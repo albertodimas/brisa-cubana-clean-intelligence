@@ -1,0 +1,28 @@
+# Node/Bun
+node_modules/
+bun.lockb
+npm-debug.log
+yarn-error.log
+
+# Python/MkDocs
+__pycache__/
+site/
+.mypy_cache/
+.mkdocs-cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+.venv/
