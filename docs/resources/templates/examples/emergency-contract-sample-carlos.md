@@ -45,7 +45,7 @@
 
 ---
 
-**Firmas**
+## Firmas
 
 - Carlos Álvarez — Hostaway ____________________________ Fecha 03/10/2025
 - Alejandra Ortega — Brisa Cubana ______________________ Fecha 03/10/2025

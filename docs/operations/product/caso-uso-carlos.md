@@ -14,7 +14,7 @@ Escenario B2B que ilustra cómo Brisa Cubana responde a una crisis post-huracán
 | Carlos (PM) | Dashboard consolidado con estado de 127 propiedades, priorización de incidentes y SLA de respuesta <6 h. | Tablero Kanban + reportes compartidos vía Notion/Sheets; SLA coordinado manualmente (checklist crisis). | Dashboard 3D con datos en tiempo real, integraciones Hostaway/Temporal, priorización automática por riesgo. |
 | Brisa Cubana | Contrato de emergencia ($67K) y oportunidad de upsell a mantenimiento integral. | Plantilla contractual + seguimiento en QuickBooks manual; upsell coordinado por equipo comercial. | Workflows DocuSign automatizados, integración QuickBooks/Temporal, modelos de pricing dinámico por crisis. |
 | Huéspedes | Comunicación cada 2 h, alternativas de reubicación <30 min, transparencia con fotos. | Plantillas WhatsApp/email enviadas por equipo soporte; repositorio compartido de fotos. | Automatización omnicanal (WhatsApp, email, SMS) con IA que genera mensajes personalizados y tracking público. |
-| Staff | Protocolos de seguridad, rutas seguras, overtime gestionado. | SOP crisis impreso/digital + planeación manual de rutas; control overtime en hoja de cálculo. | App staff con rutas optimizadas, supplies pre-posicionados y cálculo automático de overtime/bonos.
+| Staff | Protocolos de seguridad, rutas seguras, overtime gestionado. | SOP crisis impreso/digital + planeación manual de rutas; control overtime en hoja de cálculo. | App staff con rutas optimizadas, supplies pre-posicionados y cálculo automático de overtime/bonos. |
 
 ## Línea de tiempo de crisis (versión objetivo)
 1. **T0**: NOAA alerta zonas dañadas → se activan plantillas de crisis y se convoca comité.
@@ -31,9 +31,9 @@ Escenario B2B que ilustra cómo Brisa Cubana responde a una crisis post-huracán
 | Pilar | MVP Lean | Escalamiento |
 |-------|----------|--------------|
 | Infraestructura | Temporal manual (tablero de seguimiento), almacenamiento en Postgres/Sheets, backups en Drive. | Cloudflare Workers, Temporal orquestando 100+ workflows paralelos, Redis para tracking en tiempo real. |
-| Integraciones | Exportación Hostaway (CSV/API) procesada manualmente; QuickBooks/DocuSign operados desde consola web; NOAA seguimiento manual. | Synchronización Hostaway 30 s, QuickBooks/DocuSign automáticos, NOAA API 5 min, WhatsApp Business programático. |
+| Integraciones | Exportación Hostaway (CSV/API) procesada manualmente; QuickBooks/DocuSign operados desde consola web; NOAA seguimiento manual. | Sincronización Hostaway 30 s, QuickBooks/DocuSign automáticos, NOAA API 5 min, WhatsApp Business programático. |
 | IA/ML | Plantillas LLM para priorizar tareas y redactar mensajes; CleanScore asistido. | Computer Vision en 1.2k fotos, optimización de rutas para 35 cuadrillas, pricing predictivo crisis. |
-| Observabilidad | Tablero crisis en Notion/Sheets con métricas clave; checklist incidentes. | Datadog + Grafana en vivo, Sentry con auto-recovery, dashboard público para clientes enterprise.
+| Observabilidad | Tablero crisis en Notion/Sheets con métricas clave; checklist incidentes. | Datadog + Grafana en vivo, Sentry con auto-recovery, dashboard público para clientes enterprise. |
 
 ## Métricas clave
 - Tiempo de respuesta a incidentes críticos (meta MVP: <6 h, objetivo futuro: <4 h).
@@ -45,7 +45,7 @@ Escenario B2B que ilustra cómo Brisa Cubana responde a una crisis post-huracán
 - **Plan de crisis** (SOP) extendido en `docs/operations/sops/emergency-response.md` con sección B2B.
 - **Checklist PM** con columnas de prioridad, daños, ETA cuadrilla y verificación CleanScore.
 - **Macros de comunicación** en `docs/operations/support/support-playbook.md` (huéspedes, propietarios, seguros).
-- **Plantilla propuesta de contrato emergencia** en `docs/resources/templates/` (pendiente). 
+- **Plantilla contrato de emergencia** disponible en `docs/resources/templates/emergency-contract-template.md` (ver ejemplo en `docs/resources/templates/examples/emergency-contract-sample-carlos.md`). 
 - **Reporte ejecutivo 24 h**: resumen para Carlos y stakeholders internos.
   - Ejemplos completos disponibles en `docs/resources/templates/examples/` para contratos y estimaciones.
 

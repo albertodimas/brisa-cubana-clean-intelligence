@@ -45,7 +45,7 @@
 
 ---
 
-**Firmas**
+## Firmas
 
 - Property Manager ____________________________ Fecha ____
 - Brisa Cubana ________________________________ Fecha ____

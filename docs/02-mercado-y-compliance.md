@@ -1,16 +1,42 @@
 # 02 · Mercado y Compliance
 
-## Insights clave (actualizado 28 sep 2025)
-- **28.2 millones** de visitantes en 2024 (récord histórico) y **USD 22.0 B** en gasto directo según el comunicado del GMCVB (12 mar 2025); detalles en `docs/resources/market/tourism-2024-records.md`.
-- 66.6 % de las viviendas ocupadas en Miami son en alquiler (ACS 2023 1-year, Census API `B25003_003E/001E`), lo que evidencia rotación alta y demanda recurrente para servicios de limpieza.
-- Competencia fragmentada: >500 proveedores listados en Thumbtack con tickets desde USD 70 por limpieza estándar; metodología y evidencias en `docs/resources/market/cleaning-competition-snapshot.md`.
-- Salario promedio house cleaner en Miami: USD 29.8K/año (~USD 14/h) con base en OEWS May 2023; actualización May 2024 documentada en `docs/resources/market/wage-maids-miami.md`.
+## Insights clave (actualizado 29 sep 2025)
+- **28.2 millones** de visitantes y **USD 22.0 B** en gasto directo durante 2024 según el GMCVB; la ocupación hotelera llegó al 77 % y los ingresos fiscales asociados a USD 2.2 B.[^gmcvb]
+- 66.6 % de las viviendas ocupadas en Miami-Dade son en alquiler (ACS 2023 1-year, tabla B25003), lo que confirma la rotación alta y la necesidad de limpieza recurrente.[^acs]
+- Competencia altamente fragmentada: **543 proveedores con 5★** en Thumbtack y precios publicados desde **USD 70** para servicios estándar, con limpiezas profundas entre USD 200–600.[^thumbtack]
+- El release OEWS May 2024 sitúa el salario medio horario del grupo **Building & Grounds Cleaning** en **USD 17.55/h** (USD 36,504 anuales); mantenemos como referencia el valor histórico 2023 de **USD 29.8K/año (~USD 14/h)** para SOC 37-2012 hasta completar la extracción detallada.[^bls]
 
 ## Segmentación
 1. **Residencial premium / lujo**: Brickell, Coral Gables, Wynwood, Miami Beach – valoran seguridad, tecnología, evidencia visual.
 2. **Property managers / alquileres vacacionales** (Airbnb, Vrbo) – necesitan turnos rápidos y reportes automáticos.
 3. **Hospitality & eventos**: hoteles boutique, venues; SLA estrictos, integraciones PMS, métricas ESG.
 4. **Comercial / oficinas boutique**: requieren contratos, compliance (OSHA/limpieza verde), reporting.
+
+## Competencia y pricing 2025
+
+| Indicador | Valor | Fuente |
+|-----------|-------|--------|
+| Proveedores 5★ en Thumbtack (Miami) | 543 | Thumbtack “House Cleaning Services in Miami, FL”.[^thumbtack] |
+| Precio mínimo publicado | USD 70 | Thumbtack (servicio estándar).[^thumbtack] |
+| Rango típico limpieza estándar | USD 90 – 320 | Prime Residential Services, Maid You Look, Match Cleaner en Thumbtack.[^thumbtack] |
+| Rango limpieza profunda | USD 200 – 600 | Expert Cleaning, SuperClean, Leiby's Cleaning Miami.[^thumbtack] |
+| Precio medio comunicado por hora | USD 50 | Guía de precios Thumbtack 2024.[^thumbtack-guide] |
+
+### Implicaciones
+- Posicionar CleanScore™ y los SLA verificables como diferenciadores frente a un mercado saturado en precios.
+- Mantener benchmarking trimestral para detectar cambios abruptos y alimentar el motor de pricing dinámico.
+
+## Costos laborales y talento
+
+| Indicador | Valor | Nota |
+|-----------|-------|------|
+| Hourly mean wage (37-0000) | USD 17.55 | BLS OEWS May 2024 release para el agregado Building & Grounds.[^bls] |
+| Annual mean wage (37-0000) | USD 36,504 | Equivalente anualizado del dato anterior.[^bls] |
+| Referencia histórica SOC 37-2012 (May 2023) | USD 29,800/año (~USD 14/h) | Valor en uso hasta que se descargue el dataset May 2024 específico.[^bls-2023] |
+
+### Próximos pasos
+- Descargar manualmente `oesm32mi.xlsx` (SOC 37-2012) y actualizar las cifras en `docs/resources/market/wage-maids-miami.md`.
+- Ajustar el modelo financiero con la nueva cifra y documentar cualquier variación en costos operativos.
 
 ## Estrategia de entrada
 - Lanzar con pilotos en alquileres vacacionales y residenciales premium (demanda más inmediata).
@@ -44,3 +70,10 @@
 - Crecimiento hotelero (Grand Hyatt Convention Center 2027) -> preparar oferta B2B.
 - Políticas de sostenibilidad → ofrecer paquetes eco y reporting de huella.
 - Programas del GMCVB y cámaras locales → networking, certificaciones, visibilidad.
+
+[^gmcvb]: PR Newswire, “Greater Miami & Miami Beach Break All-Time Tourism Records in 2024”, 12 mar 2025. https://www.prnewswire.com/news-releases/greater-miami--miami-beach-break-all-time-tourism-records-in-2024-302043734.html
+[^acs]: U.S. Census Bureau, American Community Survey 1-year 2023, Tabla B25003 (Tenure), consultado el 29 sep 2025. https://data.census.gov/
+[^thumbtack]: Thumbtack, “House Cleaning Services in Miami, FL”, consultado el 29 sep 2025. https://www.thumbtack.com/fl/miami/house-cleaning
+[^thumbtack-guide]: Thumbtack, “Deep Cleaning Cost Guide 2024”, consultado el 29 sep 2025. https://www.thumbtack.com/p/deep-cleaning-cost
+[^bls]: Bureau of Labor Statistics, “Occupational Employment and Wage Statistics – Miami–Fort Lauderdale–West Palm Beach, FL (May 2024 release)”, consultado el 29 sep 2025. https://www.bls.gov/regions/southeast/news-release/occupationalemploymentandwages_miami.htm
+[^bls-2023]: Bureau of Labor Statistics, OEWS May 2023 release, SOC 37-2012 “Maids and Housekeeping Cleaners”.

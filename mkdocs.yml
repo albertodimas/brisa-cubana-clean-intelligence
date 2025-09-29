@@ -57,6 +57,7 @@ nav:
       - Model card: resources/templates/model-card-template.md
       - Contrato emergencia B2B: resources/templates/emergency-contract-template.md
       - Estimación manual premium: resources/templates/estimation-manual-template.md
+      - CleanScore asistido (MVP): resources/templates/cleanscore-manual-template.md
       - Ejemplos contratos & estimaciones:
           - Contrato — Carlos: resources/templates/examples/emergency-contract-sample-carlos.md
           - Estimación — María: resources/templates/examples/estimation-manual-sample-maria.md

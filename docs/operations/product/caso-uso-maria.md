@@ -28,9 +28,9 @@ Escenario end-to-end que ilustra la experiencia objetivo de Brisa Cubana para un
 
 ## Artefactos necesarios
 - **Scripts conversacionales** (landing/chatbot) documentados en `docs/operations/support/support-playbook.md`.
-- **Plantilla de estimación manual** (metraje, horas, precio) en `docs/resources/templates/` (pendiente de crear).
+- **Plantilla de estimación manual** (metraje, horas, precio) en `docs/resources/templates/estimation-manual-template.md`.
 - **Checklist staff penthouse**: versión en `docs/operations/sops/onboarding-staff.md` + anexo específico de superficies delicadas.
-- **Plantilla CleanScore asistido**: referenciada desde `docs/operations/qa/testing-strategy.md` y `docs/operations/product/mvp-lean-plan.md`.
+- **Plantilla CleanScore asistido**: ver `docs/resources/templates/cleanscore-manual-template.md` y alinear con `docs/operations/qa/testing-strategy.md` / `docs/operations/product/mvp-lean-plan.md`.
 
 ## Plan de evolución
 1. **Validar MVP** con 5-10 propiedades premium (medir tiempos, satisfacción, rework).
