@@ -12,4 +12,4 @@
 - Activados canales de contacto de privacidad y seguridad (emails/telefonía) en la documentación.
 - Añadido registro inicial de insights de investigación y checklist de vigilancia regulatoria.
 - Integrados linters Markdown/ortografía en CI y guía de calidad editorial.
-- Cartera de datos de mercado 2024 (turismo, salarios, competencia) con enlaces a fuentes y tareas pendientes.
+- Cartera de datos de mercado 2024 (turismo, salarios, competencia) consolidada con referencias verificadas y plan de actualización trimestral.
