@@ -1,14 +1,33 @@
 {
-  "name": "compania-de-limpieza-docs",
+  "name": "brisa-cubana-clean-intelligence",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "lint:md": "markdownlint \"**/*.md\" --ignore site --ignore .venv --ignore node_modules --ignore documentos-pendientes --config .markdownlint.json",
+    "dev": "next dev",
+    "dev:bun": "bun run dev",
+    "dev:remix": "remix dev",
+    "dev:hono": "bun run server/index.ts",
+    "build": "next build",
+    "build:bun": "bun build ./src/index.ts --outdir ./dist",
+    "build:remix": "remix build",
+    "start": "next start",
+    "start:bun": "bun run dist/index.js",
+    "start:remix": "remix-serve build",
+    "test": "jest",
+    "test:bun": "bun test",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint:md": "markdownlint \"**/*.md\" --ignore site --ignore .venv --ignore node_modules --ignore documentos-pendientes --config .markdownlint.json",
     "lint:spelling": "cspell lint \"**/*.md\" --config .cspell.json",
-    "lint": "npm run lint:md && npm run lint:spelling"
+    "lint": "npm run lint:md && npm run lint:spelling",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "docs:serve": "mkdocs serve",
+    "docs:build": "mkdocs build"
   },
   "devDependencies": {
-  "@cspell/dict-es-es": "3.0.8",
+    "@cspell/dict-es-es": "3.0.8",
     "cspell": "8.15.4",
     "markdownlint-cli": "0.39.0"
   }
