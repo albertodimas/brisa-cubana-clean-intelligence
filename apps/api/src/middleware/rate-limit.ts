@@ -34,7 +34,9 @@ export interface RateLimitOptions {
  * app.post("/api/auth/login", rateLimiter({ windowMs: 15 * 60 * 1000, max: 5 }));
  * ```
  */
-export function rateLimiter(options: RateLimitOptions) {
+export function rateLimiter(
+  options: RateLimitOptions,
+): (c: Context, next: Next) => Promise<Response | void> {
   const {
     windowMs,
     max,
