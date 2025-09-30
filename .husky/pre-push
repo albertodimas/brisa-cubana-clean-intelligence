@@ -17,9 +17,9 @@ pnpm typecheck || {
   exit 1
 }
 
-# Run tests
+# Run tests (vitest run mode is handled by workspace configs)
 echo "🧪 Running tests..."
-pnpm test --run || {
+pnpm test || {
   echo "❌ Tests failed. Please fix failing tests before pushing."
   exit 1
 }
