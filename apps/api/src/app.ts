@@ -71,8 +71,7 @@ app.notFound((c) => c.json({ error: "Not found" }, 404));
 
 // Error handler
 app.onError((err, c) => {
-  const requestId =
-    ((c as any).get?.("requestId") as string | undefined) ?? "unknown";
+  const requestId = c.get("requestId") ?? "unknown";
 
   // Check if it's a known application error
   if (isAppError(err)) {

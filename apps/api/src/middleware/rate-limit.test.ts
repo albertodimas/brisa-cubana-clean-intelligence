@@ -98,7 +98,7 @@ describe("Rate Limiting Middleware", () => {
 
   describe("Predefined Rate Limits", () => {
     it("should have auth rate limit configured", () => {
-      const auth = RateLimits.auth as Record<string, unknown>;
+      const auth: Record<string, unknown> = RateLimits.auth;
       expect(auth).toMatchObject({
         windowMs: 15 * 60 * 1000,
         max: 5,
@@ -108,7 +108,7 @@ describe("Rate Limiting Middleware", () => {
     });
 
     it("should have API rate limit configured", () => {
-      const api = RateLimits.api as Record<string, unknown>;
+      const api: Record<string, unknown> = RateLimits.api;
       expect(api).toMatchObject({
         windowMs: 15 * 60 * 1000,
         max: 100,
@@ -116,7 +116,7 @@ describe("Rate Limiting Middleware", () => {
     });
 
     it("should have write rate limit configured", () => {
-      const write = RateLimits.write as Record<string, unknown>;
+      const write: Record<string, unknown> = RateLimits.write;
       expect(write).toMatchObject({
         windowMs: 15 * 60 * 1000,
         max: 20,
@@ -125,7 +125,7 @@ describe("Rate Limiting Middleware", () => {
     });
 
     it("should have read rate limit configured", () => {
-      const read = RateLimits.read as Record<string, unknown>;
+      const read: Record<string, unknown> = RateLimits.read;
       expect(read).toMatchObject({
         windowMs: 15 * 60 * 1000,
         max: 300,

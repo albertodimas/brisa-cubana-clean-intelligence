@@ -177,7 +177,7 @@ export const RateLimits = {
     max: 5,
     message: "Too many login attempts, please try again in 15 minutes.",
     skipSuccessfulRequests: true,
-  },
+  } as const,
 
   /**
    * Standard rate limit for API endpoints
@@ -186,7 +186,7 @@ export const RateLimits = {
   api: {
     windowMs: 15 * 60 * 1000,
     max: 100,
-  },
+  } as const,
 
   /**
    * Strict rate limit for write operations
@@ -196,7 +196,7 @@ export const RateLimits = {
     windowMs: 15 * 60 * 1000,
     max: 20,
     message: "Too many write requests, please slow down.",
-  },
+  } as const,
 
   /**
    * Lenient rate limit for read operations
@@ -205,5 +205,5 @@ export const RateLimits = {
   read: {
     windowMs: 15 * 60 * 1000,
     max: 300,
-  },
+  } as const,
 };
