@@ -11,15 +11,18 @@
 | **DocuSign** | Contratos B2B | Integrator key + secret, cuenta sandbox | Configurar plantilla multilingüe, webhook Connect, prueba firma | P1 |
 | **Auth provider** (Clerk/Auth0) | Passkeys/WebAuthn, SSO | Tenant ID, API keys, JWKS | Habilitar WebAuthn + MFA, sync roles RBAC, flujo invitaciones | P0 |
 | **Intercom / Front** | Soporte omnicanal | Access token, webhook secret | Crear inbox beta, flow de escalamiento, sync tags con CRM | P2 |
+| **LaunchDarkly** | Feature flags, progressive delivery | SDK key, service tokens | Configurar proyectos dev/stage/prod, pruebas toggles | P1 |
+| **Sentry** | Observabilidad front/back | DSN, auth token | Activar alertas performance + IA breadcrumbs | P1 |
 
 ## Expansión 3-6 meses
-- PMS/Channel managers: Airbnb, Vrbo, Hostaway, Guesty, Lodgify.
-- PropTech: AppFolio, Buildium, Yardi.
-- Hotels: Cloudbeds, Oracle Opera.
-- Marketing: Meta Ads, Google Ads, TikTok, HubSpot CRM.
-- IoT: Cerraduras inteligentes (August, Schlage), termostatos (Nest/Ecobee), sensores BLE.
-- Contabilidad avanzada: NetSuite, Xero.
-- Background checks: Checkr.
+- PMS/Channel managers: Airbnb, Vrbo, Hostaway, Guesty, Lodgify, Mews.
+- PropTech: AppFolio, Buildium, Yardi, RealPage.
+- Hotels: Cloudbeds, Oracle Opera Cloud, Stayntouch.
+- Marketing: Meta Ads, Google Ads, TikTok, HubSpot CRM, Klaviyo.
+- IoT: Cerraduras inteligentes (August, Schlage), termostatos (Nest/Ecobee), sensores BLE, robots UV-C (SoftBank Whiz, ICE RS26).
+- Contabilidad avanzada: NetSuite, Xero, Flywire (pagos internacionales).
+- Background checks y onboarding: Checkr, Certn.
+- ESG & sostenibilidad: Watershed, Persefoni, GreenPlaces (reportes automáticos).
 
 ### Prioridad PMS
 | Partner | Criterios | Notas |
@@ -31,10 +34,11 @@
 | **Vrbo** | Mercado relevante pero acceso más restrictivo | Abordar cuando volumen >200 propiedades. |
 
 ## Futuro (6-12 meses)
-- Developer portal y API publica.
-- Integraciones ESG (Watershed, Persefoni).
-- Sistemas fiscales / payroll.
-- Programas de fidelización (Gift Up!, LoyaltyLion).
+- Developer portal y API pública con SDK (Next, React Native, Webhooks).
+- Integraciones ESG (Watershed, Persefoni) y reporting de huella directa + cadena de suministro.
+- Sistemas fiscales / payroll (Gusto, ADP, Deel) para crews e internacionalización.
+- Programas de fidelización (Gift Up!, LoyaltyLion) y partnerships con conserjerías de lujo.
+- Integraciones IoT avanzadas (Air quality, monitoreo consumo agua, sensores de vibración) para mantenimientos predictivos.
 
 ## Patrón técnico
 1. **Ingestores edge** → Cloudflare Workers/Netlify Edge reciben webhook/stream y publican en Event Mesh.

@@ -4,9 +4,10 @@
 Ofrecer soporte 24/7 alineado a la marca, blending IA y humanos.
 
 ## Canales
-- Agente IA (chat web, WhatsApp, app) con fallback humano.
-- Teléfono de emergencia (24/7).
-- Email.
+- Concierge IA (chat web, WhatsApp, app) con fallback humano.
+- Teléfono de emergencia 24/7 (Ops hotline).
+- Email y portal cliente (tickets + CleanScore™).
+- Panel de incidentes (Sentry + Grafana) para alertas proactivas.
 
 ## Clasificación tickets
 - Nivel 1: preguntas frecuentes → IA.
@@ -17,7 +18,8 @@ Ofrecer soporte 24/7 alineado a la marca, blending IA y humanos.
 | Tipo | Tiempo respuesta | Tiempo resolución |
 |------|------------------|-------------------|
 | General | ≤ 15 min | ≤ 24 h |
-| Emergencia | ≤ 5 min | ≤ 4 h |
+| Emergencia (daños/huéspedes) | ≤ 5 min | ≤ 4 h |
+| Property manager enterprise | ≤ 10 min | ≤ 8 h |
 
 ## Scripts (borradores)
 - Confirmación servicio.
@@ -27,19 +29,23 @@ Ofrecer soporte 24/7 alineado a la marca, blending IA y humanos.
 
 ## Herramientas
 - Intercom/Front para inbox unificado.
-- CRM (HubSpot/Zoho) para seguimiento.
-- Integración IA (respuestas sugeridas, resumen tickets).
+- CRM (HubSpot) para seguimiento y playbooks.
+- Copiloto IA: resúmenes automáticos, traducción, sugerencias.
+- LaunchDarkly + PagerDuty para toggles y escalamiento inmediato.
+- Sentry + Grafana para detección temprana.
 
 ## QA soporte
-- Revisiones quincenales de tickets.
-- NPS/C-SAT post-resolución.
+- Revisiones quincenales de tickets + auditoría mensual Comité IA.
+- NPS/C-SAT post-resolución y dashboard semanal.
+- Revisión de transcripciones de voz para garantizar tono y cumplimiento.
 
 
 ## Automatizaciones de comunicación
-- Email bienvenida y onboarding cliente.
-- Recordatorios pre-servicio y post-servicio (solicitar reseñas).
-- Secuencias para clientes inactivos.
-- Plantillas IA para respuestas rápidas (ver templates CRM).
+- Email bienvenida y onboarding cliente con checklists.
+- Recordatorios pre y post servicio (reseñas, CleanScore™).
+- Secuencias para clientes inactivos y upsells automáticos.
+- Alertas proactivas (Temporal + LaunchDarkly) cuando un SLA se acerca al límite.
+- Plantillas IA (ES/EN) conectadas al knowledge graph.
 
 ## Macros crisis B2B
 - **Actualización property manager (cada 2 h):**

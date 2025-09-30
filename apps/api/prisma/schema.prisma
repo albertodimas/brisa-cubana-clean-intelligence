@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+  properties Property[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  CLIENT
+  STAFF
+  ADMIN
+}
+
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  city      String   @default("Miami")
+  state     String   @default("FL")
+  zipCode   String
+  type      PropertyType
+  size      Int      // square feet
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@map("properties")
+}
+
+enum PropertyType {
+  RESIDENTIAL
+  VACATION_RENTAL
+  OFFICE
+  HOSPITALITY
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  basePrice   Decimal  @db.Decimal(10, 2)
+  duration    Int      // minutes
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId  String
+  property    Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  serviceId   String
+  service     Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  scheduledAt DateTime
+  completedAt DateTime?
+  status      BookingStatus @default(PENDING)
+  totalPrice  Decimal       @db.Decimal(10, 2)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}

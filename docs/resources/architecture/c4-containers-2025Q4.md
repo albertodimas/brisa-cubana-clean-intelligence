@@ -11,7 +11,7 @@ graph TD
     end
 
     subgraph Backend
-        Gateway[API Gateway (Bun/Remix)]
+        Gateway[API Gateway (Next.js 15 / Bun)]
         Auth[Auth Provider]
         Temporal[Temporal Server]
         Services{{Microservicios Bun/Nest}}

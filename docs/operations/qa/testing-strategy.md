@@ -4,29 +4,30 @@
 Garantizar calidad funcional, seguridad y experiencia IA antes de releases.
 
 ## Tipos de pruebas
-1. **Unitarias** (frontend, backend, mobile) – Vitest/Jest.
-2. **Integración/API** – pruebas contractuales (Pact), Postman/Newman.
-3. **E2E** – Playwright/Cypress, escenarios críticos (booking, CleanScore).
-4. **Testing IA** – validación de prompts, respuestas, fairness, alucinaciones.
-5. **Performance** – k6, carga/latencia en API (scenarios peak demanda).
-6. **Security** – SAST/DAST (Dependabot, Semgrep, OWASP Zap), pentesting.
-7. **UX/Accesibilidad** – Lighthouse, tests manuales, screen readers.
+1. **Unitarias** (frontend, backend, mobile) – Vitest + Testing Library; coverage ≥80 % en dominios críticos.
+2. **Integración/API** – contract testing (Pactflow), Postman/Newman colecciones sandbox.
+3. **E2E** – Playwright (desktop/mobile) + smoke diaria; escenarios booking, CleanScore™, rework, pagos.
+4. **Testing IA** – validación prompts (LangSmith/OpenAI evals), fairness, toxicidad, hallucination score.
+5. **Performance/Resiliencia** – k6, Artillery, Chaos testing (Gremlin) sobre Temporal/Event Mesh.
+6. **Security** – SAST/DAST (Semgrep, Dependabot, OWASP Zap), pentesting, escaneos secretos.
+7. **UX/Accesibilidad** – Lighthouse, axe-core integrado en Playwright, validaciones manuales (screen readers, contraste).
 
 ## Proceso release
-- Branch → PR → CI (lint, unit, integration).
-- Stage env: E2E automáticos + QA manual (checklist).
-- Gate de aprobación (PO + QA lead).
-- Deploy a prod con feature flags.
+- Branch → PR → CI (Turborepo: lint → unitarias → integración → build).
+- Stage env: deploy automático a Vercel/Fly (preview) + suite E2E/IA gating + QA manual.
+- Gate de aprobación (PO + QA lead + AI Lead para features IA).
+- Deploy a prod con feature flags (LaunchDarkly) y monitoreo Sentry + Grafana.
 
 ## Herramientas CI/CD
-- GitHub Actions / CircleCI.
-- Codecov / SonarQube.
-- Reports centralizados en Slack/Teams.
+- GitHub Actions / CircleCI con matrices Node 24 + Bun 1.2.
+- Codecov / SonarQube / Sentry Quality Gate.
+- Reportes centralizados en Slack/Teams, dashboards Grafana/Looker.
+- BrowserStack para cross-device.
 
 ## IA Testing specifics
-- Conjunto de prompts test (bilingüe, edge cases).
-- Evaluaciones semiautomáticas (LangSmith/OpenAI evals).
-- Revisión humana para contenido crítico.
+- Conjunto de prompts test (ES/EN/Spanglish) + escenarios adversos.
+- Evaluaciones semiautomáticas (LangSmith, OpenAI evals, Trulens) y fairness dashboards.
+- Revisión humana para contenido crítico y auditoría mensual Comité IA.
 
 ## Documentación
 - Test plan por feature.
@@ -36,7 +37,8 @@ Garantizar calidad funcional, seguridad y experiencia IA antes de releases.
 ## Roles
 - QA Lead.
 - Automation engineer.
-- Support from devs (shift-left testing).
+- AI QA specialist.
+- Support devs (shift-left testing) y Ops para pruebas de campo.
 
 
 ## Accesibilidad

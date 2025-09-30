@@ -5,40 +5,47 @@
 - **Esencia**: tecnología de limpieza premium que combina la energía cubana con la innovación de Miami.
 - **Propósito**: elevar el estándar de limpieza en la ciudad con experiencias hiperpersonalizadas, operativas autónomas y métricas objetivas.
 
-## Propuesta de valor
-1. **Experiencia sin fricciones**: agente IA multimodal 24/7 que cotiza, agenda, cobra y atiende en voz/texto/imágenes/video.
-2. **Calidad verificable**: CleanScore™ impulsado por visión artificial y feedback estructurado.
-3. **Operación autónoma**: scheduling multi-agente, rutas dinámicas, digital twin para capa operativo-financiera.
-4. **Transparencia y sostenibilidad**: reportes ESG, control de insumos, cálculo de huella de carbono.
-5. **Ecosistema conectado**: integraciones profundas con property managers, hosts de alquileres, hoteles y servicios aliados.
+## Propuesta de valor 2026
+1. **Experiencia sin fricciones**: concierge IA multimodal 24/7 (voz, texto, imagen, video) con personalización por segmento y protocolos anti prompt-injection.
+2. **Calidad verificable**: CleanScore™ v1.2 combina visión computarizada, análisis acústico y NPS asistido para cada servicio.
+3. **Operación autónoma**: scheduling multi-agente, rutas dinámicas, digital twin operativo-financiero y simulaciones antes de desplegar cambios.
+4. **Transparencia y sostenibilidad**: reportes ESG-ready (GHG, agua, químicos) y comparativas WELL/LEED automatizadas.
+5. **Ecosistema conectado**: integraciones profundas con PMS (Mews, Hostaway, Opera Cloud), contabilidad (QuickBooks, NetSuite) y partners de mantenimiento, lavandería y seguridad.
 
-## Personas clave
+### Principios 2026
+- **Human first + AI copilots**: IA para anticipar y automatizar, humanos para empatía y decisiones críticas.
+- **Zero-trust everywhere**: credenciales rotadas, passkeys/WebAuthn obligatorias y auditoría completa.
+- **Data-in, value-out**: cada dato capturado regresa como insight accionable (pricing, ESG, training).
+- **Iteración continua**: cadencia bisemanal de releases con feature flags y medición de impacto.
+
+## Personas clave y promesas
 | Segmento | Necesidades | Mensaje clave |
 |----------|-------------|----------------|
-| Propietarios residenciales premium | Confiabilidad, rapidez, evidencias | “Reserva en segundos y recibe un CleanScore™ certificado.” |
-| Property managers / hosts Airbnb | Automatización de turnos, informes, mantenimiento | “Directo a tu PMS con control total de calidad y facturación.” |
-| Oficinas boutique / comerciales | SLA, cumplimiento normativo, ESG | “Panel corporativo con métricas, auditoría y reportes ambientales.” |
-| Staff de limpieza | Herramientas amigables, reconocimiento, capacitación | “Copiloto inteligente, rutas optimizadas y gamificación justa.” |
+| Propietarios residenciales premium | Confiabilidad, seguridad y evidencias inmediatas | “Reserva en segundos, monitorea en tiempo real y recibe un CleanScore™ certificado con fotos y audio.” |
+| Property managers / hosts vacation rentals | Turnos express, fiscalización automática, integraciones PMS | “Tu PMS actualizado en segundos con billing, evidencias y reposiciones automatizadas.” |
+| Hospitality & oficinas boutique | SLA estrictos, ESG y trazabilidad | “Panel corporativo con métricas en vivo, controles ESG y auditoría lista para reguladores.” |
+| Staff & crew leads | Herramientas intuitivas, rutas optimizadas, reconocimiento | “Copiloto inteligente, voz bilingüe, incentivos transparentes y plan de crecimiento.” |
 
 ## OKR (Q1-Q2 2026)
-- **O1**: Lanzar MVP operativo
-  - KR1: 30 reservas procesadas end-to-end con NPS ≥ 4.5.
-  - KR2: SLA ≥ 95 % en puntualidad y finalización.
-  - KR3: CleanScore™ activo en 100 % de los servicios piloto.
-- **O2**: Validar modelo comercial B2B2C
-  - KR1: 5 acuerdos con property managers/hosts (>50 unidades).
-  - KR2: 2 contratos con oficinas boutique (retainer mensual).
-- **O3**: Robustecer operación interna
-  - KR1: Onboarding completo de 3 cuadrillas con app staff y juego de roles.
-  - KR2: Comité de gobernanza IA activo con reuniones mensuales.
-  - KR3: Riesgos críticos mitigados (legal/seguridad/datos) con planes documentados.
+- **O1: MVP operativo vivo**
+  - KR1: 30 reservas pagadas con concierge IA y CleanScore™ entregado ≤ 10 min post-servicio.
+  - KR2: SLA ≥ 97 % puntualidad, rework ≤ 3 %.
+  - KR3: Panel admin con dashboards en tiempo real y exportación ESG.
+- **O2: Validación comercial B2B2C**
+  - KR1: 6 property managers top-tier (>70 unidades) con contratos anuales.
+  - KR2: 3 clientes corporativos (oficinas boutique) con retainer mensual y reporting ESG automático.
+  - KR3: Tasa de retención mensual ≥ 92 %.
+- **O3: Operación resiliente**
+  - KR1: Onboarding completo de 4 crews con app staff offline + voice commands.
+  - KR2: Comité de Gobernanza IA con auditorías mensuales y matriz de riesgos actualizada.
+  - KR3: Plan de continuidad ante huracanes documentado y probado (simulacro Q2).
 
 ## Ruta estratégica 12+ meses
-1. **Descubrimiento**: entrevistas, data map, compliance, design system.
-2. **MVP 0-3 meses**: agente IA, booking, scheduling, panel admin, app staff básica, CleanScore beta.
-3. **Expansión 3-6 meses**: marketing autopilot, reputación IA, pricing dinámico, OKR dashboard, knowledge graph, marketplace inicial.
-4. **Innovación 6-12 meses**: tours 3D, portal B2B avanzado, integraciones PMS/ERP, digital twin financiero completo, dashboards WebXR.
-5. **Escalamiento 12+ meses**: internacionalización, verticales regulados, alianzas estratégicas, automatización compliance & éticas avanzadas.
+1. **Descubrimiento (en curso)**: investigación cuantitativa y cualitativa, data map regulatorio, diseño del sistema visual y del clean kit IoT.
+2. **MVP (0-3 meses)**: concierge IA, booking omnicanal, panel admin, app staff mínima, CleanScore™ beta, procesos ESG básicos.
+3. **Escala (3-6 meses)**: marketing autopilot, reputación IA, pricing dinámico, knowledge graph, marketplace partners (lavandería, mantenimiento), dashboards operativos.
+4. **Innovación (6-12 meses)**: tours 3D + WebXR, portal B2B avanzado, integraciones PMS/ERP profundas, digital twin financiero, emisiones y ESG automatizados.
+5. **Escalamiento (12+ meses)**: internacionalización Miami-Orlando-LA, verticales regulados (salud, food service), alianzas con fabricantes de robótica e IA responsable certificada.
 
 ## Gobernanza y decisiones
 - **Comité estratégico**: PO, Tech Lead, AI Lead, Head of Operations, Legal/Compliance.
@@ -49,4 +56,3 @@
 - Tono cercano, bilingüe (ES/EN), orgulloso del patrimonio cubano.
 - Visuales que combinan mares, neón de Miami y tecnología suave.
 - Storytelling centrado en la familia, confianza y modernidad.
-

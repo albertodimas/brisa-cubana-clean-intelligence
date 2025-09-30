@@ -10,11 +10,11 @@
 - **Knowledge graph**: conocimientos de procedimientos, insights, entrenamiento staff.
 
 ## Stack IA
-- Modelos foundation (OpenAI GPT-4.1, Claude 3.5); fallback local (Mistral/Mixtral) para privacidad.
-- LangChain 0.3.x para orquestar agentes y tool use.
-- Servicios CV: AWS Rekognition / Vertex AI Vision + fine-tuning.
-- pipeline ML: MLflow/Weights&Biases, Feast (feature store), Prefect/Dagster para orquestación.
-- synthetic data para entrenamiento, fairness testing, red teams IA.
+- Modelos foundation (OpenAI GPT-4.1, Realtime API + Whisper v3, Claude 3.5 Sonnet); fallback local (Mistral, Mixtral) para privacidad.
+- LangChain 0.3.35 + LangGraph para orquestar agentes, tool calling y supervisión humana.
+- Servicios CV: AWS Rekognition, Vertex AI Vision y pipelines personalizados con Segment Anything + SAM 2 para detección de superficies.
+- pipeline ML: MLflow/Weights&Biases, Feast 0.53 (feature store), Prefect/Dagster para orquestación ETL/ML.
+- Synthetic data y data augmentation con Trulens/Evidently para fairness testing, red teaming y explainability.
 
 ## Gobernanza IA
 - Comité IA (PO, AI Lead, Legal) con reuniones mensuales + revisión trimestral de métricas.
@@ -34,18 +34,20 @@
 
 ### Setup datos & ML
 - Repos dedicados: `ml/` para notebooks/pipelines, `data/` para esquemas y ETL (Prefect/Dagster).
-- MLflow (local + remoto) para tracking, Weights & Biases opcional para colaboración.
-- Feature Store (Feast) respaldado en Postgres/Redis; definir catálogo inicial (availability, cleanliness, staff sentiment).
-- Pipelines de ingestión → validación → versionado (Delta/Parquet) con `infra/data/README.md` documentando SLAs.
-- Model registry con approvals: staging → prod, ligado a feature flags.
+- MLflow (local + remoto) para tracking; Weights & Biases para experimento colaborativo y monitoreo automático de drift.
+- Feature Store (Feast 0.53) respaldado en Postgres/Redis; catálogo inicial: disponibilidad, CleanScore histórico, sentimiento staff, consumo de insumos.
+- Pipelines ingestión → validación → versionado (Delta/Parquet) documentados en `infra/data/README.md` con SLAs claros.
+- Model registry con approvals staging → prod, ligados a feature flags y políticas de rollback automático.
 - Model cards almacenadas en `docs/ai/model-cards/` (ver [Concierge](ai/model-cards/model/concierge-mvp-v0.1.md), [CleanScore](ai/model-cards/model/cleanscore-v0.1.md)). Owner: AI Lead.
+- Observabilidad IA: OTel traces + dashboards en Grafana/Looker, alertas (latencia, costo por interacción, tasa handoff) y auditorías bimestrales.
 
 ## Automatización operativa
-- Workflows Temporal: reservas, confirmaciones, asignaciones, rework, cobranzas.
-- Event-driven ops: triggers por clima, tráfico, cancelaciones, stock.
-- AIOps: agente detecta incidentes (latencia, errores), sugiere fix y puede ejecutar runbooks.
-- Inventario inteligente: predicción de consumo, órdenes automáticas, alertas.
-- Gamificación staff: métrica CleanScore, puntualidad, feedback -> incentivos y carrera.
+- Workflows Temporal: reservas, confirmaciones, asignaciones, rework, cobranzas, gestión de nómina.
+- Event-driven ops: triggers por clima, tráfico, cancelaciones, inventario, pipeline hotelero.
+- AIOps: agente detecta incidentes (latencia, errores, costos), sugiere fix y ejecuta runbooks aprobados.
+- Inventario inteligente: predicción de consumo, órdenes automáticas con proveedores eco, alertas de desabasto.
+- Gamificación staff: métrica CleanScore, puntualidad, feedback -> incentivos, badges y plan de carrera.
+- Automatización financiera: conciliación QuickBooks/Stripe, facturación recurrente y forecast de cashflow.
 
 ## Casos avanzados
 - **Voice in-ear**: asistente para staff, comandos de operación, traducción simultánea.

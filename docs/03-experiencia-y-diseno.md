@@ -7,10 +7,10 @@
 4. **Calidez caribeña + innovación**: look & feel que combine raíces cubanas y Miami tech.
 
 ## Customer Journey
-1. **Descubrimiento**: campañas hyperlocales + landing animada WebGPU, storytelling caribeño.
-2. **Onboarding**: agente IA recibe fotos/video, genera tour 3D, cotización instantánea, confirma pago.
-3. **Servicio**: app cliente muestra ETA, cuadrilla asignada, checklists en vivo, notificaciones.
-4. **Post servicio**: CleanScore™, reporte visual, encuesta NPS, opciones de reprogramación y bundles.
+1. **Descubrimiento**: campañas hyperlocales + landing animada (Tailwind 4 + Framer Motion) alineada con el design system y datos actualizados.
+2. **Onboarding**: concierge IA recibe fotos/video, genera tour 3D, cotización instantánea, ofrece Add-ons (eco, deep clean) y confirma pago.
+3. **Servicio**: app cliente muestra ETA, crew asignada, checklists IA, telemetría robótica y notificaciones push/WhatsApp.
+4. **Post servicio**: CleanScore™, reporte visual/audio, encuesta NPS, recomendaciones de mantenimiento y bundles recurrentes.
 
 ## Flujos digitales y artefactos
 - **Booking inteligente**: Landing → wizard IA → captura multimedia → cotización → pago → confirmación. Ver `resources/architecture/booking-flow-r1.md`.
@@ -28,14 +28,19 @@
 
 ## Design System (Figma → shadcn/Tailwind)
 - **Tokens**: paleta blanco marfil + acentos turquesa neón/coral, tipografía Space Grotesk + serif ligera, radios suaves, sombras sutiles.
-- **Componentes**: hero 3D, cards métricas, timeline, modales voice-first, toggles bilingual, panel drag&drop.
+- **Componentes**: hero 3D, métricas, timeline animado, cards con gradientes, badges tonales, modales voice-first, toggles bilingües, panel drag & drop.
 - **Modo oscuro**: antracita + neones; contraste mínimo 4.5:1.
-- **Animaciones**: transiciones WebGPU para mapas de demanda, loader CleanScore, microinteracciones al completar tareas.
+- **Animaciones**: Framer Motion + WebGPU para mapas de demanda, loader CleanScore, microinteracciones al completar tareas.
+
+### Implementación actual (Web)
+- Landing implementada con **Next.js 15 + Turbopack**, componentes `@brisa/ui`, `framer-motion` y `lucide-react`. Refleja hero con métricas, cards de roadmap y CTA listos para Sprint 0.
+- Tokens compartidos en `packages/ui` (Button, Badge, Card, Metric, Section) para acelerar consistencia entre landing, portal cliente y panel admin.
+- Paleta: degradados teal/emerald sobre fondo antracita, inspirado en el mar Caribe y el skyline nocturno de Miami.
 
 ## Portales
-- **Landing**: secciones héroe, visión, casos de uso (residencial, property managers, oficinas), CTA demo/booking.
-- **Portal cliente**: calendario inteligente, historial, pagos, CleanScore™, chat IA.
-- **Panel admin**: dashboard 3D, insights narrados, gestión de personal, rework, OKR.
+- **Landing**: hero con métricas, diferenciadores, roadmap 2026 y bloque Sprint 0. CTA a demo y documentación.
+- **Portal cliente**: calendario inteligente, historial, pagos, CleanScore™, chat IA y recomendaciones de mantenimiento.
+- **Panel admin**: dashboard 3D, insights narrados, gestión de personal, rework, OKR, simulador de rutas.
 - **App staff**: navegación por gestos, comandos de voz, checklists, training express, programa de recompensas.
 
 ## Experiencia voice-first

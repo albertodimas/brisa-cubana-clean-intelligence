@@ -7,36 +7,37 @@
    - Prototipos Figma (web, portal, panel, app staff).
    - Infra decisions + IaC base.
 2. **MVP (0-3 meses)**
-   - Agente IA base, booking wizard, pagos, scheduling, panel admin, app staff mínima, CleanScore beta.
-   - Integraciones Stripe, Twilio, Google Maps, QuickBooks, DocuSign.
-   - Observabilidad inicial, seguridad (passkeys, RBAC). 
+   - Concierge IA, booking omnicanal, pagos, scheduling, panel admin, app staff mínima, CleanScore beta.
+   - Integraciones Stripe, Twilio/WhatsApp, Google Maps, QuickBooks, DocuSign, LaunchDarkly.
+   - Observabilidad inicial (Sentry + Grafana), seguridad (passkeys, RBAC, rotación de secrets).
 3. **Expansión (3-6 meses)**
    - Marketing autopilot, reputación IA, pricing dinámico, digital twin operativo.
-   - Marketplace inicial de partners, knowledge graph, OKR dashboard.
-   - Integraciones con PMS/PropTech prioritarios.
+   - Marketplace de partners, knowledge graph, dashboard OKR, reporting ESG.
+   - Integraciones PMS prioritarias (Hostaway, Guesty, Mews) y AppFolio.
 4. **Innovación (6-12 meses)**
-   - Tours 3D, portal B2B avanzado, digital twin financiero completo.
-   - Dashboards WebXR, experiencias voice-first completas, módulos verticales (salud, alimentos).
-   - Programa de aliados (lavandería, mantenimiento) con comisiones.
+   - Tours 3D/WebXR, portal B2B avanzado, digital twin financiero completo.
+   - Voice-first extendido (staff + clientes), automatización financiera y robots colaborativos.
+   - Programa de aliados (lavandería, mantenimiento, wellness) con comisiones y APIs públicas.
 5. **Escalamiento (12+ meses)**
-   - Internacionalización (idioma, moneda, impuestos), verticales regulados, automatización compliance/ética.
-   - Developer portal, SDKs, planes enterprise.
+   - Internacionalización (idioma, moneda, impuestos), verticales regulados.
+   - Developer portal, SDKs, monitoreo multi-región, cumplimiento ESG y auditorías IA.
 
 ### Hitos y métricas
 | Periodo | Entregable | Criterio de éxito |
 |---------|------------|-------------------|
 | W4 (Oct 2025) | MVP booking + panel admin en staging | 10 reservas internas completadas; bugs críticos ≤2 |
 | W8 (Nov 2025) | Pilot beta con 5 clientes residenciales | NPS ≥ 40, CleanScore publicado en 100 % de servicios |
-| W12 (Dic 2025) | Integraciones Stripe/Twilio/QuickBooks en sandbox | Test contractuales verdes, tiempo de conciliación <24 h |
-| W16 (Ene 2026) | Sprint para PMS Hostaway | 2 property managers conectados, automatización turnos 90 % |
-| W24 (Mar 2026) | Revisión roadmap + decisión escalamiento | ARR objetivo ≥ USD 25 K run-rate, churn beta <10 % |
+| W12 (Dic 2025) | Integraciones Stripe/Twilio/QuickBooks/LaunchDarkly en sandbox | Tests contractuales verdes, tiempo conciliación <24 h |
+| W16 (Ene 2026) | Sprint PMS Hostaway + Guesty | 3 property managers conectados, automatización turnos 90 % |
+| W20 (Feb 2026) | CleanScore™ v1.1 + reporting ESG beta | CleanScore < 10 min post-servicio, dashboards ESG piloto |
+| W24 (Mar 2026) | Revisión roadmap + decisión escalamiento | ARR objetivo ≥ USD 30 K run-rate, churn beta <8 % |
 
 ## Operación (SOP)
 - **Cuadrillas**: onboarding digital, checklists IA, monitoreo CleanScore, programa bienestar.
 - **Rework**: se dispara automáticamente; se asigna nueva visita; reporte al cliente.
 - **Inventario**: pronóstico consumo, pedidos automáticos, auditorías mensuales.
 - **Soporte**: bot IA (primer nivel), escalamiento a humano con SLA 2h.
-- **Seguridad**: auditoría trimestral, review incidentes, tabletop exercises.
+- **Seguridad**: auditoría trimestral, review incidentes, tabletop exercises con huracán + ciberseguridad.
 
 ### RACI (extracto)
 | Stream | R | A | C | I |
@@ -81,11 +82,11 @@
 - **Feedback loop**: tickets etiquetados → dashboard semanal → backlog grooming con PO/Tech Lead.
 
 ## Plan Sprint 0 (extracto)
-- **Repos & CI/CD** (Tech Lead / DevOps): levantar monorepo, pipelines lint/test/build y deploy manual a staging.
+- **Repos & CI/CD** (Tech Lead / DevOps): monorepo pnpm + Turborepo, pipelines lint/test/build con caches y deploy manual a staging.
 - **Infra básica** (DevOps): elegir host (Vercel/Fly/Railway), definir IaC inicial (`infra/terraform`), centralizar secrets en 1Password/AWS Secrets.
 - **Integraciones sandbox** (Backend Lead): Stripe/Twilio/Auth0 listos con cuentas test + Postman collection.
 - **Data/ML setup** (AI Lead): repositorio notebooks, MLflow/W&B espacio, primeras model cards (concierge, CleanScore).
-- **Observabilidad** (Ops/DevOps): OTel collector + panel base (Grafana/Datadog), alertas smoke.
+- **Observabilidad** (Ops/DevOps): OTel collector + panel base (Grafana/Datadog), Sentry front/back, alertas smoke.
 
 ## Vigilancia regulatoria y tecnológica
 - Revisar mensualmente actualizaciones de la Florida Digital Bill of Rights, FTC y AI Safety Institute; registrar hallazgos en `docs/02-mercado-y-compliance.md`.

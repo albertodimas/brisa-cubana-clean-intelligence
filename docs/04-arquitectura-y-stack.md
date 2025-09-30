@@ -9,16 +9,16 @@
 ## Stack principal (Sep 2025)
 | Capa | Tecnología |
 |------|------------|
-| Runtime | **Bun 1.2.23** |
-| Web | Remix 2.17.1, React 19.1.1, Tailwind 4 + shadcn, WebGPU |
+| Runtime | **Bun 1.2.23** + fallback Node 24.9.0 |
+| Web | Next.js 15.5.4 (App Router + Turbopack), React 19.1.1, Tailwind CSS 4 |
 | Mobile | Expo 54, React Native 0.81, Expo Router 6 |
-| Backend | Microservicios Bun/Nest, Temporal 1.28.1, Edge functions (Cloudflare) |
-| Datos | PostgreSQL + Timescale, Redis 8.2, Vector DB (Weaviate/Milvus), Feature Store (Feast) |
-| IA | LangChain 0.3.27, OpenAI/Anthropic, modelos propios (Mistral fallback) |
-| Observabilidad | OTel, Grafana/Prometheus, AIOps agente |
+| Backend | Microservicios Bun/Hono, Temporal 1.28.1, Edge functions (Cloudflare) |
+| Datos | PostgreSQL 17.6 + Timescale, Redis 8.2.1, Vector DB (Weaviate 1.33/Milvus 2.6), Feature Store (Feast 0.53) |
+| IA | LangChain 0.3.35, OpenAI/Anthropic, modelos propios (Mistral fallback) |
+| Observabilidad | OTel, Grafana/Prometheus, Sentry, AIOps agente |
 | Infra | Terraform/Pulumi, deploy en Vercel/Fly.io/AWS Fargate, storage S3 |
 
-> Compatibilidad runtime: servicios críticos deben contar con scripts `bun test` + `node test` para validar fallback Node 20 LTS en caso de regressiones (ver ADR-06).
+> Compatibilidad runtime: servicios críticos deben contar con scripts `bun test` + `node --test`/`pnpm vitest` para validar fallback Node 24 (LTS 28-oct-2025) en caso de regressiones (ver ADR-06).
 
 ## Módulos principales
 1. **API Gateway** (REST/GraphQL) con auth y rate limiting.
@@ -27,7 +27,7 @@
 4. **AI Services**: agentes LLM,CleanScore (vision), dynamic pricing (ML), marketing autopilot.
 5. **Data Lake**: raw events → ETL/ELT → Lakehouse (DuckDB/MotherDuck) → warehouse (Snowflake/BigQuery opcional).
 6. **Digital Twin**: microservicio orquestando gemelo operativo + financiero.
-7. **Portal**: SSR Remix + componentes RSC, streaming.
+7. **Portal**: SSR Next.js 15 (App Router) + RSC, streaming y Server Actions seguras.
 8. **Mobile**: Expo/React Native con offline-first, voice-first.
 
 ## Diagramas de referencia
@@ -57,17 +57,17 @@
 - **Política de acceso**: IAM minimum privilege, auditorías trimestrales, registros en DataDog/SIEM.
 
 ## CI/CD
-1. `bun lint` (ESLint/Biome) + `bun test` (Vitest).
-2. Tests e2e (Playwright) y contract tests de integraciones.
-3. Build + deploy automatizado a dev/stage/prod (con approvals).
-4. Feature flags (LaunchDarkly) para releases controladas.
+1. `pnpm turbo run lint` (Next lint + ESLint TS, markdownlint, cspell).
+2. `pnpm turbo run test` (Vitest unitaria + contract mocks Stripe/Twilio).
+3. `pnpm turbo run build` (Next build --turbopack, tsup paquetes compartidos).
+4. Feature flags (LaunchDarkly) y despliegues automatizados a dev/stage/prod (con approvals).
 - **Pipeline mínimo**:
   - `ci-lint`: corre lint/typecheck en cada PR.
   - `ci-test`: unitarias + contract tests (Stripe/Twilio mocks).
   - `ci-e2e`: smoke Playwright contra entorno preview.
   - `deploy-staging`: manual/auto tras merge a main (usa Vercel/Fly).
   - `deploy-prod`: require approval + tagging, notifica a Slack.
-- **Herramientas**: GitHub Actions / CircleCI; usar caches pnpm/bun, matrix Node 20 + Bun.
+- **Herramientas**: GitHub Actions / CircleCI; usar caches pnpm/bun, matrix Node 24 + Bun.
 
 ### Estrategia de testing
 - **Unitarias**: Vitest + Testing Library (front) con coverage ≥80 % en dominios críticos.
@@ -77,8 +77,8 @@
 - **Observabilidad de calidad**: dashboards con métricas de tests, flakiness tracking en Datadog/Looker.
 
 ### Repositorios y scripts
-- **Monorepo** con pnpm workspaces (alternativa: turborepo) → carpetas `apps/web`, `apps/api`, `packages/shared`, `infra/`.
-- Scripts recomendados en raíz (`package.json` o `Makefile`): `dev` (levanta web + api), `test`, `lint`, `typecheck`, `storybook` (cuando aplique).
+- **Monorepo** con pnpm workspaces + Turborepo → carpetas `apps/web`, `apps/api`, `packages/ui`, `infra/`.
+- Scripts recomendados en raíz (`package.json` o `Makefile`): `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm typecheck`, `pnpm storybook` (cuando aplique).
 - Estándar de commits: Conventional Commits + Husky para pre-commit (`lint-staged` con eslint/prettier).
 - Plantilla de variables: `.env.example` por servicio, centralizando nombres de secrets descritos en la tabla de integraciones.
 
@@ -93,9 +93,9 @@
 - Plug-ins API para partners (developer portal, SDKs).
 
 ## Infraestructura inicial
-- **Entorno local**: `docker-compose` para Postgres, Redis, Temporal dev; scripts `bun dev` para web/api.
+- **Entorno local**: `docker-compose` para Postgres, Redis, Temporal dev; `pnpm dev` (Turbo) para web/api.
 - **Staging**: API en Fly.io/Railway, web en Vercel; Temporal/Redis gestionados (Temporal Cloud beta opcional).
 - **IaC**: Terraform mínimo (VPC, DB, secrets) en `infra/terraform`; pipelines manuales hasta consolidar.
 - **Secrets**: 1Password (equipo) + AWS Secrets Manager para staging/prod, con rotación automática.
-- **Observabilidad base**: OTel collector -> Grafana Cloud/Datadog; dashboards: latencia API, fallas workflows, costos IA.
+- **Observabilidad base**: OTel collector -> Grafana Cloud/Datadog + Sentry; dashboards: latencia API, fallas workflows, costos IA y alertas front/back.
 - **Alertas**: PagerDuty (SLA booking, errores 5xx, fallos CleanScore), integración Slack #ops.

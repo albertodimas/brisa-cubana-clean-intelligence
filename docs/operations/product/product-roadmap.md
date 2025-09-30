@@ -3,30 +3,29 @@
 > Para el detalle operativo del MVP priorizado, ver `mvp-lean-plan.md` en esta misma carpeta.
 
 ## MVP (0-3 meses)
-- Agente IA booking.
-- Panel admin + app staff mínima.
-- CleanScore beta.
-- Integraciones Stripe/Twilio/Maps/QuickBooks/DocuSign.
+- Concierge IA multimodal (voz/texto/imágenes) + booking omnicanal.
+- Panel admin, app staff mínima con comandos de voz, CleanScore™ beta.
+- Integraciones Stripe, Twilio/WhatsApp, Google Maps, QuickBooks, DocuSign, LaunchDarkly, Sentry.
+- Reporte ESG beta y dashboard de métricas operativas.
 
 ## V1 (3-6 meses)
-- Marketing autopilot.
-- Pricing dinámico.
-- Reputación IA.
-- Knowledge graph, dashboards.
-- Integración PMS prioritarios.
+- Marketing autopilot y reputación IA.
+- Pricing dinámico, knowledge graph y dashboards ejecutivos (OKR, ESG).
+- Integraciones PMS prioritarios (Hostaway, Guesty, Mews) y AppFolio.
+- Digital twin operativo y alertas de inventario inteligente.
 
 ## V2 (6-12 meses)
-- Tours 3D.
-- Portal B2B avanzado.
-- Digital twin operativo-financiero completo.
-- WebXR/voice-first completo.
-- Marketplace partners.
+- Tours 3D/WebXR, portal B2B avanzado con paneles inmersivos.
+- Digital twin operativo-financiero completo + pronóstico de cashflow.
+- Voice-first extendido (staff y clientes), robots UV-C coordinados con CleanScore™.
+- Marketplace partners (lavandería, mantenimiento, wellness) con bundles y revenue-share.
 
 ## Futuro
 - Internacionalización (idioma, moneda, impuestos).
 - Verticales regulados (salud, alimentos).
 - Developer portal, SDKs.
-- Integraciones IoT avanzadas.
+- Integraciones IoT avanzadas (sensores ambientales, consumo agua/energía).
+- Modelos IA propietarios (CleanScore™ visión + audio, concierge híbrido) y reporting ESG conforme a CDP/GRI.
 
 ## Gestión backlog
 - Tablero temático (Growth, Ops, IA, Integraciones).
@@ -43,4 +42,4 @@
 
 ## Consideraciones técnicas continuas
 - Evaluar Node LTS vs current en roadmap (ver ADR-06).
-- Monitorear releases Bun y Remix/Next según evolución del stack.
+- Monitorear releases Bun y Next.js según evolución del stack.
