@@ -50,11 +50,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=deps --chown=nodejs:nodejs /app/apps/api/node_modules ./apps/api/node_modules
 
-# Copy built application
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/dist ./apps/api/dist
+# Copy source code and generated files
+COPY --from=builder --chown=nodejs:nodejs /app/apps/api/src ./apps/api/src
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/package.json ./apps/api/
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/src/generated ./apps/api/src/generated
+COPY --from=builder --chown=nodejs:nodejs /app/apps/api/tsconfig.json ./apps/api/
 
 # Switch to non-root user
 USER nodejs
@@ -70,6 +70,6 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 ENV NODE_ENV=production
 ENV API_PORT=3001
 
-# Start application with dumb-init
+# Start application with dumb-init and tsx (handles TS without transpiling)
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "apps/api/dist/server.js"]
+CMD ["node", "--import", "tsx", "apps/api/src/server.ts"]

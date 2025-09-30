@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "dev:bun": "bun run src/server.ts",
-    "build": "prisma generate && tsc --project tsconfig.build.json",
+    "build": "prisma generate && tsup",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test": "vitest",
