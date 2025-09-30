@@ -8,6 +8,7 @@ import auth from "./routes/auth";
 import payments from "./routes/payments";
 import alerts from "./routes/alerts";
 import notes from "./routes/reconciliation";
+import health from "./routes/health";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
 
 export const app = new Hono();
@@ -22,7 +23,7 @@ app.use(
   }),
 );
 
-// Health check
+// Health checks
 app.get("/", (c) =>
   c.json({
     service: "Brisa Cubana Clean Intelligence API",
@@ -32,6 +33,10 @@ app.get("/", (c) =>
   }),
 );
 
+// Mount health check routes
+app.route("/health", health);
+
+// Legacy health check endpoint (kept for backwards compatibility)
 app.get("/healthz", (c) =>
   c.json({
     ok: true,

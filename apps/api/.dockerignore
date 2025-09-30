@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Development
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist
+.turbo
+coverage
+.vitest
+
+# Testing
+*.test.ts
+*.spec.ts
+__tests__
+__mocks__
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
