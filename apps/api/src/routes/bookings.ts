@@ -13,6 +13,11 @@ import type {
   PaginationInput,
   UpdateBookingInput,
 } from "../schemas";
+import {
+  sendBookingConfirmation,
+  sendStatusUpdate,
+  sendCompletionNotification,
+} from "../services/notifications";
 
 const bookings = new Hono();
 
@@ -295,6 +300,35 @@ bookings.post("/", requireAuth(), async (c) => {
     }
   }
 
+  // Send booking notification (async, non-blocking)
+  if (userRecord.phone) {
+    const scheduledDate = new Date(scheduledAt).toLocaleDateString("es-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const scheduledTime = new Date(scheduledAt).toLocaleTimeString("es-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    void sendBookingConfirmation(
+      {
+        clientName: userRecord.name ?? "Cliente",
+        clientPhone: userRecord.phone,
+        serviceName: service.name,
+        propertyName: property.name,
+        propertyAddress: property.address,
+        scheduledDate,
+        scheduledTime,
+        totalPrice: totalPrice.toFixed(2),
+        bookingId: booking.id,
+      },
+      booking.status === "CONFIRMED" ? "CONFIRMED" : "PENDING",
+    );
+  }
+
   return c.json({ booking, checkoutUrl }, 201);
 });
 
@@ -351,6 +385,70 @@ bookings.patch("/:id", requireAuth(), async (c) => {
       service: true,
     },
   });
+
+  // Send status update notifications (async, non-blocking)
+  if (payload.status && booking.user.phone) {
+    if (payload.status === "IN_PROGRESS") {
+      void sendStatusUpdate({
+        clientName: booking.user.name ?? "Cliente",
+        clientPhone: booking.user.phone,
+        serviceName: booking.service.name,
+        propertyName: booking.property.name,
+        status: payload.status,
+        bookingId: booking.id,
+      });
+    } else if (payload.status === "COMPLETED") {
+      void sendCompletionNotification({
+        clientName: booking.user.name ?? "Cliente",
+        clientPhone: booking.user.phone,
+        serviceName: booking.service.name,
+        propertyName: booking.property.name,
+        bookingId: booking.id,
+      });
+    } else if (payload.status === "CANCELLED") {
+      void sendStatusUpdate({
+        clientName: booking.user.name ?? "Cliente",
+        clientPhone: booking.user.phone,
+        serviceName: booking.service.name,
+        propertyName: booking.property.name,
+        status: payload.status,
+        bookingId: booking.id,
+      });
+    } else if (payload.status === "CONFIRMED") {
+      // Send confirmation notification when status changes to CONFIRMED
+      const scheduledDate = new Date(booking.scheduledAt).toLocaleDateString(
+        "es-US",
+        {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        },
+      );
+      const scheduledTime = new Date(booking.scheduledAt).toLocaleTimeString(
+        "es-US",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        },
+      );
+
+      void sendBookingConfirmation(
+        {
+          clientName: booking.user.name ?? "Cliente",
+          clientPhone: booking.user.phone,
+          serviceName: booking.service.name,
+          propertyName: booking.property.name,
+          propertyAddress: booking.property.address,
+          scheduledDate,
+          scheduledTime,
+          totalPrice: Number(booking.totalPrice).toFixed(2),
+          bookingId: booking.id,
+        },
+        "CONFIRMED",
+      );
+    }
+  }
 
   return c.json(booking);
 });
