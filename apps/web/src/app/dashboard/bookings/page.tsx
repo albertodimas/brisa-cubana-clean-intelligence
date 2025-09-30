@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { Badge, Button, Card, Section } from "@brisa/ui";
 import { auth } from "@/server/auth/config";
-import { Calendar, MapPin, DollarSign, Clock } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Clock, Plus } from "lucide-react";
 import type { Booking } from "@/types/api";
 
 async function getBookings(accessToken: string): Promise<Booking[]> {
@@ -90,6 +90,10 @@ export default async function BookingsPage() {
             Gestiona todas tus reservas de servicios de limpieza
           </p>
         </div>
+        <Button intent="primary" as="a" href="/dashboard/bookings/new">
+          <Plus className="h-4 w-4" />
+          Nueva Reserva
+        </Button>
       </div>
 
       {hasBookings ? (
