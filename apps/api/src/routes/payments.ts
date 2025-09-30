@@ -121,7 +121,7 @@ payments.post("/webhook", async (c) => {
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
         const bookingId = session.metadata?.bookingId;
         if (bookingId) {
           await db.booking.update({
@@ -140,7 +140,7 @@ payments.post("/webhook", async (c) => {
         break;
       }
       case "checkout.session.expired": {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
         const bookingId = session.metadata?.bookingId;
         if (bookingId) {
           await db.booking.update({
@@ -153,7 +153,7 @@ payments.post("/webhook", async (c) => {
         break;
       }
       case "payment_intent.payment_failed": {
-        const intent = event.data.object as Stripe.PaymentIntent;
+        const intent = event.data.object;
         const booking = await db.booking.findFirst({
           where: {
             paymentIntentId: intent.id,

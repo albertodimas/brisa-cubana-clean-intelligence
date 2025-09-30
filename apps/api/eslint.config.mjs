@@ -19,7 +19,17 @@ export default [
       sourceType: 'module',
       globals: {
         console: 'readonly',
-        process: 'readonly'
+        process: 'readonly',
+        fetch: 'readonly',
+        Buffer: 'readonly',
+        beforeEach: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly'
       }
     },
     plugins: {
@@ -28,7 +38,14 @@ export default [
     rules: {
       ...tsRecommendations,
       ...tsStylistic,
-      '@typescript-eslint/explicit-module-boundary-types': 'off'
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_'
+      }]
     }
   }
 ];

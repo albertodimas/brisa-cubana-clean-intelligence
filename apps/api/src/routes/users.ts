@@ -77,7 +77,7 @@ users.get("/:id", async (c) => {
     return c.json({ error: "User not found" }, 404);
   }
 
-  const { passwordHash, ...sanitized } = user;
+  const { passwordHash: _passwordHash, ...sanitized } = user;
 
   return c.json(sanitized);
 });
@@ -121,7 +121,7 @@ users.post("/", async (c) => {
     },
   });
 
-  const { passwordHash, ...sanitized } = user;
+  const { passwordHash: _passwordHash2, ...sanitized } = user;
 
   return c.json(sanitized, 201);
 });
@@ -175,7 +175,7 @@ users.patch("/:id", async (c) => {
     data: updateData,
   });
 
-  const { passwordHash, ...sanitized } = user;
+  const { passwordHash: _passwordHash, ...sanitized } = user;
 
   return c.json(sanitized);
 });

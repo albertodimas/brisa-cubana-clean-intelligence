@@ -19,10 +19,16 @@ export interface AccessTokenPayload {
 const TOKEN_EXPIRATION = "8h";
 
 export function generateAccessToken(payload: AccessTokenPayload): string {
+  if (!secret) {
+    throw new Error("JWT_SECRET is not configured");
+  }
   return jwt.sign(payload, secret, { expiresIn: TOKEN_EXPIRATION });
 }
 
 export function verifyAccessToken(token: string): AccessTokenPayload | null {
+  if (!secret) {
+    throw new Error("JWT_SECRET is not configured");
+  }
   try {
     return jwt.verify(token, secret) as AccessTokenPayload;
   } catch (error) {

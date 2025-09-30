@@ -5,12 +5,11 @@ import { auth } from "@/server/auth/config";
 import { getAuditTrail } from "@/server/api/audit";
 
 interface AuditTrailPageProps {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function AuditTrailPage({
-  searchParams,
-}: AuditTrailPageProps) {
+export default async function AuditTrailPage(props: AuditTrailPageProps) {
+  const searchParams = await props.searchParams;
   const session = await auth();
 
   if (
@@ -208,11 +207,11 @@ export default async function AuditTrailPage({
                 : {}),
               ...(authorEmailParam ? { authorEmail: authorEmailParam } : {}),
               ...(bookingIdParam ? { bookingId: bookingIdParam } : {}),
-              ...(minFailedParam && !Number.isNaN(minFailedParam)
-                ? { minFailed: String(minFailedParam) }
+              ...(minFailedRaw && !Number.isNaN(minFailedRaw)
+                ? { minFailed: String(minFailedRaw) }
                 : {}),
-              ...(minPendingParam && !Number.isNaN(minPendingParam)
-                ? { minPending: String(minPendingParam) }
+              ...(minPendingRaw && !Number.isNaN(minPendingRaw)
+                ? { minPending: String(minPendingRaw) }
                 : {}),
               tab: currentTab,
             }).toString()}`}
@@ -233,8 +232,8 @@ export default async function AuditTrailPage({
                 limit: limitParam,
                 authorEmail: authorEmailParam,
                 bookingId: bookingIdParam,
-                minFailed: minFailedParam?.toString(),
-                minPending: minPendingParam?.toString(),
+                minFailed: minFailedRaw?.toString(),
+                minPending: minPendingRaw?.toString(),
               }).filter(([, value]) => value),
             ),
             tab: "resueltas",
@@ -252,8 +251,8 @@ export default async function AuditTrailPage({
                 limit: limitParam,
                 authorEmail: authorEmailParam,
                 bookingId: bookingIdParam,
-                minFailed: minFailedParam?.toString(),
-                minPending: minPendingParam?.toString(),
+                minFailed: minFailedRaw?.toString(),
+                minPending: minPendingRaw?.toString(),
               }).filter(([, value]) => value),
             ),
             tab: "abiertas",

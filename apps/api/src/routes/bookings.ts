@@ -275,11 +275,12 @@ bookings.patch("/:id", requireAuth(), async (c) => {
 
   if (payload.status !== undefined) {
     updateData.status = payload.status;
-    updateData.completedAt = payload.status === "COMPLETED" ? new Date() : null;
+    updateData.completedAt =
+      payload.status === "COMPLETED" ? new Date() : undefined;
   }
 
   if (payload.notes !== undefined) {
-    updateData.notes = payload.notes === "" ? null : payload.notes;
+    updateData.notes = payload.notes === "" ? undefined : payload.notes;
   }
 
   if (Object.keys(updateData).length === 0) {

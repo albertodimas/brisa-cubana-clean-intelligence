@@ -1,4 +1,12 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import {
+  describe,
+  expect,
+  it,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  vi,
+} from "vitest";
 import { Hono } from "hono";
 
 const verifyPasswordMock = vi.hoisted(() => vi.fn());
