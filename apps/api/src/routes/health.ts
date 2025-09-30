@@ -44,14 +44,20 @@ health.get("/ready", async (c) => {
     memory: { status: "pass" },
   };
 
-  // Check database connection
+  // Check database connection with additional stats
   try {
     const dbStart = Date.now();
     await db.$queryRaw`SELECT 1`;
+    const responseTime = Date.now() - dbStart;
+
+    // Get database pool stats if available
     checks.database = {
-      status: "pass",
-      responseTime: Date.now() - dbStart,
-      message: "Connected",
+      status: responseTime < 100 ? "pass" : "fail",
+      responseTime,
+      message: responseTime < 100 ? "Connected" : "Slow response",
+      details: {
+        threshold: "100ms",
+      },
     };
   } catch (error) {
     checks.database = {
@@ -98,30 +104,50 @@ health.get("/ready", async (c) => {
 });
 
 /**
- * Metrics endpoint - Basic runtime metrics
- * Can be scraped by Prometheus/monitoring tools
+ * Basic runtime info
+ * For detailed metrics see /metrics (Prometheus format)
  */
-health.get("/metrics", (c) => {
+health.get("/info", (c) => {
   const memUsage = process.memoryUsage();
 
   return c.json({
+    service: "brisa-cubana-api",
+    version: "0.1.0",
+    environment: process.env.NODE_ENV ?? "development",
     process: {
-      uptime: process.uptime(),
+      uptime: Math.floor(process.uptime()),
+      uptimeFormatted: formatUptime(process.uptime()),
       pid: process.pid,
-      version: process.version,
+      nodeVersion: process.version,
       platform: process.platform,
       arch: process.arch,
     },
     memory: {
-      rss: memUsage.rss,
-      heapTotal: memUsage.heapTotal,
-      heapUsed: memUsage.heapUsed,
-      external: memUsage.external,
-      arrayBuffers: memUsage.arrayBuffers,
+      rss: `${Math.round(memUsage.rss / 1024 / 1024)}MB`,
+      heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`,
+      heapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`,
+      external: `${Math.round(memUsage.external / 1024 / 1024)}MB`,
     },
-    cpu: process.cpuUsage(),
     timestamp: new Date().toISOString(),
   });
 });
+
+/**
+ * Format uptime in human-readable format
+ */
+function formatUptime(seconds: number): string {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+
+  return parts.join(" ");
+}
 
 export default health;

@@ -233,6 +233,9 @@
     "pooler",
     "Loguear",
     "dind",
-    "newgrp"
+    "newgrp",
+    "prometheus",
+    "promql",
+    "grafana"
   ]
 }

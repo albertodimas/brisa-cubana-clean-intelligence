@@ -8,16 +8,19 @@ import payments from "./routes/payments";
 import alerts from "./routes/alerts";
 import notes from "./routes/reconciliation";
 import health from "./routes/health";
+import metrics from "./routes/metrics";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
 import { rateLimiter, RateLimits } from "./middleware/rate-limit";
 import { requestLogger } from "./middleware/logger";
+import { metricsMiddleware } from "./middleware/metrics";
 import { logger } from "./lib/logger";
 import { isAppError } from "./lib/errors";
 
 export const app = new Hono();
 
-// Middleware
-app.use("*", requestLogger);
+// Middleware (order matters!)
+app.use("*", requestLogger); // Logging first
+app.use("*", metricsMiddleware); // Metrics second (after logging)
 app.use(
   "*",
   cors({
@@ -41,6 +44,9 @@ app.get("/", (c) =>
 
 // Mount health check routes
 app.route("/health", health);
+
+// Prometheus metrics endpoint
+app.route("/metrics", metrics);
 
 // Legacy health check endpoint (kept for backwards compatibility)
 app.get("/healthz", (c) =>
