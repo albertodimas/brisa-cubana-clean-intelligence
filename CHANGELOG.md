@@ -7,8 +7,52 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
-### Added
+### Added - 2025-09-30
 
+#### Property Management System
+
+- Complete CRUD for properties with form validation
+- Property creation page (`/dashboard/properties/new`)
+- Property detail page with booking history (`/dashboard/properties/[id]`)
+- Property edit page (`/dashboard/properties/[id]/edit`)
+- Support for 4 property types: RESIDENTIAL, VACATION_RENTAL, OFFICE, HOSPITALITY
+- Optional fields: size, bedrooms, bathrooms, notes
+- Role-based authorization (users see own properties, admins see all)
+
+#### Booking Management System
+
+- Booking creation form with service and property selection (`/dashboard/bookings/new`)
+- Booking detail page with full information (`/dashboard/bookings/[id]`)
+- Status management workflow for ADMIN/STAFF:
+  - PENDING → CONFIRMED → IN_PROGRESS → COMPLETED
+  - Cancel option from any status
+- Automatic completion date setting when marking as COMPLETED
+- Minimum 2-hour advance booking validation
+- Dynamic price summary in booking form
+- "Nueva Reserva" button added to bookings listing page
+
+#### Revenue Analytics Dashboard
+
+- Admin-only revenue analytics page (`/dashboard/reports/revenue`)
+- Key metrics: total revenue, bookings count, average value
+- Revenue breakdown by service with count and averages
+- Payment status distribution (PENDING_PAYMENT, PAID, FAILED, REFUNDED)
+- Recent bookings table (last 10 completed services)
+- Date filtering support (from/to query params)
+- Localized currency (USD) and date formats (es-ES)
+
+#### Type Safety & Code Quality
+
+- Shared API types file (`apps/web/src/types/api.ts`)
+- Complete TypeScript coverage across frontend
+- Type definitions for: BookingStatus, PaymentStatus, PropertyType, Service, Property, Booking
+- All tests passing (66/66 tests, 100% success rate)
+- Zero TypeScript errors
+- Zero ESLint errors (9 acceptable warnings in API layer)
+
+#### Documentation
+
+- SESSION_LOG_2025-09-30.md with complete session details
 - CONTRIBUTING.md con guías de contribución completas
 - CODE_OF_CONDUCT.md basado en Contributor Covenant 2.1
 - ARCHITECTURE.md con overview de alto nivel del sistema
