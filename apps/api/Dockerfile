@@ -29,11 +29,8 @@ COPY apps/api ./apps/api
 # Install all dependencies (including dev, ignore lifecycle scripts)
 RUN pnpm install --frozen-lockfile --filter=@brisa/api... --ignore-scripts
 
-# Generate Prisma Client
+# Generate Prisma Client (only step needed - no build since tsx handles TS at runtime)
 RUN cd apps/api && pnpm db:generate
-
-# Build the application
-RUN cd apps/api && pnpm build
 
 # Stage 3: Production runner
 FROM node:24.9.0-alpine AS runner
