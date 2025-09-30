@@ -1,0 +1,13 @@
+# Railway Configuration
+# This file configures Railway to use the Dockerfile for building the API service
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "apps/api/Dockerfile"
+
+[deploy]
+startCommand = "tsx apps/api/src/server.ts"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
