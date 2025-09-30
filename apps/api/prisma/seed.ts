@@ -228,7 +228,7 @@ async function main() {
       scheduledAt: tomorrow,
       totalPrice: 149.99,
       status: "CONFIRMED",
-      paymentStatus: "PENDING",
+      paymentStatus: "PENDING_PAYMENT",
     },
   });
 
@@ -243,7 +243,7 @@ async function main() {
       scheduledAt: nextWeek,
       totalPrice: 119.99,
       status: "PENDING",
-      paymentStatus: "PENDING",
+      paymentStatus: "PENDING_PAYMENT",
     },
   });
 
