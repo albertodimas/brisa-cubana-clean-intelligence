@@ -1,0 +1,51 @@
+# CODEOWNERS for Brisa Cubana Clean Intelligence
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+* @albertodimas
+
+# Frontend - Next.js Web App
+/apps/web/ @albertodimas
+/apps/web/src/app/ @albertodimas
+/apps/web/src/components/ @albertodimas
+
+# Backend - Hono API
+/apps/api/ @albertodimas
+/apps/api/src/routes/ @albertodimas
+/apps/api/prisma/ @albertodimas
+
+# Shared UI Package
+/packages/ui/ @albertodimas
+
+# Documentation
+/docs/ @albertodimas
+*.md @albertodimas
+/mkdocs.yml @albertodimas
+
+# Infrastructure & DevOps
+/.github/ @albertodimas
+/.github/workflows/ @albertodimas
+/docker-compose.yml @albertodimas
+/Dockerfile @albertodimas
+
+# Configuration Files (require careful review)
+/package.json @albertodimas
+/pnpm-lock.yaml @albertodimas
+/pnpm-workspace.yaml @albertodimas
+/turbo.json @albertodimas
+/tsconfig.base.json @albertodimas
+/.env.example @albertodimas
+
+# Security & Compliance
+/SECURITY.md @albertodimas
+/CODE_OF_CONDUCT.md @albertodimas
+/.github/dependabot.yml @albertodimas
+
+# Database Schema (critical changes)
+/apps/api/prisma/schema.prisma @albertodimas
+/apps/api/prisma/migrations/ @albertodimas
+
+# CI/CD Workflows
+/.github/workflows/ci.yml @albertodimas
+/.github/workflows/documentation.yml @albertodimas
+/.github/workflows/payments-reconcile.yml @albertodimas
