@@ -12,8 +12,8 @@ RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/
 
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api
+# Install production dependencies only (ignore lifecycle scripts)
+RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api --ignore-scripts
 
 # Stage 2: Builder
 FROM node:24.9.0-alpine AS builder
@@ -26,8 +26,8 @@ RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY apps/api ./apps/api
 
-# Install all dependencies (including dev)
-RUN pnpm install --frozen-lockfile --filter=@brisa/api...
+# Install all dependencies (including dev, ignore lifecycle scripts)
+RUN pnpm install --frozen-lockfile --filter=@brisa/api... --ignore-scripts
 
 # Generate Prisma Client
 RUN cd apps/api && pnpm db:generate
