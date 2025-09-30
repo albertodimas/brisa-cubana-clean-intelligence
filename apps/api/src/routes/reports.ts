@@ -9,7 +9,7 @@ import { z } from "zod";
 const reports = new Hono();
 
 // Apply rate limiting
-reports.use("/", rateLimiter(RateLimits.write));
+reports.use("/", rateLimiter(RateLimits.read));
 
 const generateReportSchema = z.object({
   bookingId: z.string().min(1),
@@ -222,5 +222,106 @@ reports.post(
     return c.html(html);
   },
 );
+
+// Get revenue report
+reports.get("/revenue", requireAuth(["ADMIN"]), async (c) => {
+  const from = c.req.query("from");
+  const to = c.req.query("to");
+
+  // Default to current month if no dates provided
+  const fromDate = from
+    ? new Date(from)
+    : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const toDate = to ? new Date(to) : new Date();
+
+  // Get all completed bookings in date range
+  const bookings = await db.booking.findMany({
+    where: {
+      status: "COMPLETED",
+      completedAt: {
+        gte: fromDate,
+        lte: toDate,
+      },
+    },
+    include: {
+      service: {
+        select: {
+          name: true,
+        },
+      },
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  // Calculate totals
+  const totalRevenue = bookings.reduce(
+    (sum, booking) => sum + parseFloat(booking.totalPrice.toString()),
+    0,
+  );
+  const bookingsCount = bookings.length;
+  const averageBookingValue =
+    bookingsCount > 0 ? totalRevenue / bookingsCount : 0;
+
+  // Group by service
+  const revenueByService = bookings.reduce(
+    (acc, booking) => {
+      const serviceName = booking.service.name;
+      if (!acc[serviceName]) {
+        acc[serviceName] = {
+          revenue: 0,
+          count: 0,
+        };
+      }
+      acc[serviceName].revenue += parseFloat(booking.totalPrice.toString());
+      acc[serviceName].count += 1;
+      return acc;
+    },
+    {} as Record<string, { revenue: number; count: number }>,
+  );
+
+  // Group by payment status
+  const revenueByPaymentStatus = bookings.reduce(
+    (acc, booking) => {
+      const status = booking.paymentStatus;
+      if (!acc[status]) {
+        acc[status] = {
+          revenue: 0,
+          count: 0,
+        };
+      }
+      acc[status].revenue += parseFloat(booking.totalPrice.toString());
+      acc[status].count += 1;
+      return acc;
+    },
+    {} as Record<string, { revenue: number; count: number }>,
+  );
+
+  return c.json({
+    period: {
+      from: fromDate.toISOString(),
+      to: toDate.toISOString(),
+    },
+    summary: {
+      totalRevenue: totalRevenue.toFixed(2),
+      bookingsCount,
+      averageBookingValue: averageBookingValue.toFixed(2),
+    },
+    byService: revenueByService,
+    byPaymentStatus: revenueByPaymentStatus,
+    recentBookings: bookings.slice(0, 10).map((b) => ({
+      id: b.id,
+      client: b.user.name ?? b.user.email,
+      service: b.service.name,
+      amount: b.totalPrice.toString(),
+      completedAt: b.completedAt,
+      paymentStatus: b.paymentStatus,
+    })),
+  });
+});
 
 export default reports;

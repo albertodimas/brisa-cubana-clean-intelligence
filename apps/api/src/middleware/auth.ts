@@ -5,7 +5,8 @@ import { verifyAccessToken, type AccessTokenPayload } from "../lib/token";
 const AUTH_USER_KEY = "authUser";
 
 export function getAuthUser(
-  c: Parameters<MiddlewareHandler>[0],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  c: any,
 ): AccessTokenPayload | null {
   return (c.get(AUTH_USER_KEY) as AccessTokenPayload | undefined) ?? null;
 }

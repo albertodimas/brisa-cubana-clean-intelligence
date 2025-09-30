@@ -1,7 +1,9 @@
+import type { Context } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import services from "./routes/services";
 import bookings from "./routes/bookings";
+import properties from "./routes/properties";
 import users from "./routes/users";
 import auth from "./routes/auth";
 import payments from "./routes/payments";
@@ -59,6 +61,7 @@ app.get("/healthz", (c) =>
 // API routes
 app.route("/api/services", services);
 app.route("/api/bookings", bookings);
+app.route("/api/properties", properties);
 app.route("/api/users", users);
 app.route("/api/auth", auth);
 app.route("/api/payments", payments);
@@ -70,8 +73,8 @@ app.route("/api/reports", reports);
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 
 // Error handler
-app.onError((err, c) => {
-  const requestId = c.get("requestId") ?? "unknown";
+app.onError((err, c: Context) => {
+  const requestId = (c.get("requestId") as string | undefined) ?? "unknown";
 
   // Check if it's a known application error
   if (isAppError(err)) {
