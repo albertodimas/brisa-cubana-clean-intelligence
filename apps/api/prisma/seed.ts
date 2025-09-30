@@ -66,38 +66,203 @@ async function main() {
     vacationRental,
   });
 
-  // Create demo user
-  const demoPasswordHash = await hashPassword("demo123");
+  // Create users with different roles
+  const passwordHash = await hashPassword("demo123");
 
-  const demoUser = await prisma.user.upsert({
-    where: { email: "demo@brisacubanaclean.com" },
+  const adminUser = await prisma.user.upsert({
+    where: { email: "admin@brisacubanaclean.com" },
     update: {},
     create: {
-      email: "demo@brisacubanaclean.com",
-      name: "Demo User",
-      phone: "+1-305-555-0100",
-      role: "CLIENT",
-      passwordHash: demoPasswordHash,
+      email: "admin@brisacubanaclean.com",
+      name: "Admin User",
+      phone: "+1-305-555-0001",
+      role: "ADMIN",
+      passwordHash,
     },
   });
 
-  console.log("✅ Demo user created:", demoUser);
+  const staffUser = await prisma.user.upsert({
+    where: { email: "staff@brisacubanaclean.com" },
+    update: {},
+    create: {
+      email: "staff@brisacubanaclean.com",
+      name: "Staff Member",
+      phone: "+1-305-555-0002",
+      role: "STAFF",
+      passwordHash,
+    },
+  });
 
-  // Create demo property
-  const demoProperty = await prisma.property.create({
-    data: {
-      name: "Brickell Apartment",
-      address: "1234 Brickell Ave",
+  const clientUser = await prisma.user.upsert({
+    where: { email: "client@brisacubanaclean.com" },
+    update: {},
+    create: {
+      email: "client@brisacubanaclean.com",
+      name: "Maria Rodriguez",
+      phone: "+1-305-555-0100",
+      role: "CLIENT",
+      passwordHash,
+    },
+  });
+
+  const propertyManager = await prisma.user.upsert({
+    where: { email: "carlos.mendez@example.com" },
+    update: {},
+    create: {
+      email: "carlos.mendez@example.com",
+      name: "Carlos Mendez",
+      phone: "+1-305-555-0200",
+      role: "CLIENT",
+      passwordHash,
+    },
+  });
+
+  console.log("✅ Users created:", {
+    admin: adminUser.email,
+    staff: staffUser.email,
+    client: clientUser.email,
+    propertyManager: propertyManager.email,
+  });
+
+  // Create properties for different scenarios
+  const residentialProperty = await prisma.property.upsert({
+    where: { id: "prop-residential-1" },
+    update: {},
+    create: {
+      id: "prop-residential-1",
+      name: "Brickell Luxury Apartment",
+      address: "1234 Brickell Ave, Unit 2501",
       city: "Miami",
       state: "FL",
       zipCode: "33131",
       type: "RESIDENTIAL",
       size: 1200,
-      userId: demoUser.id,
+      userId: clientUser.id,
     },
   });
 
-  console.log("✅ Demo property created:", demoProperty);
+  const vacationRentalProperty = await prisma.property.upsert({
+    where: { id: "prop-vacation-1" },
+    update: {},
+    create: {
+      id: "prop-vacation-1",
+      name: "Wynwood Vacation Rental",
+      address: "567 NW 2nd Ave",
+      city: "Miami",
+      state: "FL",
+      zipCode: "33127",
+      type: "VACATION_RENTAL",
+      size: 900,
+      userId: propertyManager.id,
+    },
+  });
+
+  const officeProperty = await prisma.property.upsert({
+    where: { id: "prop-office-1" },
+    update: {},
+    create: {
+      id: "prop-office-1",
+      name: "Downtown Miami Office",
+      address: "100 SE 2nd Street, Suite 4000",
+      city: "Miami",
+      state: "FL",
+      zipCode: "33131",
+      type: "OFFICE",
+      size: 3000,
+      userId: propertyManager.id,
+    },
+  });
+
+  const hospitalityProperty = await prisma.property.upsert({
+    where: { id: "prop-hospitality-1" },
+    update: {},
+    create: {
+      id: "prop-hospitality-1",
+      name: "South Beach Boutique Hotel",
+      address: "1500 Ocean Drive",
+      city: "Miami Beach",
+      state: "FL",
+      zipCode: "33139",
+      type: "HOSPITALITY",
+      size: 15000,
+      userId: propertyManager.id,
+    },
+  });
+
+  console.log("✅ Properties created:", {
+    residential: residentialProperty.name,
+    vacation: vacationRentalProperty.name,
+    office: officeProperty.name,
+    hospitality: hospitalityProperty.name,
+  });
+
+  // Create sample bookings with different statuses
+  const now = new Date();
+  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  await prisma.booking.upsert({
+    where: { id: "booking-completed-1" },
+    update: {},
+    create: {
+      id: "booking-completed-1",
+      userId: clientUser.id,
+      propertyId: residentialProperty.id,
+      serviceId: basicClean.id,
+      scheduledAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      totalPrice: 89.99,
+      status: "COMPLETED",
+      paymentStatus: "PAID",
+      completedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  await prisma.booking.upsert({
+    where: { id: "booking-confirmed-1" },
+    update: {},
+    create: {
+      id: "booking-confirmed-1",
+      userId: clientUser.id,
+      propertyId: residentialProperty.id,
+      serviceId: deepClean.id,
+      scheduledAt: tomorrow,
+      totalPrice: 149.99,
+      status: "CONFIRMED",
+      paymentStatus: "PENDING",
+    },
+  });
+
+  await prisma.booking.upsert({
+    where: { id: "booking-pending-1" },
+    update: {},
+    create: {
+      id: "booking-pending-1",
+      userId: propertyManager.id,
+      propertyId: vacationRentalProperty.id,
+      serviceId: vacationRental.id,
+      scheduledAt: nextWeek,
+      totalPrice: 119.99,
+      status: "PENDING",
+      paymentStatus: "PENDING",
+    },
+  });
+
+  await prisma.booking.upsert({
+    where: { id: "booking-office-1" },
+    update: {},
+    create: {
+      id: "booking-office-1",
+      userId: propertyManager.id,
+      propertyId: officeProperty.id,
+      serviceId: deepClean.id,
+      scheduledAt: nextWeek,
+      totalPrice: 299.99,
+      status: "CONFIRMED",
+      paymentStatus: "PAID",
+    },
+  });
+
+  console.log("✅ Sample bookings created");
 
   console.log("🎉 Seeding completed successfully!");
 }
