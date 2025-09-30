@@ -282,6 +282,11 @@ export default async function DashboardPage() {
       <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-lg shadow-black/30">
         <h2 className="text-lg font-semibold text-white">Acciones rápidas</h2>
         <div className="mt-4 flex flex-wrap gap-3">
+          {data.canManageBookings ? (
+            <Button intent="primary" as="a" href="/dashboard/calendar">
+              Abrir calendario
+            </Button>
+          ) : null}
           <Button
             intent="secondary"
             as="a"
