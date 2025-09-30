@@ -225,6 +225,12 @@
     "testeado",
     "testid",
     "aqui",
-    "migracion"
+    "migracion",
+    "dbname",
+    "mypassword",
+    "neondb",
+    "sslmode",
+    "pooler",
+    "Loguear"
   ]
 }
