@@ -1,12 +1,7 @@
 {
   "version": "0.2",
   "language": "en,es",
-  "ignorePaths": [
-    "site/**",
-    ".venv/**",
-    "node_modules/**",
-    "*.log"
-  ],
+  "ignorePaths": ["site/**", ".venv/**", "node_modules/**", "*.log"],
   "dictionaries": [
     "softwareTerms",
     "node",
@@ -16,9 +11,7 @@
     "spanish"
   ],
   "allowCompoundWords": true,
-  "import": [
-    "@cspell/dict-es-es/cspell-ext.json"
-  ],
+  "import": ["@cspell/dict-es-es/cspell-ext.json"],
   "words": [
     "ABAC",
     "ADR",
@@ -26,6 +19,7 @@
     "ARPU",
     "Angi",
     "Anthropic",
+    "albertodimas",
     "AppFolio",
     "Brisa",
     "Buildium",
@@ -67,6 +61,7 @@
     "LangChain",
     "LangSmith",
     "LaunchDarkly",
+    "lintstagedrc",
     "Lodgify",
     "Looker",
     "MLOps",
@@ -90,11 +85,13 @@
     "Observabilidad",
     "Okta",
     "PMS",
+    "paginación",
     "Passkeys",
     "Persefoni",
     "Prefect",
     "Pulumi",
     "QuickBooks",
+    "cachés",
     "RACI",
     "Redpanda",
     "Repo",
@@ -175,6 +172,15 @@
     "shadcn",
     "sorpresivas",
     "subpáginas",
-    "venv"
+    "postgres",
+    "postgresql",
+    "venv",
+    "Algolia",
+    "DocSearch",
+    "Storybook",
+    "TypeDoc",
+    "mermaid",
+    "globby",
+    "execa"
   ]
 }

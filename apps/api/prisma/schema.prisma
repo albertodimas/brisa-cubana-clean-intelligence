@@ -14,11 +14,14 @@ model User {
   name      String?
   phone     String?
   role      UserRole @default(CLIENT)
+  passwordHash String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   bookings Booking[]
   properties Property[]
+  reconciliationNotes ReconciliationNote[] @relation("UserReconciliationNotes")
+  resolvedNotes ReconciliationNote[] @relation("UserResolvedNotes")
 
   @@map("users")
 }
@@ -83,10 +86,46 @@ model Booking {
   status      BookingStatus @default(PENDING)
   totalPrice  Decimal       @db.Decimal(10, 2)
   notes       String?
+  paymentIntentId String?
+  checkoutSessionId String?
+  paymentStatus PaymentStatus @default(PENDING_PAYMENT)
+  reconciliationNotes ReconciliationNote[] @relation("BookingNotes")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
   @@map("bookings")
+}
+
+model ReconciliationNote {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation("BookingNotes", fields: [bookingId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("UserReconciliationNotes", fields: [authorId], references: [id], onDelete: Cascade)
+  message   String   @db.Text
+  status    NoteStatus @default(OPEN)
+  resolvedById String?
+  resolvedBy   User?   @relation("UserResolvedNotes", fields: [resolvedById], references: [id])
+  resolvedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@map("reconciliation_notes")
+}
+
+model PaymentAlert {
+  id              String   @id @default(cuid())
+  failedPayments  Int
+  pendingPayments Int
+  payloadHash     String
+  triggeredAt     DateTime @default(now())
+
+  @@map("payment_alerts")
+  @@index([payloadHash, triggeredAt])
+}
+
+enum NoteStatus {
+  OPEN
+  RESOLVED
 }
 
 enum BookingStatus {
@@ -95,4 +134,12 @@ enum BookingStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING_PAYMENT
+  PAID
+  REQUIRES_ACTION
+  REFUNDED
+  FAILED
 }

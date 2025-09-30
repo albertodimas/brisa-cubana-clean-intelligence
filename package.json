@@ -9,7 +9,7 @@
     "dev:api": "node scripts/turbo.js run dev --filter=@brisa/api",
     "build": "node scripts/turbo.js run build",
     "lint": "node scripts/turbo.js run lint && pnpm lint:md && pnpm lint:spelling",
-    "lint:md": "markdownlint \"**/*.md\" --ignore site --ignore .venv --ignore node_modules --ignore documentos-pendientes --config .markdownlint.json",
+    "lint:md": "markdownlint \"**/*.md\" --ignore site --ignore .venv --ignore node_modules --ignore _archived --config .markdownlint.json",
     "lint:spelling": "cspell lint \"**/*.md\" --config .cspell.json",
     "test": "node scripts/turbo.js run test",
     "typecheck": "node scripts/turbo.js run typecheck",
@@ -17,21 +17,33 @@
     "format:check": "prettier --check .",
     "docs:serve": "mkdocs serve",
     "docs:build": "mkdocs build",
-    "prepare": "husky install"
+    "docs:typedoc": "typedoc --options typedoc.json",
+    "docs:storybook": "pnpm --filter=@brisa/ui storybook:build",
+    "docs:diagrams": "node scripts/generate_diagrams.mjs",
+    "docs:build:artifacts": "pnpm docs:typedoc && pnpm docs:storybook && pnpm docs:diagrams",
+    "stripe:listen": "./scripts/stripe_listen.sh",
+    "stripe:trigger": "./scripts/stripe_trigger.sh",
+    "prepare": "husky",
+    "test:e2e": "pnpm --filter=web build && PLAYWRIGHT_HTML_REPORT=./.playwright-report pnpm exec playwright test"
   },
   "devDependencies": {
     "@cspell/dict-es-es": "3.0.8",
     "@eslint/js": "9.36.0",
+    "@mermaid-js/mermaid-cli": "10.9.1",
+    "@playwright/test": "1.55.1",
     "@types/node": "24.6.0",
     "@typescript-eslint/eslint-plugin": "8.45.0",
     "@typescript-eslint/parser": "8.45.0",
     "cspell": "9.2.1",
     "eslint": "9.36.0",
+    "execa": "9.3.1",
+    "globby": "14.0.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
     "markdownlint-cli": "0.45.0",
     "prettier": "3.6.2",
     "turbo": "2.5.8",
+    "typedoc": "0.28.13",
     "typescript": "5.9.2"
   }
 }

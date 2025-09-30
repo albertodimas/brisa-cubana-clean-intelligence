@@ -1,32 +1,90 @@
-# Node/Bun
+# Dependencies
 node_modules/
+.pnpm-store/
 bun.lockb
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+packages/ui/storybook-static/
+
+# Testing
+coverage/
+.nyc_output/
+.playwright-report/
+playwright-report/
+test-results/
+playwright/.auth/
 
 # Python/MkDocs
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 site/
+docs/_build/
 .mypy_cache/
 .mkdocs-cache/
+.venv/
+venv/
+ENV/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Env
+# Environment variables
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env*.local
 !.env.example
 !.env.local.example
 
 # Logs
 *.log
+logs/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
 
-.venv/
-.turbo
+# Prisma
+apps/api/prisma/migrations/**/migration.sql.bak
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Archives
+_archived/
+
+# Vercel
+.vercel/
+
+# Railway
+.railway/

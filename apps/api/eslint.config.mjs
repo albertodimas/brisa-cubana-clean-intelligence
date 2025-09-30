@@ -6,7 +6,7 @@ const tsRecommendations = tseslint.configs['recommended-type-checked'].rules;
 const tsStylistic = tseslint.configs['stylistic-type-checked'].rules;
 
 export default [
-  { ignores: ['dist/**'] },
+  { ignores: ['dist/**', 'src/generated/**'] },
   js.configs.recommended,
   {
     files: ['src/**/*.ts'],

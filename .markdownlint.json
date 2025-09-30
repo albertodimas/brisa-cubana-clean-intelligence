@@ -11,7 +11,10 @@
   "MD034": false,
   "MD040": false,
   "MD031": false,
-  "ignores": [
-    "documentos-pendientes/**"
-  ]
+  "MD024": {
+    "siblings_only": true
+  },
+  "MD028": false,
+  "MD036": false,
+  "ignores": ["_archived/**"]
 }

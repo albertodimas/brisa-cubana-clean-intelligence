@@ -1,7 +1,9 @@
 site_name: Brisa Cubana Clean Intelligence Docs
 site_description: Documentación oficial de la plataforma de limpieza inteligente.
 site_author: Brisa Cubana Team
-repo_url: https://github.com/tu-usuario/brisa-cubana-clean-intelligence
+repo_url: https://github.com/albertodimas/brisa-cubana-clean-intelligence
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2025 Brisa Cubana Clean Intelligence
 nav:
   - Inicio: index.md
   - 01 · Visión y Estrategia: 01-vision-estrategia.md
@@ -11,8 +13,18 @@ nav:
   - 05 · IA y Automatización: 05-ia-y-automatizacion.md
   - 06 · Integraciones y Ecosistema: 06-integraciones-ecosistema.md
   - 07 · Roadmap y Operaciones: 07-roadmap-y-operaciones.md
+  - Design System: design-system/index.md
+  - Copilot & IA Responsable: copilot/index.md
   - Checklist Pre-Rollout: checklist-pre-rollout.md
   - Insights de Investigación: insights/index.md
+  - Getting Started:
+      - Quickstart (5 min): getting-started/quickstart.md
+  - API Reference:
+      - Endpoints: api/endpoints.md
+  - Development:
+      - Testing Guide: development/testing.md
+  - Deployment:
+      - Environments & Deploy: deployment/environments.md
   - 08 · Operaciones y Ejecución:
       - Overview: operations/index.md
       - Dominio & Branding: operations/domain-and-branding.md
@@ -68,6 +80,7 @@ nav:
           - Turismo 2024: resources/market/tourism-2024-records.md
           - Salarios limpieza: resources/market/wage-maids-miami.md
           - Competencia local: resources/market/cleaning-competition-snapshot.md
+      - Referencias y fuentes: resources/references.md
   - 10 · Anexos y registros:
       - Artefactos arquitectura:
           - Overview: resources/architecture/README.md
@@ -82,16 +95,19 @@ nav:
           - Concierge MVP v0.1: ai/model-cards/model/concierge-mvp-v0.1.md
           - CleanScore v0.1: ai/model-cards/model/cleanscore-v0.1.md
       - Changelog: changelog/index.md
+extra_css:
+  - stylesheets/extra.css
 theme:
   name: material
   features:
     - navigation.tabs
     - navigation.top
+    - navigation.instant
+    - search.suggest
     - search.highlight
     - search.share
     - content.code.copy
     - content.tabs.link
-    - navigation.instant
   palette:
     - scheme: default
       primary: teal
@@ -110,9 +126,19 @@ markdown_extensions:
   - attr_list
 plugins:
   - search
+  - git-revision-date-localized:
+      enable_creation_date: false
+      locale: es
 extra:
   social:
     - icon: fontawesome/brands/instagram
       link: https://instagram.com
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com
+  version:
+    provider: mike
+  search:
+    provider: algolia
+    application_id: ALGOLIA_APP_ID
+    api_key: ALGOLIA_PUBLIC_API_KEY
+    index_name: brisa_docs

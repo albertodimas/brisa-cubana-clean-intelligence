@@ -1,15 +1,15 @@
-import type { NextConfig } from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  output: "standalone",
+  transpilePackages: ["@brisa/ui"],
   experimental: {
-    typedRoutes: true,
-    instrumentationHook: true,
+    externalDir: true,
     serverActions: {
-      allowedOrigins: ['localhost']
-    }
-  }
+      allowedOrigins: ["localhost"],
+    },
+  },
 };
 
 export default nextConfig;

@@ -194,3 +194,83 @@ jobs:
           ls -la apps/web/.next
           ls -la apps/api/dist
           ls -la packages/ui/dist
+
+  docs:
+    name: Docs Artifacts
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build documentation artifacts
+        run: pnpm docs:build:artifacts
+
+      - name: Upload TypeDoc
+        uses: actions/upload-artifact@v4
+        with:
+          name: typedoc-reference
+          path: docs/_build/api
+          if-no-files-found: warn
+
+      - name: Upload Storybook
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-design-system
+          path: packages/ui/storybook-static
+          if-no-files-found: warn
+
+      - name: Upload Diagrams
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams
+          path: docs/_build/diagrams
+          if-no-files-found: warn
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    needs: [build]
+    env:
+      NEXTAUTH_SECRET: test-secret-1234567890
+      NEXTAUTH_URL: http://127.0.0.1:3000
+      AUTH_DEMO_USERS: demo@brisacubanaclean.com:demo123
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3001
+      API_URL: http://127.0.0.1:3001
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+      PORT: 3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: pnpm test:e2e -- --reporter=list

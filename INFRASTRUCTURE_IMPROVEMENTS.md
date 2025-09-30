@@ -11,11 +11,13 @@ Mejorar la infraestructura del proyecto desde una base de documentación sólida
 ### 1. **Variables de Entorno** ✓
 
 **Archivos creados:**
+
 - `.env.example` (raíz)
 - `apps/web/.env.local.example`
 - `apps/api/.env.example`
 
 **Incluye configuración para:**
+
 - PostgreSQL (DATABASE_URL)
 - Redis (REDIS_URL)
 - NextAuth.js (NEXTAUTH_SECRET, NEXTAUTH_URL)
@@ -27,6 +29,7 @@ Mejorar la infraestructura del proyecto desde una base de documentación sólida
 - Feature flags
 
 **Uso:**
+
 ```bash
 cp .env.example .env
 # Editar valores según necesidad
@@ -38,19 +41,21 @@ cp .env.example .env
 
 **Schema completo (`apps/api/prisma/schema.prisma`):**
 
-| Modelo | Descripción | Campos clave |
-|--------|-------------|--------------|
-| `User` | Clientes, staff, admins | email, name, role (enum) |
-| `Property` | Propiedades a limpiar | address, type (enum), size |
-| `Service` | Servicios disponibles | name, basePrice, duration |
-| `Booking` | Reservas de limpieza | scheduledAt, status (enum), totalPrice |
+| Modelo     | Descripción             | Campos clave                           |
+| ---------- | ----------------------- | -------------------------------------- |
+| `User`     | Clientes, staff, admins | email, name, role (enum)               |
+| `Property` | Propiedades a limpiar   | address, type (enum), size             |
+| `Service`  | Servicios disponibles   | name, basePrice, duration              |
+| `Booking`  | Reservas de limpieza    | scheduledAt, status (enum), totalPrice |
 
 **Enums:**
+
 - `UserRole`: CLIENT, STAFF, ADMIN
 - `PropertyType`: RESIDENTIAL, VACATION_RENTAL, OFFICE, HOSPITALITY
 - `BookingStatus`: PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
 
 **Scripts de Prisma (`apps/api/package.json`):**
+
 ```bash
 pnpm --filter=@brisa/api db:generate   # Generar client
 pnpm --filter=@brisa/api db:push       # Sync schema
@@ -60,11 +65,13 @@ pnpm --filter=@brisa/api db:seed       # Datos iniciales
 ```
 
 **Seed data (`apps/api/prisma/seed.ts`):**
+
 - 4 servicios predefinidos (Básica, Profunda, Move In/Out, Vacation Rental)
 - Usuario demo: `demo@brisacubanaclean.com`
 - Propiedad demo en Brickell
 
 **Cliente Prisma singleton (`apps/api/src/lib/db.ts`):**
+
 - Hot reload friendly (desarrollo)
 - Logs configurables por NODE_ENV
 
@@ -75,12 +82,14 @@ pnpm --filter=@brisa/api db:seed       # Datos iniciales
 **Endpoints implementados:**
 
 #### `/api/services`
+
 - `GET /` → Lista servicios activos
 - `GET /:id` → Detalle de servicio
 - `POST /` → Crear servicio (admin)
 - `PATCH /:id` → Actualizar servicio (admin)
 
 #### `/api/bookings`
+
 - `GET /` → Lista con paginación, include relations
 - `GET /:id` → Detalle completo
 - `POST /` → Crear booking (auto-calcula precio del servicio)
@@ -88,22 +97,25 @@ pnpm --filter=@brisa/api db:seed       # Datos iniciales
 - `DELETE /:id` → Cancelar booking (soft delete vía status)
 
 #### `/api/users`
+
 - `GET /` → Lista con conteos de bookings/properties
 - `GET /:id` → Detalle + últimos 10 bookings
 - `POST /` → Crear usuario (valida email único)
 - `PATCH /:id` → Actualizar perfil
 
 **Middleware configurado (`apps/api/src/app.ts`):**
+
 - CORS (configurable vía env)
 - Logger (Hono built-in)
 - Error handler global
 - 404 handler
 
-**TODO futuro:**
-- Autenticación (JWT/session middleware)
-- Rate limiting
-- Input validation con Zod
-- Webhooks Stripe
+**Pendiente siguiente iteración:**
+
+- Rate limiting (API `@brisa/api`) — ticket `ENG-142`.
+- Hardened logging + alerting para Stripe fallbacks.
+- Tests contractuales Stripe/Twilio (Pact/Playwright + Stripe CLI) — ticket `ENG-143`.
+- Pipeline documentación automatizada (TypeDoc/Storybook/diagramas) — tickets `ENG-144` y `ENG-150`.
 
 ---
 
@@ -112,6 +124,7 @@ pnpm --filter=@brisa/api db:seed       # Datos iniciales
 **Husky + lint-staged configurado:**
 
 Archivo: `.lintstagedrc.json`
+
 ```json
 {
   "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
@@ -122,12 +135,14 @@ Archivo: `.lintstagedrc.json`
 
 **Comportamiento:**
 Al hacer `git commit`, automáticamente:
+
 1. Ejecuta ESLint y corrige errores
 2. Formatea con Prettier
 3. Valida Markdown
 4. Si hay errores, bloquea el commit
 
 **Setup:**
+
 ```bash
 pnpm install  # Instala hooks automáticamente (prepare script)
 ```
@@ -136,40 +151,33 @@ pnpm install  # Instala hooks automáticamente (prepare script)
 
 ### 5. **Testing & Coverage** ✓
 
-**Configuración Vitest:**
+#### Configuración Vitest
 
-#### API (`apps/api/vitest.config.ts`):
-- Environment: Node
-- Coverage provider: V8
-- Thresholds: 70% lines/functions/branches/statements
-- Exclude: `src/generated/**`, tests, configs
+- **API (`apps/api/vitest.config.ts`)**: Node environment, coverage V8, thresholds 70 % y exclusiones de cliente Prisma.
+- **UI (`packages/ui/vitest.config.ts`)**: jsdom + Testing Library, thresholds ≥80 % líneas/funciones, limpieza automática.
 
-#### UI (`packages/ui/vitest.config.ts`):
-- Environment: jsdom
-- Testing Library configurado (`vitest.setup.ts`)
-- Thresholds: 80% lines/functions/statements, 75% branches
-- Cleanup automático después de cada test
+**Dependencias añadidas**: `@testing-library/react`, `@testing-library/jest-dom`, `jsdom` y `@playwright/test` 1.55 para smoke E2E.
 
-**Dependencias agregadas:**
-- `@testing-library/react`
-- `@testing-library/jest-dom`
-- `jsdom`
+#### Comandos
 
-**Comandos:**
 ```bash
-pnpm test                    # Ejecutar todos los tests
+pnpm test                    # Ejecutar tests Vitest en todo el monorepo
 pnpm test -- --coverage      # Con coverage report
 pnpm test -- --watch         # Watch mode
+pnpm test:e2e                # Playwright (Chromium) con reporte HTML
 ```
 
 **Cobertura actual:**
-- API: Esqueleto de tests (`app.test.ts`)
-- UI: Tests básicos de componentes (`index.test.tsx`)
+
+- API: tests de health + validaciones (`app.test.ts`, `routes/bookings.test.ts`).
+- UI: Tests básicos de componentes (`index.test.tsx`).
+- E2E: Smoke Playwright sobre la landing (`apps/web/e2e/home.spec.ts`).
 
 **TODO futuro:**
-- Tests E2E con Playwright
-- Integration tests de API + DB
-- Visual regression tests
+
+- Integration tests API + DB.
+- Suite Playwright multi-device y flujos booking/CleanScore.
+- Visual regression tests.
 
 ---
 
@@ -177,19 +185,21 @@ pnpm test -- --watch         # Watch mode
 
 **Servicios (`docker-compose.yml`):**
 
-| Servicio | Imagen | Puerto | Uso |
-|----------|--------|--------|-----|
-| **postgres** | postgres:17-alpine | 5432 | Base de datos principal |
-| **redis** | redis:8-alpine | 6379 | Cache & sesiones |
-| **mailhog** | mailhog/mailhog | 1025 (SMTP), 8025 (Web) | Testing de emails |
+| Servicio     | Imagen             | Puerto                  | Uso                     |
+| ------------ | ------------------ | ----------------------- | ----------------------- |
+| **postgres** | postgres:17-alpine | 5432                    | Base de datos principal |
+| **redis**    | redis:8-alpine     | 6379                    | Cache & sesiones        |
+| **mailhog**  | mailhog/mailhog    | 1025 (SMTP), 8025 (Web) | Testing de emails       |
 
 **Características:**
+
 - Healthchecks configurados
 - Volúmenes persistentes para datos
 - Restart policy: `unless-stopped`
 - Redis con appendonly (durabilidad)
 
 **Comandos:**
+
 ```bash
 docker compose up -d        # Iniciar servicios
 docker compose down         # Detener servicios
@@ -198,6 +208,7 @@ docker compose down -v      # Detener + eliminar volúmenes
 ```
 
 **URLs:**
+
 - Postgres: `postgresql://postgres:postgres@localhost:5432/brisa_cubana_dev`
 - Redis: `redis://localhost:6379`
 - MailHog UI: http://localhost:8025
@@ -206,37 +217,17 @@ docker compose down -v      # Detener + eliminar volúmenes
 
 ### 7. **GitHub Actions CI/CD** ✓
 
-**Workflow completo (`.github/workflows/ci.yml`):**
+**Workflow (`.github/workflows/ci.yml`)**
 
-#### Jobs configurados:
+- **Lint**: ESLint (apps + packages), markdownlint y cspell.
+- **Typecheck**: TypeScript estricto en todo el workspace.
+- **Test**: Vitest con PostgreSQL 17 en servicio, genera Prisma client y sube coverage a Codecov.
+- **Build**: Next build + tsup, verificación de artefactos (`.next`, `dist`).
+- **E2E**: Playwright smoke suite tras el build (Chromium, reporter list, install browsers en CI).
 
-**1. Lint**
-- ESLint en monorepo
-- Markdownlint
-- Spell check (cspell)
+**Triggers**: pushes/PRs a `main` y `develop` (concurrency groups + pnpm store cache).
 
-**2. Typecheck**
-- TypeScript strict check en todos los packages
-
-**3. Test**
-- Service container: PostgreSQL 17
-- Genera Prisma client
-- Ejecuta tests con coverage
-- Upload a Codecov
-
-**4. Build**
-- Build completo del monorepo
-- Verifica artefactos (`.next`, `dist/`)
-- Cache de pnpm optimizado
-
-**Triggers:**
-- Push a `main` y `develop`
-- Pull requests hacia `main` y `develop`
-
-**Optimizaciones:**
-- Concurrency groups (cancela builds duplicados)
-- pnpm store cache (acelera installs)
-- Matrix builds futura (Node 24 + Bun)
+**Roadmap CI**: ampliar matrices Node/Bun y preparar despliegues automáticos a Vercel/Fly.
 
 ---
 
@@ -245,7 +236,9 @@ docker compose down -v      # Detener + eliminar volúmenes
 **Archivos creados:**
 
 #### `SETUP.md` (nuevo)
+
 Guía detallada paso a paso:
+
 - Prerrequisitos y versiones
 - Instalación desde cero
 - Configuración de env
@@ -256,35 +249,82 @@ Guía detallada paso a paso:
 - URLs y recursos
 
 #### `README.md` (actualizado)
+
 - Sección "Inicio rápido" agregada
 - Link a `SETUP.md`
 - Estado actual actualizado con checkmarks
 - Comandos simplificados
 
 #### `.dockerignore` (nuevo)
+
 Optimiza builds de Docker:
+
 - Excluye `node_modules`, `.next`, `dist`
 - Excluye docs y archivos innecesarios
 
 ---
 
+### 9. **Validación y experiencia actualizadas** ✓
+
+- **Zod** integrado en `@brisa/api` para validar paginación, payloads (usuarios/servicios/bookings) y normalizar errores 400.
+- `totalPrice` admite valores `0` sin sobrescribir importes base; actualizaciones parciales ya no envían `undefined` a Prisma.
+- `Husky` ejecuta `pnpm lint-staged` vía hook raíz (`.husky/pre-commit`).
+- Playwright smoke (`pnpm test:e2e`) comprueba hero/CTAs de la landing e integra reportes HTML.
+- Landing Next.js incorpora sección "Operaciones vivas" con tabs animados y métricas operativas.
+
+### 10. **Autenticación y roles reforzados** ✓
+
+- Usuarios Prisma ahora incluyen `passwordHash` (bcrypt) y seeds generan credenciales demo seguras.
+- Login (`/api/auth/login`) devuelve JWT firmado (`JWT_SECRET`) consumido por NextAuth y SPA.
+- Middleware Hono (`requireAuth`) agrega guardas RBAC para bookings, servicios y usuarios, con rutas específicas (`/api/bookings/mine`, `PATCH /users/:id/password`).
+- NextAuth propaga `session.user.accessToken` y `role` al front; cookies HttpOnly y callbacks JWT actualizados.
+
+### 11. **Dashboard operativo en Next.js** ✓
+
+- Página `/dashboard` ahora muestra reservas próximas, catálogo de servicios y formulario de creación de bookings.
+- Nuevo cliente server-side (`@/server/api/client`) centraliza llamadas autenticadas al API.
+- `CreateBookingForm` usa server actions para orquestar reservas y revalida la ruta tras cada alta.
+- Panel staff/admin con métricas de conciliación, filtros interactivos por estado/pago y alertas visuales.
+- Histórico rápido de pagos fallidos (24h) y enlaces a Stripe Dashboard para acelerar la resolución.
+- API `/api/alerts/payment` persiste alertas (tabla `payment_alerts`) y notifica por Slack (`ALERTS_SLACK_WEBHOOK`) con deduplicación de 10 minutos.
+- Página `/dashboard/auditoria` expone las últimas alertas y notas resueltas para auditoría.
+- Script `pnpm --filter=@brisa/api payments:reconcile` consulta Stripe para sincronizar pagos pendientes (recomendado agendar cron horario).
+
+### 12. **Cobertura QA extendida** ✓
+
+- Vitest incluye suites para `services` y `users` con escenarios de autorización.
+- Helpers de generación JWT en pruebas garantizan cobertura sobre cabeceras y middleware.
+- Lint Next ejecutado en CI local, garantizando tipos/augmentations de `next-auth` actualizados.
+
+### 13. **Pagos Stripe integrados** ✓
+
+- `stripe.checkout.sessions.create` desde `/api/bookings` y `/api/payments/checkout-session` (reintentos controlados).
+- Webhook `/api/payments/webhook` valida firma (`STRIPE_WEBHOOK_SECRET`) y sincroniza `paymentStatus` + `BookingStatus`.
+- Nuevos campos en Prisma (`paymentIntentId`, `checkoutSessionId`, `paymentStatus`) y enums `PaymentStatus`.
+- Front consume resultado (`checkoutUrl`) y redirige automáticamente tras crear una reserva.
+- Procedimiento de verificación documentado con Stripe CLI (`pnpm stripe:listen`, `pnpm stripe:trigger <evento>`) para replicar eventos y calibrar respuestas de error.
+
+---
+
 ## 📊 Métricas de Mejora
 
-| Aspecto | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| **Funcionalidad API** | Health check básico | 15 endpoints CRUD completos | ✅ +1400% |
-| **Testing** | Esqueleto | Vitest configurado + coverage thresholds | ✅ 100% |
-| **CI/CD** | Solo docs lint | 4 jobs (lint, typecheck, test, build) | ✅ +300% |
-| **Infra local** | Manual | Docker Compose (3 servicios) | ✅ 100% |
-| **DB Schema** | N/A | 4 modelos Prisma + seed data | ✅ 100% |
-| **Pre-commit** | Manual | Husky + lint-staged automático | ✅ 100% |
-| **Documentación setup** | Básica | 200+ líneas de guía detallada | ✅ +400% |
+| Aspecto                 | Antes               | Después                                  | Mejora    |
+| ----------------------- | ------------------- | ---------------------------------------- | --------- |
+| **Funcionalidad API**   | Health check básico | 16 endpoints CRUD + rutas protegidas     | ✅ +1500% |
+| **Testing**             | Esqueleto           | Vitest configurado + coverage thresholds | ✅ 100%   |
+| **CI/CD**               | Solo docs lint      | 4 jobs (lint, typecheck, test, build)    | ✅ +300%  |
+| **Infra local**         | Manual              | Docker Compose (3 servicios)             | ✅ 100%   |
+| **DB Schema**           | N/A                 | 4 modelos Prisma + seed data             | ✅ 100%   |
+| **Pre-commit**          | Manual              | Husky + lint-staged automático           | ✅ 100%   |
+| **Documentación setup** | Básica              | 220+ líneas de guía detallada            | ✅ +420%  |
+| **Validaciones**        | Payloads sin sanear | Zod + respuestas 400 detalladas + RBAC   | ✅ 100%   |
+| **Dashboard**           | Placeholder         | Consumo API + booking action             | ✅ 100%   |
 
 ---
 
 ## 🚀 Cómo Usar las Mejoras
 
-### Primera vez (setup completo):
+### Primera vez (setup completo)
 
 ```bash
 # 1. Seguir SETUP.md
@@ -303,7 +343,7 @@ pnpm --filter=@brisa/api db:studio  # Ver datos
 pnpm dev                             # Iniciar desarrollo
 ```
 
-### Desarrollo diario:
+### Desarrollo diario
 
 ```bash
 docker compose up -d     # Si no están corriendo
@@ -311,7 +351,7 @@ pnpm dev                 # Inicia web + api
 pnpm test -- --watch     # Tests en watch mode (opcional)
 ```
 
-### Antes de commit:
+### Antes de commit
 
 ```bash
 pnpm lint                # Validar linting
@@ -320,7 +360,7 @@ pnpm test -- --coverage  # Ejecutar tests
 git commit -m "..."      # Pre-commit hook valida automáticamente
 ```
 
-### Explorar la API:
+### Explorar la API
 
 ```bash
 # Endpoints disponibles
@@ -337,41 +377,38 @@ pnpm --filter=@brisa/api db:studio
 
 ## 📝 Próximos Pasos Recomendados
 
-### Corto plazo (1-2 semanas):
+### Corto plazo (1-2 semanas)
 
-1. **Autenticación**
-   - Integrar NextAuth.js en `apps/web`
-   - Magic link con Resend
-   - Session middleware en API
+1. **Autenticación avanzada**
+   - Magic link con Resend y passkeys (Auth.js providers productivos).
+   - Revocación de tokens y refresh configurable.
 
-2. **Frontend forms**
-   - Booking form en Next.js
-   - React Hook Form + Zod validation
-   - Integrar con API
+2. **Booking lifecycle**
+   - Integrar pagos Stripe (Checkout + webhooks) y confirmaciones por email.
+   - Panel staff para cambiar estados y adjuntar CleanScore™.
 
-3. **Payments**
-   - Stripe Checkout
-   - Webhook handler en API
-   - Invoice generation
+3. **Testing expansión**
+   - Tests de integración API + Postgres real.
+   - Suite Playwright completa (login, crear booking, sign-out).
+   - Cobertura >80 % reportada a Codecov.
 
-4. **Testing expansion**
-   - Integration tests API + DB
-   - E2E tests con Playwright
-   - Coverage >80%
+4. **Seguridad**
+   - Rate limiting (Hono middleware) y auditoría Sentry breadcrumbs.
+   - Escaneo SAST/Dependabot automático.
 
-### Mediano plazo (1 mes):
+### Mediano plazo (1 mes)
 
-5. **Deploy a producción**
+1. **Deploy a producción**
    - Vercel para `apps/web`
    - Railway/Fly.io para `apps/api`
    - Supabase/Neon para Postgres managed
 
-6. **Observabilidad**
+2. **Observabilidad**
    - Sentry error tracking
    - Logs estructurados (Pino)
    - Metrics dashboard (Grafana Cloud)
 
-7. **Features core MVP**
+3. **Features core MVP**
    - Panel admin (listar bookings)
    - Email confirmaciones
    - Status updates en tiempo real

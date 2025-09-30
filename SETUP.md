@@ -31,9 +31,17 @@ cp .env.example .env
 cp apps/web/.env.local.example apps/web/.env.local
 cp apps/api/.env.example apps/api/.env
 
-# 6. Generar secreto para NextAuth
+# IMPORTANTE: Estrategia de variables de entorno
+# - .env (raíz): Variables para todo el monorepo (DB, Redis, features globales)
+# - apps/web/.env.local: Variables específicas del frontend (NEXT_PUBLIC_*, NEXTAUTH_*)
+# - apps/api/.env: Variables específicas del backend (API_PORT, WEB_APP_URL, JWT_SECRET)
+# - WEB_APP_URL: Usada por el API para redirecciones (reemplaza NEXT_PUBLIC_APP_URL)
+
+# 6. Generar secretos criptográficos
 # En .env y apps/web/.env.local reemplazar:
 # NEXTAUTH_SECRET=$(openssl rand -base64 32)
+# JWT_SECRET=$(openssl rand -hex 64)
+# Configura `ALERTS_SLACK_WEBHOOK` si quieres recibir notificaciones en un canal específico.
 
 # 7. Levantar servicios locales
 docker compose up -d
@@ -50,7 +58,10 @@ pnpm --filter=@brisa/api db:push
 # 11. Poblar base de datos con datos iniciales
 pnpm --filter=@brisa/api db:seed
 
-# 12. Iniciar desarrollo
+# 12. Instalar navegadores Playwright (opcional smoke tests E2E)
+pnpm exec playwright install
+
+# 13. Iniciar desarrollo
 pnpm dev
 ```
 
@@ -103,6 +114,7 @@ pnpm test                          # Ejecutar tests de todos los packages
 pnpm test -- --coverage            # Con coverage
 pnpm --filter=@brisa/api test      # Solo tests de API
 pnpm --filter=@brisa/ui test       # Solo tests del design system
+pnpm test:e2e                      # Playwright (servidor local en http://localhost:3000)
 ```
 
 ### Linting y formato
@@ -134,7 +146,39 @@ make serve            # Levantar docs en http://localhost:8000
 make build            # Generar sitio estático en /site
 pnpm docs:serve       # Alternativa con pnpm
 pnpm docs:build       # Alternativa con pnpm
+pnpm docs:build:artifacts  # Generar TypeDoc, Storybook estático y diagramas (CI parity)
+pnpm approve-builds puppeteer  # Autorizar descarga de Chromium para Mermaid CLI (una vez)
 ```
+
+## Autenticación y acceso API
+
+- El login usa contraseñas hasheadas con `bcryptjs` almacenadas en Prisma (`User.passwordHash`).
+- El seed crea el usuario demo `demo@brisacubanaclean.com` con contraseña `demo123`.
+- El endpoint `/api/auth/login` emite un JWT firmado con `JWT_SECRET`; las rutas sensibles (`/api/services`, `/api/bookings`, `/api/users`) requieren cabecera `Authorization: Bearer <token>`.
+- NextAuth almacena el token en la sesión (`session.user.accessToken`) y lo reutiliza para las llamadas server-side.
+- Para rotar secretos ejecuta: `openssl rand -hex 64` y actualiza `JWT_SECRET` en todos los entornos.
+- Configura `ALERTS_SLACK_WEBHOOK` si quieres recibir notificaciones en un canal específico.
+
+### Verificación del webhook de Stripe
+
+1. Instala y autentica la CLI de Stripe: `brew install stripe/stripe-cli/stripe` o descarga desde https://stripe.com/docs/stripe-cli.
+2. En la raíz del repo crea un archivo `.env.local` (si no existe) con `STRIPE_WEBHOOK_SECRET` copiado del dashboard o del comando CLI.
+3. Ejecuta el forward del webhook (puedes usar el script helper):
+   ```bash
+   stripe login          # una sola vez
+   pnpm stripe:listen    # wrapper → stripe listen --forward-to localhost:3001/api/payments/webhook
+   ```
+4. Lanza un evento de prueba:
+   ```bash
+   pnpm stripe:trigger checkout.session.completed
+   ```
+5. Observa los logs del API (`pnpm --filter=@brisa/api dev`) y confirma que el booking correspondiente se marca como `paymentStatus = PAID` y `status = CONFIRMED`.
+6. Ajusta los mensajes de error o logging según la respuesta real que recibas en consola.
+
+### Reconciliación programada con Stripe
+
+- Ejecuta manualmente: `pnpm --filter=@brisa/api payments:reconcile`.
+- Programa un cron (ej. cada hora) exportando tus variables (`STRIPE_SECRET_KEY`, `DATABASE_URL`) para que el script actualice estados en segundo plano.
 
 ## Estructura del proyecto
 
