@@ -12,9 +12,8 @@ RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/
 
-# Install production dependencies + tsx (needed for runtime TS execution, ignore lifecycle scripts)
-RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api --ignore-scripts && \
-    pnpm add -g tsx@4.20.6
+# Install production dependencies only (ignore lifecycle scripts)
+RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api --ignore-scripts
 
 # Stage 2: Builder
 FROM node:24.9.0-alpine AS builder
@@ -37,9 +36,8 @@ RUN cd apps/api && pnpm db:generate
 FROM node:24.9.0-alpine AS runner
 WORKDIR /app
 
-# Enable Corepack and install tsx globally
-RUN corepack enable && corepack prepare pnpm@10.17.1 --activate && \
-    pnpm add -g tsx@4.20.6
+# Enable Corepack
+RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
@@ -74,4 +72,4 @@ ENV API_PORT=3001
 
 # Start application with dumb-init and tsx (handles TS without transpiling)
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["tsx", "apps/api/src/server.ts"]
+CMD ["npx", "tsx", "apps/api/src/server.ts"]

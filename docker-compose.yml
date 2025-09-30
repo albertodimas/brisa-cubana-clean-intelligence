@@ -3,16 +3,16 @@ version: '3.9'
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: brisa-postgres
+    container_name: brisa-cubana-postgres-dev
     restart: unless-stopped
     ports:
-      - '5432:5432'
+      - '5433:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: brisa_cubana_dev
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - brisa_cubana_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
@@ -21,13 +21,13 @@ services:
 
   redis:
     image: redis:8-alpine
-    container_name: brisa-redis
+    container_name: brisa-cubana-redis-dev
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - '6380:6379'
     command: redis-server --appendonly yes
     volumes:
-      - redis_data:/data
+      - brisa_cubana_redis_data:/data
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
@@ -36,16 +36,16 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
-    container_name: brisa-mailhog
+    container_name: brisa-cubana-mailhog-dev
     restart: unless-stopped
     ports:
-      - '1025:1025' # SMTP
-      - '8025:8025' # Web UI
+      - '1026:1025' # SMTP
+      - '8026:8025' # Web UI
     logging:
       driver: none
 
 volumes:
-  postgres_data:
+  brisa_cubana_postgres_data:
     driver: local
-  redis_data:
+  brisa_cubana_redis_data:
     driver: local

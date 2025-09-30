@@ -9,17 +9,19 @@ export const logger = pino({
   level: process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug"),
 
   // Pretty print in development, JSON in production
-  transport: isDevelopment
-    ? {
-        target: "pino-pretty",
-        options: {
-          colorize: true,
-          translateTime: "HH:MM:ss Z",
-          ignore: "pid,hostname",
-          singleLine: false,
-        },
-      }
-    : undefined,
+  // Only use pino-pretty if explicitly in development mode (not just non-production)
+  transport:
+    isDevelopment && process.env.USE_PINO_PRETTY !== "false"
+      ? {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "HH:MM:ss Z",
+            ignore: "pid,hostname",
+            singleLine: false,
+          },
+        }
+      : undefined,
 
   // Redact sensitive information
   redact: {
