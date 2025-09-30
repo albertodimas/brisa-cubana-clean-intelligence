@@ -30,6 +30,11 @@ export default defineConfig({
       },
     },
     include: ["src/**/*.test.ts"],
-    exclude: ["node_modules", "dist", "src/generated"],
+    exclude: [
+      "node_modules",
+      "dist",
+      "src/generated",
+      "src/test/integration/**",
+    ],
   },
 });

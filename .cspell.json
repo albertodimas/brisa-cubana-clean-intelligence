@@ -231,6 +231,8 @@
     "neondb",
     "sslmode",
     "pooler",
-    "Loguear"
+    "Loguear",
+    "dind",
+    "newgrp"
   ]
 }
