@@ -6,7 +6,7 @@ const isTest = process.env.NODE_ENV === "test";
 
 // Create the logger instance
 export const logger = pino({
-  level: process.env.LOG_LEVEL || (isProduction ? "info" : "debug"),
+  level: process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug"),
 
   // Pretty print in development, JSON in production
   transport: isDevelopment

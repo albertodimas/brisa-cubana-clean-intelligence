@@ -63,9 +63,8 @@ app.notFound((c) => c.json({ error: "Not found" }, 404));
 
 // Error handler
 app.onError((err, c) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const requestId =
-    ((c as any).get?.("requestId") as string | undefined) || "unknown";
+    ((c as any).get?.("requestId") as string | undefined) ?? "unknown";
 
   // Check if it's a known application error
   if (isAppError(err)) {

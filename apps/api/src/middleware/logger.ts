@@ -11,7 +11,7 @@ export async function requestLogger(c: Context, next: Next) {
 
   // Generate request ID for tracing
   const requestId =
-    c.req.header("x-request-id") ||
+    c.req.header("x-request-id") ??
     `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
   // Add request ID to context for use in handlers
@@ -25,8 +25,8 @@ export async function requestLogger(c: Context, next: Next) {
       url,
       userAgent: c.req.header("user-agent"),
       ip:
-        c.req.header("x-forwarded-for") ||
-        c.req.header("x-real-ip") ||
+        c.req.header("x-forwarded-for") ??
+        c.req.header("x-real-ip") ??
         "unknown",
     },
     "Incoming request",

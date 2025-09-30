@@ -4,8 +4,8 @@
 export class AppError extends Error {
   constructor(
     message: string,
-    public statusCode: number = 500,
-    public code: string = "INTERNAL_ERROR",
+    public statusCode = 500,
+    public code = "INTERNAL_ERROR",
     public details?: unknown,
   ) {
     super(message);
@@ -46,7 +46,7 @@ export class BadRequestError extends AppError {
  * Authentication required but not provided or invalid
  */
 export class UnauthorizedError extends AppError {
-  constructor(message: string = "Authentication required") {
+  constructor(message = "Authentication required") {
     super(message, 401, "UNAUTHORIZED");
   }
 }
@@ -56,7 +56,7 @@ export class UnauthorizedError extends AppError {
  * User is authenticated but doesn't have permission
  */
 export class ForbiddenError extends AppError {
-  constructor(message: string = "Permission denied") {
+  constructor(message = "Permission denied") {
     super(message, 403, "FORBIDDEN");
   }
 }
@@ -66,7 +66,7 @@ export class ForbiddenError extends AppError {
  * Resource doesn't exist
  */
 export class NotFoundError extends AppError {
-  constructor(resource: string = "Resource") {
+  constructor(resource = "Resource") {
     super(`${resource} not found`, 404, "NOT_FOUND");
   }
 }
@@ -97,7 +97,7 @@ export class ValidationError extends AppError {
  */
 export class RateLimitError extends AppError {
   constructor(
-    message: string = "Too many requests",
+    message = "Too many requests",
     public retryAfter?: number,
   ) {
     super(message, 429, "RATE_LIMIT_EXCEEDED");
@@ -109,7 +109,7 @@ export class RateLimitError extends AppError {
  * Unexpected server error
  */
 export class InternalServerError extends AppError {
-  constructor(message: string = "Internal server error") {
+  constructor(message = "Internal server error") {
     super(message, 500, "INTERNAL_ERROR");
   }
 }
@@ -119,7 +119,7 @@ export class InternalServerError extends AppError {
  * Service temporarily unavailable (maintenance, overload)
  */
 export class ServiceUnavailableError extends AppError {
-  constructor(message: string = "Service temporarily unavailable") {
+  constructor(message = "Service temporarily unavailable") {
     super(message, 503, "SERVICE_UNAVAILABLE");
   }
 }
