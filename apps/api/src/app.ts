@@ -7,6 +7,7 @@ import auth from "./routes/auth";
 import payments from "./routes/payments";
 import alerts from "./routes/alerts";
 import notes from "./routes/reconciliation";
+import reports from "./routes/reports";
 import health from "./routes/health";
 import metrics from "./routes/metrics";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
@@ -63,6 +64,7 @@ app.route("/api/auth", auth);
 app.route("/api/payments", payments);
 app.route("/api/alerts", alerts);
 app.route("/api/reconciliation", notes);
+app.route("/api/reports", reports);
 
 // 404 handler
 app.notFound((c) => c.json({ error: "Not found" }, 404));
