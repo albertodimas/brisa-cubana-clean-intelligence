@@ -39,7 +39,6 @@ health.get("/", (c) => {
  * Checks all critical dependencies
  */
 health.get("/ready", async (c) => {
-  const startTime = Date.now();
   const checks: HealthCheck["checks"] = {
     database: { status: "pass" },
     memory: { status: "pass" },

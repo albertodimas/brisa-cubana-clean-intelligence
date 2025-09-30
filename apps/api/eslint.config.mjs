@@ -29,7 +29,8 @@ export default [
         afterEach: 'readonly',
         beforeAll: 'readonly',
         afterAll: 'readonly',
-        vi: 'readonly'
+        vi: 'readonly',
+        setInterval: 'readonly'
       }
     },
     plugins: {

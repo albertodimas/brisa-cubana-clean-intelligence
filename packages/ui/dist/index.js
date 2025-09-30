@@ -26,10 +26,12 @@ function Button(props) {
     ghost: "bg-transparent text-neutral-100 hover:bg-white/10 focus-visible:outline-neutral-200"
   };
   if (props.as === "a") {
-    const { as: _as2, ...rest2 } = props;
+    const { as: anchorTag, ...rest2 } = props;
+    void anchorTag;
     return /* @__PURE__ */ jsx2("a", { className: `${base} ${palettes[intent]} ${className}`, ...rest2, children });
   }
-  const { as: _as, ...rest } = props;
+  const { as: buttonTag, ...rest } = props;
+  void buttonTag;
   return /* @__PURE__ */ jsx2("button", { className: `${base} ${palettes[intent]} ${className}`, ...rest, children });
 }
 var tokens = {

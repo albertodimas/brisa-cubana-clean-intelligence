@@ -7,16 +7,16 @@ interface BadgeProps extends PropsWithChildren {
 }
 declare function Badge({ tone, className, children }: BadgeProps): react_jsx_runtime.JSX.Element;
 
-type Intent = 'primary' | 'secondary' | 'ghost';
-type ButtonBaseProps = {
+type Intent = "primary" | "secondary" | "ghost";
+interface ButtonBaseProps {
     intent?: Intent;
     className?: string;
-};
-type NativeButtonProps = ButtonBaseProps & ButtonHTMLAttributes<HTMLButtonElement> & {
-    as?: 'button';
-};
+}
+interface NativeButtonProps extends ButtonBaseProps, ButtonHTMLAttributes<HTMLButtonElement> {
+    as?: "button";
+}
 type AnchorButtonProps = PropsWithChildren<ButtonBaseProps & AnchorHTMLAttributes<HTMLAnchorElement> & {
-    as: 'a';
+    as: "a";
     href: string;
 }>;
 type ButtonProps = PropsWithChildren<NativeButtonProps | AnchorButtonProps>;

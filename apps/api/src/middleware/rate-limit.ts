@@ -1,11 +1,12 @@
 import type { Context, Next } from "hono";
 
-interface RateLimitStore {
-  [key: string]: {
+type RateLimitStore = Record<
+  string,
+  {
     count: number;
     resetTime: number;
-  };
-}
+  }
+>;
 
 // In-memory store (use Redis in production for multi-instance deployments)
 const store: RateLimitStore = {};
@@ -130,7 +131,7 @@ function defaultKeyGenerator(c: Context): string {
  */
 export function userKeyGenerator(c: Context): string {
   // Assuming auth middleware sets c.get("user")
-  const user = c.get("user");
+  const user = c.get("user") as { sub?: string } | undefined;
   if (user?.sub) {
     return `user:${user.sub}`;
   }
