@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import services from "./routes/services";
 import bookings from "./routes/bookings";
 import users from "./routes/users";
@@ -11,11 +10,14 @@ import notes from "./routes/reconciliation";
 import health from "./routes/health";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
 import { rateLimiter, RateLimits } from "./middleware/rate-limit";
+import { requestLogger } from "./middleware/logger";
+import { logger } from "./lib/logger";
+import { isAppError } from "./lib/errors";
 
 export const app = new Hono();
 
 // Middleware
-app.use("*", logger());
+app.use("*", requestLogger);
 app.use(
   "*",
   cors({
@@ -61,9 +63,71 @@ app.notFound((c) => c.json({ error: "Not found" }, 404));
 
 // Error handler
 app.onError((err, c) => {
-  console.error("API Error:", err);
-  if (sentryEnabled) {
-    Sentry.captureException(err);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const requestId =
+    ((c as any).get?.("requestId") as string | undefined) || "unknown";
+
+  // Check if it's a known application error
+  if (isAppError(err)) {
+    logger.warn(
+      {
+        requestId,
+        method: c.req.method,
+        url: c.req.url,
+        statusCode: err.statusCode,
+        errorCode: err.code,
+        error: err.message,
+        details: err.details,
+      },
+      `Application error: ${err.code}`,
+    );
+
+    // Don't send 4xx errors to Sentry (they're client errors)
+    if (err.statusCode >= 500 && sentryEnabled) {
+      Sentry.captureException(err, {
+        contexts: {
+          request: {
+            requestId,
+            method: c.req.method,
+            url: c.req.url,
+          },
+        },
+      });
+    }
+
+    return c.json(err.toJSON(), err.statusCode as never);
   }
-  return c.json({ error: err.message || "Internal server error" }, 500);
+
+  // Unknown error - log with full stack and send to Sentry
+  logger.error(
+    {
+      requestId,
+      method: c.req.method,
+      url: c.req.url,
+      error: err.message,
+      stack: err.stack,
+    },
+    "Unexpected error in request",
+  );
+
+  if (sentryEnabled) {
+    Sentry.captureException(err, {
+      contexts: {
+        request: {
+          requestId,
+          method: c.req.method,
+          url: c.req.url,
+        },
+      },
+    });
+  }
+
+  // Don't expose internal error details to client
+  return c.json(
+    {
+      error: "Internal server error",
+      code: "INTERNAL_ERROR",
+    },
+    500,
+  );
 });
