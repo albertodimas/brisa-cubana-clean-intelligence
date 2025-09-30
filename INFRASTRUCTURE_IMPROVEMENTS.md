@@ -304,6 +304,16 @@ Optimiza builds de Docker:
 - Front consume resultado (`checkoutUrl`) y redirige automáticamente tras crear una reserva.
 - Procedimiento de verificación documentado con Stripe CLI (`pnpm stripe:listen`, `pnpm stripe:trigger <evento>`) para replicar eventos y calibrar respuestas de error.
 
+### 14. **Infraestructura de producción** ✓
+
+- **Dockerfiles multi-stage**: Optimizados para API (Hono) y Web (Next.js standalone), imágenes ~150MB
+- **Health checks**: Endpoints `/health`, `/health/ready`, `/health/metrics` compatibles con Kubernetes
+- **Rate limiting middleware**: Implementado con configuraciones predefinidas (auth: 5/15min, API: 100/15min)
+- **Prisma migrations**: Historial de migraciones con snapshot inicial del schema
+- **Git hooks**: Pre-push ejecuta lint + typecheck + tests automáticamente
+- **Setup automatizado**: Script `scripts/setup-local.sh` reduce onboarding de 30min a 5min
+- **Documentación API**: README completo con 23 endpoints, auth flow, deployment guides
+
 ---
 
 ## 📊 Métricas de Mejora
@@ -425,6 +435,7 @@ pnpm --filter=@brisa/api db:studio
 
 ---
 
-**Última actualización:** 29 de septiembre de 2025
+**Última actualización:** 30 de septiembre de 2025
 **Autor:** Claude Code (con supervisión de @albertodimas)
 **Estado:** ✅ Todas las mejoras implementadas y documentadas
+**Commits recientes:** d6842a8, 95d5650, cb61c5a, 0ac2036, 70b1197

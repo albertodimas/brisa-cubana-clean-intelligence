@@ -10,6 +10,7 @@ import alerts from "./routes/alerts";
 import notes from "./routes/reconciliation";
 import health from "./routes/health";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
+import { rateLimiter, RateLimits } from "./middleware/rate-limit";
 
 export const app = new Hono();
 
@@ -22,6 +23,9 @@ app.use(
     credentials: true,
   }),
 );
+
+// Apply global API rate limiting (can be overridden by specific routes)
+app.use("/api/*", rateLimiter(RateLimits.api));
 
 // Health checks
 app.get("/", (c) =>

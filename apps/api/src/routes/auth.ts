@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "../lib/db";
 import { verifyPassword } from "../lib/password";
 import { generateAccessToken } from "../lib/token";
+import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -10,6 +11,9 @@ const credentialsSchema = z.object({
 });
 
 const auth = new Hono();
+
+// Apply strict rate limiting to auth routes
+auth.use("/*", rateLimiter(RateLimits.auth));
 
 auth.post("/login", async (c) => {
   const json = (await c.req.json()) as unknown;

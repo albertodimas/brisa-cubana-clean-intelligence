@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { db } from "../lib/db";
 import { getStripe, stripeEnabled } from "../lib/stripe";
 import { getAuthUser, requireAuth } from "../middleware/auth";
+import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 import {
   createBookingSchema,
   paginationSchema,
@@ -14,6 +15,12 @@ import type {
 } from "../schemas";
 
 const bookings = new Hono();
+
+// Apply rate limiting: read operations are more permissive, write operations are stricter
+bookings.use("/", rateLimiter(RateLimits.read));
+bookings.use("/mine", rateLimiter(RateLimits.read));
+bookings.use("/:id", rateLimiter(RateLimits.read));
+// POST/PATCH/DELETE will use default API rate limit from app-level middleware
 
 // Get all bookings (with pagination)
 bookings.get("/", requireAuth(["ADMIN", "STAFF"]), async (c) => {

@@ -30,7 +30,8 @@ export default [
         beforeAll: 'readonly',
         afterAll: 'readonly',
         vi: 'readonly',
-        setInterval: 'readonly'
+        setInterval: 'readonly',
+        setTimeout: 'readonly'
       }
     },
     plugins: {

@@ -3,8 +3,12 @@ import Stripe from "stripe";
 import { db } from "../lib/db";
 import { getStripe, stripeEnabled } from "../lib/stripe";
 import { getAuthUser, requireAuth } from "../middleware/auth";
+import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 
 const payments = new Hono();
+
+// Apply write rate limit to checkout sessions (prevents payment spam)
+payments.use("/checkout-session", rateLimiter(RateLimits.write));
 
 payments.post("/checkout-session", requireAuth(), async (c) => {
   if (!stripeEnabled()) {

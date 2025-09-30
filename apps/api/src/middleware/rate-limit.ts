@@ -150,6 +150,15 @@ export function cleanupRateLimitStore() {
   }
 }
 
+/**
+ * Clear all rate limit records (for testing purposes)
+ */
+export function clearRateLimitStore() {
+  for (const key in store) {
+    delete store[key];
+  }
+}
+
 // Run cleanup every 10 minutes
 setInterval(cleanupRateLimitStore, 10 * 60 * 1000);
 
