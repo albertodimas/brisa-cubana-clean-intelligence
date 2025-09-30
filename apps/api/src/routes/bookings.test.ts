@@ -101,16 +101,45 @@ describe("bookings route validation", () => {
     expect(bookingMock.create).not.toHaveBeenCalled();
   });
 
-  it("allows totalPrice equal to zero", async () => {
+  it("uses service basePrice when totalPrice is zero/undefined", async () => {
     const app = buildApp();
 
+    // Mock service lookup
+    serviceMock.findUnique.mockResolvedValue({
+      id: "service-1",
+      name: "Test service",
+      description: "Desc",
+      basePrice: 150,
+      duration: 120, // 2 hours
+      active: true,
+    });
+
+    // Mock user lookup
+    userMock.findUnique.mockResolvedValue({
+      id: "user-1",
+      email: "user-1@example.com",
+      name: "User 1",
+    });
+
+    // Mock property lookup
+    propertyMock.findUnique.mockResolvedValue({
+      id: "property-1",
+      name: "Property 1",
+      address: "123 Street",
+      userId: "user-1",
+    });
+
+    // Mock no conflicting bookings
+    bookingMock.findMany.mockResolvedValue([]);
+
+    // Mock successful booking creation
     bookingMock.create.mockResolvedValueOnce({
       id: "booking-1",
       status: "PENDING",
       userId: "user-1",
       propertyId: "property-1",
       serviceId: "service-1",
-      totalPrice: 0,
+      totalPrice: 150,
       scheduledAt: new Date().toISOString(),
       user: { id: "user-1", email: "user-1@example.com", name: "User 1" },
       property: { id: "property-1", name: "Property 1", address: "123 Street" },
@@ -122,6 +151,9 @@ describe("bookings route validation", () => {
       },
     });
 
+    // Use a valid future date (3 hours from now)
+    const validScheduledAt = new Date(Date.now() + 3 * 60 * 60 * 1000);
+
     const response = await app.request("/api/bookings", {
       method: "POST",
       headers: {
@@ -132,8 +164,8 @@ describe("bookings route validation", () => {
         userId: "user-1",
         propertyId: "property-1",
         serviceId: "service-1",
-        scheduledAt: new Date().toISOString(),
-        totalPrice: 0,
+        scheduledAt: validScheduledAt.toISOString(),
+        // Don't provide totalPrice - should use service basePrice (150)
       }),
     });
 
@@ -143,7 +175,8 @@ describe("bookings route validation", () => {
     const payload = (
       firstCall as { data?: { totalPrice?: number; userId?: string } }
     ).data;
-    expect(payload?.totalPrice).toBe(0);
+    // Should use service basePrice of 150
+    expect(payload?.totalPrice).toBe(150);
     expect(payload?.userId).toBe("user-1");
 
     const json = (await response.json()) as {

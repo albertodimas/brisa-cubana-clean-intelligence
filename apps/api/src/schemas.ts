@@ -18,28 +18,68 @@ const cuidSchema = z
   .string({ required_error: "id is required" })
   .min(1, "id is required");
 
-export const createBookingSchema = z.object({
-  userId: cuidSchema,
-  propertyId: cuidSchema,
-  serviceId: cuidSchema,
-  scheduledAt: z.coerce
-    .date({
-      invalid_type_error: "scheduledAt must be a valid ISO date",
-    })
-    .refine(
-      (value) => !Number.isNaN(value.getTime()),
-      "scheduledAt is invalid",
-    ),
-  totalPrice: z.coerce
-    .number({ invalid_type_error: "totalPrice must be numeric" })
-    .nonnegative("totalPrice cannot be negative")
-    .optional(),
-  notes: z
-    .string({ invalid_type_error: "notes must be text" })
-    .trim()
-    .max(1024, "notes must be 1024 characters or less")
-    .optional(),
-});
+export const createBookingSchema = z
+  .object({
+    userId: cuidSchema,
+    propertyId: cuidSchema,
+    serviceId: cuidSchema,
+    scheduledAt: z.coerce
+      .date({
+        invalid_type_error: "scheduledAt must be a valid ISO date",
+      })
+      .refine(
+        (value) => !Number.isNaN(value.getTime()),
+        "scheduledAt is invalid",
+      ),
+    totalPrice: z.coerce
+      .number({ invalid_type_error: "totalPrice must be numeric" })
+      .nonnegative("totalPrice cannot be negative")
+      .optional(),
+    notes: z
+      .string({ invalid_type_error: "notes must be text" })
+      .trim()
+      .max(1024, "notes must be 1024 characters or less")
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // Booking must be scheduled at least 2 hours in the future
+      const now = new Date();
+      const minScheduleTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      return data.scheduledAt >= minScheduleTime;
+    },
+    {
+      message: "Booking must be scheduled at least 2 hours in advance from now",
+      path: ["scheduledAt"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Don't allow bookings more than 90 days in the future
+      const now = new Date();
+      const maxScheduleTime = new Date(
+        now.getTime() + 90 * 24 * 60 * 60 * 1000,
+      );
+      return data.scheduledAt <= maxScheduleTime;
+    },
+    {
+      message: "Booking cannot be scheduled more than 90 days in advance",
+      path: ["scheduledAt"],
+    },
+  )
+  .refine(
+    (data) => {
+      // If totalPrice is provided, it must be at least $50
+      if (data.totalPrice !== undefined && data.totalPrice > 0) {
+        return data.totalPrice >= 50;
+      }
+      return true;
+    },
+    {
+      message: "Total price must be at least $50.00",
+      path: ["totalPrice"],
+    },
+  );
 
 export const updateBookingSchema = z
   .object({

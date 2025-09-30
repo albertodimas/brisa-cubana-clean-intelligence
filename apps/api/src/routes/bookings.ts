@@ -168,9 +168,57 @@ bookings.post("/", requireAuth(), async (c) => {
     );
   }
 
+  // Validate service is active
+  if (!service.active) {
+    return c.json({ error: "This service is currently unavailable" }, 400);
+  }
+
   const scheduledAt = payload.scheduledAt;
   const basePrice = Number(service.basePrice);
   const totalPrice = payload.totalPrice ?? basePrice;
+
+  // Check for scheduling conflicts (same property within service duration window)
+  const serviceDurationMs = service.duration * 60 * 1000; // duration is in minutes
+  const bookingEndTime = new Date(scheduledAt.getTime() + serviceDurationMs);
+  const conflictingBookings = await db.booking.findMany({
+    where: {
+      propertyId: payload.propertyId,
+      status: {
+        in: ["PENDING", "CONFIRMED", "IN_PROGRESS"],
+      },
+      OR: [
+        // New booking starts during existing booking
+        {
+          AND: [
+            { scheduledAt: { lte: scheduledAt } },
+            {
+              scheduledAt: {
+                gte: new Date(scheduledAt.getTime() - serviceDurationMs),
+              },
+            },
+          ],
+        },
+        // New booking ends during existing booking
+        {
+          AND: [
+            { scheduledAt: { lte: bookingEndTime } },
+            { scheduledAt: { gte: scheduledAt } },
+          ],
+        },
+      ],
+    },
+  });
+
+  if (conflictingBookings.length > 0) {
+    return c.json(
+      {
+        error:
+          "This time slot conflicts with an existing booking for this property",
+        conflictingBookingIds: conflictingBookings.map((b) => b.id),
+      },
+      409,
+    );
+  }
 
   let booking = await db.booking.create({
     data: {
