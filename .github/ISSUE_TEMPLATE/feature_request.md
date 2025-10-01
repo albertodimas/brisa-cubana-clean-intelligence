@@ -1,9 +1,10 @@
 ---
-name: ✨ Feature Request
+name: "✨ Feature Request"
 about: Sugerir una nueva funcionalidad para el proyecto
 title: "[FEATURE] "
-labels: ["enhancement", "needs-triage"]
-assignees: ""
+labels: enhancement
+assignees: ''
+
 ---
 
 ## Resumen de la Feature

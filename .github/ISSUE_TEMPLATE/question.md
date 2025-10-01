@@ -1,9 +1,10 @@
 ---
-name: ❓ Question
+name: "❓ Question"
 about: Hacer una pregunta sobre el proyecto
 title: "[QUESTION] "
-labels: ["question"]
-assignees: ""
+labels: question
+assignees: ''
+
 ---
 
 ## Pregunta
