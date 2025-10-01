@@ -267,8 +267,15 @@ reports.get("/revenue", requireAuth(["ADMIN"]), async (c) => {
     bookingsCount > 0 ? totalRevenue / bookingsCount : 0;
 
   // Group by service
+  type RevenueGroup = Record<string, { revenue: number; count: number }>;
+  interface BookingWithRelations {
+    service: { name: string };
+    totalPrice: { toString: () => string };
+    paymentStatus: string;
+  }
+
   const revenueByService = bookings.reduce(
-    (acc, booking) => {
+    (acc: RevenueGroup, booking: BookingWithRelations) => {
       const serviceName = booking.service.name;
       if (!acc[serviceName]) {
         acc[serviceName] = {
@@ -280,12 +287,12 @@ reports.get("/revenue", requireAuth(["ADMIN"]), async (c) => {
       acc[serviceName].count += 1;
       return acc;
     },
-    {} as Record<string, { revenue: number; count: number }>,
+    {} as RevenueGroup,
   );
 
   // Group by payment status
   const revenueByPaymentStatus = bookings.reduce(
-    (acc, booking) => {
+    (acc: RevenueGroup, booking: BookingWithRelations) => {
       const status = booking.paymentStatus;
       if (!acc[status]) {
         acc[status] = {
@@ -297,7 +304,7 @@ reports.get("/revenue", requireAuth(["ADMIN"]), async (c) => {
       acc[status].count += 1;
       return acc;
     },
-    {} as Record<string, { revenue: number; count: number }>,
+    {} as RevenueGroup,
   );
 
   return c.json({
@@ -312,14 +319,25 @@ reports.get("/revenue", requireAuth(["ADMIN"]), async (c) => {
     },
     byService: revenueByService,
     byPaymentStatus: revenueByPaymentStatus,
-    recentBookings: bookings.slice(0, 10).map((b) => ({
-      id: b.id,
-      client: b.user.name ?? b.user.email,
-      service: b.service.name,
-      amount: b.totalPrice.toString(),
-      completedAt: b.completedAt,
-      paymentStatus: b.paymentStatus,
-    })),
+    recentBookings: bookings
+      .slice(0, 10)
+      .map(
+        (b: {
+          id: string;
+          user: { name: string | null; email: string };
+          service: { name: string };
+          totalPrice: { toString: () => string };
+          completedAt: Date | null;
+          paymentStatus: string;
+        }) => ({
+          id: b.id,
+          client: b.user.name ?? b.user.email,
+          service: b.service.name,
+          amount: b.totalPrice.toString(),
+          completedAt: b.completedAt,
+          paymentStatus: b.paymentStatus,
+        }),
+      ),
   });
 });
 
