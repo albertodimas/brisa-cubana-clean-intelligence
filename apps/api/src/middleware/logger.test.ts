@@ -1,6 +1,3 @@
-// @ts-nocheck
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/unbound-method */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
 import { requestLogger, getRequestLogger } from "./logger";

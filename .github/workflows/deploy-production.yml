@@ -196,7 +196,6 @@ jobs:
 
       - name: Deploy to Vercel
         if: steps.check-vercel.outputs.skip == 'false'
-        working-directory: apps/web
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
