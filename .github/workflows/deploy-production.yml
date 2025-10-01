@@ -210,15 +210,29 @@ jobs:
 
       - name: Prepare Vercel project
         if: steps.check-vercel.outputs.skip == 'false'
-        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN --cwd apps/web
+
+      - name: Build with Vercel
+        if: steps.check-vercel.outputs.skip == 'false'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          NEXT_PUBLIC_API_URL: https://api.brisacubana.com
+          NEXT_PUBLIC_APP_URL: https://brisacubana.com
+        run: npx vercel build --prod --token=$VERCEL_TOKEN --cwd apps/web
 
       - name: Deploy to Vercel
         if: steps.check-vercel.outputs.skip == 'false'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          npx vercel build --prod --token=$VERCEL_TOKEN --yes
-          npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --yes
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --cwd apps/web
 
       - name: Notify Slack on success
         if: success() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL
