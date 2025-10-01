@@ -13,9 +13,5 @@
       "develop": false
     }
   },
-  "env": {
-    "NEXT_PUBLIC_API_URL": "https://api.brisacubana.com",
-    "NEXT_PUBLIC_APP_URL": "https://brisacubana.com"
-  },
   "regions": ["iad1"]
 }

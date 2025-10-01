@@ -95,7 +95,7 @@ jobs:
         if: steps.check-railway.outputs.skip == 'false'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_PRODUCTION_TOKEN }}
-        run: railway up --service @brisa/api --detach
+        run: railway up --detach
 
       - name: Wait for deployment
         if: steps.check-railway.outputs.skip == 'false'
