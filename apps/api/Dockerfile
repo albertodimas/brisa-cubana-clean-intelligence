@@ -72,7 +72,7 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node --input-type=module -e "fetch('http://localhost:3001/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
-# Set environment
+# Set environment variables
 ENV NODE_ENV=production
 ENV API_PORT=3001
 
