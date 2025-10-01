@@ -39,9 +39,6 @@ WORKDIR /app
 # Enable Corepack
 RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nodejs
@@ -77,5 +74,4 @@ ENV NODE_ENV=production
 ENV API_PORT=3001
 
 # Start application with tsx (TypeScript execution)
-ENTRYPOINT ["dumb-init", "--"]
 CMD ["tsx", "apps/api/src/server.ts"]
