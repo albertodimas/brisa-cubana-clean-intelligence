@@ -84,19 +84,18 @@ reports.post("/cleanscore", requireAuth(["ADMIN", "STAFF"]), async (c) => {
   // Calculate CleanScore
   const score = calculateCleanScore(payload.metrics);
 
-  // Format dates
-  const serviceDate = new Date(booking.scheduledAt).toLocaleDateString(
-    "es-US",
-    {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  );
+  // Format dates - explicit type conversion for Prisma DateTime fields
+  const serviceDate = new Date(
+    booking.scheduledAt as string | Date,
+  ).toLocaleDateString("es-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   const completedAt = booking.completedAt
-    ? new Date(booking.completedAt).toLocaleString("es-US")
+    ? new Date(booking.completedAt as string | Date).toLocaleString("es-US")
     : new Date().toLocaleString("es-US");
 
   // Prepare report data
@@ -183,19 +182,18 @@ reports.post(
     // Calculate CleanScore
     const score = calculateCleanScore(payload.metrics);
 
-    // Format dates
-    const serviceDate = new Date(booking.scheduledAt).toLocaleDateString(
-      "es-US",
-      {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      },
-    );
+    // Format dates - explicit type conversion for Prisma DateTime fields
+    const serviceDate = new Date(
+      booking.scheduledAt as string | Date,
+    ).toLocaleDateString("es-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
     const completedAt = booking.completedAt
-      ? new Date(booking.completedAt).toLocaleString("es-US")
+      ? new Date(booking.completedAt as string | Date).toLocaleString("es-US")
       : new Date().toLocaleString("es-US");
 
     // Import here to avoid circular dependency
@@ -260,7 +258,8 @@ reports.get("/revenue", requireAuth(["ADMIN"]), async (c) => {
 
   // Calculate totals
   const totalRevenue = bookings.reduce(
-    (sum, booking) => sum + parseFloat(booking.totalPrice.toString()),
+    (sum: number, booking: { totalPrice: { toString: () => string } }) =>
+      sum + parseFloat(booking.totalPrice.toString()),
     0,
   );
   const bookingsCount = bookings.length;

@@ -223,7 +223,9 @@ bookings.post("/", requireAuth(), async (c) => {
     throw new ConflictError(
       "This time slot conflicts with an existing booking for this property",
       {
-        conflictingBookingIds: conflictingBookings.map((b) => b.id),
+        conflictingBookingIds: conflictingBookings.map(
+          (b: { id: string }) => b.id,
+        ),
       },
     );
   }
@@ -420,22 +422,20 @@ bookings.patch("/:id", requireAuth(), async (c) => {
       });
     } else if (payload.status === "CONFIRMED") {
       // Send confirmation notification when status changes to CONFIRMED
-      const scheduledDate = new Date(booking.scheduledAt).toLocaleDateString(
-        "es-US",
-        {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        },
-      );
-      const scheduledTime = new Date(booking.scheduledAt).toLocaleTimeString(
-        "es-US",
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-        },
-      );
+      const scheduledDate = new Date(
+        booking.scheduledAt as string | Date,
+      ).toLocaleDateString("es-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      const scheduledTime = new Date(
+        booking.scheduledAt as string | Date,
+      ).toLocaleTimeString("es-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
       void sendBookingConfirmation(
         {
