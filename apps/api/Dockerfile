@@ -71,7 +71,8 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV API_PORT=3001
+
+# Note: PORT is set by Railway dynamically, don't hardcode it here
 
 # Start application with tsx (TypeScript execution)
 CMD ["tsx", "apps/api/src/server.ts"]
