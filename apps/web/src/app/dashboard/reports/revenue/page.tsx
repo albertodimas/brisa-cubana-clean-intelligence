@@ -73,13 +73,10 @@ const paymentStatusLabels: Record<string, string> = {
   REFUNDED: "Reembolsado",
 };
 
-const paymentStatusTones: Record<
-  string,
-  "teal" | "neutral" | "orange" | "rose"
-> = {
-  PENDING_PAYMENT: "orange",
+const paymentStatusTones: Record<string, "teal" | "neutral" | "sunset"> = {
+  PENDING_PAYMENT: "sunset",
   PAID: "teal",
-  FAILED: "rose",
+  FAILED: "sunset",
   REFUNDED: "neutral",
 };
 

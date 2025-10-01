@@ -27,7 +27,7 @@ export default async function StaffPage() {
     <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-black">
       <StaffWorkspace
         accessToken={session.user.accessToken}
-        userName={session.user.name ?? session.user.email}
+        userName={session.user.name ?? session.user.email ?? "Usuario"}
       />
     </div>
   );

@@ -128,7 +128,6 @@ export default async function ServicesPage() {
               <div className="mt-6 flex gap-2">
                 <Button
                   intent="primary"
-                  size="sm"
                   as="a"
                   href={`/dashboard?service=${service.id}`}
                   className="flex-1"
@@ -137,7 +136,6 @@ export default async function ServicesPage() {
                 </Button>
                 <Button
                   intent="ghost"
-                  size="sm"
                   as="a"
                   href={`/dashboard/services/${service.id}`}
                 >

@@ -33,12 +33,12 @@ const statusLabels: Record<string, string> = {
   CANCELLED: "Cancelada",
 };
 
-const statusTones: Record<string, "teal" | "neutral" | "orange" | "rose"> = {
-  PENDING: "orange",
+const statusTones: Record<string, "teal" | "neutral" | "sunset"> = {
+  PENDING: "sunset",
   CONFIRMED: "teal",
   IN_PROGRESS: "teal",
   COMPLETED: "neutral",
-  CANCELLED: "rose",
+  CANCELLED: "sunset",
 };
 
 const paymentStatusLabels: Record<string, string> = {
@@ -155,7 +155,6 @@ export default async function BookingsPage() {
                     <div className="mt-6 flex gap-2">
                       <Button
                         intent="ghost"
-                        size="sm"
                         as="a"
                         href={`/dashboard/bookings/${booking.id}`}
                       >
@@ -164,7 +163,6 @@ export default async function BookingsPage() {
                       {booking.status === "PENDING" && (
                         <Button
                           intent="secondary"
-                          size="sm"
                           as="a"
                           href={`/dashboard/bookings/${booking.id}/cancel`}
                         >
@@ -216,7 +214,6 @@ export default async function BookingsPage() {
                     <div className="mt-6">
                       <Button
                         intent="primary"
-                        size="sm"
                         as="a"
                         href={`/dashboard/bookings/${booking.id}`}
                       >
@@ -244,9 +241,11 @@ export default async function BookingsPage() {
                       {booking.service.name}
                     </h3>
                     <p className="text-xs text-neutral-400 mt-1">
-                      {new Date(booking.completedAt).toLocaleDateString(
-                        "es-US",
-                      )}
+                      {booking.completedAt
+                        ? new Date(booking.completedAt).toLocaleDateString(
+                            "es-US",
+                          )
+                        : "Sin fecha"}
                     </p>
                     <p className="text-xs text-neutral-400 mt-1">
                       {booking.property.name}
@@ -254,7 +253,6 @@ export default async function BookingsPage() {
                     <div className="mt-4">
                       <Button
                         intent="ghost"
-                        size="sm"
                         as="a"
                         href={`/dashboard/bookings/${booking.id}`}
                       >
@@ -291,7 +289,7 @@ export default async function BookingsPage() {
                         "es-US",
                       )}
                     </p>
-                    <Badge tone="rose" className="mt-2">
+                    <Badge tone="sunset" className="mt-2">
                       Cancelada
                     </Badge>
                   </Card>

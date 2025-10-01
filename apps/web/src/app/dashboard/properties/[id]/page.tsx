@@ -68,12 +68,12 @@ const statusLabels: Record<string, string> = {
   CANCELLED: "Cancelada",
 };
 
-const statusTones: Record<string, "teal" | "neutral" | "orange" | "rose"> = {
-  PENDING: "orange",
+const statusTones: Record<string, "teal" | "neutral" | "sunset"> = {
+  PENDING: "sunset",
   CONFIRMED: "teal",
   IN_PROGRESS: "teal",
   COMPLETED: "neutral",
-  CANCELLED: "rose",
+  CANCELLED: "sunset",
 };
 
 interface PropertyDetailPageProps {
@@ -243,7 +243,6 @@ export default async function PropertyDetailPage({
                 <div className="mt-4">
                   <Button
                     intent="ghost"
-                    size="sm"
                     as="a"
                     href={`/dashboard/bookings/${booking.id}`}
                   >

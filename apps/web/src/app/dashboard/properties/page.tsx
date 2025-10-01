@@ -139,17 +139,19 @@ export default async function PropertiesPage() {
                     </div>
                   )}
 
-                  {property._count?.bookings > 0 && (
-                    <p className="mt-3 text-xs uppercase tracking-[0.2em] text-teal-300">
-                      {property._count.bookings}{" "}
-                      {property._count.bookings === 1 ? "reserva" : "reservas"}
-                    </p>
-                  )}
+                  {property._count?.bookings !== undefined &&
+                    property._count.bookings > 0 && (
+                      <p className="mt-3 text-xs uppercase tracking-[0.2em] text-teal-300">
+                        {property._count.bookings}{" "}
+                        {property._count.bookings === 1
+                          ? "reserva"
+                          : "reservas"}
+                      </p>
+                    )}
 
                   <div className="mt-6 flex gap-2">
                     <Button
                       intent="ghost"
-                      size="sm"
                       as="a"
                       href={`/dashboard/properties/${property.id}`}
                     >
@@ -157,7 +159,6 @@ export default async function PropertiesPage() {
                     </Button>
                     <Button
                       intent="secondary"
-                      size="sm"
                       as="a"
                       href={`/dashboard/properties/${property.id}/edit`}
                     >

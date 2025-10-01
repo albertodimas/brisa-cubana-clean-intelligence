@@ -59,12 +59,12 @@ const statusLabels: Record<string, string> = {
   CANCELLED: "Cancelada",
 };
 
-const statusTones: Record<string, "teal" | "neutral" | "orange" | "rose"> = {
-  PENDING: "orange",
+const statusTones: Record<string, "teal" | "neutral" | "sunset"> = {
+  PENDING: "sunset",
   CONFIRMED: "teal",
   IN_PROGRESS: "teal",
   COMPLETED: "neutral",
-  CANCELLED: "rose",
+  CANCELLED: "sunset",
 };
 
 const paymentStatusLabels: Record<string, string> = {
@@ -74,13 +74,10 @@ const paymentStatusLabels: Record<string, string> = {
   REFUNDED: "Reembolsado",
 };
 
-const paymentStatusTones: Record<
-  string,
-  "teal" | "neutral" | "orange" | "rose"
-> = {
-  PENDING_PAYMENT: "orange",
+const paymentStatusTones: Record<string, "teal" | "neutral" | "sunset"> = {
+  PENDING_PAYMENT: "sunset",
   PAID: "teal",
-  FAILED: "rose",
+  FAILED: "sunset",
   REFUNDED: "neutral",
 };
 
@@ -221,7 +218,6 @@ export default async function BookingDetailPage({
             <div className="pt-2">
               <Button
                 intent="ghost"
-                size="sm"
                 as="a"
                 href={`/dashboard/properties/${booking.property.id}`}
               >
