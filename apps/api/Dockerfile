@@ -53,6 +53,9 @@ COPY --chown=nodejs:nodejs package.json pnpm-workspace.yaml ./
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=deps --chown=nodejs:nodejs /app/apps/api/node_modules ./apps/api/node_modules
 
+# Install tsx globally for production runtime
+RUN npm install -g tsx@4.20.6
+
 # Copy runtime artifacts
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/prisma ./apps/api/prisma
@@ -75,4 +78,4 @@ ENV API_PORT=3001
 
 # Start application with tsx (TypeScript execution)
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["npx", "tsx", "apps/api/src/server.ts"]
+CMD ["tsx", "apps/api/src/server.ts"]
