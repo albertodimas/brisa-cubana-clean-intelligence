@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
   experimental: {
     externalDir: true,
     serverActions: {
-      allowedOrigins: ["localhost"],
+      allowedOrigins: [
+        "localhost",
+        "brisa-cubana.vercel.app",
+        "brisacubana.com",
+      ],
     },
   },
 };

@@ -15,7 +15,7 @@ COPY apps/api/package.json ./apps/api/
 # Install production dependencies only (ignore lifecycle scripts)
 RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api --ignore-scripts
 
-# Stage 2: Builder
+# Stage 2: Builder (compile TypeScript)
 FROM node:24.9.0-alpine AS builder
 WORKDIR /app
 
@@ -26,11 +26,11 @@ RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY apps/api ./apps/api
 
-# Install all dependencies (including dev, ignore lifecycle scripts)
+# Install all dependencies required to build the API (including dev deps)
 RUN pnpm install --frozen-lockfile --filter=@brisa/api... --ignore-scripts
 
-# Generate Prisma Client (only step needed - no build since tsx handles TS at runtime)
-RUN cd apps/api && pnpm db:generate
+# Generate Prisma Client and compile TypeScript to JavaScript output
+RUN cd apps/api && pnpm db:generate && pnpm build
 
 # Stage 3: Production runner
 FROM node:24.9.0-alpine AS runner
@@ -50,11 +50,10 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=deps --chown=nodejs:nodejs /app/apps/api/node_modules ./apps/api/node_modules
 
-# Copy source code and generated files
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/src ./apps/api/src
+# Copy runtime artifacts
+COPY --from=builder --chown=nodejs:nodejs /app/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/package.json ./apps/api/
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/tsconfig.json ./apps/api/
 
 # Switch to non-root user
 USER nodejs
@@ -70,6 +69,6 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 ENV NODE_ENV=production
 ENV API_PORT=3001
 
-# Start application with dumb-init and tsx (handles TS without transpiling)
+# Start compiled application with Node.js
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["npx", "tsx", "apps/api/src/server.ts"]
+CMD ["node", "apps/api/dist/server.js"]

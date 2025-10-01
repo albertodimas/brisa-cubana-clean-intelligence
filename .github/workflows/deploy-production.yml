@@ -109,7 +109,7 @@ jobs:
           echo "Railway URL: https://brisaapi-production-up-railw-ae5ab70u.up.railway.app"
 
       - name: Notify Slack on success
-        if: success() && steps.check-railway.outputs.skip == 'false'
+        if: success() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:
@@ -130,7 +130,7 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && steps.check-railway.outputs.skip == 'false'
+        if: failure() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:
@@ -190,19 +190,38 @@ jobs:
           node-version: "24"
           cache: "pnpm"
 
+      - name: Install monorepo dependencies
+        if: steps.check-vercel.outputs.skip == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared UI package
+        if: steps.check-vercel.outputs.skip == 'false'
+        run: pnpm --filter=@brisa/ui build
+
+      - name: Prepare workspace snapshot for Vercel
+        if: steps.check-vercel.outputs.skip == 'false'
+        run: |
+          rm -rf apps/web/packages
+          mkdir -p apps/web/packages
+          cp -R packages/ui apps/web/packages/
+          rm -rf apps/web/packages/ui/node_modules
+          cp pnpm-lock.yaml apps/web/pnpm-lock.yaml
+          printf "packages:\n  - packages/ui\n" > apps/web/pnpm-workspace.yaml
+
+      - name: Prepare Vercel project
+        if: steps.check-vercel.outputs.skip == 'false'
+        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
       - name: Deploy to Vercel
         if: steps.check-vercel.outputs.skip == 'false'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          NEXT_PUBLIC_API_URL: https://api.brisacubana.com
-          NEXT_PUBLIC_APP_URL: https://brisacubana.com
         run: |
-          npx vercel deploy --prod --token=$VERCEL_TOKEN --cwd apps/web --yes
+          npx vercel build --prod --token=$VERCEL_TOKEN --yes
+          npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN --yes
 
       - name: Notify Slack on success
-        if: success() && steps.check-vercel.outputs.skip == 'false'
+        if: success() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:
@@ -223,7 +242,7 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && steps.check-vercel.outputs.skip == 'false'
+        if: failure() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:

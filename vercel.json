@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "cd apps/web && pnpm build",
+  "buildCommand": "pnpm --filter=@brisa/ui build && pnpm --filter=web build",
   "devCommand": "cd apps/web && pnpm dev",
-  "installCommand": "pnpm install",
+  "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next",
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- apps/web packages/ui",
@@ -14,8 +14,8 @@
     }
   },
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://api-brisa-cubana.up.railway.app",
-    "NEXT_PUBLIC_APP_URL": "https://brisa-cubana.vercel.app"
+    "NEXT_PUBLIC_API_URL": "https://api.brisacubana.com",
+    "NEXT_PUBLIC_APP_URL": "https://brisacubana.com"
   },
   "regions": ["iad1"]
 }

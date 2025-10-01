@@ -6,6 +6,6 @@ builder = "dockerfile"
 dockerfilePath = "apps/api/Dockerfile"
 
 [deploy]
-startCommand = "tsx apps/api/src/server.ts"
+startCommand = "node apps/api/dist/server.js"
 healthcheckPath = "/healthz"
 healthcheckTimeout = 300
