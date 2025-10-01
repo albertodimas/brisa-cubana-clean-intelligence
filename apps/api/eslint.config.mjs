@@ -1,57 +1,60 @@
-import js from '@eslint/js';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
+import js from "@eslint/js";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 
-const tsRecommendations = tseslint.configs['recommended-type-checked'].rules;
-const tsStylistic = tseslint.configs['stylistic-type-checked'].rules;
+const tsRecommendations = tseslint.configs["recommended-type-checked"].rules;
+const tsStylistic = tseslint.configs["stylistic-type-checked"].rules;
 
 export default [
-  { ignores: ['dist/**', 'src/generated/**'] },
+  { ignores: ["dist/**", "src/generated/**"] },
   js.configs.recommended,
   {
-    files: ['src/**/*.ts'],
+    files: ["src/**/*.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: './tsconfig.json',
-        tsconfigRootDir: import.meta.dirname
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
       },
-      sourceType: 'module',
+      sourceType: "module",
       globals: {
-        console: 'readonly',
-        process: 'readonly',
-        fetch: 'readonly',
-        Buffer: 'readonly',
-        beforeEach: 'readonly',
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        vi: 'readonly',
-        setInterval: 'readonly',
-        setTimeout: 'readonly'
-      }
+        console: "readonly",
+        process: "readonly",
+        fetch: "readonly",
+        Buffer: "readonly",
+        beforeEach: "readonly",
+        describe: "readonly",
+        it: "readonly",
+        expect: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        vi: "readonly",
+        setInterval: "readonly",
+        setTimeout: "readonly",
+      },
     },
     plugins: {
-      '@typescript-eslint': tseslint
+      "@typescript-eslint": tseslint,
     },
     rules: {
       ...tsRecommendations,
       ...tsStylistic,
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'warn',
-      '@typescript-eslint/no-unsafe-call': 'warn',
-      '@typescript-eslint/no-unsafe-member-access': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-      '@typescript-eslint/no-unsafe-return': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
-      '@typescript-eslint/no-unused-vars': ['error', {
-        'argsIgnorePattern': '^_',
-        'varsIgnorePattern': '^_'
-      }]
-    }
-  }
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-call": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-argument": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ];

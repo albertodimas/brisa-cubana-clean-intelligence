@@ -271,11 +271,11 @@ Deployment is considered successful when:
 
 ---
 
-**Date:** ******\_\_\_\_******
-**Deployed by:** ******\_\_\_\_******
+**Date:** **\*\***\_\_\_\_**\*\***
+**Deployed by:** **\*\***\_\_\_\_**\*\***
 **Deployment URL:** https://brisa-cubana-staging.vercel.app
 **API URL:** https://api-brisa-cubana-staging.up.railway.app
-**Notes:** ******************************\_******************************
+**Notes:** ******\*\*******\*\*******\*\*******\_******\*\*******\*\*******\*\*******
 
 ---
 

@@ -3,8 +3,7 @@ name: "✨ Feature Request"
 about: Sugerir una nueva funcionalidad para el proyecto
 title: "[FEATURE] "
 labels: enhancement
-assignees: ''
-
+assignees: ""
 ---
 
 ## Resumen de la Feature
@@ -40,7 +39,7 @@ assignees: ''
 - [ ] Aumenta performance
 - [ ] Facilita desarrollo
 - [ ] Reduce costos operativos
-- [ ] Otro: ****\_****
+- [ ] Otro: \***\*\_\*\***
 
 ## Impacto Estimado
 

@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   postgres:
@@ -6,7 +6,7 @@ services:
     container_name: brisa-cubana-postgres-dev
     restart: unless-stopped
     ports:
-      - '5433:5432'
+      - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -14,7 +14,7 @@ services:
     volumes:
       - brisa_cubana_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,12 +24,12 @@ services:
     container_name: brisa-cubana-redis-dev
     restart: unless-stopped
     ports:
-      - '6380:6379'
+      - "6380:6379"
     command: redis-server --appendonly yes
     volumes:
       - brisa_cubana_redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -39,8 +39,8 @@ services:
     container_name: brisa-cubana-mailhog-dev
     restart: unless-stopped
     ports:
-      - '1026:1025' # SMTP
-      - '8026:8025' # Web UI
+      - "1026:1025" # SMTP
+      - "8026:8025" # Web UI
     logging:
       driver: none
 

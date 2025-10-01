@@ -1,29 +1,29 @@
-import js from '@eslint/js';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
+import js from "@eslint/js";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 
-const tsRecommendations = tseslint.configs['recommended-type-checked'].rules;
-const tsStylistic = tseslint.configs['stylistic-type-checked'].rules;
+const tsRecommendations = tseslint.configs["recommended-type-checked"].rules;
+const tsStylistic = tseslint.configs["stylistic-type-checked"].rules;
 
 export default [
-  { ignores: ['dist/**'] },
+  { ignores: ["dist/**"] },
   js.configs.recommended,
   {
-    files: ['src/**/*.{ts,tsx}'],
+    files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: './tsconfig.json',
-        tsconfigRootDir: import.meta.dirname
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
       },
-      sourceType: 'module'
+      sourceType: "module",
     },
     plugins: {
-      '@typescript-eslint': tseslint
+      "@typescript-eslint": tseslint,
     },
     rules: {
       ...tsRecommendations,
-      ...tsStylistic
-    }
-  }
+      ...tsStylistic,
+    },
+  },
 ];

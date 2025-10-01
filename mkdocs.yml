@@ -216,8 +216,8 @@ extra:
     default: latest
   analytics:
     provider: google
-    property: G-XXXXXXXXXX  # Replace with actual GA4 ID
+    property: G-XXXXXXXXXX # Replace with actual GA4 ID
   generator: false
 
 # Extra configuration
-strict: false  # Set to true in CI to catch broken links
+strict: false # Set to true in CI to catch broken links

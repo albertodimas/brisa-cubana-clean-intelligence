@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -68,7 +68,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -121,7 +121,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -171,7 +171,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -220,7 +220,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

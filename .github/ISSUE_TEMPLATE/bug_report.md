@@ -3,8 +3,7 @@ name: "\U0001F41B Bug Report"
 about: Reportar un bug para ayudarnos a mejorar
 title: "[BUG] "
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 ## Descripción del Bug

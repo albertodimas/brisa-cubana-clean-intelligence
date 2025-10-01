@@ -53,5 +53,5 @@
 
 ## Firmas
 
-- Carlos Álvarez — Hostaway ************\_\_\_\_************ Fecha 03/10/2025
-- Alejandra Ortega — Brisa Cubana **********\_\_********** Fecha 03/10/2025
+- Carlos Álvarez — Hostaway \***\*\*\*\*\*\*\***\_\_\_\_\***\*\*\*\*\*\*\*** Fecha 03/10/2025
+- Alejandra Ortega — Brisa Cubana \***\*\*\*\*\***\_\_\***\*\*\*\*\*** Fecha 03/10/2025

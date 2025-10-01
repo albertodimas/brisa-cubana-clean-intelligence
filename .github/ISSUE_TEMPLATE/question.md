@@ -3,8 +3,7 @@ name: "❓ Question"
 about: Hacer una pregunta sobre el proyecto
 title: "[QUESTION] "
 labels: question
-assignees: ''
-
+assignees: ""
 ---
 
 ## Pregunta
@@ -38,7 +37,7 @@ assignees: ''
 - [ ] Frontend
 - [ ] Database
 - [ ] Documentación
-- [ ] Otro: ****\_****
+- [ ] Otro: \***\*\_\*\***
 
 ## Información Adicional
 

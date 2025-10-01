@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('turbo/bin/turbo');
+require("turbo/bin/turbo");

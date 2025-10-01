@@ -33,7 +33,9 @@
     "stripe:listen": "./scripts/stripe_listen.sh",
     "stripe:trigger": "./scripts/stripe_trigger.sh",
     "prepare": "husky",
-    "test:e2e": "pnpm --filter=web build && PLAYWRIGHT_HTML_REPORT=./.playwright-report pnpm exec playwright test"
+    "test:e2e": "pnpm --filter=web build && PLAYWRIGHT_HTML_REPORT=./.playwright-report pnpm exec playwright test",
+    "pre-push": "./scripts/pre-push-check.sh",
+    "verify": "./scripts/pre-push-check.sh"
   },
   "devDependencies": {
     "@cspell/dict-es-es": "3.0.8",
