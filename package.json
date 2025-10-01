@@ -29,7 +29,7 @@
     "docs:typedoc": "typedoc --options typedoc.json",
     "docs:storybook": "pnpm --filter=@brisa/ui storybook:build",
     "docs:diagrams": "node scripts/generate_diagrams.mjs",
-    "docs:build:artifacts": "pnpm docs:typedoc && pnpm docs:storybook && pnpm docs:diagrams",
+    "docs:build:artifacts": "pnpm docs:typedoc && pnpm docs:storybook",
     "stripe:listen": "./scripts/stripe_listen.sh",
     "stripe:trigger": "./scripts/stripe_trigger.sh",
     "prepare": "husky",
