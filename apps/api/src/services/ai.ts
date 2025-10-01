@@ -23,11 +23,11 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
  */
 function getSystemPrompt(context: Record<string, unknown>): string {
   const user = context.user as { name?: string; email: string } | undefined;
-  const services = context.availableServices as Array<{
+  const services = context.availableServices as {
     name: string;
     basePrice: number;
     description?: string;
-  }>;
+  }[];
 
   return `Eres el Concierge Virtual de Brisa Cubana Clean Intelligence, un servicio premium de limpieza residencial y comercial en Miami, Florida.
 
@@ -129,7 +129,7 @@ async function generateOpenAIResponse(
     }
 
     const data = (await response.json()) as {
-      choices: Array<{ message: { content: string } }>;
+      choices: { message: { content: string } }[];
       usage?: { total_tokens: number };
     };
 
@@ -180,7 +180,7 @@ async function generateAnthropicResponse(
     }
 
     const data = (await response.json()) as {
-      content: Array<{ text: string }>;
+      content: { text: string }[];
       usage?: { input_tokens: number; output_tokens: number };
     };
 
