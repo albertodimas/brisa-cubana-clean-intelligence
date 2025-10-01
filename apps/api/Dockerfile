@@ -46,6 +46,9 @@ RUN apk add --no-cache dumb-init
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nodejs
 
+# Copy workspace configuration for monorepo
+COPY --chown=nodejs:nodejs package.json pnpm-workspace.yaml ./
+
 # Copy production dependencies
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=deps --chown=nodejs:nodejs /app/apps/api/node_modules ./apps/api/node_modules
@@ -54,6 +57,7 @@ COPY --from=deps --chown=nodejs:nodejs /app/apps/api/node_modules ./apps/api/nod
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/package.json ./apps/api/
+COPY --from=builder --chown=nodejs:nodejs /app/apps/api/src ./apps/api/src
 
 # Switch to non-root user
 USER nodejs
@@ -61,9 +65,9 @@ USER nodejs
 # Expose port
 EXPOSE 3001
 
-# Health check
+# Health check (using fetch for ES modules compatibility)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
+  CMD node --input-type=module -e "fetch('http://localhost:3001/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 # Set environment
 ENV NODE_ENV=production
