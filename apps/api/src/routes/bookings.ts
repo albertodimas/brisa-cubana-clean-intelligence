@@ -4,6 +4,14 @@ import { getStripe, stripeEnabled } from "../lib/stripe";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "../lib/errors";
+import {
   createBookingSchema,
   paginationSchema,
   updateBookingSchema,
@@ -81,7 +89,7 @@ bookings.get("/mine", requireAuth(), async (c) => {
   const authUser = getAuthUser(c);
 
   if (!authUser) {
-    return c.json({ error: "Unauthorized" }, 401);
+    throw new UnauthorizedError();
   }
 
   const bookingsForUser = await db.booking.findMany({
@@ -111,7 +119,7 @@ bookings.get("/:id", requireAuth(), async (c) => {
   });
 
   if (!booking) {
-    return c.json({ error: "Booking not found" }, 404);
+    throw new NotFoundError("Booking");
   }
 
   if (
@@ -119,7 +127,7 @@ bookings.get("/:id", requireAuth(), async (c) => {
     authUser?.role !== "STAFF" &&
     booking.userId !== authUser?.sub
   ) {
-    return c.json({ error: "Forbidden" }, 403);
+    throw new ForbiddenError("You can only view your own bookings");
   }
 
   return c.json(booking);
@@ -131,12 +139,9 @@ bookings.post("/", requireAuth(), async (c) => {
   const parseResult = createBookingSchema.safeParse(json);
 
   if (!parseResult.success) {
-    return c.json(
-      {
-        error: "Invalid booking payload",
-        details: parseResult.error.flatten().fieldErrors,
-      },
-      400,
+    throw new ValidationError(
+      "Invalid booking payload",
+      parseResult.error.flatten().fieldErrors,
     );
   }
 
@@ -144,10 +149,7 @@ bookings.post("/", requireAuth(), async (c) => {
   const authUser = getAuthUser(c);
 
   if (authUser?.role === "CLIENT" && payload.userId !== authUser.sub) {
-    return c.json(
-      { error: "You can only create bookings for your own user" },
-      403,
-    );
+    throw new ForbiddenError("You can only create bookings for your own user");
   }
 
   const [service, userRecord, property] = await Promise.all([
@@ -159,27 +161,26 @@ bookings.post("/", requireAuth(), async (c) => {
   ]);
 
   if (!service) {
-    return c.json({ error: "Service not found" }, 404);
+    throw new NotFoundError("Service");
   }
 
   if (!userRecord) {
-    return c.json({ error: "User not found" }, 404);
+    throw new NotFoundError("User");
   }
 
   if (!property) {
-    return c.json({ error: "Property not found" }, 404);
+    throw new NotFoundError("Property");
   }
 
   if (authUser?.role === "CLIENT" && property.userId !== authUser.sub) {
-    return c.json(
-      { error: "You can only create bookings for your own properties" },
-      403,
+    throw new ForbiddenError(
+      "You can only create bookings for your own properties",
     );
   }
 
   // Validate service is active
   if (!service.active) {
-    return c.json({ error: "This service is currently unavailable" }, 400);
+    throw new BadRequestError("This service is currently unavailable");
   }
 
   const scheduledAt = payload.scheduledAt;
@@ -219,13 +220,11 @@ bookings.post("/", requireAuth(), async (c) => {
   });
 
   if (conflictingBookings.length > 0) {
-    return c.json(
+    throw new ConflictError(
+      "This time slot conflicts with an existing booking for this property",
       {
-        error:
-          "This time slot conflicts with an existing booking for this property",
         conflictingBookingIds: conflictingBookings.map((b) => b.id),
       },
-      409,
     );
   }
 
@@ -356,12 +355,13 @@ bookings.patch("/:id", requireAuth(), async (c) => {
   const authUser = getAuthUser(c);
 
   if (!authUser) {
-    return c.json({ error: "Unauthorized" }, 401);
+    throw new UnauthorizedError();
   }
 
   if (authUser.role === "CLIENT") {
-    return c.json({ error: "Forbidden" }, 403);
+    throw new ForbiddenError("Clients cannot update bookings");
   }
+
   const updateData: Partial<UpdateBookingInput> & {
     completedAt?: Date | null;
   } = {};
@@ -377,7 +377,7 @@ bookings.patch("/:id", requireAuth(), async (c) => {
   }
 
   if (Object.keys(updateData).length === 0) {
-    return c.json({ error: "No updates supplied" }, 400);
+    throw new BadRequestError("No updates supplied");
   }
 
   const booking = await db.booking.update({
@@ -463,11 +463,11 @@ bookings.delete("/:id", requireAuth(), async (c) => {
   const authUser = getAuthUser(c);
 
   if (!authUser) {
-    return c.json({ error: "Unauthorized" }, 401);
+    throw new UnauthorizedError();
   }
 
   if (authUser.role === "CLIENT") {
-    return c.json({ error: "Forbidden" }, 403);
+    throw new ForbiddenError("Clients cannot cancel bookings");
   }
 
   const booking = await db.booking.update({

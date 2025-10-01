@@ -1,6 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
+import type { Context } from "hono";
 import { generateAccessToken } from "../lib/token";
+import { isAppError } from "../lib/errors";
 
 const bookingMock = {
   findMany: vi.fn(),
@@ -37,6 +39,18 @@ const { default: bookings } = await import("./bookings");
 const buildApp = () => {
   const app = new Hono();
   app.route("/api/bookings", bookings);
+
+  // Add error handler to match production app behavior
+  app.onError((err, c: Context) => {
+    if (isAppError(err)) {
+      return c.json(err.toJSON(), err.statusCode as never);
+    }
+    return c.json(
+      { error: "Internal server error", code: "INTERNAL_ERROR" },
+      500,
+    );
+  });
+
   return app;
 };
 
@@ -94,9 +108,10 @@ describe("bookings route validation", () => {
       body: JSON.stringify({}),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(await response.json()).toMatchObject({
       error: "Invalid booking payload",
+      code: "VALIDATION_ERROR",
     });
     expect(bookingMock.create).not.toHaveBeenCalled();
   });
