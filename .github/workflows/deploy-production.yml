@@ -63,7 +63,6 @@ jobs:
   deploy-api:
     name: Deploy API to Railway
     needs: lint-and-test
-    if: ${{ secrets.RAILWAY_PRODUCTION_TOKEN != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
@@ -72,29 +71,37 @@ jobs:
 
     steps:
       - name: Check Railway secret
+        id: check-railway
         run: |
           if [ -z "${{ secrets.RAILWAY_PRODUCTION_TOKEN }}" ]; then
-            echo "⚠️  Skipping deploy-api: missing RAILWAY_PRODUCTION_TOKEN secret"
-            echo "Please configure the RAILWAY_PRODUCTION_TOKEN secret in GitHub repository settings"
-            exit 1
+            echo "⚠️  Skipping Railway deployment: RAILWAY_PRODUCTION_TOKEN secret not configured"
+            echo "Please configure the secret in: Settings → Secrets and variables → Actions"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Railway token configured, proceeding with deployment"
+            echo "skip=false" >> $GITHUB_OUTPUT
           fi
-          echo "✅ Railway token configured, proceeding with deployment"
 
       - name: Checkout code
+        if: steps.check-railway.outputs.skip == 'false'
         uses: actions/checkout@v4
 
       - name: Install Railway CLI
+        if: steps.check-railway.outputs.skip == 'false'
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
+        if: steps.check-railway.outputs.skip == 'false'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_PRODUCTION_TOKEN }}
         run: railway up --service api-production --detach
 
       - name: Wait for deployment
+        if: steps.check-railway.outputs.skip == 'false'
         run: sleep 45
 
       - name: Health check
+        if: steps.check-railway.outputs.skip == 'false'
         run: |
           max_attempts=5
           attempt=0
@@ -112,7 +119,7 @@ jobs:
           exit 1
 
       - name: Notify Slack on success
-        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        if: success() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -131,7 +138,7 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -152,7 +159,6 @@ jobs:
   deploy-web:
     name: Deploy Web to Vercel
     needs: lint-and-test
-    if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -161,39 +167,48 @@ jobs:
 
     steps:
       - name: Check Vercel secrets
+        id: check-vercel
         run: |
           if [ -z "${{ secrets.VERCEL_TOKEN }}" ] || [ -z "${{ secrets.VERCEL_ORG_ID }}" ] || [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
-            echo "⚠️  Skipping deploy-web: missing Vercel secrets"
-            echo "Required secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID"
-            echo "Please configure these secrets in GitHub repository settings"
-            exit 1
+            echo "⚠️  Skipping Vercel deployment: required secrets not configured"
+            echo "Required: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID"
+            echo "Please configure these secrets in: Settings → Secrets and variables → Actions"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Vercel secrets configured, proceeding with deployment"
+            echo "skip=false" >> $GITHUB_OUTPUT
           fi
-          echo "✅ Vercel secrets configured, proceeding with deployment"
 
       - name: Checkout code
+        if: steps.check-vercel.outputs.skip == 'false'
         uses: actions/checkout@v4
 
       - name: Setup pnpm
+        if: steps.check-vercel.outputs.skip == 'false'
         uses: pnpm/action-setup@v4
         with:
           version: 10.17.1
 
       - name: Setup Node.js
+        if: steps.check-vercel.outputs.skip == 'false'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: "pnpm"
 
       - name: Install dependencies
+        if: steps.check-vercel.outputs.skip == 'false'
         run: pnpm install --frozen-lockfile
 
       - name: Build web app
+        if: steps.check-vercel.outputs.skip == 'false'
         run: cd apps/web && pnpm build
         env:
           NEXT_PUBLIC_API_URL: https://api.brisacubana.com
           NEXT_PUBLIC_APP_URL: https://brisacubana.com
 
       - name: Deploy to Vercel
+        if: steps.check-vercel.outputs.skip == 'false'
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -203,7 +218,7 @@ jobs:
           scope: ${{ secrets.VERCEL_ORG_ID }}
 
       - name: Notify Slack on success
-        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        if: success() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -222,7 +237,7 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
