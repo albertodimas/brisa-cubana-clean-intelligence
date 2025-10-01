@@ -10,6 +10,10 @@ on:
       - ".github/workflows/deploy-production.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 concurrency:
   group: production-${{ github.ref }}
   cancel-in-progress: false
