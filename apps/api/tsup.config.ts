@@ -8,7 +8,7 @@ export default defineConfig({
   minify: false,
   splitting: false,
   bundle: false, // Don't bundle - preserve module structure
-  shims: true,
+  shims: false, // Disable shims when bundle is false to avoid conflicts
   skipNodeModulesBundle: true,
   external: ["@prisma/client", "puppeteer", /node_modules/],
   noExternal: [],

@@ -22,10 +22,14 @@ import {
 const bookings = new Hono();
 
 // Apply rate limiting: read operations are more permissive, write operations are stricter
-bookings.use("/", rateLimiter(RateLimits.read));
-bookings.use("/mine", rateLimiter(RateLimits.read));
-bookings.use("/:id", rateLimiter(RateLimits.read));
-// POST/PATCH/DELETE will use default API rate limit from app-level middleware
+bookings.get("/", rateLimiter(RateLimits.read));
+bookings.get("/mine", rateLimiter(RateLimits.read));
+bookings.get("/:id", rateLimiter(RateLimits.read));
+
+// Stricter limits for write operations
+bookings.post("/", rateLimiter(RateLimits.write));
+bookings.patch("/:id", rateLimiter(RateLimits.write));
+bookings.delete("/:id", rateLimiter(RateLimits.write));
 
 // Get all bookings (with pagination)
 bookings.get("/", requireAuth(["ADMIN", "STAFF"]), async (c) => {

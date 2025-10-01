@@ -6,8 +6,15 @@ import { z } from "zod";
 
 const properties = new Hono();
 
-// Apply rate limiting
-properties.use("/", rateLimiter(RateLimits.read));
+// Apply rate limiting: read operations get more permissive limits
+properties.get("/", rateLimiter(RateLimits.read));
+properties.get("/:id", rateLimiter(RateLimits.read));
+
+// Stricter limits for write operations
+properties.post("/", rateLimiter(RateLimits.write));
+properties.put("/:id", rateLimiter(RateLimits.write));
+properties.patch("/:id", rateLimiter(RateLimits.write));
+properties.delete("/:id", rateLimiter(RateLimits.write));
 
 const createPropertySchema = z.object({
   name: z.string().min(1).max(255),
