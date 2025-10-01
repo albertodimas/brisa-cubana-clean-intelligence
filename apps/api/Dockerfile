@@ -15,13 +15,9 @@ COPY apps/api/package.json ./apps/api/
 # Install production dependencies only (ignore lifecycle scripts)
 RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api --ignore-scripts
 
-# Stage 2: Builder (compile TypeScript)
+# Stage 2: Builder (generate Prisma only, no TypeScript compilation)
 FROM node:24.9.0-alpine AS builder
 WORKDIR /app
-
-# Cache buster to force rebuild - update timestamp to invalidate cache
-ARG CACHEBUST=2025-10-01-13:20
-RUN echo "Build timestamp: ${CACHEBUST}"
 
 # Enable Corepack
 RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
@@ -33,8 +29,8 @@ COPY apps/api ./apps/api
 # Install all dependencies required to build the API (including dev deps)
 RUN pnpm install --frozen-lockfile --filter=@brisa/api... --ignore-scripts
 
-# Generate Prisma Client and compile TypeScript to JavaScript output
-RUN cd apps/api && pnpm db:generate && pnpm build
+# Generate Prisma Client only (skip tsup compilation to avoid cache issues)
+RUN cd apps/api && pnpm db:generate
 
 # Stage 3: Production runner
 FROM node:24.9.0-alpine AS runner
@@ -54,14 +50,15 @@ COPY --chown=nodejs:nodejs package.json pnpm-workspace.yaml ./
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=deps --chown=nodejs:nodejs /app/apps/api/node_modules ./apps/api/node_modules
 
-# Install tsx globally for production runtime
+# Install tsx globally for production runtime (runs TypeScript directly)
 RUN npm install -g tsx@4.20.6
 
-# Copy runtime artifacts
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/dist ./apps/api/dist
+# Copy runtime artifacts (source code + Prisma, no compiled dist folder)
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/package.json ./apps/api/
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/src ./apps/api/src
+COPY --from=builder --chown=nodejs:nodejs /app/apps/api/node_modules/.prisma ./apps/api/node_modules/.prisma
+COPY --from=builder --chown=nodejs:nodejs /app/apps/api/src/generated ./apps/api/src/generated
 
 # Switch to non-root user
 USER nodejs
