@@ -19,6 +19,10 @@ RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api --ignore-scripts
 FROM node:24.9.0-alpine AS builder
 WORKDIR /app
 
+# Cache buster to force rebuild - update timestamp to invalidate cache
+ARG CACHEBUST=2025-10-01-13:20
+RUN echo "Build timestamp: ${CACHEBUST}"
+
 # Enable Corepack
 RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 
