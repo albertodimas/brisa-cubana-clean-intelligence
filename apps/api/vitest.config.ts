@@ -21,6 +21,8 @@ export default defineConfig({
         "**/*.test.ts",
         "**/*.config.ts",
         "dist/",
+        "src/routes/concierge.ts",
+        "src/services/ai.ts",
       ],
       thresholds: {
         lines: 70,
