@@ -6,8 +6,15 @@ const port = Number.parseInt(
   10,
 );
 
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(
-    `API ready on http://localhost:${info.port} (pid ${process.pid}, env ${process.env.NODE_ENV ?? "development"})`,
-  );
-});
+serve(
+  {
+    fetch: app.fetch,
+    port,
+    hostname: "0.0.0.0", // Listen on all network interfaces for Docker
+  },
+  (info) => {
+    console.log(
+      `API ready on http://localhost:${info.port} (pid ${process.pid}, env ${process.env.NODE_ENV ?? "development"})`,
+    );
+  },
+);
