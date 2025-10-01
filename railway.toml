@@ -7,7 +7,5 @@ dockerfilePath = "apps/api/Dockerfile"
 
 [deploy]
 startCommand = "tsx apps/api/src/server.ts"
-healthcheckPath = "/health"
+healthcheckPath = "/healthz"
 healthcheckTimeout = 300
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 10
