@@ -63,6 +63,7 @@ jobs:
   deploy-api:
     name: Deploy API to Railway
     needs: lint-and-test
+    if: ${{ secrets.RAILWAY_PRODUCTION_TOKEN != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
@@ -70,6 +71,15 @@ jobs:
       url: https://api.brisacubana.com
 
     steps:
+      - name: Check Railway secret
+        run: |
+          if [ -z "${{ secrets.RAILWAY_PRODUCTION_TOKEN }}" ]; then
+            echo "⚠️  Skipping deploy-api: missing RAILWAY_PRODUCTION_TOKEN secret"
+            echo "Please configure the RAILWAY_PRODUCTION_TOKEN secret in GitHub repository settings"
+            exit 1
+          fi
+          echo "✅ Railway token configured, proceeding with deployment"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -142,6 +152,7 @@ jobs:
   deploy-web:
     name: Deploy Web to Vercel
     needs: lint-and-test
+    if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -149,6 +160,16 @@ jobs:
       url: https://brisacubana.com
 
     steps:
+      - name: Check Vercel secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ] || [ -z "${{ secrets.VERCEL_ORG_ID }}" ] || [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "⚠️  Skipping deploy-web: missing Vercel secrets"
+            echo "Required secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID"
+            echo "Please configure these secrets in GitHub repository settings"
+            exit 1
+          fi
+          echo "✅ Vercel secrets configured, proceeding with deployment"
+
       - name: Checkout code
         uses: actions/checkout@v4
 

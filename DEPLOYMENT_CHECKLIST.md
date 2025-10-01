@@ -89,10 +89,24 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 Configure in: `Settings → Secrets and variables → Actions`
 
-- [ ] `RAILWAY_STAGING_TOKEN` - Railway API token
+### Staging Environment
+
+- [ ] `RAILWAY_STAGING_TOKEN` - Railway API token for staging
 - [ ] `VERCEL_TOKEN` - Vercel deployment token
 - [ ] `VERCEL_ORG_ID` - Vercel organization ID
-- [ ] `VERCEL_PROJECT_ID` - Vercel project ID
+- [ ] `VERCEL_PROJECT_ID` - Vercel project ID (staging)
+
+### Production Environment (REQUIRED)
+
+⚠️ **These secrets are MANDATORY before running the production deployment workflow:**
+
+- [ ] `RAILWAY_PRODUCTION_TOKEN` - Railway API token for production
+- [ ] `VERCEL_TOKEN` - Vercel deployment token (same as staging)
+- [ ] `VERCEL_ORG_ID` - Vercel organization ID (same as staging)
+- [ ] `VERCEL_PROJECT_ID` - Vercel project ID for production project
+- [ ] `SLACK_WEBHOOK_URL` - Slack webhook for deployment notifications (optional)
+
+> **Note:** The `deploy-production` workflow will skip deployment jobs if required secrets are not configured. The workflow validates secrets before attempting deployment to prevent failures.
 
 **How to obtain:**
 
@@ -104,6 +118,10 @@ railway whoami --token
 # Vercel credentials
 vercel login
 cat .vercel/project.json  # After running 'vercel link'
+
+# Slack webhook
+# Go to: https://api.slack.com/messaging/webhooks
+# Create incoming webhook for your channel
 ```
 
 ## 💳 External Services Configuration

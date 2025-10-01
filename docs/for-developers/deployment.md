@@ -677,6 +677,48 @@ app.get("/health", async (c) => {
 
 ---
 
+## GitHub Secrets Configuration
+
+### Required Secrets for Production Deployment
+
+⚠️ **MANDATORY**: Configure these secrets before running production deployment workflows.
+
+Navigate to: `Repository → Settings → Secrets and variables → Actions → New repository secret`
+
+#### Production Deployment Secrets
+
+| Secret Name                | Description                         | Required | How to Obtain                                    |
+| -------------------------- | ----------------------------------- | -------- | ------------------------------------------------ |
+| `RAILWAY_PRODUCTION_TOKEN` | Railway API token for production    | ✅ Yes   | `railway login && railway whoami --token`        |
+| `VERCEL_TOKEN`             | Vercel deployment token             | ✅ Yes   | `vercel login` → Account Settings → Tokens       |
+| `VERCEL_ORG_ID`            | Vercel organization/team ID         | ✅ Yes   | `cat .vercel/project.json` (after `vercel link`) |
+| `VERCEL_PROJECT_ID`        | Vercel project ID for production    | ✅ Yes   | `cat .vercel/project.json` (after `vercel link`) |
+| `SLACK_WEBHOOK_URL`        | Slack webhook for deployment notifs | ⚪ No    | https://api.slack.com/messaging/webhooks         |
+| `RAILWAY_STAGING_TOKEN`    | Railway API token for staging       | ⚪ No    | `railway login && railway whoami --token`        |
+
+**Important Notes:**
+
+- The `deploy-production` workflow validates these secrets and **will skip deployment jobs** if required secrets are missing
+- Validation steps provide clear error messages when secrets are not configured
+- Slack notifications are optional but recommended for team awareness
+
+**Example: Adding a Secret**
+
+```bash
+# 1. Obtain Railway token
+railway login
+railway whoami --token
+
+# 2. Add to GitHub
+# Go to: Settings → Secrets and variables → Actions → New repository secret
+# Name: RAILWAY_PRODUCTION_TOKEN
+# Value: [paste token]
+```
+
+See [DEPLOYMENT_CHECKLIST.md](../../DEPLOYMENT_CHECKLIST.md#-github-secrets-configuration) for complete configuration checklist.
+
+---
+
 ## CI/CD
 
 ### GitHub Actions Workflow
