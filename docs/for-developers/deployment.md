@@ -78,7 +78,7 @@ Guía completa para desplegar Brisa Cubana Clean Intelligence en diferentes ento
 
 ```bash
 pnpm install
-docker-compose up -d
+docker compose up -d
 cd apps/api && pnpm prisma migrate deploy && pnpm run seed
 pnpm dev
 ```

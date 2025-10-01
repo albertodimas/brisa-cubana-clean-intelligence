@@ -93,9 +93,9 @@ pnpm test users
 
 ### Configuración Vitest
 
-[apps/api/vitest.config.ts](../../apps/api/vitest.config.ts) no existe aún, pero Vitest detecta automáticamente los archivos `*.test.ts`.
+El archivo [apps/api/vitest.config.ts](../../apps/api/vitest.config.ts) contiene la configuración actual del proyecto.
 
-**Configuración recomendada:**
+**Configuración actual:**
 
 ```typescript
 // apps/api/vitest.config.ts
@@ -105,24 +105,45 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    env: {
+      DATABASE_URL:
+        process.env.DATABASE_URL ||
+        "postgresql://postgres:postgres@localhost:5432/brisa_cubana_test",
+      JWT_SECRET:
+        process.env.JWT_SECRET ||
+        "test-secret-key-for-vitest-testing-only-do-not-use-in-production",
+    },
     coverage: {
       provider: "v8",
-      reporter: ["text", "html", "lcov"],
+      reporter: ["text", "json", "html", "lcov"],
       exclude: [
         "node_modules/",
+        "src/generated/**",
+        "**/*.test.ts",
+        "**/*.config.ts",
         "dist/",
-        "*.config.{ts,js}",
-        "prisma/",
-        "scripts/",
+        "src/routes/concierge.ts", // Temporalmente excluido - TODO: agregar tests
+        "src/services/ai.ts", // Temporalmente excluido - TODO: agregar tests
       ],
-      lines: 80,
-      functions: 80,
-      branches: 80,
-      statements: 80,
+      thresholds: {
+        lines: 35, // Temporalmente bajo - objetivo: 70%
+        functions: 29, // Temporalmente bajo - objetivo: 70%
+        branches: 58, // Temporalmente bajo - objetivo: 70%
+        statements: 35, // Temporalmente bajo - objetivo: 70%
+      },
     },
+    include: ["src/**/*.test.ts"],
+    exclude: [
+      "node_modules",
+      "dist",
+      "src/generated",
+      "src/test/integration/**",
+    ],
   },
 });
 ```
+
+> **Nota:** Los umbrales de coverage están temporalmente reducidos debido a archivos nuevos sin tests (Concierge IA). El objetivo es volver a 70% en todas las métricas una vez que se agreguen los tests faltantes.
 
 ### Ejemplo: Test de Autenticación
 

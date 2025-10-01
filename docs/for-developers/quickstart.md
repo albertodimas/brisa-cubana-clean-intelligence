@@ -48,7 +48,7 @@ STRIPE_WEBHOOK_SECRET="whsec_..."
 
 ```bash
 # Levantar PostgreSQL con Docker
-docker-compose up -d
+docker compose up -d
 
 # Aplicar migraciones de Prisma
 cd apps/api

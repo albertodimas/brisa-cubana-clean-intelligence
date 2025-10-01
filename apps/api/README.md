@@ -13,7 +13,7 @@ cp apps/api/.env.example apps/api/.env
 # Edit apps/api/.env with your values
 
 # Start PostgreSQL
-docker-compose up -d postgres
+docker compose up -d postgres
 
 # Generate Prisma Client
 pnpm --filter=@brisa/api db:generate
@@ -454,7 +454,7 @@ pnpm --filter=@brisa/api db:generate
 
 ```bash
 # Start PostgreSQL
-docker-compose up -d postgres
+docker compose up -d postgres
 
 # Check connection
 psql $DATABASE_URL -c "SELECT 1"
