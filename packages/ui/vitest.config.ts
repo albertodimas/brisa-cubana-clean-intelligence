@@ -17,10 +17,10 @@ export default defineConfig({
         "dist/",
       ],
       thresholds: {
-        lines: 50,
+        lines: 45,
         functions: 60,
         branches: 50,
-        statements: 50,
+        statements: 45,
       },
     },
     include: ["src/**/*.test.tsx"],

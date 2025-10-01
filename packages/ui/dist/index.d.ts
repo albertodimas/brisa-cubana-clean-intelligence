@@ -2,7 +2,7 @@ import * as react_jsx_runtime from 'react/jsx-runtime';
 import { PropsWithChildren, ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode } from 'react';
 
 interface BadgeProps extends PropsWithChildren {
-    tone?: 'teal' | 'sunset' | 'neutral';
+    tone?: "teal" | "sunset" | "neutral";
     className?: string;
 }
 declare function Badge({ tone, className, children }: BadgeProps): react_jsx_runtime.JSX.Element;
@@ -36,7 +36,7 @@ interface CardProps extends PropsWithChildren {
     bleed?: boolean;
     className?: string;
 }
-declare function Card({ title, description, icon, bleed, className, children }: CardProps): react_jsx_runtime.JSX.Element;
+declare function Card({ title, description, icon, bleed, className, children, }: CardProps): react_jsx_runtime.JSX.Element;
 
 interface MetricProps {
     value: string;
@@ -50,9 +50,9 @@ interface SectionProps extends PropsWithChildren {
     eyebrow?: string;
     title: string;
     description?: string;
-    align?: 'left' | 'center';
+    align?: "left" | "center";
     className?: string;
 }
-declare function Section({ id, eyebrow, title, description, align, className, children }: SectionProps): react_jsx_runtime.JSX.Element;
+declare function Section({ id, eyebrow, title, description, align, className, children, }: SectionProps): react_jsx_runtime.JSX.Element;
 
 export { Badge, type BadgeProps, Button, Card, type CardProps, Metric, type MetricProps, Section, type SectionProps, tokens };
