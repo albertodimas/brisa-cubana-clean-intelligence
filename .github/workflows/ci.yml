@@ -231,7 +231,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Chrome for Puppeteer
-        run: npx puppeteer browsers install chrome-headless-shell
+        run: pnpm exec puppeteer browsers install chrome-headless-shell
 
       - name: Build documentation artifacts
         run: pnpm docs:build:artifacts
