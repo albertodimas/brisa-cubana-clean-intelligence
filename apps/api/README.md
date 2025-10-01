@@ -3,6 +3,7 @@
 Backend REST API built with Hono.js, Prisma ORM, and PostgreSQL for the Brisa Cubana Clean Intelligence platform.
 
 > **Production Ready**: Railway deployment configured with automated CI/CD pipeline.
+> **Status**: All production secrets configured ✅
 
 ## 🚀 Quick Start
 
