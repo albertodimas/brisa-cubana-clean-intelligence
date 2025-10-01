@@ -559,6 +559,190 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ---
 
+## CleanScore Reports
+
+### POST /api/reports/cleanscore
+
+Generate and send a CleanScore™ quality report for a completed booking.
+
+**Auth Required:** Yes (STAFF or ADMIN roles)
+
+**Request:**
+
+```json
+{
+  "bookingId": "booking-123",
+  "metrics": {
+    "generalCleanliness": 4.5,
+    "kitchen": 5.0,
+    "bathrooms": 4.8,
+    "premiumDetails": 4.2,
+    "ambiance": 4.7,
+    "timeCompliance": 5.0
+  },
+  "teamMembers": ["María García", "Carlos López"],
+  "photos": [
+    {
+      "url": "https://example.com/photo1.jpg",
+      "caption": "Kitchen after cleaning",
+      "category": "after"
+    }
+  ],
+  "observations": "Property was in excellent condition. All areas cleaned thoroughly.",
+  "recommendations": [
+    "Consider deep carpet cleaning for next visit",
+    "Replace air filter in HVAC system"
+  ]
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "CleanScore report is being generated and will be sent shortly",
+  "score": 4.7,
+  "bookingId": "booking-123",
+  "reportId": "report-456"
+}
+```
+
+**Errors:**
+
+- `400`: Invalid report payload or booking not completed
+- `401`: Unauthorized
+- `404`: Booking not found
+- `422`: Validation errors
+
+**Notes:**
+
+- Booking must have `status: "COMPLETED"` to generate report
+- Email with PDF report sent to customer automatically
+- CleanScore calculated as weighted average of all metrics
+- Report persisted in database for future retrieval
+
+---
+
+### GET /api/reports/cleanscore/:bookingId
+
+Retrieve CleanScore report for a specific booking.
+
+**Auth Required:** Yes (Booking owner, STAFF, or ADMIN)
+
+**URL Parameters:**
+
+- `bookingId`: The booking ID
+
+**Response (200):**
+
+```json
+{
+  "id": "report-456",
+  "bookingId": "booking-123",
+  "score": 4.7,
+  "metrics": {
+    "generalCleanliness": 4.5,
+    "kitchen": 5.0,
+    "bathrooms": 4.8,
+    "premiumDetails": 4.2,
+    "ambiance": 4.7,
+    "timeCompliance": 5.0
+  },
+  "teamMembers": ["María García", "Carlos López"],
+  "photos": [],
+  "observations": "Property was in excellent condition...",
+  "recommendations": ["Consider deep carpet cleaning..."],
+  "generatedBy": "user-staff-1",
+  "sentToEmail": "client@example.com",
+  "pdfUrl": null,
+  "createdAt": "2025-10-01T04:15:00.000Z",
+  "updatedAt": "2025-10-01T04:15:00.000Z",
+  "booking": {
+    "id": "booking-123",
+    "user": {...},
+    "property": {...},
+    "service": {...}
+  }
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `403`: Forbidden - not authorized to view this report
+- `404`: CleanScore report not found for this booking
+
+---
+
+### GET /api/reports/cleanscore
+
+List all CleanScore reports (paginated).
+
+**Auth Required:** Yes (STAFF or ADMIN roles only)
+
+**Query Parameters:**
+
+- `limit` (optional): Number of reports per page (default: 20)
+- `offset` (optional): Number of reports to skip (default: 0)
+
+**Response (200):**
+
+```json
+{
+  "reports": [
+    {
+      "id": "report-456",
+      "bookingId": "booking-123",
+      "score": 4.7,
+      "booking": {
+        "id": "booking-123",
+        "user": {
+          "id": "user-1",
+          "name": "John Doe",
+          "email": "john@example.com"
+        },
+        "property": {
+          "id": "prop-1",
+          "name": "Sunset Villa",
+          "address": "123 Ocean Drive"
+        },
+        "service": {
+          "id": "service-1",
+          "name": "Deep Clean"
+        }
+      },
+      "createdAt": "2025-10-01T04:15:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "limit": 20,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `403`: Forbidden - requires STAFF or ADMIN role
+
+---
+
+### POST /api/reports/cleanscore/preview
+
+Preview CleanScore report HTML without sending email.
+
+**Auth Required:** Yes (STAFF or ADMIN roles)
+
+**Request:** Same as POST /api/reports/cleanscore
+
+**Response (200):** Returns HTML string for preview
+
+---
+
 ## Postman Collection
 
 Import the Postman collection for easy testing:

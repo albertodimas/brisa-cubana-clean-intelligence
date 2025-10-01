@@ -125,17 +125,47 @@ reports.post("/cleanscore", requireAuth(["ADMIN", "STAFF"]), async (c) => {
     "Generating CleanScore report",
   );
 
+  // Store report in database
+  const savedReport = await db.cleanScoreReport.upsert({
+    where: { bookingId: booking.id },
+    create: {
+      bookingId: booking.id,
+      score,
+      metrics: payload.metrics,
+      teamMembers: payload.teamMembers ?? ["Equipo Brisa Cubana"],
+      photos: payload.photos ?? [],
+      observations: payload.observations,
+      recommendations: payload.recommendations ?? [],
+      generatedBy: authUser.sub,
+      sentToEmail: booking.user.email,
+    },
+    update: {
+      score,
+      metrics: payload.metrics,
+      teamMembers: payload.teamMembers ?? ["Equipo Brisa Cubana"],
+      photos: payload.photos ?? [],
+      observations: payload.observations,
+      recommendations: payload.recommendations ?? [],
+      generatedBy: authUser.sub,
+      sentToEmail: booking.user.email,
+      updatedAt: new Date(),
+    },
+  });
+
+  logger.info(
+    { reportId: savedReport.id },
+    "CleanScore report saved to database",
+  );
+
   // Generate and send report (async, non-blocking)
   void sendCleanScoreReport(reportData);
-
-  // Store report metadata in database (for future retrieval)
-  // TODO: Create Report model in Prisma schema and store here
 
   return c.json({
     success: true,
     message: "CleanScore report is being generated and will be sent shortly",
     score,
     bookingId: booking.id,
+    reportId: savedReport.id,
   });
 });
 
@@ -338,6 +368,114 @@ reports.get("/revenue", requireAuth(["ADMIN"]), async (c) => {
           paymentStatus: b.paymentStatus,
         }),
       ),
+  });
+});
+
+// Get CleanScore report by booking ID
+reports.get("/cleanscore/:bookingId", requireAuth(), async (c) => {
+  const authUser = getAuthUser(c);
+  const { bookingId } = c.req.param();
+
+  if (!authUser) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const report = await db.cleanScoreReport.findUnique({
+    where: { bookingId },
+    include: {
+      booking: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          property: true,
+          service: true,
+        },
+      },
+    },
+  });
+
+  if (!report) {
+    return c.json(
+      { error: "CleanScore report not found for this booking" },
+      404,
+    );
+  }
+
+  // Check authorization - only booking owner, staff, and admins can view
+  if (
+    authUser.role !== "ADMIN" &&
+    authUser.role !== "STAFF" &&
+    report.booking.userId !== authUser.sub
+  ) {
+    return c.json(
+      { error: "Forbidden - not authorized to view this report" },
+      403,
+    );
+  }
+
+  return c.json(report);
+});
+
+// List all CleanScore reports (admin/staff only)
+reports.get("/cleanscore", requireAuth(["ADMIN", "STAFF"]), async (c) => {
+  const authUser = getAuthUser(c);
+
+  if (!authUser) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const limit = parseInt(c.req.query("limit") ?? "20", 10);
+  const offset = parseInt(c.req.query("offset") ?? "0", 10);
+
+  const reports = await db.cleanScoreReport.findMany({
+    take: limit,
+    skip: offset,
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      booking: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          property: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+            },
+          },
+          service: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const total = await db.cleanScoreReport.count();
+
+  return c.json({
+    reports,
+    pagination: {
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
+    },
   });
 });
 
