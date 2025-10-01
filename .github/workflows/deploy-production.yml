@@ -108,10 +108,11 @@ jobs:
           echo "Railway URL: https://brisaapi-production-up-railw-ae5ab70u.up.railway.app"
 
       - name: Notify Slack on success
-        if: success() && steps.check-railway.outputs.skip == 'false'
+        if: success() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "✅ API deployed to production successfully",
@@ -127,10 +128,11 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && steps.check-railway.outputs.skip == 'false'
+        if: failure() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "❌ API production deployment failed",
@@ -197,10 +199,11 @@ jobs:
           npx vercel deploy --prod --token=$VERCEL_TOKEN --cwd apps/web --yes
 
       - name: Notify Slack on success
-        if: success() && steps.check-vercel.outputs.skip == 'false'
+        if: success() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "✅ Web app deployed to production successfully",
@@ -216,10 +219,11 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && steps.check-vercel.outputs.skip == 'false'
+        if: failure() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "❌ Web app production deployment failed",
