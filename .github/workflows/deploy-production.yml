@@ -108,7 +108,8 @@ jobs:
           echo "Railway URL: https://brisaapi-production-up-railw-ae5ab70u.up.railway.app"
 
       - name: Notify Slack on success
-        if: success() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
+        if: success() && steps.check-railway.outputs.skip == 'false'
+        continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -128,7 +129,8 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && steps.check-railway.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && steps.check-railway.outputs.skip == 'false'
+        continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -199,7 +201,8 @@ jobs:
           npx vercel deploy --prod --token=$VERCEL_TOKEN --cwd apps/web --yes
 
       - name: Notify Slack on success
-        if: success() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
+        if: success() && steps.check-vercel.outputs.skip == 'false'
+        continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -219,7 +222,8 @@ jobs:
             }
 
       - name: Notify Slack on failure
-        if: failure() && steps.check-vercel.outputs.skip == 'false' && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && steps.check-vercel.outputs.skip == 'false'
+        continue-on-error: true
         uses: slackapi/slack-github-action@v1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
