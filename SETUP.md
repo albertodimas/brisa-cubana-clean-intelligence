@@ -2,6 +2,8 @@
 
 Guía completa para configurar el entorno de desarrollo local.
 
+> **🚀 ¿Tienes prisa?** Ve directo a [QUICKSTART.md](QUICKSTART.md) para una guía de **5 minutos** en inglés.
+
 ## Prerrequisitos
 
 - **Node.js**: 24.9.0 (usar nvm: `nvm use`)

@@ -1,0 +1,69 @@
+# Git attributes for consistent line endings and diffing
+
+# Auto detect text files and normalize line endings to LF
+* text=auto eol=lf
+
+# Explicitly set text files
+*.md text
+*.txt text
+*.json text
+*.js text
+*.mjs text
+*.cjs text
+*.ts text
+*.tsx text
+*.jsx text
+*.css text
+*.scss text
+*.html text
+*.xml text
+*.yml text
+*.yaml text
+*.toml text
+*.ini text
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Explicitly set binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.pyc binary
+*.pdf binary
+
+# Lock files should be treated as binary (no merge conflicts)
+pnpm-lock.yaml binary
+package-lock.json binary
+yarn.lock binary
+bun.lockb binary
+
+# Generated files
+*.min.js binary
+*.min.css binary
+
+# Diff settings for specific file types
+*.md diff=markdown
+*.ts diff=typescript
+*.tsx diff=typescript
+*.js diff=javascript
+*.jsx diff=javascript
+
+# Linguist overrides (for GitHub language statistics)
+*.sql linguist-detectable=true linguist-language=sql
+docs/** linguist-documentation
+*.md linguist-documentation=false

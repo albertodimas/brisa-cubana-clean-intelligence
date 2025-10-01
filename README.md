@@ -1,211 +1,332 @@
-# Brisa Cubana Clean Intelligence
+<div align="center">
 
-Plataforma integral de limpieza inteligente para Miami-Dade, diseñada con IA, automatización y experiencia premium, honrando raíces cubanas.
+# 🧹 Brisa Cubana Clean Intelligence
 
-## Visión
+**El sistema operativo inteligente para la limpieza premium de Miami-Dade**
 
-Ser el sistema operativo inteligente que conecta clientes, cuadrillas y aliados para ofrecer servicios de limpieza personalizados, sostenibles y de calidad verificada en todo Miami.
+[![CI Status](https://github.com/albertodimas/brisa-cubana-clean-intelligence/workflows/CI/badge.svg)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)](https://nextjs.org/)
+[![Hono](https://img.shields.io/badge/Hono-4.9.9-orange)](https://hono.dev/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.16.2-2D3748)](https://www.prisma.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## Estado actual (30 de septiembre de 2025)
+Plataforma integral que combina **IA**, **automatización** y **experiencia premium** para revolucionar los servicios de limpieza, honrando raíces cubanas.
 
-- [x] Investigación de mercado, regulación y stack tecnológico completos
-- [x] Documentación profesional completa (MkDocs + Material + 76 archivos MD)
-- [x] Infraestructura MVP completa: API REST, Prisma ORM, Docker Compose, CI/CD
-- [x] Testing configurado: Vitest + coverage, Playwright E2E, Husky hooks
-- [x] Autenticación JWT + NextAuth v5 + Dashboard operativo
-- [x] Sistema de pagos Stripe completo con webhooks y reconciliación
-- [x] Alertas y monitoreo (Slack integration + Sentry ready)
-- [x] Documentación técnica nueva: API Reference, Testing Guide, Deployment Guide, Quickstart
-- [ ] Validación con clientes objetivo (entrevistas planificadas)
-- [ ] Despliegue a producción (Vercel + Railway/Fly.io)
+[🚀 Quick Start](#-quickstart-5-minutos) · [📚 Docs](https://docs.brisacubana.com) · [🐛 Report Bug](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues) · [💡 Request Feature](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues)
 
-## Stack final recomendado 2025
-
-- **Frontend**: Next.js 15.5.4 (App Router) + React 19.1.1 + Tailwind CSS 4.
-- **Auth**: Auth.js v5 (patrón DAL con cookies HttpOnly) — en integración.
-- **Backend**: Hono 4.9.9 + Zod para validación centralizada.
-- **Base de datos**: Prisma 6.16.2 + PostgreSQL 17 (estrategia join).
-- **Cache**: Redis 8 (roadmap; sin cliente en código aún).
-- **Testing**: Vitest 3.2.4, Testing Library y Playwright 1.55 para E2E.
-- **Monorepo**: pnpm 10.17.1 + Turborepo 2.5.8 (preparado para caché remoto).
-- **CI/CD**: GitHub Actions (pnpm cache) + despliegues Vercel.
-- **Contenedores**: Docker Compose con health checks listos para prod.
-- **Monitoring**: Sentry (errores) + Vercel Analytics / Web Vitals.
-- **Payments**: Stripe Checkout + webhook con reconciliación de estados.
-
-## 🚀 Inicio rápido (5 minutos)
-
-**Guía completa**: Ver [docs/getting-started/quickstart.md](docs/getting-started/quickstart.md)
-
-```bash
-# 1. Requisitos: Node 24.9.0+, pnpm 10.17.1+, Docker 28+
-nvm use
-pnpm install
-
-# 2. Variables de entorno
-cp .env.example .env
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env.local
-# Editar apps/api/.env con JWT_SECRET, DATABASE_URL, STRIPE_SECRET_KEY
-
-# 3. Base de datos
-docker-compose up -d
-cd apps/api && pnpm prisma migrate deploy && pnpm run seed && cd ../..
-
-# 4. Iniciar desarrollo
-pnpm dev
-# Frontend: http://localhost:3000
-# API: http://localhost:4000
-```
-
-**Credenciales demo:**
-
-- Admin: `admin@brisacubana.com` / `Admin123!`
-- Cliente: `cliente@example.com` / `Cliente123!`
-
-## 📚 Documentación
-
-Este repositorio usa **MkDocs + Material** para documentación profesional.
-
-**Levantar docs localmente:**
-
-```bash
-make setup     # Crear venv Python e instalar mkdocs
-make serve     # http://localhost:8000
-```
-
-**Documentación técnica clave:**
-
-- [Quickstart (5 min)](docs/getting-started/quickstart.md)
-- [API Reference](docs/api/endpoints.md) - 23 endpoints documentados
-- [Testing Guide](docs/development/testing.md) - Vitest + Playwright
-- [Deployment Guide](docs/deployment/environments.md) - Vercel/Railway/Fly.io
-- [Architecture](ARCHITECTURE.md) - Diagramas C4 y decisiones técnicas
-- [Contributing](CONTRIBUTING.md) - Guía de contribución completa
-- [Changelog](CHANGELOG.md) - Historial de cambios
-
-**Generar artefactos de documentación:**
-
-```bash
-pnpm docs:build:artifacts  # TypeDoc, Storybook, Diagramas Mermaid
-```
-
-## Estructura
-
-```
-.
-├── apps/
-│   ├── api/                   # API Hono (TS) lista para Bun/Node
-│   └── web/                   # Next.js 15 (App Router + Turbopack)
-├── packages/
-│   └── ui/                    # Design system compartido (tsup + Vitest)
-├── docs/                      # Base de conocimiento MkDocs + Material
-├── scripts/
-│   ├── setup_env.sh
-│   ├── mkdocs_serve.sh
-│   └── stripe_*.sh
-├── .github/workflows/
-│   ├── ci.yml
-│   ├── documentation.yml
-│   └── payments-reconcile.yml
-├── pnpm-workspace.yaml
-├── turbo.json
-├── tsconfig.base.json
-├── package.json
-├── pnpm-lock.yaml
-├── README.md
-├── LICENSE
-├── SECURITY.md
-├── Makefile
-├── mkdocs.yml
-├── requirements.txt
-└── ...
-```
-
-## Entorno tecnológico
-
-- `nvm` 0.40.3 (ver `.nvmrc` → Node 24.9.0).
-- `pnpm` 10.17.1 vía Corepack + Turborepo 2.5.8 (caché local; preparado para remoto).
-- `bun` 1.2.23 (servicios event-driven y pruebas cross-runtime).
-- `python` 3.13.3 + `.venv` local con `mkdocs` 1.6.1 y `mkdocs-material` 9.6.20.
-- `@playwright/test` 1.55.1 para smoke tests E2E.
-- Sentry listo para instrumentación (variables en `.env.example`).
-
-## 🎯 Próximos pasos
-
-1. **Validación de mercado**: Ejecutar entrevistas con clientes objetivo
-2. **Registro de marca**: Dominio `brisacubana.com` + redes sociales
-3. **Sprint 0**: Configurar ambientes staging/producción
-4. **Go-live MVP**: Despliegue en Vercel + Railway con monitoreo 24/7
+</div>
 
 ---
 
-> Nota: todo el contenido se mantiene actualizado con las versiones más recientes de las dependencias (Bun 1.2.23, Next.js 15.5.4, React 19.1.1, Hono 4.9.9, Temporal 1.28.1, Redpanda 25.2.5, Redis 8.2.1, LangChain 0.3.35, MkDocs 1.6.1, etc.) y el contexto de Miami-Dade a septiembre de 2025.
+## ✨ Características Principales
 
-## Automatización
+<table>
+<tr>
+<td width="50%">
 
-Disponibles utilidades para ahorrar tiempo:
+### 🎯 Para Clientes
 
-- `pnpm dev` / `pnpm build` / `pnpm lint`: ejecutan pipelines con Turborepo 2.5.8.
-- `turbo.json`: define dependencias y caché incremental entre apps/paquetes.
-- `scripts/setup_env.sh`: crea `.venv` e instala dependencias de documentación.
-- `scripts/mkdocs_serve.sh`: levanta MkDocs en modo desarrollo.
-- `Makefile`: wrappers para `pnpm dev`, setup de docs y limpieza.
-- `.github/workflows/documentation.yml`: usa Node 24 + pnpm para lint + build de la doc.
-- `apps/web`: landing Next.js 15 con componentes `@brisa/ui`, framer-motion y lucide-react.
-- `packages/ui`: tokens de diseño compartidos (botones, badges, cards, métricas, secciones).
-- Playwright configurado en `playwright.config.ts` (`pnpm test:e2e`).
-- Stripe Checkout disponible en la API (`/api/bookings`, `/api/payments/checkout-session`) con webhook para actualizar reservas.
-- Script helper `pnpm stripe:listen` para escuchar eventos de Stripe en local y `pnpm stripe:trigger <evento>` para simularlos.
-- Dashboard staff con filtros por estado/pago, alertas y registro de notas de conciliación vinculadas a Stripe Dashboard.
-- Canal de alertas configurable vía `ALERTS_SLACK_WEBHOOK`; la API guarda alertas en `payment_alerts` para evitar duplicados.
-- `pnpm --filter=@brisa/api payments:reconcile` permite reintentar conciliaciones con Stripe (útil para cron horario).
-- Página `/dashboard/auditoria` ofrece un panel de seguimiento con las últimas alertas y notas resueltas.
-- Workflow programado `.github/workflows/payments-reconcile.yml` ejecuta el script de conciliación cada hora (configura `STRIPE_SECRET_KEY` y `DATABASE_URL` en GitHub Secrets).
-- Storybook 8 para `@brisa/ui` y carpeta `docs/design-system/` se publicarán desde CI (`ENG-150`).
-- Ruta `docs/copilot/` documentará políticas de IA responsable y prompts validados (ticket `ENG-151`).
+- **Booking instantáneo** - Reserva en segundos
+- **CleanScore™** - Calidad verificada con evidencias
+- **Transparencia total** - Fotos, videos, reportes en tiempo real
+- **Pricing dinámico** - Precios justos basados en demanda
 
-Ejemplo:
+</td>
+<td width="50%">
 
-```bash
-make setup
-make serve
-```
+### 👨‍💼 Para Operaciones
 
-## Calidad documental
+- **Dashboard analítico** - Métricas en vivo
+- **IA predictiva** - Optimización de rutas y scheduling
+- **Integraciones PMS** - Hostaway, Guesty, Mews
+- **ESG automático** - Reportes de sostenibilidad
 
-Antes de abrir un PR, ejecuta los linters para evitar sorpresas en CI:
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Quickstart (5 minutos)
 
 ```bash
+# 1️⃣ Prerequisitos: Node 24.9.0+, pnpm 10.17.1+, Docker
+nvm use
 pnpm install
-pnpm lint          # Turbo (apps + paquetes) + markdownlint + cspell
-# Opcional: smoke E2E
-pnpm test:e2e      # Requiere `pnpm exec playwright install` y servidor web levantado
-# o
-make lint
+
+# 2️⃣ Configurar entorno
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.local.example apps/web/.env.local
+# Editar .env files con tus valores (JWT_SECRET, DATABASE_URL, etc.)
+
+# 3️⃣ Levantar base de datos
+docker compose up -d
+
+# 4️⃣ Setup inicial
+pnpm db:setup
+
+# 5️⃣ Iniciar desarrollo
+pnpm dev
 ```
 
-## 📂 Recursos adicionales
+**URLs:**
 
-- **Plantillas**: Entrevistas, minutas, ADR, evaluación IA → `docs/resources/templates/`
-- **Datos de mercado**: Turismo Miami 2024, salarios, competencia → `docs/resources/market/`
-- **Insights**: Investigación centralizada → `docs/insights/`
-- **SOPs**: Operaciones, emergencias, inventario → `docs/operations/sops/`
+- 🌐 **Frontend**: http://localhost:3000
+- 🔌 **API**: http://localhost:4000
+- 📊 **Docs**: http://localhost:8000 (ejecutar `make serve`)
 
-## 🤝 Contribuir
+**Credenciales demo:**
 
-Ver [CONTRIBUTING.md](CONTRIBUTING.md) para:
+- 👤 Admin: `admin@brisacubana.com` / `Admin123!`
+- 👥 Cliente: `cliente@example.com` / `Cliente123!`
 
-- Setup del entorno de desarrollo
-- Workflow de Git (branches, commits, PRs)
-- Estándares de código TypeScript/React
+📖 **Guía detallada**: [docs/for-developers/quickstart.md](docs/for-developers/quickstart.md)
+
+---
+
+## 🏗️ Stack Tecnológico
+
+### Frontend
+
+- **Next.js 15.5.4** - App Router + Turbopack ⚡
+- **React 19.1.1** - Server Components first
+- **Tailwind CSS 4.1.13** - Utility-first styling
+- **Auth.js v5** - NextAuth con DAL pattern
+- **Framer Motion** - Animaciones fluidas
+
+### Backend
+
+- **Hono 4.9.9** - Ultraligero, edge-ready
+- **Node.js 24.9.0** - Runtime moderno
+- **Prisma 6.16.2** - ORM type-safe
+- **PostgreSQL 17** - Base de datos relacional
+- **Zod 3.23.8** - Validación de schemas
+
+### DevOps & Testing
+
+- **pnpm 10.17.1 + Turborepo 2.5.8** - Monorepo optimizado
+- **Vitest 3.2.4** - Testing unitario (66 tests ✅)
+- **Playwright 1.55.1** - E2E testing
+- **Docker Compose** - Desarrollo local
+- **GitHub Actions** - CI/CD automático
+
+---
+
+## 📊 Estado del Proyecto
+
+| Componente          | Estado              | Descripción                                 |
+| ------------------- | ------------------- | ------------------------------------------- |
+| **Backend API**     | ✅ MVP Complete     | 23 endpoints REST, 66 tests passing         |
+| **Frontend Web**    | ✅ MVP Complete     | Dashboard, bookings, properties, revenue    |
+| **Auth System**     | ✅ Production Ready | JWT + NextAuth v5 + RBAC                    |
+| **Payments**        | ✅ Production Ready | Stripe Checkout + webhooks + reconciliation |
+| **Testing**         | ✅ Configured       | Unit + Integration + E2E                    |
+| **CI/CD**           | ✅ Active           | 5 GitHub Actions workflows                  |
+| **Documentation**   | ✅ Complete         | 78 MD files, MkDocs + Material              |
+| **Deployment**      | 🟡 Staging Ready    | Vercel (frontend) + Railway (backend)       |
+| **CleanScore™ AI** | 🔜 Roadmap          | Computer vision + scoring algorithm         |
+| **Concierge AI**    | 🔜 Roadmap          | GPT-4.1 + Realtime API                      |
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+brisa-cubana-clean-intelligence/
+├── apps/
+│   ├── api/                    # Hono backend (Node.js 24)
+│   │   ├── src/routes/        # 23 REST endpoints
+│   │   ├── prisma/            # Database schema & migrations
+│   │   └── tests/             # 66 unit tests ✅
+│   └── web/                   # Next.js 15 frontend
+│       ├── src/app/           # App Router pages
+│       ├── src/components/    # React components
+│       └── e2e/               # Playwright tests
+├── packages/
+│   └── ui/                    # Shared design system (@brisa/ui)
+├── docs/                      # Documentation (78 MD files)
+│   ├── for-developers/        # Technical docs
+│   ├── for-business/          # Business & operations
+│   ├── guides/                # Tutorials
+│   └── reference/             # Templates & specs
+├── scripts/                   # Automation scripts
+├── .github/workflows/         # CI/CD (5 workflows)
+└── docker-compose.yml         # Local development
+```
+
+---
+
+## 🎯 Casos de Uso
+
+### 🏠 Residencial Premium
+
+Propietarios en Brickell, Coral Gables, Miami Beach que valoran **seguridad**, **confiabilidad** y **evidencias inmediatas**.
+
+### 🏨 Hospitality & Vacation Rentals
+
+Property managers de Airbnb/Vrbo que necesitan **turnos express**, **reporting automático** e **integraciones PMS**.
+
+### 🏢 Oficinas Boutique
+
+Empresas con **SLAs estrictos**, **compliance ESG** y **trazabilidad verificable**.
+
+---
+
+## 📚 Documentación
+
+### Para Developers
+
+- **[Quickstart (5 min)](docs/for-developers/quickstart.md)** - Setup completo
+- **[API Reference](docs/for-developers/api-reference.md)** - 23 endpoints documentados
+- **[Testing Guide](docs/for-developers/testing.md)** - Vitest + Playwright
+- **[Deployment Guide](docs/for-developers/deployment.md)** - Vercel/Railway/Fly.io
+
+### Para Business
+
+- **[Vision & Strategy](docs/for-business/vision-strategy.md)** - Misión, OKRs, roadmap
+- **[Market Analysis](docs/for-business/market-compliance.md)** - Miami-Dade 2025
+- **[AI & Automation](docs/for-business/ai-automation.md)** - Estrategia de IA
+- **[SOPs](docs/for-business/operations/sops/)** - Procedimientos operativos
+
+### Arquitectura
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Overview técnico de alto nivel
+- **[Diagrams](docs/for-developers/diagrams/)** - C4, flowcharts, sequences
+
+**📖 Documentación completa**: http://localhost:8000 (`make serve`)
+
+---
+
+## 🧪 Testing
+
+```bash
+# Unit tests (Vitest)
+pnpm test                    # Todos los tests
+pnpm test:coverage           # Con coverage
+
+# E2E tests (Playwright)
+pnpm test:e2e                # Smoke tests
+pnpm playwright test --ui    # UI mode (debugging)
+
+# Linting
+pnpm lint                    # ESLint + markdownlint + cspell
+pnpm typecheck               # TypeScript
+pnpm format                  # Prettier
+```
+
+**Estado actual**: 66/66 tests passing ✅
+
+---
+
+## 🚀 Deployment
+
+### Frontend (Vercel)
+
+```bash
+vercel --prod
+```
+
+### Backend (Railway/Fly.io)
+
+```bash
+# Railway
+railway up
+
+# Fly.io
+fly deploy
+```
+
+**Guía completa**: [docs/for-developers/deployment.md](docs/for-developers/deployment.md)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
+- Development workflow
+- Git conventions (Conventional Commits)
 - Testing guidelines
 - Code review process
 
-**Issues & PRs**: Usa los templates en [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/)
+**Quick steps:**
 
-## 📜 Licencia y Seguridad
+```bash
+# 1. Fork & clone
+git clone git@github.com:YOUR_USERNAME/brisa-cubana-clean-intelligence.git
 
-- **Licencia**: Ver [LICENSE](LICENSE)
-- **Seguridad**: Ver [SECURITY.md](SECURITY.md) para reportar vulnerabilidades
-- **Código de conducta**: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+# 2. Create branch
+git checkout -b feature/amazing-feature
+
+# 3. Make changes & test
+pnpm lint
+pnpm test
+pnpm typecheck
+
+# 4. Commit & push
+git commit -m "feat: add amazing feature"
+git push origin feature/amazing-feature
+
+# 5. Open PR
+gh pr create --fill
+```
+
+---
+
+## 📜 License & Security
+
+- **License**: [MIT](LICENSE)
+- **Security**: [SECURITY.md](SECURITY.md) - Report vulnerabilities
+- **Code of Conduct**: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+---
+
+## 🌟 Roadmap
+
+### ✅ Phase 1: MVP (Complete)
+
+- [x] Backend API (23 endpoints)
+- [x] Frontend dashboard
+- [x] Auth system (JWT + NextAuth)
+- [x] Stripe payments
+- [x] Testing suite
+- [x] Documentation (78 MD files)
+
+### 🔄 Phase 2: Expansion (In Progress)
+
+- [ ] CleanScore™ AI (computer vision)
+- [ ] Concierge IA (GPT-4.1 + Realtime API)
+- [ ] PMS integrations (Hostaway, Guesty, Mews)
+- [ ] Marketing autopilot
+- [ ] Dynamic pricing engine
+
+### 🔜 Phase 3: Innovation (Roadmap)
+
+- [ ] 3D tours / WebXR
+- [ ] Voice-first staff interface
+- [ ] Digital twin (operational + financial)
+- [ ] Robotic collaboration
+- [ ] ESG reporting automation
+
+Full roadmap: [docs/for-business/roadmap.md](docs/for-business/roadmap.md)
+
+---
+
+## 📞 Contact & Links
+
+- **GitHub**: [@albertodimas](https://github.com/albertodimas)
+- **Email**: albertodimasmorazaldivar@gmail.com
+- **Docs**: https://docs.brisacubana.com
+- **Issues**: [GitHub Issues](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues)
+
+---
+
+<div align="center">
+
+**Built with ❤️ in Miami, honoring Cuban heritage**
+
+⭐ Star us on GitHub if you like this project!
+
+</div>

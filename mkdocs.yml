@@ -1,144 +1,223 @@
 site_name: Brisa Cubana Clean Intelligence Docs
-site_description: Documentación oficial de la plataforma de limpieza inteligente.
+site_description: Documentación oficial de la plataforma de limpieza inteligente para Miami-Dade.
 site_author: Brisa Cubana Team
 repo_url: https://github.com/albertodimas/brisa-cubana-clean-intelligence
 edit_uri: edit/main/docs/
 copyright: Copyright &copy; 2025 Brisa Cubana Clean Intelligence
+
+# Navigation
 nav:
-  - Inicio: index.md
-  - 01 · Visión y Estrategia: 01-vision-estrategia.md
-  - 02 · Mercado y Compliance: 02-mercado-y-compliance.md
-  - 03 · Experiencia y Diseño: 03-experiencia-y-diseno.md
-  - 04 · Arquitectura y Stack: 04-arquitectura-y-stack.md
-  - 05 · IA y Automatización: 05-ia-y-automatizacion.md
-  - 06 · Integraciones y Ecosistema: 06-integraciones-ecosistema.md
-  - 07 · Roadmap y Operaciones: 07-roadmap-y-operaciones.md
-  - Design System: design-system/index.md
-  - Copilot & IA Responsable: copilot/index.md
-  - Checklist Pre-Rollout: checklist-pre-rollout.md
-  - Insights de Investigación: insights/index.md
-  - Getting Started:
-      - Quickstart (5 min): getting-started/quickstart.md
-  - API Reference:
-      - Endpoints: api/endpoints.md
-  - Development:
-      - Testing Guide: development/testing.md
-  - Deployment:
-      - Environments & Deploy: deployment/environments.md
-  - 08 · Operaciones y Ejecución:
-      - Overview: operations/index.md
-      - Dominio & Branding: operations/domain-and-branding.md
-      - Entrevistas de validación: operations/interview-plan.md
-      - Plan Sprint 0: operations/sprint0-plan.md
-      - Integraciones & Sandbox: operations/integrations/sandbox-plan.md
-      - Políticas y Gobernanza:
-          - Resumen: operations/policies/index.md
-          - Política de privacidad (borrador): operations/policies/privacy-policy-draft.md
-          - Carta de gobernanza IA: operations/policies/governance-ia-charter.md
-      - SOPs operativos:
-          - Resumen: operations/sops/index.md
-          - Onboarding staff: operations/sops/onboarding-staff.md
-          - Gestión inventario: operations/sops/inventory-management.md
-          - Emergencias climáticas: operations/sops/emergency-response.md
-          - Simulacro tabletop crisis: operations/sops/emergency-response-tabletop.md
-          - Mantenimiento equipos: operations/sops/maintenance.md
-      - Branding: operations/branding/style-guide-outline.md
-      - Modelo financiero: operations/finance/financial-model-outline.md
-      - Checklists:
-          - Resumen: operations/checklists/index.md
-          - Sprint 0: operations/checklists/sprint0-checklist.md
-          - Lanzamiento: operations/checklists/launch-checklist.md
-      - Plan marketing & GTM: operations/marketing/gtm-plan.md
-      - Testing & QA: operations/qa/testing-strategy.md
-      - Risk register: operations/risk/risk-register.md
-      - Plan de datos: operations/data/data-analytics-plan.md
-      - Playbook soporte: operations/support/support-playbook.md
-      - Partner onboarding: operations/partners/partner-onboarding.md
-      - Roadmap producto: operations/product/product-roadmap.md
-      - Plan MVP Lean: operations/product/mvp-lean-plan.md
-      - Caso de uso (María): operations/product/caso-uso-maria.md
-      - Caso de uso (Carlos): operations/product/caso-uso-carlos.md
-      - Decision log: operations/decision-log/decisions.md
-      - Resumen ejecutivo expansión: operations/pre-dev-summary-executive.md
-      - Resumen pre-desarrollo: operations/pre-dev-summary.md
-  - 09 · Plantillas y utilidades:
-      - Entrevista: resources/templates/interview-notes-template.md
-      - Minuta de reunión: resources/templates/meeting-minutes-template.md
-      - ADR: resources/templates/adr-template.md
-      - Evaluación de modelo IA: resources/templates/ia-model-eval-template.md
-      - Model card: resources/templates/model-card-template.md
-      - Contrato emergencia B2B: resources/templates/emergency-contract-template.md
-      - Estimación manual premium: resources/templates/estimation-manual-template.md
-      - CleanScore asistido (MVP): resources/templates/cleanscore-manual-template.md
-      - Ejemplos contratos & estimaciones:
-          - Contrato — Carlos: resources/templates/examples/emergency-contract-sample-carlos.md
-          - Estimación — María: resources/templates/examples/estimation-manual-sample-maria.md
-      - Checklist seguros: resources/templates/insurance-checklist.md
-      - Guía seguridad química: resources/templates/chemical-safety-guideline.md
-      - Checklist CRM: resources/templates/crm-integration-checklist.md
-      - Datos mercado 2024:
-          - Turismo 2024: resources/market/tourism-2024-records.md
-          - Salarios limpieza: resources/market/wage-maids-miami.md
-          - Competencia local: resources/market/cleaning-competition-snapshot.md
-      - Referencias y fuentes: resources/references.md
-  - 10 · Anexos y registros:
-      - Artefactos arquitectura:
-          - Overview: resources/architecture/README.md
-          - C4 contexto: resources/architecture/c4-context-2025Q4.md
-          - C4 contenedores: resources/architecture/c4-containers-2025Q4.md
-          - Booking flow R1: resources/architecture/booking-flow-r1.md
-          - Panel cliente R2: resources/architecture/panel-cliente-r2.md
-          - App staff R3: resources/architecture/app-staff-r3.md
-          - CleanScore secuencia: resources/architecture/cleanscore-sequence.md
-      - Model cards IA:
-          - Overview: ai/model-cards/README.md
-          - Concierge MVP v0.1: ai/model-cards/model/concierge-mvp-v0.1.md
-          - CleanScore v0.1: ai/model-cards/model/cleanscore-v0.1.md
-      - Changelog: changelog/index.md
-extra_css:
-  - stylesheets/extra.css
+  - Home: index.md
+
+  - For Developers:
+      - Overview: for-developers/README.md
+      - Quickstart (5 min): for-developers/quickstart.md
+      - API Reference: for-developers/api-reference.md
+      - Testing Guide: for-developers/testing.md
+      - Deployment Guide: for-developers/deployment.md
+      - GitHub Secrets: for-developers/github-secrets.md
+      - Staging Setup: for-developers/staging-setup.md
+      - Architecture:
+          - Diagrams Index: for-developers/diagrams/README.md
+          - C4 Context: for-developers/diagrams/c4-context-2025Q4.md
+          - C4 Containers: for-developers/diagrams/c4-containers-2025Q4.md
+          - Booking Flow: for-developers/diagrams/booking-flow-r1.md
+          - Panel Cliente: for-developers/diagrams/panel-cliente-r2.md
+          - App Staff: for-developers/diagrams/app-staff-r3.md
+          - CleanScore Sequence: for-developers/diagrams/cleanscore-sequence.md
+      - Design System: for-developers/design-system/index.md
+      - AI & ML:
+          - Overview: for-developers/ai-ml/model-cards/README.md
+          - Concierge MVP: for-developers/ai-ml/model-cards/model/concierge-mvp-v0.1.md
+          - CleanScore v0.1: for-developers/ai-ml/model-cards/model/cleanscore-v0.1.md
+      - Copilot Guide: for-developers/copilot/index.md
+
+  - For Business:
+      - Overview: for-business/README.md
+      - Vision & Strategy: for-business/vision-strategy.md
+      - Market & Compliance: for-business/market-compliance.md
+      - User Experience: for-business/user-experience.md
+      - Tech Stack: for-business/tech-stack.md
+      - AI & Automation: for-business/ai-automation.md
+      - Integrations: for-business/integrations.md
+      - Roadmap: for-business/roadmap.md
+      - Checklist Pre-Rollout: for-business/checklist-pre-rollout.md
+      - Operations:
+          - Overview: for-business/operations/index.md
+          - Domain & Branding: for-business/operations/domain-and-branding.md
+          - Interview Plan: for-business/operations/interview-plan.md
+          - Sprint 0 Plan: for-business/operations/sprint0-plan.md
+          - Pre-Dev Summary: for-business/operations/pre-dev-summary.md
+          - Pre-Dev Summary (Executive): for-business/operations/pre-dev-summary-executive.md
+          - Policies:
+              - Overview: for-business/operations/policies/index.md
+              - Privacy Policy (Draft): for-business/operations/policies/privacy-policy-draft.md
+              - AI Governance Charter: for-business/operations/policies/governance-ia-charter.md
+          - SOPs:
+              - Overview: for-business/operations/sops/index.md
+              - Onboarding Staff: for-business/operations/sops/onboarding-staff.md
+              - Inventory Management: for-business/operations/sops/inventory-management.md
+              - Emergency Response: for-business/operations/sops/emergency-response.md
+              - Emergency Tabletop: for-business/operations/sops/emergency-response-tabletop.md
+              - Equipment Maintenance: for-business/operations/sops/maintenance.md
+          - Branding: for-business/operations/branding/style-guide-outline.md
+          - Finance: for-business/operations/finance/financial-model-outline.md
+          - Checklists:
+              - Overview: for-business/operations/checklists/index.md
+              - Sprint 0: for-business/operations/checklists/sprint0-checklist.md
+              - Launch: for-business/operations/checklists/launch-checklist.md
+          - Marketing: for-business/operations/marketing/gtm-plan.md
+          - QA: for-business/operations/qa/testing-strategy.md
+          - Risk: for-business/operations/risk/risk-register.md
+          - Data: for-business/operations/data/data-analytics-plan.md
+          - Support: for-business/operations/support/support-playbook.md
+          - Partners: for-business/operations/partners/partner-onboarding.md
+          - Product:
+              - Product Roadmap: for-business/operations/product/product-roadmap.md
+              - MVP Lean Plan: for-business/operations/product/mvp-lean-plan.md
+              - Caso de Uso - María: for-business/operations/product/caso-uso-maria.md
+              - Caso de Uso - Carlos: for-business/operations/product/caso-uso-carlos.md
+          - Integrations: for-business/operations/integrations/sandbox-plan.md
+          - Decision Log: for-business/operations/decision-log/decisions.md
+      - Market Data:
+          - Tourism 2024: for-business/market-data/tourism-2024-records.md
+          - Wage Data: for-business/market-data/wage-maids-miami.md
+          - Competition: for-business/market-data/cleaning-competition-snapshot.md
+      - Insights: for-business/insights/index.md
+
+  - Guides:
+      - Overview: guides/README.md
+
+  - Reference:
+      - Overview: reference/README.md
+      - Sources: reference/sources.md
+      - Templates:
+          - ADR Template: reference/templates/adr-template.md
+          - Model Card Template: reference/templates/model-card-template.md
+          - Interview Notes: reference/templates/interview-notes-template.md
+          - Meeting Minutes: reference/templates/meeting-minutes-template.md
+          - IA Model Evaluation: reference/templates/ia-model-eval-template.md
+          - Emergency Contract: reference/templates/emergency-contract-template.md
+          - Estimation Manual: reference/templates/estimation-manual-template.md
+          - CleanScore Manual: reference/templates/cleanscore-manual-template.md
+          - Insurance Checklist: reference/templates/insurance-checklist.md
+          - Chemical Safety: reference/templates/chemical-safety-guideline.md
+          - CRM Integration: reference/templates/crm-integration-checklist.md
+          - Examples:
+              - Contract Sample - Carlos: reference/templates/examples/emergency-contract-sample-carlos.md
+              - Estimation Sample - María: reference/templates/examples/estimation-manual-sample-maria.md
+
+  - Changelog: changelog/index.md
+
+# Theme configuration
 theme:
   name: material
   features:
     - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
     - navigation.top
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.tracking
     - search.suggest
     - search.highlight
     - search.share
     - content.code.copy
+    - content.code.annotate
     - content.tabs.link
+    - toc.follow
   palette:
+    # Light mode
     - scheme: default
       primary: teal
       accent: pink
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
     - scheme: slate
       primary: teal
       accent: pink
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   language: es
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/broom
+
+# Markdown extensions
 markdown_extensions:
   - admonition
-  - codehilite
+  - attr_list
+  - md_in_html
+  - codehilite:
+      guess_lang: false
   - toc:
       permalink: true
+      toc_depth: 3
   - footnotes
   - tables
-  - attr_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+# Plugins
 plugins:
-  - search
+  - search:
+      lang:
+        - es
+        - en
   - git-revision-date-localized:
       enable_creation_date: false
+      type: timeago
       locale: es
+  - minify:
+      minify_html: true
+
+# Extra CSS
+extra_css:
+  - stylesheets/extra.css
+
+# Extra JavaScript
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+
+# Social links
 extra:
   social:
-    - icon: fontawesome/brands/instagram
-      link: https://instagram.com
+    - icon: fontawesome/brands/github
+      link: https://github.com/albertodimas/brisa-cubana-clean-intelligence
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com
+    - icon: fontawesome/brands/instagram
+      link: https://instagram.com
   version:
     provider: mike
-  search:
-    provider: algolia
-    application_id: ALGOLIA_APP_ID
-    api_key: ALGOLIA_PUBLIC_API_KEY
-    index_name: brisa_docs
+    default: latest
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX  # Replace with actual GA4 ID
+  generator: false
+
+# Extra configuration
+strict: false  # Set to true in CI to catch broken links
