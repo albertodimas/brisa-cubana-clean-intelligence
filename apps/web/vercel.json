@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd ../.. && pnpm install --filter web... --filter @brisa/ui && cd apps/web && pnpm build",
-  "installCommand": "echo 'Dependencies installed in buildCommand'",
-  "framework": "nextjs"
-}
