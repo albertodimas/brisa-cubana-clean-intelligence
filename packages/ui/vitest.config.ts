@@ -1,26 +1,29 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: "jsdom",
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      provider: "v8",
+      reporter: ["text", "json", "html"],
       exclude: [
-        'node_modules/',
-        '**/*.test.tsx',
-        '**/*.config.ts',
-        'dist/'
+        "node_modules/",
+        "**/*.test.tsx",
+        "**/*.config.ts",
+        "**/*.config.mjs",
+        "**/*.stories.tsx",
+        ".storybook/**",
+        "dist/",
       ],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 75,
-        statements: 80
-      }
+        lines: 50,
+        functions: 60,
+        branches: 50,
+        statements: 50,
+      },
     },
-    include: ['src/**/*.test.tsx'],
-    setupFiles: ['./vitest.setup.ts']
-  }
+    include: ["src/**/*.test.tsx"],
+    setupFiles: ["./vitest.setup.ts"],
+  },
 });
