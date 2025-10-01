@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { compress } from "hono/compress";
 import services from "./routes/services";
 import bookings from "./routes/bookings";
 import properties from "./routes/properties";
@@ -22,8 +23,9 @@ import { isAppError } from "./lib/errors";
 export const app = new Hono();
 
 // Middleware (order matters!)
-app.use("*", requestLogger); // Logging first
-app.use("*", metricsMiddleware); // Metrics second (after logging)
+app.use("*", compress()); // Compression first (gzip/deflate)
+app.use("*", requestLogger); // Logging second
+app.use("*", metricsMiddleware); // Metrics third (after logging)
 app.use(
   "*",
   cors({

@@ -23,6 +23,8 @@ model User {
   reconciliationNotes ReconciliationNote[] @relation("UserReconciliationNotes")
   resolvedNotes ReconciliationNote[] @relation("UserResolvedNotes")
 
+  @@index([role])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -48,6 +50,10 @@ model Property {
 
   bookings Booking[]
 
+  @@index([userId])
+  @@index([type])
+  @@index([city, state])
+  @@index([createdAt])
   @@map("properties")
 }
 
@@ -70,6 +76,8 @@ model Service {
 
   bookings Booking[]
 
+  @@index([active])
+  @@index([basePrice])
   @@map("services")
 }
 
@@ -93,6 +101,16 @@ model Booking {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
+  @@index([userId])
+  @@index([propertyId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([scheduledAt])
+  @@index([createdAt])
+  @@index([userId, status])
+  @@index([propertyId, scheduledAt])
+  @@index([status, paymentStatus])
   @@map("bookings")
 }
 
@@ -109,6 +127,10 @@ model ReconciliationNote {
   resolvedAt DateTime?
   createdAt DateTime @default(now())
 
+  @@index([bookingId])
+  @@index([authorId])
+  @@index([status])
+  @@index([createdAt])
   @@map("reconciliation_notes")
 }
 
