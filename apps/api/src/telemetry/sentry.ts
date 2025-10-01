@@ -4,7 +4,8 @@ const dsn = process.env.SENTRY_DSN;
 
 const enabled = Boolean(dsn);
 
-if (enabled && !Sentry.getCurrentHub().getClient()) {
+// Initialize Sentry if DSN is configured and not already initialized
+if (enabled && !Sentry.getClient()) {
   Sentry.init({
     dsn: dsn!,
     environment:
