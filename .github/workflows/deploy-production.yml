@@ -216,6 +216,7 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: "--prod"
           scope: ${{ secrets.VERCEL_ORG_ID }}
+          working-directory: apps/web
 
       - name: Notify Slack on success
         if: success() && steps.check-vercel.outputs.skip == 'false'
