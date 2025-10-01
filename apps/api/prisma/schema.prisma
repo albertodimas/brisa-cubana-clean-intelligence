@@ -22,6 +22,7 @@ model User {
   properties          Property[]
   reconciliationNotes ReconciliationNote[] @relation("UserReconciliationNotes")
   resolvedNotes       ReconciliationNote[] @relation("UserResolvedNotes")
+  conversations       Conversation[]
 
   @@index([role])
   @@index([createdAt])
@@ -193,4 +194,58 @@ model CleanScoreReport {
   @@index([bookingId])
   @@index([createdAt])
   @@map("cleanscore_reports")
+}
+
+model Conversation {
+  id         String              @id @default(cuid())
+  userId     String
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String?
+  status     ConversationStatus  @default(ACTIVE)
+  channel    ConversationChannel @default(WEB)
+  bookingId  String?
+  propertyId String?
+  messages   Message[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String       @db.Text
+  model          String?
+  tokens         Int?
+  context        Json?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+enum ConversationStatus {
+  ACTIVE
+  RESOLVED
+  ARCHIVED
+}
+
+enum ConversationChannel {
+  WEB
+  WHATSAPP
+  SMS
+  EMAIL
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

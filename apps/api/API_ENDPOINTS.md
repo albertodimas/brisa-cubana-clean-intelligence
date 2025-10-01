@@ -743,6 +743,295 @@ Preview CleanScore report HTML without sending email.
 
 ---
 
+## Concierge IA
+
+### POST /api/concierge/conversations
+
+Create a new conversation with optional initial message.
+
+**Auth Required:** Yes (any authenticated user)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Request:**
+
+```json
+{
+  "channel": "WEB",
+  "bookingId": "booking-123",
+  "propertyId": "property-456",
+  "initialMessage": "Hola, necesito información sobre mis servicios"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "conversation": {
+    "id": "conv-789",
+    "userId": "user-123",
+    "title": "Hola, necesito información sobre mis servici...",
+    "status": "ACTIVE",
+    "channel": "WEB",
+    "bookingId": "booking-123",
+    "propertyId": "property-456",
+    "createdAt": "2025-10-01T12:00:00.000Z",
+    "updatedAt": "2025-10-01T12:00:00.000Z"
+  },
+  "messages": [
+    {
+      "id": "msg-001",
+      "conversationId": "conv-789",
+      "role": "USER",
+      "content": "Hola, necesito información sobre mis servicios",
+      "createdAt": "2025-10-01T12:00:00.000Z"
+    },
+    {
+      "id": "msg-002",
+      "conversationId": "conv-789",
+      "role": "ASSISTANT",
+      "content": "¡Hola! Bienvenido a Brisa Cubana Clean Intelligence...",
+      "model": "mock-concierge-v1",
+      "tokens": 45,
+      "createdAt": "2025-10-01T12:00:01.000Z"
+    }
+  ]
+}
+```
+
+**Errors:**
+
+- `400`: Invalid payload
+- `401`: Unauthorized
+- `429`: Rate limit exceeded
+
+---
+
+### GET /api/concierge/conversations
+
+List user's conversations with pagination.
+
+**Auth Required:** Yes (any authenticated user)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Query Parameters:**
+
+- `limit` (number, default: 20) - Number of conversations to return
+- `offset` (number, default: 0) - Pagination offset
+- `status` (string, optional) - Filter by status: ACTIVE, RESOLVED, ARCHIVED
+
+**Response (200):**
+
+```json
+{
+  "conversations": [
+    {
+      "id": "conv-789",
+      "userId": "user-123",
+      "title": "Hola, necesito información sobre mis servici...",
+      "status": "ACTIVE",
+      "channel": "WEB",
+      "bookingId": "booking-123",
+      "propertyId": "property-456",
+      "createdAt": "2025-10-01T12:00:00.000Z",
+      "updatedAt": "2025-10-01T12:00:00.000Z",
+      "messages": [
+        {
+          "id": "msg-002",
+          "conversationId": "conv-789",
+          "role": "ASSISTANT",
+          "content": "¡Hola! Bienvenido a Brisa Cubana...",
+          "createdAt": "2025-10-01T12:00:01.000Z"
+        }
+      ],
+      "_count": {
+        "messages": 15
+      }
+    }
+  ],
+  "pagination": {
+    "total": 42,
+    "limit": 20,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `429`: Rate limit exceeded
+
+---
+
+### GET /api/concierge/conversations/:id
+
+Get a specific conversation with all messages.
+
+**Auth Required:** Yes (conversation owner, or STAFF/ADMIN roles)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Response (200):**
+
+```json
+{
+  "id": "conv-789",
+  "userId": "user-123",
+  "title": "Hola, necesito información sobre mis servici...",
+  "status": "ACTIVE",
+  "channel": "WEB",
+  "bookingId": "booking-123",
+  "propertyId": "property-456",
+  "createdAt": "2025-10-01T12:00:00.000Z",
+  "updatedAt": "2025-10-01T12:05:00.000Z",
+  "messages": [
+    {
+      "id": "msg-001",
+      "conversationId": "conv-789",
+      "role": "USER",
+      "content": "Hola, necesito información sobre mis servicios",
+      "createdAt": "2025-10-01T12:00:00.000Z"
+    },
+    {
+      "id": "msg-002",
+      "conversationId": "conv-789",
+      "role": "ASSISTANT",
+      "content": "¡Hola! Bienvenido a Brisa Cubana Clean Intelligence...",
+      "model": "mock-concierge-v1",
+      "tokens": 45,
+      "createdAt": "2025-10-01T12:00:01.000Z"
+    }
+  ]
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `403`: Forbidden - Not authorized to view this conversation
+- `404`: Not Found - Conversation does not exist
+- `429`: Rate limit exceeded
+
+---
+
+### POST /api/concierge/conversations/:id/messages
+
+Send a message in a conversation and get AI response.
+
+**Auth Required:** Yes (conversation owner, or STAFF/ADMIN roles)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Request:**
+
+```json
+{
+  "content": "¿Cuánto cuesta el servicio de Deep Clean?"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "userMessage": {
+    "id": "msg-003",
+    "conversationId": "conv-789",
+    "role": "USER",
+    "content": "¿Cuánto cuesta el servicio de Deep Clean?",
+    "createdAt": "2025-10-01T12:05:00.000Z"
+  },
+  "assistantMessage": {
+    "id": "msg-004",
+    "conversationId": "conv-789",
+    "role": "ASSISTANT",
+    "content": "El servicio de Deep Clean tiene un precio base de $149...",
+    "model": "mock-concierge-v1",
+    "tokens": 38,
+    "context": {
+      "user": {
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "availableServices": [
+        {
+          "name": "Deep Clean",
+          "basePrice": "149.00"
+        }
+      ]
+    },
+    "createdAt": "2025-10-01T12:05:01.000Z"
+  }
+}
+```
+
+**Errors:**
+
+- `400`: Invalid message payload
+- `401`: Unauthorized
+- `403`: Forbidden - Not authorized to send messages in this conversation
+- `404`: Not Found - Conversation does not exist
+- `429`: Rate limit exceeded
+
+---
+
+### PATCH /api/concierge/conversations/:id
+
+Update conversation status or title.
+
+**Auth Required:** Yes (conversation owner, or STAFF/ADMIN roles)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Request:**
+
+```json
+{
+  "status": "RESOLVED",
+  "title": "Consulta sobre Deep Clean"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "id": "conv-789",
+  "userId": "user-123",
+  "title": "Consulta sobre Deep Clean",
+  "status": "RESOLVED",
+  "channel": "WEB",
+  "bookingId": "booking-123",
+  "propertyId": "property-456",
+  "createdAt": "2025-10-01T12:00:00.000Z",
+  "updatedAt": "2025-10-01T12:10:00.000Z"
+}
+```
+
+**Errors:**
+
+- `400`: Invalid update payload
+- `401`: Unauthorized
+- `403`: Forbidden - Not authorized to update this conversation
+- `404`: Not Found - Conversation does not exist
+- `429`: Rate limit exceeded
+
+**AI Provider Configuration:**
+
+The Concierge IA system supports multiple AI providers configured via environment variables:
+
+- `AI_PROVIDER` - Provider to use: `mock` (default), `openai`, or `anthropic`
+- `OPENAI_API_KEY` - Required if using OpenAI provider
+- `ANTHROPIC_API_KEY` - Required if using Anthropic provider
+
+**Mock Mode:** By default, the system uses mock AI responses for development/testing without requiring API keys.
+
+---
+
 ## Postman Collection
 
 Import the Postman collection for easy testing:
