@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import { app } from "./app";
 
+// Server configuration for Docker deployment
 const port = Number.parseInt(
   process.env.API_PORT ?? process.env.PORT ?? "3001",
   10,
