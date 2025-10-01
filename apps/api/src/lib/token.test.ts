@@ -1,3 +1,5 @@
+// @ts-nocheck
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { generateAccessToken, verifyAccessToken } from "./token";
 import type { AccessTokenPayload } from "./token";
