@@ -277,6 +277,20 @@
     "Stmts",
     "Funcs",
     "ATEU",
-    "Ldnt"
+    "Ldnt",
+    "tfvars",
+    "kubernetes",
+    "debian",
+    "SARIF",
+    "Syft",
+    "Rekor",
+    "PXXXXXX",
+    "MTTD",
+    "MTTA",
+    "CISO",
+    "Anchore",
+    "oidc",
+    "SLSA",
+    "MTTP"
   ]
 }

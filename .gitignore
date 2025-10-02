@@ -91,3 +91,17 @@ _archived/
 .archive/
 CLAUDE.md
 CLAUDE.local.md
+
+# Terraform
+infra/terraform/.terraform/
+infra/terraform/.terraform.lock.hcl
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.backup
+infra/terraform/terraform.tfvars
+infra/terraform/.terraform.tfstate.lock.info
+infra/terraform/crash.log
+infra/terraform/crash.*.log
+
+# Kubernetes secrets
+infra/kubernetes/**/secrets.yaml
+infra/kubernetes/**/*secret*.yaml

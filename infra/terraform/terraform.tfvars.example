@@ -1,0 +1,26 @@
+# Terraform Variables - Example Configuration
+# Copy to terraform.tfvars and fill with real values
+# DO NOT commit terraform.tfvars to version control
+
+environment = "production"
+
+# Vercel Configuration
+vercel_team_id = null # or "team_xxxxxxx"
+
+# Database
+database_url = "postgresql://user:pass@host:5432/db?sslmode=require"
+redis_url    = "redis://host:6379"
+
+# Authentication Secrets
+jwt_secret      = "generate-with: openssl rand -hex 64"
+nextauth_secret = "generate-with: openssl rand -base64 32"
+
+# Stripe
+stripe_secret_key     = "sk_live_xxxxx"
+stripe_webhook_secret = "whsec_xxxxx"
+
+# Email
+resend_api_key = "re_xxxxx"
+
+# AI
+openai_api_key = "sk-xxxxx"

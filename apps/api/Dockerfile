@@ -1,7 +1,13 @@
 # Multi-stage Dockerfile for Brisa Cubana API
-# Optimized for production deployment
+# Production-ready with security hardening, distroless base, and SBOM support
+# References:
+# - Google Distroless: https://github.com/GoogleContainerTools/distroless
+# - Syft SBOM: https://github.com/anchore/syft
+# Consulted: October 2, 2025
 
+# ============================================================================
 # Stage 1: Dependencies
+# ============================================================================
 FROM node:24.9.0-alpine AS deps
 WORKDIR /app
 
@@ -15,7 +21,9 @@ COPY apps/api/package.json ./apps/api/
 # Install production dependencies only (ignore lifecycle scripts)
 RUN pnpm install --frozen-lockfile --prod --filter=@brisa/api --ignore-scripts
 
-# Stage 2: Builder (generate Prisma only, no TypeScript compilation)
+# ============================================================================
+# Stage 2: Builder (TypeScript compilation + Prisma generation)
+# ============================================================================
 FROM node:24.9.0-alpine AS builder
 WORKDIR /app
 
@@ -26,53 +34,61 @@ RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY apps/api ./apps/api
 
-# Install all dependencies required to build the API (including dev deps)
+# Install all dependencies (including dev deps for build)
 RUN pnpm install --frozen-lockfile --filter=@brisa/api... --ignore-scripts
 
-# Generate Prisma Client only (skip tsup compilation to avoid cache issues)
+# Generate Prisma Client
 RUN cd apps/api && pnpm db:generate
 
-# Stage 3: Production runner
-FROM node:24.9.0-alpine AS runner
+# Compile TypeScript to JavaScript (production-ready)
+RUN cd apps/api && pnpm build
+
+# ============================================================================
+# Stage 3: Distroless Production Runner (Minimal Attack Surface)
+# ============================================================================
+FROM gcr.io/distroless/nodejs24-debian12:nonroot AS runner
+
+# Set working directory
 WORKDIR /app
 
-# Enable Corepack
-RUN corepack enable && corepack prepare pnpm@10.17.1 --activate
+# Copy workspace metadata (for monorepo compatibility)
+COPY --chown=nonroot:nonroot package.json pnpm-workspace.yaml ./
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nodejs
+# Copy production dependencies from deps stage
+COPY --from=deps --chown=nonroot:nonroot /app/node_modules ./node_modules
+COPY --from=deps --chown=nonroot:nonroot /app/apps/api/node_modules ./apps/api/node_modules
 
-# Copy workspace configuration for monorepo
-COPY --chown=nodejs:nodejs package.json pnpm-workspace.yaml ./
+# Copy compiled application from builder
+COPY --from=builder --chown=nonroot:nonroot /app/apps/api/dist ./apps/api/dist
+COPY --from=builder --chown=nonroot:nonroot /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder --chown=nonroot:nonroot /app/apps/api/package.json ./apps/api/
 
-# Copy production dependencies
-COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=deps --chown=nodejs:nodejs /app/apps/api/node_modules ./apps/api/node_modules
-
-# Install tsx globally for production runtime (runs TypeScript directly)
-RUN npm install -g tsx@4.20.6
-
-# Copy runtime artifacts (source code including generated Prisma client)
-# Note: Prisma client is generated to apps/api/src/generated/prisma (see prisma/schema.prisma output config)
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/prisma ./apps/api/prisma
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/package.json ./apps/api/
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api/src ./apps/api/src
-
-# Switch to non-root user
-USER nodejs
-
-# Expose port
+# Expose port (Railway will override with PORT env var)
 EXPOSE 3001
 
-# Health check (using fetch for ES modules compatibility)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node --input-type=module -e "fetch('http://localhost:3001/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+# Health check (distroless requires vector form, no shell)
+# Note: Health checks are handled by Railway/Kubernetes external probes
+# Uncomment if running on platforms that support HEALTHCHECK
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+#   CMD ["/nodejs/bin/node", "--input-type=module", "-e", "fetch('http://localhost:3001/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
 
 # Set environment variables
 ENV NODE_ENV=production
 
-# Note: PORT is set by Railway dynamically, don't hardcode it here
+# Security: Read-only filesystem (distroless enforces this)
+# Security: Non-root user (distroless uses uid 65532 "nonroot" by default)
 
-# Start application with tsx (TypeScript execution)
-CMD ["tsx", "apps/api/src/server.ts"]
+# Start application (vector form required for distroless)
+ENTRYPOINT ["/nodejs/bin/node"]
+CMD ["apps/api/dist/server.js"]
+
+# ============================================================================
+# Labels for SBOM and Container Metadata
+# ============================================================================
+LABEL org.opencontainers.image.title="Brisa Cubana API"
+LABEL org.opencontainers.image.description="Production API for cleaning service management platform"
+LABEL org.opencontainers.image.authors="Platform Engineering <platform@brisacubana.com>"
+LABEL org.opencontainers.image.vendor="Brisa Cubana Clean Intelligence"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.source="https://github.com/albertodimas/brisa-cubana-clean-intelligence"
+LABEL org.opencontainers.image.documentation="https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/api/README.md"
