@@ -11,7 +11,7 @@ Guía completa para configurar el entorno de staging de Brisa Cubana Clean Intel
 - [Database Setup (Neon)](#database-setup-neon)
 - [API Deployment (Railway)](#api-deployment-railway)
 - [Web Deployment (Vercel)](#web-deployment-vercel)
-- [Configuración de Servicios Externos](#configuración-de-servicios-externos)
+- [Configuración de Servicios Externos](#configuracion-de-servicios-externos)
 - [Testing del Staging](#testing-del-staging)
 - [Troubleshooting](#troubleshooting)
 
@@ -236,7 +236,7 @@ git push origin develop
 
 ---
 
-## Configuración de Servicios Externos
+## Configuración de Servicios Externos {#configuracion-de-servicios-externos}
 
 ### Stripe (Test Mode)
 
@@ -454,6 +454,6 @@ psql $DATABASE_URL < staging-backup-20250930.sql
 
 Ver también:
 
-- [environments.md](./environments.md)
+- [Environment Variables](environment-variables.md)
 - [github-secrets.md](./github-secrets.md)
-- [../getting-started/quickstart.md](../getting-started/quickstart.md)
+- [Quickstart](quickstart.md)

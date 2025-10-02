@@ -58,7 +58,12 @@ OTEL_SERVICE_NAME=brisa-cubana-api
 ```bash
 # OpenAI for Concierge
 OPENAI_API_KEY=sk-...
+
+# Distributed Rate Limiting (optional)
+RATE_LIMIT_REDIS_URL=redis://user:password@host:port/0
 ```
+
+> `RATE_LIMIT_REDIS_URL` habilita el rate limiting distribuido en Redis/Upstash. Si no se define, la API recurre a un contador en memoria pensado solo para entornos de una instancia.
 
 ## Web Environment Variables (Vercel)
 

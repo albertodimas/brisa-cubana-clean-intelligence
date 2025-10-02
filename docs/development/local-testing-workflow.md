@@ -328,10 +328,10 @@ gh run view <run-id>
 
 ## Related Documentation
 
-- [Contributing Guide](../CONTRIBUTING.md)
-- [Testing Guide](./testing.md)
-- [CI/CD Documentation](../ci-cd/workflows.md)
-- [Docker Setup](./docker-setup.md)
+- [Contributing Guide](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md)
+- [Testing Guide](../for-developers/testing.md)
+- [Deployment & CI/CD](../for-developers/deployment.md)
+- [Environment Setup](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/SETUP.md)
 
 ## Questions?
 

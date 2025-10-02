@@ -69,10 +69,10 @@ Guía completa para desplegar Brisa Cubana Clean Intelligence en diferentes ento
 **Infraestructura:**
 
 - Frontend: `localhost:3000` (Next.js dev server)
-- Backend: `localhost:4000` (Hono via tsx watch)
+- Backend: `localhost:3001` (Hono via tsx watch)
 - Database: PostgreSQL 17 en Docker Compose
 
-**Variables:** Ver [.env.example](../../.env.example)
+**Variables:** Ver [.env.example](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.env.example)
 
 **Setup:**
 
@@ -362,9 +362,9 @@ COPY --from=base /app/apps/api/node_modules ./node_modules
 COPY --from=base /app/apps/api/prisma ./prisma
 
 ENV NODE_ENV=production
-ENV PORT=4000
+ENV PORT=3001
 
-EXPOSE 4000
+EXPOSE 3001
 
 CMD ["node", "dist/server.js"]
 ```
@@ -541,7 +541,7 @@ brew install stripe/stripe-cli/stripe
 stripe login
 
 # Forward webhooks a localhost
-stripe listen --forward-to localhost:4000/api/payments/webhook
+stripe listen --forward-to localhost:3001/api/payments/webhook
 
 # Copiar webhook secret que imprime
 whsec_...
@@ -715,7 +715,7 @@ railway whoami --token
 # Value: [paste token]
 ```
 
-See [DEPLOYMENT_CHECKLIST.md](../../DEPLOYMENT_CHECKLIST.md#-github-secrets-configuration) for complete configuration checklist.
+See [DEPLOYMENT_CHECKLIST.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/DEPLOYMENT_CHECKLIST.md#-github-secrets-configuration) for complete configuration checklist.
 
 ---
 
@@ -723,7 +723,7 @@ See [DEPLOYMENT_CHECKLIST.md](../../DEPLOYMENT_CHECKLIST.md#-github-secrets-conf
 
 ### GitHub Actions Workflow
 
-[.github/workflows/deploy.yml](../../.github/workflows/deploy.yml):
+[.github/workflows/deploy.yml](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/deploy.yml):
 
 ```yaml
 name: Deploy Production
@@ -893,7 +893,7 @@ echo $STRIPE_WEBHOOK_SECRET
 
 Ver también:
 
-- [Quickstart Guide](../getting-started/quickstart.md)
-- [API Reference](../api/endpoints.md)
-- [Testing Guide](../development/testing.md)
-- [ARCHITECTURE.md](../../ARCHITECTURE.md)
+- [Quickstart Guide](quickstart.md)
+- [API Reference](api-reference.md)
+- [Testing Guide](testing.md)
+- [ARCHITECTURE.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/ARCHITECTURE.md)

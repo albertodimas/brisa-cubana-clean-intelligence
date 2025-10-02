@@ -36,7 +36,7 @@ Guía completa de testing para Brisa Cubana Clean Intelligence. Este proyecto us
 
 - **PostgreSQL 17** (Docker)
 - **Migrations:** Prisma
-- **Seeding:** [apps/api/prisma/seed.ts](../../apps/api/prisma/seed.ts)
+- **Seeding:** [apps/api/prisma/seed.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/api/prisma/seed.ts)
 
 ---
 
@@ -93,7 +93,7 @@ pnpm test users
 
 ### Configuración Vitest
 
-El archivo [apps/api/vitest.config.ts](../../apps/api/vitest.config.ts) contiene la configuración actual del proyecto.
+El archivo [apps/api/vitest.config.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/api/vitest.config.ts) contiene la configuración actual del proyecto.
 
 **Configuración actual:**
 
@@ -122,14 +122,12 @@ export default defineConfig({
         "**/*.test.ts",
         "**/*.config.ts",
         "dist/",
-        "src/routes/concierge.ts", // Temporalmente excluido - TODO: agregar tests
-        "src/services/ai.ts", // Temporalmente excluido - TODO: agregar tests
       ],
       thresholds: {
-        lines: 35, // Temporalmente bajo - objetivo: 70%
-        functions: 29, // Temporalmente bajo - objetivo: 70%
-        branches: 58, // Temporalmente bajo - objetivo: 70%
-        statements: 35, // Temporalmente bajo - objetivo: 70%
+        lines: 75,
+        functions: 70,
+        branches: 70,
+        statements: 75,
       },
     },
     include: ["src/**/*.test.ts"],
@@ -143,11 +141,11 @@ export default defineConfig({
 });
 ```
 
-> **Nota:** Los umbrales de coverage están temporalmente reducidos debido a archivos nuevos sin tests (Concierge IA). El objetivo es volver a 70% en todas las métricas una vez que se agreguen los tests faltantes.
+> **Nota:** Mantén la cobertura en ≥75 % (líneas/estadísticas) y ≥70 % (funciones/branches). Los módulos de concierge e IA ya cuentan con pruebas, por lo que cualquier cambio debe actualizar sus suites correspondientes.
 
 ### Ejemplo: Test de Autenticación
 
-[apps/api/src/routes/auth.test.ts](../../apps/api/src/routes/auth.test.ts):
+[apps/api/src/routes/auth.test.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/api/src/routes/auth.test.ts):
 
 ```typescript
 import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
@@ -330,7 +328,7 @@ pnpm playwright test --debug
 
 ### Estructura de un Test E2E
 
-[apps/web/e2e/home.spec.ts](../../apps/web/e2e/home.spec.ts):
+[apps/web/e2e/home.spec.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/web/e2e/home.spec.ts):
 
 ```typescript
 import { test, expect } from "@playwright/test";
@@ -359,7 +357,7 @@ test.describe("Landing page", () => {
 
 ### Configuración Playwright
 
-[playwright.config.ts](../../playwright.config.ts):
+[playwright.config.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/playwright.config.ts):
 
 ```typescript
 import { defineConfig, devices } from "@playwright/test";
@@ -453,7 +451,7 @@ test.describe("Authenticated flows", () => {
 // Generar storageState con un test de setup
 test("authenticate", async ({ page }) => {
   await page.goto("/auth/signin");
-  await page.fill('[name="email"]', "admin@brisacubana.com");
+  await page.fill('[name="email"]', "admin@brisacubanaclean.com");
   await page.fill('[name="password"]', "Admin123!");
   await page.click('button[type="submit"]');
   await page.waitForURL("/dashboard");
@@ -621,7 +619,7 @@ coverage: {
 
 ### GitHub Actions Workflow
 
-[.github/workflows/ci.yml](../../.github/workflows/ci.yml):
+[.github/workflows/ci.yml](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/ci.yml):
 
 ```yaml
 name: CI
@@ -892,6 +890,6 @@ pnpm playwright show-trace trace.zip
 
 Ver también:
 
-- [API Reference](../api/endpoints.md)
-- [Quickstart Guide](../getting-started/quickstart.md)
-- [CONTRIBUTING.md](../../CONTRIBUTING.md)
+- [API Reference](api-reference.md)
+- [Quickstart Guide](quickstart.md)
+- [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md)

@@ -27,7 +27,7 @@ pnpm install
 # Copiar templates de variables de entorno
 cp .env.example .env
 cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env.local
+cp apps/web/.env.local.example apps/web/.env.local
 ```
 
 **Configurar claves críticas en `apps/api/.env`:**
@@ -36,8 +36,8 @@ cp apps/web/.env.example apps/web/.env.local
 # Generar JWT_SECRET (32+ caracteres)
 JWT_SECRET="tu-clave-secreta-muy-segura-aqui-32-chars-min"
 
-# PostgreSQL (Docker levantará estas credenciales)
-DATABASE_URL="postgresql://brisa_user:brisa_pass@localhost:5432/brisa_cubana_db"
+# PostgreSQL (Docker levanta el servicio en el puerto host 5433)
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev"
 
 # Stripe (usar claves de test de Stripe Dashboard)
 STRIPE_SECRET_KEY="sk_test_..."
@@ -47,7 +47,7 @@ STRIPE_WEBHOOK_SECRET="whsec_..."
 ## Paso 3: Base de datos (1.5 min)
 
 ```bash
-# Levantar PostgreSQL con Docker
+# Levantar PostgreSQL + Redis + MailHog con Docker
 docker compose up -d
 
 # Aplicar migraciones de Prisma
@@ -56,7 +56,7 @@ pnpm prisma migrate deploy
 pnpm prisma generate
 
 # Cargar datos de prueba (servicios, usuarios demo)
-pnpm run seed
+pnpm db:seed
 cd ../..
 ```
 
@@ -69,7 +69,7 @@ pnpm dev
 
 Esto levanta:
 
-- ✅ **API Backend (Hono):** [http://localhost:4000](http://localhost:4000)
+- ✅ **API Backend (Hono):** [http://localhost:3001](http://localhost:3001)
 - ✅ **Frontend (Next.js):** [http://localhost:3000](http://localhost:3000)
 - ✅ **Turborepo Watch:** Hot reload en ambos servicios
 
@@ -78,16 +78,17 @@ Esto levanta:
 ### Backend API Health Check
 
 ```bash
-curl http://localhost:4000/health
+curl http://localhost:3001/health
 ```
 
 Respuesta esperada:
 
 ```json
 {
+  "service": "Brisa Cubana Clean Intelligence API",
   "status": "ok",
-  "timestamp": "2025-09-30T...",
-  "version": "1.0.0"
+  "version": "0.1.0",
+  "timestamp": "2024-09-30T..."
 }
 ```
 
@@ -103,22 +104,22 @@ Abre [http://localhost:3000](http://localhost:3000)
 **Usuario Admin:**
 
 ```
-Email: admin@brisacubana.com
+Email: admin@brisacubanaclean.com
 Password: Admin123!
 ```
 
 **Usuario Staff:**
 
 ```
-Email: staff@brisacubana.com
+Email: staff@brisacubanaclean.com
 Password: Staff123!
 ```
 
 **Usuario Cliente:**
 
 ```
-Email: cliente@example.com
-Password: Cliente123!
+Email: client@brisacubanaclean.com
+Password: Client123!
 ```
 
 ## Siguiente paso
@@ -126,39 +127,37 @@ Password: Cliente123!
 Ahora que tienes el proyecto corriendo:
 
 1. **Explora el Dashboard:** [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
-2. **Revisa la documentación completa:** [SETUP.md](../../SETUP.md)
-3. **Consulta arquitectura:** [ARCHITECTURE.md](../../ARCHITECTURE.md)
-4. **Lee guía de contribución:** [CONTRIBUTING.md](../../CONTRIBUTING.md)
+2. **Revisa la documentación completa:** [SETUP.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/SETUP.md)
+3. **Consulta arquitectura:** [ARCHITECTURE.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/ARCHITECTURE.md)
+4. **Lee guía de contribución:** [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md)
 
 ## Troubleshooting Rápido
 
 ### Error: "Port 5432 already in use"
 
-Ya tienes PostgreSQL corriendo localmente:
+Ya tienes PostgreSQL corriendo localmente. Usa el puerto host 5433 definido en `docker-compose.yml` o apunta la aplicación a tu propia instancia:
 
 ```bash
-# Opción 1: Cambiar puerto en docker-compose.yml
+# Mantener la configuración por defecto
 ports:
-  - "5433:5432"  # Usar 5433 en host
+  - "5433:5432"
 
-# Opción 2: Usar tu PostgreSQL local
-# Actualizar DATABASE_URL en apps/api/.env con tus credenciales
+# Alternativa: usar tu PostgreSQL local
+# Actualiza DATABASE_URL en apps/api/.env con tus credenciales
 ```
 
-### Error: "Port 4000 or 3000 already in use"
+### Error: "Port 3001 or 3000 already in use"
 
 ```bash
 # Liberar puertos
-lsof -ti:4000 | xargs kill -9
+lsof -ti:3001 | xargs kill -9
 lsof -ti:3000 | xargs kill -9
 ```
 
 ### Error: "Prisma Client not generated"
 
 ```bash
-cd apps/api
-pnpm prisma generate
-cd ../..
+pnpm --filter=@brisa/api db:generate
 pnpm dev
 ```
 
@@ -173,7 +172,7 @@ En desarrollo local:
 1. Instala Stripe CLI: `stripe login`
 2. Inicia webhook forwarding:
    ```bash
-   stripe listen --forward-to localhost:4000/api/webhooks/stripe
+   stripe listen --forward-to localhost:3001/api/webhooks/stripe
    ```
 3. Copia el webhook secret que imprime y actualiza `STRIPE_WEBHOOK_SECRET`
 
@@ -200,10 +199,10 @@ pnpm prisma migrate dev --name nombre_migracion  # Nueva migración
 
 ## Recursos Adicionales
 
-- **API Docs:** [docs/api/endpoints.md](../api/endpoints.md)
-- **Testing Guide:** [docs/development/testing.md](../development/testing.md)
-- **Deployment:** [docs/deployment/environments.md](../deployment/environments.md)
-- **Changelog:** [CHANGELOG.md](../../CHANGELOG.md)
+- **API Docs:** [API Reference](api-reference.md)
+- **Testing Guide:** [Testing](testing.md)
+- **Deployment:** [Deployment Guide](deployment.md)
+- **Changelog:** [Registro de cambios](../changelog/index.md)
 
 ---
 

@@ -2,7 +2,7 @@
 
 Documentación completa de la API REST de Brisa Cubana Clean Intelligence.
 
-**Base URL:** `http://localhost:4000` (desarrollo) | `https://api.brisacubana.com` (producción)
+**Base URL:** `http://localhost:3001` (desarrollo) | `https://api.brisacubana.com` (producción)
 
 **Formato:** JSON
 
@@ -12,18 +12,18 @@ Documentación completa de la API REST de Brisa Cubana Clean Intelligence.
 
 ## Tabla de Contenidos
 
-- [Autenticación](#autenticación)
+- [Autenticación](#autenticacion)
 - [Usuarios](#usuarios)
 - [Servicios](#servicios)
 - [Reservas (Bookings)](#reservas-bookings)
 - [Pagos](#pagos)
 - [Alertas](#alertas)
-- [Conciliación](#conciliación)
+- [Conciliación](#conciliacion)
 - [Health Check](#health-check)
 
 ---
 
-## Autenticación
+## Autenticación {#autenticacion}
 
 ### POST `/api/auth/login`
 
@@ -35,7 +35,7 @@ Autentica usuario y retorna JWT token.
 
 ```json
 {
-  "email": "admin@brisacubana.com",
+  "email": "admin@brisacubanaclean.com",
   "password": "Admin123!"
 }
 ```
@@ -45,7 +45,7 @@ Autentica usuario y retorna JWT token.
 ```json
 {
   "id": "uuid-del-usuario",
-  "email": "admin@brisacubana.com",
+  "email": "admin@brisacubanaclean.com",
   "name": "Admin User",
   "role": "ADMIN",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -84,7 +84,7 @@ Lista todos los usuarios (paginado).
 [
   {
     "id": "uuid",
-    "email": "cliente@example.com",
+    "email": "client@brisacubanaclean.com",
     "name": "Cliente Demo",
     "phone": "+1234567890",
     "role": "CLIENT",
@@ -114,7 +114,7 @@ Obtiene un usuario por ID.
 ```json
 {
   "id": "uuid",
-  "email": "cliente@example.com",
+  "email": "client@brisacubanaclean.com",
   "name": "Cliente Demo",
   "phone": "+1234567890",
   "role": "CLIENT",
@@ -340,7 +340,7 @@ Lista todas las reservas (paginado).
       "user": {
         "id": "user-uuid",
         "name": "Cliente Demo",
-        "email": "cliente@example.com"
+        "email": "client@brisacubanaclean.com"
       },
       "property": {
         "id": "prop-uuid",
@@ -546,7 +546,7 @@ STRIPE_WEBHOOK_SECRET="whsec_..."
 **Testing local:**
 
 ```bash
-stripe listen --forward-to localhost:4000/api/payments/webhook
+stripe listen --forward-to localhost:3001/api/payments/webhook
 ```
 
 ---
@@ -626,7 +626,7 @@ ALERTS_SLACK_WEBHOOK="https://hooks.slack.com/services/..."
 
 ---
 
-## Conciliación
+## Conciliación {#conciliacion}
 
 ### GET `/api/reconciliation/history/resolved`
 
@@ -689,7 +689,7 @@ Obtiene todas las notas de conciliación para una reserva.
     "resolvedBy": {
       "id": "admin-uuid",
       "name": "Admin User",
-      "email": "admin@brisacubana.com"
+      "email": "admin@brisacubanaclean.com"
     }
   }
 ]
@@ -826,15 +826,15 @@ ALERTS_SLACK_WEBHOOK="https://hooks.slack.com/services/..."
 ### Login
 
 ```bash
-curl -X POST http://localhost:4000/api/auth/login \
+curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@brisacubana.com","password":"Admin123!"}'
+  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}'
 ```
 
 ### Listar servicios
 
 ```bash
-curl http://localhost:4000/api/services
+curl http://localhost:3001/api/services
 ```
 
 ### Crear reserva (autenticado)
@@ -842,7 +842,7 @@ curl http://localhost:4000/api/services
 ```bash
 TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
-curl -X POST http://localhost:4000/api/bookings \
+curl -X POST http://localhost:3001/api/bookings \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -857,7 +857,7 @@ curl -X POST http://localhost:4000/api/bookings \
 ### Mis reservas
 
 ```bash
-curl http://localhost:4000/api/bookings/mine \
+curl http://localhost:3001/api/bookings/mine \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -865,7 +865,7 @@ curl http://localhost:4000/api/bookings/mine \
 
 ## Testing con Postman/Insomnia
 
-1. Importar collection con base URL: `http://localhost:4000`
+1. Importar collection con base URL: `http://localhost:3001`
 2. Crear environment variable `{{token}}`
 3. Ejecutar `POST /api/auth/login` y copiar token
 4. Configurar Authorization: `Bearer {{token}}` en collection
@@ -891,4 +891,4 @@ curl http://localhost:4000/api/bookings/mine \
 
 **Documentación generada:** 30 de septiembre de 2025
 
-**Changelog:** [CHANGELOG.md](../../CHANGELOG.md)
+**Changelog:** [Registro de cambios](../changelog/index.md)

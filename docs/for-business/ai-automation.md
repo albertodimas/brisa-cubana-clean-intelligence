@@ -18,12 +18,12 @@
 - pipeline ML: MLflow/Weights&Biases, Feast 0.53 (feature store), Prefect/Dagster para orquestación ETL/ML.
 - Synthetic data y data augmentation con Trulens/Evidently para fairness testing, red teaming y explainability.
 
-> Estado actual: los directorios `ml/` y `data/` aún no existen en el monorepo; su creación y automatización están priorizados en el backlog operativo (`docs/07-roadmap-y-operaciones.md`).
+> Estado actual: los directorios `ml/` y `data/` aún no existen en el monorepo; su creación y automatización están priorizados en el backlog operativo (ver [Roadmap](../for-business/roadmap.md)).
 
 ## Gobernanza IA
 
 - Comité IA (PO, AI Lead, Legal) con reuniones mensuales + revisión trimestral de métricas.
-- Model cards obligatorias (`docs/resources/templates/model-card-template.md`) para cada modelo/servicio desplegado; almacenar en `docs/ai/model-cards/`.
+- Model cards obligatorias ([Model Card Template](../reference/templates/model-card-template.md)) para cada modelo/servicio desplegado; almacenar en `../for-developers/ai-ml/model-cards/`.
 - Guardrails → validación de prompts, detección de contenido tóxico, límites de uso por rol, filtros de imágenes sensibles.
 - Transparencia → etiquetar interacciones generadas por IA, logs auditables, disclosure en UI.
 - Gestión de drift → monitoreo continuo, alertas, retraining programado; métricas en W&B y dashboards OTel.
@@ -34,7 +34,7 @@
 
 1. **Ideación**: business case + impacto → ticket AI backlog (Linear/Jira) etiquetado `AI`/`Risk`.
 2. **Experimentación**: notebooks en W&B/MLflow; datos etiquetados con Label Studio; commits en `ml/experiments/`.
-3. **Evaluación**: completar Model Card (`docs/ai/model-cards/`), fairness (EvidentlyAI), seguridad (prompt injection, adversarial). Checkpoint en Comité IA.
+3. **Evaluación**: completar Model Card (`../for-developers/ai-ml/model-cards/`), fairness (EvidentlyAI), seguridad (prompt injection, adversarial). Checkpoint en Comité IA.
 4. **Deploy**: gated por feature flag; observabilidad (latencia, costos, drift). Logs cifrados (retención 90 días) y alertas.
 5. **Post-deploy**: feedback humano en loop → retraining programado (mensual) + actualización de Model Card/ADR.
 
@@ -45,7 +45,7 @@
 - Feature Store (Feast 0.53) respaldado en Postgres/Redis; catálogo inicial: disponibilidad, CleanScore histórico, sentimiento staff, consumo de insumos.
 - Pipelines ingestión → validación → versionado (Delta/Parquet) documentados en `infra/data/README.md` con SLAs claros.
 - Model registry con approvals staging → prod, ligados a feature flags y políticas de rollback automático.
-- Model cards almacenadas en `docs/ai/model-cards/` (ver [Concierge](ai/model-cards/model/concierge-mvp-v0.1.md), [CleanScore](ai/model-cards/model/cleanscore-v0.1.md)). Owner: AI Lead.
+- Model cards almacenadas en `../for-developers/ai-ml/model-cards/` (ver [Concierge](../for-developers/ai-ml/model-cards/model/concierge-mvp-v0.1.md), [CleanScore](../for-developers/ai-ml/model-cards/model/cleanscore-v0.1.md)). Owner: AI Lead.
 - Observabilidad IA: OTel traces + dashboards en Grafana/Looker, alertas (latencia, costo por interacción, tasa handoff) y auditorías bimestrales.
 
 ## Automatización operativa

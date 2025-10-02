@@ -1,162 +1,75 @@
 # Brisa Cubana Clean Intelligence — Documentation Hub
 
-Welcome to the **Brisa Cubana Clean Intelligence** documentation center. Here you'll find everything needed to understand, build, and operate the intelligent cleaning platform for Miami-Dade.
+Bienvenido a la base de conocimiento oficial del proyecto. Aquí encontrarás guías técnicas, operativas y de negocio para mantener la plataforma alineada con los estándares actuales.
 
 ---
 
-## 👨‍💻 For Developers
+## Para developers
 
-**Technical documentation for building, testing, and deploying.**
+Documentación técnica y operativa:
 
-- **[Quickstart (5 min)](for-developers/quickstart.md)** - Get up and running
-- **[API Reference](for-developers/api-reference.md)** - 23 REST endpoints documented
-- **[Testing Guide](for-developers/testing.md)** - Vitest + Playwright
-- **[Deployment Guide](for-developers/deployment.md)** - Vercel/Railway/Fly.io
-
-[📚 Browse all developer docs →](for-developers/)
-
----
-
-## 💼 For Business & Operations
-
-**Strategic planning, market analysis, and operational guides.**
-
-- **[Vision & Strategy](for-business/vision-strategy.md)** - Mission, OKRs, roadmap
-- **[Market & Compliance](for-business/market-compliance.md)** - Miami-Dade analysis
-- **[AI & Automation](for-business/ai-automation.md)** - AI strategy and governance
-- **[Roadmap](for-business/roadmap.md)** - Product roadmap and operations
-- **[SOPs](for-business/operations/sops/)** - Standard Operating Procedures
-
-[📊 Browse all business docs →](for-business/)
+- [Quickstart](for-developers/quickstart.md) — puesta en marcha en local.
+- [Environment Variables](for-developers/environment-variables.md) — inventario completo para todos los entornos.
+- [Deployment](for-developers/deployment.md) — Vercel, Railway y buenas prácticas de releases.
+- [Testing](for-developers/testing.md) — cobertura, tipos de pruebas y pipelines.
+- [Documentation Standards](development/documentation-standards.md) — reglas de estilo y veracidad.
+- [Diagrams](for-developers/diagrams/README.md) — C4, flujos de reservas y rutas internas.
 
 ---
 
-## 🎓 Guides & Tutorials
+## Para negocio y operaciones
 
-**Step-by-step tutorials for common tasks.**
+Recursos para la operación y el crecimiento:
 
-_Coming soon_
-
-[📖 Browse guides →](guides/)
-
----
-
-## 📚 Reference
-
-**Templates, specs, and reference materials.**
-
-- [ADR Template](reference/templates/adr-template.md)
-- [Model Card Template](reference/templates/model-card-template.md)
-- [Sources & Bibliography](reference/sources.md)
-
-[🗂️ Browse reference materials →](reference/)
+- [Vision & Strategy](for-business/vision-strategy.md).
+- [Market & Compliance](for-business/market-compliance.md).
+- [Roadmap](for-business/roadmap.md).
+- [SOPs](for-business/operations/sops/index.md) y manuales de soporte.
+- [Risk Register](for-business/operations/risk/risk-register.md).
 
 ---
 
-## 🚀 Quick Start
+## Referencias y plantillas
 
-### For Developers
+- [Templates](reference/templates/index.md) — ADR, manuales, contratos, listas de chequeo.
+- [Model Cards](for-developers/ai-ml/model-cards/README.md) — fichas de los modelos en desarrollo.
+- [Sources](reference/sources.md) — bibliografía utilizada en investigación.
+
+---
+
+## Inicio rápido
 
 ```bash
-# 1. Clone repo
-git clone git@github.com:albertodimas/brisa-cubana-clean-intelligence.git
-cd brisa-cubana-clean-intelligence
-
-# 2. Install dependencies
 pnpm install
-
-# 3. Setup environment
 cp .env.example .env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.local.example apps/web/.env.local
-
-# 4. Start services
 docker compose up -d
 pnpm db:setup
-
-# 5. Run development servers
 pnpm dev
 ```
 
-See [Quickstart Guide](for-developers/quickstart.md) for detailed instructions.
+Servicios locales:
 
-### For Documentation Contributors
-
-```bash
-# Install MkDocs
-pip install -r requirements.txt
-
-# Start local server
-mkdocs serve
-# → http://localhost:8000
-
-# Build static site
-mkdocs build
-```
+- Web: http://localhost:3000
+- API: http://localhost:3001
+- MailHog: http://localhost:8026
+- Docs: http://localhost:8000 (`make serve`)
 
 ---
 
-## 📦 Project Structure
+## Información útil
 
-```
-brisa-cubana-clean-intelligence/
-├── apps/
-│   ├── api/          # Hono backend (Node.js 24)
-│   └── web/          # Next.js 15 frontend
-├── packages/
-│   └── ui/           # Shared design system
-├── docs/             # Documentation (you are here)
-│   ├── for-developers/
-│   ├── for-business/
-│   ├── guides/
-│   └── reference/
-└── scripts/          # Automation scripts
-```
+| Dato                 | Valor                   |
+| -------------------- | ----------------------- |
+| Archivos Markdown    | 90                      |
+| Stack                | MkDocs + Material theme |
+| Búsqueda             | Integrada (lunr.js)     |
+| Dark mode            | Disponible              |
+| Última actualización | 5 de febrero de 2026    |
+
+Las contribuciones a la documentación siguen el flujo descrito en [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md). Utiliza PRs con revisión para mantener coherencia.
 
 ---
 
-## 📊 Project Status
-
-| Area                | Status                                        |
-| ------------------- | --------------------------------------------- |
-| **MVP Backend**     | ✅ Complete (23 endpoints, 66 tests)          |
-| **MVP Frontend**    | ✅ Complete (dashboard, bookings, properties) |
-| **Documentation**   | ✅ Complete (78 MD files)                     |
-| **Testing**         | ✅ Unit + Integration + E2E configured        |
-| **CI/CD**           | ✅ GitHub Actions (5 workflows)               |
-| **Deployment**      | 🔄 Staging ready, prod planned                |
-| **CleanScore™ AI** | 🔜 Roadmap (MVP in development)               |
-| **Concierge AI**    | 🔜 Roadmap                                    |
-
----
-
-## 🔗 External Links
-
-- **GitHub Repository**: [albertodimas/brisa-cubana-clean-intelligence](https://github.com/albertodimas/brisa-cubana-clean-intelligence)
-- **API Docs** (when deployed): `https://api.brisacubana.com/docs`
-- **Staging**: `https://brisa-cubana-staging.vercel.app`
-
----
-
-## 📝 Documentation Info
-
-- **Last Updated**: September 30, 2025
-- **Stack**: MkDocs + Material theme
-- **Search**: Enabled with highlighting
-- **Dark Mode**: Available via theme toggle
-- **Versioning**: Git-tracked, use PRs for changes
-
----
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
-
-- Development workflow
-- Commit conventions
-- Testing guidelines
-- Code review process
-
----
-
-**Questions?** Open an issue on [GitHub](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues) or contact: albertodimasmorazaldivar@gmail.com
+¿Dudas o sugerencias? Abre un issue en GitHub o escribe a `albertodimasmorazaldivar@gmail.com`.

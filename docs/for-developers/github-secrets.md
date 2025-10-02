@@ -4,16 +4,16 @@ Esta guía documenta todos los secretos necesarios para configurar en GitHub Act
 
 ## 📋 Tabla de Contenidos
 
-- [¿Por qué GitHub Secrets?](#por-qué-github-secrets)
+- [¿Por qué GitHub Secrets?](#por-que-github-secrets)
 - [Secretos Requeridos](#secretos-requeridos)
 - [Secretos Opcionales](#secretos-opcionales)
-- [Cómo Configurar Secretos](#cómo-configurar-secretos)
-- [Verificación](#verificación)
-- [Rotación de Secretos](#rotación-de-secretos)
+- [Cómo Configurar Secretos](#como-configurar-secretos)
+- [Verificación](#verificacion)
+- [Rotación de Secretos](#rotacion-de-secretos)
 
 ---
 
-## ¿Por qué GitHub Secrets?
+## ¿Por qué GitHub Secrets? {#por-que-github-secrets}
 
 Los secretos de GitHub Actions permiten:
 
@@ -275,7 +275,7 @@ Token para despliegues automáticos a Vercel desde GitHub Actions.
 
 ---
 
-## Cómo Configurar Secretos
+## Cómo Configurar Secretos {#como-configurar-secretos}
 
 ### Opción 1: GitHub Web UI
 
@@ -328,7 +328,7 @@ echo "✅ Secretos configurados correctamente"
 
 ---
 
-## Verificación
+## Verificación {#verificacion}
 
 ### Verificar que los secretos están configurados
 
@@ -378,7 +378,7 @@ jobs:
 
 ---
 
-## Rotación de Secretos
+## Rotación de Secretos {#rotacion-de-secretos}
 
 ### Frecuencia Recomendada
 

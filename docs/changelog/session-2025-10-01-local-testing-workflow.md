@@ -409,9 +409,9 @@ pnpm test            # Run all tests
 ## References
 
 - **Documentation:** [docs/development/local-testing-workflow.md](../development/local-testing-workflow.md)
-- **Script:** [scripts/pre-push-check.sh](../../scripts/pre-push-check.sh)
-- **Package.json:** [package.json](../../package.json)
-- **Husky config:** [.husky/](../../.husky/)
+- **Script:** [scripts/pre-push-check.sh](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/scripts/pre-push-check.sh)
+- **Package.json:** [package.json](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/package.json)
+- **Husky config:** [.husky/](https://github.com/albertodimas/brisa-cubana-clean-intelligence/tree/main/.husky)
 
 ## Conclusion
 
