@@ -1,0 +1,71 @@
+---
+# Flux CD GitOps Toolkit Sync Configuration
+# Automatically syncs infrastructure state from Git repository
+
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: brisa-infrastructure
+  namespace: flux-system
+spec:
+  interval: 5m0s
+  ref:
+    branch: main
+  url: https://github.com/albertodimas/brisa-cubana-clean-intelligence
+  secretRef:
+    name: flux-github-token
+  ignore: |
+    # Ignore non-infrastructure files
+    /*
+    !/infra/
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: brisa-production
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./infra/gitops
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: brisa-infrastructure
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: api-deployment
+      namespace: brisa-production
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: web-deployment
+      namespace: brisa-production
+  timeout: 5m0s
+  retryInterval: 1m0s
+  wait: true
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: brisa-production-alert
+  namespace: flux-system
+spec:
+  eventSeverity: info
+  eventSources:
+    - kind: GitRepository
+      name: brisa-infrastructure
+    - kind: Kustomization
+      name: brisa-production
+  providerRef:
+    name: slack-notifications
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: slack-notifications
+  namespace: flux-system
+spec:
+  type: slack
+  channel: "#deployments"
+  secretRef:
+    name: slack-webhook-url

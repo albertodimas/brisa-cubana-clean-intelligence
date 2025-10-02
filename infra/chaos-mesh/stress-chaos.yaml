@@ -1,0 +1,60 @@
+---
+# Chaos Mesh CPU Stress Experiment
+# Stresses CPU to test resource limits and autoscaling
+
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: api-cpu-stress
+  namespace: brisa-production
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - brisa-production
+    labelSelectors:
+      app: api
+  stressors:
+    cpu:
+      workers: 2
+      load: 80  # 80% CPU load
+  duration: "3m"
+---
+# Memory Stress Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: api-memory-stress
+  namespace: brisa-production
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - brisa-production
+    labelSelectors:
+      app: api
+  stressors:
+    memory:
+      workers: 1
+      size: "512MB"  # Allocate 512MB
+  duration: "2m"
+---
+# I/O Stress Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: api-io-delay
+  namespace: brisa-production
+spec:
+  action: latency
+  mode: one
+  selector:
+    namespaces:
+      - brisa-production
+    labelSelectors:
+      app: api
+  delay: "100ms"
+  percent: 50  # 50% of I/O operations
+  path: "/var/log"
+  duration: "2m"
+  volumePath: "/var/log"

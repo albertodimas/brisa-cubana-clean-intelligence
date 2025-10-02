@@ -1,0 +1,69 @@
+---
+# Chaos Mesh Network Delay Experiment
+# Injects latency to test timeout handling
+
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-network-delay
+  namespace: brisa-production
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - brisa-production
+    labelSelectors:
+      app: api
+  delay:
+    latency: "200ms"
+    correlation: "50"
+    jitter: "50ms"
+  duration: "5m"
+  direction: to  # Outbound traffic
+  target:
+    selector:
+      namespaces:
+        - brisa-production
+      labelSelectors:
+        app: database
+    mode: all
+---
+# Network Partition Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-network-partition
+  namespace: brisa-production
+spec:
+  action: partition
+  mode: one
+  selector:
+    namespaces:
+      - brisa-production
+    labelSelectors:
+      app: api
+  direction: both
+  duration: "30s"
+  externalTargets:
+    - "8.8.8.8"  # Simulate DNS failure
+---
+# Network Packet Loss Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-packet-loss
+  namespace: brisa-production
+spec:
+  action: loss
+  mode: one
+  selector:
+    namespaces:
+      - brisa-production
+    labelSelectors:
+      app: api
+  loss:
+    loss: "10"  # 10% packet loss
+    correlation: "25"
+  duration: "2m"
+  direction: to

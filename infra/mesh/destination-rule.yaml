@@ -1,0 +1,80 @@
+---
+# Istio DestinationRule for mTLS and load balancing
+# Enforces mutual TLS between services
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: api-destination-rule
+  namespace: brisa-production
+spec:
+  host: api-service
+  trafficPolicy:
+    # Load balancing policy
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: X-User-ID  # Session affinity by user
+
+    # Connection pool settings
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+
+    # Circuit breaker
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+
+    # mTLS enforcement
+    tls:
+      mode: ISTIO_MUTUAL  # Enforce mTLS
+      sni: api.brisa-production.svc.cluster.local
+
+  # Subsets for canary deployment
+  subsets:
+    - name: stable
+      labels:
+        version: stable
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
+
+    - name: canary
+      labels:
+        version: canary
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: web-destination-rule
+  namespace: brisa-production
+spec:
+  host: web-service
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+    connectionPool:
+      tcp:
+        maxConnections: 200
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 200
+
+    outlierDetection:
+      consecutiveErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+
+    tls:
+      mode: ISTIO_MUTUAL

@@ -291,6 +291,15 @@
     "Anchore",
     "oidc",
     "SLSA",
-    "MTTP"
+    "MTTP",
+    "gotk",
+    "fluxcd",
+    "Kustomization",
+    "kustomization",
+    "kustomizations",
+    "istio",
+    "istioctl",
+    "ZSCORE",
+    "goroutines"
   ]
 }
