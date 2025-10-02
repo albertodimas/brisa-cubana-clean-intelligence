@@ -142,6 +142,39 @@ export const rateLimitExceededTotal = new Counter({
   registers: [register],
 });
 
+export const rateLimitStorage = new Gauge({
+  name: "brisa_api_rate_limit_storage",
+  help: "Indicates which storage backend is active for rate limiting",
+  labelNames: ["backend"],
+  registers: [register],
+});
+
+export const rateLimitRedisUp = new Gauge({
+  name: "brisa_api_rate_limit_redis_up",
+  help: "Redis client status for rate limiting (1 = ready, 0 = disconnected)",
+  registers: [register],
+});
+
+export const rateLimitRedisReconnectsTotal = new Counter({
+  name: "brisa_api_rate_limit_redis_reconnects_total",
+  help: "Total number of Redis ready events observed by the rate limiter",
+  registers: [register],
+});
+
+export const rateLimitRedisErrorsTotal = new Counter({
+  name: "brisa_api_rate_limit_redis_errors_total",
+  help: "Total number of Redis errors encountered by the rate limiter",
+  labelNames: ["reason"],
+  registers: [register],
+});
+
+export const rateLimitFallbackTotal = new Counter({
+  name: "brisa_api_rate_limit_fallback_total",
+  help: "Total number of times the in-memory fallback handled a rate-limit request",
+  labelNames: ["reason"],
+  registers: [register],
+});
+
 /**
  * Helper functions
  */

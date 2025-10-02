@@ -1,14 +1,12 @@
-import type { MiddlewareHandler } from "hono";
+import type { Context, MiddlewareHandler } from "hono";
 import type { UserRole } from "../generated/prisma";
 import { verifyAccessToken, type AccessTokenPayload } from "../lib/token";
 
 const AUTH_USER_KEY = "authUser";
 
-export function getAuthUser(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  c: any,
-): AccessTokenPayload | null {
-  return (c.get(AUTH_USER_KEY) as AccessTokenPayload | undefined) ?? null;
+export function getAuthUser(c: Context): AccessTokenPayload | null {
+  const payload = c.get(AUTH_USER_KEY) as AccessTokenPayload | undefined | null;
+  return payload ?? null;
 }
 
 export function requireAuth(allowedRoles?: UserRole[]): MiddlewareHandler {

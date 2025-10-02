@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createBookingSchema, updateBookingSchema } from "./schemas";
+import {
+  createBookingSchema,
+  updateBookingSchema,
+  createPropertySchema,
+  updatePropertySchema,
+} from "./schemas";
 
 describe("Booking Schema Validations", () => {
   describe("createBookingSchema", () => {
@@ -309,5 +314,80 @@ describe("Booking Schema Validations", () => {
         expect(result.success).toBe(true);
       });
     });
+  });
+});
+
+describe("Property Schema Validations", () => {
+  const baseProperty = {
+    name: "Casa Test",
+    address: "123 Calle Principal",
+    city: "Miami",
+    state: "FL",
+    zipCode: "33101",
+    type: "RESIDENTIAL" as const,
+  };
+
+  it("should accept property with optional details", () => {
+    const result = createPropertySchema.safeParse({
+      ...baseProperty,
+      size: 1200,
+      bedrooms: 3,
+      bathrooms: 2,
+      notes: "Tiene vista al mar",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("should coerce numeric fields passed as strings", () => {
+    const result = createPropertySchema.safeParse({
+      ...baseProperty,
+      size: "1500",
+      bedrooms: "4",
+      bathrooms: "3",
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.size).toBe(1500);
+      expect(result.data.bedrooms).toBe(4);
+      expect(result.data.bathrooms).toBe(3);
+    }
+  });
+
+  it("should reject unsupported property type", () => {
+    const result = createPropertySchema.safeParse({
+      ...baseProperty,
+      type: "WAREHOUSE",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject non-positive size", () => {
+    const result = createPropertySchema.safeParse({
+      ...baseProperty,
+      size: 0,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("should require at least one field on update", () => {
+    const result = updatePropertySchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("should allow partial updates for subset of fields", () => {
+    const result = updatePropertySchema.safeParse({
+      bedrooms: "5",
+      notes: "Actualizar limpieza profunda",
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.bedrooms).toBe(5);
+      expect(result.data.notes).toBe("Actualizar limpieza profunda");
+    }
   });
 });

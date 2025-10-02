@@ -5,22 +5,22 @@ import { generateAccessToken } from "../lib/token";
 import type { AccessTokenPayload } from "../lib/token";
 
 describe("Auth Middleware", () => {
-  const mockUserPayload: AccessTokenPayload = {
-    sub: "user-123",
-    email: "user@example.com",
-    role: "USER" as const,
+  const mockClientPayload: AccessTokenPayload = {
+    sub: "client-123",
+    email: "client@example.com",
+    role: "CLIENT",
   };
 
   const mockAdminPayload: AccessTokenPayload = {
     sub: "admin-123",
     email: "admin@example.com",
-    role: "ADMIN" as const,
+    role: "ADMIN",
   };
 
-  const mockCleanerPayload: AccessTokenPayload = {
-    sub: "cleaner-123",
-    email: "cleaner@example.com",
-    role: "CLEANER" as const,
+  const mockStaffPayload: AccessTokenPayload = {
+    sub: "staff-123",
+    email: "staff@example.com",
+    role: "STAFF",
   };
 
   describe("requireAuth - Basic Authentication", () => {
@@ -28,7 +28,7 @@ describe("Auth Middleware", () => {
       const app = new Hono();
       app.get("/protected", requireAuth(), (c) => c.json({ success: true }));
 
-      const token = generateAccessToken(mockUserPayload);
+      const token = generateAccessToken(mockClientPayload);
       const res = await app.request("/protected", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -101,13 +101,13 @@ describe("Auth Middleware", () => {
   });
 
   describe("requireAuth - Role-Based Access Control", () => {
-    it("should allow USER role when USER is allowed", async () => {
+    it("should allow CLIENT role when CLIENT is allowed", async () => {
       const app = new Hono();
-      app.get("/protected", requireAuth(["USER"]), (c) =>
+      app.get("/protected", requireAuth(["CLIENT"]), (c) =>
         c.json({ success: true }),
       );
 
-      const token = generateAccessToken(mockUserPayload);
+      const token = generateAccessToken(mockClientPayload);
       const res = await app.request("/protected", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -129,27 +129,27 @@ describe("Auth Middleware", () => {
       expect(res.status).toBe(200);
     });
 
-    it("should allow CLEANER role when CLEANER is allowed", async () => {
+    it("should allow STAFF role when STAFF is allowed", async () => {
       const app = new Hono();
-      app.get("/cleaner", requireAuth(["CLEANER"]), (c) =>
+      app.get("/staff", requireAuth(["STAFF"]), (c) =>
         c.json({ success: true }),
       );
 
-      const token = generateAccessToken(mockCleanerPayload);
-      const res = await app.request("/cleaner", {
+      const token = generateAccessToken(mockStaffPayload);
+      const res = await app.request("/staff", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       expect(res.status).toBe(200);
     });
 
-    it("should reject USER when only ADMIN is allowed", async () => {
+    it("should reject CLIENT when only ADMIN is allowed", async () => {
       const app = new Hono();
       app.get("/admin-only", requireAuth(["ADMIN"]), (c) =>
         c.json({ success: true }),
       );
 
-      const token = generateAccessToken(mockUserPayload);
+      const token = generateAccessToken(mockClientPayload);
       const res = await app.request("/admin-only", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -159,13 +159,13 @@ describe("Auth Middleware", () => {
       expect(body).toEqual({ error: "Forbidden" });
     });
 
-    it("should reject CLEANER when only ADMIN is allowed", async () => {
+    it("should reject STAFF when only ADMIN is allowed", async () => {
       const app = new Hono();
       app.get("/admin-only", requireAuth(["ADMIN"]), (c) =>
         c.json({ success: true }),
       );
 
-      const token = generateAccessToken(mockCleanerPayload);
+      const token = generateAccessToken(mockStaffPayload);
       const res = await app.request("/admin-only", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -175,36 +175,36 @@ describe("Auth Middleware", () => {
 
     it("should allow multiple roles", async () => {
       const app = new Hono();
-      app.get("/multi-role", requireAuth(["ADMIN", "CLEANER"]), (c) =>
+      app.get("/multi-role", requireAuth(["ADMIN", "STAFF"]), (c) =>
         c.json({ success: true }),
       );
 
       const adminToken = generateAccessToken(mockAdminPayload);
-      const cleanerToken = generateAccessToken(mockCleanerPayload);
-      const userToken = generateAccessToken(mockUserPayload);
+      const staffToken = generateAccessToken(mockStaffPayload);
+      const clientToken = generateAccessToken(mockClientPayload);
 
       const adminRes = await app.request("/multi-role", {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-      const cleanerRes = await app.request("/multi-role", {
-        headers: { Authorization: `Bearer ${cleanerToken}` },
+      const staffRes = await app.request("/multi-role", {
+        headers: { Authorization: `Bearer ${staffToken}` },
       });
-      const userRes = await app.request("/multi-role", {
-        headers: { Authorization: `Bearer ${userToken}` },
+      const clientRes = await app.request("/multi-role", {
+        headers: { Authorization: `Bearer ${clientToken}` },
       });
 
       expect(adminRes.status).toBe(200);
-      expect(cleanerRes.status).toBe(200);
-      expect(userRes.status).toBe(403);
+      expect(staffRes.status).toBe(200);
+      expect(clientRes.status).toBe(403);
     });
 
     it("should allow any authenticated user when no roles specified", async () => {
       const app = new Hono();
       app.get("/any-user", requireAuth(), (c) => c.json({ success: true }));
 
-      const userToken = generateAccessToken(mockUserPayload);
+      const userToken = generateAccessToken(mockClientPayload);
       const adminToken = generateAccessToken(mockAdminPayload);
-      const cleanerToken = generateAccessToken(mockCleanerPayload);
+      const staffToken = generateAccessToken(mockStaffPayload);
 
       const userRes = await app.request("/any-user", {
         headers: { Authorization: `Bearer ${userToken}` },
@@ -212,13 +212,13 @@ describe("Auth Middleware", () => {
       const adminRes = await app.request("/any-user", {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-      const cleanerRes = await app.request("/any-user", {
-        headers: { Authorization: `Bearer ${cleanerToken}` },
+      const staffRes = await app.request("/any-user", {
+        headers: { Authorization: `Bearer ${staffToken}` },
       });
 
       expect(userRes.status).toBe(200);
       expect(adminRes.status).toBe(200);
-      expect(cleanerRes.status).toBe(200);
+      expect(staffRes.status).toBe(200);
     });
   });
 
@@ -230,7 +230,7 @@ describe("Auth Middleware", () => {
         return c.json({ user });
       });
 
-      const token = generateAccessToken(mockUserPayload);
+      const token = generateAccessToken(mockClientPayload);
       const res = await app.request("/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -238,9 +238,9 @@ describe("Auth Middleware", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.user).toMatchObject({
-        sub: mockUserPayload.sub,
-        email: mockUserPayload.email,
-        role: mockUserPayload.role,
+        sub: mockClientPayload.sub,
+        email: mockClientPayload.email,
+        role: mockClientPayload.role,
       });
     });
 
@@ -268,14 +268,14 @@ describe("Auth Middleware", () => {
         });
       });
 
-      const token = generateAccessToken(mockUserPayload);
+      const token = generateAccessToken(mockClientPayload);
       const res = await app.request("/check", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const body = await res.json();
       expect(body.same).toBe(true);
-      expect(body.email).toBe(mockUserPayload.email);
+      expect(body.email).toBe(mockClientPayload.email);
     });
   });
 
@@ -290,7 +290,7 @@ describe("Auth Middleware", () => {
       const app = new Hono();
       app.get("/protected", requireAuth(), (c) => c.json({ success: true }));
 
-      const token = generateAccessToken(mockUserPayload);
+      const token = generateAccessToken(mockClientPayload);
       const res = await app.request("/protected", {
         headers: { Authorization: `Bearer  ${token}  ` },
       });
@@ -302,7 +302,7 @@ describe("Auth Middleware", () => {
       const app = new Hono();
       app.get("/protected", requireAuth(), (c) => c.json({ success: true }));
 
-      const token = generateAccessToken(mockUserPayload);
+      const token = generateAccessToken(mockClientPayload);
       const res = await app.request("/protected", {
         headers: { Authorization: `bearer ${token}` },
       });

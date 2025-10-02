@@ -1,4 +1,14 @@
 import type { Context, Next } from "hono";
+import type Redis from "ioredis";
+import { logger } from "../lib/logger";
+import { getRedisClient } from "../lib/redis";
+import {
+  rateLimitStorage,
+  rateLimitHitsTotal,
+  rateLimitExceededTotal,
+  rateLimitFallbackTotal,
+  rateLimitRedisErrorsTotal,
+} from "../lib/metrics";
 
 type RateLimitStore = Record<
   string,
@@ -8,8 +18,9 @@ type RateLimitStore = Record<
   }
 >;
 
-// In-memory store (use Redis in production for multi-instance deployments)
+// In-memory fallback store (single-instance only)
 const store: RateLimitStore = {};
+const metricsEnabled = process.env.NODE_ENV !== "test";
 
 export interface RateLimitOptions {
   windowMs: number; // Time window in milliseconds
@@ -47,64 +58,72 @@ export function rateLimiter(
   } = options;
 
   return async (c: Context, next: Next) => {
-    // Skip if rate limiting is disabled
-    if (process.env.ENABLE_RATE_LIMITING === "false") {
+    const disableForTestEnv =
+      process.env.NODE_ENV === "test" &&
+      process.env.ENABLE_RATE_LIMITING !== "true";
+
+    if (process.env.ENABLE_RATE_LIMITING === "false" || disableForTestEnv) {
       return next();
     }
 
     const key = keyGenerator(c);
-    const now = Date.now();
+    const redisClient = getRedisClient();
+    let fallbackReason: "redis_error" | "no_client" | null = null;
 
-    // Initialize or retrieve rate limit data
-    if (!store[key] || store[key].resetTime < now) {
-      store[key] = {
-        count: 0,
-        resetTime: now + windowMs,
-      };
+    if (redisClient) {
+      setRateLimitBackend("redis");
+      try {
+        return await handleWithRedis(
+          redisClient,
+          key,
+          {
+            windowMs,
+            max,
+            message,
+            skipSuccessfulRequests,
+            skipFailedRequests,
+          },
+          c,
+          next,
+        );
+      } catch (error) {
+        fallbackReason = "redis_error";
+        if (metricsEnabled) {
+          const labelledError = error as { code?: unknown } | undefined;
+          const reasonLabel =
+            typeof labelledError?.code === "string"
+              ? labelledError.code
+              : error instanceof Error
+                ? error.name
+                : "redis_error";
+          rateLimitRedisErrorsTotal.inc({ reason: reasonLabel });
+        }
+        logger.warn(
+          { error },
+          "Redis rate limiter failed, falling back to in-memory store",
+        );
+      }
+    } else {
+      fallbackReason = "no_client";
     }
 
-    const record = store[key];
-
-    // Check if limit exceeded
-    if (record.count >= max) {
-      const retryAfter = Math.ceil((record.resetTime - now) / 1000);
-
-      c.header("Retry-After", retryAfter.toString());
-      c.header("X-RateLimit-Limit", max.toString());
-      c.header("X-RateLimit-Remaining", "0");
-      c.header("X-RateLimit-Reset", new Date(record.resetTime).toISOString());
-
-      return c.json(
-        {
-          error: message,
-          retryAfter,
-        },
-        429,
-      );
+    if (metricsEnabled && fallbackReason) {
+      rateLimitFallbackTotal.inc({ reason: fallbackReason });
     }
 
-    // Increment counter (before request if not skipping)
-    if (!skipSuccessfulRequests && !skipFailedRequests) {
-      record.count++;
-    }
-
-    // Set rate limit headers
-    c.header("X-RateLimit-Limit", max.toString());
-    c.header("X-RateLimit-Remaining", (max - record.count).toString());
-    c.header("X-RateLimit-Reset", new Date(record.resetTime).toISOString());
-
-    await next();
-
-    // Update counter after request if skipping certain statuses
-    const statusCode = c.res.status;
-    const isSuccessful = statusCode < 400;
-    const isFailed = statusCode >= 400;
-
-    if (skipSuccessfulRequests && !skipFailedRequests && !isSuccessful) {
-      record.count++;
-    } else if (skipFailedRequests && !skipSuccessfulRequests && !isFailed) {
-      record.count++;
-    }
+    setRateLimitBackend("memory");
+    return handleWithMemory(
+      key,
+      {
+        windowMs,
+        max,
+        message,
+        skipSuccessfulRequests,
+        skipFailedRequests,
+      },
+      c,
+      next,
+    );
   };
 }
 
@@ -196,6 +215,7 @@ export const RateLimits = {
     windowMs: 15 * 60 * 1000,
     max: 20,
     message: "Too many write requests, please slow down.",
+    skipFailedRequests: true,
   } as const,
 
   /**
@@ -207,3 +227,217 @@ export const RateLimits = {
     max: 300,
   } as const,
 };
+
+interface ResolvedOptions {
+  windowMs: number;
+  max: number;
+  message: string;
+  skipSuccessfulRequests: boolean;
+  skipFailedRequests: boolean;
+}
+
+async function handleWithMemory(
+  key: string,
+  options: ResolvedOptions,
+  c: Context,
+  next: Next,
+): Promise<Response | void> {
+  const { windowMs, max, message, skipSuccessfulRequests, skipFailedRequests } =
+    options;
+  const now = Date.now();
+
+  if (!store[key] || store[key].resetTime < now) {
+    store[key] = {
+      count: 0,
+      resetTime: now + windowMs,
+    };
+  }
+
+  const record = store[key];
+
+  if (metricsEnabled) {
+    rateLimitHitsTotal.inc({ endpoint: key });
+  }
+
+  if (record.count >= max) {
+    const retryAfter = Math.ceil((record.resetTime - now) / 1000);
+    applyHeaders(c, max, 0, record.resetTime - now, retryAfter);
+    if (metricsEnabled) {
+      rateLimitExceededTotal.inc({ endpoint: key });
+    }
+    return c.json(
+      {
+        error: message,
+        retryAfter,
+      },
+      429,
+    );
+  }
+
+  if (!skipSuccessfulRequests && !skipFailedRequests) {
+    record.count++;
+  }
+
+  applyHeaders(c, max, max - record.count, record.resetTime - now);
+
+  await next();
+
+  const statusCode = c.res.status;
+  const isSuccessful = statusCode < 400;
+  const isFailed = statusCode >= 400;
+
+  if (skipSuccessfulRequests && !skipFailedRequests && !isSuccessful) {
+    record.count++;
+  } else if (skipFailedRequests && !skipSuccessfulRequests && !isFailed) {
+    record.count++;
+  }
+}
+
+async function handleWithRedis(
+  redis: Redis,
+  key: string,
+  options: ResolvedOptions,
+  c: Context,
+  next: Next,
+): Promise<Response | void> {
+  const { windowMs, max, message, skipSuccessfulRequests, skipFailedRequests } =
+    options;
+
+  const redisKey = buildRedisKey(windowMs, key);
+
+  if (!skipSuccessfulRequests && !skipFailedRequests) {
+    if (metricsEnabled) {
+      rateLimitHitsTotal.inc({ endpoint: key });
+    }
+    const count = await incrementRedis(redis, redisKey, windowMs);
+    const ttlMs = await ensureTtl(redis, redisKey, windowMs);
+
+    if (count > max) {
+      const retryAfter = Math.ceil(ttlMs / 1000);
+      applyHeaders(c, max, 0, ttlMs, retryAfter);
+      if (metricsEnabled) {
+        rateLimitExceededTotal.inc({ endpoint: key });
+      }
+      return c.json(
+        {
+          error: message,
+          retryAfter,
+        },
+        429,
+      );
+    }
+
+    applyHeaders(c, max, max - count, ttlMs);
+    await next();
+    return;
+  }
+
+  const { currentCount, ttlMs } = await getRedisState(
+    redis,
+    redisKey,
+    windowMs,
+  );
+
+  if (currentCount >= max) {
+    const retryAfter = Math.ceil(ttlMs / 1000);
+    applyHeaders(c, max, 0, ttlMs, retryAfter);
+    if (metricsEnabled) {
+      rateLimitExceededTotal.inc({ endpoint: key });
+    }
+    return c.json(
+      {
+        error: message,
+        retryAfter,
+      },
+      429,
+    );
+  }
+
+  if (metricsEnabled) {
+    rateLimitHitsTotal.inc({ endpoint: key });
+  }
+
+  applyHeaders(c, max, max - currentCount, ttlMs);
+
+  await next();
+
+  const statusCode = c.res.status;
+  const isSuccessful = statusCode < 400;
+  const isFailed = statusCode >= 400;
+
+  if (skipSuccessfulRequests && !skipFailedRequests && !isSuccessful) {
+    await incrementRedis(redis, redisKey, windowMs);
+  } else if (skipFailedRequests && !skipSuccessfulRequests && !isFailed) {
+    await incrementRedis(redis, redisKey, windowMs);
+  }
+}
+
+function buildRedisKey(windowMs: number, key: string): string {
+  return `rate:${windowMs}:${key}`;
+}
+
+async function incrementRedis(redis: Redis, key: string, windowMs: number) {
+  const count = await redis.incr(key);
+  if (count === 1) {
+    await redis.pexpire(key, windowMs);
+  }
+  return count;
+}
+
+async function ensureTtl(redis: Redis, key: string, windowMs: number) {
+  let ttlMs = await redis.pttl(key);
+  if (ttlMs === -1 || ttlMs === -2 || ttlMs < 0) {
+    await redis.pexpire(key, windowMs);
+    ttlMs = windowMs;
+  }
+  return ttlMs;
+}
+
+async function getRedisState(redis: Redis, key: string, windowMs: number) {
+  const multiResult = await redis.multi().pttl(key).get(key).exec();
+
+  if (!multiResult) {
+    return { currentCount: 0, ttlMs: windowMs };
+  }
+
+  const ttlResult = multiResult[0]?.[1];
+  const valueResult = multiResult[1]?.[1];
+
+  let ttlMs = typeof ttlResult === "number" ? ttlResult : Number(ttlResult);
+  if (!Number.isFinite(ttlMs) || ttlMs === -1 || ttlMs === -2 || ttlMs < 0) {
+    ttlMs = windowMs;
+  }
+
+  const currentCount = valueResult ? Number(valueResult) : 0;
+
+  if (currentCount === 0) {
+    // Ensure TTL exists for future increments
+    await redis.pexpire(key, windowMs);
+  }
+
+  return { currentCount, ttlMs };
+}
+
+function applyHeaders(
+  c: Context,
+  limit: number,
+  remaining: number,
+  ttlMs: number,
+  retryAfterSeconds?: number,
+) {
+  c.header("X-RateLimit-Limit", limit.toString());
+  c.header("X-RateLimit-Remaining", Math.max(remaining, 0).toString());
+  const resetDate = new Date(Date.now() + Math.max(ttlMs, 0));
+  c.header("X-RateLimit-Reset", resetDate.toISOString());
+
+  if (retryAfterSeconds !== undefined) {
+    c.header("Retry-After", Math.max(retryAfterSeconds, 0).toString());
+  }
+}
+function setRateLimitBackend(backend: "redis" | "memory") {
+  if (!metricsEnabled) {
+    return;
+  }
+  rateLimitStorage.set({ backend: "redis" }, backend === "redis" ? 1 : 0);
+  rateLimitStorage.set({ backend: "memory" }, backend === "memory" ? 1 : 0);
+}

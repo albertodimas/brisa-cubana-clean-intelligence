@@ -1,41 +1,18 @@
 import { Hono } from "hono";
-import { db } from "../lib/db";
+import { db, type Prisma } from "../lib/db";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
-import { z } from "zod";
+import {
+  createPropertySchema,
+  updatePropertySchema,
+  type CreatePropertyInput,
+  type UpdatePropertyInput,
+} from "../schemas";
 
 const properties = new Hono();
 
-// Apply rate limiting: read operations get more permissive limits
-properties.get("/", rateLimiter(RateLimits.read));
-properties.get("/:id", rateLimiter(RateLimits.read));
-
-// Stricter limits for write operations
-properties.post("/", rateLimiter(RateLimits.write));
-properties.put("/:id", rateLimiter(RateLimits.write));
-properties.patch("/:id", rateLimiter(RateLimits.write));
-properties.delete("/:id", rateLimiter(RateLimits.write));
-
-const createPropertySchema = z.object({
-  name: z.string().min(1).max(255),
-  address: z.string().min(1).max(500),
-  city: z.string().min(1).max(100),
-  state: z.string().min(1).max(100),
-  zipCode: z.string().min(1).max(20),
-  type: z.enum(["RESIDENTIAL", "VACATION_RENTAL", "OFFICE", "HOSPITALITY"]),
-  size: z.number().int().positive().optional(),
-  bedrooms: z.number().int().nonnegative().optional(),
-  bathrooms: z.number().int().nonnegative().optional(),
-  notes: z.string().max(1000).optional(),
-});
-
-const updatePropertySchema = createPropertySchema.partial();
-
-type CreatePropertyInput = z.infer<typeof createPropertySchema>;
-type UpdatePropertyInput = z.infer<typeof updatePropertySchema>;
-
 // Get all properties for authenticated user
-properties.get("/", requireAuth(), async (c) => {
+properties.get("/", rateLimiter(RateLimits.read), requireAuth(), async (c) => {
   const authUser = getAuthUser(c);
 
   if (!authUser) {
@@ -68,57 +45,62 @@ properties.get("/", requireAuth(), async (c) => {
 });
 
 // Get specific property by ID
-properties.get("/:id", requireAuth(), async (c) => {
-  const authUser = getAuthUser(c);
+properties.get(
+  "/:id",
+  rateLimiter(RateLimits.read),
+  requireAuth(),
+  async (c) => {
+    const authUser = getAuthUser(c);
 
-  if (!authUser) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
+    if (!authUser) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
 
-  const propertyId = c.req.param("id");
+    const propertyId = c.req.param("id");
 
-  const property = await db.property.findUnique({
-    where: { id: propertyId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          name: true,
+    const property = await db.property.findUnique({
+      where: { id: propertyId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
         },
-      },
-      bookings: {
-        orderBy: { scheduledAt: "desc" },
-        take: 10,
-        include: {
-          service: {
-            select: {
-              id: true,
-              name: true,
+        bookings: {
+          orderBy: { scheduledAt: "desc" },
+          take: 10,
+          include: {
+            service: {
+              select: {
+                id: true,
+                name: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  if (!property) {
-    return c.json({ error: "Property not found" }, 404);
-  }
+    if (!property) {
+      return c.json({ error: "Property not found" }, 404);
+    }
 
-  // Users can only see their own properties, admins can see all
-  if (authUser.role !== "ADMIN" && property.userId !== authUser.sub) {
-    return c.json({ error: "Forbidden" }, 403);
-  }
+    // Users can only see their own properties, admins can see all
+    if (authUser.role !== "ADMIN" && property.userId !== authUser.sub) {
+      return c.json({ error: "Forbidden" }, 403);
+    }
 
-  return c.json(property);
-});
+    return c.json(property);
+  },
+);
 
 // Create new property
 properties.post(
   "/",
-  requireAuth(),
   rateLimiter(RateLimits.write),
+  requireAuth(),
   async (c) => {
     const authUser = getAuthUser(c);
 
@@ -141,9 +123,7 @@ properties.post(
 
     const data: CreatePropertyInput = parseResult.data;
 
-    // Create property for the authenticated user
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const createData: any = {
+    const createData: Prisma.PropertyUncheckedCreateInput = {
       name: data.name,
       address: data.address,
       city: data.city,
@@ -151,12 +131,11 @@ properties.post(
       zipCode: data.zipCode,
       type: data.type,
       userId: authUser.sub,
+      size: data.size ?? null,
+      bedrooms: data.bedrooms ?? null,
+      bathrooms: data.bathrooms ?? null,
+      notes: data.notes ?? null,
     };
-
-    if (data.size !== undefined) createData.size = data.size;
-    if (data.bedrooms !== undefined) createData.bedrooms = data.bedrooms;
-    if (data.bathrooms !== undefined) createData.bathrooms = data.bathrooms;
-    if (data.notes !== undefined) createData.notes = data.notes;
 
     const property = await db.property.create({
       data: createData,
@@ -178,8 +157,8 @@ properties.post(
 // Update property
 properties.patch(
   "/:id",
-  requireAuth(),
   rateLimiter(RateLimits.write),
+  requireAuth(),
   async (c) => {
     const authUser = getAuthUser(c);
 
@@ -218,9 +197,26 @@ properties.patch(
 
     const data: UpdatePropertyInput = parseResult.data;
 
+    const updateData: Prisma.PropertyUncheckedUpdateInput = {
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.address !== undefined ? { address: data.address } : {}),
+      ...(data.city !== undefined ? { city: data.city } : {}),
+      ...(data.state !== undefined ? { state: data.state } : {}),
+      ...(data.zipCode !== undefined ? { zipCode: data.zipCode } : {}),
+      ...(data.type !== undefined ? { type: data.type } : {}),
+      ...(data.size !== undefined ? { size: data.size ?? null } : {}),
+      ...(data.bedrooms !== undefined
+        ? { bedrooms: data.bedrooms ?? null }
+        : {}),
+      ...(data.bathrooms !== undefined
+        ? { bathrooms: data.bathrooms ?? null }
+        : {}),
+      ...(data.notes !== undefined ? { notes: data.notes ?? null } : {}),
+    };
+
     const property = await db.property.update({
       where: { id: propertyId },
-      data,
+      data: updateData,
       include: {
         user: {
           select: {
@@ -239,8 +235,8 @@ properties.patch(
 // Delete property
 properties.delete(
   "/:id",
-  requireAuth(),
   rateLimiter(RateLimits.write),
+  requireAuth(),
   async (c) => {
     const authUser = getAuthUser(c);
 

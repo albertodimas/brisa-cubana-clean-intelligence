@@ -18,6 +18,25 @@ const cuidSchema = z
   .string({ required_error: "id is required" })
   .min(1, "id is required");
 
+export const createPropertySchema = z.object({
+  name: z.string().trim().min(1).max(255),
+  address: z.string().trim().min(1).max(500),
+  city: z.string().trim().min(1).max(100),
+  state: z.string().trim().min(1).max(100),
+  zipCode: z.string().trim().min(1).max(20),
+  type: z.enum(["RESIDENTIAL", "VACATION_RENTAL", "OFFICE", "HOSPITALITY"]),
+  size: z.coerce.number().int().positive().optional(),
+  bedrooms: z.coerce.number().int().nonnegative().optional(),
+  bathrooms: z.coerce.number().int().nonnegative().optional(),
+  notes: z.string().trim().max(1000).optional(),
+});
+
+export const updatePropertySchema = createPropertySchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "Provide at least one field to update",
+  });
+
 export const createBookingSchema = z
   .object({
     userId: cuidSchema,
@@ -161,6 +180,8 @@ export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 export type UpdateBookingInput = z.infer<typeof updateBookingSchema>;
 export type CreateServiceInput = z.infer<typeof createServiceSchema>;
 export type UpdateServiceInput = z.infer<typeof updateServiceSchema>;
+export type CreatePropertyInput = z.infer<typeof createPropertySchema>;
+export type UpdatePropertyInput = z.infer<typeof updatePropertySchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type UpdateUserPasswordInput = z.infer<typeof updateUserPasswordSchema>;

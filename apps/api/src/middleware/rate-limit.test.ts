@@ -6,6 +6,7 @@ describe("Rate Limiting Middleware", () => {
   let app: Hono;
 
   beforeEach(() => {
+    process.env.ENABLE_RATE_LIMITING = "true";
     // Clear rate limit store before each test
     clearRateLimitStore();
 
@@ -17,6 +18,7 @@ describe("Rate Limiting Middleware", () => {
   afterEach(() => {
     // Clean up after each test
     clearRateLimitStore();
+    delete process.env.ENABLE_RATE_LIMITING;
   });
 
   it("should allow requests within rate limit", async () => {
