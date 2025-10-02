@@ -271,6 +271,8 @@
     "lunr",
     "DYLD",
     "Elgp",
-    "saas"
+    "saas",
+    "Stmts",
+    "Funcs"
   ]
 }
