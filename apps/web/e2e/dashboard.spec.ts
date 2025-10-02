@@ -13,26 +13,30 @@ test.describe("Dashboard", () => {
   // Login before each test
   test.beforeEach(async ({ page }) => {
     await page.goto("/auth/signin");
-    await page.getByLabel(/email/i).fill("admin@brisacubanaclean.com");
-    await page.getByLabel(/password/i).fill("Admin123!");
-    await page.getByRole("button", { name: /sign in/i }).click();
+    const emailInput = page.getByLabel(/email/i);
+    const passwordInput = page.getByLabel(/contraseñ?a/i);
+
+    await emailInput.fill("admin@brisacubanaclean.com");
+    await passwordInput.fill("Admin123!");
+    await expect(emailInput).toHaveValue("admin@brisacubanaclean.com");
+    await expect(passwordInput).toHaveValue("Admin123!");
+    await page.getByRole("button", { name: /entrar/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
   test("should display dashboard overview", async ({ page }) => {
-    // Check for dashboard elements
-    await expect(
-      page.getByRole("heading", { name: /dashboard|overview/i }),
-    ).toBeVisible();
+    // Check for dashboard heading with "Hola"
+    await expect(page.getByRole("heading", { name: /hola/i })).toBeVisible();
 
-    // Should show some metrics or content
-    const mainContent = page.locator("main");
-    await expect(mainContent).toBeVisible();
+    // Should show operational state section heading
+    await expect(
+      page.getByRole("heading", { name: /estado operacional/i }),
+    ).toBeVisible();
   });
 
   test("should navigate to bookings page", async ({ page }) => {
     // Look for bookings link in navigation
-    const bookingsLink = page.getByRole("link", { name: /bookings|reservas/i });
+    const bookingsLink = page.getByRole("link", { name: /reservas/i });
 
     if (await bookingsLink.isVisible()) {
       await bookingsLink.click();
@@ -46,9 +50,7 @@ test.describe("Dashboard", () => {
 
   test("should navigate to properties page", async ({ page }) => {
     // Look for properties link in navigation
-    const propertiesLink = page.getByRole("link", {
-      name: /properties|propiedades/i,
-    });
+    const propertiesLink = page.getByRole("link", { name: /propiedades/i });
 
     if (await propertiesLink.isVisible()) {
       await propertiesLink.click();
@@ -61,8 +63,9 @@ test.describe("Dashboard", () => {
   });
 
   test("should display user info or navigation", async ({ page }) => {
-    // Should show some user-related element (name, email, or menu)
-    const bodyText = await page.textContent("body");
-    expect(bodyText).toContain("admin@brisacubanaclean.com");
+    // Should show user email in the page (use first() to handle multiple matches)
+    await expect(
+      page.getByText("admin@brisacubanaclean.com", { exact: false }).first(),
+    ).toBeVisible();
   });
 });

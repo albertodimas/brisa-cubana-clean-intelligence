@@ -11,9 +11,14 @@ test.describe("Booking Flow", () => {
   // Login before each test
   test.beforeEach(async ({ page }) => {
     await page.goto("/auth/signin");
-    await page.getByLabel(/email/i).fill("client@example.com");
-    await page.getByLabel(/password/i).fill("Client123!");
-    await page.getByRole("button", { name: /sign in/i }).click();
+    const emailInput = page.getByLabel(/email/i);
+    const passwordInput = page.getByLabel(/contraseñ?a/i);
+
+    await emailInput.fill("client@brisacubanaclean.com");
+    await passwordInput.fill("Client123!");
+    await expect(emailInput).toHaveValue("client@brisacubanaclean.com");
+    await expect(passwordInput).toHaveValue("Client123!");
+    await page.getByRole("button", { name: /entrar/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
@@ -22,7 +27,7 @@ test.describe("Booking Flow", () => {
 
     // Look for "New Property" or "Create" button
     const createButton = page.getByRole("link", {
-      name: /new property|create|nueva propiedad/i,
+      name: /agregar propiedad|nueva propiedad|create/i,
     });
 
     if (await createButton.isVisible()) {
@@ -57,7 +62,7 @@ test.describe("Booking Flow", () => {
 
     // Look for "New Booking" or "Create" button
     const createButton = page.getByRole("link", {
-      name: /new booking|create|nueva reserva/i,
+      name: /nueva reserva|crear reserva|new booking/i,
     });
 
     if (await createButton.isVisible()) {
