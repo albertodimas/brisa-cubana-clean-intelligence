@@ -27,13 +27,34 @@ export const app = new Hono();
 app.use("*", compress()); // Compression first (gzip/deflate)
 app.use("*", requestLogger); // Logging second
 app.use("*", metricsMiddleware); // Metrics third (after logging)
+// Production-grade CORS configuration
+// References:
+// - https://hono.dev/docs/middleware/builtin/cors
+// - https://app.studyraid.com/en/read/11303/352730/cors-configuration-in-hono
+// Consulted: 2025-10-02
 app.use(
   "*",
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? (process.env.CORS_ORIGIN ?? "*")
-        : "http://localhost:3000",
+    origin: (origin) => {
+      // Development: allow localhost
+      if (process.env.NODE_ENV !== "production") {
+        return origin;
+      }
+
+      // Production: explicit allowlist (never use wildcards)
+      const allowedOrigins = [
+        "https://brisacubana.com",
+        "https://www.brisacubana.com",
+        "https://brisa-cubana.vercel.app",
+        ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+      ];
+
+      return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+    },
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length", "X-Request-Id"],
+    maxAge: 86400, // 24 hours for preflight cache
     credentials: true,
   }),
 );

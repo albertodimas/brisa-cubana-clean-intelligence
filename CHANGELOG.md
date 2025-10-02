@@ -7,6 +7,79 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+### Added - 2025-10-02
+
+#### Production-Ready Security & Performance
+
+- **Next.js Security Headers** (`apps/web/next.config.ts`):
+  - HSTS (Strict-Transport-Security) with 2-year max-age + preload
+  - Content Security Policy (CSP) with strict directives
+  - X-Frame-Options: DENY (clickjacking protection)
+  - X-Content-Type-Options: nosniff
+  - Permissions-Policy for camera/microphone/geolocation
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - References: [Next.js CSP Docs](https://nextjs.org/docs/pages/guides/content-security-policy), [Arcjet Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
+
+- **Production CORS Configuration** (`apps/api/src/app.ts`):
+  - Explicit origin allowlist (no wildcards in production)
+  - Function-based origin validation
+  - 24-hour preflight cache (`maxAge: 86400`)
+  - References: [Hono CORS Docs](https://hono.dev/docs/middleware/builtin/cors), [StudyRaid CORS Guide](https://app.studyraid.com/en/read/11303/352730/cors-configuration-in-hono)
+
+- **Database Connection Pooling Optimization** (`.env.example`):
+  - Prisma 6.16+ connection pool configuration
+  - `connection_limit=10` and `pool_timeout=10` parameters documented
+  - Production guidance for Railway (long-running) vs Vercel (serverless)
+  - References: [Prisma Connection Pool Docs](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/databases-connections/connection-pool), [Prisma Connection Management](https://www.prisma.io/docs/guides/performance-and-optimization/connection-management)
+
+- **Production Runbook** (`docs/for-developers/production-runbook.md`):
+  - Pre-deployment checklist (security, infrastructure, compliance)
+  - Environment configuration (Railway API + Vercel Web)
+  - Deployment procedures (automated CI/CD + manual emergency)
+  - Health checks & monitoring (endpoints, KPIs, dashboards)
+  - Incident response playbook (severity levels, on-call procedures)
+  - Rollback procedures (Railway, Vercel, Git, Database)
+  - Performance optimization (database, API, web)
+  - Security hardening checklist
+
+### Changed - 2025-10-02
+
+- **Dependencies Updated**:
+  - React: 19.1.1 → 19.2.0
+  - @types/react: 19.1.15 → 19.2.0
+  - @types/react-dom: 19.1.9 → 19.2.0
+  - Prisma: 6.16.2 → 6.16.3
+  - @types/node: 24.6.0 → 24.6.2
+  - pino: 9.12.0 → 9.13.0
+  - puppeteer: 24.22.3 → 24.23.0
+  - resend: 6.1.1 → 6.1.2
+  - typescript: 5.9.2 → 5.9.3
+
+- **Security**: CORS configuration migrated from static allowlist to function-based validation
+- **Performance**: Database URL examples now include connection pooling parameters
+
+### Security - 2025-10-02
+
+- Production-grade HTTP security headers (8 headers) enforced via Next.js config
+- CORS restricted to explicit production domains (no wildcards)
+- Database connection pooling optimized to prevent exhaustion
+- Rate limiting already active (100 req/15min per IP on API routes)
+
+### Deprecated
+
+- `next lint` command (warning shown, will be removed in Next.js 16)
+- `@types/bcryptjs@3.0.0` (marked as deprecated by npm)
+
+### Notes - 2025-10-02
+
+**Breaking Changes NOT Applied** (require manual migration):
+
+- `bcryptjs` 2.4.3 → 3.0.2 (ESM module changes)
+- `stripe` 17.7.0 → 19.0.0 (API changes, need Stripe changelog review)
+- `zod` 3.25.76 → 4.1.11 (major breaking changes, see [Zod v4 Migration Guide](https://zod.dev/v4/changelog))
+
+These updates deferred to avoid production disruption. Current versions are stable and secure.
+
 ### Added - 2025-09-30
 
 #### Property Management System
