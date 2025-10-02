@@ -1,10 +1,67 @@
 import { redirect } from "next/navigation";
 import { Badge, Button, Card, Section } from "@brisa/ui";
 import { auth } from "@/server/auth/config";
-import { Calendar, MapPin, DollarSign, Clock, Plus } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Plus } from "lucide-react";
 import type { Booking } from "@/types/api";
+import { isFakeDataEnabled } from "@/server/utils/fake";
 
 async function getBookings(accessToken: string): Promise<Booking[]> {
+  if (isFakeDataEnabled()) {
+    const now = new Date().toISOString();
+    return [
+      {
+        id: "fake-booking-1",
+        userId: "fake-admin",
+        propertyId: "fake-property-1",
+        serviceId: "fake-service-1",
+        scheduledAt: now,
+        completedAt: null,
+        status: "CONFIRMED" as const,
+        totalPrice: "149.99",
+        notes: null,
+        paymentStatus: "PENDING_PAYMENT" as const,
+        createdAt: now,
+        updatedAt: now,
+        service: {
+          id: "fake-service-1",
+          name: "Limpieza Profunda",
+          duration: 180,
+        },
+        property: {
+          id: "fake-property-1",
+          name: "Brickell Luxury Apartment",
+          address: "1234 Brickell Ave, Unit 2501",
+        },
+      },
+      {
+        id: "fake-booking-2",
+        userId: "fake-admin",
+        propertyId: "fake-property-2",
+        serviceId: "fake-service-2",
+        scheduledAt: new Date(
+          Date.now() + 2 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        completedAt: null,
+        status: "PENDING" as const,
+        totalPrice: "119.99",
+        notes: null,
+        paymentStatus: "PENDING_PAYMENT" as const,
+        createdAt: now,
+        updatedAt: now,
+        service: {
+          id: "fake-service-2",
+          name: "Turnover Vacation Rental",
+          duration: 90,
+        },
+        property: {
+          id: "fake-property-2",
+          name: "Wynwood Vacation Rental",
+          address: "567 NW 2nd Ave",
+        },
+      },
+    ];
+  }
+
   const API_BASE_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -139,36 +196,21 @@ export default async function BookingsPage() {
                         <MapPin className="h-4 w-4 text-neutral-500" />
                         {booking.property.name}
                       </p>
-                      <p className="text-xs text-neutral-400 pl-6">
-                        {booking.property.address}
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-neutral-500" />
-                        {booking.service.duration} minutos
-                      </p>
                       <p className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-neutral-500" />
                         {paymentStatusLabels[booking.paymentStatus]}
                       </p>
                     </div>
 
-                    <div className="mt-6 flex gap-2">
+                    <div className="mt-4 flex gap-2">
                       <Button
-                        intent="ghost"
+                        intent="secondary"
                         as="a"
                         href={`/dashboard/bookings/${booking.id}`}
+                        className="flex-1"
                       >
-                        Ver detalles
+                        Ver Detalles
                       </Button>
-                      {booking.status === "PENDING" && (
-                        <Button
-                          intent="secondary"
-                          as="a"
-                          href={`/dashboard/bookings/${booking.id}/cancel`}
-                        >
-                          Cancelar
-                        </Button>
-                      )}
                     </div>
                   </Card>
                 ))}
@@ -179,13 +221,13 @@ export default async function BookingsPage() {
           {inProgress.length > 0 && (
             <Section
               title="En Progreso"
-              description={`${inProgress.length} ${inProgress.length === 1 ? "servicio" : "servicios"} actualmente en ejecución`}
+              description={`${inProgress.length} ${inProgress.length === 1 ? "servicio" : "servicios"} en proceso`}
             >
               <div className="grid gap-4 lg:grid-cols-2">
                 {inProgress.map((booking) => (
                   <Card
                     key={booking.id}
-                    className="border-teal-500/50 bg-teal-500/5"
+                    className="border-teal-500/30 bg-teal-500/5"
                   >
                     <div className="flex items-start justify-between">
                       <div>
@@ -196,28 +238,34 @@ export default async function BookingsPage() {
                           {statusLabels[booking.status]}
                         </Badge>
                       </div>
+                      <span className="text-lg font-bold text-teal-300">
+                        {currencyFormatter.format(
+                          parseFloat(booking.totalPrice),
+                        )}
+                      </span>
                     </div>
 
                     <div className="mt-4 space-y-2 text-sm text-neutral-300">
                       <p className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-neutral-500" />
-                        {booking.property.name}
-                      </p>
-                      <p className="text-xs text-neutral-400 pl-6">
-                        Iniciado:{" "}
+                        <Calendar className="h-4 w-4 text-neutral-500" />
                         {datetimeFormatter.format(
                           new Date(booking.scheduledAt),
                         )}
                       </p>
+                      <p className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-neutral-500" />
+                        {booking.property.name}
+                      </p>
                     </div>
 
-                    <div className="mt-6">
+                    <div className="mt-4">
                       <Button
                         intent="primary"
                         as="a"
                         href={`/dashboard/bookings/${booking.id}`}
+                        className="w-full"
                       >
-                        Ver progreso
+                        Ver Detalles
                       </Button>
                     </div>
                   </Card>
@@ -232,41 +280,28 @@ export default async function BookingsPage() {
               description={`${completed.length} ${completed.length === 1 ? "servicio completado" : "servicios completados"}`}
             >
               <div className="grid gap-4 lg:grid-cols-3">
-                {completed.slice(0, 6).map((booking) => (
-                  <Card
-                    key={booking.id}
-                    className="text-sm opacity-75 hover:opacity-100 transition"
-                  >
-                    <h3 className="font-semibold text-white text-sm">
+                {completed.map((booking) => (
+                  <Card key={booking.id} className="bg-white/[0.02]">
+                    <h4 className="font-semibold text-neutral-200">
                       {booking.service.name}
-                    </h3>
-                    <p className="text-xs text-neutral-400 mt-1">
-                      {booking.completedAt
-                        ? new Date(booking.completedAt).toLocaleDateString(
-                            "es-US",
-                          )
-                        : "Sin fecha"}
+                    </h4>
+                    <p className="mt-1 text-xs text-neutral-400">
+                      {datetimeFormatter.format(new Date(booking.scheduledAt))}
                     </p>
-                    <p className="text-xs text-neutral-400 mt-1">
-                      {booking.property.name}
+                    <p className="mt-2 text-sm text-teal-300">
+                      {currencyFormatter.format(parseFloat(booking.totalPrice))}
                     </p>
-                    <div className="mt-4">
-                      <Button
-                        intent="ghost"
-                        as="a"
-                        href={`/dashboard/bookings/${booking.id}`}
-                      >
-                        Ver reporte
-                      </Button>
-                    </div>
+                    <Button
+                      intent="ghost"
+                      as="a"
+                      href={`/dashboard/bookings/${booking.id}`}
+                      className="mt-3 w-full"
+                    >
+                      Ver Detalles
+                    </Button>
                   </Card>
                 ))}
               </div>
-              {completed.length > 6 && (
-                <p className="text-xs text-neutral-400 text-center mt-4">
-                  Mostrando 6 de {completed.length} reservas completadas
-                </p>
-              )}
             </Section>
           )}
 
@@ -276,20 +311,18 @@ export default async function BookingsPage() {
               description={`${cancelled.length} ${cancelled.length === 1 ? "reserva cancelada" : "reservas canceladas"}`}
             >
               <div className="grid gap-4 lg:grid-cols-3">
-                {cancelled.slice(0, 6).map((booking) => (
+                {cancelled.map((booking) => (
                   <Card
                     key={booking.id}
-                    className="text-sm opacity-60 hover:opacity-80 transition border-neutral-700/50"
+                    className="border-neutral-700 bg-neutral-900/30"
                   >
-                    <h3 className="font-semibold text-neutral-300 text-sm">
+                    <h4 className="font-semibold text-neutral-400">
                       {booking.service.name}
-                    </h3>
-                    <p className="text-xs text-neutral-500 mt-1">
-                      {new Date(booking.scheduledAt).toLocaleDateString(
-                        "es-US",
-                      )}
+                    </h4>
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {datetimeFormatter.format(new Date(booking.scheduledAt))}
                     </p>
-                    <Badge tone="sunset" className="mt-2">
+                    <Badge tone="neutral" className="mt-2">
                       Cancelada
                     </Badge>
                   </Card>
@@ -299,23 +332,21 @@ export default async function BookingsPage() {
           )}
         </>
       ) : (
-        <Card
-          title="Aún no tienes reservas"
-          description="Agenda tu primer servicio de limpieza desde el dashboard"
-        >
-          <div className="mt-6">
-            <Button intent="primary" as="a" href="/dashboard">
-              Ir al Dashboard
-            </Button>
-          </div>
+        <Card title="Sin reservas" description="Todavía no tienes reservas">
+          <p className="text-sm text-neutral-300">
+            Crea tu primera reserva para comenzar a gestionar tus servicios de
+            limpieza.
+          </p>
+          <Button
+            intent="primary"
+            as="a"
+            href="/dashboard/bookings/new"
+            className="mt-4"
+          >
+            Crear Primera Reserva
+          </Button>
         </Card>
       )}
-
-      <div className="flex justify-center">
-        <Button intent="ghost" as="a" href="/dashboard">
-          ← Volver al Dashboard
-        </Button>
-      </div>
     </section>
   );
 }

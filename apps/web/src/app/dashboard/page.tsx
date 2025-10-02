@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { Badge, Button, Card, Section } from "@brisa/ui";
 import { auth, signOut } from "@/server/auth/config";
-import { getDashboardData } from "@/server/api/client";
+import { buildFakeDashboardData } from "@/server/api/fake-dashboard";
 import { queuePaymentAlert } from "@/server/notifications/alerts";
+import { isFakeDataEnabled } from "@/server/utils/fake";
 import { CreateBookingForm } from "./create-booking-form";
 import { ManageBookings } from "./manage-bookings";
 
@@ -31,12 +32,23 @@ export default async function DashboardPage() {
   if (!session.user.accessToken) {
     redirect("/auth/signin");
   }
+  const user = session.user;
+  const accessToken = user.accessToken!;
+  const role = user.role;
+  const useFakeData = isFakeDataEnabled();
 
-  const data = await getDashboardData(
-    session.user.id,
-    session.user.accessToken,
-    session.user.role,
-  );
+  let data;
+  if (useFakeData) {
+    data = buildFakeDashboardData({
+      userId: user.id,
+      userRole: role,
+      canManageBookings: role === "ADMIN" || role === "STAFF",
+      includeAlerts: true,
+    });
+  } else {
+    const { getDashboardData } = await import("@/server/api/client");
+    data = await getDashboardData(user.id, accessToken, role);
+  }
 
   const hasProperties = data.user.properties.length > 0;
   const upcomingBookings =
@@ -47,12 +59,21 @@ export default async function DashboardPage() {
   const failedPayments = Number(data.paymentMetrics?.FAILED ?? 0);
   const pendingPayments = Number(data.paymentMetrics?.PENDING_PAYMENT ?? 0);
 
-  if (data.canManageBookings && (failedPayments > 0 || pendingPayments > 5)) {
-    await queuePaymentAlert({
+  if (
+    !useFakeData &&
+    data.canManageBookings &&
+    (failedPayments > 0 || pendingPayments > 5)
+  ) {
+    const queued = await queuePaymentAlert({
       failedPayments,
       pendingPayments,
-      accessToken: session.user.accessToken,
+      accessToken,
     });
+    if (!queued) {
+      console.warn(
+        "[dashboard] unable to enqueue payment alert for finance team",
+      );
+    }
   }
 
   return (
@@ -246,7 +267,10 @@ export default async function DashboardPage() {
               </ul>
             </Card>
           </div>
-          <ManageBookings bookings={data.managedBookings ?? []} />
+          <ManageBookings
+            bookings={data.managedBookings ?? []}
+            useFakeData={useFakeData}
+          />
           {data.failedPaymentsLast24h &&
           data.failedPaymentsLast24h.length > 0 ? (
             <Card

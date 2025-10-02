@@ -35,12 +35,14 @@ const updateInitialState: UpdateBookingState = { ok: false };
 const noteInitialState: CreateReconciliationNoteState = { ok: false };
 const resolveInitialState: ResolveReconciliationNoteState = { ok: false };
 
-interface ManageBookingsProps {
-  bookings: BookingSummary[];
-}
-
 interface ManageBookingRowProps {
   booking: BookingSummary;
+  useFakeData: boolean;
+}
+
+interface ManageBookingsProps {
+  bookings: BookingSummary[];
+  useFakeData: boolean;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -73,7 +75,7 @@ function stripeDashboardUrl(booking: BookingSummary) {
   return null;
 }
 
-function ManageBookingRow({ booking }: ManageBookingRowProps) {
+function ManageBookingRow({ booking, useFakeData }: ManageBookingRowProps) {
   const [state, formAction] = useFormState(
     updateBookingStatus,
     updateInitialState,
@@ -89,7 +91,8 @@ function ManageBookingRow({ booking }: ManageBookingRowProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const stripeUrl = stripeDashboardUrl(booking);
   const [note, setNote] = useState("");
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [notes, setNotes] = useState<
     Array<{
       id: string;
@@ -118,6 +121,10 @@ function ManageBookingRow({ booking }: ManageBookingRowProps) {
   }, [noteState]);
 
   useEffect(() => {
+    if (useFakeData) {
+      return;
+    }
+
     const token = session?.user?.accessToken;
     if (!token) {
       return;
@@ -159,7 +166,13 @@ function ManageBookingRow({ booking }: ManageBookingRowProps) {
     }
 
     void loadNotes();
-  }, [booking.id, session?.user?.accessToken, noteState.ok, resolveState.ok]);
+  }, [
+    booking.id,
+    session?.user?.accessToken,
+    noteState.ok,
+    resolveState.ok,
+    useFakeData,
+  ]);
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-neutral-200">
@@ -325,7 +338,7 @@ function ManageBookingRow({ booking }: ManageBookingRowProps) {
   );
 }
 
-export function ManageBookings({ bookings }: ManageBookingsProps) {
+export function ManageBookings({ bookings, useFakeData }: ManageBookingsProps) {
   const [statusFilter, setStatusFilter] =
     useState<(typeof statusOptions)[number]>("TODOS");
   const [paymentFilter, setPaymentFilter] =
@@ -397,7 +410,11 @@ export function ManageBookings({ bookings }: ManageBookingsProps) {
       </div>
 
       {filtered.map((booking) => (
-        <ManageBookingRow key={booking.id} booking={booking} />
+        <ManageBookingRow
+          key={booking.id}
+          booking={booking}
+          useFakeData={useFakeData}
+        />
       ))}
 
       {filtered.length === 0 ? (

@@ -1,5 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
+process.env.USE_FAKE_API_DATA ??= "1";
+process.env.NEXT_PUBLIC_USE_FAKE_API_DATA ??= "1";
+process.env.DYLD_USE_FAKE_API_DATA ??= "1";
+
 const port = Number(process.env.PORT ?? 3000);
 
 export default defineConfig({
@@ -11,7 +15,7 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`,
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -20,10 +24,14 @@ export default defineConfig({
     command: `node apps/web/scripts/start-e2e.js`,
     url: `http://127.0.0.1:${port}`,
     timeout: 120_000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     env: {
       HOSTNAME: "0.0.0.0",
       PORT: String(port),
+      USE_FAKE_API_DATA: process.env.USE_FAKE_API_DATA ?? "1",
+      DYLD_USE_FAKE_API_DATA: process.env.DYLD_USE_FAKE_API_DATA ?? "1",
+      NEXT_PUBLIC_USE_FAKE_API_DATA:
+        process.env.NEXT_PUBLIC_USE_FAKE_API_DATA ?? "1",
     },
   },
   projects: [

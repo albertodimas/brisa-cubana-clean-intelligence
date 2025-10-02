@@ -33,7 +33,7 @@
     "stripe:listen": "./scripts/stripe_listen.sh",
     "stripe:trigger": "./scripts/stripe_trigger.sh",
     "prepare": "husky",
-    "test:e2e": "pnpm --filter=web build && PLAYWRIGHT_HTML_REPORT=./.playwright-report pnpm exec playwright test",
+    "test:e2e": "DYLD_USE_FAKE_API_DATA=1 USE_FAKE_API_DATA=1 NEXT_PUBLIC_USE_FAKE_API_DATA=1 pnpm --filter=web build && PLAYWRIGHT_HTML_REPORT=./.playwright-report DYLD_USE_FAKE_API_DATA=1 USE_FAKE_API_DATA=1 NEXT_PUBLIC_USE_FAKE_API_DATA=1 pnpm exec playwright test",
     "pre-push": "./scripts/pre-push-check.sh",
     "verify": "./scripts/pre-push-check.sh"
   },

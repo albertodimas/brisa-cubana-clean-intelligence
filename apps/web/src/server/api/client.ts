@@ -1,5 +1,8 @@
 import "server-only";
 
+import { isFakeDataEnabled } from "@/server/utils/fake";
+import { buildFakeDashboardData } from "./fake-dashboard";
+
 const API_BASE_URL =
   process.env.API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
@@ -35,6 +38,12 @@ async function fetchJson<T>(
   });
 
   if (!response.ok) {
+    const body = await response.text().catch(() => "<unreadable>");
+    console.error("[api] Request failed", {
+      path,
+      status: response.status,
+      body,
+    });
     const message = await response
       .json()
       .catch(() => ({ error: response.statusText }));
@@ -61,9 +70,13 @@ interface ApiProperty {
   id: string;
   name: string;
   address: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
+  size?: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  notes?: string | null;
 }
 
 interface ApiBooking {
@@ -101,6 +114,13 @@ export interface PropertySummary {
   id: string;
   name: string;
   address: string;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
+  size?: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  notes?: string | null;
 }
 
 export interface BookingSummary {
@@ -171,95 +191,126 @@ export async function getDashboardData(
   }
 
   const canManageBookings = userRole === "ADMIN" || userRole === "STAFF";
-
-  const userPromise = fetchJson<ApiUserResponse>(
-    `/api/users/${userId}`,
-    accessToken,
-  );
-  const servicesPromise = fetchJson<ApiService[]>(`/api/services`);
-
-  let personalBookings: ApiBooking[] = [];
-  let managedBookings: ApiBooking[] | undefined;
-
-  if (canManageBookings) {
-    const [managedResponse, personalResponse] = await Promise.all([
-      fetchJson<{ data: ApiBooking[] }>(`/api/bookings?limit=20`, accessToken),
-      fetchJson<ApiBooking[]>(`/api/bookings/mine`, accessToken).catch(
-        () => [],
-      ),
-    ]);
-    managedBookings = managedResponse.data;
-    personalBookings = Array.isArray(personalResponse) ? personalResponse : [];
-  } else {
-    personalBookings = await fetchJson<ApiBooking[]>(
-      `/api/bookings/mine`,
-      accessToken,
-    );
+  if (isFakeDataEnabled()) {
+    return buildFakeDashboardData({
+      userId,
+      userRole,
+      canManageBookings,
+      includeAlerts: true,
+    });
   }
 
-  const [user, services] = await Promise.all([userPromise, servicesPromise]);
+  try {
+    const userPromise = fetchJson<ApiUserResponse>(
+      `/api/users/${userId}`,
+      accessToken,
+    );
+    const servicesPromise = fetchJson<ApiService[]>(`/api/services`);
 
-  const mappedServices: ServiceSummary[] = services.map((service) => ({
-    id: service.id,
-    name: service.name,
-    description: service.description ?? undefined,
-    basePrice: toCurrencyNumber(service.basePrice),
-    durationMinutes: service.duration,
-  }));
+    let personalBookings: ApiBooking[] = [];
+    let managedBookings: ApiBooking[] | undefined;
 
-  const mappedProperties: PropertySummary[] = user.properties.map(
-    (property) => ({
-      id: property.id,
-      name: property.name,
-      address: property.address,
-    }),
-  );
+    if (canManageBookings) {
+      const [managedResponse, personalResponse] = await Promise.all([
+        fetchJson<{ data: ApiBooking[] }>(
+          `/api/bookings?limit=20`,
+          accessToken,
+        ),
+        fetchJson<ApiBooking[]>(`/api/bookings/mine`, accessToken).catch(
+          () => [],
+        ),
+      ]);
+      managedBookings = managedResponse.data;
+      personalBookings = Array.isArray(personalResponse)
+        ? personalResponse
+        : [];
+    } else {
+      personalBookings = await fetchJson<ApiBooking[]>(
+        `/api/bookings/mine`,
+        accessToken,
+      );
+    }
 
-  const mappedBookings: BookingSummary[] = personalBookings.map(mapBooking);
-  const mappedManagedBookings = managedBookings?.map(mapBooking);
+    const [user, services] = await Promise.all([userPromise, servicesPromise]);
 
-  const sourceForMetrics = mappedManagedBookings ?? mappedBookings;
+    const mappedServices: ServiceSummary[] = services.map((service) => ({
+      id: service.id,
+      name: service.name,
+      description: service.description ?? undefined,
+      basePrice: toCurrencyNumber(service.basePrice),
+      durationMinutes: service.duration,
+    }));
 
-  const paymentMetrics = sourceForMetrics.reduce<Record<string, number>>(
-    (acc, booking) => {
-      const status = booking.paymentStatus ?? "PENDING_PAYMENT";
-      acc[status] = (acc[status] ?? 0) + 1;
-      return acc;
-    },
-    {},
-  );
-
-  const bookingMetrics = sourceForMetrics.reduce<Record<string, number>>(
-    (acc, booking) => {
-      acc[booking.status] = (acc[booking.status] ?? 0) + 1;
-      return acc;
-    },
-    {},
-  );
-
-  const now = Date.now();
-  const failedPaymentsLast24h = mappedManagedBookings
-    ?.filter((booking) => booking.paymentStatus === "FAILED")
-    .filter(
-      (booking) => now - new Date(booking.scheduledAt).getTime() <= 86_400_000,
+    const mappedProperties: PropertySummary[] = user.properties.map(
+      (property) => ({
+        id: property.id,
+        name: property.name,
+        address: property.address,
+        city: property.city ?? null,
+        state: property.state ?? null,
+        zipCode: property.zipCode ?? null,
+        size: property.size ?? null,
+        bedrooms: property.bedrooms ?? null,
+        bathrooms: property.bathrooms ?? null,
+        notes: property.notes ?? null,
+      }),
     );
 
-  return {
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name ?? undefined,
-      role: user.role,
-      properties: mappedProperties,
-    },
-    bookings: mappedBookings,
-    services: mappedServices,
-    managedBookings: mappedManagedBookings,
-    canManageBookings,
-    paymentMetrics,
-    bookingMetrics,
-    failedPaymentsLast24h,
-  };
+    const mappedBookings: BookingSummary[] = personalBookings.map(mapBooking);
+    const mappedManagedBookings = managedBookings?.map(mapBooking);
+
+    const sourceForMetrics = mappedManagedBookings ?? mappedBookings;
+
+    const paymentMetrics = sourceForMetrics.reduce<Record<string, number>>(
+      (acc, booking) => {
+        const status = booking.paymentStatus ?? "PENDING_PAYMENT";
+        acc[status] = (acc[status] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
+
+    const bookingMetrics = sourceForMetrics.reduce<Record<string, number>>(
+      (acc, booking) => {
+        acc[booking.status] = (acc[booking.status] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
+
+    const now = Date.now();
+    const failedPaymentsLast24h = mappedManagedBookings
+      ?.filter((booking) => booking.paymentStatus === "FAILED")
+      .filter(
+        (booking) =>
+          now - new Date(booking.scheduledAt).getTime() <= 86_400_000,
+      );
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name ?? undefined,
+        role: user.role,
+        properties: mappedProperties,
+      },
+      bookings: mappedBookings,
+      services: mappedServices,
+      managedBookings: mappedManagedBookings,
+      canManageBookings,
+      paymentMetrics,
+      bookingMetrics,
+      failedPaymentsLast24h,
+    };
+  } catch (error) {
+    console.warn("[api] Falling back to static dashboard data", error);
+    return buildFakeDashboardData({
+      userId,
+      userRole,
+      canManageBookings,
+      includeAlerts: true,
+    });
+  }
 }
 
 export { ApiError };

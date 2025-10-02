@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { verifyUserCredentials } from "./dal";
+import { findFakeUser, isFakeDataEnabled } from "@/server/utils/fake";
 
 const sessionMaxAgeSeconds = 60 * 60 * 8; // 8 horas
 
@@ -26,6 +27,23 @@ export const {
       authorize: async (credentials) => {
         if (!credentials?.email || !credentials?.password) {
           return null;
+        }
+
+        if (isFakeDataEnabled()) {
+          const user = findFakeUser(
+            String(credentials.email),
+            String(credentials.password),
+          );
+          if (!user) {
+            return null;
+          }
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name ?? user.email,
+            role: user.role ?? "CLIENT",
+            accessToken: user.token,
+          };
         }
 
         const user = await verifyUserCredentials(
