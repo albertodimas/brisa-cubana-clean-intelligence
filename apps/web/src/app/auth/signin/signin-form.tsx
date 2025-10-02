@@ -5,8 +5,8 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 export function SignInForm({ callbackUrl }: { callbackUrl: string }) {
-  const [email, setEmail] = useState("demo@brisacubanaclean.com");
-  const [password, setPassword] = useState("demo123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -41,8 +41,8 @@ export function SignInForm({ callbackUrl }: { callbackUrl: string }) {
           Inicia sesión
         </h1>
         <p className="text-sm text-neutral-400">
-          Usa las credenciales demo configuradas en {".env"}{" "}
-          (`AUTH_DEMO_USERS`).
+          Usa las credenciales demo configuradas en `.env` (`AUTH_DEMO_USERS`).
+          Por defecto: admin@brisacubanaclean.com / Admin123!
         </p>
       </div>
 

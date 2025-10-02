@@ -62,7 +62,9 @@ export function CreateBookingForm({
             </option>
             {properties.map((property) => (
               <option key={property.id} value={property.id}>
-                {property.name}
+                {property.city
+                  ? `${property.name} · ${property.city}`
+                  : property.name}
               </option>
             ))}
           </select>

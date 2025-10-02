@@ -14,6 +14,8 @@ nav:
       - Quickstart (5 min): for-developers/quickstart.md
       - API Reference: for-developers/api-reference.md
       - Testing Guide: for-developers/testing.md
+      - Delivery Plan: development/delivery-plan.md
+      - Documentation Standards: development/documentation-standards.md
       - Deployment Guide: for-developers/deployment.md
       - GitHub Secrets: for-developers/github-secrets.md
       - Staging Setup: for-developers/staging-setup.md
@@ -92,6 +94,7 @@ nav:
       - Overview: reference/README.md
       - Sources: reference/sources.md
       - Templates:
+          - Overview: reference/templates/index.md
           - ADR Template: reference/templates/adr-template.md
           - Model Card Template: reference/templates/model-card-template.md
           - Interview Notes: reference/templates/interview-notes-template.md
@@ -191,6 +194,10 @@ plugins:
       enable_creation_date: false
       type: timeago
       locale: es
+      fallback_to_build_date: true
+      exclude:
+        - development/documentation-standards.md
+        - reference/templates/index.md
   - minify:
       minify_html: true
 

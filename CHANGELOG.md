@@ -57,6 +57,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - CODE_OF_CONDUCT.md basado en Contributor Covenant 2.1
 - ARCHITECTURE.md con overview de alto nivel del sistema
 - CHANGELOG.md migrado desde docs/changelog/
+- Guía de estándares editoriales (`docs/development/documentation-standards.md`) enlazada en MkDocs
 
 ### Changed
 
@@ -64,11 +65,17 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - `engines.node` actualizado a `>=24.9.0` en apps/web/package.json
 - Variables de entorno: agregado WEB_APP_URL para reemplazar NEXT_PUBLIC_APP_URL en API
 - Documentación de estrategia de .env en SETUP.md
+- Prisma: propiedades permiten campos opcionales (`size`, `bedrooms`, `bathrooms`, `notes`) y comparten validaciones en `schemas.ts`
+- Frontend: tarjetas y formularios de propiedades muestran y persisten notas, metros cuadrados y distribución de habitaciones con tipado consistente
+- README, SETUP y QUICKSTART reescritos con instrucciones reales (puertos 3001/5433/6380/8026) y tono profesional
+- Portal de documentación actualizado (`docs/index.md`, `mkdocs.yml`) con recuento real y nuevo estándar editorial
 
 ### Fixed
 
 - Comentarios TODO obsoletos eliminados en routes/users.ts y routes/services.ts
 - Fecha de changelog corregida (2025-10-01 → 2025-09-30)
+- Plantillas `.env` y guías corrigieron mapeos reales (PostgreSQL 5433, Redis 6380, API 3001, MailHog 8026)
+- Rate limiting asegura todos los verbos en `/api/properties` antes de hits a base de datos
 
 ### Removed
 

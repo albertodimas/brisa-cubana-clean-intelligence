@@ -4,21 +4,21 @@ This document describes all the seed data created by `pnpm db:seed` for developm
 
 ## 🔑 Test Users
 
-All users share the same password for development: `demo123`
+Credenciales por defecto generadas por el seed:
 
-| Email                       | Role   | Name            | Phone           | Use Case                               |
-| --------------------------- | ------ | --------------- | --------------- | -------------------------------------- |
-| admin@brisacubanaclean.com  | ADMIN  | Admin User      | +1-305-555-0001 | Full system access, user management    |
-| staff@brisacubanaclean.com  | STAFF  | Staff Member    | +1-305-555-0002 | Booking management, reconciliation     |
-| client@brisacubanaclean.com | CLIENT | Maria Rodriguez | +1-305-555-0100 | Residential client                     |
-| carlos.mendez@example.com   | CLIENT | Carlos Mendez   | +1-305-555-0200 | Property manager (multiple properties) |
+| Email                       | Contraseña  | Rol    | Nombre          | Teléfono        | Caso de uso                                |
+| --------------------------- | ----------- | ------ | --------------- | --------------- | ------------------------------------------ |
+| admin@brisacubanaclean.com  | Admin123!   | ADMIN  | Admin User      | +1-305-555-0001 | Acceso completo y gestión de usuarios      |
+| staff@brisacubanaclean.com  | Staff123!   | STAFF  | Staff Member    | +1-305-555-0002 | Gestión operativa y conciliaciones         |
+| client@brisacubanaclean.com | Client123!  | CLIENT | Maria Rodriguez | +1-305-555-0100 | Cliente residencial                        |
+| carlos.mendez@example.com   | Manager123! | CLIENT | Carlos Mendez   | +1-305-555-0200 | Property manager con múltiples propiedades |
 
 ### Login Example
 
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@brisacubanaclean.com","password":"demo123"}'
+  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}'
 ```
 
 ## 🏢 Properties
@@ -114,7 +114,7 @@ curl -X POST http://localhost:3001/api/auth/login \
 # Admin can access all endpoints
 TOKEN=$(curl -s -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@brisacubanaclean.com","password":"demo123"}' \
+  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}' \
   | jq -r '.token')
 
 # List all bookings (admin/staff only)

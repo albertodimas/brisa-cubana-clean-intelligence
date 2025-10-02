@@ -67,53 +67,64 @@ async function main() {
   });
 
   // Create users with different roles
-  const passwordHash = await hashPassword("demo123");
+  const adminPasswordHash = await hashPassword("Admin123!");
+  const staffPasswordHash = await hashPassword("Staff123!");
+  const clientPasswordHash = await hashPassword("Client123!");
+  const managerPasswordHash = await hashPassword("Manager123!");
 
   const adminUser = await prisma.user.upsert({
     where: { email: "admin@brisacubanaclean.com" },
-    update: {},
+    update: {
+      passwordHash: adminPasswordHash,
+    },
     create: {
       email: "admin@brisacubanaclean.com",
       name: "Admin User",
       phone: "+1-305-555-0001",
       role: "ADMIN",
-      passwordHash,
+      passwordHash: adminPasswordHash,
     },
   });
 
   const staffUser = await prisma.user.upsert({
     where: { email: "staff@brisacubanaclean.com" },
-    update: {},
+    update: {
+      passwordHash: staffPasswordHash,
+    },
     create: {
       email: "staff@brisacubanaclean.com",
       name: "Staff Member",
       phone: "+1-305-555-0002",
       role: "STAFF",
-      passwordHash,
+      passwordHash: staffPasswordHash,
     },
   });
 
   const clientUser = await prisma.user.upsert({
     where: { email: "client@brisacubanaclean.com" },
-    update: {},
+    update: {
+      passwordHash: clientPasswordHash,
+    },
     create: {
       email: "client@brisacubanaclean.com",
       name: "Maria Rodriguez",
       phone: "+1-305-555-0100",
       role: "CLIENT",
-      passwordHash,
+      passwordHash: clientPasswordHash,
     },
   });
 
   const propertyManager = await prisma.user.upsert({
     where: { email: "carlos.mendez@example.com" },
-    update: {},
+    update: {
+      passwordHash: managerPasswordHash,
+    },
     create: {
       email: "carlos.mendez@example.com",
       name: "Carlos Mendez",
       phone: "+1-305-555-0200",
       role: "CLIENT",
-      passwordHash,
+      passwordHash: managerPasswordHash,
     },
   });
 
@@ -229,6 +240,21 @@ async function main() {
       totalPrice: 149.99,
       status: "CONFIRMED",
       paymentStatus: "PENDING_PAYMENT",
+    },
+  });
+
+  await prisma.booking.upsert({
+    where: { id: "booking-failed-1" },
+    update: {},
+    create: {
+      id: "booking-failed-1",
+      userId: clientUser.id,
+      propertyId: residentialProperty.id,
+      serviceId: deepClean.id,
+      scheduledAt: new Date(now.getTime() - 6 * 60 * 60 * 1000), // 6 hours ago
+      totalPrice: 189.99,
+      status: "IN_PROGRESS",
+      paymentStatus: "FAILED",
     },
   });
 

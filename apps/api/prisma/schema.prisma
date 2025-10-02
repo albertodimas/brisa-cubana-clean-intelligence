@@ -43,7 +43,10 @@ model Property {
   state     String       @default("FL")
   zipCode   String
   type      PropertyType
-  size      Int // square feet
+  size      Int? // square feet
+  bedrooms  Int?
+  bathrooms Int?
+  notes     String?
   userId    String
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime     @default(now())

@@ -44,8 +44,9 @@ cp apps/api/.env.example apps/api/.env
 # NEXTAUTH_SECRET=$(openssl rand -base64 32)
 # JWT_SECRET=$(openssl rand -hex 64)
 # Configura `ALERTS_SLACK_WEBHOOK` si quieres recibir notificaciones en un canal específico.
+# (Opcional) Define `RATE_LIMIT_REDIS_URL` para apuntar al Redis local (`redis://localhost:6380/0`).
 
-# 7. Levantar servicios locales
+# 7. Levantar servicios locales (PostgreSQL, Redis, MailHog)
 docker compose up -d
 
 # 8. Esperar a que Postgres esté listo
@@ -72,16 +73,16 @@ pnpm dev
 - **Frontend (Next.js)**: http://localhost:3000
 - **API (Hono)**: http://localhost:3001
 - **Prisma Studio**: `pnpm --filter=@brisa/api db:studio` → http://localhost:5555
-- **MailHog (Email testing)**: http://localhost:8025
+- **MailHog (Email testing)**: http://localhost:8026
 - **Documentación (MkDocs)**: `make serve` → http://localhost:8000
 
 ## Servicios Docker
 
 El `docker-compose.yml` incluye:
 
-- **PostgreSQL 17**: Base de datos principal (puerto 5432)
-- **Redis 8**: Cache y sesiones (puerto 6379)
-- **MailHog**: Capturar emails en desarrollo (puertos 1025 SMTP, 8025 Web)
+- **PostgreSQL 17**: Base de datos principal (puerto host 5433 → contenedor 5432)
+- **Redis 8**: Cache y sesiones (puerto host 6380 → contenedor 6379)
+- **MailHog**: Capturar emails en desarrollo (puerto host 8026 → contenedor 8025)
 
 ```bash
 # Comandos útiles
@@ -149,13 +150,17 @@ make build            # Generar sitio estático en /site
 pnpm docs:serve       # Alternativa con pnpm
 pnpm docs:build       # Alternativa con pnpm
 pnpm docs:build:artifacts  # Generar TypeDoc, Storybook estático y diagramas (CI parity)
-pnpm approve-builds puppeteer  # Autorizar descarga de Chromium para Mermaid CLI (una vez)
+pnpm exec puppeteer browsers install chrome  # Descarga Chromium para Mermaid CLI (una vez)
 ```
 
 ## Autenticación y acceso API
 
 - El login usa contraseñas hasheadas con `bcryptjs` almacenadas en Prisma (`User.passwordHash`).
-- El seed crea el usuario demo `demo@brisacubanaclean.com` con contraseña `demo123`.
+- El seed crea usuarios demo listos para QA:
+  - `admin@brisacubanaclean.com` / `Admin123!`
+  - `staff@brisacubanaclean.com` / `Staff123!`
+  - `client@brisacubanaclean.com` / `Client123!`
+  - `carlos.mendez@example.com` / `Manager123!`
 - El endpoint `/api/auth/login` emite un JWT firmado con `JWT_SECRET`; las rutas sensibles (`/api/services`, `/api/bookings`, `/api/users`) requieren cabecera `Authorization: Bearer <token>`.
 - NextAuth almacena el token en la sesión (`session.user.accessToken`) y lo reutiliza para las llamadas server-side.
 - Para rotar secretos ejecuta: `openssl rand -hex 64` y actualiza `JWT_SECRET` en todos los entornos.

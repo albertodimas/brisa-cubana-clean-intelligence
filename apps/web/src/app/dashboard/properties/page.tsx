@@ -139,6 +139,12 @@ export default async function PropertiesPage() {
                     </div>
                   )}
 
+                  {property.notes && (
+                    <p className="mt-4 line-clamp-2 text-xs text-neutral-400">
+                      {property.notes}
+                    </p>
+                  )}
+
                   {property._count?.bookings !== undefined &&
                     property._count.bookings > 0 && (
                       <p className="mt-3 text-xs uppercase tracking-[0.2em] text-teal-300">

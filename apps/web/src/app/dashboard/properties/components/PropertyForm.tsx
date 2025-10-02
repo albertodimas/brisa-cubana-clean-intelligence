@@ -28,7 +28,7 @@ export default function PropertyForm({
     size: property?.size?.toString() ?? "",
     bedrooms: property?.bedrooms?.toString() ?? "",
     bathrooms: property?.bathrooms?.toString() ?? "",
-    notes: "",
+    notes: property?.notes ?? "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,19 +40,27 @@ export default function PropertyForm({
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
+      const trimmedNotes = formData.notes.trim();
+      const sizeValue = Number.parseInt(formData.size, 10);
+      const bedroomsValue = Number.parseInt(formData.bedrooms, 10);
+      const bathroomsValue = Number.parseInt(formData.bathrooms, 10);
       const payload = {
-        name: formData.name,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode,
+        name: formData.name.trim(),
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim(),
+        zipCode: formData.zipCode.trim(),
         type: formData.type,
-        ...(formData.size && { size: parseInt(formData.size, 10) }),
-        ...(formData.bedrooms && { bedrooms: parseInt(formData.bedrooms, 10) }),
-        ...(formData.bathrooms && {
-          bathrooms: parseInt(formData.bathrooms, 10),
-        }),
-        ...(formData.notes && { notes: formData.notes }),
+        ...(formData.size && !Number.isNaN(sizeValue)
+          ? { size: sizeValue }
+          : {}),
+        ...(formData.bedrooms && !Number.isNaN(bedroomsValue)
+          ? { bedrooms: bedroomsValue }
+          : {}),
+        ...(formData.bathrooms && !Number.isNaN(bathroomsValue)
+          ? { bathrooms: bathroomsValue }
+          : {}),
+        ...(trimmedNotes ? { notes: trimmedNotes } : {}),
       };
 
       const url = property

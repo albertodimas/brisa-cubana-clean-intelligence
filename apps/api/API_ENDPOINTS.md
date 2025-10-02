@@ -48,7 +48,7 @@ Login with email and password.
 ```json
 {
   "email": "admin@brisacubanaclean.com",
-  "password": "demo123"
+  "password": "Admin123!"
 }
 ```
 
@@ -76,7 +76,7 @@ curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@brisacubanaclean.com",
-    "password": "demo123"
+    "password": "Admin123!"
   }'
 ```
 
@@ -546,7 +546,7 @@ All errors follow this format:
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@brisacubanaclean.com","password":"demo123"}' \
+  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}' \
   | jq -r '.token')
 ```
 

@@ -287,6 +287,8 @@ spec:
 
 ### Recommended Queries
 
+> Sugerencias de paneles: agrega un gráfico de líneas con `rate(brisa_api_rate_limit_fallback_total[1h])`, un panel tipo stat para `brisa_api_rate_limit_redis_up` y un panel de barras para los motivos de `brisa_api_rate_limit_redis_errors_total` con la leyenda `reason`. Esto permite visualizar rápidamente los cambios de backend y disparar alertas proactivas.
+
 **Request Rate**
 
 ```promql
@@ -315,6 +317,24 @@ brisa_api_bookings_active
 
 ```promql
 rate(brisa_api_rate_limit_exceeded_total[5m])
+```
+
+**Redis Availability (Rate Limiter)**
+
+```promql
+brisa_api_rate_limit_redis_up
+```
+
+**Redis Reconnect Frequency**
+
+```promql
+rate(brisa_api_rate_limit_redis_reconnects_total[15m])
+```
+
+**Fallback Usage (Memory Store)**
+
+```promql
+increase(brisa_api_rate_limit_fallback_total[1h])
 ```
 
 ## Alerting Rules
@@ -358,6 +378,19 @@ rate(brisa_api_rate_limit_exceeded_total[5m])
   annotations:
     summary: "API is down"
     description: "Health check is failing"
+```
+
+**Rate Limiter Fallback Surge**
+
+```yaml
+- alert: RateLimiterFallbackSurge
+  expr: increase(brisa_api_rate_limit_fallback_total[10m]) > 10
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "Redis fallback activations are spiking"
+    description: "Rate limiter fallback triggered {{ $value }} times in the last 10 minutes; check Redis availability"
 ```
 
 ## Local Development

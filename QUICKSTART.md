@@ -67,9 +67,9 @@ openssl rand -hex 64
 
 ```bash
 # Required
-NEXT AUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="<generate-with-openssl-rand-base64-32>"
-NEXT_PUBLIC_API_URL="http://localhost:4000"
+NEXT_PUBLIC_API_URL="http://localhost:3001"
 ```
 
 **Generate NextAuth Secret:**
@@ -88,7 +88,7 @@ docker compose up -d
 
 # Verify services are running
 docker compose ps
-# Should show postgres (healthy), redis (healthy), mailhog (healthy)
+# Should show postgres (port 5433), redis (port 6380), mailhog (port 8026)
 ```
 
 ---
@@ -108,9 +108,9 @@ pnpm --filter=@brisa/api db:seed
 
 **Seeded users:**
 
-- 👤 Admin: `admin@brisacubana.com` / `Admin123!`
-- 👥 Cliente: `cliente@example.com` / `Cliente123!`
-- 👷 Staff: `staff@example.com` / `Staff123!`
+- 👤 Admin: `admin@brisacubanaclean.com` / `Admin123!`
+- 👷 Staff: `staff@brisacubanaclean.com` / `Staff123!`
+- 👥 Cliente: `client@brisacubanaclean.com` / `Client123!`
 
 ---
 
@@ -124,8 +124,8 @@ pnpm dev
 **Open in browser:**
 
 - 🌐 **Frontend**: http://localhost:3000
-- 🔌 **API**: http://localhost:4000
-- 📬 **MailHog**: http://localhost:8025
+- 🔌 **API**: http://localhost:3001
+- 📬 **MailHog**: http://localhost:8026
 - 🗄️ **Prisma Studio**: `pnpm --filter=@brisa/api db:studio`
 
 ---
@@ -136,19 +136,19 @@ pnpm dev
 
 ```bash
 # Health check
-curl http://localhost:4000/health
+curl http://localhost:3001/health
 
 # Login
-curl -X POST http://localhost:4000/api/auth/login \
+curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@brisacubana.com","password":"Admin123!"}'
+  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}'
 ```
 
 ### Test Frontend
 
 1. Navigate to http://localhost:3000
-2. Click "Sign In"
-3. Login with `admin@brisacubana.com` / `Admin123!`
+2. Haz clic en "Inicia sesión"
+3. Ingresa con `admin@brisacubanaclean.com` / `Admin123!`
 4. Explore dashboard
 
 ---
@@ -248,9 +248,9 @@ psql "postgresql://brisa_user:brisa_pass@localhost:5433/brisa_cubana_dev" -c "SE
 ### Error: "Port already in use"
 
 ```bash
-# Find process using port 3000/4000
+# Find process using port 3000/3001
 lsof -i :3000
-lsof -i :4000
+lsof -i :3001
 
 # Kill process
 kill -9 <PID>

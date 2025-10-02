@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { findFakeUser, isFakeDataEnabled } from "@/server/utils/fake";
 
 const loginResponseSchema = z.object({
   id: z.string(),
@@ -22,23 +23,43 @@ export async function verifyUserCredentials(
   email: string,
   password: string,
 ): Promise<VerifiedUser | null> {
-  const response = await fetch(`${resolveApiBaseUrl()}/api/auth/login`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!response.ok) {
-    return null;
+  if (isFakeDataEnabled()) {
+    const fakeUser = findFakeUser(email, password);
+    if (!fakeUser) {
+      return null;
+    }
+    return fakeUser;
   }
 
-  const json = await response.json();
-  const parsed = loginResponseSchema.safeParse(json);
-  if (!parsed.success) {
+  try {
+    const response = await fetch(`${resolveApiBaseUrl()}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(
+        "[auth] Failed to verify credentials",
+        response.status,
+        errorBody,
+      );
+      return null;
+    }
+
+    const json = await response.json();
+    const parsed = loginResponseSchema.safeParse(json);
+    if (!parsed.success) {
+      console.error("[auth] Invalid login payload", parsed.error.flatten());
+      return null;
+    }
+
+    return parsed.data;
+  } catch (error) {
+    console.error("[auth] Error verifying credentials", error);
     return null;
   }
-
-  return parsed.data;
 }

@@ -8,6 +8,7 @@ import {
   createReconciliationNote,
   resolveReconciliationNote,
 } from "@/server/api/reconciliation";
+import { isFakeDataEnabled } from "@/server/utils/fake";
 
 const createBookingSchema = z.object({
   propertyId: z.string().min(1, "Selecciona una propiedad"),
@@ -45,6 +46,15 @@ export interface ResolveReconciliationNoteState {
 }
 
 async function postBooking(body: unknown, accessToken: string, userId: string) {
+  if (isFakeDataEnabled()) {
+    return {
+      booking: {
+        id: `fake-booking-${Date.now()}`,
+      },
+      checkoutUrl: null,
+    } satisfies BookingApiResponse;
+  }
+
   const response = await fetch(
     `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/api/bookings`,
     {
@@ -83,6 +93,11 @@ export async function createBooking(
 
   if (!session?.user?.accessToken || !session.user.id) {
     return { ok: false, error: "Sesión inválida. Inicia sesión nuevamente." };
+  }
+
+  if (isFakeDataEnabled()) {
+    revalidatePath("/dashboard");
+    return { ok: true, checkoutUrl: null };
   }
 
   const raw = {
@@ -145,6 +160,11 @@ export async function updateBookingStatus(
     return { ok: false, error: "Selecciona un estado válido." };
   }
 
+  if (isFakeDataEnabled()) {
+    revalidatePath("/dashboard");
+    return { ok: true };
+  }
+
   try {
     const response = await fetch(
       `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/api/bookings/${bookingId}`,
@@ -191,6 +211,11 @@ export async function createReconciliationNoteAction(
 
   if (!session?.user?.accessToken || !session.user.id) {
     return { ok: false, error: "Sesión inválida. Inicia sesión nuevamente." };
+  }
+
+  if (isFakeDataEnabled()) {
+    revalidatePath("/dashboard");
+    return { ok: true };
   }
 
   const bookingId = formData.get("bookingId");
@@ -245,6 +270,11 @@ export async function resolveReconciliationNoteAction(
   const noteId = formData.get("noteId");
   if (!noteId || typeof noteId !== "string") {
     return { ok: false, error: "Identificador de nota inválido." };
+  }
+
+  if (isFakeDataEnabled()) {
+    revalidatePath("/dashboard");
+    return { ok: true };
   }
 
   try {

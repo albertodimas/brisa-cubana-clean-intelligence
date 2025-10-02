@@ -37,6 +37,7 @@ export interface Property {
   size: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
+  notes: string | null;
   userId: string;
   createdAt: string;
   updatedAt: string;

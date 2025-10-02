@@ -177,6 +177,15 @@ export default async function PropertyDetailPage({
             </div>
           )}
 
+          {property.notes && (
+            <div className="md:col-span-2">
+              <h3 className="text-sm font-medium text-neutral-400">Notas</h3>
+              <p className="mt-1 rounded-lg border border-neutral-800 bg-neutral-900/60 p-4 text-sm text-neutral-200">
+                {property.notes}
+              </p>
+            </div>
+          )}
+
           {property.user && (
             <div>
               <h3 className="text-sm font-medium text-neutral-400">
