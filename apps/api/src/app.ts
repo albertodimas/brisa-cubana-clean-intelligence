@@ -20,13 +20,30 @@ import { requestLogger } from "./middleware/logger";
 import { metricsMiddleware } from "./middleware/metrics";
 import { logger } from "./lib/logger";
 import { isAppError } from "./lib/errors";
+import {
+  tracingMiddleware,
+  correlationIdMiddleware,
+  requestLoggingMiddleware,
+  errorTrackingMiddleware,
+  performanceMonitoringMiddleware,
+} from "./middleware/observability";
 
 export const app = new Hono();
 
 // Middleware (order matters!)
-app.use("*", compress()); // Compression first (gzip/deflate)
-app.use("*", requestLogger); // Logging second
-app.use("*", metricsMiddleware); // Metrics third (after logging)
+// 1. Compression first (for all responses)
+app.use("*", compress());
+
+// 2. Observability stack (tracing, correlation, metrics)
+app.use("*", tracingMiddleware); // OpenTelemetry tracing
+app.use("*", correlationIdMiddleware); // Correlation IDs for distributed tracing
+app.use("*", metricsMiddleware); // Legacy Prometheus metrics
+
+// 3. Logging and monitoring
+app.use("*", requestLogger); // Legacy logger (TODO: migrate to requestLoggingMiddleware)
+app.use("*", requestLoggingMiddleware); // Structured logging with correlation IDs
+app.use("*", performanceMonitoringMiddleware); // Slow request detection
+app.use("*", errorTrackingMiddleware); // Error tracking
 // Production-grade CORS configuration
 // References:
 // - https://hono.dev/docs/middleware/builtin/cors

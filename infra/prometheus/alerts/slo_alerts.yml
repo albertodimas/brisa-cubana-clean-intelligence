@@ -1,0 +1,142 @@
+# Prometheus Alert Rules - Service Level Objectives (SLOs)
+# References:
+# - Alerting Rules: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+# - SLO Best Practices: https://sre.google/workbook/alerting-on-slos/
+# Consulted: October 2, 2025
+
+groups:
+  # ===========================================================================
+  # SLO: Availability (99.9% uptime)
+  # ===========================================================================
+  - name: availability_slo
+    interval: 1m
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m])
+            /
+            rate(http_requests_total[5m])
+          ) * 100 > 1
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: "High error rate detected (current: {{ $value }}%)"
+          description: "Error rate is {{ $value }}% (SLO: < 1%). Service availability impacted."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+
+      - alert: ServiceDown
+        expr: |
+          up{job="brisa-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: "API service is DOWN"
+          description: "brisa-api has been down for 1 minute. Immediate action required."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+
+  # ===========================================================================
+  # SLO: Latency (p95 < 500ms, p99 < 1000ms)
+  # ===========================================================================
+  - name: latency_slo
+    interval: 1m
+    rules:
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000 > 500
+        for: 5m
+        labels:
+          severity: warning
+          slo: latency
+        annotations:
+          summary: "High latency p95 detected (current: {{ $value }}ms)"
+          description: "p95 latency is {{ $value }}ms (SLO: < 500ms). Performance degraded."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+
+      - alert: HighLatencyP99
+        expr: |
+          histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) * 1000 > 1000
+        for: 5m
+        labels:
+          severity: critical
+          slo: latency
+        annotations:
+          summary: "Critical latency p99 detected (current: {{ $value }}ms)"
+          description: "p99 latency is {{ $value }}ms (SLO: < 1000ms). Severe performance degradation."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+
+  # ===========================================================================
+  # Database Performance
+  # ===========================================================================
+  - name: database_performance
+    interval: 1m
+    rules:
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m])) * 1000 > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries detected (p95: {{ $value }}ms)"
+          description: "Database p95 query time is {{ $value }}ms (SLO: < 100ms). Investigate slow queries."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          db_connections_active >= db_connections_max * 0.9
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection pool near capacity"
+          description: "Active connections: {{ $value }}. Connection pool near exhaustion."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+
+  # ===========================================================================
+  # Error Budget Alerts
+  # ===========================================================================
+  - name: error_budget
+    interval: 1h
+    rules:
+      - alert: ErrorBudgetExhausted
+        expr: |
+          (
+            1 - (
+              (1 - rate(http_requests_total{status=~"5.."}[30d]))
+              /
+              0.999 # 99.9% availability SLO
+            )
+          ) < 0
+        for: 1h
+        labels:
+          severity: warning
+          slo: error_budget
+        annotations:
+          summary: "30-day error budget exhausted"
+          description: "Error budget for 99.9% SLO has been exhausted. Deployment freeze recommended."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/GO_LIVE.md"
+
+  # ===========================================================================
+  # Payment Processing (Business-Critical)
+  # ===========================================================================
+  - name: payment_processing
+    interval: 1m
+    rules:
+      - alert: PaymentProcessingFailures
+        expr: |
+          rate(payment_transactions_total{status="failed"}[5m]) / rate(payment_transactions_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          business_impact: high
+        annotations:
+          summary: "High payment failure rate ({{ $value }}%)"
+          description: "Payment failures exceed 5%. Revenue impact. Immediate investigation required."
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
