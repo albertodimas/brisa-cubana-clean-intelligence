@@ -216,7 +216,11 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           NEXT_PUBLIC_API_URL: https://api.brisacubana.com
           NEXT_PUBLIC_APP_URL: https://brisacubana.com
-        run: npx vercel deploy --prod --token=$VERCEL_TOKEN --yes
+        working-directory: apps/web
+        run: |
+          npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          npx vercel build --prod --token=$VERCEL_TOKEN
+          npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
 
       - name: Notify Slack on success
         if: success() && steps.check-vercel.outputs.skip == 'false'
