@@ -63,14 +63,15 @@ Idiomas y formato:
   3. Etiqueta como predeterminada: `mike set-default latest`.
   4. Publica en GitHub Pages: `mike publish` o `mkdocs gh-deploy` para entornos puntuales.
 - Mantén historial en `gh-pages` y documenta cambios en `docs/operations/production/PRODUCTION_DEPLOYMENT_GUIDE.md`.
+- Ejecuta `pnpm docs:api` siempre que se modifique `apps/api/API_ENDPOINTS.md` para sincronizar la referencia publicada.
 
 Calendario sugerido:
 
-| Frecuencia   | Actividad                                                                           | Responsable            |
-| ------------ | ----------------------------------------------------------------------------------- | ---------------------- |
-| Mensual      | Revisar advertencias de `pnpm docs:build` y backlog de issues de documentación      | Tech Writing + SRE     |
-| Trimestral   | Liberar versión con `mike deploy <YYYY.Q>` y actualizar `README.md`/`docs/index.md` | Plataforma             |
-| Post-release | Ejecutar check de calidad funcional (precisión, completitud) y registrar hallazgos  | Equipo cross-funcional |
+| Frecuencia                  | Actividad                                                                           | Responsable            |
+| --------------------------- | ----------------------------------------------------------------------------------- | ---------------------- |
+| Mensual (inicio 2025-11-01) | Revisar advertencias de `pnpm docs:build` y backlog de issues de documentación      | Tech Writing + SRE     |
+| Trimestral                  | Liberar versión con `mike deploy <YYYY.Q>` y actualizar `README.md`/`docs/index.md` | Plataforma             |
+| Post-release                | Ejecutar check de calidad funcional (precisión, completitud) y registrar hallazgos  | Equipo cross-funcional |
 
 ## Auditorías periódicas
 

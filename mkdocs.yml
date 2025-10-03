@@ -34,6 +34,10 @@ nav:
           - Panel cliente: for-developers/diagrams/panel-cliente-r2.md
           - App staff: for-developers/diagrams/app-staff-r3.md
           - Secuencia CleanScore: for-developers/diagrams/cleanscore-sequence.md
+      - Tutoriales:
+          - Quickstart: for-developers/quickstart.md
+          - CleanScore™: for-developers/tutorials/cleanscore-tutorial.md
+          - Concierge AI: for-developers/tutorials/concierge-ai-tutorial.md
       - Roadmaps técnicos:
           - Observabilidad (Fase 2): for-developers/observability-phase2.md
           - Advanced Features (Fase 3): for-developers/phase3-advanced-features.md

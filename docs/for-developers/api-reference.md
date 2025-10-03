@@ -1,37 +1,49 @@
-# API Reference - Endpoints
+# API Endpoints Documentation
 
-Documentación completa de la API REST de Brisa Cubana Clean Intelligence.
+Base URL: `http://localhost:3001`
 
-**Base URL:** `http://localhost:3001` (desarrollo) | `https://api.brisacubana.com` (producción)
+## Authentication
 
-**Formato:** JSON
+Most endpoints require JWT authentication. Include the token in the Authorization header:
 
-**Autenticación:** JWT Bearer Token (excepto endpoints públicos)
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+```
 
----
-
-## Tabla de Contenidos
-
-- [Autenticación](#autenticacion)
-- [Usuarios](#usuarios)
-- [Servicios](#servicios)
-- [Reservas (Bookings)](#reservas-bookings)
-- [Pagos](#pagos)
-- [Alertas](#alertas)
-- [Conciliación](#conciliacion)
-- [Health Check](#health-check)
+Get a token by logging in (see Authentication endpoints).
 
 ---
 
-## Autenticación {#autenticacion}
+## Health & Monitoring
 
-### POST `/api/auth/login`
+### GET /health
 
-Autentica usuario y retorna JWT token.
+Health check endpoint.
 
-**Acceso:** Público
+**Response:**
 
-**Request Body:**
+```json
+{
+  "status": "healthy",
+  "service": "brisa-cubana-api",
+  "version": "0.1.0",
+  "timestamp": "2025-09-30T21:00:00.000Z"
+}
+```
+
+### GET /metrics
+
+Prometheus metrics endpoint (no auth required).
+
+---
+
+## Auth Endpoints
+
+### POST /api/auth/login
+
+Login with email and password.
+
+**Request:**
 
 ```json
 {
@@ -40,11 +52,11 @@ Autentica usuario y retorna JWT token.
 }
 ```
 
-**Response 200:**
+**Response (200):**
 
 ```json
 {
-  "id": "uuid-del-usuario",
+  "id": "cmg72rzxi0000xqio1hygre4t",
   "email": "admin@brisacubanaclean.com",
   "name": "Admin User",
   "role": "ADMIN",
@@ -52,843 +64,982 @@ Autentica usuario y retorna JWT token.
 }
 ```
 
-**Response 400:** `{ "error": "Invalid credentials payload", "details": {...} }`
+**Errors:**
 
-**Response 401:** `{ "error": "Invalid email or password" }`
+- `400`: Missing email or password
+- `401`: Invalid credentials
 
-**Uso del Token:**
-
-Todos los endpoints protegidos requieren el header:
-
-```
-Authorization: Bearer <token>
-```
-
-**Expiración:** 8 horas
-
----
-
-## Usuarios
-
-### GET `/api/users`
-
-Lista todos los usuarios (paginado).
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Headers:** `Authorization: Bearer <token>`
-
-**Response 200:**
-
-```json
-[
-  {
-    "id": "uuid",
-    "email": "client@brisacubanaclean.com",
-    "name": "Cliente Demo",
-    "phone": "+1234567890",
-    "role": "CLIENT",
-    "createdAt": "2025-09-30T10:00:00.000Z",
-    "_count": {
-      "bookings": 5,
-      "properties": 2
-    }
-  }
-]
-```
-
-**Response 403:** `{ "error": "Forbidden" }`
-
----
-
-### GET `/api/users/:id`
-
-Obtiene un usuario por ID.
-
-**Roles permitidos:** `ADMIN`, `STAFF`, o el propio usuario
-
-**Headers:** `Authorization: Bearer <token>`
-
-**Response 200:**
-
-```json
-{
-  "id": "uuid",
-  "email": "client@brisacubanaclean.com",
-  "name": "Cliente Demo",
-  "phone": "+1234567890",
-  "role": "CLIENT",
-  "createdAt": "2025-09-30T10:00:00.000Z",
-  "updatedAt": "2025-09-30T10:00:00.000Z",
-  "properties": [
-    {
-      "id": "prop-uuid",
-      "name": "Casa Principal",
-      "address": "123 Main St",
-      "sqft": 2000,
-      "bedrooms": 3
-    }
-  ],
-  "bookings": [
-    {
-      "id": "booking-uuid",
-      "status": "CONFIRMED",
-      "scheduledAt": "2025-10-05T14:00:00.000Z",
-      "totalPrice": "150.00",
-      "service": { "name": "Limpieza Estándar" },
-      "property": { "name": "Casa Principal" }
-    }
-  ]
-}
-```
-
-**Response 404:** `{ "error": "User not found" }`
-
----
-
-### POST `/api/users`
-
-Crea un nuevo usuario.
-
-**Roles permitidos:** `ADMIN`
-
-**Request Body:**
-
-```json
-{
-  "email": "nuevo@example.com",
-  "name": "Nuevo Usuario",
-  "phone": "+1987654321",
-  "password": "SecurePass123!",
-  "role": "CLIENT"
-}
-```
-
-**Response 201:**
-
-```json
-{
-  "id": "uuid",
-  "email": "nuevo@example.com",
-  "name": "Nuevo Usuario",
-  "phone": "+1987654321",
-  "role": "CLIENT",
-  "createdAt": "2025-09-30T12:00:00.000Z"
-}
-```
-
-**Response 400:** Email ya existe o validación falló
-
----
-
-### PATCH `/api/users/:id`
-
-Actualiza un usuario.
-
-**Roles permitidos:** `ADMIN` o el propio usuario
-
-**Request Body:**
-
-```json
-{
-  "name": "Nombre Actualizado",
-  "phone": "+1111111111",
-  "role": "STAFF"
-}
-```
-
-**Response 200:** Usuario actualizado
-
-**Response 400:** `{ "error": "No updates supplied" }`
-
----
-
-### PATCH `/api/users/:id/password`
-
-Cambia contraseña del usuario.
-
-**Roles permitidos:** `ADMIN` o el propio usuario
-
-**Request Body:**
-
-```json
-{
-  "password": "NewSecurePass123!"
-}
-```
-
-**Response 200:** `{ "ok": true }`
-
----
-
-## Servicios
-
-### GET `/api/services`
-
-Lista todos los servicios activos.
-
-**Acceso:** Público (no requiere autenticación)
-
-**Response 200:**
-
-```json
-[
-  {
-    "id": "service-uuid",
-    "name": "Limpieza Estándar",
-    "description": "Limpieza completa de todas las áreas",
-    "basePrice": "120.00",
-    "duration": 180,
-    "active": true,
-    "createdAt": "2025-09-30T10:00:00.000Z"
-  },
-  {
-    "id": "service-uuid-2",
-    "name": "Limpieza Profunda",
-    "description": "Limpieza intensiva con desinfección",
-    "basePrice": "250.00",
-    "duration": 300,
-    "active": true,
-    "createdAt": "2025-09-30T10:00:00.000Z"
-  }
-]
-```
-
----
-
-### GET `/api/services/:id`
-
-Obtiene un servicio por ID.
-
-**Acceso:** Público
-
-**Response 200:** Objeto del servicio
-
-**Response 404:** `{ "error": "Service not found" }`
-
----
-
-### POST `/api/services`
-
-Crea un nuevo servicio.
-
-**Roles permitidos:** `ADMIN`
-
-**Request Body:**
-
-```json
-{
-  "name": "Limpieza de Ventanas",
-  "description": "Limpieza de ventanas interiores y exteriores",
-  "basePrice": 80,
-  "duration": 120,
-  "active": true
-}
-```
-
-**Response 201:** Servicio creado
-
----
-
-### PATCH `/api/services/:id`
-
-Actualiza un servicio.
-
-**Roles permitidos:** `ADMIN`
-
-**Request Body:**
-
-```json
-{
-  "basePrice": 90,
-  "active": false
-}
-```
-
-**Response 200:** Servicio actualizado
-
----
-
-## Reservas (Bookings)
-
-### GET `/api/bookings`
-
-Lista todas las reservas (paginado).
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Query Parameters:**
-
-- `page` (default: 1)
-- `limit` (default: 10, max: 100)
-
-**Response 200:**
-
-```json
-{
-  "data": [
-    {
-      "id": "booking-uuid",
-      "userId": "user-uuid",
-      "propertyId": "prop-uuid",
-      "serviceId": "service-uuid",
-      "scheduledAt": "2025-10-05T14:00:00.000Z",
-      "status": "CONFIRMED",
-      "paymentStatus": "PAID",
-      "totalPrice": "150.00",
-      "notes": "Traer productos hipoalergénicos",
-      "user": {
-        "id": "user-uuid",
-        "name": "Cliente Demo",
-        "email": "client@brisacubanaclean.com"
-      },
-      "property": {
-        "id": "prop-uuid",
-        "name": "Casa Principal",
-        "address": "123 Main St"
-      },
-      "service": {
-        "id": "service-uuid",
-        "name": "Limpieza Estándar",
-        "basePrice": "120.00"
-      }
-    }
-  ],
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "total": 42,
-    "totalPages": 5
-  }
-}
-```
-
----
-
-### GET `/api/bookings/mine`
-
-Obtiene reservas del usuario autenticado.
-
-**Roles permitidos:** `CLIENT`, `ADMIN`, `STAFF`
-
-**Response 200:** Array de reservas (últimas 10)
-
----
-
-### GET `/api/bookings/:id`
-
-Obtiene una reserva por ID.
-
-**Roles permitidos:** `ADMIN`, `STAFF`, o el propio cliente
-
-**Response 200:** Objeto de la reserva completo
-
-**Response 404:** `{ "error": "Booking not found" }`
-
-**Response 403:** Si el cliente intenta ver reserva de otro usuario
-
----
-
-### POST `/api/bookings`
-
-Crea una nueva reserva.
-
-**Roles permitidos:** Todos los usuarios autenticados
-
-**Request Body:**
-
-```json
-{
-  "userId": "user-uuid",
-  "propertyId": "prop-uuid",
-  "serviceId": "service-uuid",
-  "scheduledAt": "2025-10-10T10:00:00.000Z",
-  "totalPrice": 150,
-  "notes": "Favor de tocar el timbre"
-}
-```
-
-**Response 201:**
-
-```json
-{
-  "booking": {
-    "id": "new-booking-uuid",
-    "userId": "user-uuid",
-    "propertyId": "prop-uuid",
-    "serviceId": "service-uuid",
-    "scheduledAt": "2025-10-10T10:00:00.000Z",
-    "status": "PENDING",
-    "paymentStatus": "PENDING_PAYMENT",
-    "totalPrice": "150.00",
-    "checkoutSessionId": "cs_test_...",
-    "paymentIntentId": "pi_...",
-    "user": {...},
-    "property": {...},
-    "service": {...}
-  },
-  "checkoutUrl": "https://checkout.stripe.com/c/pay/cs_test_..."
-}
-```
-
-**Notas:**
-
-- Si Stripe está habilitado, se crea automáticamente una sesión de Checkout
-- El usuario es redirigido a `checkoutUrl` para completar el pago
-- Clientes solo pueden crear reservas para sus propias propiedades
-
----
-
-### PATCH `/api/bookings/:id`
-
-Actualiza estado de una reserva.
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Request Body:**
-
-```json
-{
-  "status": "IN_PROGRESS",
-  "notes": "Iniciando servicio"
-}
-```
-
-**Valores permitidos para `status`:**
-
-- `PENDING`
-- `CONFIRMED`
-- `IN_PROGRESS`
-- `COMPLETED`
-- `CANCELLED`
-
-**Response 200:** Reserva actualizada
-
-**Nota:** Si status cambia a `COMPLETED`, se registra automáticamente `completedAt`
-
----
-
-### DELETE `/api/bookings/:id`
-
-Cancela una reserva (cambia status a CANCELLED).
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Response 200:** Reserva cancelada
-
----
-
-## Pagos
-
-### POST `/api/payments/checkout-session`
-
-Crea una sesión de Stripe Checkout para una reserva existente.
-
-**Roles permitidos:** Todos (con restricciones)
-
-**Request Body:**
-
-```json
-{
-  "bookingId": "booking-uuid"
-}
-```
-
-**Response 200:**
-
-```json
-{
-  "booking": {
-    "id": "booking-uuid",
-    "checkoutSessionId": "cs_test_...",
-    "paymentStatus": "PENDING_PAYMENT",
-    "paymentIntentId": "pi_..."
-  },
-  "checkoutUrl": "https://checkout.stripe.com/c/pay/cs_test_..."
-}
-```
-
-**Response 400:** Stripe deshabilitado o bookingId faltante
-
-**Response 403:** Clientes solo pueden pagar sus propias reservas
-
-**Response 404:** Reserva no encontrada
-
----
-
-### POST `/api/payments/webhook`
-
-Webhook de Stripe para eventos de pago.
-
-**Acceso:** Solo desde Stripe (verifica signature)
-
-**Headers:**
-
-- `stripe-signature`: Firma del webhook
-
-**Eventos procesados:**
-
-- `checkout.session.completed`: Pago exitoso → status `CONFIRMED`, paymentStatus `PAID`
-- `checkout.session.expired`: Sesión expirada → paymentStatus `FAILED`
-- `payment_intent.payment_failed`: Pago fallido → paymentStatus `FAILED`
-
-**Response 200:** `ok`
-
-**Response 400:** Signature inválida o faltante
-
-**Configuración requerida:**
-
-```bash
-# En apps/api/.env
-STRIPE_WEBHOOK_SECRET="whsec_..."
-```
-
-**Testing local:**
-
-```bash
-stripe listen --forward-to localhost:3001/api/payments/webhook
-```
-
----
-
-## Alertas
-
-### GET `/api/alerts/payment`
-
-Lista alertas de pagos.
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Query Parameters:**
-
-- `limit` (default: 20, max: 100)
-- `startDate` (ISO 8601)
-- `endDate` (ISO 8601)
-- `minFailed` (número mínimo de pagos fallidos)
-- `minPending` (número mínimo de pagos pendientes)
-
-**Response 200:**
-
-```json
-[
-  {
-    "id": "alert-uuid",
-    "failedPayments": 3,
-    "pendingPayments": 12,
-    "payloadHash": "3-12",
-    "triggeredAt": "2025-09-30T15:30:00.000Z"
-  }
-]
-```
-
----
-
-### POST `/api/alerts/payment`
-
-Crea alerta de pagos (envía a Slack si configurado).
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Request Body:**
-
-```json
-{
-  "failedPayments": 2,
-  "pendingPayments": 8
-}
-```
-
-**Response 200:**
-
-```json
-{
-  "queued": true,
-  "alert": {
-    "id": "alert-uuid",
-    "failedPayments": 2,
-    "pendingPayments": 8,
-    "triggeredAt": "2025-09-30T16:00:00.000Z"
-  }
-}
-```
-
-**Respuestas alternativas:**
-
-- `{ "queued": false, "reason": "threshold" }` - No alcanza umbral (failed=0 y pending≤5)
-- `{ "queued": false, "reason": "duplicate" }` - Ya existe alerta idéntica en últimos 10 minutos
-
-**Configuración Slack:**
-
-```bash
-# En apps/api/.env
-ALERTS_SLACK_WEBHOOK="https://hooks.slack.com/services/..."
-```
-
----
-
-## Conciliación {#conciliacion}
-
-### GET `/api/reconciliation/history/resolved`
-
-Lista notas de conciliación resueltas.
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Query Parameters:**
-
-- `limit` (default: 20, max: 100)
-- `startDate` (ISO 8601)
-- `endDate` (ISO 8601)
-- `authorEmail` (filtro por email del autor)
-- `bookingId` (filtro por reserva)
-
-**Response 200:** Array de notas con status `RESOLVED`
-
----
-
-### GET `/api/reconciliation/history/open`
-
-Lista notas de conciliación abiertas.
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Query Parameters:** Igual que `/history/resolved`
-
-**Response 200:** Array de notas con status `OPEN`
-
----
-
-### GET `/api/reconciliation/booking/:bookingId`
-
-Obtiene todas las notas de conciliación para una reserva.
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Query Parameters:**
-
-- `status` (`OPEN` | `RESOLVED`)
-
-**Response 200:**
-
-```json
-[
-  {
-    "id": "note-uuid",
-    "bookingId": "booking-uuid",
-    "authorId": "user-uuid",
-    "message": "Cliente reporta pago duplicado en Stripe",
-    "status": "RESOLVED",
-    "createdAt": "2025-09-29T10:00:00.000Z",
-    "resolvedAt": "2025-09-30T14:00:00.000Z",
-    "resolvedById": "admin-uuid",
-    "author": {
-      "id": "user-uuid",
-      "name": "Staff Member",
-      "email": "staff@brisacubana.com"
-    },
-    "resolvedBy": {
-      "id": "admin-uuid",
-      "name": "Admin User",
-      "email": "admin@brisacubanaclean.com"
-    }
-  }
-]
-```
-
----
-
-### POST `/api/reconciliation/booking/:bookingId`
-
-Crea una nota de conciliación para una reserva.
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Request Body:**
-
-```json
-{
-  "message": "Verificar pago en Stripe - cliente reporta cobro incorrecto",
-  "status": "OPEN"
-}
-```
-
-**Response 201:** Nota creada
-
----
-
-### PATCH `/api/reconciliation/note/:noteId`
-
-Actualiza una nota de conciliación.
-
-**Roles permitidos:** `ADMIN`, `STAFF`
-
-**Request Body:**
-
-```json
-{
-  "message": "Reembolso procesado - caso cerrado",
-  "status": "RESOLVED"
-}
-```
-
-**Response 200:** Nota actualizada
-
-**Nota:** Al cambiar a `RESOLVED`, se registra automáticamente `resolvedAt` y `resolvedById`
-
----
-
-## Health Check
-
-### GET `/health`
-
-Verifica que la API esté funcionando.
-
-**Acceso:** Público
-
-**Response 200:**
-
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-09-30T12:34:56.789Z",
-  "version": "1.0.0"
-}
-```
-
----
-
-## Códigos de Estado HTTP
-
-- **200 OK**: Operación exitosa
-- **201 Created**: Recurso creado exitosamente
-- **400 Bad Request**: Payload inválido o parámetros incorrectos
-- **401 Unauthorized**: Token faltante o inválido
-- **403 Forbidden**: Usuario no tiene permisos para esta operación
-- **404 Not Found**: Recurso no encontrado
-- **500 Internal Server Error**: Error del servidor
-
----
-
-## Roles y Permisos
-
-### Roles disponibles
-
-- **`CLIENT`**: Usuario regular, puede ver/crear sus propias reservas
-- **`STAFF`**: Personal de limpieza, acceso a gestión de reservas
-- **`ADMIN`**: Acceso completo al sistema
-
-### Matriz de permisos
-
-| Endpoint                  | CLIENT | STAFF | ADMIN |
-| ------------------------- | ------ | ----- | ----- |
-| `POST /auth/login`        | ✅     | ✅    | ✅    |
-| `GET /services`           | ✅     | ✅    | ✅    |
-| `GET /users`              | ❌     | ✅    | ✅    |
-| `GET /users/:id` (propio) | ✅     | ✅    | ✅    |
-| `GET /users/:id` (otro)   | ❌     | ✅    | ✅    |
-| `POST /users`             | ❌     | ❌    | ✅    |
-| `POST /services`          | ❌     | ❌    | ✅    |
-| `GET /bookings`           | ❌     | ✅    | ✅    |
-| `GET /bookings/mine`      | ✅     | ✅    | ✅    |
-| `POST /bookings`          | ✅     | ✅    | ✅    |
-| `PATCH /bookings/:id`     | ❌     | ✅    | ✅    |
-| `GET /alerts/*`           | ❌     | ✅    | ✅    |
-| `GET /reconciliation/*`   | ❌     | ✅    | ✅    |
-
----
-
-## Variables de Entorno Requeridas
-
-```bash
-# JWT
-JWT_SECRET="clave-secreta-minimo-32-caracteres"
-
-# Database
-DATABASE_URL="postgresql://user:pass@localhost:5432/db"
-
-# Stripe (opcional pero recomendado)
-STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_WEBHOOK_SECRET="whsec_..."
-
-# URLs de la app web
-WEB_APP_URL="http://localhost:3000"
-STRIPE_SUCCESS_URL="${WEB_APP_URL}/dashboard?payment=success"
-STRIPE_CANCEL_URL="${WEB_APP_URL}/dashboard?payment=cancelled"
-
-# Alertas Slack (opcional)
-ALERTS_SLACK_WEBHOOK="https://hooks.slack.com/services/..."
-```
-
----
-
-## Ejemplos de Uso con cURL
-
-### Login
+**Example:**
 
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}'
+  -d '{
+    "email": "admin@brisacubanaclean.com",
+    "password": "Admin123!"
+  }'
 ```
 
-### Listar servicios
+### POST /api/auth/register
+
+Register a new user.
+
+**Request:**
+
+```json
+{
+  "email": "newuser@example.com",
+  "password": "SecurePass123!",
+  "name": "John Doe",
+  "phone": "+1-305-555-0100"
+}
+```
+
+**Response (201):**
+
+```json
+{
+  "id": "cm...",
+  "email": "newuser@example.com",
+  "name": "John Doe",
+  "role": "CLIENT"
+}
+```
+
+---
+
+## Services
+
+### GET /api/services
+
+Get all active services (public endpoint, no auth required).
+
+**Response (200):**
+
+```json
+[
+  {
+    "id": "basic-clean-1",
+    "name": "Limpieza Básica",
+    "description": "Limpieza estándar de espacios residenciales y oficinas",
+    "basePrice": "89.99",
+    "duration": 120,
+    "active": true,
+    "createdAt": "2025-09-30T21:34:16.050Z",
+    "updatedAt": "2025-09-30T21:34:16.050Z"
+  }
+]
+```
+
+**Example:**
 
 ```bash
 curl http://localhost:3001/api/services
 ```
 
-### Crear reserva (autenticado)
+### POST /api/services
+
+Create a new service (Admin only).
+
+**Auth Required:** Yes (ADMIN role)
+
+**Request:**
+
+```json
+{
+  "name": "Window Cleaning",
+  "description": "Professional window cleaning service",
+  "basePrice": 69.99,
+  "duration": 90
+}
+```
+
+**Response (201):**
+
+```json
+{
+  "id": "cm...",
+  "name": "Window Cleaning",
+  ...
+}
+```
+
+### PATCH /api/services/:id
+
+Update a service (Admin only).
+
+**Auth Required:** Yes (ADMIN role)
+
+---
+
+## Bookings
+
+### GET /api/bookings
+
+Get bookings for authenticated user.
+
+**Auth Required:** Yes
+
+**Query Parameters:**
+
+- `status`: Filter by status (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED)
+- `from`: Start date (ISO format)
+- `to`: End date (ISO format)
+
+**Response (200):**
+
+```json
+[
+  {
+    "id": "booking-confirmed-1",
+    "userId": "cm...",
+    "propertyId": "prop-residential-1",
+    "serviceId": "deep-clean-1",
+    "scheduledAt": "2025-10-01T21:34:16.255Z",
+    "totalPrice": "149.99",
+    "status": "CONFIRMED",
+    "paymentStatus": "PENDING_PAYMENT",
+    "service": {
+      "name": "Limpieza Profunda",
+      "duration": 180
+    },
+    "property": {
+      "name": "Brickell Luxury Apartment",
+      "address": "1234 Brickell Ave, Unit 2501"
+    }
+  }
+]
+```
+
+**Example:**
 
 ```bash
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://localhost:3001/api/bookings?status=CONFIRMED"
+```
 
-curl -X POST http://localhost:3001/api/bookings \
-  -H "Authorization: Bearer $TOKEN" \
+### POST /api/bookings
+
+Create a new booking.
+
+**Auth Required:** Yes
+
+**Request:**
+
+```json
+{
+  "propertyId": "prop-residential-1",
+  "serviceId": "basic-clean-1",
+  "scheduledAt": "2025-10-15T14:00:00Z",
+  "notes": "Please use eco-friendly products"
+}
+```
+
+**Response (201):**
+
+```json
+{
+  "id": "cm...",
+  "userId": "cm...",
+  "propertyId": "prop-residential-1",
+  "serviceId": "basic-clean-1",
+  "scheduledAt": "2025-10-15T14:00:00.000Z",
+  "totalPrice": "89.99",
+  "status": "PENDING",
+  "paymentStatus": "PENDING_PAYMENT"
+}
+```
+
+### GET /api/bookings/:id
+
+Get a specific booking.
+
+**Auth Required:** Yes
+
+**Response (200):**
+
+```json
+{
+  "id": "booking-confirmed-1",
+  ...
+}
+```
+
+### PATCH /api/bookings/:id
+
+Update a booking.
+
+**Auth Required:** Yes
+
+**Request:**
+
+```json
+{
+  "status": "CANCELLED",
+  "cancellationReason": "Customer request"
+}
+```
+
+---
+
+## Properties
+
+### GET /api/properties
+
+Get properties for authenticated user.
+
+**Auth Required:** Yes
+
+**Response (200):**
+
+```json
+[
+  {
+    "id": "prop-residential-1",
+    "name": "Brickell Luxury Apartment",
+    "address": "1234 Brickell Ave, Unit 2501",
+    "city": "Miami",
+    "state": "FL",
+    "zipCode": "33131",
+    "type": "RESIDENTIAL",
+    "size": 1200,
+    "userId": "cm..."
+  }
+]
+```
+
+### POST /api/properties
+
+Add a new property.
+
+**Auth Required:** Yes
+
+**Request:**
+
+```json
+{
+  "name": "My Beach House",
+  "address": "456 Ocean Drive",
+  "city": "Miami Beach",
+  "state": "FL",
+  "zipCode": "33139",
+  "type": "VACATION_RENTAL",
+  "size": 1500
+}
+```
+
+---
+
+## Users
+
+### GET /api/users/me
+
+Get current user profile.
+
+**Auth Required:** Yes
+
+**Response (200):**
+
+```json
+{
+  "id": "cm...",
+  "email": "admin@brisacubanaclean.com",
+  "name": "Admin User",
+  "phone": "+1-305-555-0001",
+  "role": "ADMIN",
+  "createdAt": "2025-09-30T21:34:16.000Z"
+}
+```
+
+### PATCH /api/users/me
+
+Update current user profile.
+
+**Auth Required:** Yes
+
+**Request:**
+
+```json
+{
+  "name": "Updated Name",
+  "phone": "+1-305-555-9999"
+}
+```
+
+### GET /api/users
+
+Get all users (Admin only).
+
+**Auth Required:** Yes (ADMIN role)
+
+---
+
+## Payments
+
+### POST /api/payments/create-intent
+
+Create a payment intent for a booking.
+
+**Auth Required:** Yes
+
+**Request:**
+
+```json
+{
+  "bookingId": "booking-confirmed-1"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "clientSecret": "pi_xxx_secret_xxx",
+  "amount": 14999
+}
+```
+
+### POST /api/payments/webhook
+
+Stripe webhook endpoint (Stripe signature validation).
+
+**Auth Required:** No (validated via Stripe signature)
+
+---
+
+## Alerts
+
+### POST /api/alerts
+
+Send an alert (Admin/Staff only).
+
+**Auth Required:** Yes (ADMIN or STAFF role)
+
+**Request:**
+
+```json
+{
+  "type": "BOOKING_REMINDER",
+  "userId": "cm...",
+  "message": "Your cleaning is scheduled for tomorrow at 2 PM",
+  "channels": ["EMAIL", "SMS"]
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "sent": true,
+  "channels": {
+    "EMAIL": "success",
+    "SMS": "success"
+  }
+}
+```
+
+---
+
+## Reports
+
+### GET /api/reports/revenue
+
+Get revenue report (Admin only).
+
+**Auth Required:** Yes (ADMIN role)
+
+**Query Parameters:**
+
+- `from`: Start date (ISO format)
+- `to`: End date (ISO format)
+
+**Response (200):**
+
+```json
+{
+  "totalRevenue": "1234.56",
+  "bookingsCount": 15,
+  "averageBookingValue": "82.30"
+}
+```
+
+---
+
+## Reconciliation
+
+### GET /api/reconciliation
+
+Get payment reconciliation data (Admin only).
+
+**Auth Required:** Yes (ADMIN role)
+
+**Query Parameters:**
+
+- `from`: Start date
+- `to`: End date
+
+**Response (200):**
+
+```json
+{
+  "period": {
+    "from": "2025-09-01T00:00:00.000Z",
+    "to": "2025-09-30T23:59:59.999Z"
+  },
+  "totals": {
+    "expected": "5000.00",
+    "received": "4850.00",
+    "pending": "150.00"
+  },
+  "discrepancies": []
+}
+```
+
+---
+
+## Rate Limiting
+
+API endpoints are rate limited:
+
+- **Public endpoints**: 60 requests per minute
+- **Authenticated endpoints**: 120 requests per minute
+- **Admin endpoints**: 240 requests per minute
+
+Rate limit headers included in responses:
+
+```
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 119
+X-RateLimit-Reset: 1696089600
+```
+
+---
+
+## Error Responses
+
+All errors follow this format:
+
+```json
+{
+  "error": "Error message",
+  "code": "ERROR_CODE",
+  "details": {}
+}
+```
+
+**Common HTTP Status Codes:**
+
+- `400` - Bad Request (validation error)
+- `401` - Unauthorized (missing/invalid token)
+- `403` - Forbidden (insufficient permissions)
+- `404` - Not Found
+- `409` - Conflict (duplicate resource)
+- `429` - Too Many Requests (rate limit exceeded)
+- `500` - Internal Server Error
+
+---
+
+## Testing with cURL
+
+### Login and store token
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{
-    "userId": "user-uuid",
-    "propertyId": "prop-uuid",
-    "serviceId": "service-uuid",
-    "scheduledAt": "2025-10-15T10:00:00Z",
-    "totalPrice": 120
-  }'
+  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}' \
+  | jq -r '.token')
 ```
 
-### Mis reservas
+### Use token in requests
 
 ```bash
-curl http://localhost:3001/api/bookings/mine \
-  -H "Authorization: Bearer $TOKEN"
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:3001/api/bookings
 ```
 
 ---
 
-## Testing con Postman/Insomnia
+## CleanScore Reports
 
-1. Importar collection con base URL: `http://localhost:3001`
-2. Crear environment variable `{{token}}`
-3. Ejecutar `POST /api/auth/login` y copiar token
-4. Configurar Authorization: `Bearer {{token}}` en collection
+### POST /api/reports/cleanscore
+
+Generate and send a CleanScore™ quality report for a completed booking.
+
+**Auth Required:** Yes (STAFF or ADMIN roles)
+
+**Request:**
+
+```json
+{
+  "bookingId": "booking-123",
+  "metrics": {
+    "generalCleanliness": 4.5,
+    "kitchen": 5.0,
+    "bathrooms": 4.8,
+    "premiumDetails": 4.2,
+    "ambiance": 4.7,
+    "timeCompliance": 5.0
+  },
+  "teamMembers": ["María García", "Carlos López"],
+  "photos": [
+    {
+      "url": "https://example.com/photo1.jpg",
+      "caption": "Kitchen after cleaning",
+      "category": "after"
+    }
+  ],
+  "observations": "Property was in excellent condition. All areas cleaned thoroughly.",
+  "recommendations": [
+    "Consider deep carpet cleaning for next visit",
+    "Replace air filter in HVAC system"
+  ]
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "CleanScore report is being generated and will be sent shortly",
+  "score": 4.7,
+  "bookingId": "booking-123",
+  "reportId": "report-456"
+}
+```
+
+**Errors:**
+
+- `400`: Invalid report payload or booking not completed
+- `401`: Unauthorized
+- `404`: Booking not found
+- `422`: Validation errors
+
+**Notes:**
+
+- Booking must have `status: "COMPLETED"` to generate report
+- Email with PDF report sent to customer automatically
+- CleanScore calculated as weighted average of all metrics
+- Report persisted in database for future retrieval
 
 ---
 
-## Rate Limiting (Roadmap)
+### GET /api/reports/cleanscore/:bookingId
 
-⚠️ **Actualmente no implementado** - Planificado para v0.2.0:
+Retrieve CleanScore report for a specific booking.
 
-- 100 requests/minuto por IP
-- 500 requests/hora por usuario autenticado
+**Auth Required:** Yes (Booking owner, STAFF, or ADMIN)
+
+**URL Parameters:**
+
+- `bookingId`: The booking ID
+
+**Response (200):**
+
+```json
+{
+  "id": "report-456",
+  "bookingId": "booking-123",
+  "score": 4.7,
+  "metrics": {
+    "generalCleanliness": 4.5,
+    "kitchen": 5.0,
+    "bathrooms": 4.8,
+    "premiumDetails": 4.2,
+    "ambiance": 4.7,
+    "timeCompliance": 5.0
+  },
+  "teamMembers": ["María García", "Carlos López"],
+  "photos": [],
+  "observations": "Property was in excellent condition...",
+  "recommendations": ["Consider deep carpet cleaning..."],
+  "generatedBy": "user-staff-1",
+  "sentToEmail": "client@example.com",
+  "pdfUrl": null,
+  "createdAt": "2025-10-01T04:15:00.000Z",
+  "updatedAt": "2025-10-01T04:15:00.000Z",
+  "booking": {
+    "id": "booking-123",
+    "user": {...},
+    "property": {...},
+    "service": {...}
+  }
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `403`: Forbidden - not authorized to view this report
+- `404`: CleanScore report not found for this booking
 
 ---
 
-## Versionado
+### GET /api/reports/cleanscore
 
-**Versión actual:** v1 (sin prefijo en URL)
+List all CleanScore reports (paginated).
 
-**Roadmap:** Se agregará versionado `/api/v1/` en futuras versiones para mantener compatibilidad retroactiva.
+**Auth Required:** Yes (STAFF or ADMIN roles only)
+
+**Query Parameters:**
+
+- `limit` (optional): Number of reports per page (default: 20)
+- `offset` (optional): Number of reports to skip (default: 0)
+
+**Response (200):**
+
+```json
+{
+  "reports": [
+    {
+      "id": "report-456",
+      "bookingId": "booking-123",
+      "score": 4.7,
+      "booking": {
+        "id": "booking-123",
+        "user": {
+          "id": "user-1",
+          "name": "John Doe",
+          "email": "john@example.com"
+        },
+        "property": {
+          "id": "prop-1",
+          "name": "Sunset Villa",
+          "address": "123 Ocean Drive"
+        },
+        "service": {
+          "id": "service-1",
+          "name": "Deep Clean"
+        }
+      },
+      "createdAt": "2025-10-01T04:15:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "limit": 20,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `403`: Forbidden - requires STAFF or ADMIN role
 
 ---
 
-**Documentación generada:** 30 de septiembre de 2025
+### POST /api/reports/cleanscore/preview
 
-**Changelog:** [Registro de cambios](../changelog/index.md)
+Preview CleanScore report HTML without sending email.
+
+**Auth Required:** Yes (STAFF or ADMIN roles)
+
+**Request:** Same as POST /api/reports/cleanscore
+
+**Response (200):** Returns HTML string for preview
+
+---
+
+## Concierge IA
+
+### POST /api/concierge/conversations
+
+Create a new conversation with optional initial message.
+
+**Auth Required:** Yes (any authenticated user)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Request:**
+
+```json
+{
+  "channel": "WEB",
+  "bookingId": "booking-123",
+  "propertyId": "property-456",
+  "initialMessage": "Hola, necesito información sobre mis servicios"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "conversation": {
+    "id": "conv-789",
+    "userId": "user-123",
+    "title": "Hola, necesito información sobre mis servici...",
+    "status": "ACTIVE",
+    "channel": "WEB",
+    "bookingId": "booking-123",
+    "propertyId": "property-456",
+    "createdAt": "2025-10-01T12:00:00.000Z",
+    "updatedAt": "2025-10-01T12:00:00.000Z"
+  },
+  "messages": [
+    {
+      "id": "msg-001",
+      "conversationId": "conv-789",
+      "role": "USER",
+      "content": "Hola, necesito información sobre mis servicios",
+      "createdAt": "2025-10-01T12:00:00.000Z"
+    },
+    {
+      "id": "msg-002",
+      "conversationId": "conv-789",
+      "role": "ASSISTANT",
+      "content": "¡Hola! Bienvenido a Brisa Cubana Clean Intelligence...",
+      "model": "mock-concierge-v1",
+      "tokens": 45,
+      "createdAt": "2025-10-01T12:00:01.000Z"
+    }
+  ]
+}
+```
+
+**Errors:**
+
+- `400`: Invalid payload
+- `401`: Unauthorized
+- `429`: Rate limit exceeded
+
+---
+
+### GET /api/concierge/conversations
+
+List user's conversations with pagination.
+
+**Auth Required:** Yes (any authenticated user)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Query Parameters:**
+
+- `limit` (number, default: 20) - Number of conversations to return
+- `offset` (number, default: 0) - Pagination offset
+- `status` (string, optional) - Filter by status: ACTIVE, RESOLVED, ARCHIVED
+
+**Response (200):**
+
+```json
+{
+  "conversations": [
+    {
+      "id": "conv-789",
+      "userId": "user-123",
+      "title": "Hola, necesito información sobre mis servici...",
+      "status": "ACTIVE",
+      "channel": "WEB",
+      "bookingId": "booking-123",
+      "propertyId": "property-456",
+      "createdAt": "2025-10-01T12:00:00.000Z",
+      "updatedAt": "2025-10-01T12:00:00.000Z",
+      "messages": [
+        {
+          "id": "msg-002",
+          "conversationId": "conv-789",
+          "role": "ASSISTANT",
+          "content": "¡Hola! Bienvenido a Brisa Cubana...",
+          "createdAt": "2025-10-01T12:00:01.000Z"
+        }
+      ],
+      "_count": {
+        "messages": 15
+      }
+    }
+  ],
+  "pagination": {
+    "total": 42,
+    "limit": 20,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `429`: Rate limit exceeded
+
+---
+
+### GET /api/concierge/conversations/:id
+
+Get a specific conversation with all messages.
+
+**Auth Required:** Yes (conversation owner, or STAFF/ADMIN roles)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Response (200):**
+
+```json
+{
+  "id": "conv-789",
+  "userId": "user-123",
+  "title": "Hola, necesito información sobre mis servici...",
+  "status": "ACTIVE",
+  "channel": "WEB",
+  "bookingId": "booking-123",
+  "propertyId": "property-456",
+  "createdAt": "2025-10-01T12:00:00.000Z",
+  "updatedAt": "2025-10-01T12:05:00.000Z",
+  "messages": [
+    {
+      "id": "msg-001",
+      "conversationId": "conv-789",
+      "role": "USER",
+      "content": "Hola, necesito información sobre mis servicios",
+      "createdAt": "2025-10-01T12:00:00.000Z"
+    },
+    {
+      "id": "msg-002",
+      "conversationId": "conv-789",
+      "role": "ASSISTANT",
+      "content": "¡Hola! Bienvenido a Brisa Cubana Clean Intelligence...",
+      "model": "mock-concierge-v1",
+      "tokens": 45,
+      "createdAt": "2025-10-01T12:00:01.000Z"
+    }
+  ]
+}
+```
+
+**Errors:**
+
+- `401`: Unauthorized
+- `403`: Forbidden - Not authorized to view this conversation
+- `404`: Not Found - Conversation does not exist
+- `429`: Rate limit exceeded
+
+---
+
+### POST /api/concierge/conversations/:id/messages
+
+Send a message in a conversation and get AI response.
+
+**Auth Required:** Yes (conversation owner, or STAFF/ADMIN roles)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Request:**
+
+```json
+{
+  "content": "¿Cuánto cuesta el servicio de Deep Clean?"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "userMessage": {
+    "id": "msg-003",
+    "conversationId": "conv-789",
+    "role": "USER",
+    "content": "¿Cuánto cuesta el servicio de Deep Clean?",
+    "createdAt": "2025-10-01T12:05:00.000Z"
+  },
+  "assistantMessage": {
+    "id": "msg-004",
+    "conversationId": "conv-789",
+    "role": "ASSISTANT",
+    "content": "El servicio de Deep Clean tiene un precio base de $149...",
+    "model": "mock-concierge-v1",
+    "tokens": 38,
+    "context": {
+      "user": {
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "availableServices": [
+        {
+          "name": "Deep Clean",
+          "basePrice": "149.00"
+        }
+      ]
+    },
+    "createdAt": "2025-10-01T12:05:01.000Z"
+  }
+}
+```
+
+**Errors:**
+
+- `400`: Invalid message payload
+- `401`: Unauthorized
+- `403`: Forbidden - Not authorized to send messages in this conversation
+- `404`: Not Found - Conversation does not exist
+- `429`: Rate limit exceeded
+
+---
+
+### PATCH /api/concierge/conversations/:id
+
+Update conversation status or title.
+
+**Auth Required:** Yes (conversation owner, or STAFF/ADMIN roles)
+
+**Rate Limit:** Write limit (10 req/min per IP)
+
+**Request:**
+
+```json
+{
+  "status": "RESOLVED",
+  "title": "Consulta sobre Deep Clean"
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "id": "conv-789",
+  "userId": "user-123",
+  "title": "Consulta sobre Deep Clean",
+  "status": "RESOLVED",
+  "channel": "WEB",
+  "bookingId": "booking-123",
+  "propertyId": "property-456",
+  "createdAt": "2025-10-01T12:00:00.000Z",
+  "updatedAt": "2025-10-01T12:10:00.000Z"
+}
+```
+
+**Errors:**
+
+- `400`: Invalid update payload
+- `401`: Unauthorized
+- `403`: Forbidden - Not authorized to update this conversation
+- `404`: Not Found - Conversation does not exist
+- `429`: Rate limit exceeded
+
+**AI Provider Configuration:**
+
+The Concierge IA system supports multiple AI providers configured via environment variables:
+
+- `AI_PROVIDER` - Provider to use: `mock` (default), `openai`, or `anthropic`
+- `OPENAI_API_KEY` - Required if using OpenAI provider
+- `ANTHROPIC_API_KEY` - Required if using Anthropic provider
+
+**Mock Mode:** By default, the system uses mock AI responses for development/testing without requiring API keys.
+
+---
+
+## Postman Collection
+
+Import the Postman collection for easy testing:
+[Download Postman Collection](./postman_collection.json)
+
+---
+
+## OpenAPI/Swagger
+
+OpenAPI spec available at:
+`/api/docs` (coming soon)

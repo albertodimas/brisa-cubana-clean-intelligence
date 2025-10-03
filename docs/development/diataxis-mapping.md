@@ -4,28 +4,28 @@ Este inventario clasifica la documentación existente según el marco [Diátaxis
 
 ## Tutoriales (lecciones paso a paso)
 
-| Documento                             | Propósito                                 | Observaciones                                                  |
-| ------------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| `docs/for-developers/quickstart.md`   | Leva entorno local y seed de datos        | Debe actualizarse cuando cambien scripts de bootstrap.         |
-| `docs/operations/runbooks/GO_LIVE.md` | Despliegue controlado a producción        | Ejecutar ejercicios guiados con equipo SRE cada release mayor. |
-| _Faltante_                            | Tutorial CleanScore™ (captura y reporte) | Crear lección para operadores antes de activar el módulo.      |
-| _Faltante_                            | Tutorial Concierge AI (casos reales)      | Preparar demo guiada antes del piloto comercial.               |
+| Documento                                                | Propósito                               | Observaciones                                                  |
+| -------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------- |
+| `docs/for-developers/quickstart.md`                      | Leva entorno local y seed de datos      | Debe actualizarse cuando cambien scripts de bootstrap.         |
+| `docs/operations/runbooks/GO_LIVE.md`                    | Despliegue controlado a producción      | Ejecutar ejercicios guiados con equipo SRE cada release mayor. |
+| `docs/for-developers/tutorials/cleanscore-tutorial.md`   | Generar informe CleanScore™ end-to-end | Revisar tras cambios en pipeline de scoring.                   |
+| `docs/for-developers/tutorials/concierge-ai-tutorial.md` | Atender solicitudes con Concierge AI    | Actualizar modelos soportados y flags disponibles.             |
 
 ## How-to Guides (resolver tareas concretas)
 
-| Documento                                                   | Tarea                                                 | Observaciones                                          |
-| ----------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
-| `docs/operations/runbooks/ROLLBACK.md`                      | Revertir despliegues problemáticos                    | Mantener sincronizado con scripts de Railway/Vercel.   |
-| `docs/operations/runbooks/INCIDENT_RESPONSE.md`             | Gestionar incidentes Sev1–Sev3                        | Añadir ejemplos de plantillas para status page.        |
-| `docs/operations/runbooks/OPERATIONAL_READINESS_REVIEW.md`  | Validar releases críticos                             | Incluir checklist automatizable en GitHub Actions.     |
-| `docs/operations/runbooks/README.md`                        | Índice de procedimientos operativos                   | Debe enlazar a futuras guías de soporte L1/L2.         |
-| `docs/development/local-testing-workflow.md`                | Validar código antes de push                          | Añadir sección para pruebas E2E cuando se automaticen. |
-| `docs/operations/production/DEPLOYMENT_CHECKLIST.md`        | Checklist previo a Go-Live                            | Integrar campos para evidencias (links a dashboards).  |
-| `docs/operations/production/DEPLOYMENT_SETUP.md`            | Cargar secretos y tokens                              | Añadir ejemplos de rotación automatizada.              |
-| `docs/operations/production/PRODUCTION_DEPLOYMENT_GUIDE.md` | Procedimiento completo de despliegue                  | Revisar contra nuevos pipelines CI/CD.                 |
-| `docs/operations/production/RAILWAY_FIX.md`                 | Corregir configuración Railway                        | Evaluar migración a guía general de plataformas.       |
-| _Faltante_                                                  | Cómo operar CleanScore™ en campo                     | Requiere procesos QA y recolección de evidencias.      |
-| _Faltante_                                                  | Cómo manejar incidencias de Concierge AI con clientes | Definir pasos con Customer Success.                    |
+| Documento                                                   | Tarea                                              | Observaciones                                          |
+| ----------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
+| `docs/operations/runbooks/ROLLBACK.md`                      | Revertir despliegues problemáticos                 | Mantener sincronizado con scripts de Railway/Vercel.   |
+| `docs/operations/runbooks/INCIDENT_RESPONSE.md`             | Gestionar incidentes Sev1–Sev3                     | Añadir ejemplos de plantillas para status page.        |
+| `docs/operations/runbooks/OPERATIONAL_READINESS_REVIEW.md`  | Validar releases críticos                          | Incluir checklist automatizable en GitHub Actions.     |
+| `docs/operations/runbooks/README.md`                        | Índice de procedimientos operativos                | Debe enlazar a futuras guías de soporte L1/L2.         |
+| `docs/development/local-testing-workflow.md`                | Validar código antes de push                       | Añadir sección para pruebas E2E cuando se automaticen. |
+| `docs/operations/production/DEPLOYMENT_CHECKLIST.md`        | Checklist previo a Go-Live                         | Integrar campos para evidencias (links a dashboards).  |
+| `docs/operations/production/DEPLOYMENT_SETUP.md`            | Cargar secretos y tokens                           | Añadir ejemplos de rotación automatizada.              |
+| `docs/operations/production/PRODUCTION_DEPLOYMENT_GUIDE.md` | Procedimiento completo de despliegue               | Revisar contra nuevos pipelines CI/CD.                 |
+| `docs/operations/production/RAILWAY_FIX.md`                 | Corregir configuración Railway                     | Evaluar migración a guía general de plataformas.       |
+| `docs/for-developers/tutorials/cleanscore-tutorial.md`      | Publicar informes CleanScore™                     | Añadir sección específica para operadores de campo.    |
+| `docs/for-developers/tutorials/concierge-ai-tutorial.md`    | Gestionar solicitudes recurrentes con Concierge AI | Documentar escenarios de escalamiento a humanos.       |
 
 ## Referencias
 
@@ -56,7 +56,7 @@ Este inventario clasifica la documentación existente según el marco [Diátaxis
 
 ## Acciones pendientes
 
-- Completar tutoriales para CleanScore™ y Concierge AI antes del piloto Q1.
+- Completar runbooks específicos para CleanScore™ y Concierge AI si los flujos superan el estadio tutorial.
 - Incorporar contratos OpenAPI y generar referencia automática.
 - Consolidar guía de observabilidad en how-to una vez desplegada la fase 2.
 - Definir responsables de actualización por categoría (añadir a `CONTRIBUTING.md`).
