@@ -20,14 +20,27 @@ Norma para mantener la documentación sincronizada con el estado real del proyec
 | 6    | Actualizar tablas de estado                                | `README.md`, `PRODUCTION_READINESS_REPORT.md`, `PRODUCTION_DEPLOYMENT_GUIDE.md` |
 | 7    | Registrar cambios mayor > menor                            | `CHANGELOG.md` + etiqueta Git si aplica                                         |
 
-## Convenciones de Estilo
+## Guía de Estilo (Markdown + Voz)
 
-- **Formato**: Markdown (`.md`) con títulos `h2` en español, emojis opcionales para secciones.
-- **Enlaces**: usar rutas relativas que apunten a archivos reales (`../for-developers/README.md`). Evitar enlaces a carpetas (`dir/`).
-- **Fechas**: formato `YYYY-MM-DD` (ej. `2025-10-03`).
-- **Idiomas**: Español como idioma principal. Se permite Inglés para nombres propios o citas de documentación externa.
-- **Tablas**: sin celdas vacías; siempre incluir encabezado.
-- **Código**: usar bloques de código con lenguaje definido (por ejemplo, abrir con tres backticks + `bash` y cerrar con tres backticks).
+Adoptamos los principios del [Google Markdown Style Guide](https://github.com/google/styleguide/blob/gh-pages/docguide/style.md):
+
+- **Legibilidad del source**: evita HTML embebido salvo casos excepcionales.
+- **Encabezados escalonados**: un solo `#` por documento y jerarquía secuencial (`##`, `###`, ...).
+- **Listas concisas**: frases paralelas y punto final solo si la oración es completa.
+- **Tablas con encabezados claros** y sin celdas vacías; utiliza `N/A` cuando aplique.
+- **Bloques de código con lenguaje declarado** (por ejemplo, ``bash`).
+
+Voz y tono:
+
+- Usa segunda persona (“ejecuta”, “valida”) y voz activa.
+- Evita regionalismos y tecnicismos innecesarios (“re-introducir” → “volver a configurar”).
+- Indica contexto y resultado esperado en cada paso (“Ejecuta X para obtener Y”).
+
+Idiomas y formato:
+
+- Español como idioma principal; reserva términos en inglés para APIs, librerías o citas.
+- Fechas en formato ISO (`YYYY-MM-DD`).
+- Enlaces relativos a archivos concretos (`../for-developers/README.md`) y no a carpetas.
 
 ## Workflow de actualización
 
@@ -40,6 +53,24 @@ Norma para mantener la documentación sincronizada con el estado real del proyec
 4. Correr `pnpm docs:build` y revisar advertencias
    - El build actual (2025-10-03) aún reporta enlaces faltantes en `docs/index.md` → usar esta guía como referencia para corregirlos.
 5. Adjuntar salida relevante en el PR (logs de tests, build, docs).
+
+## Versionado y despliegue de documentación
+
+- Utilizamos [mike](https://github.com/jimporter/mike) para gestionar versiones de documentación. Versiona al menos cada release mayor o cuando la API cambie.
+- Flujo recomendado:
+  1. Instala dependencias (`pip install -r requirements.txt`).
+  2. Genera versión: `mike deploy <version> latest` (ej. `mike deploy 1.0 latest`).
+  3. Etiqueta como predeterminada: `mike set-default latest`.
+  4. Publica en GitHub Pages: `mike publish` o `mkdocs gh-deploy` para entornos puntuales.
+- Mantén historial en `gh-pages` y documenta cambios en `docs/operations/production/PRODUCTION_DEPLOYMENT_GUIDE.md`.
+
+Calendario sugerido:
+
+| Frecuencia   | Actividad                                                                           | Responsable            |
+| ------------ | ----------------------------------------------------------------------------------- | ---------------------- |
+| Mensual      | Revisar advertencias de `pnpm docs:build` y backlog de issues de documentación      | Tech Writing + SRE     |
+| Trimestral   | Liberar versión con `mike deploy <YYYY.Q>` y actualizar `README.md`/`docs/index.md` | Plataforma             |
+| Post-release | Ejecutar check de calidad funcional (precisión, completitud) y registrar hallazgos  | Equipo cross-funcional |
 
 ## Auditorías periódicas
 

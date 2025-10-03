@@ -15,6 +15,7 @@ nav:
       - Variables de entorno: for-developers/environment-variables.md
       - Plan de entregas y releases: development/delivery-plan.md
       - Workflow de testing local: development/local-testing-workflow.md
+      - Inventario Diátaxis: development/diataxis-mapping.md
       - Estándares de documentación: development/documentation-standards.md
       - Referencia de API: for-developers/api-reference.md
       - Guía de testing: for-developers/testing.md

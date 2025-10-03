@@ -1,17 +1,29 @@
-# Quickstart (5 minutos)
+# Quickstart: Entorno de Desarrollo
 
-Guía paso a paso para preparar el entorno local de Brisa Cubana Clean Intelligence en menos de cinco minutos.
+## Resumen
 
-## 1. Prerrequisitos
+Guía paso a paso para que un desarrollador configure y ejecute Brisa Cubana Clean Intelligence en un entorno local. Sigue la plantilla de tutorial del Good Docs Project: objetivo claro, pasos numerados y validaciones al final.
 
-| Herramienta | Versión mínima | Comando sugerido                                                 |
-| ----------- | -------------- | ---------------------------------------------------------------- |
-| Node.js     | 24.9.0         | `nvm install 24 && nvm use`                                      |
-| pnpm        | 10.17.1        | `corepack enable`                                                |
-| Docker      | 28             | [Docker Desktop](https://www.docker.com/products/docker-desktop) |
-| Git         | 2.40           | Incluido en la mayoría de sistemas                               |
+## Audiencia
 
-Verifica versiones:
+- Ingenieros backend/frontend que se incorporan al proyecto.
+- Personal de SRE que necesita reproducir el stack para pruebas.
+- Colaboradores externos que requieren visibilidad del sistema.
+
+## Duración estimada
+
+20 minutos con conexión estable y acceso a dependencias.
+
+## Prerrequisitos
+
+| Componente | Versión mínima | Notas                                                       |
+| ---------- | -------------- | ----------------------------------------------------------- |
+| Node.js    | 24.9.0         | Usa `nvm use` para activar la versión definida en `.nvmrc`. |
+| pnpm       | 10.17.1        | Habilita Corepack (`corepack enable`).                      |
+| Docker     | 28+            | Necesario para PostgreSQL, Redis y MailHog.                 |
+| Git        | 2.40+          | Se recomienda acceso SSH configurado.                       |
+
+Antes de comenzar ejecuta:
 
 ```bash
 node --version
@@ -20,18 +32,28 @@ docker --version
 git --version
 ```
 
-## 2. Clonar e instalar
+## Procedimiento
+
+### 1. Clonar el repositorio
 
 ```bash
-# Clona el repositorio
 git clone git@github.com:albertodimas/brisa-cubana-clean-intelligence.git
 cd brisa-cubana-clean-intelligence
+```
 
-# Instala dependencias
+Activa la versión de Node definida:
+
+```bash
+nvm use
+```
+
+### 2. Instalar dependencias
+
+```bash
 pnpm install
 ```
 
-## 3. Variables de entorno
+### 3. Configurar variables de entorno
 
 ```bash
 cp .env.example .env
@@ -41,38 +63,41 @@ cp apps/web/.env.local.example apps/web/.env.local
 
 Completa los valores obligatorios:
 
-- `DATABASE_URL`: `postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev`
-- `JWT_SECRET`: genera con `openssl rand -hex 64`
-- `NEXTAUTH_SECRET`: genera con `openssl rand -base64 32`
-- `NEXT_PUBLIC_API_URL`: `http://localhost:3001`
-- Claves de Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) si deseas probar pagos.
+- `DATABASE_URL="postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev"`
+- `JWT_SECRET="$(openssl rand -hex 64)"`
+- `NEXTAUTH_SECRET="$(openssl rand -base64 32)"`
+- `NEXT_PUBLIC_API_URL="http://localhost:3001"`
+- Claves de Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) si probarás pagos.
 
-## 4. Levantar infraestructura local
+### 4. Levantar servicios locales
 
 ```bash
-# PostgreSQL 17, Redis 8 y MailHog
 docker compose up -d
+```
 
+Verifica los contenedores:
+
+```bash
 docker compose ps
 ```
 
-Confirma que los contenedores se exponen en los puertos `5433`, `6380` y `8026`.
+Debes ver PostgreSQL en `5433`, Redis en `6380` y MailHog en `8026`.
 
-## 5. Preparar base de datos
+### 5. Preparar base de datos
 
 ```bash
-pnpm --filter=@brisa/api db:generate   # Prisma Client
-pnpm --filter=@brisa/api db:push       # Sincroniza esquema
-pnpm --filter=@brisa/api db:seed       # Carga datos de ejemplo
+pnpm --filter=@brisa/api db:generate
+pnpm --filter=@brisa/api db:push
+pnpm --filter=@brisa/api db:seed
 ```
 
 Usuarios sembrados:
 
-- Admin: `admin@brisacubanaclean.com` / `Admin123!`
-- Staff: `staff@brisacubanaclean.com` / `Staff123!`
-- Cliente: `client@brisacubanaclean.com` / `Client123!`
+- `admin@brisacubanaclean.com` / `Admin123!`
+- `staff@brisacubanaclean.com` / `Staff123!`
+- `client@brisacubanaclean.com` / `Client123!`
 
-## 6. Ejecutar el entorno de desarrollo
+### 6. Ejecutar el stack
 
 ```bash
 pnpm dev
@@ -80,63 +105,51 @@ pnpm dev
 
 Servicios disponibles:
 
-- Web: http://localhost:3000
-- API: http://localhost:3001
-- MailHog: http://localhost:8026
+- Web: <http://localhost:3000>
+- API: <http://localhost:3001>
+- MailHog: <http://localhost:8026>
 
-## 7. Verificaciones básicas
+### 7. Preparar documentación (opcional)
 
-```bash
-# Salud de la API
-curl http://localhost:3001/health
-
-# Login de prueba
-curl -X POST http://localhost:3001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}'
-```
-
-Revisa http://localhost:3000 y accede con las credenciales de administrador para validar el dashboard.
-
-## 8. Comandos útiles
+Si necesitas consultar la documentación localmente, crea/actualiza el entorno de MkDocs:
 
 ```bash
-pnpm dev:web          # Next.js únicamente
-pnpm dev:api          # API Hono únicamente
-pnpm db:reset         # Fuerza recreación + seed
-pnpm db:studio        # Prisma Studio en navegador
-pnpm docs:serve       # Documentación (MkDocs) en :8000
-pnpm test             # Vitest completo
-pnpm test:e2e         # Escenarios Playwright
-pnpm stripe:listen    # Escucha webhooks de Stripe
+./scripts/setup_env.sh
+source .venv/bin/activate
+mkdocs serve
 ```
 
-## 9. Problemas frecuentes
+La documentación estará en <http://localhost:8000>.
 
-### Puerto 5432/3000/3001 en uso
+## Validación
 
-```bash
-lsof -i :5432
-lsof -i :3000
-lsof -i :3001
-kill -9 <PID>
-```
+1. Ejecuta `curl http://localhost:3001/health` y confirma respuesta `status: ok`.
+2. Inicia sesión en <http://localhost:3000> con el usuario admin.
+3. Corre las validaciones locales:
+   ```bash
+   pnpm lint
+   pnpm typecheck
+   pnpm test
+   ```
 
-### Prisma Client no generado
+## Resolución de problemas
 
-```bash
-pnpm --filter=@brisa/api db:generate
-```
+| Síntoma                                     | Causa común                     | Solución                                                              |
+| ------------------------------------------- | ------------------------------- | --------------------------------------------------------------------- |
+| `Port 5432 already in use`                  | PostgreSQL local en ejecución   | Cambia a puerto `5433` o detén instancia local.                       |
+| `Cannot connect to database`                | Docker no levantó servicios     | `docker compose down && docker compose up -d` y re-intenta `db:push`. |
+| `Prisma Client not generated`               | Omitiste paso de `db:generate`  | Ejecuta `pnpm --filter=@brisa/api db:generate`.                       |
+| `npm command not found` al ejecutar scripts | PATH sin pnpm con Corepack      | Ejecuta `corepack enable` y reinstala dependencias.                   |
+| `mkdocs: command not found`                 | Entorno `.venv` no inicializado | Corre `./scripts/setup_env.sh` y activa `. .venv/bin/activate`.       |
 
-### Dependencias corruptas
+## Próximos pasos
 
-```bash
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
-```
+- Leer `docs/development/local-testing-workflow.md` para conocer el pipeline pre-push.
+- Revisar `docs/operations/runbooks/GO_LIVE.md` si necesitas participar en despliegues.
+- Consultar `docs/operations/production/PRODUCTION_READINESS_REPORT.md` para entender el estado actual del proyecto.
 
-## 10. Próximos pasos
+## Registro de cambios
 
-1. Revisa `architecture.md` para entender los componentes clave.
-2. Lee `CONTRIBUTING.md` antes de abrir tu primer PR.
-3. Explora la documentación completa en `docs/index.md` o ejecuta `make serve`.
+| Fecha      | Responsable      | Cambio                                                  |
+| ---------- | ---------------- | ------------------------------------------------------- |
+| 2025-10-03 | Plataforma & Eng | Reestructuración siguiendo templates Good Docs Project. |
