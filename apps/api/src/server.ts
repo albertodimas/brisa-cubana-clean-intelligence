@@ -25,8 +25,11 @@ serve(
     console.log(
       `Metrics: http://localhost:9464/metrics (Prometheus scrape endpoint)`,
     );
-    console.log(
-      `Tracing: ${process.env.OTLP_ENDPOINT || "Console only (set OTLP_ENDPOINT for external collector)"}`,
-    );
+    const otlpEndpoint = process.env.OTLP_ENDPOINT;
+    const tracingTarget =
+      otlpEndpoint && otlpEndpoint.trim().length > 0
+        ? otlpEndpoint
+        : "Console only (set OTLP_ENDPOINT for external collector)";
+    console.log(`Tracing: ${tracingTarget}`);
   },
 );

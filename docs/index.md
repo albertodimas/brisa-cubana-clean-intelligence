@@ -13,6 +13,7 @@ Documentación técnica y operativa:
 - [Deployment](for-developers/deployment.md) — Vercel, Railway y buenas prácticas de releases.
 - [Testing](for-developers/testing.md) — cobertura, tipos de pruebas y pipelines.
 - [Documentation Standards](development/documentation-standards.md) — reglas de estilo y veracidad.
+- [Delivery Plan](development/delivery-plan.md) — gobierno de releases y release train.
 - [Diagrams](for-developers/diagrams/README.md) — C4, flujos de reservas y rutas internas.
 
 ---
@@ -62,11 +63,11 @@ Servicios locales:
 
 | Dato                 | Valor                   |
 | -------------------- | ----------------------- |
-| Archivos Markdown    | 90                      |
-| Stack                | MkDocs + Material theme |
-| Búsqueda             | Integrada (lunr.js)     |
+| Archivos Markdown    | 124 (2025-10-03)        |
+| Stack                | MkDocs 1.6.1 + Material |
+| Búsqueda             | Integrada (lunr + ES)   |
 | Dark mode            | Disponible              |
-| Última actualización | 5 de febrero de 2026    |
+| Última actualización | 2025-10-03              |
 
 Las contribuciones a la documentación siguen el flujo descrito en [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md). Utiliza PRs con revisión para mantener coherencia.
 

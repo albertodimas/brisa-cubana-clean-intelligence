@@ -300,6 +300,8 @@
     "istio",
     "istioctl",
     "ZSCORE",
-    "goroutines"
+    "goroutines",
+    "gatilla",
+    "revalidaciones"
   ]
 }

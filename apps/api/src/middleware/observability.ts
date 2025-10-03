@@ -51,8 +51,8 @@ export const metricsMiddleware = prometheus();
  * - Adds to response headers for client tracking
  */
 export const correlationIdMiddleware: MiddlewareHandler = async (c, next) => {
-  const correlationId =
-    extractCorrelationId(c.req.header()) || generateCorrelationId();
+  const incomingCorrelationId = extractCorrelationId(c.req.header());
+  const correlationId = incomingCorrelationId ?? generateCorrelationId();
 
   // Store in context for downstream handlers
   c.set("correlationId", correlationId);
@@ -77,14 +77,14 @@ export const requestLoggingMiddleware: MiddlewareHandler = async (c, next) => {
   const startTime = Date.now();
   const method = c.req.method;
   const path = c.req.path;
-  const correlationId = c.get("correlationId");
+  const correlationId = c.get("correlationId") as string | undefined;
 
   // Execute request
   await next();
 
   const duration = Date.now() - startTime;
   const status = c.res.status;
-  const userId = c.get("userId") || null; // From auth middleware
+  const userId = (c.get("userId") as string | undefined) ?? null; // From auth middleware
 
   // Determine log level based on status code
   const level = status >= 500 ? "error" : status >= 400 ? "warn" : "info";
@@ -98,7 +98,8 @@ export const requestLoggingMiddleware: MiddlewareHandler = async (c, next) => {
     duration,
     userId,
     userAgent: c.req.header("user-agent"),
-    ip: c.req.header("x-forwarded-for") || c.req.header("x-real-ip"),
+    ip:
+      c.req.header("x-forwarded-for") ?? c.req.header("x-real-ip") ?? undefined,
   });
 };
 
@@ -111,7 +112,7 @@ export const errorTrackingMiddleware: MiddlewareHandler = async (c, next) => {
   try {
     await next();
   } catch (error) {
-    const correlationId = c.get("correlationId");
+    const correlationId = c.get("correlationId") as string | undefined;
 
     logStructured("error", "Unhandled Error", {
       correlationId,
@@ -119,7 +120,7 @@ export const errorTrackingMiddleware: MiddlewareHandler = async (c, next) => {
       stack: error instanceof Error ? error.stack : undefined,
       method: c.req.method,
       path: c.req.path,
-      userId: c.get("userId"),
+      userId: c.get("userId") as string | undefined,
     });
 
     // Re-throw for Hono's error handler
@@ -145,7 +146,7 @@ export const performanceMonitoringMiddleware: MiddlewareHandler = async (
   const SLOW_REQUEST_THRESHOLD = 1000; // 1 second
 
   if (duration > SLOW_REQUEST_THRESHOLD) {
-    const correlationId = c.get("correlationId");
+    const correlationId = c.get("correlationId") as string | undefined;
 
     logStructured("warn", "Slow Request Detected", {
       correlationId,

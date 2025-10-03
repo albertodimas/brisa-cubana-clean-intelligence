@@ -107,7 +107,7 @@ pnpm dev
 ### DevOps & Testing
 
 - **pnpm 10.17.1 + Turborepo 2.5.8** - Monorepo optimizado
-- **Vitest 3.2.4** - Testing unitario (66 tests ✅)
+- **Vitest 3.2.4** - Testing unitario (171 tests ✅)
 - **Playwright 1.55.1** - E2E testing
 - **Docker Compose** - Desarrollo local
 - **GitHub Actions** - CI/CD automático
@@ -116,18 +116,18 @@ pnpm dev
 
 ## 📊 Estado del Proyecto
 
-| Componente          | Estado              | Descripción                                 |
-| ------------------- | ------------------- | ------------------------------------------- |
-| **Backend API**     | ✅ MVP Complete     | 23 endpoints REST, 66 tests passing         |
-| **Frontend Web**    | ✅ MVP Complete     | Dashboard, bookings, properties, revenue    |
-| **Auth System**     | ✅ Production Ready | JWT + NextAuth v5 + RBAC                    |
-| **Payments**        | ✅ Production Ready | Stripe Checkout + webhooks + reconciliation |
-| **Testing**         | ✅ Configured       | Unit + Integration + E2E                    |
-| **CI/CD**           | ✅ Active           | 5 GitHub Actions workflows                  |
-| **Documentation**   | ✅ Complete         | 78 MD files, MkDocs + Material              |
-| **Deployment**      | 🟡 Staging Ready    | Vercel (frontend) + Railway (backend)       |
-| **CleanScore™ AI** | 🔜 Roadmap          | Computer vision + scoring algorithm         |
-| **Concierge AI**    | 🔜 Roadmap          | GPT-4.1 + Realtime API                      |
+| Componente          | Estado           | Descripción                                                                                       |
+| ------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
+| **Backend API**     | ✅ Implementado  | Hono + Prisma con módulos para servicios, bookings, usuarios, pagos y alertas.                    |
+| **Frontend Web**    | 🟡 MVP funcional | Next.js App Router con dashboard y flujo de reservas; concierge/staff en progreso.                |
+| **Auth System**     | ✅ Disponible    | NextAuth v5 (App Router) + JWT emitidos por la API con roles RBAC básicos.                        |
+| **Payments**        | 🟡 Integración   | Endpoints Stripe Checkout y webhooks listos; requiere claves reales para validar end-to-end.      |
+| **Testing**         | ✅ En marcha     | 171 pruebas Vitest + 15 escenarios Playwright; cobertura automática pendiente.                    |
+| **CI/CD**           | 🟡 Configurada   | 7 workflows en `.github/workflows/`; paso de Codecov deshabilitado hasta definir secreto.         |
+| **Documentación**   | ✅ Extensa       | 120+ archivos Markdown, MkDocs + Typedoc + Storybook (artefactos locales).                        |
+| **Deployment**      | 🟡 Plantillas    | Configuración de Railway/Vercel en `infra/` y workflows GH para despliegues.                      |
+| **CleanScore™ AI** | 🔜 Investigación | Plantillas HTML/PDF y modelos de datos listos; falta modelo de visión.                            |
+| **Concierge AI**    | 🔜 Prototipo     | Endpoint `/api/concierge` opera en modo `mock`; soporta OpenAI/Anthropic si se configuran claves. |
 
 ---
 
@@ -137,22 +137,22 @@ pnpm dev
 brisa-cubana-clean-intelligence/
 ├── apps/
 │   ├── api/                    # Hono backend (Node.js 24)
-│   │   ├── src/routes/        # 23 REST endpoints
+│   │   ├── src/routes/        # REST endpoints para servicios, bookings, pagos, alertas
 │   │   ├── prisma/            # Database schema & migrations
-│   │   └── tests/             # 66 unit tests ✅
+│   │   └── tests/             # 171 tests unitarios/integración ✅
 │   └── web/                   # Next.js 15 frontend
 │       ├── src/app/           # App Router pages
 │       ├── src/components/    # React components
 │       └── e2e/               # Playwright tests
 ├── packages/
 │   └── ui/                    # Shared design system (@brisa/ui)
-├── docs/                      # Documentation (78 MD files)
+├── docs/                      # Documentation (120+ MD files)
 │   ├── for-developers/        # Technical docs
 │   ├── for-business/          # Business & operations
 │   ├── guides/                # Tutorials
 │   └── reference/             # Templates & specs
 ├── scripts/                   # Automation scripts
-├── .github/workflows/         # CI/CD (5 workflows)
+├── .github/workflows/         # CI/CD (7 workflows)
 └── docker-compose.yml         # Local development
 ```
 
@@ -179,7 +179,7 @@ Empresas con **SLAs estrictos**, **compliance ESG** y **trazabilidad verificable
 ### Para Developers
 
 - **[Quickstart (5 min)](docs/for-developers/quickstart.md)** - Setup completo
-- **[API Reference](docs/for-developers/api-reference.md)** - 23 endpoints documentados
+- **[API Reference](docs/for-developers/api-reference.md)** - Endpoints documentados (servicios, bookings, pagos, alertas)
 - **[Testing Guide](docs/for-developers/testing.md)** - Vitest + Playwright
 - **[Deployment Guide](docs/for-developers/deployment.md)** - Vercel/Railway/Fly.io
 
@@ -216,7 +216,9 @@ pnpm typecheck               # TypeScript
 pnpm format                  # Prettier
 ```
 
-**Estado actual**: 66/66 tests passing ✅
+**Estado actual**: 171/171 pruebas Vitest y 15/15 escenarios Playwright pasando (ejecución local `2025-10-03`).
+
+**Linting**: `pnpm lint` sin advertencias (`2025-10-03`).
 
 ---
 
@@ -287,12 +289,12 @@ gh pr create --fill
 
 ### ✅ Phase 1: MVP (Complete)
 
-- [x] Backend API (23 endpoints)
+- [x] Backend API (endpoints principales)
 - [x] Frontend dashboard
 - [x] Auth system (JWT + NextAuth)
 - [x] Stripe payments
 - [x] Testing suite
-- [x] Documentation (78 MD files)
+- [x] Documentation (120+ MD files)
 
 ### 🔄 Phase 2: Expansion (In Progress)
 

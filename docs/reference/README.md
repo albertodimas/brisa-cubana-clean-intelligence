@@ -31,10 +31,10 @@ Reusable templates for documentation and processes:
 
 ## 📚 Related Documentation
 
-- [Developer Docs](../for-developers/) - Technical documentation
-- [Business Docs](../for-business/) - Strategic documentation
-- [Guides](../guides/) - Step-by-step tutorials
+- [Developer Docs](../for-developers/README.md) - Technical documentation
+- [Business Docs](../for-business/README.md) - Strategic documentation
+- [Guides](../guides/README.md) - Step-by-step tutorials
 
 ---
 
-**Last Updated:** September 30, 2025
+**Last Updated:** 2025-10-03

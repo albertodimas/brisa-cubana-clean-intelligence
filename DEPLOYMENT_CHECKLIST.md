@@ -1,16 +1,19 @@
 # Deployment Checklist - Brisa Cubana Clean Intelligence
 
-✅ **Pre-flight checklist for staging deployment (W4 - Oct 2025)**
+📆 **Última revisión**: 2025-10-03 (auditoría local `main@f47c7e4`)
+
+> Usa esta lista como guía operativa. Actualiza los checkboxes según avances reales; los que figuran con `[ ]` aún no han sido verificados en la fecha indicada.
 
 ---
 
-## ✅ Code Quality (All passing)
+## 🧪 Code Quality
 
-- [x] Build completes successfully (`pnpm build`)
-- [x] All unit tests passing (66 tests - API)
-- [x] Type checking passes (`pnpm typecheck`)
-- [x] Linting passes (`pnpm lint`)
-- [x] E2E tests created (12 tests - auth, dashboard, booking flow)
+- [x] `pnpm build` — Turbo build ejecutado 2025-10-03 (API/UI/Paquetes).
+- [x] `pnpm --filter=@brisa/api exec vitest run --reporter=json` → 171/171 pruebas (2025-10-03).
+- [x] `pnpm typecheck` — TypeScript sin errores (2025-10-03).
+- [x] `pnpm lint` — sin advertencias tras refactor de observabilidad (2025-10-03).
+- [x] `pnpm test:e2e` — 15 escenarios Playwright con datos fake (2025-10-03).
+- [x] `pnpm docs:build` — build 2025-10-03 sin warnings de enlaces/nav (sólo avisos de git log para archivos nuevos).
 
 ## 🗄️ Database Setup (Neon PostgreSQL)
 

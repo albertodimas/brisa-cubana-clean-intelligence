@@ -1,469 +1,166 @@
-# 🚀 Production Deployment Guide
+# 🚀 Guía de Despliegue a Producción
 
-> **Complete playbook implementation for enterprise-grade production deployments**
-> **Created:** October 2, 2025
-> **Based on:** Industry best practices (2025 standards)
+**Objetivo**: documentar el camino recomendado para promover Brisa Cubana Clean Intelligence desde el estado actual del repositorio hacia un despliegue productivo seguro. La información refleja la auditoría local realizada el 2025-10-03 sobre la rama `main` (`f47c7e4`).
 
 ---
 
-## 📋 Overview
+## 1. Estado Actual
 
-This guide documents the **complete production deployment infrastructure** implemented for Brisa Cubana Clean Intelligence, following the comprehensive playbook for production-ready systems.
-
-## ✅ What Has Been Implemented
-
-### 1. Infrastructure as Code (IaC)
-
-**Location:** `infra/terraform/`
-
-- ✅ Terraform configuration for Railway + Vercel
-- ✅ Declarative infrastructure management
-- ✅ Environment-specific configs (dev/staging/production)
-- ✅ Secrets management with variables
-- ✅ State management ready (S3 backend commented)
-
-**Providers:**
-
-- Vercel Terraform Provider v3.15+ (official)
-- Railway Community Provider v0.7+ (production-ready)
-
-**Documentation:** `infra/README.md`
+| Área                        | Situación (2025-10-03)                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Tests unitarios/integración | `pnpm --filter=@brisa/api exec vitest run --reporter=json` → ✅ 171/171 pruebas pasando (~7s).                           |
+| Tests E2E                   | `pnpm test:e2e` → ✅ 15/15 escenarios Playwright con datos fake (2025-10-03).                                            |
+| Lint                        | `pnpm lint` → ✅ sin advertencias tras refactor de observabilidad.                                                       |
+| Build/typecheck             | `pnpm build` / `pnpm typecheck` → ✅ ejecutados 2025-10-03; Turbo + TSC sin errores.                                     |
+| CI (`.github/workflows/ci`) | Último histórico reportó fallo en subida a Codecov por falta de `CODECOV_TOKEN`. Resto de jobs pasan localmente.         |
+| Deploy workflows            | `deploy-production.yml` y `deploy-staging.yml` definidos pero requieren secretos Railway/Vercel y verificación de paths. |
+| Infraestructura             | Carpetas `infra/` (Railway, Vercel, GitOps, observabilidad, Mesh, Terraform) con plantillas. Ningún despliegue validado. |
+| Documentación               | README + reportes actualizados; runbooks y manuales listos para seguir, pero muchos pasos siguen como pendientes.        |
 
 ---
 
-### 2. Operational Runbooks
+## 2. Activos Disponibles en el Repositorio
 
-**Location:** `RUNBOOKS/`
+### 2.1 Infraestructura como Código
 
-Four critical operational documents:
+- `infra/terraform/`: módulos para Railway/Vercel y bases de datos. Son plantillas, requieren variables, backend remoto y pruebas antes de usarse.
+- `infra/gitops/`, `infra/mesh/`, `infra/chaos-mesh/`, `infra/grafana/`, `infra/prometheus/`: manifiestos de referencia para fases futuras (no desplegados).
 
-#### a) Operational Readiness Review (`OPERATIONAL_READINESS_REVIEW.md`)
+### 2.2 Operaciones y Runbooks
 
-- Pre-deployment gate checklist (10 categories, 100 criteria)
-- Go/No-Go decision framework
-- Scoring system (minimum 80/100 to deploy)
-- Gap remediation procedures
+- `RUNBOOKS/GO_LIVE.md`, `RUNBOOKS/ROLLBACK.md`, `RUNBOOKS/INCIDENT_RESPONSE.md`, `RUNBOOKS/OPERATIONAL_READINESS_REVIEW.md`: guías paso a paso still en borrador; seguirlas requiere ajustar timings y responsables reales.
 
-#### b) Go-Live Procedure (`GO_LIVE.md`)
+### 2.3 Dockerfiles endurecidos
 
-- Step-by-step deployment procedure (8 phases, 60-90 min)
-- Database migration (expand/contract pattern)
-- Blue/Green deployment for Railway
-- Canary deployment for Vercel
-- Smoke tests and health checks
-- Hypercare monitoring (72h)
+- `apps/api/Dockerfile` y `apps/web/Dockerfile`: multi-stage + base distroless + etiquetas OCI. Probados localmente pero no publicados en registry.
 
-#### c) Rollback Procedure (`ROLLBACK.md`)
+### 2.4 Workflows de GitHub Actions (7)
 
-- Emergency rollback (10-20 min recovery)
-- Rollback triggers and decision criteria
-- Step-by-step reversion (app + database)
-- Common scenarios with solutions
-- Post-rollback analysis
-
-#### d) Incident Response (`INCIDENT_RESPONSE.md`)
-
-- Severity classification (Sev1/Sev2/Sev3)
-- 24/7 incident management process
-- Role assignments (IC, Scribe, SMEs)
-- Communication protocols
-- Post-mortem template
+| Workflow                 | Propósito principal                          | Notas clave                                                               |
+| ------------------------ | -------------------------------------------- | ------------------------------------------------------------------------- |
+| `ci.yml`                 | Lint, typecheck, tests, build                | Paso de Codecov deshabilitado; activar solo si se define `CODECOV_TOKEN`. |
+| `deploy-production.yml`  | Despliegue a Railway/Vercel desde `main`     | Requiere `RAILWAY_PRODUCTION_TOKEN`, `VERCEL_*`, etc. No probado.         |
+| `deploy-staging.yml`     | Despliegue a entornos staging                | Igual que producción, ajustar ramas y secretos.                           |
+| `documentation.yml`      | Build MkDocs + artefactos                    | Necesita token con permisos para `gh-pages` o storage propio.             |
+| `payments-reconcile.yml` | Script de conciliación Stripe                | Depende de variables `STRIPE_*`.                                          |
+| `security-scan.yml`      | TruffleHog, Snyk, Trivy, Cosign, CodeQL, OPA | Algunos pasos requieren `SNYK_TOKEN` y acceso a ghcr.io.                  |
+| `codeql.yml`             | Análisis CodeQL programado                   | Usa configuración estándar; verificar resultados en Security tab.         |
 
 ---
 
-### 3. Security Hardening
-
-#### a) Dockerfiles (Distroless Base)
-
-**API Dockerfile:** `apps/api/Dockerfile`
-
-- ✅ Multi-stage build (deps → builder → runner)
-- ✅ Google Distroless Node.js 24 base (`gcr.io/distroless/nodejs24-debian12:nonroot`)
-- ✅ Non-root user (UID 65532)
-- ✅ Read-only filesystem
-- ✅ OCI labels for SBOM metadata
-
-**Web Dockerfile:** `apps/web/Dockerfile`
-
-- ✅ Next.js standalone output (minimal runtime)
-- ✅ Distroless base
-- ✅ Security hardening (no shell, no package manager)
-- ✅ Metadata labels
-
-**Benefits:**
-
-- 98% smaller attack surface vs Debian
-- No shell = no shell-based exploits
-- Minimal CVE exposure
-
-#### b) Security Scanning Pipeline
-
-**Workflow:** `.github/workflows/security-scan.yml`
-
-Automated security checks on every commit:
-
-1. **Secret Detection** (TruffleHog OSS)
-   - Scans git history for leaked credentials
-   - Verified secrets only (reduces false positives)
-
-2. **Dependency Scanning** (Snyk)
-   - npm package vulnerability detection
-   - Fails on critical/high severity
-   - Automated fix PRs via Dependabot
-
-3. **SAST** (CodeQL)
-   - Static analysis for JavaScript/TypeScript
-   - Security-and-quality query suite
-   - SARIF upload to GitHub Security tab
-
-4. **Container Scanning** (Trivy)
-   - OS + application vulnerability scan
-   - Critical/High severity blocking
-   - Ignores unfixed CVEs
-
-5. **SBOM Generation** (Syft)
-   - SPDX 2.3 and CycloneDX 1.6 formats
-   - Published to GitHub Releases
-   - Attached to container registry
-
-6. **Image Signing** (Sigstore Cosign)
-   - Keyless signing via GitHub OIDC
-   - Transparency log (Rekor)
-   - Verification required before deployment
-
-7. **Policy as Code** (OPA Conftest)
-   - Dockerfile best practices validation
-   - No `latest` tags, no root user
-   - Custom policies enforced
-
-#### c) Enhanced SECURITY.md
-
-**Location:** `SECURITY.md`
-
-- ✅ Vulnerability disclosure process
-- ✅ Bug bounty program ($50-$2000)
-- ✅ Supply chain security (SBOM, signing, dependencies)
-- ✅ Incident response (contacts, SLAs)
-- ✅ Compliance (OWASP, CIS, NIST, GDPR, PCI-DSS)
-- ✅ Security metrics and targets
-
----
-
-### 4. Deployment Strategy
-
-**Current:** GitHub Actions → Railway (API) + Vercel (Web)
-
-**Implemented:**
-
-- ✅ Blue/Green capability (Railway rollback)
-- ✅ Canary capability (Vercel gradual rollout)
-- ✅ Feature flags ready (database-driven)
-- ✅ Automated rollback triggers
-
-**Workflow:** `.github/workflows/deploy-production.yml`
-
-**Protection:**
-
-- Branch protection on `main`
-- Required status checks (lint, test, security)
-- Deployment freeze during incidents
-
----
-
-### 5. Observability (Phase 2 - COMPLETE ✅)
-
-**Status:** ✅ **Production-Ready** (Implemented October 2, 2025)
-
-**Implemented:**
-
-- ✅ OpenTelemetry distributed tracing (auto-instrumentation)
-- ✅ Prometheus metrics with RED methodology (Rate/Errors/Duration)
-- ✅ Structured logging with correlation IDs (W3C Trace Context)
-- ✅ Grafana dashboards with SLO tracking
-- ✅ Prometheus alerting rules (SLO-based)
-- ✅ Performance monitoring (slow request detection)
-- ✅ Error tracking with stack traces
-- ✅ Health checks (`/healthz`, `/health/ready`, `/health/live`)
-
-**Metrics Endpoint:** `http://localhost:9464/metrics`
-
-**Key Features:**
-
-- Service-level objectives: 99.9% availability, p95 < 500ms, error rate < 1%
-- Error budget tracking (30-day windows)
-- Database query performance monitoring
-- In-flight request tracking
-- Business metrics (payments, bookings)
-
-**Documentation:** `docs/for-developers/observability-phase2.md`
-
----
-
-### 6. Database Operations
-
-**Expand/Contract Migration Pattern:**
-
-Documented in `GO_LIVE.md` and `ROLLBACK.md`:
-
-1. **Expand Phase:**
-   - Add new columns/tables (non-breaking)
-   - Dual-write if needed
-   - Backfill data
-
-2. **Deploy Application:**
-   - Code compatible with both schemas
-
-3. **Contract Phase (when safe):**
-   - Remove old columns/tables
-   - After 100% traffic on new version
-
-**Tools:**
-
-- Prisma migrations
-- Manual backfill scripts (idempotent)
-- Backup verification before contract
-
----
-
-### 7. Secrets Management
-
-**Current:**
-
-- ✅ GitHub Secrets for CI/CD
-- ✅ Environment variables (Railway, Vercel)
-- ✅ `.env` files in `.gitignore`
-
-**Best Practices:**
-
-- Secrets never committed (TruffleHog enforces)
-- Rotation documented (90-day policy)
-- KMS integration ready (future: AWS Secrets Manager)
-
-**Documentation:** `infra/README.md` → Secrets Management section
-
----
-
-## 📊 Deployment Readiness Scorecard
-
-| Category                    | Status      | Score |
-| --------------------------- | ----------- | ----- |
-| **Infrastructure as Code**  | ✅ Complete | 10/10 |
-| **Operational Runbooks**    | ✅ Complete | 10/10 |
-| **Security (Supply Chain)** | ✅ Complete | 10/10 |
-| **Dockerfile Hardening**    | ✅ Complete | 10/10 |
-| **CI/CD Security Pipeline** | ✅ Complete | 10/10 |
-| **SBOM + Signing**          | ✅ Complete | 10/10 |
-| **Deployment Strategy**     | ✅ Complete | 9/10  |
-| **Health Checks**           | ✅ Complete | 10/10 |
-| **Structured Logging**      | ✅ Complete | 10/10 |
-| **Distributed Tracing**     | ✅ Complete | 10/10 |
-| **SLOs + Dashboards**       | ✅ Complete | 10/10 |
-| **Prometheus Metrics**      | ✅ Complete | 10/10 |
-| **FinOps Monitoring**       | ✅ Complete | 10/10 |
-| **Canary Analysis**         | ✅ Complete | 10/10 |
-| **Chaos Engineering**       | ✅ Complete | 10/10 |
-| **GitOps (Flux CD)**        | ✅ Complete | 10/10 |
-| **Service Mesh (Istio)**    | ✅ Complete | 10/10 |
-| **ML Anomaly Detection**    | ✅ Complete | 10/10 |
-| **Advanced Chaos Mesh**     | ✅ Complete | 10/10 |
-
-**Overall Readiness:** 178/200 (89%) → **ENTERPRISE READY** 🏆 (Phase 4 Complete ✅)
-
-**Phase 3 Complete (Advanced Features):**
-
-- ✅ Automated canary deployment analysis with SLO-based decisions
-- ✅ FinOps cost monitoring dashboards (Railway + Vercel + Neon)
-- ✅ Chaos engineering framework with safety controls
-- ✅ Rightsizing recommendations for cost optimization
-
-**Phase 4 Complete (Enterprise-Grade):**
-
-- ✅ GitOps with Flux CD (declarative infrastructure, auto-reconciliation every 5 min)
-- ✅ Service Mesh with Istio (mTLS enforcement, circuit breaking, advanced routing)
-- ✅ ML-based anomaly detection (5 algorithms: Z-Score, MA, IQR, ES, Ensemble)
-- ✅ Advanced Chaos Mesh (pod/network/stress experiments + orchestrated workflows)
-
-**DevOps Maturity Level:** **5/5 (Optimized)** - Continuous improvement and innovation 🚀
-
----
-
-## 🚦 How to Deploy to Production
-
-### Pre-Deployment (1 week before)
-
-1. **Complete ORR:**
+## 3. Pasos Recomendados para Despliegue
+
+### 3.1 Preparación Local
+
+1. Instalar dependencias: `pnpm install` + `pnpm db:setup` (Docker debe estar activo).
+2. Ejecutar verificaciones completas:
+   ```bash
+   pnpm lint            # ESLint + markdownlint + cspell
+   pnpm typecheck       # TypeScript en API/UI empaquetadas
+   pnpm build           # Turbo build (API, UI, packages)
+   pnpm test            # Vitest completo
+   pnpm test:e2e        # Playwright con datos fake
+   pnpm docs:build      # MkDocs sin warnings estructurales
+   ```
+3. Actualizar la documentación con resultados reales si difieren.
+
+### 3.2 Configurar Secretos y Variables
+
+- **GitHub Actions** (`Settings → Secrets and variables → Actions`):
+  - `CODECOV_TOKEN` (opcional; quitar paso si no se usará).
+  - `RAILWAY_PRODUCTION_TOKEN`, `RAILWAY_STAGING_TOKEN`.
+  - `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` (prod/staging según corresponda).
+  - `SNYK_TOKEN`, `SLACK_WEBHOOK_URL`, `STRIPE_SECRET_KEY`, etc., si se requiere cada workflow.
+- **Railway/Vercel**: replicar variables listadas en `DEPLOYMENT_CHECKLIST.md` (`DATABASE_URL`, `JWT_SECRET`, `NEXTAUTH_SECRET`, `NEXT_PUBLIC_API_URL`, etc.).
+- **API env files**: asegurarse de que `apps/api/.env` y `apps/web/.env.local` contengan credenciales válidas para staging/production.
+
+### 3.3 Ajustar Pipelines
+
+1. En `ci.yml`, deja registrado si deseas reactivar Codecov: el paso está eliminado y solo debe volver con `CODECOV_TOKEN` disponible.
+2. Verifica que los jobs de GitHub Actions instalen Node 24.9.0, alineado con `.nvmrc` y `apps/web/package.json` (ver [GitHub Docs](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs)).
+3. Revisa `deploy-production.yml` / `deploy-staging.yml` para confirmar nombre de servicio Railway, comandos de build y dependencias de secretos; considera usar entornos protegidos y revisores obligatorios.
+
+### 3.4 Primer Despliegue Manual (Recomendado)
+
+1. **API (Railway)**
 
    ```bash
-   open RUNBOOKS/OPERATIONAL_READINESS_REVIEW.md
-   # Fill out checklist, minimum 80/100 score required
+   cd apps/api
+   pnpm build
+   railway up
+   # Configurar variables -> railway variables set KEY=value
    ```
 
-2. **Verify Terraform State:**
+   Validar con `curl https://<domain>/healthz`.
+
+2. **Web (Vercel)**
 
    ```bash
-   cd infra/terraform
-   cp terraform.tfvars.example terraform.tfvars
-   # Fill with production values
-   terraform plan
-   # Review changes, ensure no destructive ops
+   cd apps/web
+   pnpm build
+   vercel deploy --prod
    ```
 
-3. **Run Security Scan Locally:**
+   Revisar logs y confirmar que `NEXT_PUBLIC_API_URL` apunta al dominio de la API.
 
-   ```bash
-   # Trigger security workflow
-   gh workflow run security-scan.yml
-   # Wait for completion, verify all checks pass
-   ```
+3. **Stripe y Webhooks**
+   - Crear endpoint en dashboard y actualizar `STRIPE_WEBHOOK_SECRET`.
+   - Probar con `./scripts/stripe_trigger.sh` si se dispone de claves.
 
-4. **Database Backup:**
-   ```bash
-   # Production database backup
-   psql $DATABASE_URL -c "SELECT pg_create_restore_point('pre_deployment_$(date +%Y%m%d)');"
-   ```
-
-### Deployment Day
-
-1. **Follow Go-Live Runbook:**
-
-   ```bash
-   open RUNBOOKS/GO_LIVE.md
-   # Execute steps 1-8 (60-90 min window)
-   ```
-
-2. **Trigger Deployment:**
-
-   ```bash
-   # Push to main triggers auto-deployment
-   git push origin main
-
-   # OR manual trigger
-   gh workflow run deploy-production.yml
-   ```
-
-3. **Monitor Deployment:**
-
-   ```bash
-   # Watch Railway logs
-   railway logs --service "@brisa/api" --follow
-
-   # Watch Vercel deployment
-   vercel inspect
-   ```
-
-4. **Verify Health:**
-
-   ```bash
-   curl https://api.brisacubana.com/healthz
-   curl https://brisacubana.com
-
-   # Run E2E smoke tests
-   pnpm test:e2e --grep "smoke"
-   ```
-
-### Post-Deployment (72h hypercare)
-
-1. **Monitor Metrics:**
-   - Error rate (target: < 1%)
-   - Latency p95 (target: < 500ms)
-   - Database connections
-   - Payment success rate
-
-2. **Gradual Feature Flag Rollout:**
-
-   ```sql
-   -- Enable for 10% of users
-   UPDATE feature_flags SET rollout_percentage = 10 WHERE name = 'new_feature';
-
-   -- Monitor 30 min, then increase to 50%, 100%
-   ```
-
-3. **Post-Mortem (optional):**
-   ```bash
-   # If any issues occurred
-   cp RUNBOOKS/INCIDENT_RESPONSE.md deployments/post_mortem_$(date +%Y%m%d).md
-   # Fill with learnings
-   ```
+4. Documentar resultados en `DEPLOYMENT_CHECKLIST.md` y runbooks.
 
 ---
 
-## ⏪ Emergency Rollback
+## 4. Validaciones Posteriores
 
-If deployment fails (error rate spike, service down):
-
-```bash
-# Follow rollback runbook
-open RUNBOOKS/ROLLBACK.md
-
-# Execute rollback (10-20 min recovery)
-railway rollback --service "@brisa/api"
-vercel promote <previous_deployment_url> --token=$VERCEL_TOKEN
-
-# Verify services healthy
-curl https://api.brisacubana.com/healthz
-```
+- **API**: `/`, `/healthz`, `/api/services`, `/api/bookings` (autenticado) responden correctamente.
+- **Web**: login, creación de propiedad, flujo de booking funcionan con datos seed.
+- **Observabilidad**: confirmar logs en Railway, métricas `/metrics`, eventos Sentry si se activa.
+- **Seguridad**: revisar reportes de `security-scan.yml` y resolver hallazgos críticos.
 
 ---
 
-## 📚 Documentation Index
+## 5. Pendientes Conocidos
 
-| Document                                       | Purpose                      | Audience            |
-| ---------------------------------------------- | ---------------------------- | ------------------- |
-| **PRODUCTION_DEPLOYMENT_GUIDE.md** (this file) | Overview and quick reference | All engineers       |
-| **infra/README.md**                            | Infrastructure setup         | Platform/DevOps     |
-| **RUNBOOKS/GO_LIVE.md**                        | Step-by-step deployment      | On-call/SRE         |
-| **RUNBOOKS/ROLLBACK.md**                       | Emergency recovery           | On-call/SRE         |
-| **RUNBOOKS/INCIDENT_RESPONSE.md**              | Incident management          | All engineers       |
-| **RUNBOOKS/OPERATIONAL_READINESS_REVIEW.md**   | Pre-deployment gate          | Engineering leads   |
-| **SECURITY.md**                                | Security policies and SBOM   | Security/Compliance |
-| **.github/workflows/security-scan.yml**        | CI/CD security pipeline      | Platform/DevOps     |
+1. Monitorear y resolver los warnings de `pnpm docs:build` (enlaces/nav en MkDocs).
+2. Definir política de cobertura: mantener el paso removido de Codecov o volver a activarlo con `CODECOV_TOKEN` documentado.
+3. Verificar que los workflows de despliegue no sobrescriban variables sensibles ni falten secretos requeridos.
+4. Registrar dominios, credenciales y responsables en `RUNBOOKS/GO_LIVE.md` y sincronizar `DEPLOYMENT_CHECKLIST.md` tras el primer despliegue.
 
 ---
 
-## 🔗 External Resources
+## 6. Referencias Útiles
 
-All resources consulted on **October 2, 2025**:
+- `PRODUCTION_READINESS_REPORT.md`: snapshot de auditoría 2025-10-03.
+- `PRODUCTION_AUDIT_REPORT.md`: resumen ejecutivo y próximos pasos.
+- `DEPLOYMENT_CHECKLIST.md`: checklist operativo detallado (actualizar conforme se avance).
+- `RUNBOOKS/`: procedimientos de go-live, incidentes y rollback.
+- `infra/README.md`: índice de plantillas de infraestructura.
 
-- **Google Distroless:** https://github.com/GoogleContainerTools/distroless
-- **Syft SBOM:** https://github.com/anchore/syft
-- **Sigstore Cosign:** https://github.com/sigstore/cosign
-- **Trivy Scanner:** https://github.com/aquasecurity/trivy-action
-- **Vercel Terraform:** https://registry.terraform.io/providers/vercel/vercel/latest
-- **Railway Terraform:** https://registry.terraform.io/providers/terraform-community-providers/railway/latest
-- **OWASP Top 10:** https://owasp.org/www-project-top-ten/
-- **CIS Docker Benchmark:** https://www.cisecurity.org/benchmark/docker
+> Mantener este documento sincronizado después de cada despliegue real: registrar fechas, commits y responsables facilita auditorías futuras.
 
 ---
 
-## ✅ Next Steps (Post-Go-Live)
+## 7. Checklist complementaria (referencias externas)
 
-1. **Observability Enhancement:**
-   - Integrate OpenTelemetry SDK
-   - Set up Prometheus metrics
-   - Build Grafana dashboards
-   - Define SLOs (availability, latency, error rate)
+### Next.js 15.5.4 Production Checklist
 
-2. **Advanced Deployment:**
-   - Automate canary analysis (Flagger)
-   - Progressive delivery (Argo Rollouts)
-   - Chaos engineering (Chaos Monkey)
+- Revisar uso de **Dynamic APIs** (`cookies`, `searchParams`) para evitar forzar renderizado dinámico global; encapsular en `<Suspense>` donde sea necesario.
+- Confirmar estrategias de **caching** (`fetch`, `unstable_cache`) y definir revalidaciones apropiadas.
+- Asegurar **Server Actions** con validaciones y controles de acceso.
+- Aplicar **Content Security Policy**, optimizar fuentes con `next/font` y usar `<Image>`/`<Script>` para mejorar Core Web Vitals.
+- Ejecutar `next build` + `next start` y Lighthouse antes de promover a producción.
+- Analizar bundles con `@next/bundle-analyzer` y monitorear impacto de dependencias externas.
 
-3. **FinOps:**
-   - Cost monitoring dashboards
-   - Budget alerts
-   - Rightsizing recommendations
-   - Reserved instance planning
+Fuente: [Next.js Guides – Production Checklist (2025-09)](https://nextjs.org/docs/app/guides/production-checklist)
 
-4. **Compliance:**
-   - SLSA Level 3 (build provenance)
-   - SOC 2 Type II audit
-   - GDPR data flow mapping
-   - PCI-DSS compliance review
+### Railway Production Readiness Checklist (2025-08)
 
----
+- Seleccionar la región más cercana y habilitar **private networking** entre servicios.
+- Configurar **restart policy** y al menos **2 replicas** para servicios críticos.
+- Activar **Check Suites** y entornos diferenciados (staging/PR) antes de auto-desplegar.
+- Versionar configuración con **config-as-code** (`railway.json` / `railway.toml`).
+- Configurar alertas (Slack/webhooks) y **backups** automáticos.
+- Considerar WAF o CDN (p.e. Cloudflare) para protección adicional de la capa pública.
 
-**Maintained By:** Platform Engineering Team
-
-**Questions?** Slack `#platform-team` or platform@brisacubana.com
-
-**Last Updated:** October 2, 2025
+Fuente: [Railway Docs – Production Readiness Checklist](https://docs.railway.com/reference/production-readiness-checklist)

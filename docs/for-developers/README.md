@@ -25,13 +25,13 @@ Technical documentation for building, testing, and deploying Brisa Cubana Clean 
 
 ### Architecture & Design
 
-- [Diagrams](diagrams/) - C4 diagrams, flowcharts, sequences
-- [Design System](design-system/) - UI component library docs
-- [AI & ML](ai-ml/) - Model cards, AI governance
+- [Diagrams](diagrams/README.md) - C4 diagrams, flowcharts, sequences
+- [Design System](design-system/index.md) - UI component library docs
+- [AI & ML](ai-ml/model-cards/README.md) - Model cards, AI governance
 
 ### Tools & Integrations
 
-- [Copilot](copilot/) - AI-assisted development policies
+- [Copilot](copilot/index.md) - AI-assisted development policies
 
 ## 🛠️ Quick Commands
 
@@ -59,14 +59,14 @@ pnpm format           # Format code
 
 ## 📚 Related Documentation
 
-- [Business Documentation](../for-business/) - Vision, market, operations
-- [Templates](../reference/templates/) - Reusable templates
-- [Guides](../guides/) - Step-by-step tutorials
+- [Business Documentation](../for-business/README.md) - Vision, market, operations
+- [Templates](../reference/templates/index.md) - Reusable templates
+- [Guides](../guides/README.md) - Step-by-step tutorials
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](../../CONTRIBUTING.md) for development workflow and code standards.
+See [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md) for development workflow and code standards.
 
 ---
 
-**Last Updated:** September 30, 2025
+**Last Updated:** 2025-10-03

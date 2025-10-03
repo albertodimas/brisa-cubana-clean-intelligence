@@ -195,9 +195,6 @@ plugins:
       type: timeago
       locale: es
       fallback_to_build_date: true
-      exclude:
-        - development/documentation-standards.md
-        - reference/templates/index.md
   - minify:
       minify_html: true
 

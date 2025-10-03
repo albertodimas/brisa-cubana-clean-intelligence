@@ -20,7 +20,7 @@ Strategic and operational documentation for Brisa Cubana Clean Intelligence.
 
 ## 🗂️ Operations
 
-Detailed operational documentation in **[operations/](operations/)** folder:
+Detailed operational documentation in **[Operations Index](operations/index.md)** folder:
 
 ### Planning & Strategy
 
@@ -90,7 +90,7 @@ Detailed operational documentation in **[operations/](operations/)** folder:
 
 ## 📊 Market Data
 
-Detailed market research in **[market-data/](market-data/)** folder:
+Detailed market research in **[Market Data Index](market-data/index.md)**:
 
 - [Tourism 2024 Records](market-data/tourism-2024-records.md)
 - [Wage Data Miami](market-data/wage-maids-miami.md)
@@ -98,7 +98,7 @@ Detailed market research in **[market-data/](market-data/)** folder:
 
 ## 💡 Insights
 
-Research insights in **[insights/](insights/)** folder.
+Research insights in **[Insights Index](insights/index.md)** folder.
 
 ## 🎯 Quick Links
 
@@ -107,14 +107,14 @@ Research insights in **[insights/](insights/)** folder.
 | **Vision**  | [vision-strategy.md](vision-strategy.md)                                                       |
 | **Market**  | [market-compliance.md](market-compliance.md)                                                   |
 | **Roadmap** | [roadmap.md](roadmap.md)                                                                       |
-| **SOPs**    | [operations/sops/](operations/sops/)                                                           |
+| **SOPs**    | [operations/sops/index.md](operations/sops/index.md)                                           |
 | **Finance** | [operations/finance/financial-model-outline.md](operations/finance/financial-model-outline.md) |
 
 ## 📚 Related Documentation
 
-- [Developer Docs](../for-developers/) - Technical documentation
-- [Templates](../reference/templates/) - Reusable templates
+- [Developer Docs](../for-developers/README.md) - Technical documentation
+- [Templates](../reference/templates/index.md) - Reusable templates
 
 ---
 
-**Last Updated:** September 30, 2025
+**Last Updated:** 2025-10-03

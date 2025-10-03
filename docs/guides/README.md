@@ -19,14 +19,14 @@ _Guides will be added here as they are created._
 
 ## 📚 Related Documentation
 
-- [Developer Docs](../for-developers/) - Technical reference
-- [Business Docs](../for-business/) - Strategic documentation
-- [Templates](../reference/templates/) - Reusable templates
+- [Developer Docs](../for-developers/README.md) - Technical reference
+- [Business Docs](../for-business/README.md) - Strategic documentation
+- [Templates](../reference/templates/index.md) - Reusable templates
 
 ## 🤝 Contributing
 
-Want to add a guide? See [CONTRIBUTING.md](../../CONTRIBUTING.md).
+Want to add a guide? See [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md).
 
 ---
 
-**Last Updated:** September 30, 2025
+**Last Updated:** 2025-10-03

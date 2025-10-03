@@ -501,7 +501,7 @@ SELECT * FROM pg_stat_user_tables WHERE idx_scan = 0;
 
 ### Security Headers (Next.js)
 
-Already configured in [apps/web/next.config.ts](../../apps/web/next.config.ts):
+Already configured in [apps/web/next.config.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/web/next.config.ts):
 
 - `Strict-Transport-Security`
 - `X-Content-Type-Options`
@@ -515,7 +515,7 @@ Already configured in [apps/web/next.config.ts](../../apps/web/next.config.ts):
 
 ### API Security (Hono)
 
-Already configured in [apps/api/src/app.ts](../../apps/api/src/app.ts):
+Already configured in [apps/api/src/app.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/api/src/app.ts):
 
 - **CORS**: Function-based origin validation
 - **Rate Limiting**: Distributed (Redis) or in-memory

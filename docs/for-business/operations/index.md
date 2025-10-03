@@ -8,7 +8,7 @@ Esta sección centraliza los planes accionables pendientes para lanzar Brisa Cub
 - [Plan de entrevistas de validación](interview-plan.md)
 - [Plan del Sprint 0](sprint0-plan.md)
 - [Integraciones & sandbox](integrations/sandbox-plan.md)
-- [Delivery Plan (estado quincenal)](../development/delivery-plan.md)
+- [Delivery Plan (estado quincenal)](../../development/delivery-plan.md)
 - [Políticas y gobernanza](policies/index.md)
 - [SOPs operativos](sops/index.md)
 - [Modelo financiero](finance/financial-model-outline.md)

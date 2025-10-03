@@ -1,256 +1,133 @@
-# 🚀 Autonomous Deployment Setup Guide
+# 🚀 Deployment Automation Setup Guide
 
-> **Goal**: Enable Claude to autonomously deploy and monitor the project to production
-
----
-
-## 📋 Current Status
-
-**CI/CD Pipeline**: ✅ **100% GREEN**
-
-- ✅ All 171 tests passing
-- ✅ Coverage reporting to Codecov
-- ✅ Linting, TypeCheck, Build all passing
-- ⚠️ Deployment workflows need credential configuration
-
-**Last Updated**: October 2, 2025
+**Objetivo**: consolidar la información y las credenciales necesarias para activar los despliegues automáticos (Railway + Vercel) a través de los workflows de GitHub Actions. Estado reflejado al 2025-10-03 (`main@f47c7e4`).
 
 ---
 
-## 🔐 Required Credentials
+## 1. Resumen del estado actual
 
-### GitHub Secrets (Current Status)
+- 🔁 **Workflows definidos**: `deploy-staging.yml` y `deploy-production.yml` existen, pero faltan secretos (`RAILWAY_*`, `VERCEL_*`).
+- 📦 **CI base**: `ci.yml` actualizado para omitir Codecov hasta decidir si se reintroduce con `CODECOV_TOKEN` (2025-10-03).
+- 🧪 **Pruebas**: vitest (171 pruebas) pasa localmente; Playwright listo pero sin ejecución reciente en CI.
+- 🧹 **Lint**: `pnpm lint` sin advertencias tras refactor de observabilidad (2025-10-03).
+- 📚 **Docs**: `pnpm docs:build` genera warnings por enlaces/nav; ver `Documentation Standards` para resolverlos.
+- 🛠️ **Infra**: no se ha validado el deployment real en Railway/Vercel dentro de este repo clonado.
 
-```bash
-# View current secrets:
-gh secret list
-
-# Expected output:
-CODECOV_TOKEN              ✅ Set (2025-10-02)
-RAILWAY_PRODUCTION_TOKEN   ⚠️ Needs verification
-VERCEL_TOKEN               ⚠️ Needs verification
-VERCEL_ORG_ID              ✅ Set
-VERCEL_PROJECT_ID          ✅ Set
-SLACK_WEBHOOK_URL          ❌ Optional (not set)
-```
-
-### What's Needed
-
-1. **Railway Service Name** - Currently unknown
-2. **Valid Railway Token** - Current token is expired
-3. **Vercel Configuration** - Root directory needs verification
+> Antes de automatizar, ejecuta `pnpm build`, `pnpm typecheck` y `pnpm test:e2e` para mantener consistencia con la checklist de despliegue.
 
 ---
 
-## 🛠️ Setup Instructions
+## 2. Credenciales y variables requeridas
 
-### Option 1: Automated Script (Recommended)
+| Destino        | Secreto / variable                   | Notas                                                                        |
+| -------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
+| GitHub Actions | `CODECOV_TOKEN` (opcional)           | Necesario solo si se mantiene el paso de subida a Codecov.                   |
+| GitHub Actions | `RAILWAY_STAGING_TOKEN`              | Token CLI con acceso al proyecto staging.                                    |
+| GitHub Actions | `RAILWAY_PRODUCTION_TOKEN`           | Token CLI con acceso al proyecto producción.                                 |
+| GitHub Actions | `VERCEL_TOKEN`                       | Token personal con permisos de deploy.                                       |
+| GitHub Actions | `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | IDs correspondientes a cada entorno (staging/prod).                          |
+| GitHub Actions | `SNYK_TOKEN`, `SLACK_WEBHOOK_URL`    | Opcionales según workflows secundarios.                                      |
+| Railway        | Variables de entorno API             | `DATABASE_URL`, `JWT_SECRET`, `WEB_APP_URL`, `CORS_ORIGIN`, `STRIPE_*`, etc. |
+| Vercel         | Variables de entorno Web             | `NEXTAUTH_SECRET`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_APP_URL`, etc.        |
 
-Run the provided setup script:
+Mantén un inventario privado (1Password, Vault, etc.) con el valor de cada secreto y la fecha de rotación.
 
-```bash
-./scripts/setup-deployment-credentials.sh
-```
+---
 
-This script will:
+## 3. Cómo recolectar la información
 
-1. ✅ Check all required tools are installed
-2. ✅ Authenticate with Railway and Vercel
-3. ✅ Collect all necessary configuration
-4. ✅ Update GitHub Secrets
-5. ✅ Generate summary for Claude
-
-**Copy the entire output and provide it to Claude.**
-
-### Option 2: Manual Configuration
-
-If you prefer manual setup:
-
-#### Step 1: Railway Configuration
+### 3.1 Railway
 
 ```bash
-# Authenticate
 railway login
-
-# Link project
-railway link
-
-# Get service information
 railway whoami
-railway status
+railway projects list
+railway variables --json            # Exporta variables por entorno
 railway service list
-
-# Get environment variables
-railway variables
 ```
 
-**Copy all output above**
+Documenta:
 
-#### Step 2: Vercel Configuration
+- ID/nombre de proyecto y servicio (staging/prod).
+- URL expuesta por Railway.
+- Variables existentes vs. requeridas (ver checklist).
+
+### 3.2 Vercel
 
 ```bash
-# Authenticate
 vercel login
-
-# List projects
+vercel link
 vercel ls
-
-# Inspect project
-vercel inspect brisa-cubana-clean-intelligence
-
-# Get environment variables
+vercel inspect <project-name>
 vercel env ls --environment production
+vercel env ls --environment preview
 ```
 
-**Copy all output above**
+Anota:
 
-#### Step 3: Update GitHub Secrets
+- `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` (por entorno si usas proyectos separados).
+- Variables configuradas actualmente.
+
+### 3.3 GitHub
 
 ```bash
-# Railway token
+gh secret list
+```
+
+Confirma si ya existen secretos previos o si deben crearse/rotarse.
+
+---
+
+## 4. Cargar secretos en GitHub Actions
+
+Ejemplo (copia y pega el valor cuando se solicite):
+
+```bash
+# Producción
 gh secret set RAILWAY_PRODUCTION_TOKEN
-# Paste token from: https://railway.app/account/tokens
-
-# Vercel token
 gh secret set VERCEL_TOKEN
-# Paste token from: https://vercel.com/account/tokens
+gh secret set VERCEL_ORG_ID
+gh secret set VERCEL_PROJECT_ID
 
-# (Optional) Slack webhook
+# Staging
+gh secret set RAILWAY_STAGING_TOKEN
+
+# Opcionales
+gh secret set CODECOV_TOKEN
+gh secret set SNYK_TOKEN
 gh secret set SLACK_WEBHOOK_URL
-# Paste webhook URL from Slack app settings
 ```
+
+> Usa `gh secret set --env` si prefieres configurarlos en ambientes específicos (`staging` / `production`).
 
 ---
 
-## 📤 Providing Information to Claude
+## 5. Ajustes necesarios en los workflows
 
-Once you've collected all the information, **paste it in the chat** in this format:
-
-```
-Railway Configuration:
-- Service Name: [paste here]
-- Project: [paste railway status output]
-- Variables: [paste railway variables output]
-
-Vercel Configuration:
-- Project: [paste vercel ls output]
-- Inspection: [paste vercel inspect output]
-- Environment: [paste vercel env ls output]
-
-GitHub Secrets:
-[paste gh secret list output]
-```
+1. **Codecov**: decidir si se provee `CODECOV_TOKEN` o se elimina el paso (líneas 150-165 aprox. de `.github/workflows/ci.yml`).
+2. **Railway** (`deploy-*.yml`): verificar que `serviceName` y rutas `apps/api` coincidan con el proyecto real. Ajustar comando de build si el workflow falla.
+3. **Vercel** (`deploy-*.yml`): confirmar `working-directory: apps/web` y que el token tenga acceso a la organización.
+4. **Filtros de ramas**: adaptar triggers a tu flujo (`main`/`develop`).
+5. **Notificaciones**: habilitar Slack (opcional) una vez configurado `SLACK_WEBHOOK_URL`.
 
 ---
 
-## ✅ What Claude Will Do Autonomously
+## 6. Checklist posterior a la carga de secretos
 
-Once credentials are provided, Claude will:
-
-1. **Update Deployment Workflows** (10 min)
-   - Fix Railway service name in `.github/workflows/deploy-production.yml`
-   - Verify Vercel root directory and build command
-   - Update any missing configuration
-
-2. **Execute Test Deployment** (30 min)
-   - Deploy API to Railway
-   - Deploy Web to Vercel
-   - Verify health checks
-   - Test connectivity between services
-
-3. **Setup Monitoring** (20 min)
-   - Configure Sentry error tracking
-   - Setup uptime monitoring
-   - Add status badges to README
-   - Configure alerting
-
-4. **Documentation** (15 min)
-   - Document production URLs
-   - Create deployment procedures
-   - Add rollback procedures
-   - Update CLAUDE.md with final config
-
-5. **Verification** (30 min)
-   - End-to-end smoke tests
-   - Auth flow verification
-   - CRUD operations test
-   - Integration tests (Stripe, Resend, Twilio)
-
-**Total estimated time**: ~2 hours for complete autonomous deployment
+- [ ] Ejecutar manualmente `deploy-staging.yml` (`Actions → Deploy to Staging → Run workflow`).
+- [ ] Revisar logs de Railway y Vercel para confirmar dominio y variables.
+- [ ] Probar endpoints (`/`, `/healthz`, `/api/services`) y la web (`/auth/signin`, `/dashboard`).
+- [ ] Actualizar `DEPLOYMENT_CHECKLIST.md` con resultados.
+- [ ] Registrar dominios y credenciales en `RUNBOOKS/GO_LIVE.md`.
 
 ---
 
-## 🚨 Important Notes
+## 7. Próximos pasos sugeridos
 
-### Security
+1. Resolver las advertencias ESLint en la capa de observabilidad.
+2. Alinear `engines.node` (apps/web) con `.nvmrc`/CI.
+3. Definir responsable para rotación de llaves Stripe/Resend/Sentry.
+4. Configurar monitoreo (Sentry DSN, Prometheus remoto, etc.).
+5. Revisar `PRODUCTION_DEPLOYMENT_GUIDE.md` tras el primer despliegue real y actualizar fechas/resultados.
 
-- ✅ All secrets are stored in GitHub Secrets (encrypted)
-- ✅ Never commit secrets to the repository
-- ✅ Tokens are environment-specific (production only)
-- ✅ Script uses `read -s` for sensitive input (hidden)
-
-### Prerequisites
-
-Ensure these tools are installed:
-
-```bash
-# Check installations
-railway --version   # @railway/cli
-vercel --version    # vercel@latest
-gh --version        # GitHub CLI
-node --version      # Node.js 24+
-pnpm --version      # pnpm 10+
-```
-
-### Troubleshooting
-
-**Railway login fails:**
-
-```bash
-# Clear credentials and retry
-rm -rf ~/.railway
-railway login
-```
-
-**Vercel login fails:**
-
-```bash
-# Clear credentials and retry
-rm -rf ~/.vercel
-vercel login
-```
-
-**GitHub CLI not authenticated:**
-
-```bash
-gh auth login
-```
-
----
-
-## 📞 Support
-
-If you encounter issues:
-
-1. Check the error message carefully
-2. Verify all tools are up to date
-3. Ensure you have admin access to Railway/Vercel projects
-4. Provide the error message to Claude
-
----
-
-## 🎯 Success Criteria
-
-After autonomous deployment, you should have:
-
-- ✅ Working production API on Railway
-- ✅ Working production Web on Vercel
-- ✅ All environment variables configured
-- ✅ Health checks passing
-- ✅ Monitoring and alerting active
-- ✅ Documentation complete
-- ✅ Rollback procedures documented
-
----
-
-**Ready to start?** Run: `./scripts/setup-deployment-credentials.sh`
+Con esta información centralizada, cualquier miembro del equipo puede habilitar y mantener los despliegues automáticos de forma segura.

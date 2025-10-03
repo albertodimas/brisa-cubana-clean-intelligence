@@ -31,6 +31,41 @@ import {
 // Initialize OpenTelemetry SDK
 let sdk: NodeSDK | null = null;
 
+type HeaderRecord = Record<string, string>;
+
+function parseOtlpHeaders(value: string | undefined): HeaderRecord {
+  if (!value) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return Object.entries(parsed).reduce<HeaderRecord>((acc, [key, val]) => {
+        if (typeof val === "string") {
+          acc[key] = val;
+        }
+        return acc;
+      }, {});
+    }
+  } catch (error) {
+    console.warn("[OpenTelemetry] Invalid OTLP_HEADERS value ignored", error);
+  }
+
+  return {};
+}
+
+function resolveMetricsPort(): number {
+  const envPort = process.env.PROMETHEUS_PORT;
+  if (envPort) {
+    const parsed = Number(envPort);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return 9464;
+}
+
 /**
  * Initialize OpenTelemetry instrumentation
  *
@@ -48,16 +83,14 @@ export function initializeOpenTelemetry() {
 
   // Prometheus metrics exporter (port 9464 by default)
   const prometheusExporter = new PrometheusExporter({
-    port: Number(process.env.PROMETHEUS_PORT) || 9464,
+    port: resolveMetricsPort(),
   });
 
   // OTLP trace exporter configuration (optional - for external collectors)
   const otlpExporter = process.env.OTLP_ENDPOINT
     ? new OTLPTraceExporter({
         url: process.env.OTLP_ENDPOINT,
-        headers: process.env.OTLP_HEADERS
-          ? JSON.parse(process.env.OTLP_HEADERS)
-          : {},
+        headers: parseOtlpHeaders(process.env.OTLP_HEADERS),
       })
     : undefined;
 
@@ -107,7 +140,7 @@ export function initializeOpenTelemetry() {
   // Start SDK
   sdk.start();
 
-  const metricsPort = Number(process.env.PROMETHEUS_PORT) || 9464;
+  const metricsPort = resolveMetricsPort();
   console.log("[OpenTelemetry] Instrumentation initialized");
   console.log(
     `[Prometheus] Metrics available at http://localhost:${metricsPort}/metrics`,
@@ -144,10 +177,12 @@ export function generateCorrelationId(): string {
 export function extractCorrelationId(
   headers: Record<string, string | undefined>,
 ): string | null {
+  const traceParentId = headers.traceparent?.split("-")[1];
+
   return (
-    headers["x-correlation-id"] ||
-    headers["x-request-id"] ||
-    headers.traceparent?.split("-")[1] || // Extract trace-id from W3C traceparent
+    headers["x-correlation-id"] ??
+    headers["x-request-id"] ??
+    traceParentId ??
     null
   );
 }
@@ -203,8 +238,8 @@ export function logStructured(
     timestamp: new Date().toISOString(),
     level,
     message,
-    service: process.env.SERVICE_NAME || "brisa-api",
-    environment: process.env.NODE_ENV || "development",
+    service: process.env.SERVICE_NAME ?? "brisa-api",
+    environment: process.env.NODE_ENV ?? "development",
     ...context,
   };
 
