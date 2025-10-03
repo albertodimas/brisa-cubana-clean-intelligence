@@ -247,10 +247,14 @@ describe("POST /api/bookings", () => {
 
 #### Actualizar Documentación
 
-- Cambios en features → actualizar `docs/04-arquitectura-y-stack.md`
-- Decisiones técnicas → agregar ADR en `docs/operations/decision-log/decisions.md`
-- Cambios de API → actualizar documentación correspondiente
-- Breaking changes → actualizar `CHANGELOG.md`
+- Cambios en features → actualizar `docs/for-business/tech-stack.md` y la sección técnica correspondiente en `docs/for-developers/`.
+- Decisiones técnicas → agregar ADR en `docs/for-business/operations/decision-log/decisions.md`.
+- Cambios de API → actualizar documentación correspondiente.
+- Al mover o crear archivos en `docs/`:
+  - Actualiza `docs/index.md`, `mkdocs.yml` y cualquier menú relacionado.
+  - Refleja el nuevo conteo en `README.md` y `docs/index.md` (`rg --files docs -g '*.md' | wc -l`).
+  - Ejecuta `pnpm lint:md` y `pnpm lint:spelling` para validar estilo y ortografía.
+- Breaking changes → actualizar `CHANGELOG.md`.
 
 #### MkDocs
 
