@@ -1,14 +1,12 @@
-# Scripts - Brisa Cubana Clean Intelligence
+# Guía de Scripts
 
-Scripts de automatización y utilidades para desarrollo, testing y deployment.
+Colección de scripts de automatización y utilidades empleadas en Brisa Cubana Clean Intelligence para desarrollo, pruebas y despliegue.
 
-## 📂 Scripts Disponibles
+## Scripts disponibles
 
 ### `turbo.js`
 
-Wrapper personalizado para Turborepo con manejo de errores mejorado.
-
-**Uso:**
+Wrapper de Turborepo con manejo de errores mejorado.
 
 ```bash
 node scripts/turbo.js run dev
@@ -16,137 +14,110 @@ node scripts/turbo.js run build
 node scripts/turbo.js run test
 ```
 
-**Características:**
+Características clave:
 
-- Detección automática de Turbo CLI
-- Mensajes de error claros
-- Compatible con todos los comandos de Turbo
+- Detección automática de la CLI de Turbo.
+- Mensajes de error normalizados.
+- Compatible con cualquier pipeline definido en `turbo.json`.
 
 ---
 
 ### `setup_env.sh`
 
-Configuración inicial del entorno de desarrollo para MkDocs.
-
-**Uso:**
+Configuración inicial del entorno de documentación (MkDocs).
 
 ```bash
 ./scripts/setup_env.sh
 ```
 
-**Acciones:**
+Acciones ejecutadas:
 
-- Crea virtual environment Python (`.venv`)
-- Instala MkDocs 1.6.1
-- Instala Material theme 9.6.20
-- Instala plugins necesarios
+- Creación de entorno virtual de Python (`.venv`).
+- Instalación de MkDocs 1.6.1 y Material 9.6.20.
+- Instalación de plugins requeridos para la documentación.
 
 ---
 
 ### `mkdocs_serve.sh`
 
-Levanta el servidor de documentación MkDocs en modo desarrollo.
-
-**Uso:**
+Levantamiento del servidor de documentación en modo desarrollo.
 
 ```bash
 ./scripts/mkdocs_serve.sh
 ```
 
-**Puerto:** `http://localhost:8000`
+- Puerto por defecto: `http://localhost:8000`.
 
 ---
 
 ### `stripe_listen.sh`
 
-Escucha webhooks de Stripe en desarrollo local.
-
-**Uso:**
+Encaminamiento local de webhooks de Stripe.
 
 ```bash
 ./scripts/stripe_listen.sh
 ```
 
-**Requiere:**
+Requisitos previos:
 
-- Stripe CLI instalado (`brew install stripe/stripe-cli/stripe`)
-- Autenticación previa (`stripe login`)
+- Stripe CLI instalada (`brew install stripe/stripe-cli/stripe`).
+- Autenticación mediante `stripe login`.
 
-**Acción:**
+Funcionalidad:
 
-- Forward de webhooks a `localhost:4000/api/payments/webhook`
-- Imprime `STRIPE_WEBHOOK_SECRET` en consola
+- Reenvía webhooks a `http://localhost:3001/api/payments/webhook`.
+- Muestra `STRIPE_WEBHOOK_SECRET` para copiar en variables de entorno.
 
 ---
 
 ### `stripe_trigger.sh`
 
-Dispara eventos de Stripe para testing local.
-
-**Uso:**
+Generación de eventos Stripe para pruebas.
 
 ```bash
 ./scripts/stripe_trigger.sh checkout.session.completed
 ./scripts/stripe_trigger.sh payment_intent.payment_failed
 ```
 
-**Eventos soportados:**
+Eventos soportados:
 
 - `checkout.session.completed`
 - `checkout.session.expired`
 - `payment_intent.payment_failed`
-- Cualquier otro evento de Stripe
+- Otros eventos disponibles en la CLI de Stripe.
 
 ---
 
 ### `generate_diagrams.mjs`
 
-Genera diagramas Mermaid como imágenes PNG/SVG.
-
-**Uso:**
+Generación de diagramas Mermaid a PNG/SVG.
 
 ```bash
 node scripts/generate_diagrams.mjs
 ```
 
-**Requiere:**
-
-- `@mermaid-js/mermaid-cli` instalado
-
-**Input:** Archivos `.mmd` en `docs/resources/diagrams/`
-**Output:** Imágenes en `docs/_build/diagrams/`
-
-**Ejemplo:**
-
-```mermaid
-graph TD
-  A[Start] --> B[Process]
-  B --> C[End]
-```
+- Entrada: archivos `.mmd` en `docs/resources/diagrams/`.
+- Salida: imágenes en `docs/_build/diagrams/`.
+- Requiere `@mermaid-js/mermaid-cli` instalado.
 
 ---
 
-### `reconcile-payments.ts` (en apps/api/scripts/)
+### `apps/api/scripts/reconcile-payments.ts`
 
-Script de conciliación de pagos con Stripe (ejecutado por cron).
-
-**Ubicación:** `apps/api/scripts/reconcile-payments.ts`
-
-**Uso:**
+Script de conciliación de pagos con Stripe, ejecutado por cron o workflow.
 
 ```bash
 cd apps/api
 pnpm payments:reconcile
 ```
 
-**Acción:**
+Funciones principales:
 
-- Consulta bookings con `paymentStatus = PENDING_PAYMENT` o `REQUIRES_ACTION`
-- Verifica estado en Stripe API
-- Actualiza estados locales
-- Crea alertas si detecta problemas
+- Revisa bookings con estados `PENDING_PAYMENT` o `REQUIRES_ACTION`.
+- Consulta Stripe y actualiza el estado local.
+- Genera alertas mediante Slack si detecta discrepancias.
 
-**Variables requeridas:**
+Variables necesarias:
 
 ```bash
 DATABASE_URL="postgresql://..."
@@ -154,31 +125,28 @@ STRIPE_SECRET_KEY="sk_..."
 ALERTS_SLACK_WEBHOOK="https://hooks.slack.com/..." # opcional
 ```
 
-**Cron sugerido:**
+Cron sugerido:
 
 ```bash
-# Ejecutar cada hora
 0 * * * * cd /path/to/apps/api && pnpm payments:reconcile
 ```
 
 ---
 
-## 🚀 Uso en CI/CD
+## Uso en CI/CD
 
-### GitHub Actions
-
-Los scripts se usan en workflows:
+Ejemplo de integración en GitHub Actions:
 
 ```yaml
 # .github/workflows/ci.yml
-- name: Setup environment
+- name: Preparar entorno de documentación
   run: ./scripts/setup_env.sh
 
-- name: Build docs
+- name: Construir documentación
   run: pnpm docs:build
 
 # .github/workflows/payments-reconcile.yml
-- name: Reconcile payments
+- name: Conciliar pagos
   run: cd apps/api && pnpm payments:reconcile
   env:
     DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -187,105 +155,74 @@ Los scripts se usan en workflows:
 
 ---
 
-## 🛠️ Crear Nuevo Script
+## Creación de nuevos scripts
 
-### Script Bash
+### Bash
 
 ```bash
 #!/bin/bash
-# scripts/my-script.sh
+set -euo pipefail
 
-set -e  # Exit on error
+log() { echo "[$(date +%T)] $1"; }
 
-echo "Running my script..."
-
-# Tu código aquí
-
-echo "Done!"
+log "Iniciando script"
+# Lógica aquí
+log "Finalizado"
 ```
 
-**Hacer ejecutable:**
+Asegúrate de otorgar permisos de ejecución (`chmod +x scripts/<nombre>.sh`).
 
-```bash
-chmod +x scripts/my-script.sh
-```
-
-### Script Node.js/TypeScript
+### Node.js / TypeScript
 
 ```typescript
-// scripts/my-script.mjs (ESM)
-import { execSync } from "child_process";
-
-console.log("Running my script...");
+// scripts/my-script.mjs
+import { execSync } from "node:child_process";
 
 try {
   execSync("pnpm build", { stdio: "inherit" });
-  console.log("Build successful!");
 } catch (error) {
-  console.error("Build failed:", error);
+  console.error("Fallo en build", error);
   process.exit(1);
 }
 ```
 
-**Ejecutar:**
-
-```bash
-node scripts/my-script.mjs
-```
+Ejecución: `node scripts/my-script.mjs`.
 
 ---
 
-## 📝 Best Practices
+## Buenas prácticas
 
-1. **Documentar cada script** en este README
-2. **Agregar comentarios** en el código del script
-3. **Validar dependencias** antes de ejecutar
-4. **Mensajes claros** de error y éxito
-5. **Exit codes** apropiados (0 = éxito, 1 = error)
-6. **Idempotencia** cuando sea posible
-
----
-
-## 🔧 Troubleshooting
-
-### Error: "Permission denied"
-
-```bash
-chmod +x scripts/nombre-del-script.sh
-```
-
-### Error: "Stripe CLI not found"
-
-```bash
-# macOS
-brew install stripe/stripe-cli/stripe
-
-# Linux
-# Ver https://stripe.com/docs/stripe-cli
-```
-
-### Error: "Python venv not found"
-
-```bash
-./scripts/setup_env.sh
-```
+1. Documentar cada script en este archivo.
+2. Añadir comentarios que expliquen supuestos y efectos secundarios.
+3. Validar dependencias antes de ejecutar (`command -v`).
+4. Proveer mensajes claros de éxito/fracaso.
+5. Utilizar códigos de salida adecuados (0 = éxito, ≠0 = error).
+6. Diseñar scripts idempotentes cuando sea posible.
 
 ---
 
-## 📚 Recursos
+## Resolución de incidencias comunes
 
-- [Turborepo Docs](https://turbo.build/repo/docs)
-- [MkDocs Docs](https://www.mkdocs.org/)
-- [Stripe CLI Docs](https://stripe.com/docs/stripe-cli)
-- [Mermaid CLI Docs](https://github.com/mermaid-js/mermaid-cli)
+| Problema                      | Solución recomendada                          |
+| ----------------------------- | --------------------------------------------- |
+| `Permission denied`           | `chmod +x scripts/<script>.sh`                |
+| `stripe: command not found`   | Instalar Stripe CLI y ejecutar `stripe login` |
+| `python: No module named ...` | Ejecutar `./scripts/setup_env.sh`             |
 
 ---
 
-## 🤝 Contribuir
+## Recursos
 
-Al agregar un nuevo script:
+- [Turborepo](https://turbo.build/repo/docs)
+- [MkDocs](https://www.mkdocs.org/)
+- [Stripe CLI](https://stripe.com/docs/stripe-cli)
+- [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli)
 
-1. Agregarlo a este README
-2. Incluir ejemplos de uso
-3. Documentar variables de entorno requeridas
-4. Agregar a `.gitignore` si genera archivos temporales
+---
+
+## Contribuciones
+
+1. Agregar el script al repositorio bajo `scripts/` o carpeta correspondiente.
+2. Documentarlo en este README con uso, dependencias y ejemplos.
+3. Añadir pruebas o ejemplos de integración si aplica.
+4. Solicitar revisión del equipo de Plataforma.

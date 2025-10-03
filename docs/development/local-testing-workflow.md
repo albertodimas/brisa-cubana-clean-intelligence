@@ -16,6 +16,12 @@ All code changes must pass local validation before being pushed to GitHub. This 
 
 ### One-Command Verification
 
+If you have not yet prepared the documentation environment, run:
+
+```bash
+./scripts/setup_env.sh
+```
+
 Run this command before pushing any code:
 
 ```bash
@@ -28,7 +34,11 @@ or
 pnpm pre-push
 ```
 
-This will automatically check all requirements and provide clear feedback on what needs to be fixed.
+This will automatically check all requirements and provide clear feedback on what needs to be fixed. When working on documentation, remember to activar el entorno antes de usar MkDocs:
+
+```bash
+source .venv/bin/activate
+```
 
 ## Step-by-Step Workflow
 
@@ -331,7 +341,7 @@ gh run view <run-id>
 - [Contributing Guide](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md)
 - [Testing Guide](../for-developers/testing.md)
 - [Deployment & CI/CD](../for-developers/deployment.md)
-- [Environment Setup](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/SETUP.md)
+- [Quickstart & Environment Setup](../for-developers/quickstart.md)
 
 ## Questions?
 

@@ -10,7 +10,7 @@ Este proyecto adhiere a un Código de Conducta para asegurar un ambiente positiv
 
 ### 1. Setup del Entorno
 
-Sigue la guía completa en [SETUP.md](SETUP.md):
+Sigue la guía detallada en [docs/for-developers/quickstart.md](docs/for-developers/quickstart.md):
 
 ```bash
 # Requisitos: Node 24.9.0, pnpm 10.17.1, Docker
@@ -294,7 +294,7 @@ El template se completa automáticamente desde [.github/PULL_REQUEST_TEMPLATE.md
 - ❌ **NUNCA** commitear archivos `.env`
 - ❌ **NUNCA** incluir API keys en el código
 - ✅ Usar `.env.example` con valores placeholder
-- ✅ Documentar variables requeridas en `SETUP.md`
+- ✅ Documentar variables requeridas en `docs/for-developers/environment-variables.md`
 
 #### Dependencias
 
@@ -340,8 +340,8 @@ pnpm audit
 #### Documentación del Proyecto
 
 - [README.md](README.md) - Overview general
-- [SETUP.md](SETUP.md) - Guía de instalación
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Arquitectura high-level
+- [docs/for-developers/quickstart.md](docs/for-developers/quickstart.md) - Puesta en marcha
+- [docs/for-developers/architecture.md](docs/for-developers/architecture.md) - Arquitectura high-level
 - [docs/](docs/) - Documentación completa MkDocs
 
 #### Stack Tecnológico

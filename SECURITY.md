@@ -58,7 +58,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 - **Critical Vulnerabilities:** Patched and deployed within **72 hours**
 - **High Severity:** Patched within **7 days**
 - **Medium/Low:** Included in next scheduled release
-- **Zero-Day:** Emergency rollout process (see `RUNBOOKS/INCIDENT_RESPONSE.md`)
+- **Zero-Day:** Emergency rollout process (see `docs/operations/runbooks/INCIDENT_RESPONSE.md`)
 
 ### Security Audits
 
@@ -156,7 +156,7 @@ cosign verify ghcr.io/albertodimas/brisa-cubana-clean-intelligence/api:latest \
 5. **Recovery:** Restore services, verify integrity
 6. **Post-Mortem:** Root cause analysis within 48 hours
 
-**Full Incident Response Runbook:** `RUNBOOKS/INCIDENT_RESPONSE.md`
+**Full Incident Response Runbook:** `docs/operations/runbooks/INCIDENT_RESPONSE.md`
 
 ---
 
@@ -216,8 +216,8 @@ We track and report:
 
 ## 📚 Security Resources
 
-- **Runbooks:** `RUNBOOKS/` (incident response, rollback, go-live)
-- **Architecture:** `ARCHITECTURE.md` (security design decisions)
+- **Runbooks:** `docs/operations/runbooks/` (incident response, rollback, go-live)
+- **Architecture:** `docs/for-developers/architecture.md` (security design decisions)
 - **Infrastructure:** `infra/README.md` (IaC, secrets management)
 - **API Security:** `apps/api/README.md` (authentication, rate limiting)
 - **OWASP:** https://owasp.org/www-project-top-ten/

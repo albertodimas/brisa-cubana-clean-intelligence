@@ -896,4 +896,4 @@ Ver también:
 - [Quickstart Guide](quickstart.md)
 - [API Reference](api-reference.md)
 - [Testing Guide](testing.md)
-- [ARCHITECTURE.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/ARCHITECTURE.md)
+- [Arquitectura](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/for-developers/architecture.md)

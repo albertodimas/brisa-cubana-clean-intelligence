@@ -172,7 +172,7 @@ terraform apply
 terraform destroy
 
 # Production requires approval and runbook
-# See: RUNBOOKS/DISASTER_RECOVERY.md
+# See: docs/operations/runbooks/DISASTER_RECOVERY.md
 ```
 
 ---
@@ -226,4 +226,4 @@ terraform import railway_service.api srv_xxxxx
 
 - **Platform Team:** platform@brisacubana.com
 - **On-Call:** PagerDuty escalation
-- **Runbooks:** `RUNBOOKS/` directory
+- **Runbooks:** `docs/operations/runbooks/` directory

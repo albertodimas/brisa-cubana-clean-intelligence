@@ -1,209 +1,142 @@
-# Quickstart - 5 Minutos ⚡
+# Quickstart (5 minutos)
 
-Guía express para levantar el proyecto en modo desarrollo en menos de 5 minutos.
+Guía paso a paso para preparar el entorno local de Brisa Cubana Clean Intelligence en menos de cinco minutos.
 
-## Prerrequisitos
+## 1. Prerrequisitos
+
+| Herramienta | Versión mínima | Comando sugerido                                                 |
+| ----------- | -------------- | ---------------------------------------------------------------- |
+| Node.js     | 24.9.0         | `nvm install 24 && nvm use`                                      |
+| pnpm        | 10.17.1        | `corepack enable`                                                |
+| Docker      | 28             | [Docker Desktop](https://www.docker.com/products/docker-desktop) |
+| Git         | 2.40           | Incluido en la mayoría de sistemas                               |
+
+Verifica versiones:
 
 ```bash
-node --version  # >= 24.9.0
-pnpm --version  # >= 10.17.1
-docker --version  # >= 28.x
+node --version
+pnpm --version
+docker --version
+git --version
 ```
 
-## Paso 1: Clonar y configurar (1 min)
+## 2. Clonar e instalar
 
 ```bash
-# Clonar repositorio
+# Clona el repositorio
 git clone git@github.com:albertodimas/brisa-cubana-clean-intelligence.git
 cd brisa-cubana-clean-intelligence
 
-# Instalar dependencias
+# Instala dependencias
 pnpm install
 ```
 
-## Paso 2: Variables de entorno (1 min)
+## 3. Variables de entorno
 
 ```bash
-# Copiar templates de variables de entorno
 cp .env.example .env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.local.example apps/web/.env.local
 ```
 
-**Configurar claves críticas en `apps/api/.env`:**
+Completa los valores obligatorios:
+
+- `DATABASE_URL`: `postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev`
+- `JWT_SECRET`: genera con `openssl rand -hex 64`
+- `NEXTAUTH_SECRET`: genera con `openssl rand -base64 32`
+- `NEXT_PUBLIC_API_URL`: `http://localhost:3001`
+- Claves de Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) si deseas probar pagos.
+
+## 4. Levantar infraestructura local
 
 ```bash
-# Generar JWT_SECRET (32+ caracteres)
-JWT_SECRET="tu-clave-secreta-muy-segura-aqui-32-chars-min"
-
-# PostgreSQL (Docker levanta el servicio en el puerto host 5433)
-DATABASE_URL="postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev"
-
-# Stripe (usar claves de test de Stripe Dashboard)
-STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_WEBHOOK_SECRET="whsec_..."
-```
-
-## Paso 3: Base de datos (1.5 min)
-
-```bash
-# Levantar PostgreSQL + Redis + MailHog con Docker
+# PostgreSQL 17, Redis 8 y MailHog
 docker compose up -d
 
-# Aplicar migraciones de Prisma
-cd apps/api
-pnpm prisma migrate deploy
-pnpm prisma generate
-
-# Cargar datos de prueba (servicios, usuarios demo)
-pnpm db:seed
-cd ../..
+docker compose ps
 ```
 
-## Paso 4: Iniciar servidores (30 seg)
+Confirma que los contenedores se exponen en los puertos `5433`, `6380` y `8026`.
+
+## 5. Preparar base de datos
 
 ```bash
-# Desde la raíz del proyecto
+pnpm --filter=@brisa/api db:generate   # Prisma Client
+pnpm --filter=@brisa/api db:push       # Sincroniza esquema
+pnpm --filter=@brisa/api db:seed       # Carga datos de ejemplo
+```
+
+Usuarios sembrados:
+
+- Admin: `admin@brisacubanaclean.com` / `Admin123!`
+- Staff: `staff@brisacubanaclean.com` / `Staff123!`
+- Cliente: `client@brisacubanaclean.com` / `Client123!`
+
+## 6. Ejecutar el entorno de desarrollo
+
+```bash
 pnpm dev
 ```
 
-Esto levanta:
+Servicios disponibles:
 
-- ✅ **API Backend (Hono):** [http://localhost:3001](http://localhost:3001)
-- ✅ **Frontend (Next.js):** [http://localhost:3000](http://localhost:3000)
-- ✅ **Turborepo Watch:** Hot reload en ambos servicios
+- Web: http://localhost:3000
+- API: http://localhost:3001
+- MailHog: http://localhost:8026
 
-## Paso 5: Verificar (1 min)
-
-### Backend API Health Check
+## 7. Verificaciones básicas
 
 ```bash
+# Salud de la API
 curl http://localhost:3001/health
+
+# Login de prueba
+curl -X POST http://localhost:3001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@brisacubanaclean.com","password":"Admin123!"}'
 ```
 
-Respuesta esperada:
+Revisa http://localhost:3000 y accede con las credenciales de administrador para validar el dashboard.
 
-```json
-{
-  "service": "Brisa Cubana Clean Intelligence API",
-  "status": "ok",
-  "version": "0.1.0",
-  "timestamp": "2024-09-30T..."
-}
-```
-
-### Frontend
-
-Abre [http://localhost:3000](http://localhost:3000)
-
-- Verás la landing page de Brisa Cubana
-- Click en **"Get Started"** → redirige a `/auth/signin`
-
-### Credenciales de prueba (creadas por seed.ts)
-
-**Usuario Admin:**
-
-```
-Email: admin@brisacubanaclean.com
-Password: Admin123!
-```
-
-**Usuario Staff:**
-
-```
-Email: staff@brisacubanaclean.com
-Password: Staff123!
-```
-
-**Usuario Cliente:**
-
-```
-Email: client@brisacubanaclean.com
-Password: Client123!
-```
-
-## Siguiente paso
-
-Ahora que tienes el proyecto corriendo:
-
-1. **Explora el Dashboard:** [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
-2. **Revisa la documentación completa:** [SETUP.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/SETUP.md)
-3. **Consulta arquitectura:** [ARCHITECTURE.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/ARCHITECTURE.md)
-4. **Lee guía de contribución:** [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md)
-
-## Troubleshooting Rápido
-
-### Error: "Port 5432 already in use"
-
-Ya tienes PostgreSQL corriendo localmente. Usa el puerto host 5433 definido en `docker-compose.yml` o apunta la aplicación a tu propia instancia:
+## 8. Comandos útiles
 
 ```bash
-# Mantener la configuración por defecto
-ports:
-  - "5433:5432"
-
-# Alternativa: usar tu PostgreSQL local
-# Actualiza DATABASE_URL en apps/api/.env con tus credenciales
+pnpm dev:web          # Next.js únicamente
+pnpm dev:api          # API Hono únicamente
+pnpm db:reset         # Fuerza recreación + seed
+pnpm db:studio        # Prisma Studio en navegador
+pnpm docs:serve       # Documentación (MkDocs) en :8000
+pnpm test             # Vitest completo
+pnpm test:e2e         # Escenarios Playwright
+pnpm stripe:listen    # Escucha webhooks de Stripe
 ```
 
-### Error: "Port 3001 or 3000 already in use"
+## 9. Problemas frecuentes
+
+### Puerto 5432/3000/3001 en uso
 
 ```bash
-# Liberar puertos
-lsof -ti:3001 | xargs kill -9
-lsof -ti:3000 | xargs kill -9
+lsof -i :5432
+lsof -i :3000
+lsof -i :3001
+kill -9 <PID>
 ```
 
-### Error: "Prisma Client not generated"
+### Prisma Client no generado
 
 ```bash
 pnpm --filter=@brisa/api db:generate
-pnpm dev
 ```
 
-### Error: "JWT token verification failed"
-
-Verifica que `JWT_SECRET` en `apps/api/.env` tenga al menos 32 caracteres.
-
-### Error: "Stripe webhook signature verification failed"
-
-En desarrollo local:
-
-1. Instala Stripe CLI: `stripe login`
-2. Inicia webhook forwarding:
-   ```bash
-   stripe listen --forward-to localhost:3001/api/webhooks/stripe
-   ```
-3. Copia el webhook secret que imprime y actualiza `STRIPE_WEBHOOK_SECRET`
-
-## Scripts Útiles
+### Dependencias corruptas
 
 ```bash
-# Limpiar todo y reiniciar
-pnpm clean          # Limpia node_modules, .next, dist
-pnpm install        # Reinstala dependencias
-
-# Tests
-pnpm test           # Vitest tests (backend)
-pnpm test:e2e       # Playwright E2E tests
-
-# Linting
-pnpm lint           # ESLint + TypeScript checks
-pnpm format         # Prettier format
-
-# Base de datos
-cd apps/api
-pnpm prisma studio  # UI visual de la base de datos (http://localhost:5555)
-pnpm prisma migrate dev --name nombre_migracion  # Nueva migración
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
 ```
 
-## Recursos Adicionales
+## 10. Próximos pasos
 
-- **API Docs:** [API Reference](api-reference.md)
-- **Testing Guide:** [Testing](testing.md)
-- **Deployment:** [Deployment Guide](deployment.md)
-- **Changelog:** [Registro de cambios](../changelog/index.md)
-
----
-
-**¿Dudas?** Abre un [issue en GitHub](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues/new/choose) usando el template de pregunta.
+1. Revisa `architecture.md` para entender los componentes clave.
+2. Lee `CONTRIBUTING.md` antes de abrir tu primer PR.
+3. Explora la documentación completa en `docs/index.md` o ejecuta `make serve`.

@@ -302,4 +302,4 @@ Deployment is considered successful when:
 
 **Next Steps:** After successful staging validation → Deploy to production
 
-See: [docs/for-developers/staging-setup.md](docs/for-developers/staging-setup.md)
+See: [Guía de staging](../../for-developers/staging-setup.md)

@@ -394,7 +394,7 @@ curl -X PUT \
 - ✅ Disabled Wiki to avoid documentation fragmentation
 - ✅ MkDocs serves as canonical documentation
 - ✅ README.md for quick overview
-- ✅ ARCHITECTURE.md for technical details
+- ✅ docs/for-developers/architecture.md for technical details
 
 ### 3. GitHub Features Optimization
 

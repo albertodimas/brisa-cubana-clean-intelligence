@@ -9,108 +9,138 @@ copyright: Copyright &copy; 2025 Brisa Cubana Clean Intelligence
 nav:
   - Home: index.md
 
-  - For Developers:
-      - Overview: for-developers/README.md
-      - Quickstart (5 min): for-developers/quickstart.md
-      - API Reference: for-developers/api-reference.md
-      - Testing Guide: for-developers/testing.md
-      - Delivery Plan: development/delivery-plan.md
-      - Documentation Standards: development/documentation-standards.md
-      - Deployment Guide: for-developers/deployment.md
-      - GitHub Secrets: for-developers/github-secrets.md
-      - Staging Setup: for-developers/staging-setup.md
-      - Architecture:
-          - Diagrams Index: for-developers/diagrams/README.md
-          - C4 Context: for-developers/diagrams/c4-context-2025Q4.md
-          - C4 Containers: for-developers/diagrams/c4-containers-2025Q4.md
-          - Booking Flow: for-developers/diagrams/booking-flow-r1.md
-          - Panel Cliente: for-developers/diagrams/panel-cliente-r2.md
-          - App Staff: for-developers/diagrams/app-staff-r3.md
-          - CleanScore Sequence: for-developers/diagrams/cleanscore-sequence.md
-      - Design System: for-developers/design-system/index.md
-      - AI & ML:
-          - Overview: for-developers/ai-ml/model-cards/README.md
+  - Para desarrolladores:
+      - Panorama general: for-developers/README.md
+      - Quickstart (5 minutos): for-developers/quickstart.md
+      - Variables de entorno: for-developers/environment-variables.md
+      - Plan de entregas y releases: development/delivery-plan.md
+      - Workflow de testing local: development/local-testing-workflow.md
+      - Estándares de documentación: development/documentation-standards.md
+      - Referencia de API: for-developers/api-reference.md
+      - Guía de testing: for-developers/testing.md
+      - Guía de despliegue: for-developers/deployment.md
+      - Configuración Railway: for-developers/railway-env-setup.md
+      - Modo API fake: for-developers/fake-api-mode.md
+      - Runbook de producción: for-developers/production-runbook.md
+      - Secretos GitHub: for-developers/github-secrets.md
+      - Configuración staging: for-developers/staging-setup.md
+      - Arquitectura:
+          - Arquitectura general: for-developers/architecture.md
+          - Índice de diagramas: for-developers/diagrams/README.md
+          - C4 Contexto: for-developers/diagrams/c4-context-2025Q4.md
+          - C4 Contenedores: for-developers/diagrams/c4-containers-2025Q4.md
+          - Flujo de reservas: for-developers/diagrams/booking-flow-r1.md
+          - Panel cliente: for-developers/diagrams/panel-cliente-r2.md
+          - App staff: for-developers/diagrams/app-staff-r3.md
+          - Secuencia CleanScore: for-developers/diagrams/cleanscore-sequence.md
+      - Roadmaps técnicos:
+          - Observabilidad (Fase 2): for-developers/observability-phase2.md
+          - Advanced Features (Fase 3): for-developers/phase3-advanced-features.md
+          - Enterprise Grade (Fase 4): for-developers/phase4-enterprise-grade.md
+          - Procedimientos de rollback: for-developers/rollback-procedures.md
+      - Design system: for-developers/design-system/index.md
+      - IA & ML:
+          - Panorama general: for-developers/ai-ml/model-cards/README.md
           - Concierge MVP: for-developers/ai-ml/model-cards/model/concierge-mvp-v0.1.md
           - CleanScore v0.1: for-developers/ai-ml/model-cards/model/cleanscore-v0.1.md
-      - Copilot Guide: for-developers/copilot/index.md
+      - Guía Copilot: for-developers/copilot/index.md
+      - Operaciones técnicas:
+          - Checklist de despliegue: operations/production/DEPLOYMENT_CHECKLIST.md
+          - Guía de despliegue: operations/production/PRODUCTION_DEPLOYMENT_GUIDE.md
+          - Preparación para producción: operations/production/PRODUCTION_READINESS_REPORT.md
+          - Auditoría de producción: operations/production/PRODUCTION_AUDIT_REPORT.md
+          - Configuración de secretos: operations/production/DEPLOYMENT_SETUP.md
+          - Guía Railway: operations/production/RAILWAY_FIX.md
+      - Runbooks:
+          - Índice: operations/runbooks/README.md
+          - Operational Readiness Review: operations/runbooks/OPERATIONAL_READINESS_REVIEW.md
+          - Go-Live: operations/runbooks/GO_LIVE.md
+          - Rollback: operations/runbooks/ROLLBACK.md
+          - Incident Response: operations/runbooks/INCIDENT_RESPONSE.md
 
-  - For Business:
-      - Overview: for-business/README.md
-      - Vision & Strategy: for-business/vision-strategy.md
-      - Market & Compliance: for-business/market-compliance.md
-      - User Experience: for-business/user-experience.md
-      - Tech Stack: for-business/tech-stack.md
-      - AI & Automation: for-business/ai-automation.md
-      - Integrations: for-business/integrations.md
+  - Negocio y operaciones:
+      - Panorama general: for-business/README.md
+      - Visión y estrategia: for-business/vision-strategy.md
+      - Mercado y cumplimiento: for-business/market-compliance.md
+      - Experiencia de usuario: for-business/user-experience.md
+      - Stack tecnológico: for-business/tech-stack.md
+      - IA y automatización: for-business/ai-automation.md
+      - Integraciones: for-business/integrations.md
       - Roadmap: for-business/roadmap.md
-      - Checklist Pre-Rollout: for-business/checklist-pre-rollout.md
-      - Operations:
-          - Overview: for-business/operations/index.md
-          - Domain & Branding: for-business/operations/domain-and-branding.md
-          - Interview Plan: for-business/operations/interview-plan.md
-          - Sprint 0 Plan: for-business/operations/sprint0-plan.md
-          - Pre-Dev Summary: for-business/operations/pre-dev-summary.md
-          - Pre-Dev Summary (Executive): for-business/operations/pre-dev-summary-executive.md
-          - Policies:
-              - Overview: for-business/operations/policies/index.md
-              - Privacy Policy (Draft): for-business/operations/policies/privacy-policy-draft.md
-              - AI Governance Charter: for-business/operations/policies/governance-ia-charter.md
+      - Checklist pre-rollout: for-business/checklist-pre-rollout.md
+      - Operaciones:
+          - Panorama general: for-business/operations/index.md
+          - Dominio y branding: for-business/operations/domain-and-branding.md
+          - Plan de entrevistas: for-business/operations/interview-plan.md
+          - Plan Sprint 0: for-business/operations/sprint0-plan.md
+          - Resumen pre-dev: for-business/operations/pre-dev-summary.md
+          - Resumen pre-dev (Ejecutivo): for-business/operations/pre-dev-summary-executive.md
+          - Políticas:
+              - Panorama general: for-business/operations/policies/index.md
+              - Política de privacidad (borrador): for-business/operations/policies/privacy-policy-draft.md
+              - Carta de gobierno IA: for-business/operations/policies/governance-ia-charter.md
           - SOPs:
-              - Overview: for-business/operations/sops/index.md
+              - Panorama general: for-business/operations/sops/index.md
               - Onboarding Staff: for-business/operations/sops/onboarding-staff.md
-              - Inventory Management: for-business/operations/sops/inventory-management.md
-              - Emergency Response: for-business/operations/sops/emergency-response.md
-              - Emergency Tabletop: for-business/operations/sops/emergency-response-tabletop.md
-              - Equipment Maintenance: for-business/operations/sops/maintenance.md
+              - Gestión de inventario: for-business/operations/sops/inventory-management.md
+              - Respuesta a emergencias: for-business/operations/sops/emergency-response.md
+              - Simulacro de emergencias: for-business/operations/sops/emergency-response-tabletop.md
+              - Mantenimiento de equipos: for-business/operations/sops/maintenance.md
           - Branding: for-business/operations/branding/style-guide-outline.md
-          - Finance: for-business/operations/finance/financial-model-outline.md
+          - Finanzas: for-business/operations/finance/financial-model-outline.md
           - Checklists:
-              - Overview: for-business/operations/checklists/index.md
+              - Panorama general: for-business/operations/checklists/index.md
               - Sprint 0: for-business/operations/checklists/sprint0-checklist.md
-              - Launch: for-business/operations/checklists/launch-checklist.md
+              - Lanzamiento: for-business/operations/checklists/launch-checklist.md
           - Marketing: for-business/operations/marketing/gtm-plan.md
           - QA: for-business/operations/qa/testing-strategy.md
-          - Risk: for-business/operations/risk/risk-register.md
-          - Data: for-business/operations/data/data-analytics-plan.md
-          - Support: for-business/operations/support/support-playbook.md
+          - Riesgos: for-business/operations/risk/risk-register.md
+          - Datos: for-business/operations/data/data-analytics-plan.md
+          - Soporte: for-business/operations/support/support-playbook.md
           - Partners: for-business/operations/partners/partner-onboarding.md
-          - Product:
-              - Product Roadmap: for-business/operations/product/product-roadmap.md
-              - MVP Lean Plan: for-business/operations/product/mvp-lean-plan.md
-              - Caso de Uso - María: for-business/operations/product/caso-uso-maria.md
-              - Caso de Uso - Carlos: for-business/operations/product/caso-uso-carlos.md
-          - Integrations: for-business/operations/integrations/sandbox-plan.md
-          - Decision Log: for-business/operations/decision-log/decisions.md
-      - Market Data:
-          - Tourism 2024: for-business/market-data/tourism-2024-records.md
-          - Wage Data: for-business/market-data/wage-maids-miami.md
-          - Competition: for-business/market-data/cleaning-competition-snapshot.md
+          - Producto:
+              - Roadmap de producto: for-business/operations/product/product-roadmap.md
+              - Plan MVP Lean: for-business/operations/product/mvp-lean-plan.md
+              - Caso de uso - María: for-business/operations/product/caso-uso-maria.md
+              - Caso de uso - Carlos: for-business/operations/product/caso-uso-carlos.md
+          - Integraciones: for-business/operations/integrations/sandbox-plan.md
+          - Registro de decisiones: for-business/operations/decision-log/decisions.md
+      - Datos de mercado:
+          - Índice: for-business/market-data/index.md
+          - Turismo 2024: for-business/market-data/tourism-2024-records.md
+          - Datos salariales: for-business/market-data/wage-maids-miami.md
+          - Competencia: for-business/market-data/cleaning-competition-snapshot.md
       - Insights: for-business/insights/index.md
 
-  - Guides:
-      - Overview: guides/README.md
+  - Guías:
+      - Panorama general: guides/README.md
 
-  - Reference:
-      - Overview: reference/README.md
-      - Sources: reference/sources.md
-      - Templates:
-          - Overview: reference/templates/index.md
-          - ADR Template: reference/templates/adr-template.md
-          - Model Card Template: reference/templates/model-card-template.md
-          - Interview Notes: reference/templates/interview-notes-template.md
-          - Meeting Minutes: reference/templates/meeting-minutes-template.md
-          - IA Model Evaluation: reference/templates/ia-model-eval-template.md
-          - Emergency Contract: reference/templates/emergency-contract-template.md
-          - Estimation Manual: reference/templates/estimation-manual-template.md
-          - CleanScore Manual: reference/templates/cleanscore-manual-template.md
-          - Insurance Checklist: reference/templates/insurance-checklist.md
-          - Chemical Safety: reference/templates/chemical-safety-guideline.md
-          - CRM Integration: reference/templates/crm-integration-checklist.md
-          - Examples:
-              - Contract Sample - Carlos: reference/templates/examples/emergency-contract-sample-carlos.md
-              - Estimation Sample - María: reference/templates/examples/estimation-manual-sample-maria.md
+  - Referencia:
+      - Panorama general: reference/README.md
+      - Fuentes: reference/sources.md
+      - Plantillas:
+          - Panorama general: reference/templates/index.md
+          - Plantilla ADR: reference/templates/adr-template.md
+          - Plantilla Model Card: reference/templates/model-card-template.md
+          - Plantilla notas de entrevista: reference/templates/interview-notes-template.md
+          - Acta de reunión: reference/templates/meeting-minutes-template.md
+          - Evaluación modelos IA: reference/templates/ia-model-eval-template.md
+          - Contrato de emergencia: reference/templates/emergency-contract-template.md
+          - Manual de estimaciones: reference/templates/estimation-manual-template.md
+          - Manual CleanScore: reference/templates/cleanscore-manual-template.md
+          - Checklist seguros: reference/templates/insurance-checklist.md
+          - Guía seguridad químicos: reference/templates/chemical-safety-guideline.md
+          - Checklist integración CRM: reference/templates/crm-integration-checklist.md
+          - Ejemplos:
+              - Contrato ejemplo (Carlos): reference/templates/examples/emergency-contract-sample-carlos.md
+              - Estimación ejemplo (María): reference/templates/examples/estimation-manual-sample-maria.md
 
-  - Changelog: changelog/index.md
+  - Registro de cambios:
+      - Índice general: changelog/index.md
+      - Sesión 2025-10-01 · Workflow de testing local: changelog/session-2025-10-01-local-testing-workflow.md
+      - Sesión 2025-10-01 · Auditoría de seguridad: changelog/session-2025-10-01-security-audit.md
+      - Sesión 2025-10-02 · Auditoría y optimización: changelog/session-2025-10-02-audit-and-optimization.md
+      - Sesión 2025-10-02 · Optimización del repositorio: changelog/session-2025-10-02-repository-optimization.md
 
 # Theme configuration
 theme:
@@ -195,6 +225,7 @@ plugins:
       type: timeago
       locale: es
       fallback_to_build_date: true
+      strict: false
   - minify:
       minify_html: true
 

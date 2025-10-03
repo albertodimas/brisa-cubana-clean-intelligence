@@ -128,7 +128,7 @@ These updates deferred to avoid production disruption. Current versions are stab
 - SESSION_LOG_2025-09-30.md with complete session details
 - CONTRIBUTING.md con guías de contribución completas
 - CODE_OF_CONDUCT.md basado en Contributor Covenant 2.1
-- ARCHITECTURE.md con overview de alto nivel del sistema
+- docs/for-developers/architecture.md con overview de alto nivel del sistema
 - CHANGELOG.md migrado desde docs/changelog/
 - Guía de estándares editoriales (`docs/development/documentation-standards.md`) enlazada en MkDocs
 
@@ -137,10 +137,10 @@ These updates deferred to avoid production disruption. Current versions are stab
 - Node 20 → 24 en workflow payments-reconcile.yml
 - `engines.node` actualizado a `>=24.9.0` en apps/web/package.json
 - Variables de entorno: agregado WEB_APP_URL para reemplazar NEXT_PUBLIC_APP_URL en API
-- Documentación de estrategia de .env en SETUP.md
+- Documentación de estrategia de .env en `docs/for-developers/environment-variables.md`
 - Prisma: propiedades permiten campos opcionales (`size`, `bedrooms`, `bathrooms`, `notes`) y comparten validaciones en `schemas.ts`
 - Frontend: tarjetas y formularios de propiedades muestran y persisten notas, metros cuadrados y distribución de habitaciones con tipado consistente
-- README, SETUP y QUICKSTART reescritos con instrucciones reales (puertos 3001/5433/6380/8026) y tono profesional
+- README y `docs/for-developers/quickstart.md` reescritos con instrucciones reales (puertos 3001/5433/6380/8026) y tono profesional
 - Portal de documentación actualizado (`docs/index.md`, `mkdocs.yml`) con recuento real y nuevo estándar editorial
 
 ### Fixed

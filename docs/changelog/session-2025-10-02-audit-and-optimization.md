@@ -11,13 +11,13 @@ Comprehensive project audit and cleanup session. Restored documentation system, 
 **Problem**: Documentation was simplified losing important context
 
 - README.md reduced from 332 → 129 lines (lost marketing, features)
-- ARCHITECTURE.md lost 380 lines of context
+- docs/for-developers/architecture.md lost 380 lines of context
 - Multiple README files in subdirectories simplified
 
 **Solution**: Restored all original documentation
 
 - README.md: 332 lines (professional presentation with badges, features, marketing)
-- ARCHITECTURE.md: 429 lines (complete architectural context)
+- docs/for-developers/architecture.md: 429 lines (complete architectural context)
 - All package READMEs restored to original state
 
 ### 2. Code Organization & Cleanup
@@ -119,7 +119,7 @@ a66a953 feat(web): implement fake API data mode for testing
    - Quick start guide
    - Professional presentation
 
-2. **ARCHITECTURE.md** (429 lines) - Technical Decisions
+2. **docs/for-developers/architecture.md** (429 lines) - Technical Decisions
    - Architectural patterns
    - Technical flows
    - Business context

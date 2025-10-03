@@ -171,10 +171,10 @@ brisa-cubana-clean-intelligence/
 │       └── package.json
 │
 ├── docs/                       # MkDocs documentation
-│   ├── 01-vision-estrategia.md
-│   ├── 04-arquitectura-y-stack.md
-│   ├── operations/             # SOPs, policies
-│   └── resources/              # Templates, diagrams
+│   ├── for-developers/         # Guías técnicas, arquitectura, quickstart
+│   ├── for-business/           # Visión, mercado, SOPs y decisiones
+│   ├── operations/             # Runbooks y playbooks de despliegue
+│   └── reference/              # Plantillas, fuentes y recursos
 │
 ├── .github/
 │   └── workflows/
@@ -251,7 +251,7 @@ Return 200 OK
 
 ## Decisiones Arquitectónicas (ADRs)
 
-Decisiones técnicas documentadas en [docs/operations/decision-log/decisions.md](docs/operations/decision-log/decisions.md):
+Decisiones técnicas documentadas en [for-business/operations/decision-log/decisions.md](../for-business/operations/decision-log/decisions.md):
 
 - **ADR-01**: Bun + Next.js 15 + React 19 (rendimiento y DX)
 - **ADR-04**: Event mesh + Temporal (orquestación)
@@ -411,9 +411,9 @@ logger.error({ err, requestId }, "Payment failed");
 
 ### Documentación Detallada
 
-- [04 · Arquitectura y Stack](docs/04-arquitectura-y-stack.md) - Detalles técnicos
-- [Diagramas C4](docs/resources/architecture/) - Visualizaciones
-- [Decision Log](docs/operations/decision-log/decisions.md) - ADRs
+- [Tech Stack](../for-business/tech-stack.md) - Detalles técnicos
+- [Diagramas C4](../for-developers/diagrams/README.md) - Visualizaciones
+- [Decision Log](../for-business/operations/decision-log/decisions.md) - ADRs
 
 ### Stack Docs
 

@@ -25,7 +25,7 @@ groups:
         annotations:
           summary: "High error rate detected (current: {{ $value }}%)"
           description: "Error rate is {{ $value }}% (SLO: < 1%). Service availability impacted."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/INCIDENT_RESPONSE.md"
 
       - alert: ServiceDown
         expr: |
@@ -37,7 +37,7 @@ groups:
         annotations:
           summary: "API service is DOWN"
           description: "brisa-api has been down for 1 minute. Immediate action required."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/INCIDENT_RESPONSE.md"
 
   # ===========================================================================
   # SLO: Latency (p95 < 500ms, p99 < 1000ms)
@@ -55,7 +55,7 @@ groups:
         annotations:
           summary: "High latency p95 detected (current: {{ $value }}ms)"
           description: "p95 latency is {{ $value }}ms (SLO: < 500ms). Performance degraded."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/INCIDENT_RESPONSE.md"
 
       - alert: HighLatencyP99
         expr: |
@@ -67,7 +67,7 @@ groups:
         annotations:
           summary: "Critical latency p99 detected (current: {{ $value }}ms)"
           description: "p99 latency is {{ $value }}ms (SLO: < 1000ms). Severe performance degradation."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/INCIDENT_RESPONSE.md"
 
   # ===========================================================================
   # Database Performance
@@ -85,7 +85,7 @@ groups:
         annotations:
           summary: "Slow database queries detected (p95: {{ $value }}ms)"
           description: "Database p95 query time is {{ $value }}ms (SLO: < 100ms). Investigate slow queries."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/INCIDENT_RESPONSE.md"
 
       - alert: DatabaseConnectionPoolExhausted
         expr: |
@@ -97,7 +97,7 @@ groups:
         annotations:
           summary: "Database connection pool near capacity"
           description: "Active connections: {{ $value }}. Connection pool near exhaustion."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/INCIDENT_RESPONSE.md"
 
   # ===========================================================================
   # Error Budget Alerts
@@ -121,7 +121,7 @@ groups:
         annotations:
           summary: "30-day error budget exhausted"
           description: "Error budget for 99.9% SLO has been exhausted. Deployment freeze recommended."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/GO_LIVE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/GO_LIVE.md"
 
   # ===========================================================================
   # Payment Processing (Business-Critical)
@@ -139,4 +139,4 @@ groups:
         annotations:
           summary: "High payment failure rate ({{ $value }}%)"
           description: "Payment failures exceed 5%. Revenue impact. Immediate investigation required."
-          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/RUNBOOKS/INCIDENT_RESPONSE.md"
+          runbook_url: "https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/operations/runbooks/INCIDENT_RESPONSE.md"
