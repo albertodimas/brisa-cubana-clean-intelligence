@@ -3,8 +3,11 @@ import { defineConfig, devices } from "@playwright/test";
 process.env.USE_FAKE_API_DATA ??= "1";
 process.env.NEXT_PUBLIC_USE_FAKE_API_DATA ??= "1";
 process.env.DYLD_USE_FAKE_API_DATA ??= "1";
+process.env.E2E_API_HOST ??= "127.0.0.1";
+process.env.E2E_APP_HOST ??= "127.0.0.1";
 
 const port = Number(process.env.PORT ?? 3000);
+process.env.PLAYWRIGHT_BASE_URL ??= `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: "./apps/web/e2e",

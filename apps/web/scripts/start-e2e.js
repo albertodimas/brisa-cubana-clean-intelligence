@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const port = process.env.PORT ?? "3000";
-const appHost = process.env.E2E_APP_HOST ?? "localhost";
+const appHost = process.env.E2E_APP_HOST ?? "127.0.0.1";
 const appBaseUrl = `http://${appHost}:${port}`;
 
 const rootDir = path.resolve(__dirname, "..", "..", "..");
@@ -146,7 +146,7 @@ seedProcess.on("exit", (seedCode) => {
   });
 
   async function startNextServer() {
-    const apiHost = process.env.E2E_API_HOST ?? "localhost";
+  const apiHost = process.env.E2E_API_HOST ?? "127.0.0.1";
     const apiBaseUrl = `http://${apiHost}:${apiPort}`;
 
     const ready = await waitForApiReady(`${apiBaseUrl}/health`, 40, 500);
