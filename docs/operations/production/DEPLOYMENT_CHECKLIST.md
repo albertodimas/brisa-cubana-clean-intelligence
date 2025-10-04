@@ -197,7 +197,9 @@ Expected responses:
 ### Métricas y Observabilidad
 
 - [ ] Endpoint `/api/metrics` responde 200 con payload de métricas de reservas/servicios.
-- [ ] Dashboards de Cloud/Observabilidad actualizados (Bookings KPI, CleanScore KPI). Enlazar en Notion/Datadog: `https://observability.brisacubana.com/dashboards/bookings`, `https://observability.brisacubana.com/dashboards/cleanscore`.
+- [ ] Dashboards de Cloud/Observabilidad actualizados (Bookings KPI, CleanScore KPI).
+  - Estado actual: dashboards en construcción; revisar tablero Notion “Observability > KPI Dashboards” y confirmar enlaces publicados en Datadog.
+  - Responsable: equipo de Observabilidad (contacto `@observability-team` en Slack).
 - [ ] Alertas activas en caso de latencia > SLA o error rate > 2%; verificar notificaciones Slack `#brisa-alerts`.
 
 ### End-to-End User Journey

@@ -82,6 +82,7 @@ pnpm dev
 # API metrics endpoint (desde octubre 2025)
 # https://api.brisacubana.com/api/metrics – expone KPIs de reservas/CleanScore
 # Validado por tests en apps/api/src/routes/metrics.test.ts
+# Dashboards agregados gradualmente (ver tablero Notion “Observability > KPI Dashboards”), responsables: @observability-team.
 
 # Structured logs in console (JSON format)
 ```
