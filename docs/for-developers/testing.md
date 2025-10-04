@@ -324,7 +324,22 @@ pnpm playwright test home.spec.ts
 
 # Con debugging
 pnpm playwright test --debug
+
+# Abrir el último reporte HTML (.playwright-report)
+pnpm exec playwright show-report
 ```
+
+> Consejo: el script `./scripts/pre-push-check.sh` ejecuta esta suite por defecto. Si necesitas omitirla puntualmente, exporta `SKIP_E2E=1` antes de ejecutar el script.
+
+### Casos cubiertos clave
+
+- `apps/web/e2e/cleanscore-dashboard.spec.ts`: valida filtros, detalle y publicación de reportes CleanScore desde el dashboard admin.
+- `apps/web/e2e/booking-flow.spec.ts`: comprueba navegación clave y confirma la creación de una reserva con payload controlado.
+- `apps/web/e2e/staff-flow.spec.ts`: simula el flujo staff en campo (inicio, checklist y generación de CleanScore).
+
+### Sesiones autenticadas
+
+Los tests que requieren usuarios con roles presembrados reutilizan el helper `establishSession` definido en `apps/web/e2e/fixtures/session.ts`. Este helper hace login contra `/api/auth/callback/credentials`, replica las cookies emitidas por NextAuth y las agrega al contexto de Playwright, evitando dependencias frágiles con el formulario de inicio de sesión.
 
 ### Mocks de red y datos deterministas
 
@@ -631,83 +646,37 @@ coverage: {
 
 ### GitHub Actions Workflow
 
-[.github/workflows/ci.yml](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/ci.yml):
+[.github/workflows/ci.yml](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/ci.yml) define cinco jobs encadenados: `lint`, `typecheck`, `test`, `build` y `e2e`. Los primeros cuatro validan estilo, tipos, unit tests (con PostgreSQL 17) y la build del monorepo. El job `e2e` depende de `test` y ejecuta Playwright contra el bundle productivo con Postgres/Redis en los puertos 5433/6380.
+
+Fragmento relevante:
 
 ```yaml
-name: CI
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: brisa_user
-          POSTGRES_PASSWORD: brisa_pass
-          POSTGRES_DB: brisa_cubana_db
-        ports:
-          - 5432:5432
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run Prisma migrations
-        run: cd apps/api && pnpm prisma migrate deploy
-
-      - name: Run tests
-        run: cd apps/api && pnpm test
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          files: apps/api/coverage/lcov.info
-
-  e2e:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-      - uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install Playwright browsers
-        run: pnpm playwright install --with-deps chromium
-
-      - name: Run E2E tests
-        run: pnpm test:e2e
-
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
+e2e:
+  needs: [test]
+  services:
+    postgres:
+      image: postgres:17-alpine
+      ports: ["5433:5432"]
+    redis:
+      image: redis:8-alpine
+      ports: ["6380:6379"]
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "24"
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10.17.1
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm --filter=@brisa/api db:generate
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
+    - run: pnpm exec playwright install --with-deps chromium
+    - run: pnpm test:e2e
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
+        REDIS_URL: redis://localhost:6380
 ```
 
 ---

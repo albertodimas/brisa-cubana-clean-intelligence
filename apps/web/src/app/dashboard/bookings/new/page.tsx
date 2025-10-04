@@ -2,10 +2,90 @@ import { redirect } from "next/navigation";
 import { auth } from "@/server/auth/config";
 import BookingForm from "../components/BookingForm";
 import type { Service, Property } from "@/types/api";
+import { isFakeDataEnabled } from "@/server/utils/fake";
 
 async function getServicesAndProperties(
   accessToken: string,
 ): Promise<{ services: Service[]; properties: Property[] }> {
+  if (isFakeDataEnabled()) {
+    const now = new Date().toISOString();
+    const services: Service[] = [
+      {
+        id: "deep-clean-1",
+        name: "Limpieza Profunda",
+        description: "Limpieza detallada incluyendo áreas difíciles",
+        basePrice: "149.99",
+        duration: 180,
+        active: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: "vacation-rental-1",
+        name: "Turnover Vacation Rental",
+        description: "Limpieza express entre huéspedes con reporte fotográfico",
+        basePrice: "119.99",
+        duration: 90,
+        active: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+
+    const properties: Property[] = [
+      {
+        id: "prop-residential-1",
+        name: "Brickell Luxury Apartment",
+        address: "1234 Brickell Ave, Unit 2501",
+        city: "Miami",
+        state: "FL",
+        zipCode: "33131",
+        type: "RESIDENTIAL",
+        size: 1200,
+        bedrooms: 2,
+        bathrooms: 2,
+        notes: null,
+        userId: "client-user",
+        createdAt: now,
+        updatedAt: now,
+        user: {
+          id: "client-user",
+          email: "client@brisacubanaclean.com",
+          name: "Client Demo",
+        },
+        _count: {
+          bookings: 3,
+        },
+      },
+      {
+        id: "prop-vacation-1",
+        name: "Wynwood Vacation Rental",
+        address: "567 NW 2nd Ave",
+        city: "Miami",
+        state: "FL",
+        zipCode: "33127",
+        type: "VACATION_RENTAL",
+        size: 900,
+        bedrooms: 1,
+        bathrooms: 1,
+        notes: null,
+        userId: "client-user",
+        createdAt: now,
+        updatedAt: now,
+        user: {
+          id: "client-user",
+          email: "client@brisacubanaclean.com",
+          name: "Client Demo",
+        },
+        _count: {
+          bookings: 5,
+        },
+      },
+    ];
+
+    return { services, properties };
+  }
+
   const API_BASE_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
