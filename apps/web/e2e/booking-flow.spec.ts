@@ -94,6 +94,70 @@ test.describe("Booking Flow", () => {
   });
 
   test("should create a new booking", async ({ page }) => {
+    const servicesMock = [
+      {
+        id: "deep-clean-1",
+        name: "Limpieza Profunda",
+        description: "Limpieza detallada incluyendo áreas difíciles",
+        basePrice: "149.99",
+        duration: 180,
+        active: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+
+    const propertiesMock = [
+      {
+        id: "prop-residential-1",
+        name: "Brickell Luxury Apartment",
+        address: "1234 Brickell Ave, Unit 2501",
+        city: "Miami",
+        state: "FL",
+        zipCode: "33131",
+        type: "RESIDENTIAL",
+        size: 1200,
+        bedrooms: 2,
+        bathrooms: 2,
+        notes: null,
+        userId: "client-user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        user: {
+          id: "client-user",
+          email: "client@brisacubanaclean.com",
+          name: "Client Demo",
+        },
+        _count: {
+          bookings: 0,
+        },
+      },
+    ];
+
+    await page.route("**/api/services", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(servicesMock),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.route("**/api/properties", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(propertiesMock),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
     const bookingCalls: Array<Record<string, unknown>> = [];
 
     await page.route("**/api/bookings", async (route) => {
@@ -121,27 +185,7 @@ test.describe("Booking Flow", () => {
       (select) => (select as HTMLSelectElement).value,
     );
 
-    const hasProperties = await page.evaluate(() => {
-      const select = document.querySelector<HTMLSelectElement>("#propertyId");
-      return Boolean(select && select.options.length > 1);
-    });
-
-    if (!hasProperties) {
-      await page.evaluate(() => {
-        const propertySelect =
-          document.querySelector<HTMLSelectElement>("#propertyId");
-        if (propertySelect) {
-          propertySelect.options.add(
-            new Option(
-              "Brickell Luxury Apartment - 1234 Brickell Ave",
-              "prop-residential-1",
-            ),
-          );
-        }
-      });
-    }
-
-    await page.selectOption("#propertyId", { index: 1 });
+    await page.selectOption("#propertyId", "prop-residential-1");
     const selectedPropertyId = await page.$eval(
       "#propertyId",
       (select) => (select as HTMLSelectElement).value,
