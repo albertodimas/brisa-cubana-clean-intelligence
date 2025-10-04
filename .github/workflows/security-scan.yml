@@ -34,6 +34,8 @@ jobs:
   secret-detection:
     name: Secret Detection
     runs-on: ubuntu-latest
+    # Only run on PRs to avoid BASE==HEAD issue on direct pushes to main
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -331,7 +333,8 @@ jobs:
     name: Security Summary
     runs-on: ubuntu-latest
     # Don't depend on sign-images since it only runs on main branch
-    needs: [secret-detection, dependency-scan, container-scan, policy-check, codeql]
+    # Don't depend on secret-detection since it only runs on PRs/schedule
+    needs: [dependency-scan, container-scan, policy-check, codeql]
     if: always()
     steps:
       - name: Generate security report
