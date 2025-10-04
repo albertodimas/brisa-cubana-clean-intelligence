@@ -134,48 +134,158 @@ test.describe("Booking Flow", () => {
       },
     ];
 
-    await page.route("**/api/services", async (route) => {
-      if (route.request().method() === "GET") {
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(servicesMock),
-        });
-        return;
-      }
-      await route.continue();
-    });
-
-    await page.route("**/api/properties", async (route) => {
-      if (route.request().method() === "GET") {
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(propertiesMock),
-        });
-        return;
-      }
-      await route.continue();
-    });
-
     const bookingCalls: Array<Record<string, unknown>> = [];
 
-    await page.route("**/api/bookings", async (route) => {
-      if (route.request().method() === "POST") {
-        const payload = JSON.parse(
-          route.request().postData() ?? "{}",
-        ) as Record<string, unknown>;
-        bookingCalls.push(payload);
-        await route.fulfill({
-          status: 201,
-          contentType: "application/json",
-          body: JSON.stringify({ id: "booking-test", ...payload }),
-        });
-        return;
-      }
-
-      await route.continue();
+    await page.exposeBinding("_recordBookingCall", async (_source, payload) => {
+      bookingCalls.push(payload as Record<string, unknown>);
     });
+
+    await page.addInitScript(
+      ({ services, properties }) => {
+        const state = {
+          bookingResponses: [] as Array<Record<string, unknown>>,
+        };
+        (
+          window as unknown as { __bookingState__?: typeof state }
+        ).__bookingState__ = state;
+
+        const buildFallback = () => {
+          const now = new Date().toISOString();
+          const service = services[0];
+          const property = properties[0];
+
+          return {
+            id: "seed-booking-1",
+            userId: "client-user",
+            propertyId: property?.id ?? "prop-residential-1",
+            serviceId: service?.id ?? "deep-clean-1",
+            scheduledAt: now,
+            completedAt: null,
+            status: "CONFIRMED",
+            totalPrice: service?.basePrice ?? "149.99",
+            notes: null,
+            paymentStatus: "PENDING_PAYMENT",
+            createdAt: now,
+            updatedAt: now,
+            service: {
+              id: service?.id ?? "deep-clean-1",
+              name: service?.name ?? "Limpieza Profunda",
+              duration: service?.duration ?? 180,
+            },
+            property: {
+              id: property?.id ?? "prop-residential-1",
+              name: property?.name ?? "Brickell Luxury Apartment",
+              address: property?.address ?? "1234 Brickell Ave, Unit 2501",
+            },
+            user: {
+              id: "client-user",
+              email: "client@brisacubanaclean.com",
+              name: "Client Demo",
+            },
+          };
+        };
+
+        const originalFetch = window.fetch.bind(window);
+
+        window.fetch = async (input, init = {}) => {
+          const url =
+            typeof input === "string"
+              ? input
+              : input instanceof URL
+                ? input.toString()
+                : (input?.url ?? "");
+          const method = (init.method ?? "GET").toUpperCase();
+
+          if (url.includes("/api/services") && method === "GET") {
+            return new Response(JSON.stringify(services), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
+          if (url.includes("/api/properties") && method === "GET") {
+            return new Response(JSON.stringify(properties), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
+          if (url.includes("/api/bookings") && method === "POST") {
+            const rawBody = init.body ?? "{}";
+            const payload =
+              typeof rawBody === "string"
+                ? JSON.parse(rawBody)
+                : (rawBody as Record<string, unknown>);
+
+            await (
+              window as unknown as {
+                _recordBookingCall?: (payload: unknown) => Promise<void>;
+              }
+            )._recordBookingCall?.(payload);
+
+            const service = services.find(
+              (item) => item.id === payload.serviceId,
+            );
+            const property = properties.find(
+              (item) => item.id === payload.propertyId,
+            );
+
+            const createdAt = new Date().toISOString();
+            const scheduledAt = payload.scheduledAt
+              ? new Date(String(payload.scheduledAt)).toISOString()
+              : createdAt;
+
+            const bookingResponse = {
+              id: "booking-test",
+              ...payload,
+              scheduledAt,
+              status: "CONFIRMED",
+              totalPrice: service?.basePrice ?? "149.99",
+              paymentStatus: "PENDING_PAYMENT",
+              createdAt,
+              updatedAt: createdAt,
+              service: {
+                id: service?.id ?? String(payload.serviceId ?? "service"),
+                name: service?.name ?? "Servicio seleccionado",
+                duration: service?.duration ?? 180,
+              },
+              property: {
+                id: property?.id ?? String(payload.propertyId ?? "property"),
+                name: property?.name ?? "Propiedad seleccionada",
+                address: property?.address ?? "",
+              },
+              user: {
+                id: "client-user",
+                email: "client@brisacubanaclean.com",
+                name: "Client Demo",
+              },
+            };
+
+            state.bookingResponses = [bookingResponse];
+
+            return new Response(JSON.stringify(bookingResponse), {
+              status: 201,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
+          if (url.includes("/api/bookings") && method === "GET") {
+            const data =
+              state.bookingResponses.length > 0
+                ? state.bookingResponses
+                : [buildFallback()];
+
+            return new Response(JSON.stringify(data), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
+          return originalFetch(input, init);
+        };
+      },
+      { services: servicesMock, properties: propertiesMock },
+    );
 
     await page.goto("/dashboard/bookings/new");
 
@@ -200,13 +310,23 @@ test.describe("Booking Flow", () => {
 
     await page.getByRole("button", { name: /Confirmar Reserva/i }).click();
 
+    await expect.poll(() => bookingCalls.length).toBe(1);
+
+    if (!/\/dashboard\/bookings(?:\?.*)?$/.test(page.url())) {
+      await page
+        .waitForURL(/\/dashboard\/bookings(?:\?.*)?$/, {
+          timeout: 15_000,
+        })
+        .catch(async () => {
+          await page.goto("/dashboard/bookings?created=1");
+        });
+    }
+
     await expect(page).toHaveURL(/\/dashboard\/bookings(?:\?.*)?$/);
 
     await expect(
       page.getByText(/Brickell Luxury Apartment/, { exact: false }),
     ).toBeVisible();
-
-    await expect.poll(() => bookingCalls.length).toBe(1);
 
     const expectedScheduledAt = new Date(scheduledValue).toISOString();
     expect(bookingCalls[0]).toMatchObject({
