@@ -5,6 +5,7 @@ import { generateAccessToken } from "../lib/token";
 const bookingMock = {
   findUnique: vi.fn(),
   update: vi.fn(),
+  findFirst: vi.fn(),
 };
 
 const stripeEnabledMock = vi.fn();
@@ -53,6 +54,7 @@ describe("payments route", () => {
         constructEvent: vi.fn(),
       },
     });
+    process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
   });
 
   it("rejects checkout when Stripe está deshabilitado", async () => {
@@ -150,5 +152,124 @@ describe("payments route", () => {
     expect(stripeSessionCreateMock).toHaveBeenCalled();
     const json = (await response.json()) as { checkoutUrl?: string | null };
     expect(json.checkoutUrl).toBe("https://checkout.stripe.com/session/test");
+  });
+
+  it("marca la reserva como pagada cuando el webhook checkout.session.completed llega", async () => {
+    const app = buildApp();
+    stripeEnabledMock.mockReturnValue(true);
+    const constructEvent = vi.fn().mockReturnValue({
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_test_123",
+          payment_intent: "pi_123",
+          metadata: {
+            bookingId: "booking-1",
+          },
+        },
+      },
+    });
+    getStripeMock.mockReturnValue({
+      checkout: { sessions: { create: stripeSessionCreateMock } },
+      webhooks: { constructEvent },
+    });
+
+    bookingMock.update.mockResolvedValueOnce(undefined);
+
+    const response = await app.request("/api/payments/webhook", {
+      method: "POST",
+      headers: {
+        "stripe-signature": "sig_test",
+        "content-type": "application/json",
+      },
+      body: "{}",
+    });
+
+    expect(response.status).toBe(200);
+    expect(constructEvent).toHaveBeenCalled();
+    expect(bookingMock.update).toHaveBeenCalledWith({
+      where: { id: "booking-1" },
+      data: expect.objectContaining({
+        paymentStatus: "PAID",
+        status: "CONFIRMED",
+        paymentIntentId: "pi_123",
+        checkoutSessionId: "cs_test_123",
+      }),
+    });
+  });
+
+  it("marca la reserva como fallida cuando checkout.session.expired llega", async () => {
+    const app = buildApp();
+    stripeEnabledMock.mockReturnValue(true);
+    const constructEvent = vi.fn().mockReturnValue({
+      type: "checkout.session.expired",
+      data: {
+        object: {
+          id: "cs_expired",
+          metadata: {
+            bookingId: "booking-2",
+          },
+        },
+      },
+    });
+    getStripeMock.mockReturnValue({
+      checkout: { sessions: { create: stripeSessionCreateMock } },
+      webhooks: { constructEvent },
+    });
+
+    bookingMock.update.mockResolvedValueOnce(undefined);
+
+    const response = await app.request("/api/payments/webhook", {
+      method: "POST",
+      headers: {
+        "stripe-signature": "sig_test",
+        "content-type": "application/json",
+      },
+      body: "{}",
+    });
+
+    expect(response.status).toBe(200);
+    expect(bookingMock.update).toHaveBeenCalledWith({
+      where: { id: "booking-2" },
+      data: { paymentStatus: "FAILED" },
+    });
+  });
+
+  it("usa paymentIntentId para marcar fallas de pago", async () => {
+    const app = buildApp();
+    stripeEnabledMock.mockReturnValue(true);
+    const constructEvent = vi.fn().mockReturnValue({
+      type: "payment_intent.payment_failed",
+      data: {
+        object: {
+          id: "pi_fail",
+        },
+      },
+    });
+    getStripeMock.mockReturnValue({
+      checkout: { sessions: { create: stripeSessionCreateMock } },
+      webhooks: { constructEvent },
+    });
+
+    bookingMock.findFirst.mockResolvedValueOnce({ id: "booking-3" });
+    bookingMock.update.mockResolvedValueOnce(undefined);
+
+    const response = await app.request("/api/payments/webhook", {
+      method: "POST",
+      headers: {
+        "stripe-signature": "sig_test",
+        "content-type": "application/json",
+      },
+      body: "{}",
+    });
+
+    expect(response.status).toBe(200);
+    expect(bookingMock.findFirst).toHaveBeenCalledWith({
+      where: { paymentIntentId: "pi_fail" },
+    });
+    expect(bookingMock.update).toHaveBeenCalledWith({
+      where: { id: "booking-3" },
+      data: { paymentStatus: "FAILED" },
+    });
   });
 });
