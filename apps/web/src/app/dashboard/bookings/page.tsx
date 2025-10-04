@@ -1,9 +1,20 @@
 import { redirect } from "next/navigation";
 import { Badge, Button, Card, Section } from "@brisa/ui";
 import { auth } from "@/server/auth/config";
-import { Calendar, MapPin, DollarSign, Plus } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Plus, CheckCircle2 } from "lucide-react";
 import type { Booking } from "@/types/api";
 import { isFakeDataEnabled } from "@/server/utils/fake";
+
+interface BookingsPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function resolveCreatedFlag(value: string | string[] | undefined): boolean {
+  if (Array.isArray(value)) {
+    return value.includes("1");
+  }
+  return value === "1";
+}
 
 async function getBookings(accessToken: string): Promise<Booking[]> {
   if (isFakeDataEnabled()) {
@@ -115,7 +126,12 @@ const datetimeFormatter = new Intl.DateTimeFormat("es-US", {
   timeStyle: "short",
 });
 
-export default async function BookingsPage() {
+export default async function BookingsPage({
+  searchParams,
+}: BookingsPageProps) {
+  const params = (await searchParams) ?? {};
+  const showCreatedToast = resolveCreatedFlag(params.created);
+
   const session = await auth();
 
   if (!session?.user || !session.user.accessToken) {
@@ -152,6 +168,21 @@ export default async function BookingsPage() {
           Nueva Reserva
         </Button>
       </div>
+
+      {showCreatedToast ? (
+        <div className="flex items-center gap-3 rounded-lg border border-teal-400/40 bg-teal-500/10 p-4 text-sm text-teal-50">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-teal-500/30">
+            <CheckCircle2 className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="font-semibold text-teal-100">¡Reserva creada!</p>
+            <p className="text-teal-200/80">
+              El resumen se actualizó con la nueva reserva. Puedes revisar los
+              detalles o crear otra cuando quieras.
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       {hasBookings ? (
         <>

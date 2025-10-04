@@ -1,8 +1,6 @@
 import { test, expect } from "@playwright/test";
-import type { APIRequestContext, Page, Cookie } from "@playwright/test";
-
-const API_BASE = process.env.PLAYWRIGHT_API_URL ?? "http://127.0.0.1:3001";
-const WEB_BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
+import type { APIRequestContext } from "@playwright/test";
+import { API_BASE, establishSession, WEB_BASE } from "./fixtures/session";
 const ADMIN_EMAIL = "admin@brisacubanaclean.com";
 const ADMIN_PASSWORD = "Admin123!";
 
@@ -69,79 +67,6 @@ async function ensureDraftReport(request: APIRequestContext) {
   return bookingId;
 }
 
-async function establishSession(page: Page, request: APIRequestContext) {
-  const csrfResponse = await request.get(`${WEB_BASE}/api/auth/csrf`);
-  expect(csrfResponse.ok()).toBeTruthy();
-  const { csrfToken } = (await csrfResponse.json()) as { csrfToken: string };
-  expect(csrfToken).toBeTruthy();
-
-  const callbackResponse = await request.fetch(
-    `${WEB_BASE}/api/auth/callback/credentials?json=true`,
-    {
-      method: "POST",
-      maxRedirects: 0,
-      form: {
-        csrfToken,
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
-        callbackUrl: `${WEB_BASE}/dashboard`,
-      },
-    },
-  );
-
-  expect([200, 302]).toContain(callbackResponse.status());
-
-  const cookieHeaders = callbackResponse
-    .headersArray()
-    .filter((header) => header.name.toLowerCase() === "set-cookie");
-
-  expect(cookieHeaders.length).toBeGreaterThan(0);
-
-  const { hostname } = new URL(WEB_BASE);
-
-  const cookies: Cookie[] = cookieHeaders.map((header) => {
-    const [cookiePair, ...attributePairs] = header.value.split(";");
-    const [cookieName, ...cookieValueParts] = cookiePair.split("=");
-    const cookieValue = cookieValueParts.join("=");
-    const cookie: Cookie = {
-      name: cookieName.trim(),
-      value: cookieValue.trim(),
-      domain: hostname,
-      path: "/",
-    };
-
-    for (const attribute of attributePairs) {
-      const [rawKey, rawValue] = attribute.trim().split("=");
-      const key = rawKey?.toLowerCase();
-      if (!key) continue;
-      switch (key) {
-        case "httponly":
-          cookie.httpOnly = true;
-          break;
-        case "secure":
-          cookie.secure = true;
-          break;
-        case "samesite":
-          cookie.sameSite = (rawValue ?? "Lax") as "Strict" | "Lax" | "None";
-          break;
-        case "expires":
-          cookie.expires = Math.round(
-            new Date(rawValue ?? "").getTime() / 1000,
-          );
-          break;
-        case "max-age":
-          cookie.expires =
-            Math.round(Date.now() / 1000) + Number(rawValue ?? "0");
-          break;
-      }
-    }
-
-    return cookie;
-  });
-
-  await page.context().addCookies(cookies);
-}
-
 test.describe("CleanScore dashboard", () => {
   test("allows filtering and publishing CleanScore reports", async ({
     page,
@@ -149,7 +74,10 @@ test.describe("CleanScore dashboard", () => {
   }) => {
     const bookingId = await ensureDraftReport(request);
 
-    await establishSession(page, request);
+    await establishSession(page, request, {
+      email: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+    });
 
     await page.goto("/dashboard/reports/cleanscore");
 

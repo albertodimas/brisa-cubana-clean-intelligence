@@ -98,6 +98,25 @@ run_tests() {
     fi
 }
 
+run_e2e_tests() {
+    if [[ "${SKIP_E2E}" =~ ^(1|true|TRUE)$ ]]; then
+        print_warning "Skipping end-to-end tests because SKIP_E2E=${SKIP_E2E}"
+        return 0
+    fi
+
+    print_status "Running end-to-end tests..."
+
+    if pnpm test:e2e > /tmp/e2e-output.log 2>&1; then
+        print_success "E2E suite passed"
+        return 0
+    else
+        print_error "E2E suite failed. See details below:"
+        cat /tmp/e2e-output.log
+        print_warning "You can bypass temporarily with 'SKIP_E2E=1 ./scripts/pre-push-check.sh'"
+        return 1
+    fi
+}
+
 # Function to check if there are uncommitted changes
 check_uncommitted_changes() {
     print_status "Checking for uncommitted changes..."
@@ -156,6 +175,7 @@ main() {
     run_lint || FAILED=1
     run_typecheck || FAILED=1
     run_tests || FAILED=1
+    run_e2e_tests || FAILED=1
 
     echo ""
     echo "╔════════════════════════════════════════════════════════════╗"

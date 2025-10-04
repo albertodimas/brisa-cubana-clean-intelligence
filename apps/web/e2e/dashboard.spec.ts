@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { establishSession } from "./fixtures/session";
 
 /**
  * E2E tests for dashboard functionality
@@ -11,16 +12,13 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Dashboard", () => {
   // Login before each test
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/auth/signin");
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/contraseñ?a/i);
+  test.beforeEach(async ({ page, request }) => {
+    await establishSession(page, request, {
+      email: "admin@brisacubanaclean.com",
+      password: "Admin123!",
+    });
 
-    await emailInput.fill("admin@brisacubanaclean.com");
-    await passwordInput.fill("Admin123!");
-    await expect(emailInput).toHaveValue("admin@brisacubanaclean.com");
-    await expect(passwordInput).toHaveValue("Admin123!");
-    await page.getByRole("button", { name: /entrar/i }).click();
+    await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
   });
 

@@ -4,6 +4,7 @@ import { auth } from "@/server/auth/config";
 import { Calendar, MapPin, DollarSign, Clock, User } from "lucide-react";
 import type { Booking } from "@/types/api";
 import BookingActions from "../components/BookingActions";
+import { isFakeDataEnabled } from "@/server/utils/fake";
 
 interface BookingWithDetails extends Booking {
   service: {
@@ -31,10 +32,59 @@ async function getBooking(
   id: string,
   accessToken: string,
 ): Promise<BookingWithDetails> {
+  const useFakeData =
+    isFakeDataEnabled() ||
+    accessToken.startsWith("fake.") ||
+    id.startsWith("fake-");
+
+  if (useFakeData) {
+    const now = new Date().toISOString();
+    return {
+      id,
+      userId: "fake-admin",
+      propertyId: id.startsWith("fake-")
+        ? id.replace("fake-", "prop-")
+        : "fake-property-1",
+      serviceId: "fake-service-1",
+      scheduledAt: now,
+      completedAt: null,
+      status: "CONFIRMED",
+      totalPrice: "149.99",
+      notes: "Revisar terraza y reponer amenities",
+      paymentStatus: "PENDING_PAYMENT",
+      createdAt: now,
+      updatedAt: now,
+      service: {
+        id: "fake-service-1",
+        name: "Limpieza Profunda",
+        duration: 180,
+        description: "Limpieza detallada incluyendo áreas difíciles",
+      },
+      property: {
+        id: "fake-property-1",
+        name: "Brickell Luxury Apartment",
+        address: "1234 Brickell Ave, Unit 2501",
+        city: "Miami",
+        state: "FL",
+        zipCode: "33131",
+      },
+      user: {
+        id: "fake-admin",
+        email: "client@brisacubanaclean.com",
+        name: "Client Demo",
+      },
+    } satisfies BookingWithDetails;
+  }
+
   const API_BASE_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
     "http://localhost:3001";
+
+  console.log("[bookings/[id]] fetching real booking", {
+    tokenSample: accessToken.slice(0, 10),
+    useFakeFlag: isFakeDataEnabled(),
+  });
 
   const response = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
     headers: {

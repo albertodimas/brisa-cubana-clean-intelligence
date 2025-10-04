@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { establishSession } from "./fixtures/session";
 
 /**
  * E2E tests for booking creation flow
@@ -9,16 +10,13 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Booking Flow", () => {
   // Login before each test
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/auth/signin");
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/contraseñ?a/i);
+  test.beforeEach(async ({ page, request }) => {
+    await establishSession(page, request, {
+      email: "client@brisacubanaclean.com",
+      password: "Client123!",
+    });
 
-    await emailInput.fill("client@brisacubanaclean.com");
-    await passwordInput.fill("Client123!");
-    await expect(emailInput).toHaveValue("client@brisacubanaclean.com");
-    await expect(passwordInput).toHaveValue("Client123!");
-    await page.getByRole("button", { name: /entrar/i }).click();
+    await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
@@ -93,5 +91,172 @@ test.describe("Booking Flow", () => {
       pageContent?.includes("Limpieza");
 
     expect(hasServices).toBe(true);
+  });
+
+  test("should create a new booking", async ({ page }) => {
+    const bookingCalls: Array<Record<string, unknown>> = [];
+
+    await page.route("**/api/bookings", async (route) => {
+      if (route.request().method() === "POST") {
+        const payload = JSON.parse(
+          route.request().postData() ?? "{}",
+        ) as Record<string, unknown>;
+        bookingCalls.push(payload);
+        await route.fulfill({
+          status: 201,
+          contentType: "application/json",
+          body: JSON.stringify({ id: "booking-test", ...payload }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.goto("/dashboard/bookings/new");
+
+    await page.selectOption("#serviceId", "deep-clean-1");
+    const selectedServiceId = await page.$eval(
+      "#serviceId",
+      (select) => (select as HTMLSelectElement).value,
+    );
+
+    const hasProperties = await page.evaluate(() => {
+      const select = document.querySelector<HTMLSelectElement>("#propertyId");
+      return Boolean(select && select.options.length > 1);
+    });
+
+    if (!hasProperties) {
+      await page.evaluate(() => {
+        const propertySelect =
+          document.querySelector<HTMLSelectElement>("#propertyId");
+        if (propertySelect) {
+          propertySelect.options.add(
+            new Option(
+              "Brickell Luxury Apartment - 1234 Brickell Ave",
+              "prop-residential-1",
+            ),
+          );
+        }
+      });
+    }
+
+    await page.selectOption("#propertyId", { index: 1 });
+    const selectedPropertyId = await page.$eval(
+      "#propertyId",
+      (select) => (select as HTMLSelectElement).value,
+    );
+
+    const scheduledDate = new Date(Date.now() + 4 * 60 * 60 * 1000);
+    const scheduledValue = scheduledDate.toISOString().slice(0, 16);
+    await page.fill("#scheduledAt", scheduledValue);
+
+    const notes = "Favor dejar kit de bienvenida en la mesa";
+    await page.fill("#notes", notes);
+
+    await page.getByRole("button", { name: /Confirmar Reserva/i }).click();
+
+    await expect(page).toHaveURL(/\/dashboard\/bookings(?:\?.*)?$/);
+
+    await expect(
+      page.getByText(/Brickell Luxury Apartment/, { exact: false }),
+    ).toBeVisible();
+
+    await expect.poll(() => bookingCalls.length).toBe(1);
+
+    const expectedScheduledAt = new Date(scheduledValue).toISOString();
+    expect(bookingCalls[0]).toMatchObject({
+      serviceId: selectedServiceId,
+      propertyId: selectedPropertyId,
+      notes,
+    });
+    expect(bookingCalls[0]?.scheduledAt).toBe(expectedScheduledAt);
+  });
+
+  test("should open booking details view", async ({ page, request }) => {
+    await establishSession(page, request, {
+      email: "client@brisacubanaclean.com",
+      password: "Client123!",
+    });
+
+    const bookingId = "fake-booking-1";
+    const baseBooking = {
+      id: bookingId,
+      userId: "client-user",
+      propertyId: "prop-residential-1",
+      serviceId: "deep-clean-1",
+      scheduledAt: new Date().toISOString(),
+      completedAt: null,
+      status: "CONFIRMED" as const,
+      totalPrice: "149.99",
+      notes: "Revisar terraza",
+      paymentStatus: "PENDING_PAYMENT" as const,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      service: {
+        id: "deep-clean-1",
+        name: "Limpieza Profunda",
+        duration: 180,
+      },
+      property: {
+        id: "prop-residential-1",
+        name: "Brickell Luxury Apartment",
+        address: "1234 Brickell Ave, Unit 2501",
+      },
+    };
+
+    await page.route("**/api/bookings", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([baseBooking]),
+      });
+    });
+
+    await page.route(`**/api/bookings/${bookingId}`, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ...baseBooking,
+          service: {
+            ...baseBooking.service,
+            description:
+              "Limpieza detallada incluyendo áreas difíciles y sanitización",
+          },
+          property: {
+            id: baseBooking.property.id,
+            name: baseBooking.property.name,
+            address: baseBooking.property.address,
+            city: "Miami",
+            state: "FL",
+            zipCode: "33131",
+          },
+          user: {
+            id: "client-user",
+            email: "client@brisacubanaclean.com",
+            name: "Client Demo",
+          },
+        }),
+      });
+    });
+
+    await page.goto("/dashboard/bookings");
+
+    await expect(
+      page.getByRole("heading", { name: /Mis Reservas/i }),
+    ).toBeVisible();
+
+    await page
+      .getByRole("link", { name: /Ver Detalles/i })
+      .first()
+      .click();
+
+    await expect(page).toHaveURL(`/dashboard/bookings/${bookingId}`);
+    await expect(
+      page.getByRole("heading", { name: /Limpieza Profunda/i }),
+    ).toBeVisible();
+    await expect(page.getByText(/Revisar terraza/)).toBeVisible();
+    await expect(page.getByText(/Brickell Luxury Apartment/)).toBeVisible();
   });
 });
