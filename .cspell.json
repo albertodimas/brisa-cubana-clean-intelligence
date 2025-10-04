@@ -330,6 +330,8 @@
     "menciónalo",
     "desincronizado",
     "monitoreado",
-    "monitoreados"
+    "monitoreados",
+    "cname",
+    "nslookup"
   ]
 }
