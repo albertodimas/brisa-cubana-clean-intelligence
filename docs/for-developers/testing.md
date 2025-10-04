@@ -341,6 +341,12 @@ pnpm exec playwright show-report
 
 Los tests que requieren usuarios con roles presembrados reutilizan el helper `establishSession` definido en `apps/web/e2e/fixtures/session.ts`. Este helper hace login contra `/api/auth/callback/credentials`, replica las cookies emitidas por NextAuth y las agrega al contexto de Playwright, evitando dependencias frágiles con el formulario de inicio de sesión.
 
+### Mocks de red y datos deterministas
+
+- Los specs `apps/web/e2e/booking-flow.spec.ts` y `apps/web/e2e/cleanscore-dashboard.spec.ts` reemplazan `window.fetch` al inicio de cada test para responder con fixtures controladas.
+- Las capturas de payload (`bookingCalls`, `patchCalls`) se exponen mediante `page.exposeBinding`, permitiendo aserciones sin depender de servicios externos.
+- Este enfoque garantiza que los flujos críticos funcionen igual en local y en CI aun sin backend disponible.
+
 ### Estructura de un Test E2E
 
 [apps/web/e2e/home.spec.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/web/e2e/home.spec.ts):
@@ -497,6 +503,12 @@ test("should create booking", async ({ page }) => {
   await expect(page).toHaveURL(/\/dashboard\/bookings\/[a-z0-9-]+/);
 });
 ```
+
+### Evidencias y reportes
+
+- `pnpm exec playwright test` genera un reporte HTML navegable en `playwright-report/index.html`.
+- Los videos y capturas de fallos se guardan en `test-results/**/video.webm` y `test-results/**/test-failed-*.png`.
+- En CI, el job **E2E** publica el reporte HTML como artefacto y el job **Security Summary** adjunta `security-report.md` con el estado de los escaneos.
 
 ---
 
