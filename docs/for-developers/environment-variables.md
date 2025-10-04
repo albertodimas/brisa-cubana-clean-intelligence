@@ -112,6 +112,26 @@ VERCEL_PROJECT_ID=...
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
 ```
 
+## Testing / CI Flags
+
+Variables útiles para ejecutar los pipelines locales y remotos:
+
+```bash
+# Omitir suite E2E en el script pre-push
+SKIP_E2E=1
+
+# Base URL alternativa para Playwright (staging o review apps)
+PLAYWRIGHT_BASE_URL=https://preview.brisacubana.com
+
+# Forzar uso de datos fake en backends locales
+NEXT_PUBLIC_USE_FAKE_API_DATA=1
+
+# URL del API fake en pipelines
+PLAYWRIGHT_API_URL=http://127.0.0.1:3001
+```
+
+> Ajusta estas banderas solo en entornos de testing o CI. Los despliegues a producción deben ejecutarse sin `SKIP_E2E` y apuntando a los servicios reales.
+
 ## Security Notes
 
 ### Critical Variables
