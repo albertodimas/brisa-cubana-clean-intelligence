@@ -65,6 +65,9 @@ nav:
           - Go-Live: operations/runbooks/GO_LIVE.md
           - Rollback: operations/runbooks/ROLLBACK.md
           - Incident Response: operations/runbooks/INCIDENT_RESPONSE.md
+      - Reportes:
+          - GitHub Status Report: operations/GITHUB_STATUS_REPORT.md
+          - Documentation Improvements 2025-10-04: operations/DOCUMENTATION_IMPROVEMENTS_2025-10-04.md
 
   - Negocio y operaciones:
       - Panorama general: for-business/README.md

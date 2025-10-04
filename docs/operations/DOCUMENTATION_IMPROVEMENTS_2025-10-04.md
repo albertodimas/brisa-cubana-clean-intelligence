@@ -112,11 +112,11 @@ Se implementaron **mejoras significativas** al sistema de documentación del pro
 
 **Badges añadidos:**
 
-1. [![Docs](badge)](gh-pages) - Estado de deploy de docs
-2. [![PRs Welcome](badge)](CONTRIBUTING.md) - Invitación a contribuir
-3. [![Last commit](badge)](commits) - Actividad del repo
-4. [![Issues](badge)](issues) - Issues abiertas
-5. [![Stars](badge)](stargazers) - GitHub stars
+1. **Docs** - Estado de deploy de docs (GitHub Pages)
+2. **PRs Welcome** - Invitación a contribuir (ver [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md))
+3. **Last commit** - Actividad del repo
+4. **Issues** - Issues abiertas
+5. **Stars** - GitHub stars
 
 **Badges existentes (mantenidos):**
 

@@ -65,7 +65,7 @@ Para que funcione en GitHub Actions:
 
 ### 5. Actualizar Workflow de Deployment
 
-Edita [.github/workflows/docs-deploy.yml](../../.github/workflows/docs-deploy.yml):
+Edita `.github/workflows/docs-deploy.yml` ([ver en GitHub](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/docs-deploy.yml)):
 
 ```yaml
 - name: Build documentation
