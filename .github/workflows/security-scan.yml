@@ -330,7 +330,8 @@ jobs:
   security-summary:
     name: Security Summary
     runs-on: ubuntu-latest
-    needs: [secret-detection, dependency-scan, container-scan, sign-images, policy-check, codeql]
+    # Don't depend on sign-images since it only runs on main branch
+    needs: [secret-detection, dependency-scan, container-scan, policy-check, codeql]
     if: always()
     steps:
       - name: Generate security report

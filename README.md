@@ -3,11 +3,16 @@
 **Sistema operativo para operaciones de limpieza premium en Miami-Dade.**
 
 [![CI Status](https://github.com/albertodimas/brisa-cubana-clean-intelligence/workflows/CI/badge.svg)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions)
+[![Docs](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/docs-deploy.yml/badge.svg)](https://albertodimas.github.io/brisa-cubana-clean-intelligence/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)](https://nextjs.org/)
 [![Hono](https://img.shields.io/badge/Hono-4.9.9-orange)](https://hono.dev/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.16.2-2D3748)](https://www.prisma.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![GitHub last commit](https://img.shields.io/github/last-commit/albertodimas/brisa-cubana-clean-intelligence)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/commits/main)
+[![GitHub issues](https://img.shields.io/github/issues/albertodimas/brisa-cubana-clean-intelligence)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues)
+[![GitHub stars](https://img.shields.io/github/stars/albertodimas/brisa-cubana-clean-intelligence?style=social)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/stargazers)
 
 Brisa Cubana Clean Intelligence centraliza la experiencia del cliente, las operaciones en campo, la facturación y el control de calidad en un único monorepo. La solución combina un frontend moderno en Next.js, una API REST con Hono y un data layer Prisma/PostgreSQL, con capacidades de automatización e IA en evolución.
 
@@ -43,7 +48,7 @@ Brisa Cubana Clean Intelligence centraliza la experiencia del cliente, las opera
 - `apps/web`: Next.js 15.5.4 (App Router), React 19, Tailwind CSS 4.1.13, Auth.js v5.
 - `apps/api`: Hono 4.9.9 sobre Node.js 24.9.0, Prisma 6.16.2 y validaciones Zod.
 - `packages/ui`: Design system compartido utilizado por la web.
-- `docs`: Base de conocimiento en MkDocs con 111 documentos.
+- `docs`: Base de conocimiento en MkDocs con 120 documentos.
 - Tooling: pnpm 10.17.1, Turborepo 2.5.8, Vitest 3.2.4, Playwright 1.55.1, GitHub Actions.
 
 La arquitectura detallada, principios de diseño y diagramas están disponibles en `docs/for-developers/architecture.md` y `docs/for-developers/diagrams/`.

@@ -57,7 +57,7 @@ Servicios locales relevantes:
 
 | Dato                 | Valor                   |
 | -------------------- | ----------------------- |
-| Archivos Markdown    | 111 (2025-10-03)        |
+| Archivos Markdown    | 120 (2025-10-04)        |
 | Stack                | MkDocs 1.6.1 + Material |
 | Búsqueda             | Integrada (lunr + ES)   |
 | Modo oscuro          | Disponible              |

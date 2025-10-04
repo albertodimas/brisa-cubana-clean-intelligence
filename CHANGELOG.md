@@ -1,9 +1,16 @@
 # Changelog
 
+> **📝 Nota:** Este es el changelog oficial de **releases públicos** con versionado semántico. Para logs detallados de sesiones de desarrollo, ver [`docs/changelog/`](docs/changelog/index.md).
+
 Todos los cambios notables del proyecto serán documentados en este archivo.
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Diferencia con Development Session Logs
+
+- **CHANGELOG.md** (este archivo): Releases públicos versionados (v0.1.0, v0.2.0, etc.)
+- **docs/changelog/session-\*.md**: Registros detallados de sesiones de desarrollo internas
 
 ## [Unreleased]
 

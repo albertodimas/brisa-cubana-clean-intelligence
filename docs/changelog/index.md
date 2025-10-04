@@ -1,4 +1,15 @@
-# Changelog
+# Development Session Logs
+
+**Nota:** Este directorio contiene registros detallados de sesiones de desarrollo internas. Para el **Changelog oficial de releases públicos**, ver [CHANGELOG.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CHANGELOG.md) en el root del repositorio.
+
+## Diferencia entre estos logs y CHANGELOG.md
+
+| Archivo                          | Propósito                      | Audiencia                            | Formato                                         |
+| -------------------------------- | ------------------------------ | ------------------------------------ | ----------------------------------------------- |
+| **CHANGELOG.md** (root)          | Releases públicos con semver   | Usuarios, contribuidores externos    | [Keep a Changelog](https://keepachangelog.com/) |
+| **docs/changelog/session-\*.md** | Logs de sesiones de desarrollo | Equipo interno, referencia histórica | Narrativo, detallado                            |
+
+## Registros de Sesiones de Desarrollo
 
 ## 2025-09-28
 
