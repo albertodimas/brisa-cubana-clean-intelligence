@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach, vi } from "vitest";
 import { Hono } from "hono";
 import concierge from "./concierge";
 import { clearRateLimitStore } from "../middleware/rate-limit";
+import { resetConciergeMetrics } from "../services/concierge-metrics";
 
 const mockMessages: Array<Record<string, unknown>> = [];
 const mockConversation = {
@@ -136,6 +137,7 @@ describe("Concierge routes", () => {
     mockMessages.splice(0, mockMessages.length);
     vi.clearAllMocks();
     clearRateLimitStore();
+    resetConciergeMetrics();
   });
 
   it("creates a conversation with an initial message", async () => {
@@ -193,5 +195,47 @@ describe("Concierge routes", () => {
       messages: Array<Record<string, unknown>>;
     };
     expect(payload.messages.length).toBeGreaterThan(0);
+  });
+
+  it("exposes status flags and aggregates metrics", async () => {
+    process.env.CONCIERGE_MODE = "llm";
+    process.env.AI_PROVIDER = "anthropic";
+    process.env.ENABLE_AI_CONCIERGE = "true";
+
+    const app = new Hono();
+    app.route("/api/concierge", concierge);
+
+    const statusResponse = await app.request(
+      new Request("http://localhost/api/concierge/status"),
+    );
+    expect(statusResponse.status).toBe(200);
+    const statusPayload = (await statusResponse.json()) as {
+      mode: string;
+      provider: string;
+    };
+    expect(statusPayload.mode).toBe("llm");
+    expect(statusPayload.provider).toBe("anthropic");
+
+    await app.request(
+      new Request("http://localhost/api/concierge/conversations", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          initialMessage: "¿Cuál es mi próximo servicio?",
+        }),
+      }),
+    );
+
+    const metricsResponse = await app.request(
+      new Request("http://localhost/api/concierge/metrics"),
+    );
+    expect(metricsResponse.status).toBe(200);
+    const metricsPayload = (await metricsResponse.json()) as {
+      conversations: number;
+      messages: { total: number };
+    };
+
+    expect(metricsPayload.conversations).toBeGreaterThanOrEqual(1);
+    expect(metricsPayload.messages.total).toBeGreaterThanOrEqual(2);
   });
 });

@@ -55,3 +55,13 @@ export function getConciergeSnapshot() {
     tokensGenerated,
   };
 }
+
+export function resetConciergeMetrics() {
+  conversationCount = 0;
+  userMessages = 0;
+  aiMessages = 0;
+  tokensGenerated = 0;
+  conciergeConversationsTotal.reset();
+  conciergeMessagesTotal.reset();
+  conciergeTokensTotal.reset();
+}
