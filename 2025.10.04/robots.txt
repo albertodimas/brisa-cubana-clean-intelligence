@@ -1,0 +1,14 @@
+# robots.txt para Brisa Cubana Clean Intelligence Docs
+# Generado automáticamente - 2025-10-04
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://albertodimas.github.io/brisa-cubana-clean-intelligence/sitemap.xml
+
+# Crawl delay (opcional, previene sobrecarga)
+Crawl-delay: 1
+
+# Disallow specific paths (si hay alguno)
+# Disallow: /private/
