@@ -5,6 +5,22 @@ import { Button } from "@brisa/ui";
 import { ChecklistSection } from "./checklist-section";
 import { PhotoCapture } from "./photo-capture";
 
+const configuredApiBase = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+function resolveApiBase(): string {
+  if (configuredApiBase) {
+    return configuredApiBase;
+  }
+
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  throw new Error(
+    "NEXT_PUBLIC_API_URL is not configured for staff active service actions",
+  );
+}
+
 interface ActiveServiceProps {
   booking: {
     id: string;
@@ -64,8 +80,7 @@ export function ActiveService({
 
   async function handleStart() {
     try {
-      const apiBase =
-        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const apiBase = resolveApiBase();
       const response = await fetch(`${apiBase}/api/bookings/${booking.id}`, {
         method: "PATCH",
         headers: {
@@ -104,8 +119,7 @@ export function ActiveService({
 
     try {
       setCompleting(true);
-      const apiBase =
-        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const apiBase = resolveApiBase();
       const response = await fetch(`${apiBase}/api/bookings/${booking.id}`, {
         method: "PATCH",
         headers: {
@@ -119,8 +133,38 @@ export function ActiveService({
         throw new Error("Failed to complete booking");
       }
 
-      // TODO: Upload photos to storage
-      // TODO: Generate CleanScore report
+      const checklistPayload = tasks.map((task) => ({
+        area: task.label,
+        status: task.completed ? "PASS" : "FAIL",
+      }));
+
+      const reportResponse = await fetch(`${apiBase}/api/reports/cleanscore`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          images: photos,
+          checklist: checklistPayload,
+          notes: booking.notes ?? undefined,
+        }),
+      });
+
+      if (!reportResponse.ok) {
+        throw new Error("Failed to generate CleanScore report");
+      }
+
+      const reportJson = (await reportResponse.json()) as {
+        success?: boolean;
+        message?: string;
+        status?: string;
+      };
+
+      if (reportJson.success && reportJson.message) {
+        alert(reportJson.message);
+      }
 
       onComplete();
     } catch (error) {

@@ -4,10 +4,23 @@ import { getAuthUser, requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 import { generateAIResponse } from "../services/ai";
 import { logger } from "../lib/logger";
+import { resendEnabled } from "../lib/resend";
 import { z } from "zod";
+import {
+  getConciergeSnapshot,
+  recordConversationCreated,
+  recordMessage,
+} from "../services/concierge-metrics";
+import { sendConciergeEmail } from "../services/notifications";
 import { ValidationError, NotFoundError, ForbiddenError } from "../lib/errors";
 
 const concierge = new Hono();
+
+function envFlag(value?: string | null): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "on";
+}
 
 // Apply rate limiting - more restrictive for AI endpoints
 concierge.use("/*", rateLimiter(RateLimits.write));
@@ -25,6 +38,35 @@ const sendMessageSchema = z.object({
   content: z.string().min(1).max(2000),
 });
 
+concierge.get("/status", requireAuth(), (c) => {
+  const mode = (
+    process.env.CONCIERGE_MODE ??
+    (envFlag(process.env.ENABLE_AI_CONCIERGE) ? "llm" : "mock")
+  ).toLowerCase();
+  const provider =
+    process.env.AI_PROVIDER ?? (mode === "mock" ? "mock" : "openai");
+
+  return c.json({
+    mode,
+    provider,
+    emailDeliveryEnabled: resendEnabled(),
+    flags: {
+      conciergeMode: process.env.CONCIERGE_MODE ?? null,
+      aiProvider: process.env.AI_PROVIDER ?? null,
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+concierge.get("/metrics", requireAuth(["ADMIN", "STAFF"]), (c) => {
+  const snapshot = getConciergeSnapshot();
+  return c.json({
+    ...snapshot,
+    messagesProcessed: snapshot.messages.total,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Create a new conversation
 concierge.post("/conversations", requireAuth(), async (c) => {
   const authUser = getAuthUser(c);
@@ -32,6 +74,8 @@ concierge.post("/conversations", requireAuth(), async (c) => {
   if (!authUser) {
     throw new ForbiddenError();
   }
+
+  recordConversationCreated();
 
   const json = (await c.req.json()) as unknown;
   const parseResult = createConversationSchema.safeParse(json);
@@ -65,6 +109,7 @@ concierge.post("/conversations", requireAuth(), async (c) => {
 
   // If there's an initial message, send it
   if (payload.initialMessage) {
+    recordMessage("USER");
     // Create user message
     const userMessage = await db.message.create({
       data: {
@@ -97,6 +142,18 @@ concierge.post("/conversations", requireAuth(), async (c) => {
         context: context as never,
       },
     });
+
+    recordMessage("ASSISTANT", aiResponse.tokens);
+
+    const userEmail = (context.user as { email?: string } | undefined)?.email;
+    if (userEmail) {
+      void sendConciergeEmail({
+        to: userEmail,
+        conversationId: conversation.id,
+        assistantMessage: aiResponse.content,
+        userMessage: payload.initialMessage,
+      });
+    }
 
     return c.json({
       conversation,
@@ -246,6 +303,7 @@ concierge.post("/conversations/:id/messages", requireAuth(), async (c) => {
   const payload = parseResult.data;
 
   // Create user message
+  recordMessage("USER");
   const userMessage = await db.message.create({
     data: {
       conversationId: id,
@@ -291,6 +349,18 @@ concierge.post("/conversations/:id/messages", requireAuth(), async (c) => {
       context: context as never,
     },
   });
+
+  recordMessage("ASSISTANT", aiResponse.tokens);
+
+  const userEmail = (context.user as { email?: string } | undefined)?.email;
+  if (userEmail) {
+    void sendConciergeEmail({
+      to: userEmail,
+      conversationId: id,
+      assistantMessage: aiResponse.content,
+      userMessage: payload.content,
+    });
+  }
 
   // Update conversation timestamp
   await db.conversation.update({

@@ -152,6 +152,22 @@ async function main() {
     },
   });
 
+  const skylineLoftProperty = await prisma.property.upsert({
+    where: { id: "prop-skyline-loft" },
+    update: {},
+    create: {
+      id: "prop-skyline-loft",
+      name: "Skyline Loft",
+      address: "890 Biscayne Blvd, PH 5701",
+      city: "Miami",
+      state: "FL",
+      zipCode: "33132",
+      type: "RESIDENTIAL",
+      size: 2200,
+      userId: clientUser.id,
+    },
+  });
+
   const vacationRentalProperty = await prisma.property.upsert({
     where: { id: "prop-vacation-1" },
     update: {},
@@ -202,6 +218,7 @@ async function main() {
 
   console.log("✅ Properties created:", {
     residential: residentialProperty.name,
+    skylineLoft: skylineLoftProperty.name,
     vacation: vacationRentalProperty.name,
     office: officeProperty.name,
     hospitality: hospitalityProperty.name,

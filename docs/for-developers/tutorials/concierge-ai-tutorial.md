@@ -14,7 +14,7 @@ Configurar y probar el flujo Concierge AI para responder solicitudes básicas de
 | Recurso                    | Detalle                                                                                     |
 | -------------------------- | ------------------------------------------------------------------------------------------- |
 | API Key OpenAI o Anthropic | Definir `OPENAI_API_KEY` o `ANTHROPIC_API_KEY` en `apps/api/.env`.                          |
-| Flag de modo real          | `CONCIERGE_MODE=llm` en `apps/api/.env`.                                                    |
+| Flag de modo real          | `CONCIERGE_MODE=llm` en `apps/api/.env` (o `ENABLE_AI_CONCIERGE=true`).                     |
 | Seed de clientes           | Ejecutar `pnpm --filter=@brisa/api db:seed` (incluye cuenta `client@brisacubanaclean.com`). |
 | Navegador actualizado      | Se recomienda Chrome/Edge para WebSocket.                                                   |
 
@@ -23,7 +23,7 @@ Configurar y probar el flujo Concierge AI para responder solicitudes básicas de
 1. Inicia API y Web (`pnpm dev`).
 2. Confirma que el endpoint `/api/concierge/status` responda `"mode": "llm"`:
    ```bash
-   curl http://localhost:3001/api/concierge/status | jq '.mode'
+   curl http://localhost:3001/api/concierge/status | jq '{mode, provider}'
    ```
 3. Activa panel de logs para seguir conversaciones (`pnpm dev:api` y busca tag `concierge`).
 

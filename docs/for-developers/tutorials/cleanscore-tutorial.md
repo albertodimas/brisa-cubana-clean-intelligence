@@ -22,7 +22,7 @@ Guiar al personal de operaciones para capturar y publicar un informe CleanScore�
 ## Paso 1. Preparar entorno
 
 1. Levanta la API y Web local (consulta [Quickstart](../quickstart.md)).
-2. Verifica que el flag esté activo: `curl http://localhost:4000/api/features | jq '.cleanScoreAI.enabled'` → `true`.
+2. Verifica que el flag esté activo: `curl http://localhost:3001/api/features | jq '.features.cleanScoreAI.enabled'` → `true`.
 3. Asegúrate de que `apps/api/prisma/seed.ts` generó la propiedad “Skyline Loft”.
 
 ## Paso 2. Registrar inspección inicial
@@ -37,39 +37,46 @@ Guiar al personal de operaciones para capturar y publicar un informe CleanScore�
 1. Desde el dispositivo móvil, abre la app de captura (mock Figma).
 2. Escanea el QR generado por el dashboard.
 3. Captura fotos obligatorias: sala, cocina, baño. Asegúrate de usar orientación horizontal.
-4. Captura at least one video walkthrough.
+4. Captura al menos un video corto como walkthrough.
 5. Finaliza la carga y verifica que las evidencias aparecen en el dashboard (estado “Procesando”).
 
 ## Paso 4. Ejecutar análisis CleanScore™
 
-1. Ejecuta la API de scoring para generar el informe:
+1. Ejecuta la API de scoring para registrar el informe (puedes repetir el comando si deseas forzar nuevos datos desde el dashboard):
    ```bash
    curl -X POST http://localhost:3001/api/reports/cleanscore \
      -H "Authorization: Bearer <TOKEN_ADMIN>" \
      -H "Content-Type: application/json" \
      -d '{
-       "bookingId": "<ID>",
-       "notes": "Inspección tutorial",
-       "images": ["https://storage.local/cleanscore/booking-123/livingroom.jpg"],
-       "videos": ["https://storage.local/cleanscore/booking-123/walkthrough.mp4"],
-       "checklist": [{"area":"Kitchen","status":"PASS"}]
+       "bookingId": "<ID_COMPLETED>",
+       "images": [
+         "https://storage.mock/cleanscore/livingroom.jpg",
+         "https://storage.mock/cleanscore/kitchen.jpg",
+         "https://storage.mock/cleanscore/bathroom.jpg"
+       ],
+       "videos": ["https://storage.mock/cleanscore/walkthrough.mp4"],
+       "checklist": [
+         {"area": "Kitchen", "status": "PASS"},
+         {"area": "Bathrooms", "status": "PASS"},
+         {"area": "Final inspection", "status": "PASS"}
+       ],
+       "notes": "Inspección tutorial generada desde curl"
      }'
    ```
-2. Si usas el modo mock (sin S3 configurado), puedes sustituir las URLs por rutas demo (`https://storage.mock/imagen.jpg`).
-3. En el dashboard, abre la inspección y revisa:
-   - Puntaje general (`score` > 85).
-   - Observaciones generadas (sección “Insights AI”).
-   - Evidencias adjuntas (genera PDF con botón “Descargar informe”).
+2. En el dashboard (ruta `/dashboard/reports/cleanscore`), localiza el booking y revisa:
+   - Puntaje general (`score` debería aparecer con valor ≥ 90 cuando el checklist está completo).
+   - Observaciones generadas (sección “Observaciones del equipo”).
+   - Evidencias adjuntas (fotos y videos quedan listados en la tarjeta).
 
 ## Paso 5. Publicar informe
 
-1. Cambia el estado a “Publicado” en CleanScore™.
-2. Envía el resumen al cliente con el botón “Enviar a cliente”.
-3. Confirma recepción en la bandeja de MailHog (look for subject “Resumen CleanScore™”).
+1. Desde `/dashboard/reports/cleanscore`, haz clic en “Publicar y enviar” en el reporte que creaste.
+2. El reporte se marca como `Publicado` y se dispara el correo hacia el cliente (“Tu CleanScore™ Report - <Propiedad>”).
+3. Confirma recepción en la bandeja de MailHog (subject: “Tu CleanScore™ Report - …”).
 
 ## Validación
 
-- API: `GET http://localhost:3001/api/cleanscore/reports/<ID>` debe devolver el informe con `status: PUBLISHED`.
+- API: `GET http://localhost:3001/api/reports/cleanscore/<ID>` debe devolver el informe con `status: PUBLISHED`.
 - Dashboard: la tarjeta de la propiedad muestra el último score y enlace al PDF.
 - Si tienes S3 configurado: carpeta `cleanscore/<bookingID>/` contiene imágenes y `report.pdf`.
 

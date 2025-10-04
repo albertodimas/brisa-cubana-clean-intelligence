@@ -1,0 +1,19 @@
+# Dependencies and virtual environments
+node_modules
+.venv
+.venv*
+
+# Build artifacts
+.turbo
+site
+apps/api/src/generated/prisma
+.playwright-report
+
+# Documentation caches
+.docs
+_docs
+_docs/**
+docs/_build
+
+# Misc
+.vscode

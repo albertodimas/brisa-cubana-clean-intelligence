@@ -306,6 +306,14 @@
     "ZSCORE",
     "goroutines",
     "gatilla",
-    "revalidaciones"
+    "revalidaciones",
+    "coequiper",
+    "pyright",
+    "mypy",
+    "pyproject",
+    "riesgosas",
+    "Sanitizar",
+    "pytest",
+    "evítalos"
   ]
 }

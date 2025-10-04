@@ -1,5 +1,31 @@
 import type { NextConfig } from "next";
 
+const baseConnectSources = [
+  "'self'",
+  "https://api.brisacubana.com",
+  "https://vitals.vercel-insights.com",
+];
+
+const connectSrc = new Set(baseConnectSources);
+
+const apiUrlFromEnv = process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL;
+
+if (apiUrlFromEnv) {
+  try {
+    const apiOrigin = new URL(apiUrlFromEnv).origin;
+    connectSrc.add(apiOrigin);
+  } catch {
+    // ignore invalid URLs; fallback to defaults only
+  }
+}
+
+if (process.env.NODE_ENV !== "production") {
+  connectSrc.add("http://localhost:3001");
+  connectSrc.add("http://127.0.0.1:3001");
+}
+
+const connectSrcValue = Array.from(connectSrc).join(" ");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
@@ -64,7 +90,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'; " +
               "img-src 'self' data: https: blob:; " +
               "font-src 'self' data:; " +
-              "connect-src 'self' https://api.brisacubana.com https://vitals.vercel-insights.com; " +
+              `connect-src ${connectSrcValue}; ` +
               "frame-ancestors 'none'; " +
               "base-uri 'self'; " +
               "form-action 'self';",

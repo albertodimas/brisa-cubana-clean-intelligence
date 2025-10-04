@@ -58,6 +58,15 @@ OTEL_SERVICE_NAME=brisa-cubana-api
 ```bash
 # OpenAI for Concierge
 OPENAI_API_KEY=sk-...
+CONCIERGE_MODE=llm # llm | mock
+
+# CleanScore storage (opcional)
+CLEAN_SCORE_AI=true
+CLEAN_SCORE_S3_BUCKET=brisa-cubana-cleanscore
+CLEAN_SCORE_S3_REGION=us-east-1
+CLEAN_SCORE_S3_ACCESS_KEY=...
+CLEAN_SCORE_S3_SECRET_KEY=...
+CLEAN_SCORE_S3_ENDPOINT=https://s3.amazonaws.com
 
 # Distributed Rate Limiting (optional)
 RATE_LIMIT_REDIS_URL=redis://user:password@host:port/0
@@ -77,6 +86,7 @@ NEXT_PUBLIC_APP_URL=https://brisacubana.com
 
 # Stripe (Public Key)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+CLEAN_SCORE_AI=false
 
 # Sentry (Frontend)
 NEXT_PUBLIC_SENTRY_DSN=https://...@sentry.io/...

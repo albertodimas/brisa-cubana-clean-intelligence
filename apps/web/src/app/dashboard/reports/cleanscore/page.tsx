@@ -71,8 +71,8 @@ export interface CleanScoreReport {
     status: string;
     scheduledAt: string;
     completedAt: string | null;
-    property: { name: string; address: string };
-    service: { name: string };
+    property?: { name: string | null; address: string | null };
+    service?: { name: string | null };
     user?: { id: string; name: string | null; email: string };
   };
 }

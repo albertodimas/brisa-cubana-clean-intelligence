@@ -5,6 +5,7 @@ import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 import { sendCleanScoreReport, calculateCleanScore } from "../services/reports";
 import { logger } from "../lib/logger";
 import { z } from "zod";
+import type { Prisma } from "../generated/prisma";
 
 const reports = new Hono();
 
@@ -17,6 +18,12 @@ interface NormalizedChecklistItem {
   area: string;
   status: ChecklistStatus;
   notes?: string;
+}
+
+interface PhotoEntry {
+  url: string;
+  caption: string;
+  category: "before" | "after";
 }
 
 interface EvidenceContext {
@@ -46,11 +53,11 @@ function normalizeMediaList(values?: string[]): string[] {
 }
 
 function normalizeChecklist(
-  items?: Array<{
+  items?: {
     area: string;
     status?: string | null;
     notes?: string | null;
-  }>,
+  }[],
 ): NormalizedChecklistItem[] {
   if (!items) {
     return [];
@@ -65,10 +72,12 @@ function normalizeChecklist(
         ? (rawStatus as ChecklistStatus)
         : "PASS";
 
+      const trimmedNotes = item.notes?.trim();
       return {
         area: item.area.trim(),
         status,
-        notes: item.notes?.trim() || undefined,
+        notes:
+          trimmedNotes && trimmedNotes.length > 0 ? trimmedNotes : undefined,
       } satisfies NormalizedChecklistItem;
     })
     .filter((item) => item.area.length > 0);
@@ -147,25 +156,25 @@ interface GenerateReportMetrics {
 }
 
 function buildPhotoEntries(
-  photos?: Array<{
+  photos?: {
     url: string;
     caption?: string;
     category?: "before" | "after";
-  }>,
+  }[],
   images?: string[],
-) {
-  const normalizedExisting = (photos ?? [])
+): PhotoEntry[] {
+  const normalizedExisting: PhotoEntry[] = (photos ?? [])
     .map((photo, index) => ({
       url: photo.url,
       caption: photo.caption ?? `Evidencia ${index + 1}`,
       category: photo.category ?? "after",
     }))
-    .filter((photo) => Boolean(photo.url));
+    .filter((photo): photo is PhotoEntry => Boolean(photo.url));
 
-  const normalizedImages = (images ?? []).map((url, index) => ({
+  const normalizedImages: PhotoEntry[] = (images ?? []).map((url, index) => ({
     url,
     caption: `Evidencia ${normalizedExisting.length + index + 1}`,
-    category: "after" as const,
+    category: "after",
   }));
 
   return [...normalizedExisting, ...normalizedImages];
@@ -217,11 +226,7 @@ function parseMetricsJson(value: unknown): GenerateReportMetrics {
   };
 }
 
-function coercePhotoEntries(value: unknown): Array<{
-  url: string;
-  caption: string;
-  category: "before" | "after";
-}> {
+function coercePhotoEntries(value: unknown): PhotoEntry[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -246,17 +251,9 @@ function coercePhotoEntries(value: unknown): Array<{
           : "after";
       const category: "before" | "after" =
         rawCategory === "before" ? "before" : "after";
-      return { url, caption, category };
+      return { url, caption, category } satisfies PhotoEntry;
     })
-    .filter(
-      (
-        value,
-      ): value is {
-        url: string;
-        caption: string;
-        category: "before" | "after";
-      } => Boolean(value),
-    );
+    .filter((item): item is PhotoEntry => Boolean(item));
 }
 
 function coerceChecklistEntries(value: unknown): NormalizedChecklistItem[] {
@@ -313,6 +310,19 @@ function serializeCleanScoreReport(report: {
     user?: { id: string; name: string | null; email: string } | null;
   } | null;
 }) {
+  const coalescedProperty = report.booking?.property
+    ? {
+        name: report.booking.property.name ?? "Propiedad sin nombre",
+        address: report.booking.property.address ?? "",
+      }
+    : undefined;
+
+  const coalescedService = report.booking?.service
+    ? {
+        name: report.booking.service.name ?? "Servicio sin nombre",
+      }
+    : undefined;
+
   return {
     id: report.id,
     bookingId: report.bookingId,
@@ -335,11 +345,8 @@ function serializeCleanScoreReport(report: {
           status: report.booking.status,
           scheduledAt: report.booking.scheduledAt,
           completedAt: report.booking.completedAt,
-          property: {
-            name: report.booking.property.name,
-            address: report.booking.property.address,
-          },
-          service: { name: report.booking.service.name },
+          property: coalescedProperty,
+          service: coalescedService,
           user: report.booking.user
             ? {
                 id: report.booking.user.id,
@@ -516,30 +523,39 @@ reports.post("/cleanscore", requireAuth(["ADMIN", "STAFF"]), async (c) => {
     "Generating CleanScore report",
   );
 
+  const metricsJson = { ...metrics } as Prisma.JsonObject;
+  const teamMembersJson = [...teamMembers] as Prisma.JsonArray;
+  const photosJson = photos.map((photo) => ({ ...photo })) as Prisma.JsonArray;
+  const videosJson = [...videos] as Prisma.JsonArray;
+  const checklistJson = checklist.map((item) => ({
+    ...item,
+  })) as Prisma.JsonArray;
+  const recommendationsJson = [...recommendations] as Prisma.JsonArray;
+
   const savedReport = await db.cleanScoreReport.upsert({
     where: { bookingId: booking.id },
     create: {
       bookingId: booking.id,
       score,
-      metrics,
-      teamMembers,
-      photos,
-      videos,
-      checklist,
+      metrics: metricsJson,
+      teamMembers: teamMembersJson,
+      photos: photosJson,
+      videos: videosJson,
+      checklist: checklistJson,
       observations,
-      recommendations,
+      recommendations: recommendationsJson,
       generatedBy: authUser.sub,
       status: "DRAFT",
     },
     update: {
       score,
-      metrics,
-      teamMembers,
-      photos,
-      videos,
-      checklist,
+      metrics: metricsJson,
+      teamMembers: teamMembersJson,
+      photos: photosJson,
+      videos: videosJson,
+      checklist: checklistJson,
       observations,
-      recommendations,
+      recommendations: recommendationsJson,
       generatedBy: authUser.sub,
       updatedAt: new Date(),
     },
@@ -791,51 +807,73 @@ reports.patch(
           );
 
     let status = report.status;
-    const updateData: Record<string, unknown> = {};
+    const updateData: Prisma.CleanScoreReportUpdateInput = {};
     let emailSent = false;
 
     if (payload.status && payload.status !== report.status) {
-      updateData["status"] = payload.status;
+      updateData.status = payload.status;
       status = payload.status;
     }
 
-    if (payload.sendEmail) {
-      const reportData = {
-        bookingId: report.bookingId,
-        clientName: booking.user.name ?? "Cliente",
-        clientEmail: booking.user.email,
-        propertyName: booking.property.name,
-        propertyAddress: booking.property.address,
-        serviceName: booking.service.name,
-        serviceDate,
-        teamMembers:
-          teamMembers.length > 0 ? teamMembers : ["Equipo Brisa Cubana"],
-        score: report.score,
-        metrics,
-        photos,
-        videos,
-        checklist,
-        observations,
-        recommendations:
-          recommendations.length > 0
-            ? recommendations
-            : deriveRecommendations(checklist),
-        completedAt,
-      } satisfies Parameters<typeof sendCleanScoreReport>[0];
+    const skipEmailDelivery =
+      process.env.USE_FAKE_API_DATA === "1" ||
+      process.env.NEXT_PUBLIC_USE_FAKE_API_DATA === "1";
 
-      const emailResult = await sendCleanScoreReport(reportData);
-      if (emailResult.success) {
-        updateData["sentToEmail"] = booking.user.email;
-        emailSent = true;
-      } else {
+    if (payload.sendEmail && !skipEmailDelivery) {
+      const clientEmail = booking.user?.email?.trim();
+
+      if (!clientEmail) {
         logger.warn(
           { bookingId },
-          "CleanScore report published sin enviar correo (Resend no configurado)",
+          "CleanScore report published sin enviar correo (booking sin email de cliente)",
         );
+      } else {
+        const reportData = {
+          bookingId: report.bookingId,
+          clientName: booking.user?.name ?? "Cliente",
+          clientEmail,
+          propertyName: booking.property?.name ?? "Propiedad sin nombre",
+          propertyAddress: booking.property?.address ?? "",
+          serviceName: booking.service?.name ?? "Servicio sin nombre",
+          serviceDate,
+          teamMembers:
+            teamMembers.length > 0 ? teamMembers : ["Equipo Brisa Cubana"],
+          score: report.score,
+          metrics,
+          photos,
+          videos,
+          checklist,
+          observations,
+          recommendations:
+            recommendations.length > 0
+              ? recommendations
+              : deriveRecommendations(checklist),
+          completedAt,
+        } satisfies Parameters<typeof sendCleanScoreReport>[0];
+
+        const emailResult = await sendCleanScoreReport(reportData);
+        if (emailResult.success) {
+          updateData.sentToEmail = clientEmail;
+          emailSent = true;
+        } else {
+          logger.warn(
+            { bookingId },
+            "CleanScore report published sin enviar correo (Resend no configurado)",
+          );
+        }
       }
 
       if (status !== "PUBLISHED") {
-        updateData["status"] = "PUBLISHED";
+        updateData.status = "PUBLISHED";
+        status = "PUBLISHED";
+      }
+    } else if (payload.sendEmail && skipEmailDelivery) {
+      logger.info(
+        { bookingId },
+        "CleanScore report publicado sin email por modo de datos fake",
+      );
+      if (status !== "PUBLISHED") {
+        updateData.status = "PUBLISHED";
         status = "PUBLISHED";
       }
     }
@@ -1025,55 +1063,6 @@ reports.get("/cleanscore/:bookingId", requireAuth(), async (c) => {
 
   return c.json(serializeCleanScoreReport(report));
 });
-reports.get("/cleanscore/reports/:bookingId", requireAuth(), async (c) => {
-  const authUser = getAuthUser(c);
-  const { bookingId } = c.req.param();
-
-  if (!authUser) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-
-  const report = await db.cleanScoreReport.findUnique({
-    where: { bookingId },
-    include: {
-      booking: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          property: true,
-          service: true,
-        },
-      },
-    },
-  });
-
-  if (!report) {
-    return c.json(
-      { error: "CleanScore report not found for this booking" },
-      404,
-    );
-  }
-
-  // Check authorization - only booking owner, staff, and admins can view
-  if (
-    authUser.role !== "ADMIN" &&
-    authUser.role !== "STAFF" &&
-    report.booking.userId !== authUser.sub
-  ) {
-    return c.json(
-      { error: "Forbidden - not authorized to view this report" },
-      403,
-    );
-  }
-
-  return c.json(serializeCleanScoreReport(report));
-});
-
 // List all CleanScore reports (admin/staff only)
 reports.get("/cleanscore", requireAuth(["ADMIN", "STAFF"]), async (c) => {
   const authUser = getAuthUser(c);

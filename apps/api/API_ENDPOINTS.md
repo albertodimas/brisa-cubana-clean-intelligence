@@ -35,6 +35,25 @@ Health check endpoint.
 
 Prometheus metrics endpoint (no auth required).
 
+### GET /api/features
+
+Feature-flag snapshot used by docs and dashboards.
+
+**Auth Required:** No
+
+**Response (200):**
+
+```json
+{
+  "generatedAt": "2025-10-03T14:45:00.000Z",
+  "features": {
+    "cleanScoreAI": { "enabled": true, "source": "CLEAN_SCORE_AI" },
+    "conciergeAI": { "enabled": true, "mode": "llm" },
+    "payments": { "enabled": true }
+  }
+}
+```
+
 ---
 
 ## Auth Endpoints
@@ -563,7 +582,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ### POST /api/reports/cleanscore
 
-Generate and send a CleanScore™ quality report for a completed booking.
+Generate a CleanScore™ quality report for a completed booking. The endpoint stores the report and, optionally, publishes it to the customer.
 
 **Auth Required:** Yes (STAFF or ADMIN roles)
 
@@ -571,28 +590,19 @@ Generate and send a CleanScore™ quality report for a completed booking.
 
 ```json
 {
-  "bookingId": "booking-123",
-  "metrics": {
-    "generalCleanliness": 4.5,
-    "kitchen": 5.0,
-    "bathrooms": 4.8,
-    "premiumDetails": 4.2,
-    "ambiance": 4.7,
-    "timeCompliance": 5.0
-  },
-  "teamMembers": ["María García", "Carlos López"],
-  "photos": [
-    {
-      "url": "https://example.com/photo1.jpg",
-      "caption": "Kitchen after cleaning",
-      "category": "after"
-    }
+  "bookingId": "booking-completed-1",
+  "images": [
+    "https://storage.mock/cleanscore/livingroom.jpg",
+    "https://storage.mock/cleanscore/kitchen.jpg"
   ],
-  "observations": "Property was in excellent condition. All areas cleaned thoroughly.",
-  "recommendations": [
-    "Consider deep carpet cleaning for next visit",
-    "Replace air filter in HVAC system"
-  ]
+  "videos": ["https://storage.mock/cleanscore/walkthrough.mp4"],
+  "checklist": [
+    { "area": "Kitchen", "status": "PASS" },
+    { "area": "Bathrooms", "status": "PASS" },
+    { "area": "Final inspection", "status": "PASS" }
+  ],
+  "notes": "Inspección tutorial",
+  "publish": false
 }
 ```
 
@@ -601,10 +611,12 @@ Generate and send a CleanScore™ quality report for a completed booking.
 ```json
 {
   "success": true,
-  "message": "CleanScore report is being generated and will be sent shortly",
-  "score": 4.7,
-  "bookingId": "booking-123",
-  "reportId": "report-456"
+  "message": "CleanScore report generated (status: borrador)",
+  "status": "DRAFT",
+  "score": 94.2,
+  "bookingId": "booking-completed-1",
+  "reportId": "csr_bJaAzVj3RD",
+  "published": false
 }
 ```
 
@@ -617,10 +629,42 @@ Generate and send a CleanScore™ quality report for a completed booking.
 
 **Notes:**
 
-- Booking must have `status: "COMPLETED"` to generate report
-- Email with PDF report sent to customer automatically
-- CleanScore calculated as weighted average of all metrics
-- Report persisted in database for future retrieval
+- Booking must have `status: "COMPLETED"` to generate a report.
+- Metrics can be omitted; when absent, the API derives them automatically from checklist + evidences.
+- `score` is returned on a 0-100 scale. A perfect checklist with evidencias produce valores ≥ 90.
+- Set `publish: true` to send the report immediately; otherwise publish later via PATCH.
+
+---
+
+### PATCH /api/reports/cleanscore/:bookingId
+
+Update CleanScore report metadata (e.g., publish and send email).
+
+**Auth Required:** Yes (STAFF or ADMIN roles)
+
+**Request:**
+
+```json
+{
+  "status": "PUBLISHED",
+  "sendEmail": true
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "status": "PUBLISHED",
+  "emailSent": true
+}
+```
+
+**Notes:**
+
+- `sendEmail: true` triggers the “Tu CleanScore™ Report” email via Resend.
+- If email delivery fails the report remains in `DRAFT` status.
 
 ---
 
@@ -630,48 +674,64 @@ Retrieve CleanScore report for a specific booking.
 
 **Auth Required:** Yes (Booking owner, STAFF, or ADMIN)
 
-**URL Parameters:**
-
-- `bookingId`: The booking ID
-
 **Response (200):**
 
 ```json
 {
-  "id": "report-456",
-  "bookingId": "booking-123",
-  "score": 4.7,
+  "id": "csr_bJaAzVj3RD",
+  "bookingId": "booking-completed-1",
+  "status": "PUBLISHED",
+  "score": 94.2,
   "metrics": {
-    "generalCleanliness": 4.5,
-    "kitchen": 5.0,
-    "bathrooms": 4.8,
-    "premiumDetails": 4.2,
-    "ambiance": 4.7,
-    "timeCompliance": 5.0
+    "generalCleanliness": 4.8,
+    "kitchen": 4.9,
+    "bathrooms": 4.7,
+    "premiumDetails": 4.6,
+    "ambiance": 4.5,
+    "timeCompliance": 4.8
   },
   "teamMembers": ["María García", "Carlos López"],
-  "photos": [],
-  "observations": "Property was in excellent condition...",
-  "recommendations": ["Consider deep carpet cleaning..."],
+  "photos": [
+    {
+      "url": "https://storage.mock/cleanscore/livingroom.jpg",
+      "caption": "Sala (después)",
+      "category": "after"
+    }
+  ],
+  "videos": ["https://storage.mock/cleanscore/walkthrough.mp4"],
+  "checklist": [
+    { "area": "Kitchen", "status": "PASS" },
+    { "area": "Bathrooms", "status": "PASS" },
+    { "area": "Final inspection", "status": "PASS" }
+  ],
+  "observations": "Checklist completado al 100% con 3 fotos y 1 video de evidencia.",
+  "recommendations": [
+    "Enviar recordatorio al cliente para agendar mantenimiento mensual"
+  ],
   "generatedBy": "user-staff-1",
   "sentToEmail": "client@example.com",
-  "pdfUrl": null,
-  "createdAt": "2025-10-01T04:15:00.000Z",
-  "updatedAt": "2025-10-01T04:15:00.000Z",
+  "createdAt": "2025-10-03T14:15:00.000Z",
+  "updatedAt": "2025-10-03T14:32:00.000Z",
   "booking": {
-    "id": "booking-123",
-    "user": {...},
-    "property": {...},
-    "service": {...}
+    "id": "booking-completed-1",
+    "status": "COMPLETED",
+    "scheduledAt": "2025-10-02T13:00:00.000Z",
+    "completedAt": "2025-10-02T16:45:00.000Z",
+    "property": {
+      "name": "Skyline Loft",
+      "address": "890 Biscayne Blvd, PH 5701"
+    },
+    "service": {
+      "name": "Deep Clean"
+    },
+    "user": {
+      "id": "user-client-1",
+      "name": "María Rodriguez",
+      "email": "client@brisacubanaclean.com"
+    }
   }
 }
 ```
-
-**Errors:**
-
-- `401`: Unauthorized
-- `403`: Forbidden - not authorized to view this report
-- `404`: CleanScore report not found for this booking
 
 ---
 
@@ -681,38 +741,29 @@ List all CleanScore reports (paginated).
 
 **Auth Required:** Yes (STAFF or ADMIN roles only)
 
-**Query Parameters:**
-
-- `limit` (optional): Number of reports per page (default: 20)
-- `offset` (optional): Number of reports to skip (default: 0)
-
 **Response (200):**
 
 ```json
 {
   "reports": [
     {
-      "id": "report-456",
-      "bookingId": "booking-123",
-      "score": 4.7,
+      "id": "csr_bJaAzVj3RD",
+      "bookingId": "booking-completed-1",
+      "status": "PUBLISHED",
+      "score": 94.2,
       "booking": {
-        "id": "booking-123",
-        "user": {
-          "id": "user-1",
-          "name": "John Doe",
-          "email": "john@example.com"
-        },
+        "id": "booking-completed-1",
+        "status": "COMPLETED",
         "property": {
-          "id": "prop-1",
-          "name": "Sunset Villa",
-          "address": "123 Ocean Drive"
+          "name": "Skyline Loft",
+          "address": "890 Biscayne Blvd, PH 5701"
         },
         "service": {
-          "id": "service-1",
           "name": "Deep Clean"
         }
       },
-      "createdAt": "2025-10-01T04:15:00.000Z"
+      "createdAt": "2025-10-03T14:15:00.000Z",
+      "updatedAt": "2025-10-03T14:32:00.000Z"
     }
   ],
   "pagination": {
@@ -724,10 +775,9 @@ List all CleanScore reports (paginated).
 }
 ```
 
-**Errors:**
+---
 
-- `401`: Unauthorized
-- `403`: Forbidden - requires STAFF or ADMIN role
+> Nota: el endpoint legado `/api/cleanscore/reports/:bookingId` se retiró. Usa `GET /api/reports/cleanscore/:bookingId` documentado arriba.
 
 ---
 
@@ -744,6 +794,53 @@ Preview CleanScore report HTML without sending email.
 ---
 
 ## Concierge IA
+
+### GET /api/concierge/status
+
+Return Concierge AI mode and provider configuration.
+
+**Auth Required:** Yes (any authenticated user)
+
+**Response (200):**
+
+```json
+{
+  "mode": "llm",
+  "provider": "openai",
+  "emailDeliveryEnabled": true,
+  "flags": {
+    "conciergeMode": "llm",
+    "aiProvider": "openai"
+  },
+  "timestamp": "2025-10-03T14:45:00.000Z"
+}
+```
+
+---
+
+### GET /api/concierge/metrics
+
+Retrieve aggregate counters for Concierge AI.
+
+**Auth Required:** Yes (STAFF or ADMIN roles)
+
+**Response (200):**
+
+```json
+{
+  "conversations": 5,
+  "messages": {
+    "user": 8,
+    "assistant": 8,
+    "total": 16
+  },
+  "messagesProcessed": 16,
+  "tokensGenerated": 4200,
+  "timestamp": "2025-10-03T14:45:00.000Z"
+}
+```
+
+---
 
 ### POST /api/concierge/conversations
 

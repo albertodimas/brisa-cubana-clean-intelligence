@@ -1,5 +1,6 @@
 import { sendSMS, sendWhatsApp, twilioEnabled } from "../lib/twilio";
 import { logger } from "../lib/logger";
+import { resendEnabled, sendEmail } from "../lib/resend";
 
 interface BookingNotificationData {
   clientName: string;
@@ -390,4 +391,42 @@ export function formatPhoneForDisplay(phone: string): string {
   }
 
   return phone;
+}
+
+export async function sendConciergeEmail({
+  to,
+  conversationId,
+  assistantMessage,
+  userMessage,
+}: {
+  to: string;
+  conversationId: string;
+  assistantMessage: string;
+  userMessage: string;
+}): Promise<{ success: boolean }> {
+  if (!resendEnabled()) {
+    logger.warn({ conversationId }, "Concierge email skipped: Resend disabled");
+    return { success: false };
+  }
+
+  const html = `
+  <!DOCTYPE html>
+  <html lang="es">
+  <head><meta charset="utf-8" /></head>
+  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111;">
+    <h2 style="margin-bottom: 8px;">Respuesta Concierge AI</h2>
+    <p style="margin: 0 0 12px 0;">Hemos recibido tu mensaje:</p>
+    <blockquote style="margin: 0 0 16px 0; padding-left: 12px; border-left: 4px solid #14b8a6; color: #4b5563;">${userMessage}</blockquote>
+    <p style="margin: 0 0 12px 0;">Nuestra IA respondió:</p>
+    <blockquote style="margin: 0 0 16px 0; padding-left: 12px; border-left: 4px solid #14b8a6; color: #111;">${assistantMessage}</blockquote>
+    <p style="font-size: 12px; color: #6b7280;">ID de conversación: ${conversationId}</p>
+  </body>
+  </html>
+  `;
+  const result = await sendEmail({
+    to,
+    subject: "Concierge AI Response",
+    html,
+  });
+  return { success: result.success };
 }

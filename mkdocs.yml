@@ -17,6 +17,7 @@ nav:
       - Workflow de testing local: development/local-testing-workflow.md
       - Inventario Diátaxis: development/diataxis-mapping.md
       - Estándares de documentación: development/documentation-standards.md
+      - KPIs & métricas: development/kpi-dashboard.md
       - Referencia de API: for-developers/api-reference.md
       - Guía de testing: for-developers/testing.md
       - Guía de despliegue: for-developers/deployment.md

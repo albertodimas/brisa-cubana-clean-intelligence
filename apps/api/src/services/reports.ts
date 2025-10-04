@@ -3,6 +3,12 @@ import { generateCleanScorePDF } from "./pdf";
 import { sendEmail, resendEnabled } from "../lib/resend";
 import { logger } from "../lib/logger";
 
+interface CleanScoreChecklistItem {
+  area: string;
+  status: "PASS" | "WARN" | "FAIL";
+  notes?: string;
+}
+
 interface CleanScoreReportData {
   bookingId: string;
   clientName: string;
@@ -26,6 +32,8 @@ interface CleanScoreReportData {
     caption: string;
     category: "before" | "after";
   }[];
+  videos: string[];
+  checklist: CleanScoreChecklistItem[];
   observations: string;
   recommendations: string[];
   completedAt: string;
@@ -132,8 +140,14 @@ export async function sendCleanScoreReport(
   <div class="header">
     <div class="logo">🧹 Brisa Cubana</div>
     <p style="font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 2px;">Premium Cleaning Intelligence</p>
-    <div class="score">CleanScore™: ${data.score.toFixed(1)}</div>
-    <p style="font-size: 18px; margin: 0;">${data.score >= 4.5 ? "¡Excelente!" : data.score >= 3.5 ? "Buen trabajo" : "Mejorable"}</p>
+    <div class="score">CleanScore™: ${Math.round(data.score)}</div>
+    <p style="font-size: 18px; margin: 0;">${
+      data.score >= 90
+        ? "¡Excelente!"
+        : data.score >= 80
+          ? "Buen trabajo"
+          : "Revisión recomendada"
+    }</p>
   </div>
 
   <div class="content">
@@ -149,12 +163,12 @@ export async function sendCleanScoreReport(
     <p>
       <strong>Fecha de servicio:</strong> ${data.serviceDate}<br>
       <strong>Equipo asignado:</strong> ${data.teamMembers.join(", ")}<br>
-      <strong>CleanScore™ obtenido:</strong> ${data.score.toFixed(1)}/5.0
-    </p>
-  </div>
+      <strong>CleanScore™ obtenido:</strong> ${Math.round(data.score)}/100
+  </p>
+</div>
 
-  <div class="content">
-    <h2>📊 Métricas de Calidad</h2>
+<div class="content">
+  <h2>📊 Métricas de Calidad</h2>
     <ul style="list-style: none; padding: 0;">
       <li>✓ Limpieza General: ${data.metrics.generalCleanliness.toFixed(1)}/5.0</li>
       <li>✓ Cocina: ${data.metrics.kitchen.toFixed(1)}/5.0</li>
@@ -163,7 +177,48 @@ export async function sendCleanScoreReport(
       <li>✓ Ambientación: ${data.metrics.ambiance.toFixed(1)}/5.0</li>
       <li>✓ Puntualidad: ${data.metrics.timeCompliance.toFixed(1)}/5.0</li>
     </ul>
+</div>
+
+  ${
+    data.checklist.length > 0
+      ? `
+  <div class="content">
+    <h2>📝 Checklist de servicio</h2>
+    <ul>
+      ${data.checklist
+        .map((item) => {
+          const label =
+            item.status === "PASS"
+              ? "Completado"
+              : item.status === "WARN"
+                ? "Revisar"
+                : "Pendiente";
+          return `<li><strong>${item.area}</strong>: ${label}${
+            item.notes ? ` — ${item.notes}` : ""
+          }</li>`;
+        })
+        .join("")}
+    </ul>
   </div>
+  `
+      : ""
+  }
+
+  ${
+    data.videos.length > 0
+      ? `
+  <div class="content">
+    <h2>🎥 Clips de verificación</h2>
+    <p>Se adjuntan ${data.videos.length} video${
+      data.videos.length === 1 ? "" : "s"
+    } con evidencia adicional:</p>
+    <ul>
+      ${data.videos.map((video) => `<li>${video}</li>`).join("")}
+    </ul>
+  </div>
+  `
+      : ""
+  }
 
   ${
     data.recommendations.length > 0
@@ -230,8 +285,16 @@ export async function sendCleanScoreReport(
     );
     return { success: false, pdfBuffer };
   } catch (error) {
+    const err =
+      error instanceof Error
+        ? error
+        : new Error("Unknown CleanScore report error");
     logger.error(
-      { error, bookingId: data.bookingId },
+      {
+        bookingId: data.bookingId,
+        error: err.message,
+        stack: err.stack,
+      },
       "Error generating/sending CleanScore report",
     );
     return { success: false };
@@ -241,14 +304,17 @@ export async function sendCleanScoreReport(
 /**
  * Calculate weighted CleanScore from metrics
  */
-export function calculateCleanScore(metrics: {
-  generalCleanliness: number;
-  kitchen: number;
-  bathrooms: number;
-  premiumDetails: number;
-  ambiance: number;
-  timeCompliance: number;
-}): number {
+export function calculateCleanScore(
+  metrics: {
+    generalCleanliness: number;
+    kitchen: number;
+    bathrooms: number;
+    premiumDetails: number;
+    ambiance: number;
+    timeCompliance: number;
+  },
+  options?: { bonus?: number },
+): number {
   // Weights according to MVP Lean Plan template
   const weights = {
     generalCleanliness: 0.3, // 30%
@@ -268,6 +334,11 @@ export function calculateCleanScore(metrics: {
     metrics.ambiance * weights.ambiance +
     metrics.timeCompliance * weights.timeCompliance;
 
-  // Scale to 85% (15% reserved for client feedback)
-  return baseScore * 0.85;
+  const maxBaseScore = 5 * 0.85; // 4.25
+  const basePercentage = (baseScore / maxBaseScore) * 85;
+
+  const bonus = options?.bonus ?? 0;
+  const total = basePercentage + bonus;
+
+  return Math.min(100, Number(total.toFixed(2)));
 }

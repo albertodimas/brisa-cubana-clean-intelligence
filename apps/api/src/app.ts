@@ -14,6 +14,7 @@ import reports from "./routes/reports";
 import concierge from "./routes/concierge";
 import health from "./routes/health";
 import metrics from "./routes/metrics";
+import features from "./routes/features";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
 import { rateLimiter, RateLimits } from "./middleware/rate-limit";
 import { requestLogger } from "./middleware/logger";
@@ -48,14 +49,14 @@ app.use("*", errorTrackingMiddleware); // Error tracking
 // References:
 // - https://hono.dev/docs/middleware/builtin/cors
 // - https://app.studyraid.com/en/read/11303/352730/cors-configuration-in-hono
-// Consulted: 2025-10-02
+// Consulted: 2025-10-02 (updated 2025-10-04)
 app.use(
   "*",
   cors({
     origin: (origin) => {
       // Development: allow localhost
       if (process.env.NODE_ENV !== "production") {
-        return origin;
+        return origin ?? "*";
       }
 
       // Production: explicit allowlist (never use wildcards)
@@ -63,10 +64,20 @@ app.use(
         "https://brisacubana.com",
         "https://www.brisacubana.com",
         "https://brisa-cubana.vercel.app",
-        ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
-      ];
+        process.env.WEB_APP_URL,
+        process.env.CORS_ORIGIN,
+      ].filter(Boolean) as string[];
 
-      return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+      if (!origin) {
+        return origin;
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return origin;
+      }
+
+      logger.warn({ origin }, "Blocked CORS origin");
+      return null;
     },
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
@@ -113,6 +124,7 @@ app.route("/api/alerts", alerts);
 app.route("/api/reconciliation", notes);
 app.route("/api/reports", reports);
 app.route("/api/concierge", concierge);
+app.route("/api/features", features);
 
 // 404 handler
 app.notFound((c) => c.json({ error: "Not found" }, 404));

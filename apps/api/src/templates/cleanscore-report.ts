@@ -20,6 +20,12 @@ interface CleanScoreData {
     caption: string;
     category: "before" | "after";
   }[];
+  videos: string[];
+  checklist: {
+    area: string;
+    status: "PASS" | "WARN" | "FAIL";
+    notes?: string;
+  }[];
   observations: string;
   recommendations: string[];
   completedAt: string;
@@ -27,9 +33,28 @@ interface CleanScoreData {
 
 export function generateCleanScoreHTML(data: CleanScoreData): string {
   const scoreColor =
-    data.score >= 4.5 ? "#14b8a6" : data.score >= 3.5 ? "#f59e0b" : "#ef4444";
+    data.score >= 90 ? "#14b8a6" : data.score >= 80 ? "#f59e0b" : "#ef4444";
   const scoreLabel =
-    data.score >= 4.5 ? "Excelente" : data.score >= 3.5 ? "Bueno" : "Mejorable";
+    data.score >= 90
+      ? "Excelente"
+      : data.score >= 80
+        ? "Bueno"
+        : "Revisión recomendada";
+  const checklistItems = data.checklist
+    .map((item) => {
+      const statusLabel =
+        item.status === "PASS"
+          ? "Completado"
+          : item.status === "WARN"
+            ? "Revisar"
+            : "Pendiente";
+      const note = item.notes ? ` — ${item.notes}` : "";
+      return `<li><strong>${item.area}</strong>: ${statusLabel}${note}</li>`;
+    })
+    .join("");
+  const videoItems = data.videos
+    .map((video, index) => `<li>Video ${index + 1}: ${video}</li>`)
+    .join("");
 
   return `
 <!DOCTYPE html>
@@ -239,7 +264,7 @@ export function generateCleanScoreHTML(data: CleanScoreData): string {
       position: absolute;
       top: 8px;
       right: 8px;
-      background: ${data.score >= 4.5 ? "#14b8a6" : "#f59e0b"};
+      background: ${data.score >= 90 ? "#14b8a6" : "#f59e0b"};
       color: white;
       padding: 4px 8px;
       border-radius: 4px;
@@ -325,7 +350,7 @@ export function generateCleanScoreHTML(data: CleanScoreData): string {
     <!-- Score Section -->
     <div class="score-section">
       <div class="score-label">CleanScore™</div>
-      <div class="score-value">${data.score.toFixed(1)}</div>
+      <div class="score-value">${Math.round(data.score)}</div>
       <div class="score-status">${scoreLabel}</div>
     </div>
 
@@ -409,6 +434,34 @@ export function generateCleanScoreHTML(data: CleanScoreData): string {
       </div>
     </div>
 
+    <!-- Checklist -->
+    ${
+      data.checklist.length > 0
+        ? `
+    <div class="section">
+      <h2 class="section-title">Checklist del Servicio</h2>
+      <ul class="recommendations">
+        ${checklistItems}
+      </ul>
+    </div>
+    `
+        : ""
+    }
+
+    <!-- Evidencia en Video -->
+    ${
+      data.videos.length > 0
+        ? `
+    <div class="section">
+      <h2 class="section-title">Clips de Verificación</h2>
+      <ul class="recommendations">
+        ${videoItems}
+      </ul>
+    </div>
+    `
+        : ""
+    }
+
     <!-- Photos -->
     ${
       data.photos.length > 0
@@ -437,7 +490,7 @@ export function generateCleanScoreHTML(data: CleanScoreData): string {
     <div class="section">
       <h2 class="section-title">Observaciones del Equipo</h2>
       <div class="observations">
-        ${data.observations || "No hay observaciones adicionales para este servicio."}
+        ${data.observations || "Checklist completado sin incidencias adicionales."}
       </div>
     </div>
 

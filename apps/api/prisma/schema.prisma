@@ -171,22 +171,30 @@ enum PaymentStatus {
   FAILED
 }
 
+enum CleanScoreStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model CleanScoreReport {
   id        String  @id @default(cuid())
   bookingId String  @unique
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   // CleanScore metrics
-  score   Float // Overall CleanScore (0-5)
+  score   Float // Overall CleanScore (0-100)
   metrics Json // Detailed metrics object
 
   // Report content
   teamMembers     Json // Array of team member names
-  photos          Json // Array of photo objects {url, caption, category}
+  photos          Json @default("[]") // Array of photo objects {url, caption, category}
+  videos          Json @default("[]") // Array of video URLs
+  checklist       Json @default("[]") // Array of checklist items with status
   observations    String? @db.Text
-  recommendations Json // Array of recommendation strings
+  recommendations Json @default("[]") // Array of recommendation strings
 
   // Metadata
+  status      CleanScoreStatus @default(DRAFT)
   generatedBy String // User ID who generated the report
   sentToEmail String? // Email where report was sent
   pdfUrl      String? // S3/storage URL for PDF (future)
