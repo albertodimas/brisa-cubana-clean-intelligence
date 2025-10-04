@@ -36,7 +36,6 @@ nav:
           - App staff: for-developers/diagrams/app-staff-r3.md
           - Secuencia CleanScore: for-developers/diagrams/cleanscore-sequence.md
       - Tutoriales:
-          - Quickstart: for-developers/quickstart.md
           - CleanScore™: for-developers/tutorials/cleanscore-tutorial.md
           - Concierge AI: for-developers/tutorials/concierge-ai-tutorial.md
       - Roadmaps técnicos:
