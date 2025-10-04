@@ -34,8 +34,9 @@ jobs:
   secret-detection:
     name: Secret Detection
     runs-on: ubuntu-latest
-    # Only run on PRs to avoid BASE==HEAD issue on direct pushes to main
-    if: github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Only run on PRs and schedule to avoid BASE==HEAD issue
+    # workflow_dispatch excluded because it would also trigger BASE==HEAD error
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
