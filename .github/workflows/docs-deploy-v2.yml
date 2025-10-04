@@ -80,18 +80,26 @@ jobs:
       - name: Check GitHub Pages deployment
         run: |
           echo "🔍 Verificando deployment..."
-          sleep 30  # Esperar a que GitHub Pages procese
 
           URL="https://albertodimas.github.io/brisa-cubana-clean-intelligence/"
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
-
-          if [ "$STATUS" -eq 200 ]; then
-            echo "✅ GitHub Pages está respondiendo correctamente (HTTP $STATUS)"
-          else
-            echo "⚠️  GitHub Pages respondió con HTTP $STATUS"
+          MAX_ATTEMPTS=10
+          SLEEP_SECONDS=10
+          ATTEMPT=1
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ GitHub Pages está respondiendo correctamente (HTTP $STATUS) en el intento $ATTEMPT"
+              break
+            else
+              echo "Intento $ATTEMPT: GitHub Pages respondió con HTTP $STATUS. Reintentando en $SLEEP_SECONDS segundos..."
+              sleep $SLEEP_SECONDS
+              ATTEMPT=$((ATTEMPT+1))
+            fi
+          done
+          if [ "$STATUS" -ne 200 ]; then
+            echo "⚠️  GitHub Pages no respondió con HTTP 200 después de $MAX_ATTEMPTS intentos"
             exit 1
           fi
-
       - name: Verify latest version redirect
         run: |
           URL="https://albertodimas.github.io/brisa-cubana-clean-intelligence/latest/"
