@@ -69,6 +69,7 @@ nav:
       - Reportes:
           - GitHub Status Report: operations/GITHUB_STATUS_REPORT.md
           - Documentation Improvements 2025-10-04: operations/DOCUMENTATION_IMPROVEMENTS_2025-10-04.md
+          - Security Accepted Risks: operations/SECURITY_ACCEPTED_RISKS.md
 
   - Negocio y operaciones:
       - Panorama general: for-business/README.md
