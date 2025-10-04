@@ -7,6 +7,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+### Changed - 2025-10-04
+
+- **E2E Pipeline Estabilizado**:
+  - Tests de reservas y CleanScore ahora simulan respuestas vía `window.fetch` para evitar dependencias externas.
+  - El reporte de seguridad ya no descarga artefactos ni comenta en PRs, eliminando errores 403 y reintentos fallidos en CI.
+
 ### Added - 2025-10-02
 
 #### Production-Ready Security & Performance
