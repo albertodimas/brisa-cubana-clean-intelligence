@@ -29,6 +29,7 @@ nav:
       - Configuración staging: for-developers/staging-setup.md
       - Configuración Analytics: for-developers/analytics-setup.md
       - Configuración VS Code: for-developers/vscode-setup.md
+      - Configuración Custom Domain: for-developers/custom-domain-setup.md
       - Arquitectura:
           - Arquitectura general: for-developers/architecture.md
           - Índice de diagramas: for-developers/diagrams/README.md
@@ -239,6 +240,11 @@ plugins:
       strict: false
   - minify:
       minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+      cache_safe: true
 
 # Extra CSS
 extra_css:
