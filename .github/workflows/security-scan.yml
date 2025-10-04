@@ -297,34 +297,10 @@ jobs:
   # ============================================================================
   # SAST (Static Application Security Testing) - CodeQL
   # ============================================================================
-  codeql:
-    name: CodeQL SAST
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ['javascript']
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-and-quality
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
+  # NOTE: CodeQL is now managed via GitHub Code Scanning Default Setup
+  # See: Settings > Security > Code security and analysis > CodeQL analysis
+  # Default Setup provides better integration and automatic language detection
+  # Manual workflow removed to avoid configuration conflicts
 
   # ============================================================================
   # Summary Report
@@ -334,7 +310,8 @@ jobs:
     runs-on: ubuntu-latest
     # Don't depend on sign-images since it only runs on main branch
     # Don't depend on secret-detection since it only runs on PRs/schedule
-    needs: [dependency-scan, container-scan, policy-check, codeql]
+    # Don't depend on codeql since it's managed via Default Setup
+    needs: [dependency-scan, container-scan, policy-check]
     if: always()
     steps:
       - name: Generate security report
@@ -351,7 +328,7 @@ jobs:
           echo "- ✅ Container Scan (Trivy)" >> security-report.md
           echo "- ✅ Image Signing (Cosign)" >> security-report.md
           echo "- ✅ Policy Check (OPA)" >> security-report.md
-          echo "- ✅ SAST (CodeQL)" >> security-report.md
+          echo "- ✅ SAST (CodeQL via Default Setup)" >> security-report.md
           echo "" >> security-report.md
           echo "**Status:** All security checks passed ✅" >> security-report.md
 
