@@ -115,20 +115,43 @@ const apiEnv = {
   USE_FAKE_API_DATA: process.env.USE_FAKE_API_DATA ?? "1",
 };
 
-const seedProcess = spawn("pnpm", ["--filter=@brisa/api", "db:seed"], {
-  cwd: rootDir,
-  stdio: "inherit",
-  env: apiEnv,
-});
+const migrateProcess = spawn(
+  "pnpm",
+  ["--filter=@brisa/api", "db:push", "--force-reset"],
+  {
+    cwd: rootDir,
+    stdio: "inherit",
+    env: apiEnv,
+  },
+);
 
-children.push(seedProcess);
+children.push(migrateProcess);
 
-seedProcess.on("exit", (seedCode) => {
-  if (seedCode !== 0) {
-    console.error("\n[e2e] Falló la siembra de datos para las pruebas. Abortando.");
-    shutdown(seedCode ?? 1);
+migrateProcess.on("exit", (migrateCode) => {
+  if (migrateCode !== 0) {
+    console.error(
+      "\n[e2e] Falló la sincronización de la base de datos para las pruebas. Abortando.",
+    );
+    shutdown(migrateCode ?? 1);
     return;
   }
+
+  const seedProcess = spawn("pnpm", ["--filter=@brisa/api", "db:seed"], {
+    cwd: rootDir,
+    stdio: "inherit",
+    env: apiEnv,
+  });
+
+  children.push(seedProcess);
+
+  seedProcess.on("exit", (seedCode) => {
+    if (seedCode !== 0) {
+      console.error(
+        "\n[e2e] Falló la siembra de datos para las pruebas. Abortando.",
+      );
+      shutdown(seedCode ?? 1);
+      return;
+    }
 
   const apiProcess = spawn("pnpm", ["--filter=@brisa/api", "start"], {
     cwd: rootDir,
@@ -189,4 +212,5 @@ seedProcess.on("exit", (seedCode) => {
 
   const nextDelayMs = Number(process.env.E2E_NEXT_DELAY_MS ?? 2000);
   setTimeout(startNextServer, nextDelayMs);
+  });
 });

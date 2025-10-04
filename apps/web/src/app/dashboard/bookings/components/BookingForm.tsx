@@ -64,8 +64,7 @@ export default function BookingForm({
         throw new Error(errorData.error?.message ?? "Error al crear reserva");
       }
 
-      router.push("/dashboard/bookings");
-      router.refresh();
+      router.push("/dashboard/bookings?created=1");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {

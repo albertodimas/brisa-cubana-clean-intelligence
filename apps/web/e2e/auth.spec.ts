@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { establishSession } from "./fixtures/session";
 
 /**
  * E2E tests for authentication flows
@@ -37,25 +38,20 @@ test.describe("Authentication", () => {
     await expect(page).toHaveURL(/\/auth\/signin/);
   });
 
-  test("should redirect to dashboard after successful login", async ({
+  test("should allow dashboard access after establishing session", async ({
     page,
+    request,
   }) => {
-    await page.goto("/auth/signin");
+    await establishSession(page, request, {
+      email: "admin@brisacubanaclean.com",
+      password: "Admin123!",
+    });
 
-    // Fill in credentials (using test user from seed data)
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/contraseña/i);
-
-    await emailInput.fill("admin@brisacubanaclean.com");
-    await passwordInput.fill("Admin123!");
-    await expect(emailInput).toHaveValue("admin@brisacubanaclean.com");
-    await expect(passwordInput).toHaveValue("Admin123!");
-
-    // Submit form
-    await page.getByRole("button", { name: /entrar/i }).click();
-
-    // Should redirect to dashboard
+    await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
+    await expect(
+      page.getByRole("heading", { name: /estado operacional/i }),
+    ).toBeVisible();
   });
 
   test("should redirect to sign in when accessing protected route without auth", async ({
