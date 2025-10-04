@@ -55,6 +55,11 @@ pnpm db:push          # Sync schema
 pnpm lint             # Lint all
 pnpm typecheck        # TypeScript check
 pnpm format           # Format code
+
+# Documentation
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+mkdocs build --strict
 ```
 
 ## 📚 Related Documentation
