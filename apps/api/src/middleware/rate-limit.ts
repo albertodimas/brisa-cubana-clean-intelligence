@@ -107,7 +107,7 @@ export function rateLimiter(
       fallbackReason = "no_client";
     }
 
-    if (metricsEnabled && fallbackReason) {
+    if (metricsEnabled) {
       rateLimitFallbackTotal.inc({ reason: fallbackReason });
     }
 
