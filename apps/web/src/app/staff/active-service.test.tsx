@@ -1,7 +1,7 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import React from "react";
 import { ActiveService } from "./active-service";
-
-global.fetch = vi.fn();
 
 const baseBooking = {
   id: "booking-1",
@@ -14,51 +14,48 @@ const baseBooking = {
 };
 
 function setupOverrides(overrides?: Partial<typeof globalThis.fetch>) {
-  (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(
-    async (url, init) => {
-      if (typeof overrides?.call === "function") {
-        return overrides.call(url as string, init);
-      }
+  vi.mocked(global.fetch).mockImplementation(async (url, init) => {
+    if (typeof overrides?.call === "function") {
+      return overrides.call(url as string, init);
+    }
 
-      if (
-        typeof url === "string" &&
-        url.endsWith("/api/bookings/booking-1") &&
-        init?.method === "PATCH" &&
-        init?.body
-      ) {
-        return { ok: true, json: async () => ({}) } as Response;
-      }
-
-      if (
-        typeof url === "string" &&
-        url.endsWith("/api/reports/cleanscore") &&
-        init?.method === "POST"
-      ) {
-        return {
-          ok: true,
-          json: async () => ({
-            success: true,
-            message: "CleanScore report generated",
-          }),
-        } as Response;
-      }
-
+    if (
+      typeof url === "string" &&
+      url.endsWith("/api/bookings/booking-1") &&
+      init?.method === "PATCH" &&
+      init?.body
+    ) {
       return { ok: true, json: async () => ({}) } as Response;
-    },
-  );
+    }
+
+    if (
+      typeof url === "string" &&
+      url.endsWith("/api/reports/cleanscore") &&
+      init?.method === "POST"
+    ) {
+      return {
+        ok: true,
+        json: async () => ({
+          success: true,
+          message: "CleanScore report generated",
+        }),
+      } as Response;
+    }
+
+    return { ok: true, json: async () => ({}) } as Response;
+  });
 }
 
 describe("ActiveService component", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    delete (global.fetch as Record<string, unknown>).mockImplementation;
   });
 
   it("muestra errores cuando los fetch fallan", async () => {
     const errorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => undefined);
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: false,
     } as Response);
 

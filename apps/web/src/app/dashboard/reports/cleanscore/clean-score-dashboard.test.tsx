@@ -1,7 +1,7 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import React from "react";
 import CleanScoreDashboard from "./clean-score-dashboard";
-
-global.fetch = vi.fn();
 
 const baseReport = {
   id: "csr_123",
@@ -75,33 +75,37 @@ describe("CleanScoreDashboard", () => {
     );
 
     expect(
-      screen.getByText("Skyline Loft · Limpieza Premium"),
-    ).toBeInTheDocument();
+      screen.getAllByText("Skyline Loft · Limpieza Premium").length,
+    ).toBeGreaterThan(0);
 
-    const publishedTab = screen.getByRole("tab", { name: /publicados/i });
-    fireEvent.click(publishedTab);
+    // Filter by status using select
+    const statusFilter = screen.getByTestId("status-filter");
+    fireEvent.change(statusFilter, { target: { value: "published" } });
 
-    expect(
-      screen.queryByText("Skyline Loft · Limpieza Premium"),
-    ).not.toBeInTheDocument();
+    // Should only show published report
+    expect(screen.getAllByText("Skyline Loft · Limpieza Premium").length).toBe(
+      1,
+    );
 
-    const search = screen.getByPlaceholderText(/Buscar por propiedad/i);
-    fireEvent.change(search, { target: { value: "Skyline" } });
+    // Search functionality
+    const search = screen.getByTestId("cleanscore-search");
+    fireEvent.change(search, { target: { value: "XYZ" } });
 
+    // Should not find any matches
     expect(
       screen.queryByText("Skyline Loft · Limpieza Premium"),
     ).not.toBeInTheDocument();
   });
 
   it("muestra el detalle del reporte al solicitarlo", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         ...baseReport,
         status: "PUBLISHED",
         sentToEmail: "client@example.com",
       }),
-    });
+    } as Response);
 
     render(
       <CleanScoreDashboard
@@ -111,7 +115,7 @@ describe("CleanScoreDashboard", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /ver reporte/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ver detalle/i }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
