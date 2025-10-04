@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import type { Dialog } from "@playwright/test";
-import { API_BASE, establishSession } from "./fixtures/session";
+import { establishSession } from "./fixtures/session";
 
 const STAFF_EMAIL = "staff@brisacubanaclean.com";
 const STAFF_PASSWORD = "Staff123!";

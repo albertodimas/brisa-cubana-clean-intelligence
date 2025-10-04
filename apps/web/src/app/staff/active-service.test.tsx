@@ -13,10 +13,10 @@ const baseBooking = {
   notes: "Revisar ventanas",
 };
 
-function setupOverrides(overrides?: Partial<typeof globalThis.fetch>) {
+function setupOverrides(overrides?: typeof globalThis.fetch) {
   vi.mocked(global.fetch).mockImplementation(async (url, init) => {
-    if (typeof overrides?.call === "function") {
-      return overrides.call(url as string, init);
+    if (overrides) {
+      return overrides(url as string, init);
     }
 
     if (
