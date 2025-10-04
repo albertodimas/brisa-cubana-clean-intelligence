@@ -79,6 +79,10 @@ pnpm dev
 # Metrics available at:
 # http://localhost:9464/metrics
 
+# API metrics endpoint (desde octubre 2025)
+# https://api.brisacubana.com/api/metrics – expone KPIs de reservas/CleanScore
+# Validado por tests en apps/api/src/routes/metrics.test.ts
+
 # Structured logs in console (JSON format)
 ```
 

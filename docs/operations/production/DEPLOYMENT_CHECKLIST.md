@@ -15,6 +15,14 @@
 - [x] `pnpm test:e2e` — 15 escenarios Playwright con datos fake (2025-10-03).
 - [x] `pnpm docs:build` — build 2025-10-03 sin warnings de enlaces/nav (sólo avisos de git log para archivos nuevos).
 
+## 📋 Release Checklist Rápido
+
+1. Ejecutar `./scripts/pre-push-check.sh` (incluye lint, unit tests y Playwright). Si necesitas omitir E2E temporalmente exporta `SKIP_E2E=1`, pero **nunca** lo hagas para un despliegue productivo.
+2. Revisar artefactos de Playwright (HTML y videos) en `playwright-report/` o en el job **E2E** de GitHub Actions.
+3. Confirmar que el job **Security Summary** genera `security-report.md` (ya no descarga SBOM ni comenta en el PR, se adjunta como artefacto).
+4. Validar el preview de Vercel (`Deploy Preview` en el PR) y registrar cualquier hallazgo en el PR antes del merge.
+5. Anunciar ventana de despliegue en Slack con link al PR y checklist actualizado.
+
 ## 🗄️ Database Setup (Neon PostgreSQL)
 
 - [ ] Neon project created: `brisa-cubana-staging`
@@ -152,6 +160,7 @@ cat .vercel/project.json  # After running 'vercel link'
   - [ ] `lint-and-test`
   - [ ] `deploy-api` (Railway)
   - [ ] `deploy-web` (Vercel)
+- [ ] Revisar artefacto `security-report.md` generado por el job **Security Summary** (GitHub Actions → E2E pipeline). Cubre estado de scans, secretos y escaneos container.
 
 **Test the workflow:**
 
@@ -184,6 +193,12 @@ Expected responses:
 - [ ] Sign in page accessible: `/auth/signin`
 - [ ] Static assets loading (CSS, images)
 - [ ] API connection working (check browser console)
+
+### Métricas y Observabilidad
+
+- [ ] Endpoint `/api/metrics` responde 200 con payload de métricas de reservas/servicios.
+- [ ] Dashboards de Cloud/Observabilidad actualizados (Bookings KPI, CleanScore KPI). Enlazar en Notion/Datadog: `https://observability.brisacubana.com/dashboards/bookings`, `https://observability.brisacubana.com/dashboards/cleanscore`.
+- [ ] Alertas activas en caso de latencia > SLA o error rate > 2%; verificar notificaciones Slack `#brisa-alerts`.
 
 ### End-to-End User Journey
 

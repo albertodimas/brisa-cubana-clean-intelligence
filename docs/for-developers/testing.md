@@ -347,6 +347,37 @@ Los tests que requieren usuarios con roles presembrados reutilizan el helper `es
 - Las capturas de payload (`bookingCalls`, `patchCalls`) se exponen mediante `page.exposeBinding`, permitiendo aserciones sin depender de servicios externos.
 - Este enfoque garantiza que los flujos críticos funcionen igual en local y en CI aun sin backend disponible.
 
+### Fixtures y test doubles
+
+```typescript
+test.beforeEach(async ({ page }) => {
+  await page.exposeBinding("_recordAction", async (_source, payload) => {
+    actions.push(payload);
+  });
+
+  await page.addInitScript(
+    ({ baseUrl }) => {
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = async (input, init = {}) => {
+        const url = typeof input === "string" ? input : (input.url ?? "");
+        if (url.startsWith(`${baseUrl}/api/example`) && init.method === "GET") {
+          return new Response(JSON.stringify({ value: "fixture" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return originalFetch(input, init);
+      };
+    },
+    { baseUrl: process.env.PLAYWRIGHT_API_URL ?? "http://127.0.0.1:3001" },
+  );
+});
+```
+
+- Centraliza los datos en `apps/web/e2e/fixtures/` para evitar divergencias con la API real.
+- Revisa periódicamente que los campos sigan reflejando la respuesta del backend; actualiza los fixtures tras cada cambio de esquema.
+- Documenta en el PR cualquier fixture nuevo para que QA conozca qué escenarios se están cubriendo.
+
 ### Estructura de un Test E2E
 
 [apps/web/e2e/home.spec.ts](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/web/e2e/home.spec.ts):
