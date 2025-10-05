@@ -141,4 +141,144 @@ describe("Token Management", () => {
       expect(decoded?.sub).toBe(payload.sub);
     });
   });
+
+  describe("Fake tokens for development", () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it("should decode fake token when USE_FAKE_API_DATA is enabled", () => {
+      process.env.USE_FAKE_API_DATA = "1";
+      const payload: AccessTokenPayload = {
+        sub: "fake-user",
+        email: "fake@test.com",
+        role: "CLIENT",
+      };
+      const encoded = Buffer.from(JSON.stringify(payload)).toString(
+        "base64url",
+      );
+      const fakeToken = `fake.${encoded}`;
+
+      const decoded = verifyAccessToken(fakeToken);
+      expect(decoded).toMatchObject(payload);
+    });
+
+    it("should decode fake token when NEXT_PUBLIC_USE_FAKE_API_DATA is enabled", () => {
+      process.env.NEXT_PUBLIC_USE_FAKE_API_DATA = "1";
+      const payload: AccessTokenPayload = {
+        sub: "fake-admin",
+        email: "admin@fake.com",
+        role: "ADMIN",
+      };
+      const encoded = Buffer.from(JSON.stringify(payload)).toString(
+        "base64url",
+      );
+      const fakeToken = `fake.${encoded}`;
+
+      const decoded = verifyAccessToken(fakeToken);
+      expect(decoded).toMatchObject(payload);
+    });
+
+    it("should return null for malformed fake token payload", () => {
+      process.env.USE_FAKE_API_DATA = "1";
+      const malformed = { sub: "test" }; // Missing email and role
+      const encoded = Buffer.from(JSON.stringify(malformed)).toString(
+        "base64url",
+      );
+      const fakeToken = `fake.${encoded}`;
+
+      const decoded = verifyAccessToken(fakeToken);
+      expect(decoded).toBeNull();
+    });
+
+    it("should return null for invalid fake token encoding", () => {
+      process.env.USE_FAKE_API_DATA = "1";
+      const fakeToken = "fake.invalid-base64!!!";
+
+      const decoded = verifyAccessToken(fakeToken);
+      expect(decoded).toBeNull();
+    });
+
+    it("should return null for fake token with invalid JSON", () => {
+      process.env.USE_FAKE_API_DATA = "1";
+      const invalidJson = Buffer.from("{invalid json}").toString("base64url");
+      const fakeToken = `fake.${invalidJson}`;
+
+      const decoded = verifyAccessToken(fakeToken);
+      expect(decoded).toBeNull();
+    });
+
+    it("should not decode fake token when USE_FAKE_API_DATA is disabled", () => {
+      delete process.env.USE_FAKE_API_DATA;
+      delete process.env.NEXT_PUBLIC_USE_FAKE_API_DATA;
+
+      const payload: AccessTokenPayload = {
+        sub: "fake-user",
+        email: "fake@test.com",
+        role: "CLIENT",
+      };
+      const encoded = Buffer.from(JSON.stringify(payload)).toString(
+        "base64url",
+      );
+      const fakeToken = `fake.${encoded}`;
+
+      // Should be treated as invalid JWT
+      const decoded = verifyAccessToken(fakeToken);
+      expect(decoded).toBeNull();
+    });
+
+    it("should support all user roles in fake tokens", () => {
+      process.env.USE_FAKE_API_DATA = "1";
+
+      const roles = ["CLIENT", "STAFF", "ADMIN"] as const;
+
+      for (const role of roles) {
+        const payload: AccessTokenPayload = {
+          sub: `user-${role}`,
+          email: `${role.toLowerCase()}@test.com`,
+          role,
+        };
+        const encoded = Buffer.from(JSON.stringify(payload)).toString(
+          "base64url",
+        );
+        const fakeToken = `fake.${encoded}`;
+
+        const decoded = verifyAccessToken(fakeToken);
+        expect(decoded?.role).toBe(role);
+      }
+    });
+  });
+
+  describe("Error handling", () => {
+    it("should handle token with tampered payload", () => {
+      const token = generateAccessToken(mockPayload);
+      const parts = token.split(".");
+      // Tamper with the payload
+      const tamperedPayload = Buffer.from(
+        JSON.stringify({
+          sub: "hacker",
+          email: "hack@test.com",
+          role: "ADMIN",
+        }),
+      ).toString("base64url");
+      const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
+
+      const decoded = verifyAccessToken(tamperedToken);
+      expect(decoded).toBeNull();
+    });
+
+    it("should handle token with missing parts", () => {
+      const decoded1 = verifyAccessToken("only.two");
+      expect(decoded1).toBeNull();
+
+      const decoded2 = verifyAccessToken("single");
+      expect(decoded2).toBeNull();
+    });
+  });
 });
