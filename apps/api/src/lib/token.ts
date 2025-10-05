@@ -48,13 +48,13 @@ export async function generateRefreshToken(userId: string): Promise<string> {
   expiresAt.setDate(expiresAt.getDate() + 7);
 
   // Store in database
-  const refreshToken = await db.refreshToken.create({
+  const refreshToken = (await db.refreshToken.create({
     data: {
       token: tokenValue,
       userId,
       expiresAt,
     },
-  });
+  })) as { id: string; token: string; userId: string; expiresAt: Date };
 
   // Create JWT with token ID for additional validation
   const payload: RefreshTokenPayload = {
@@ -76,17 +76,17 @@ export async function verifyRefreshToken(
     // Verify JWT signature and expiration
     const payload = jwt.verify(token, secret) as RefreshTokenPayload;
 
-    // Check if token exists in database and is not revoked
-    const storedToken = await db.refreshToken.findFirst({
+    // Verify token exists in database and hasn't been revoked
+    const storedToken = (await db.refreshToken.findFirst({
       where: {
         id: payload.tokenId,
         userId: payload.sub,
         isRevoked: false,
         expiresAt: {
-          gt: new Date(), // Token not expired
+          gt: new Date(),
         },
       },
-    });
+    })) as { id: string; token: string } | null;
 
     if (!storedToken) {
       console.warn("[token] Refresh token not found or revoked", {
@@ -117,7 +117,7 @@ export async function revokeAllRefreshTokens(userId: string): Promise<void> {
 }
 
 export async function cleanupExpiredTokens(): Promise<number> {
-  const result = await db.refreshToken.deleteMany({
+  const result = (await db.refreshToken.deleteMany({
     where: {
       OR: [
         { expiresAt: { lt: new Date() } },
@@ -128,7 +128,7 @@ export async function cleanupExpiredTokens(): Promise<number> {
         },
       ],
     },
-  });
+  })) as { count: number };
   return result.count;
 }
 
