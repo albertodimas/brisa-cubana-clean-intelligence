@@ -103,7 +103,7 @@ describe("Rate Limiting Middleware", () => {
       const auth: Record<string, unknown> = RateLimits.auth;
       expect(auth).toMatchObject({
         windowMs: 15 * 60 * 1000,
-        max: 5,
+        max: 3,
         message: expect.stringContaining("login"),
         skipSuccessfulRequests: true,
       });

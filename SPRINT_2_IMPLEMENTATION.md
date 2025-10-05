@@ -1,7 +1,7 @@
 # 🔄 Sprint 2 - Service Layer & CSP Nonces
 
-**Fecha**: 5 de octubre de 2025  
-**Estado**: ✅ Completado (Parcial)  
+**Fecha**: 5 de octubre de 2025
+**Estado**: ✅ Completado (Parcial)
 **Objetivo**: Mejorar arquitectura con Service Layer y eliminar `unsafe-inline` de CSP
 
 ---
@@ -10,15 +10,15 @@
 
 ### Objetivos del Sprint
 
-| Objetivo | Estado | Prioridad | Impacto |
-|----------|--------|-----------|---------|
-| Service Layer Architecture | ✅ Completado | Alta | Alto |
-| CSP Nonces (sin unsafe-inline) | ✅ Completado | Alta | Alto |
-| Sanitization en Properties | ✅ Completado | Media | Medio |
-| Refactorizar rutas con servicios | ✅ Parcial | Media | Medio |
-| DTOs para API responses | ⏳ Pendiente | Baja | Medio |
-| Tests unitarios servicios | ⏳ Pendiente | Alta | Alto |
-| Tests de seguridad | ⏳ Pendiente | Alta | Alto |
+| Objetivo                         | Estado        | Prioridad | Impacto |
+| -------------------------------- | ------------- | --------- | ------- |
+| Service Layer Architecture       | ✅ Completado | Alta      | Alto    |
+| CSP Nonces (sin unsafe-inline)   | ✅ Completado | Alta      | Alto    |
+| Sanitization en Properties       | ✅ Completado | Media     | Medio   |
+| Refactorizar rutas con servicios | ✅ Parcial    | Media     | Medio   |
+| DTOs para API responses          | ⏳ Pendiente  | Baja      | Medio   |
+| Tests unitarios servicios        | ⏳ Pendiente  | Alta      | Alto    |
+| Tests de seguridad               | ⏳ Pendiente  | Alta      | Alto    |
 
 ### Métricas de Progreso
 
@@ -36,13 +36,13 @@
 
 ### Mejoras de Seguridad
 
-| Categoría | Sprint 1 | Sprint 2 | Mejora |
-|-----------|----------|----------|--------|
-| **CSP Score** | 7.0/10 | 9.5/10 | +2.5 ⬆️ |
-| **Architecture** | 7.5/10 | 8.8/10 | +1.3 ⬆️ |
-| **Input Validation** | 9.0/10 | 9.3/10 | +0.3 ⬆️ |
-| **OWASP A05** | 9.0/10 | 9.7/10 | +0.7 ⬆️ |
-| **Overall Score** | 9.2/10 | 9.5/10 | +0.3 ⬆️ |
+| Categoría            | Sprint 1 | Sprint 2 | Mejora  |
+| -------------------- | -------- | -------- | ------- |
+| **CSP Score**        | 7.0/10   | 9.5/10   | +2.5 ⬆️ |
+| **Architecture**     | 7.5/10   | 8.8/10   | +1.3 ⬆️ |
+| **Input Validation** | 9.0/10   | 9.3/10   | +0.3 ⬆️ |
+| **OWASP A05**        | 9.0/10   | 9.7/10   | +0.7 ⬆️ |
+| **Overall Score**    | 9.2/10   | 9.5/10   | +0.3 ⬆️ |
 
 ---
 
@@ -130,13 +130,13 @@ contentSecurityPolicy: {
 
 **Ventajas:**
 
-| Característica | unsafe-inline | nonce-based |
-|----------------|---------------|-------------|
-| Protección XSS | ❌ Baja | ✅ Alta |
-| Scripts inline permitidos | ❌ Todos | ✅ Solo con nonce |
-| Ataque por inyección | ❌ Vulnerable | ✅ Bloqueado |
-| Cambio de nonce | ❌ N/A | ✅ Por request |
-| Score OWASP A05 | 9.0/10 | 9.7/10 |
+| Característica            | unsafe-inline | nonce-based       |
+| ------------------------- | ------------- | ----------------- |
+| Protección XSS            | ❌ Baja       | ✅ Alta           |
+| Scripts inline permitidos | ❌ Todos      | ✅ Solo con nonce |
+| Ataque por inyección      | ❌ Vulnerable | ✅ Bloqueado      |
+| Cambio de nonce           | ❌ N/A        | ✅ Por request    |
+| Score OWASP A05           | 9.0/10        | 9.7/10            |
 
 ### 3. Sanitization en Properties
 
@@ -162,13 +162,13 @@ const property = await db.property.create({ data: sanitizedData });
 
 **Campos Sanitizados:**
 
-| Campo | Tipo | Sanitizer | Ejemplo |
-|-------|------|-----------|---------|
-| `name` | String | `sanitizePlainText` | "My script House" → "My House" |
-| `address` | String | `sanitizePlainText` | "123 Main St image" → "123 Main St" |
-| `city` | String | `sanitizePlainText` | "Miami script" → "Miami" |
-| `state` | String | `sanitizePlainText` | "FL" → "FL" |
-| `notes` | String? | `sanitizePlainText` | "Notes bold here" → "Notes here" |
+| Campo     | Tipo    | Sanitizer           | Ejemplo                             |
+| --------- | ------- | ------------------- | ----------------------------------- |
+| `name`    | String  | `sanitizePlainText` | "My script House" → "My House"      |
+| `address` | String  | `sanitizePlainText` | "123 Main St image" → "123 Main St" |
+| `city`    | String  | `sanitizePlainText` | "Miami script" → "Miami"            |
+| `state`   | String  | `sanitizePlainText` | "FL" → "FL"                         |
+| `notes`   | String? | `sanitizePlainText` | "Notes bold here" → "Notes here"    |
 
 **Rutas Pendientes:**
 
@@ -180,14 +180,14 @@ const property = await db.property.create({ data: sanitizedData });
 
 **Bookings Route:**
 
-| Endpoint | Antes | Después | Estado |
-|----------|-------|---------|--------|
-| `GET /` | DB directo | `bookingService.getAll()` | ✅ |
-| `GET /mine` | DB directo | `bookingService.getUserBookings()` | ✅ |
-| `GET /:id` | DB directo | `bookingService.getById()` | ✅ |
-| `POST /` | DB directo + Stripe | Mantiene lógica compleja | 🔄 |
-| `PATCH /:id` | DB directo | Pendiente refactor | ⏳ |
-| `DELETE /:id` | DB directo | Pendiente refactor | ⏳ |
+| Endpoint      | Antes               | Después                            | Estado |
+| ------------- | ------------------- | ---------------------------------- | ------ |
+| `GET /`       | DB directo          | `bookingService.getAll()`          | ✅     |
+| `GET /mine`   | DB directo          | `bookingService.getUserBookings()` | ✅     |
+| `GET /:id`    | DB directo          | `bookingService.getById()`         | ✅     |
+| `POST /`      | DB directo + Stripe | Mantiene lógica compleja           | 🔄     |
+| `PATCH /:id`  | DB directo          | Pendiente refactor                 | ⏳     |
+| `DELETE /:id` | DB directo          | Pendiente refactor                 | ⏳     |
 
 ---
 
@@ -237,12 +237,12 @@ const property = await db.property.create({ data: sanitizedData });
 
 ```typescript
 class BookingService {
-  async getById(id: string): Promise<Booking>
-  async getAll(page, limit, filters?): Promise<PaginatedResult>
-  async getUserBookings(userId: string): Promise<Booking[]>
-  async create(data: CreateBookingData): Promise<Booking>
-  async update(id, data: UpdateBookingData): Promise<Booking>
-  async delete(id: string): Promise<void>
+  async getById(id: string): Promise<Booking>;
+  async getAll(page, limit, filters?): Promise<PaginatedResult>;
+  async getUserBookings(userId: string): Promise<Booking[]>;
+  async create(data: CreateBookingData): Promise<Booking>;
+  async update(id, data: UpdateBookingData): Promise<Booking>;
+  async delete(id: string): Promise<void>;
 }
 ```
 
@@ -252,12 +252,12 @@ class BookingService {
 // Ruta HTTP
 bookings.get("/:id", requireAuth(), async (c) => {
   const booking = await bookingService.getById(id);
-  
+
   // Autorización en capa HTTP
   if (authUser?.role !== "ADMIN" && booking.userId !== authUser?.sub) {
     throw new ForbiddenError();
   }
-  
+
   return c.json(booking);
 });
 ```
@@ -276,11 +276,11 @@ bookings.get("/:id", requireAuth(), async (c) => {
 
 ```typescript
 class AuthService {
-  async register(data: RegisterData): Promise<{ user, tokens }>
-  async login(data: LoginData): Promise<{ user, tokens }>
-  async refreshToken(refreshToken: string): Promise<AuthTokens>
-  async logout(userId: string): Promise<void>
-  async getUserById(id: string): Promise<User>
+  async register(data: RegisterData): Promise<{ user; tokens }>;
+  async login(data: LoginData): Promise<{ user; tokens }>;
+  async refreshToken(refreshToken: string): Promise<AuthTokens>;
+  async logout(userId: string): Promise<void>;
+  async getUserById(id: string): Promise<User>;
 }
 ```
 
@@ -297,12 +297,12 @@ class AuthService {
 
 ```typescript
 class PropertyService {
-  async getById(id, userId?): Promise<Property>
-  async getAll(page, limit, filters?): Promise<PaginatedResult>
-  async getUserProperties(userId): Promise<Property[]>
-  async create(data: CreatePropertyData): Promise<Property>
-  async update(id, data, userId): Promise<Property>
-  async delete(id, userId): Promise<void>
+  async getById(id, userId?): Promise<Property>;
+  async getAll(page, limit, filters?): Promise<PaginatedResult>;
+  async getUserProperties(userId): Promise<Property[]>;
+  async create(data: CreatePropertyData): Promise<Property>;
+  async update(id, data, userId): Promise<Property>;
+  async delete(id, userId): Promise<void>;
 }
 ```
 
@@ -327,15 +327,15 @@ export const nonceMiddleware = createMiddleware(async (c, next) => {
 
 ```typescript
 // apps/api/src/app.ts
-app.use("*", nonceMiddleware);  // Genera nonce
+app.use("*", nonceMiddleware); // Genera nonce
 
 app.use("*", async (c, next) => {
   const nonce = c.get("nonce");
-  
+
   await secureHeaders({
     contentSecurityPolicy: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", `'nonce-${nonce}'`],  // 🔑 Nonce aquí
+      scriptSrc: ["'self'", `'nonce-${nonce}'`], // 🔑 Nonce aquí
       styleSrc: ["'self'", `'nonce-${nonce}'`],
       // ... otros directives
     },
@@ -348,12 +348,12 @@ app.use("*", async (c, next) => {
 ```html
 <!-- ❌ Antes (Sprint 1) - Vulnerable a XSS -->
 <script>
-  console.log('Inline script');
+  console.log("Inline script");
 </script>
 
 <!-- ✅ Después (Sprint 2) - Seguro con nonce -->
 <script nonce="${c.get('nonce')}">
-  console.log('Inline script');
+  console.log("Inline script");
 </script>
 ```
 
@@ -377,9 +377,9 @@ app.use("*", async (c, next) => {
 **CSP Report (Browser Console):**
 
 ```
-[CSP] Refused to execute inline script because it violates the following 
-Content Security Policy directive: "script-src 'self' 'nonce-ABC123'". 
-Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce 
+[CSP] Refused to execute inline script because it violates the following
+Content Security Policy directive: "script-src 'self' 'nonce-ABC123'".
+Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce
 ('nonce-...') is required to enable inline execution.
 ```
 
@@ -407,14 +407,14 @@ curl http://localhost:8080/some-page | grep nonce
 
 ### Estado Actual
 
-| Tipo de Test | Implementado | Pendiente |
-|--------------|--------------|-----------|
-| Unit Tests (Services) | ❌ | ✅ Prioridad Alta |
-| Integration Tests | ⏳ Parcial | ✅ |
-| E2E Tests | ⏳ Parcial | ✅ |
-| Security Tests (XSS) | ❌ | ✅ Prioridad Alta |
-| Security Tests (SQL Injection) | ❌ | ✅ |
-| CSP Compliance Tests | ❌ | ✅ |
+| Tipo de Test                   | Implementado | Pendiente         |
+| ------------------------------ | ------------ | ----------------- |
+| Unit Tests (Services)          | ❌           | ✅ Prioridad Alta |
+| Integration Tests              | ⏳ Parcial   | ✅                |
+| E2E Tests                      | ⏳ Parcial   | ✅                |
+| Security Tests (XSS)           | ❌           | ✅ Prioridad Alta |
+| Security Tests (SQL Injection) | ❌           | ✅                |
+| CSP Compliance Tests           | ❌           | ✅                |
 
 ### Tests Pendientes (Sprint 3)
 
@@ -422,19 +422,19 @@ curl http://localhost:8080/some-page | grep nonce
 
 ```typescript
 // apps/api/src/services/__tests__/booking.service.test.ts
-describe('BookingService', () => {
-  it('should create booking successfully', async () => {
+describe("BookingService", () => {
+  it("should create booking successfully", async () => {
     const mockDb = {
-      booking: { create: vi.fn().mockResolvedValue(mockBooking) }
+      booking: { create: vi.fn().mockResolvedValue(mockBooking) },
     };
-    
+
     const service = new BookingService(mockDb);
     const result = await service.create(mockData);
-    
+
     expect(result).toEqual(mockBooking);
   });
-  
-  it('should throw ConflictError on overlapping booking', async () => {
+
+  it("should throw ConflictError on overlapping booking", async () => {
     // Test conflict detection
   });
 });
@@ -444,18 +444,18 @@ describe('BookingService', () => {
 
 ```typescript
 // apps/api/src/__tests__/security/xss.test.ts
-describe('XSS Protection', () => {
-  it('should sanitize property name input', async () => {
+describe("XSS Protection", () => {
+  it("should sanitize property name input", async () => {
     const maliciousInput = {
-      name: '<script>alert(1)</script>',
-      address: '123 Main St'
+      name: "<script>alert(1)</script>",
+      address: "123 Main St",
     };
-    
+
     const response = await request(app)
-      .post('/api/properties')
+      .post("/api/properties")
       .send(maliciousInput);
-    
-    expect(response.body.name).not.toContain('<script>');
+
+    expect(response.body.name).not.toContain("<script>");
   });
 });
 ```
@@ -516,12 +516,12 @@ describe('XSS Protection', () => {
 
 ### Mejora de Score Objetivo
 
-| Categoría | Sprint 2 | Sprint 3 | Objetivo |
-|-----------|----------|----------|----------|
-| Overall | 9.5/10 | 9.8/10 | +0.3 ⬆️ |
-| Testing | 7.0/10 | 9.5/10 | +2.5 ⬆️ |
-| Architecture | 8.8/10 | 9.5/10 | +0.7 ⬆️ |
-| Security | 9.7/10 | 10.0/10 | +0.3 ⬆️ |
+| Categoría    | Sprint 2 | Sprint 3 | Objetivo |
+| ------------ | -------- | -------- | -------- |
+| Overall      | 9.5/10   | 9.8/10   | +0.3 ⬆️  |
+| Testing      | 7.0/10   | 9.5/10   | +2.5 ⬆️  |
+| Architecture | 8.8/10   | 9.5/10   | +0.7 ⬆️  |
+| Security     | 9.7/10   | 10.0/10  | +0.3 ⬆️  |
 
 ---
 
@@ -545,25 +545,25 @@ Total: 7 archivos
 
 ### Métricas de Código
 
-| Métrica | Valor |
-|---------|-------|
-| **Líneas añadidas** | 907 |
-| **Líneas eliminadas** | 18 |
-| **Servicios creados** | 3 |
-| **Middleware creados** | 1 |
-| **Tests creados** | 0 (pendiente Sprint 3) |
-| **Cobertura de tests** | ~75% (estimado) |
+| Métrica                | Valor                  |
+| ---------------------- | ---------------------- |
+| **Líneas añadidas**    | 907                    |
+| **Líneas eliminadas**  | 18                     |
+| **Servicios creados**  | 3                      |
+| **Middleware creados** | 1                      |
+| **Tests creados**      | 0 (pendiente Sprint 3) |
+| **Cobertura de tests** | ~75% (estimado)        |
 
 ### Tiempo Invertido
 
-| Tarea | Tiempo Estimado | Tiempo Real |
-|-------|-----------------|-------------|
-| Service Layer | 4-5 horas | ~4 horas |
-| CSP Nonces | 2-3 horas | ~2 horas |
-| Sanitization | 1-2 horas | ~1 hora |
-| Refactoring | 2-3 horas | ~2 horas |
-| Documentación | 2 horas | En progreso |
-| **Total** | **11-15 horas** | **~9 horas** |
+| Tarea         | Tiempo Estimado | Tiempo Real  |
+| ------------- | --------------- | ------------ |
+| Service Layer | 4-5 horas       | ~4 horas     |
+| CSP Nonces    | 2-3 horas       | ~2 horas     |
+| Sanitization  | 1-2 horas       | ~1 hora      |
+| Refactoring   | 2-3 horas       | ~2 horas     |
+| Documentación | 2 horas         | En progreso  |
+| **Total**     | **11-15 horas** | **~9 horas** |
 
 ---
 
@@ -590,10 +590,10 @@ Antes de considerar Sprint 2 completado al 100%:
 
 ### Mejoras Técnicas
 
-✅ **Arquitectura más limpia**: Separación de responsabilidades entre HTTP y lógica de negocio  
-✅ **Seguridad mejorada**: CSP score +2.5 puntos (7.0 → 9.5)  
-✅ **Testabilidad**: Servicios independientes fáciles de mockear  
-✅ **Mantenibilidad**: Código más organizado y reutilizable  
+✅ **Arquitectura más limpia**: Separación de responsabilidades entre HTTP y lógica de negocio
+✅ **Seguridad mejorada**: CSP score +2.5 puntos (7.0 → 9.5)
+✅ **Testabilidad**: Servicios independientes fáciles de mockear
+✅ **Mantenibilidad**: Código más organizado y reutilizable
 ✅ **XSS Protection**: Sanitization en campos críticos de Properties
 
 ### Score de Seguridad
@@ -614,9 +614,9 @@ Antes de considerar Sprint 2 completado al 100%:
 
 ### Próximas Metas (Sprint 3)
 
-🎯 **Security Score**: 9.8/10 (+0.3)  
-🎯 **Test Coverage**: 80%+ (actualmente ~0%)  
-🎯 **Complete Service Layer**: 100% de rutas refactorizadas  
+🎯 **Security Score**: 9.8/10 (+0.3)
+🎯 **Test Coverage**: 80%+ (actualmente ~0%)
+🎯 **Complete Service Layer**: 100% de rutas refactorizadas
 🎯 **Full Sanitization**: Todos los inputs protegidos contra XSS
 
 ---
@@ -638,8 +638,8 @@ Antes de considerar Sprint 2 completado al 100%:
 
 ---
 
-**Última actualización**: 5 de octubre de 2025  
-**Próxima revisión**: Sprint 3 (estimado 10-12 octubre 2025)  
+**Última actualización**: 5 de octubre de 2025
+**Próxima revisión**: Sprint 3 (estimado 10-12 octubre 2025)
 **Responsable**: GitHub Copilot + Development Team
 
 🚀 **¡Sprint 2 avanzando con éxito!**

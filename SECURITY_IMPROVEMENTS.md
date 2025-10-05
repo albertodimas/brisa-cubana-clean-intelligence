@@ -1,6 +1,6 @@
 # 🔒 Mejoras de Seguridad Implementadas
 
-**Fecha**: 5 de octubre de 2025  
+**Fecha**: 5 de octubre de 2025
 **Versión**: 0.1.1
 
 ## ✅ Correcciones Críticas Implementadas
@@ -308,6 +308,6 @@ curl -X POST http://localhost:3001/api/bookings \
 
 ---
 
-**Autor**: GitHub Copilot  
-**Revisado**: Equipo Brisa Cubana  
+**Autor**: GitHub Copilot
+**Revisado**: Equipo Brisa Cubana
 **Próxima Auditoría**: Enero 2026

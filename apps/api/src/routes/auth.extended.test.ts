@@ -9,9 +9,14 @@ const userMock = {
   findUnique: vi.fn(),
 };
 
+const refreshTokenMock = {
+  create: vi.fn(),
+};
+
 vi.mock("../lib/db", () => ({
   db: {
     user: userMock,
+    refreshToken: refreshTokenMock,
   },
 }));
 
@@ -38,6 +43,13 @@ describe("Auth Routes - Extended Tests", () => {
     app = buildApp();
     originalEnv = { ...process.env };
     vi.clearAllMocks();
+    refreshTokenMock.create.mockResolvedValue({
+      id: "refresh-token-id",
+      token: "mock-refresh-token",
+      userId: "test-user",
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(),
+    });
   });
 
   afterEach(() => {

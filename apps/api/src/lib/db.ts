@@ -10,7 +10,7 @@ const globalForPrisma = globalThis as unknown as {
 // Prisma Client with optimized configuration
 // Connection pooling configured via DATABASE_URL:
 // postgresql://user:pass@host:5432/db?connection_limit=20&pool_timeout=10
-export const db =
+export const db: PrismaClient =
   globalForPrisma.prisma ??
   new PrismaClient({
     log:

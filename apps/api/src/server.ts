@@ -1,3 +1,4 @@
+/* cSpell:ignore otlp */
 import { serve } from "@hono/node-server";
 import { app } from "./app";
 import { initializeOpenTelemetry } from "./lib/observability";

@@ -30,7 +30,7 @@ vi.mock("../../lib/token", () => ({
   generateRefreshToken: vi.fn(),
   verifyRefreshToken: vi.fn(),
   revokeRefreshToken: vi.fn(),
-  revokeAllUserRefreshTokens: vi.fn(),
+  revokeAllRefreshTokens: vi.fn(),
 }));
 
 // Global mock for logger
@@ -50,7 +50,7 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
   revokeRefreshToken,
-  revokeAllUserRefreshTokens,
+  revokeAllRefreshTokens,
 } = await import("../../lib/token");
 
 describe("AuthService", () => {
@@ -344,11 +344,11 @@ describe("AuthService", () => {
 
   describe("logout", () => {
     it("should revoke all user refresh tokens", async () => {
-      vi.mocked(revokeAllUserRefreshTokens).mockResolvedValueOnce(undefined);
+      vi.mocked(revokeAllRefreshTokens).mockResolvedValueOnce(undefined);
 
       await service.logout("user-1");
 
-      expect(revokeAllUserRefreshTokens).toHaveBeenCalledWith("user-1");
+      expect(revokeAllRefreshTokens).toHaveBeenCalledWith("user-1");
     });
   });
 

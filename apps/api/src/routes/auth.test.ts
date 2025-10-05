@@ -26,6 +26,21 @@ vi.mock("../lib/db", () => ({
           : null,
       ),
     },
+    refreshToken: {
+      create: vi.fn(
+        ({
+          data,
+        }: {
+          data: { token: string; userId: string; expiresAt: Date };
+        }) => ({
+          id: "refresh-token-id",
+          token: data.token,
+          userId: data.userId,
+          expiresAt: data.expiresAt,
+          createdAt: new Date(),
+        }),
+      ),
+    },
   },
 }));
 

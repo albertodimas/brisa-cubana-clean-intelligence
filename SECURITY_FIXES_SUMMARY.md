@@ -68,7 +68,7 @@ Los siguientes errores existían **antes** de nuestros cambios:
 - `properties.ts:126` - Tipo `PropertyUncheckedCreateInput` no exportado
 - `properties.ts:200` - Tipo `PropertyUncheckedUpdateInput` no exportado
 
-**Causa**: Problema con generación de tipos de Prisma.  
+**Causa**: Problema con generación de tipos de Prisma.
 **Solución recomendada**: Ejecutar `pnpm --filter=@brisa/api db:generate`
 
 ---
@@ -242,13 +242,13 @@ const authUser = requireAuthUser(c); // Lanza excepción si no auth
 
 ---
 
-**Estado Final**: ✅ **7/7 Mejoras Críticas Implementadas**  
-**Nivel de Seguridad**: 🟢 **MEJORADO** (7/10 → 8.5/10)  
+**Estado Final**: ✅ **7/7 Mejoras Críticas Implementadas**
+**Nivel de Seguridad**: 🟢 **MEJORADO** (7/10 → 8.5/10)
 **Producción Ready**: ✅ **SÍ** (con corrección de errores preexistentes de Prisma)
 
 ---
 
-**Fecha**: 5 de octubre de 2025  
-**Implementado por**: GitHub Copilot  
-**Tiempo total**: ~30 minutos  
+**Fecha**: 5 de octubre de 2025
+**Implementado por**: GitHub Copilot
+**Tiempo total**: ~30 minutos
 **Próxima revisión**: En próximo sprint

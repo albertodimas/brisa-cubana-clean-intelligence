@@ -7,7 +7,7 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
   revokeRefreshToken,
-  revokeAllUserRefreshTokens,
+  revokeAllRefreshTokens,
 } from "../lib/token";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 import { requireAuth } from "../middleware/auth";
@@ -132,7 +132,7 @@ auth.post("/logout", requireAuth(), async (c) => {
   const authUser = requireAuthUser(c);
 
   // Revoke all refresh tokens for this user
-  await revokeAllUserRefreshTokens(authUser.sub);
+  await revokeAllRefreshTokens(authUser.sub);
 
   return c.json({ message: "Logged out successfully" });
 });

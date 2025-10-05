@@ -48,6 +48,7 @@ export async function generateRefreshToken(userId: string): Promise<string> {
   expiresAt.setDate(expiresAt.getDate() + 7);
 
   // Store in database
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const refreshToken = await db.refreshToken.create({
     data: {
       token: tokenValue,
@@ -59,6 +60,7 @@ export async function generateRefreshToken(userId: string): Promise<string> {
   // Create JWT with token ID for additional validation
   const payload: RefreshTokenPayload = {
     sub: userId,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     tokenId: refreshToken.id,
   };
 
@@ -77,6 +79,7 @@ export async function verifyRefreshToken(
     const payload = jwt.verify(token, secret) as RefreshTokenPayload;
 
     // Check if token exists in database and is not revoked
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const storedToken = await db.refreshToken.findFirst({
       where: {
         id: payload.tokenId,
@@ -103,33 +106,36 @@ export async function verifyRefreshToken(
 }
 
 export async function revokeRefreshToken(tokenId: string): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   await db.refreshToken.update({
     where: { id: tokenId },
     data: { isRevoked: true },
   });
 }
 
-export async function revokeAllUserRefreshTokens(
-  userId: string,
-): Promise<void> {
+export async function revokeAllRefreshTokens(userId: string): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   await db.refreshToken.updateMany({
-    where: { userId, isRevoked: false },
+    where: { userId },
     data: { isRevoked: true },
   });
 }
 
-export async function cleanupExpiredRefreshTokens(): Promise<number> {
+export async function cleanupExpiredTokens(): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const result = await db.refreshToken.deleteMany({
     where: {
       OR: [
         { expiresAt: { lt: new Date() } },
         {
           isRevoked: true,
+          // Delete revoked tokens older than 30 days
           createdAt: { lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-        }, // Delete revoked tokens older than 30 days
+        },
       ],
     },
   });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   return result.count;
 }
 

@@ -1,3 +1,4 @@
+/* cSpell:ignore pexpire pttl */
 import type { Context, Next } from "hono";
 import type Redis from "ioredis";
 import { logger } from "../lib/logger";

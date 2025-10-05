@@ -7,7 +7,7 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
   revokeRefreshToken,
-  revokeAllUserRefreshTokens,
+  revokeAllRefreshTokens,
 } from "../lib/token";
 import {
   NotFoundError,
@@ -43,7 +43,7 @@ export interface UserResponse {
 
 /**
  * Authentication Service
- * 
+ *
  * Handles all authentication logic:
  * - User registration and login
  * - Token generation and verification
@@ -53,7 +53,7 @@ export interface UserResponse {
 export class AuthService {
   /**
    * Register a new user
-   * 
+   *
    * Validates email uniqueness, password strength, hashes password
    */
   async register(data: RegisterData): Promise<{
@@ -77,9 +77,7 @@ export class AuthService {
 
     // Validate password strength
     if (data.password.length < 8) {
-      throw new ValidationError(
-        "Password must be at least 8 characters long",
-      );
+      throw new ValidationError("Password must be at least 8 characters long");
     }
 
     // Hash password
@@ -120,7 +118,7 @@ export class AuthService {
 
   /**
    * Login a user
-   * 
+   *
    * Validates credentials and returns tokens
    */
   async login(data: LoginData): Promise<{
@@ -171,7 +169,7 @@ export class AuthService {
 
   /**
    * Refresh access token using refresh token
-   * 
+   *
    * Implements token rotation: old token is revoked, new tokens issued
    */
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
@@ -205,11 +203,11 @@ export class AuthService {
 
   /**
    * Logout a user
-   * 
+   *
    * Revokes all refresh tokens for the user
    */
   async logout(userId: string): Promise<void> {
-    await revokeAllUserRefreshTokens(userId);
+    await revokeAllRefreshTokens(userId);
     logger.info(`User logged out: ${userId}`);
   }
 
