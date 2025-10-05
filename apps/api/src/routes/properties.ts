@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { db, type Prisma } from "../lib/db";
+import { db } from "../lib/db";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 import {
@@ -123,22 +123,20 @@ properties.post(
 
     const data: CreatePropertyInput = parseResult.data;
 
-    const createData: Prisma.PropertyUncheckedCreateInput = {
-      name: data.name,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zipCode: data.zipCode,
-      type: data.type,
-      userId: authUser.sub,
-      size: data.size ?? null,
-      bedrooms: data.bedrooms ?? null,
-      bathrooms: data.bathrooms ?? null,
-      notes: data.notes ?? null,
-    };
-
     const property = await db.property.create({
-      data: createData,
+      data: {
+        name: data.name,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode,
+        type: data.type,
+        userId: authUser.sub,
+        size: data.size ?? null,
+        bedrooms: data.bedrooms ?? null,
+        bathrooms: data.bathrooms ?? null,
+        notes: data.notes ?? null,
+      },
       include: {
         user: {
           select: {
@@ -197,26 +195,24 @@ properties.patch(
 
     const data: UpdatePropertyInput = parseResult.data;
 
-    const updateData: Prisma.PropertyUncheckedUpdateInput = {
-      ...(data.name !== undefined ? { name: data.name } : {}),
-      ...(data.address !== undefined ? { address: data.address } : {}),
-      ...(data.city !== undefined ? { city: data.city } : {}),
-      ...(data.state !== undefined ? { state: data.state } : {}),
-      ...(data.zipCode !== undefined ? { zipCode: data.zipCode } : {}),
-      ...(data.type !== undefined ? { type: data.type } : {}),
-      ...(data.size !== undefined ? { size: data.size ?? null } : {}),
-      ...(data.bedrooms !== undefined
-        ? { bedrooms: data.bedrooms ?? null }
-        : {}),
-      ...(data.bathrooms !== undefined
-        ? { bathrooms: data.bathrooms ?? null }
-        : {}),
-      ...(data.notes !== undefined ? { notes: data.notes ?? null } : {}),
-    };
-
     const property = await db.property.update({
       where: { id: propertyId },
-      data: updateData,
+      data: {
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.address !== undefined ? { address: data.address } : {}),
+        ...(data.city !== undefined ? { city: data.city } : {}),
+        ...(data.state !== undefined ? { state: data.state } : {}),
+        ...(data.zipCode !== undefined ? { zipCode: data.zipCode } : {}),
+        ...(data.type !== undefined ? { type: data.type } : {}),
+        ...(data.size !== undefined ? { size: data.size ?? null } : {}),
+        ...(data.bedrooms !== undefined
+          ? { bedrooms: data.bedrooms ?? null }
+          : {}),
+        ...(data.bathrooms !== undefined
+          ? { bathrooms: data.bathrooms ?? null }
+          : {}),
+        ...(data.notes !== undefined ? { notes: data.notes ?? null } : {}),
+      },
       include: {
         user: {
           select: {

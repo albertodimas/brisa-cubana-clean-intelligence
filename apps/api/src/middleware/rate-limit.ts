@@ -189,11 +189,11 @@ setInterval(cleanupRateLimitStore, 10 * 60 * 1000);
 export const RateLimits = {
   /**
    * Strict rate limit for authentication endpoints
-   * 5 requests per 15 minutes
+   * 3 requests per 15 minutes (reduced from 5 for security)
    */
   auth: {
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: 3,
     message: "Too many login attempts, please try again in 15 minutes.",
     skipSuccessfulRequests: true,
   } as const,

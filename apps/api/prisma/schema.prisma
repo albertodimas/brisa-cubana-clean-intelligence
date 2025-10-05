@@ -23,6 +23,7 @@ model User {
   reconciliationNotes ReconciliationNote[] @relation("UserReconciliationNotes")
   resolvedNotes       ReconciliationNote[] @relation("UserResolvedNotes")
   conversations       Conversation[]
+  refreshTokens       RefreshToken[]
 
   @@index([role])
   @@index([createdAt])
@@ -259,4 +260,19 @@ enum MessageRole {
   USER
   ASSISTANT
   SYSTEM
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token, isRevoked])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
 }

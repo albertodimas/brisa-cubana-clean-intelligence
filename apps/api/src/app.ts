@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { compress } from "hono/compress";
+import { secureHeaders } from "hono/secure-headers";
 import services from "./routes/services";
 import bookings from "./routes/bookings";
 import properties from "./routes/properties";
@@ -32,15 +33,37 @@ import {
 export const app = new Hono();
 
 // Middleware (order matters!)
-// 1. Compression first (for all responses)
+// 1. Security headers first (CSP, HSTS, X-Frame-Options, etc.)
+app.use(
+  "*",
+  secureHeaders({
+    contentSecurityPolicy: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+    xFrameOptions: "DENY",
+    xContentTypeOptions: "nosniff",
+    referrerPolicy: "strict-origin-when-cross-origin",
+    strictTransportSecurity: "max-age=31536000; includeSubDomains",
+  }),
+);
+
+// 2. Compression (for all responses)
 app.use("*", compress());
 
-// 2. Observability stack (tracing, correlation, metrics)
+// 3. Observability stack (tracing, correlation, metrics)
 app.use("*", tracingMiddleware); // OpenTelemetry tracing
 app.use("*", correlationIdMiddleware); // Correlation IDs for distributed tracing
 app.use("*", metricsMiddleware); // Legacy Prometheus metrics
 
-// 3. Logging and monitoring
+// 4. Logging and monitoring
 app.use("*", requestLogger); // Legacy logger (TODO: migrate to requestLoggingMiddleware)
 app.use("*", requestLoggingMiddleware); // Structured logging with correlation IDs
 app.use("*", performanceMonitoringMiddleware); // Slow request detection
@@ -54,9 +77,16 @@ app.use(
   "*",
   cors({
     origin: (origin) => {
-      // Development: allow localhost
+      // Development: explicit whitelist (never use wildcards)
       if (process.env.NODE_ENV !== "production") {
-        return origin ?? "*";
+        const devOrigins = [
+          "http://localhost:3000",
+          "http://127.0.0.1:3000",
+          "http://localhost:3001",
+          "http://127.0.0.1:3001",
+        ];
+        if (!origin) return "*"; // Postman/curl requests
+        return devOrigins.includes(origin) ? origin : null;
       }
 
       // Production: explicit allowlist (never use wildcards)

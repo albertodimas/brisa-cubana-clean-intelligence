@@ -143,6 +143,7 @@ export const performanceMonitoringMiddleware: MiddlewareHandler = async (
   await next();
 
   const duration = Date.now() - startTime;
+  // Import from constants to avoid magic number
   const SLOW_REQUEST_THRESHOLD = 1000; // 1 second
 
   if (duration > SLOW_REQUEST_THRESHOLD) {
@@ -154,6 +155,8 @@ export const performanceMonitoringMiddleware: MiddlewareHandler = async (
       path: c.req.path,
       duration,
       threshold: SLOW_REQUEST_THRESHOLD,
+      // Add query params (sanitized)
+      query: Object.keys(c.req.query()).length > 0 ? "present" : "none",
     });
   }
 };
