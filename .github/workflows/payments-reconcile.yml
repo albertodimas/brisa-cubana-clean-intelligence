@@ -32,5 +32,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        run: pnpm --filter=@brisa/api db:generate
+
       - name: Reconcile payments with Stripe
         run: pnpm --filter=@brisa/api payments:reconcile
