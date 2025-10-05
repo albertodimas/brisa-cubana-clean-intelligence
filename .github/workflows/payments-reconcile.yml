@@ -53,8 +53,8 @@ jobs:
       - name: Generate Prisma Client
         run: pnpm --filter=@brisa/api db:generate
 
-      - name: Run database migrations
-        run: cd apps/api && pnpm exec prisma migrate deploy
+      - name: Create database schema
+        run: pnpm --filter=@brisa/api db:push --skip-generate --accept-data-loss
 
       - name: Reconcile payments with Stripe
         run: pnpm --filter=@brisa/api payments:reconcile
