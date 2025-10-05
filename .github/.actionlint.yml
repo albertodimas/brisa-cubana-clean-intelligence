@@ -1,0 +1,7 @@
+# GitHub Actions Linter Configuration
+# This file configures the GitHub Actions extension to ignore false positives
+
+# Ignore context validation for dynamically set environment variables
+ignore-context:
+  - STORE_PATH  # Set by pnpm store path command
+  - SLACK_WEBHOOK_URL  # Optional secret with continue-on-error
