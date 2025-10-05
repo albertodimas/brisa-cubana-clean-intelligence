@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../lib/db";
+import { sanitizeNoteMessage } from "../lib/sanitize";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import { createReconciliationNoteSchema } from "../schemas";
 
@@ -160,7 +161,7 @@ notes.post("/booking/:bookingId", async (c) => {
     data: {
       bookingId,
       authorId: authUser!.sub,
-      message: parsed.data.message,
+      message: sanitizeNoteMessage(parsed.data.message),
       status: parsed.data.status ?? "OPEN",
       resolvedById:
         parsed.data.status === "RESOLVED" ? authUser!.sub : undefined,
@@ -208,7 +209,7 @@ notes.patch("/note/:noteId", async (c) => {
   const note = await db.reconciliationNote.update({
     where: { id: noteId },
     data: {
-      message: payload.message,
+      message: payload.message ? sanitizeNoteMessage(payload.message) : undefined,
       status: payload.status,
       resolvedById:
         payload.status === "RESOLVED"

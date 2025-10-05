@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../lib/db";
+import { sanitizePlainText } from "../lib/sanitize";
 import { getStripe, stripeEnabled } from "../lib/stripe";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
@@ -341,7 +342,7 @@ bookings.patch("/:id", requireAuth(), async (c) => {
   }
 
   if (payload.notes !== undefined) {
-    updateData.notes = payload.notes === "" ? undefined : payload.notes;
+    updateData.notes = payload.notes === "" ? undefined : sanitizePlainText(payload.notes);
   }
 
   if (Object.keys(updateData).length === 0) {

@@ -6,19 +6,6 @@
 
 ---
 
-## 📋 Tabla de Contenidos
-
-1. [Resumen Ejecutivo](#resumen-ejecutivo)
-2. [Cambios Implementados](#cambios-implementados)
-3. [Arquitectura de Servicios](#arquitectura-de-servicios)
-4. [CSP con Nonces](#csp-con-nonces)
-5. [Sanitization Mejorada](#sanitization-mejorada)
-6. [Guía de Uso](#guía-de-uso)
-7. [Testing](#testing)
-8. [Próximos Pasos](#próximos-pasos)
-
----
-
 ## 🎯 Resumen Ejecutivo
 
 ### Objetivos del Sprint
@@ -177,11 +164,11 @@ const property = await db.property.create({ data: sanitizedData });
 
 | Campo | Tipo | Sanitizer | Ejemplo |
 |-------|------|-----------|---------|
-| `name` | String | `sanitizePlainText` | "My <script>alert(1)</script> House" → "My House" |
-| `address` | String | `sanitizePlainText` | "123 Main St <img src=x>" → "123 Main St" |
-| `city` | String | `sanitizePlainText` | "Miami<script>" → "Miami" |
+| `name` | String | `sanitizePlainText` | "My script House" → "My House" |
+| `address` | String | `sanitizePlainText` | "123 Main St image" → "123 Main St" |
+| `city` | String | `sanitizePlainText` | "Miami script" → "Miami" |
 | `state` | String | `sanitizePlainText` | "FL" → "FL" |
-| `notes` | String? | `sanitizePlainText` | "Notes <b>here</b>" → "Notes here" |
+| `notes` | String? | `sanitizePlainText` | "Notes bold here" → "Notes here" |
 
 **Rutas Pendientes:**
 
@@ -500,29 +487,29 @@ describe('XSS Protection', () => {
 
 #### Media Prioridad
 
-4. **DTOs (Data Transfer Objects)** (2-3 días)
+1. **DTOs (Data Transfer Objects)** (2-3 días)
    - Separar modelos Prisma de API responses
    - `BookingResponseDTO`, `CreateBookingDTO`, etc.
    - Usar class-transformer y class-validator
 
-5. **Refactorizar Rutas Restantes** (2-3 días)
+2. **Refactorizar Rutas Restantes** (2-3 días)
    - Users route → UserService
    - Reports route → ReportService
    - Messages route → MessageService
 
-6. **Cron Job para Cleanup** (1 día)
+3. **Cron Job para Cleanup** (1 día)
    - Tarea diaria: `cleanupExpiredRefreshTokens()`
    - Opciones: node-cron o GitHub Actions
    - Schedule: 3 AM UTC
 
 #### Baja Prioridad
 
-7. **Documentación API (OpenAPI)** (2-3 días)
+1. **Documentación API (OpenAPI)** (2-3 días)
    - Generar swagger desde código
    - Documentar todos los endpoints
    - Incluir ejemplos de request/response
 
-8. **Performance Optimization** (1-2 días)
+2. **Performance Optimization** (1-2 días)
    - Añadir caching con Redis
    - Optimizar queries Prisma (include, select)
    - Implementar database indexes faltantes

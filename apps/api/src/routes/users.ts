@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { db } from "../lib/db";
 import { hashPassword } from "../lib/password";
+import { sanitizePlainText } from "../lib/sanitize";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import {
   createUserSchema,
@@ -111,14 +112,16 @@ users.post("/", async (c) => {
     return c.json({ error: "Email already exists" }, 400);
   }
 
+  const sanitizedData = {
+    email: payload.email,
+    name: payload.name ? sanitizePlainText(payload.name) : null,
+    phone: payload.phone ? sanitizePlainText(payload.phone) : null,
+    role: payload.role ?? "CLIENT",
+    passwordHash: await hashPassword(payload.password),
+  };
+
   const user = await db.user.create({
-    data: {
-      email: payload.email,
-      name: payload.name,
-      phone: payload.phone,
-      role: payload.role ?? "CLIENT",
-      passwordHash: await hashPassword(payload.password),
-    },
+    data: sanitizedData,
   });
 
   const { passwordHash: _passwordHash2, ...sanitized } = user;
@@ -155,11 +158,11 @@ users.patch("/:id", async (c) => {
   const updateData: UpdateUserInput = {};
 
   if (payload.name !== undefined) {
-    updateData.name = payload.name;
+    updateData.name = payload.name ? sanitizePlainText(payload.name) : undefined;
   }
 
   if (payload.phone !== undefined) {
-    updateData.phone = payload.phone;
+    updateData.phone = payload.phone ? sanitizePlainText(payload.phone) : undefined;
   }
 
   if (payload.role !== undefined) {
