@@ -1,6 +1,16 @@
 import { serve } from "@hono/node-server";
 import { app } from "./app";
 import { initializeOpenTelemetry } from "./lib/observability";
+import { validateEnv } from "./lib/env";
+import { logger } from "./lib/logger";
+
+// Validate environment variables first (fail-fast if missing critical vars)
+try {
+  validateEnv();
+} catch {
+  logger.error("Failed to start server: invalid environment configuration");
+  process.exit(1);
+}
 
 // Initialize OpenTelemetry before starting server
 // This must be done before any other imports to ensure instrumentation works
