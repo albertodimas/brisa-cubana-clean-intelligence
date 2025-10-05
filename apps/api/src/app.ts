@@ -29,18 +29,25 @@ import {
   errorTrackingMiddleware,
   performanceMonitoringMiddleware,
 } from "./middleware/observability";
+import { nonceMiddleware } from "./middleware/csp-nonce";
 
 export const app = new Hono();
 
 // Middleware (order matters!)
-// 1. Security headers first (CSP, HSTS, X-Frame-Options, etc.)
-app.use(
-  "*",
-  secureHeaders({
+// 1. Generate nonce for CSP (must be first to set context variable)
+app.use("*", nonceMiddleware);
+
+// 2. Security headers with dynamic CSP nonce
+app.use("*", async (c, next) => {
+  // Get nonce from context
+  const nonce = c.get("nonce");
+
+  // Apply secure headers with nonce-based CSP (removes unsafe-inline!)
+  await secureHeaders({
     contentSecurityPolicy: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", `'nonce-${nonce}'`],
+      styleSrc: ["'self'", `'nonce-${nonce}'`],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
@@ -52,8 +59,8 @@ app.use(
     xContentTypeOptions: "nosniff",
     referrerPolicy: "strict-origin-when-cross-origin",
     strictTransportSecurity: "max-age=31536000; includeSubDomains",
-  }),
-);
+  })(c, next);
+});
 
 // 2. Compression (for all responses)
 app.use("*", compress());

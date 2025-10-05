@@ -8,6 +8,7 @@ import {
   type CreatePropertyInput,
   type UpdatePropertyInput,
 } from "../schemas";
+import { sanitizePlainText } from "../lib/sanitize";
 
 const properties = new Hono();
 
@@ -123,20 +124,23 @@ properties.post(
 
     const data: CreatePropertyInput = parseResult.data;
 
+    // Sanitize user inputs to prevent XSS
+    const sanitizedData = {
+      name: sanitizePlainText(data.name),
+      address: sanitizePlainText(data.address),
+      city: sanitizePlainText(data.city),
+      state: sanitizePlainText(data.state),
+      zipCode: sanitizePlainText(data.zipCode),
+      type: data.type, // Enum, no sanitization needed
+      userId: authUser.sub,
+      size: data.size ?? null,
+      bedrooms: data.bedrooms ?? null,
+      bathrooms: data.bathrooms ?? null,
+      notes: data.notes ? sanitizePlainText(data.notes) : null,
+    };
+
     const property = await db.property.create({
-      data: {
-        name: data.name,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        type: data.type,
-        userId: authUser.sub,
-        size: data.size ?? null,
-        bedrooms: data.bedrooms ?? null,
-        bathrooms: data.bathrooms ?? null,
-        notes: data.notes ?? null,
-      },
+      data: sanitizedData,
       include: {
         user: {
           select: {
@@ -195,24 +199,22 @@ properties.patch(
 
     const data: UpdatePropertyInput = parseResult.data;
 
+    // Sanitize user inputs
+    const sanitizedData: Record<string, unknown> = {};
+    if (data.name !== undefined) sanitizedData.name = sanitizePlainText(data.name);
+    if (data.address !== undefined) sanitizedData.address = sanitizePlainText(data.address);
+    if (data.city !== undefined) sanitizedData.city = sanitizePlainText(data.city);
+    if (data.state !== undefined) sanitizedData.state = sanitizePlainText(data.state);
+    if (data.zipCode !== undefined) sanitizedData.zipCode = sanitizePlainText(data.zipCode);
+    if (data.type !== undefined) sanitizedData.type = data.type;
+    if (data.size !== undefined) sanitizedData.size = data.size ?? null;
+    if (data.bedrooms !== undefined) sanitizedData.bedrooms = data.bedrooms ?? null;
+    if (data.bathrooms !== undefined) sanitizedData.bathrooms = data.bathrooms ?? null;
+    if (data.notes !== undefined) sanitizedData.notes = data.notes ? sanitizePlainText(data.notes) : null;
+
     const property = await db.property.update({
       where: { id: propertyId },
-      data: {
-        ...(data.name !== undefined ? { name: data.name } : {}),
-        ...(data.address !== undefined ? { address: data.address } : {}),
-        ...(data.city !== undefined ? { city: data.city } : {}),
-        ...(data.state !== undefined ? { state: data.state } : {}),
-        ...(data.zipCode !== undefined ? { zipCode: data.zipCode } : {}),
-        ...(data.type !== undefined ? { type: data.type } : {}),
-        ...(data.size !== undefined ? { size: data.size ?? null } : {}),
-        ...(data.bedrooms !== undefined
-          ? { bedrooms: data.bedrooms ?? null }
-          : {}),
-        ...(data.bathrooms !== undefined
-          ? { bathrooms: data.bathrooms ?? null }
-          : {}),
-        ...(data.notes !== undefined ? { notes: data.notes ?? null } : {}),
-      },
+      data: sanitizedData,
       include: {
         user: {
           select: {

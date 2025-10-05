@@ -26,6 +26,7 @@ import {
   sendStatusUpdate,
   sendCompletionNotification,
 } from "../services/notifications";
+import { bookingService } from "../services/booking.service";
 
 const bookings = new Hono();
 
@@ -57,31 +58,11 @@ bookings.get("/", requireAuth(["ADMIN", "STAFF"]), async (c) => {
   }
 
   const { page, limit }: PaginationInput = paginationResult.data;
-  const skip = (page - 1) * limit;
 
-  const [allBookings, total] = await Promise.all([
-    db.booking.findMany({
-      skip,
-      take: limit,
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        property: { select: { id: true, name: true, address: true } },
-        service: { select: { id: true, name: true, basePrice: true } },
-      },
-      orderBy: { scheduledAt: "desc" },
-    }),
-    db.booking.count(),
-  ]);
+  // Use service layer instead of direct DB access
+  const result = await bookingService.getAll(page, limit);
 
-  return c.json({
-    data: allBookings,
-    meta: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  });
+  return c.json(result);
 });
 
 // Get bookings for the authenticated user
@@ -92,15 +73,8 @@ bookings.get("/mine", requireAuth(), async (c) => {
     throw new UnauthorizedError();
   }
 
-  const bookingsForUser = await db.booking.findMany({
-    where: { userId: authUser.sub },
-    include: {
-      service: { select: { id: true, name: true, basePrice: true } },
-      property: { select: { id: true, name: true, address: true } },
-    },
-    orderBy: { scheduledAt: "asc" },
-    take: 10,
-  });
+  // Use service layer
+  const bookingsForUser = await bookingService.getUserBookings(authUser.sub);
 
   return c.json(bookingsForUser);
 });
@@ -109,19 +83,11 @@ bookings.get("/mine", requireAuth(), async (c) => {
 bookings.get("/:id", requireAuth(), async (c) => {
   const id = c.req.param("id");
   const authUser = getAuthUser(c);
-  const booking = await db.booking.findUnique({
-    where: { id },
-    include: {
-      user: true,
-      property: true,
-      service: true,
-    },
-  });
 
-  if (!booking) {
-    throw new NotFoundError("Booking");
-  }
+  // Use service layer
+  const booking = await bookingService.getById(id);
 
+  // Authorization check (service layer focuses on business logic, auth stays in route)
   if (
     authUser?.role !== "ADMIN" &&
     authUser?.role !== "STAFF" &&
