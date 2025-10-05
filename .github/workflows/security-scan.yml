@@ -22,6 +22,7 @@ permissions:
   contents: read
   security-events: write
   id-token: write # Required for Sigstore keyless signing
+  packages: write # Required for pushing to GitHub Container Registry
 
 concurrency:
   group: security-${{ github.workflow }}-${{ github.ref }}

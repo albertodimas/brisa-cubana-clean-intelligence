@@ -1,7 +1,8 @@
-import "dotenv/config";
 import Stripe from "stripe";
 import { db } from "../src/lib/db";
 
+// Environment variables are already loaded in GitHub Actions workflow
+// No need for dotenv in production/CI environment
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 
 if (!stripeSecret) {
