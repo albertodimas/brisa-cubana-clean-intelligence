@@ -14,8 +14,8 @@ features.get("/", (c) => {
   const cleanScoreEnabled =
     envFlag(process.env.CLEAN_SCORE_AI) ||
     envFlag(process.env.ENABLE_CLEANSCORE);
-  const conciergeEnabled = envFlag(process.env.CONCIERGE_MODE)
-    ? process.env.CONCIERGE_MODE?.toLowerCase() !== "off"
+  const conciergeEnabled = process.env.CONCIERGE_MODE
+    ? process.env.CONCIERGE_MODE.toLowerCase() !== "off"
     : envFlag(process.env.ENABLE_AI_CONCIERGE);
   const paymentsEnabled = envFlag(process.env.ENABLE_PAYMENTS ?? "true");
 
