@@ -63,33 +63,32 @@ if (process.env.NODE_ENV !== "production") {
   });
 
   app.get("/test-transaction", async (c) => {
-    // Test performance monitoring
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    const transaction = Sentry.startTransaction({
-      op: "test",
-      name: "Test Transaction",
-    });
+    // Test performance monitoring with modern Sentry SDK
+    return await Sentry.startSpan(
+      {
+        op: "test",
+        name: "Test Transaction",
+      },
+      async () => {
+        // Simulate some work
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Simulate some work
-    await new Promise((resolve) => setTimeout(resolve, 100));
+        await Sentry.startSpan(
+          {
+            op: "test.operation",
+            name: "Simulated operation",
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          },
+        );
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const span = transaction.startChild({
-      op: "test.operation",
-      description: "Simulated operation",
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    span.finish();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    transaction.finish();
-
-    return c.json({
-      message: "Transaction completed and sent to Sentry",
-      check: "Visit Sentry Performance tab to see the transaction",
-    });
+        return c.json({
+          message: "Transaction completed and sent to Sentry",
+          check: "Visit Sentry Performance tab to see the transaction",
+        });
+      },
+    );
   });
 
   app.get("/", (c) => {
