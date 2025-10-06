@@ -187,5 +187,5 @@ tracesSampleRate: 0.05; // 5% instead of 100%
 - [Full Setup Guide](./SENTRY_SETUP.md)
 - [Sentry Dashboard](https://sentry.io)
 - [Sentry Docs](https://docs.sentry.io)
-- [API Config](../apps/api/src/telemetry/sentry.ts)
-- [Web Config](../apps/web/sentry.client.config.ts)
+- [API Config](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/api/src/telemetry/sentry.ts)
+- [Web Config](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/apps/web/sentry.client.config.ts)

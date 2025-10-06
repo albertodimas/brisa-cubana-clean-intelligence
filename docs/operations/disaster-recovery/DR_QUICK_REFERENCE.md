@@ -400,10 +400,10 @@ Post-mortem scheduled: [DATE/TIME]
 
 **Full Procedures:**
 
-- [DR Drill Procedure](./runbooks/DR_DRILL_PROCEDURE.md) - Complete drill guide
-- [Backup & Restore Guide](./runbooks/BACKUP_RESTORE_GUIDE.md) - Detailed backup procedures
-- [Incident Response](./runbooks/INCIDENT_RESPONSE.md) - Incident management
-- [Rollback Procedure](./runbooks/ROLLBACK.md) - Deployment rollback
+- [DR Drill Procedure](../runbooks/DR_DRILL_PROCEDURE.md) - Complete drill guide
+- [Backup & Restore Guide](../runbooks/BACKUP_RESTORE_GUIDE.md) - Detailed backup procedures
+- [Incident Response](../runbooks/INCIDENT_RESPONSE.md) - Incident management
+- [Rollback Procedure](../runbooks/ROLLBACK.md) - Deployment rollback
 
 **Infrastructure:**
 

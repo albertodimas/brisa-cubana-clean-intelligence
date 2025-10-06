@@ -53,7 +53,7 @@ Resumen de implementación
 
 ## 📖 Runbooks Detallados
 
-### [../runbooks/DR_DRILL_PROCEDURE.md](../runbooks/DR_DRILL_PROCEDURE.md)
+### [../runbooks/DR_DRILL_PROCEDURE.md](../../operations/runbooks/DR_DRILL_PROCEDURE.md)
 
 5 escenarios de simulacro (21KB)
 
@@ -74,7 +74,7 @@ Resumen de implementación
 
 **Audiencia:** DevOps, SRE
 
-### [../runbooks/BACKUP_RESTORE_GUIDE.md](../runbooks/BACKUP_RESTORE_GUIDE.md)
+### [../runbooks/BACKUP_RESTORE_GUIDE.md](../../operations/runbooks/BACKUP_RESTORE_GUIDE.md)
 
 Guía completa de backup/restore (30KB)
 
@@ -145,7 +145,7 @@ railway service start api
 curl https://api.brisacubanaclean.com/api/health
 ```
 
-**Ver:** [../runbooks/BACKUP_RESTORE_GUIDE.md](../runbooks/BACKUP_RESTORE_GUIDE.md) para procedimiento completo
+**Ver:** [../runbooks/BACKUP_RESTORE_GUIDE.md](../../operations/runbooks/BACKUP_RESTORE_GUIDE.md) para procedimiento completo
 
 #### Point-in-Time Recovery (20-30 min)
 
@@ -173,7 +173,7 @@ railway rollback --service api --deployment <deployment-id>
 curl https://api.brisacubanaclean.com/api/health
 ```
 
-**Ver:** [../runbooks/ROLLBACK.md](../runbooks/ROLLBACK.md)
+**Ver:** [../runbooks/ROLLBACK.md](../../operations/runbooks/ROLLBACK.md)
 
 ### 3. Web Application Recovery
 
@@ -219,7 +219,7 @@ En caso de pérdida completa:
    - Test critical flows
    - Monitor errors
 
-**Ver:** [DR_DRILL_PROCEDURE.md escenario 5](../runbooks/DR_DRILL_PROCEDURE.md)
+**Ver:** [DR_DRILL_PROCEDURE.md escenario 5](../../operations/runbooks/DR_DRILL_PROCEDURE.md)
 
 ## 🧪 DR Drills - Simulacros
 
@@ -253,7 +253,7 @@ En caso de pérdida completa:
 
 ### Script Automatizado
 
-**Script:** [`scripts/verify-backup.sh`](../../../scripts/verify-backup.sh)
+**Script:** [`scripts/verify-backup.sh`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/scripts/verify-backup.sh)
 
 ```bash
 # Verificación completa
@@ -398,10 +398,10 @@ Ver [DR_QUICK_REFERENCE.md](DR_QUICK_REFERENCE.md) para lista completa.
 
 ## 🔗 Enlaces Relacionados
 
-- [Runbooks](../runbooks/)
-- [On-Call Handbook](../runbooks/ON_CALL_HANDBOOK.md)
-- [Incident Response](../runbooks/INCIDENT_RESPONSE.md)
-- [Production Readiness](../PRODUCTION_READINESS_CHECKLIST.md)
+- [Runbooks](../../operations/runbooks/)
+- [On-Call Handbook](../../operations/runbooks/ON_CALL_HANDBOOK.md)
+- [Incident Response](../../operations/runbooks/INCIDENT_RESPONSE.md)
+- [Production Readiness](../../operations/PRODUCTION_READINESS_CHECKLIST.md)
 
 ## 📈 Mejoras Futuras
 

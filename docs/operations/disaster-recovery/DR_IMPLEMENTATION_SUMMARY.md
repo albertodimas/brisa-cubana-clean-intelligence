@@ -658,12 +658,12 @@ vercel ls --scope brisa-cubana
 
 ### Internal Documentation
 
-- [DR Drill Procedure](./runbooks/DR_DRILL_PROCEDURE.md)
-- [Backup & Restore Guide](./runbooks/BACKUP_RESTORE_GUIDE.md)
+- [DR Drill Procedure](../runbooks/DR_DRILL_PROCEDURE.md)
+- [Backup & Restore Guide](../runbooks/BACKUP_RESTORE_GUIDE.md)
 - [DR Quick Reference](./DR_QUICK_REFERENCE.md)
-- [Incident Response](./runbooks/INCIDENT_RESPONSE.md)
-- [Rollback Procedure](./runbooks/ROLLBACK.md)
-- [Production Readiness Checklist](./PRODUCTION_READINESS_CHECKLIST.md)
+- [Incident Response](../runbooks/INCIDENT_RESPONSE.md)
+- [Rollback Procedure](../runbooks/ROLLBACK.md)
+- [Production Readiness Checklist](../PRODUCTION_READINESS_CHECKLIST.md)
 
 ### External Resources
 

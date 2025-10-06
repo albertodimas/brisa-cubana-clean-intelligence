@@ -94,7 +94,7 @@ for i in {1..10}; do curl https://api.brisacubanaclean.com/api/services; done
 
 ### GitHub Actions
 
-**Workflow:** [`.github/workflows/security-scan.yml`](../../../.github/workflows/security-scan.yml)
+**Workflow:** [`.github/workflows/security-scan.yml`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/security-scan.yml)
 
 **Checks ejecutados:**
 
@@ -111,7 +111,7 @@ for i in {1..10}; do curl https://api.brisacubanaclean.com/api/services; done
 
 ### Script Automatizado
 
-**Script:** [`scripts/security-scan.sh`](../../../scripts/security-scan.sh)
+**Script:** [`scripts/security-scan.sh`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/scripts/security-scan.sh)
 
 **Módulos:**
 
@@ -237,7 +237,7 @@ En caso de incidente de seguridad:
 4. **Remediar:** Aplicar parche/fix
 5. **Post-mortem:** Usar template en `../templates/incident-report-template.md`
 
-Ver [../runbooks/INCIDENT_RESPONSE.md](../runbooks/INCIDENT_RESPONSE.md) para procedimiento completo.
+Ver [../runbooks/INCIDENT_RESPONSE.md](../../operations/runbooks/INCIDENT_RESPONSE.md) para procedimiento completo.
 
 ## 📈 Roadmap de Mejoras
 
@@ -277,7 +277,7 @@ Para reportar vulnerabilidades de seguridad:
 4. Incluir: Descripción, pasos de reproducción, impacto
 5. Tiempo de respuesta: 48 horas
 
-Ver [../../../SECURITY.md](../../../SECURITY.md) para proceso completo de responsible disclosure.
+Ver [SECURITY.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/SECURITY.md) para proceso completo de responsible disclosure.
 
 ## 📝 Compliance
 

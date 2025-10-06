@@ -100,7 +100,7 @@ tests/load/
 
 ### GitHub Actions
 
-**Workflow:** [`.github/workflows/load-test.yml`](../../../.github/workflows/load-test.yml)
+**Workflow:** [`.github/workflows/load-test.yml`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/load-test.yml)
 
 **Triggers:**
 
@@ -119,7 +119,7 @@ gh secret set TEST_ADMIN_PASSWORD
 
 ### Script Automatizado
 
-**Script:** [`scripts/run-load-tests.sh`](../../../scripts/run-load-tests.sh)
+**Script:** [`scripts/run-load-tests.sh`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/scripts/run-load-tests.sh)
 
 **Features:**
 

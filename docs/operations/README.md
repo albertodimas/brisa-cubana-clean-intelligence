@@ -23,9 +23,9 @@ Documentación completa para operaciones de producción, monitoreo, seguridad y 
 - [**LOAD_TESTING_SETUP.md**](load-testing/LOAD_TESTING_SETUP.md) - Resumen de implementación
 - [**LOAD_TESTING_SECRETS.md**](load-testing/LOAD_TESTING_SECRETS.md) - Configuración de secrets en GitHub
 
-**Scripts:** [`../../scripts/run-load-tests.sh`](../../scripts/run-load-tests.sh)
-**Tests:** [`../../tests/load/`](../../tests/load/)
-**Workflow:** [`../../.github/workflows/load-test.yml`](../../.github/workflows/load-test.yml)
+**Scripts:** [`../../scripts/run-load-tests.sh`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/scripts/run-load-tests.sh)
+**Tests:** [`../../tests/load/`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/tree/main/tests/load)
+**Workflow:** [`../../.github/workflows/load-test.yml`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/load-test.yml)
 
 **Estado:** ✅ 5 escenarios completos (smoke, load, stress, spike, soak)
 
@@ -38,8 +38,8 @@ Documentación completa para operaciones de producción, monitoreo, seguridad y 
 - [**PENETRATION_TESTING_GUIDE.md**](security/PENETRATION_TESTING_GUIDE.md) - Guía de pen testing (1061 líneas)
 - [**SECURITY_ACCEPTED_RISKS.md**](security/SECURITY_ACCEPTED_RISKS.md) - Riesgos aceptados documentados
 
-**Scripts:** [`../../scripts/security-scan.sh`](../../scripts/security-scan.sh)
-**Workflow:** [`../../.github/workflows/security-scan.yml`](../../.github/workflows/security-scan.yml)
+**Scripts:** [`../../scripts/security-scan.sh`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/scripts/security-scan.sh)
+**Workflow:** [`../../.github/workflows/security-scan.yml`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/.github/workflows/security-scan.yml)
 
 **Estado:** ✅ 10/10 OWASP compliance, 47 security tests
 
@@ -56,7 +56,7 @@ Documentación completa para operaciones de producción, monitoreo, seguridad y 
 - [**DR_DRILL_PROCEDURE.md**](runbooks/DR_DRILL_PROCEDURE.md) - 5 escenarios de simulacro (21KB)
 - [**BACKUP_RESTORE_GUIDE.md**](runbooks/BACKUP_RESTORE_GUIDE.md) - Guía de backup/restore (30KB)
 
-**Scripts:** [`../../scripts/verify-backup.sh`](../../scripts/verify-backup.sh)
+**Scripts:** [`../../scripts/verify-backup.sh`](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/scripts/verify-backup.sh)
 
 **Estado:** ✅ RTO < 1 hora, RPO < 15 minutos
 
