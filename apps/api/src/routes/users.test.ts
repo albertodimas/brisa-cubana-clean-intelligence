@@ -2,22 +2,27 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import { generateAccessToken } from "../lib/token";
 
-const userMock = {
-  findMany: vi.fn(),
-  findUnique: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-};
+// Set environment FIRST
+process.env.JWT_SECRET = "test-secret";
 
+// Mock with inline functions
 vi.mock("../lib/db", () => ({
   db: {
-    user: userMock,
+    user: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
   },
 }));
 
-process.env.JWT_SECRET = "test-secret";
-
+// Import after mocking
 const { default: users } = await import("./users");
+
+// Get mock references for assertions
+const { db } = await import("../lib/db");
+const userMock = db.user;
 
 const buildApp = () => {
   const app = new Hono();

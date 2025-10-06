@@ -2,19 +2,21 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Hono } from "hono";
 import { generateAccessToken } from "../lib/token";
 
-// Mock dependencies
-const bookingMock = {
-  findUnique: vi.fn(),
-  findFirst: vi.fn(),
-  update: vi.fn(),
-};
+// Set environment FIRST
+process.env.JWT_SECRET = "test-secret-payments";
 
+// Store mock functions
 const stripeEnabledMock = vi.fn();
 const getStripeMock = vi.fn();
 
+// Mock with inline functions
 vi.mock("../lib/db", () => ({
   db: {
-    booking: bookingMock,
+    booking: {
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
+    },
   },
 }));
 
@@ -23,10 +25,12 @@ vi.mock("../lib/stripe", () => ({
   getStripe: getStripeMock,
 }));
 
-process.env.JWT_SECRET = "test-secret-payments";
-
 // Import after mocking
 const payments = (await import("./payments")).default;
+
+// Get mock references for assertions
+const { db } = await import("../lib/db");
+const bookingMock = db.booking;
 
 function buildApp() {
   const app = new Hono();

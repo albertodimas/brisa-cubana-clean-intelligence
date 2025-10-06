@@ -2,26 +2,29 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Hono } from "hono";
 import { generateAccessToken } from "../lib/token";
 
-// Mock dependencies
-const paymentAlertMock = {
-  findMany: vi.fn(),
-  findFirst: vi.fn(),
-  create: vi.fn(),
-};
+// Set environment before any imports
+process.env.JWT_SECRET = "test-secret-alerts";
 
+// Mock dependencies - define mocks INSIDE vi.mock factory
 vi.mock("../lib/db", () => ({
   db: {
-    paymentAlert: paymentAlertMock,
+    paymentAlert: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+    },
   },
 }));
 
 const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
 
-process.env.JWT_SECRET = "test-secret-alerts";
-
 // Import after mocking
 const alerts = (await import("./alerts")).default;
+
+// Get reference to the mocked db for test assertions
+const { db } = await import("../lib/db");
+const paymentAlertMock = db.paymentAlert;
 
 function buildApp() {
   const app = new Hono();

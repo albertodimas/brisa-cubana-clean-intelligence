@@ -2,27 +2,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import { generateAccessToken } from "../lib/token";
 
-const bookingMock = {
-  findUnique: vi.fn(),
-};
+// Set environment FIRST
+process.env.JWT_SECRET = "test-secret";
 
-const cleanScoreReportMock = {
-  upsert: vi.fn(),
-  findUnique: vi.fn(),
-  update: vi.fn(),
-  findMany: vi.fn(),
-  count: vi.fn(),
-};
-
-vi.mock("../lib/db", () => ({
-  db: {
-    booking: bookingMock,
-    cleanScoreReport: cleanScoreReportMock,
-  },
-}));
-
+// Store mock functions
 const sendCleanScoreReport = vi.fn();
 const calculateCleanScore = vi.fn();
+
+// Mock with inline functions
+vi.mock("../lib/db", () => ({
+  db: {
+    booking: {
+      findUnique: vi.fn(),
+    },
+    cleanScoreReport: {
+      upsert: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn(),
+    },
+  },
+}));
 
 vi.mock("../services/reports", () => ({
   sendCleanScoreReport: sendCleanScoreReport.mockResolvedValue({
@@ -31,9 +32,13 @@ vi.mock("../services/reports", () => ({
   calculateCleanScore: calculateCleanScore.mockReturnValue(92.5),
 }));
 
-process.env.JWT_SECRET = "test-secret";
-
+// Import after mocking
 const { default: reports } = await import("./reports");
+
+// Get mock references for assertions
+const { db } = await import("../lib/db");
+const bookingMock = db.booking;
+const cleanScoreReportMock = db.cleanScoreReport;
 
 const buildApp = () => {
   const app = new Hono();

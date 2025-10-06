@@ -4,28 +4,32 @@ import type { Context } from "hono";
 import { generateAccessToken } from "../lib/token";
 import { isAppError } from "../lib/errors";
 
-const propertyMock = {
-  findMany: vi.fn(),
-  findUnique: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-};
+// Set environment FIRST
+process.env.JWT_SECRET = "test-secret";
 
-const userMock = {
-  findUnique: vi.fn(),
-};
-
+// Mock with inline functions
 vi.mock("../lib/db", () => ({
   db: {
-    property: propertyMock,
-    user: userMock,
+    property: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    user: {
+      findUnique: vi.fn(),
+    },
   },
 }));
 
-process.env.JWT_SECRET = "test-secret";
-
+// Import after mocking
 const { default: properties } = await import("./properties");
+
+// Get mock references for assertions
+const { db } = await import("../lib/db");
+const propertyMock = db.property;
+const userMock = db.user;
 
 const buildApp = () => {
   const app = new Hono();

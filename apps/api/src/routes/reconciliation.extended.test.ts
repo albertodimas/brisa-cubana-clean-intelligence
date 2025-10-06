@@ -2,23 +2,26 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
 import { generateAccessToken } from "../lib/token";
 
-// Mock dependencies
-const reconciliationNoteMock = {
-  findMany: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-};
+// Set environment FIRST
+process.env.JWT_SECRET = "test-secret-reconciliation";
 
+// Mock with inline functions
 vi.mock("../lib/db", () => ({
   db: {
-    reconciliationNote: reconciliationNoteMock,
+    reconciliationNote: {
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
   },
 }));
 
-process.env.JWT_SECRET = "test-secret-reconciliation";
-
 // Import after mocking
 const reconciliation = (await import("./reconciliation")).default;
+
+// Get mock references for assertions
+const { db } = await import("../lib/db");
+const reconciliationNoteMock = db.reconciliationNote;
 
 function buildApp() {
   const app = new Hono();

@@ -4,32 +4,28 @@ import type { Context } from "hono";
 import { generateAccessToken } from "../lib/token";
 import { isAppError } from "../lib/errors";
 
-const bookingMock = {
-  findMany: vi.fn(),
-  findUnique: vi.fn(),
-  count: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-};
+// Set environment FIRST
+process.env.JWT_SECRET = "test-secret";
 
-const serviceMock = {
-  findUnique: vi.fn(),
-};
-
-const userMock = {
-  findUnique: vi.fn(),
-};
-
-const propertyMock = {
-  findUnique: vi.fn(),
-};
-
+// Mock with inline functions
 vi.mock("../lib/db", () => ({
   db: {
-    booking: bookingMock,
-    service: serviceMock,
-    user: userMock,
-    property: propertyMock,
+    booking: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    service: {
+      findUnique: vi.fn(),
+    },
+    user: {
+      findUnique: vi.fn(),
+    },
+    property: {
+      findUnique: vi.fn(),
+    },
   },
 }));
 
@@ -44,9 +40,15 @@ vi.mock("../lib/stripe", () => ({
   getStripe: vi.fn(),
 }));
 
-process.env.JWT_SECRET = "test-secret";
-
+// Import after mocking
 const { default: bookings } = await import("./bookings");
+
+// Get mock references for assertions
+const { db } = await import("../lib/db");
+const bookingMock = db.booking;
+const serviceMock = db.service;
+const userMock = db.user;
+const propertyMock = db.property;
 
 const buildApp = () => {
   const app = new Hono();
@@ -151,6 +153,10 @@ describe("Bookings Extended Tests - GET Operations", () => {
   });
 
   describe("GET /mine - User's bookings", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
     it("should return user's own bookings", async () => {
       bookingMock.findMany.mockResolvedValue([
         {
@@ -183,7 +189,7 @@ describe("Bookings Extended Tests - GET Operations", () => {
       expect(response.status).toBe(401);
     });
 
-    it("should limit to 10 bookings", async () => {
+    it("should include property and service details", async () => {
       bookingMock.findMany.mockResolvedValue([]);
 
       const app = buildApp();
@@ -191,11 +197,26 @@ describe("Bookings Extended Tests - GET Operations", () => {
         headers: authHeader("CLIENT", "user-1"),
       });
 
-      expect(bookingMock.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          take: 10,
-        }),
-      );
+      expect(bookingMock.findMany).toHaveBeenCalledWith({
+        where: { userId: "user-1" },
+        orderBy: { scheduledAt: "asc" },
+        include: {
+          service: {
+            select: {
+              id: true,
+              name: true,
+              basePrice: true,
+            },
+          },
+          property: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+            },
+          },
+        },
+      });
     });
 
     it("should order by scheduled date ascending", async () => {
