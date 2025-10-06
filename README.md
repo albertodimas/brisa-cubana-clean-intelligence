@@ -14,7 +14,22 @@
 [![GitHub issues](https://img.shields.io/github/issues/albertodimas/brisa-cubana-clean-intelligence)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues)
 [![GitHub stars](https://img.shields.io/github/stars/albertodimas/brisa-cubana-clean-intelligence?style=social)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/stargazers)
 
+---
+
+**Estado Actual**: ✅ **100% Operativo en Local** | 🧪 Tests: 589/589 Passing | 📊 Coverage: 80% | 🚀 Ready for Production
+
+---
+
 Brisa Cubana Clean Intelligence centraliza la experiencia del cliente, las operaciones en campo, la facturación y el control de calidad en un único monorepo. La solución combina un frontend moderno en Next.js, una API REST con Hono y un data layer Prisma/PostgreSQL, con capacidades de automatización e IA en evolución.
+
+## 🚀 Documentación Rápida
+
+**¿Primera vez aquí?** Lee estas guías primero:
+
+- 📖 **[QUICKSTART.md](./QUICKSTART.md)** - Puesta en marcha en 5 minutos
+- 📊 **[PLATFORM_STATUS.md](./PLATFORM_STATUS.md)** - Estado actual y métricas
+- 🎯 **[PROXIMOS_PASOS.md](./PROXIMOS_PASOS.md)** - Roadmap y próximos pasos
+- 🛠️ **[scripts/start-local.sh](./scripts/start-local.sh)** - Script de inicio automático
 
 ## Contenido
 
