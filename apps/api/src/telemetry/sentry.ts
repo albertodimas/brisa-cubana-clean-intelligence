@@ -23,7 +23,7 @@ if (enabled && !Sentry.getClient()) {
     ],
 
     // Enhanced error context
-    beforeSend(event, hint) {
+    beforeSend(event, _hint) {
       // Don't send errors in test environment
       if (process.env.NODE_ENV === "test") {
         return null;

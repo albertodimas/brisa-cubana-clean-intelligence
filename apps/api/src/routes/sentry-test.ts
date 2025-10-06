@@ -8,7 +8,7 @@ const app = new Hono();
  * Only available in development and staging environments
  */
 if (process.env.NODE_ENV !== "production") {
-  app.get("/test-error", (c) => {
+  app.get("/test-error", (_c) => {
     // Throw a test error
     throw new Error(
       "Test Sentry Error - This is a test error to verify Sentry integration",
@@ -37,7 +37,7 @@ if (process.env.NODE_ENV !== "production") {
     });
   });
 
-  app.get("/test-breadcrumbs", (c) => {
+  app.get("/test-breadcrumbs", (_c) => {
     // Add breadcrumbs
     Sentry.addBreadcrumb({
       category: "test",
@@ -64,6 +64,7 @@ if (process.env.NODE_ENV !== "production") {
 
   app.get("/test-transaction", async (c) => {
     // Test performance monitoring
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const transaction = Sentry.startTransaction({
       op: "test",
       name: "Test Transaction",
@@ -72,6 +73,7 @@ if (process.env.NODE_ENV !== "production") {
     // Simulate some work
     await new Promise((resolve) => setTimeout(resolve, 100));
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const span = transaction.startChild({
       op: "test.operation",
       description: "Simulated operation",
@@ -79,7 +81,9 @@ if (process.env.NODE_ENV !== "production") {
 
     await new Promise((resolve) => setTimeout(resolve, 50));
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     span.finish();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     transaction.finish();
 
     return c.json({
