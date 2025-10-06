@@ -70,15 +70,46 @@ nav:
           - Go-Live: operations/runbooks/GO_LIVE.md
           - Rollback: operations/runbooks/ROLLBACK.md
           - Incident Response: operations/runbooks/INCIDENT_RESPONSE.md
-      - Estado y reportes:
-          - Plan de acción inmediato: operations/immediate-action-plan.md
-          - Estado de la plataforma: operations/status/platform-status.md
-          - Security Accepted Risks: operations/security/SECURITY_ACCEPTED_RISKS.md
-          - Reportes de sesiones:
+      - Producción y operaciones:
+          - Panorama operacional: operations/README.md
+          - Production Readiness: operations/PRODUCTION_READINESS_CHECKLIST.md
+          - On-Call Rotation: operations/ON_CALL_ROTATION.md
+          - Monitoreo (Sentry):
+              - Panorama: operations/monitoring/README.md
+              - Setup completo: operations/monitoring/SENTRY_SETUP.md
+              - Quickstart: operations/monitoring/SENTRY_QUICKSTART.md
+              - Migración: operations/monitoring/SENTRY_MIGRATION.md
+          - Load Testing:
+              - Panorama: operations/load-testing/README.md
+              - Guía completa: operations/load-testing/LOAD_TESTING_GUIDE.md
+              - Quickstart: operations/load-testing/LOAD_TESTING_QUICKSTART.md
+              - Setup: operations/load-testing/LOAD_TESTING_SETUP.md
+              - Secrets GitHub: operations/load-testing/LOAD_TESTING_SECRETS.md
+          - Seguridad:
+              - Panorama: operations/security/README.md
+              - Resumen: operations/security/SECURITY_SUMMARY.md
+              - Audit Checklist (OWASP): operations/security/SECURITY_AUDIT_CHECKLIST.md
+              - Penetration Testing: operations/security/PENETRATION_TESTING_GUIDE.md
+              - Riesgos aceptados: operations/security/SECURITY_ACCEPTED_RISKS.md
+          - Disaster Recovery:
+              - Panorama: operations/disaster-recovery/README.md
+              - Quick Reference: operations/disaster-recovery/DR_QUICK_REFERENCE.md
+              - Executive Summary: operations/disaster-recovery/DR_EXECUTIVE_SUMMARY.md
+              - Implementation Summary: operations/disaster-recovery/DR_IMPLEMENTATION_SUMMARY.md
+          - Runbooks adicionales:
+              - On-Call Handbook: operations/runbooks/ON_CALL_HANDBOOK.md
+              - DR Drill Procedure: operations/runbooks/DR_DRILL_PROCEDURE.md
+              - Backup & Restore: operations/runbooks/BACKUP_RESTORE_GUIDE.md
+          - Estado y reportes:
+              - Plan de acción inmediato: operations/immediate-action-plan.md
+              - Estado de la plataforma: operations/status/platform-status.md
+              - Reportes: operations/reports/README.md
               - GitHub Status Report: operations/reports/GITHUB_STATUS_REPORT.md
               - Documentation Improvements 2025-10-04: operations/reports/DOCUMENTATION_IMPROVEMENTS_2025-10-04.md
               - Deployment Session 2025-10-05: operations/reports/deployment-session-2025-10-05.md
               - Deployment Setup Complete 2025-10-05: operations/reports/deployment-setup-complete-2025-10-05.md
+          - Templates:
+              - Incident Report: operations/templates/incident-report-template.md
 
   - Negocio y operaciones:
       - Panorama general: for-business/README.md
