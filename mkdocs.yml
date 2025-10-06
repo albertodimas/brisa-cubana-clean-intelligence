@@ -73,7 +73,7 @@ nav:
       - Estado y reportes:
           - Plan de acción inmediato: operations/immediate-action-plan.md
           - Estado de la plataforma: operations/status/platform-status.md
-          - Security Accepted Risks: operations/SECURITY_ACCEPTED_RISKS.md
+          - Security Accepted Risks: operations/security/SECURITY_ACCEPTED_RISKS.md
           - Reportes de sesiones:
               - GitHub Status Report: operations/reports/GITHUB_STATUS_REPORT.md
               - Documentation Improvements 2025-10-04: operations/reports/DOCUMENTATION_IMPROVEMENTS_2025-10-04.md

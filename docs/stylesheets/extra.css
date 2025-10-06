@@ -1,0 +1,24 @@
+/* Custom styles for Brisa Cubana Clean Intelligence documentation */
+
+:root {
+  --md-primary-fg-color: #14b8a6;
+  --md-primary-fg-color--light: #5eead4;
+  --md-primary-fg-color--dark: #0f766e;
+}
+
+/* Custom styles for code blocks */
+.highlight {
+  border-radius: 0.3rem;
+}
+
+/* Improve readability */
+.md-typeset {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Enhance tables */
+.md-typeset table:not([class]) {
+  border-radius: 0.3rem;
+  overflow: hidden;
+}
