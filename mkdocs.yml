@@ -22,6 +22,10 @@ nav:
           - Sprint 1 Implementation: development/sprints/SPRINT_1_IMPLEMENTATION.md
           - Sprint 1 Summary: development/sprints/SPRINT_1_SUMMARY.md
           - Sprint 2 Implementation: development/sprints/SPRINT_2_IMPLEMENTATION.md
+          - Sprint 3 Implementation: development/SPRINT_3_IMPLEMENTATION.md
+          - Sprint 3 Extended: development/SPRINT_3_EXTENDED.md
+          - Sprint 4 Production Readiness: development/sprints/SPRINT_4_PRODUCTION_READINESS.md
+          - Sanitization Coverage: development/SANITIZATION_COVERAGE.md
       - Referencia de API: for-developers/api-reference.md
       - Configuración OpenAPI/Swagger: for-developers/openapi-setup.md
       - Guía de testing: for-developers/testing.md
