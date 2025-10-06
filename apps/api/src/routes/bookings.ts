@@ -204,7 +204,7 @@ bookings.post("/", requireAuth(), async (c) => {
       serviceId: payload.serviceId,
       scheduledAt,
       totalPrice,
-      notes: payload.notes,
+      notes: payload.notes ? sanitizePlainText(payload.notes) : undefined,
       status: "PENDING",
     },
     include: {
@@ -342,7 +342,8 @@ bookings.patch("/:id", requireAuth(), async (c) => {
   }
 
   if (payload.notes !== undefined) {
-    updateData.notes = payload.notes === "" ? undefined : sanitizePlainText(payload.notes);
+    updateData.notes =
+      payload.notes === "" ? undefined : sanitizePlainText(payload.notes);
   }
 
   if (Object.keys(updateData).length === 0) {

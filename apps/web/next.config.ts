@@ -67,11 +67,6 @@ const nextConfig: NextConfig = {
             key: "X-Frame-Options",
             value: "DENY",
           },
-          // XSS protection (legacy browsers)
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
           // Referrer policy (privacy)
           {
             key: "Referrer-Policy",
@@ -83,19 +78,22 @@ const nextConfig: NextConfig = {
             value:
               "camera=(), microphone=(), geolocation=(self), payment=(self)",
           },
-          // Content Security Policy (CSP) - Strict
+          // Content Security Policy (CSP) - Enhanced
+          // Note: 'unsafe-inline' required for Next.js styles and Vercel Analytics
+          // TODO: Implement nonce-based CSP in future iteration
           {
             key: "Content-Security-Policy",
             value:
               "default-src 'self'; " +
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; " +
+              "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://*.sentry.io; " +
               "style-src 'self' 'unsafe-inline'; " +
               "img-src 'self' data: https: blob:; " +
               "font-src 'self' data:; " +
               `connect-src ${connectSrcValue}; ` +
               "frame-ancestors 'none'; " +
               "base-uri 'self'; " +
-              "form-action 'self';",
+              "form-action 'self'; " +
+              "upgrade-insecure-requests;",
           },
         ],
       },
