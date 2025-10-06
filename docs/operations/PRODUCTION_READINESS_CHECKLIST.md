@@ -354,9 +354,42 @@ docker build -t brisa-web -f apps/web/Dockerfile .
 
 ### On-Call
 
-- [ ] **On-call rotation defined** ⚠️
-- [ ] **Escalation matrix** ⚠️
+- [x] **On-call rotation defined** ✅
+  - [x] Weekly rotation schedule established
+  - [x] Primary and secondary on-call coverage
+  - [x] Holiday coverage policy defined
+  - [x] Compensation structure documented
+  - [x] Reference: [ON_CALL_ROTATION.md](./ON_CALL_ROTATION.md)
+- [x] **Escalation matrix** ✅
+  - [x] Level 1-4 escalation paths defined
+  - [x] SME contacts for each service area
+  - [x] External vendor escalation procedures
+  - [x] SLA response times documented
+- [x] **On-call handbook** ✅
+  - [x] Start/end of shift checklists
+  - [x] Common issues and debugging commands
+  - [x] Communication guidelines
+  - [x] Reference: [ON_CALL_HANDBOOK.md](./runbooks/ON_CALL_HANDBOOK.md)
+- [x] **Incident reporting** ✅
+  - [x] Incident report template created
+  - [x] Post-mortem process documented
+  - [x] Action item tracking process
+  - [x] Reference: [incident-report-template.md](./templates/incident-report-template.md)
 - [x] Contact information documented ✅
+
+**Validation:**
+
+```bash
+# Review on-call documentation
+cat docs/operations/ON_CALL_ROTATION.md
+cat docs/operations/runbooks/ON_CALL_HANDBOOK.md
+
+# Test PagerDuty integration
+pagerduty incidents list
+
+# Verify escalation contacts are current
+grep -r "Contact:" docs/operations/ON_CALL_ROTATION.md
+```
 
 ---
 
@@ -373,7 +406,31 @@ docker build -t brisa-web -f apps/web/Dockerfile .
 
 - [x] RTO (Recovery Time Objective): < 1 hour ✅
 - [x] RPO (Recovery Point Objective): < 15 minutes ✅
-- [ ] **DR drill completed** ⚠️ (Recommended)
+- [x] **DR Runbooks Documented** ✅
+  - [x] DR Drill Procedure (`docs/operations/runbooks/DR_DRILL_PROCEDURE.md`)
+  - [x] Backup & Restore Guide (`docs/operations/runbooks/BACKUP_RESTORE_GUIDE.md`)
+  - [x] Backup Verification Script (`scripts/verify-backup.sh`)
+- [x] **Backup Strategy Defined** ✅
+  - [x] PostgreSQL continuous WAL archiving (PITR)
+  - [x] Daily automated snapshots
+  - [x] 30-day retention policy
+  - [x] Configuration in Git (version controlled)
+  - [x] Secrets encrypted in Railway/Vercel
+- [ ] **DR Drill Executed** ⚠️ (Recommended - use `DR_DRILL_PROCEDURE.md`)
+- [ ] **Backup Restoration Tested** ⚠️ (Run: `./scripts/verify-backup.sh --mode=full`)
+
+**Validation:**
+
+```bash
+# Verify backup infrastructure
+./scripts/verify-backup.sh --mode=full
+
+# Test backup restoration (creates temp DB)
+railway run --service postgres pg_restore --list backups/latest.dump
+
+# Check backup age (should be < 24 hours)
+railway run --service postgres psql -c "SELECT pg_last_wal_receive_lsn();"
+```
 
 ### Scalability
 
@@ -410,7 +467,11 @@ docker build -t brisa-web -f apps/web/Dockerfile .
 - [ ] Load tests executed and passing
 - [ ] Performance monitoring dashboard
 - [ ] Uptime monitoring (status page)
-- [ ] On-call rotation established
+- [x] On-call rotation established ✅
+  - [x] Rotation schedule configured in PagerDuty
+  - [x] On-call handbook created and reviewed
+  - [x] Escalation matrix documented
+  - [x] Emergency contacts verified
 - [ ] DR drill completed
 
 ### Post-Launch (Within 30 Days)
@@ -428,21 +489,21 @@ docker build -t brisa-web -f apps/web/Dockerfile .
 
 ### Technical Lead
 
-- **Name:** ************\_\_\_************
-- **Date:** ************\_\_\_************
-- **Signature:** ************\_\_\_************
+- **Name:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Date:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Signature:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
 
 ### Product Owner
 
-- **Name:** ************\_\_\_************
-- **Date:** ************\_\_\_************
-- **Signature:** ************\_\_\_************
+- **Name:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Date:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Signature:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
 
 ### Security Officer
 
-- **Name:** ************\_\_\_************
-- **Date:** ************\_\_\_************
-- **Signature:** ************\_\_\_************
+- **Name:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Date:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Signature:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
 
 ---
 
@@ -457,6 +518,31 @@ Run the consistency audit:
 ```
 
 Expected output: `✓ All consistency checks passed!`
+
+### Disaster Recovery Validation
+
+Verify backup and disaster recovery readiness:
+
+```bash
+# Full backup verification (recommended before production)
+./scripts/verify-backup.sh --mode=full
+
+# Quick smoke test
+./scripts/verify-backup.sh --mode=smoke
+
+# Database integrity only
+./scripts/verify-backup.sh --mode=integrity
+
+# Specific table verification
+./scripts/verify-backup.sh --table=bookings
+```
+
+**DR Runbooks:**
+
+- [DR Drill Procedure](./runbooks/DR_DRILL_PROCEDURE.md) - Quarterly disaster recovery exercises
+- [Backup & Restore Guide](./runbooks/BACKUP_RESTORE_GUIDE.md) - Complete backup/restore procedures
+- [Incident Response](./runbooks/INCIDENT_RESPONSE.md) - Emergency response procedures
+- [Rollback Procedure](./runbooks/ROLLBACK.md) - Deployment rollback steps
 
 ### Manual Testing Checklist
 

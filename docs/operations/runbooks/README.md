@@ -14,6 +14,8 @@
 | [Go-Live](GO_LIVE.md)                                           | Procedimiento de despliegue a producción       | 60-90 minutos     |
 | [Rollback](ROLLBACK.md)                                         | Reversión inmediata ante un despliegue fallido | 10-20 minutos     |
 | [Incident Response](INCIDENT_RESPONSE.md)                       | Gestión de incidentes Sev1/Sev2/Sev3           | Variable          |
+| [DR Drill Procedure](DR_DRILL_PROCEDURE.md)                     | Simulacro de recuperación ante desastres       | 60-90 minutos     |
+| [Backup & Restore Guide](BACKUP_RESTORE_GUIDE.md)               | Procedimientos de backup y restauración        | 30-60 minutos     |
 
 ## Referencias rápidas
 
@@ -45,6 +47,13 @@
 3. Confirmar la salud de los servicios tras la reversión.
 4. Coordinar post-mortem dentro de las 48 horas siguientes.
 
+### Disaster Recovery y Backups
+
+1. **Simulacro trimestral:** Ejecutar [DR Drill Procedure](DR_DRILL_PROCEDURE.md).
+2. **Verificación de backups:** Correr `./scripts/verify-backup.sh --mode=full`.
+3. **Restauración completa:** Consultar [Backup & Restore Guide](BACKUP_RESTORE_GUIDE.md).
+4. **Objetivos:** RTO < 1 hora, RPO < 15 minutos.
+
 ## Escalamiento y contactos
 
 - **Ruta de escalamiento:** primaria on-call → secundaria on-call (5 min) → manager de ingeniería (15 min) → CTO (solo Sev1).
@@ -75,6 +84,15 @@ railway rollback --service "@brisa/api"
 
 # Rollback Vercel
 vercel promote <deployment_url> --token=$VERCEL_TOKEN
+
+# Verificar backups
+./scripts/verify-backup.sh --mode=full
+
+# Backup manual de base de datos
+railway run --service postgres pg_dump --format=custom -f backup-$(date +%Y%m%d).dump brisa_production
+
+# Restaurar base de datos
+railway run --service postgres pg_restore --dbname=brisa_production --clean backup-20251006.dump
 ```
 
 ## Mantenimiento de runbooks

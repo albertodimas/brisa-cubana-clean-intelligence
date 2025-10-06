@@ -36,6 +36,7 @@
     "@opentelemetry/semantic-conventions": "^1.37.0",
     "@prisma/client": "^6.16.3",
     "@sentry/node": "10.17.0",
+    "@sentry/profiling-node": "^10.17.0",
     "bcryptjs": "^2.4.3",
     "dompurify": "^3.2.7",
     "helmet": "^8.1.0",

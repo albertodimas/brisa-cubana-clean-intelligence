@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { SentryInit } from "@/components/sentry-init";
+import { SentryErrorBoundary } from "@/components/sentry-error-boundary";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,8 +38,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SentryInit />
-        {children}
+        <SentryErrorBoundary>{children}</SentryErrorBoundary>
         <Analytics />
       </body>
     </html>

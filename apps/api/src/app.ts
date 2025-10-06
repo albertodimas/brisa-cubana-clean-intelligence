@@ -16,6 +16,7 @@ import concierge from "./routes/concierge";
 import health from "./routes/health";
 import metrics from "./routes/metrics";
 import features from "./routes/features";
+import sentryTest from "./routes/sentry-test";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
 import { rateLimiter, RateLimits } from "./middleware/rate-limit";
 import { requestLogger } from "./middleware/logger";
@@ -162,6 +163,9 @@ app.route("/api/reconciliation", notes);
 app.route("/api/reports", reports);
 app.route("/api/concierge", concierge);
 app.route("/api/features", features);
+
+// Sentry test endpoints (dev/staging only)
+app.route("/api/sentry", sentryTest);
 
 // 404 handler
 app.notFound((c) => c.json({ error: "Not found" }, 404));

@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const baseConnectSources = [
   "'self'",
   "https://api.brisacubana.com",
   "https://vitals.vercel-insights.com",
+  "https://*.sentry.io", // Sentry error reporting
 ];
 
 const connectSrc = new Set(baseConnectSources);
@@ -39,6 +41,8 @@ const nextConfig: NextConfig = {
         "brisacubana.com",
       ],
     },
+    // Enable instrumentation for Sentry
+    instrumentationHook: true,
   },
   // Production-grade security headers
   // References:
@@ -101,4 +105,30 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrap config with Sentry for source maps upload and error tracking
+// Only apply in production builds to avoid overhead in development
+export default process.env.NODE_ENV === "production" &&
+process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      // Sentry Webpack Plugin Options
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+
+      // Only upload source maps for releases
+      silent: true, // Suppresses all logs
+
+      // Upload source maps during build
+      widenClientFileUpload: true,
+
+      // Automatically tree-shake Sentry logger statements
+      disableLogger: true,
+
+      // Hides source maps from generated client bundles
+      hideSourceMaps: true,
+
+      // Automatically annotate React components for better error grouping
+      reactComponentAnnotation: {
+        enabled: true,
+      },
+    })
+  : nextConfig;

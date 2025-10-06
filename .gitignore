@@ -24,6 +24,15 @@ playwright-report/
 test-results/
 playwright/.auth/
 
+# Load test results (keep directory structure)
+tests/load/results/*.json
+tests/load/results/*.html
+tests/load/results/*.txt
+tests/load/results/*.log
+tests/load/results/*.md
+!tests/load/results/README.md
+!tests/load/results/.gitkeep
+
 # Python/MkDocs
 __pycache__/
 *.py[cod]
@@ -105,3 +114,6 @@ infra/terraform/crash.*.log
 # Kubernetes secrets
 infra/kubernetes/**/secrets.yaml
 infra/kubernetes/**/*secret*.yaml
+
+# Sentry
+sentry-debug.log
