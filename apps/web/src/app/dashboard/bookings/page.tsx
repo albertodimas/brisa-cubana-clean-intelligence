@@ -16,7 +16,7 @@ function resolveCreatedFlag(value: string | string[] | undefined): boolean {
   return value === "1";
 }
 
-async function getBookings(accessToken: string): Promise<Booking[]> {
+async function getBookings(): Promise<Booking[]> {
   if (isFakeDataEnabled()) {
     const now = new Date().toISOString();
     return [
@@ -80,9 +80,9 @@ async function getBookings(accessToken: string): Promise<Booking[]> {
 
   const response = await fetch(`${API_BASE_URL}/api/bookings`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    credentials: "include", // HttpOnly cookies
     cache: "no-store",
   });
 
@@ -134,11 +134,11 @@ export default async function BookingsPage({
 
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
-  const bookings = await getBookings(session.user.accessToken);
+  const bookings = await getBookings();
   const hasBookings = bookings.length > 0;
 
   // Group bookings by status

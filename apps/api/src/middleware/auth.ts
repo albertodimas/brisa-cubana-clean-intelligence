@@ -1,6 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import type { UserRole } from "../generated/prisma";
 import { verifyAccessToken, type AccessTokenPayload } from "../lib/token";
+import { getAccessTokenCookie } from "../lib/cookies";
 
 const AUTH_USER_KEY = "authUser";
 
@@ -11,11 +12,22 @@ export function getAuthUser(c: Context): AccessTokenPayload | null {
 
 export function requireAuth(allowedRoles?: UserRole[]): MiddlewareHandler {
   return async (c, next) => {
-    const header = c.req.header("authorization") ?? "";
-    const token = header.startsWith("Bearer ") ? header.slice(7).trim() : null;
+    // Try HttpOnly cookie first (new secure method)
+    let token = getAccessTokenCookie(c);
+
+    // Fallback to Authorization header for backward compatibility
+    if (!token) {
+      const header = c.req.header("authorization") ?? "";
+      token = header.startsWith("Bearer ")
+        ? header.slice(7).trim() || undefined
+        : undefined;
+    }
 
     if (!token) {
-      return c.json({ error: "Authorization header missing" }, 401);
+      return c.json(
+        { error: "Authentication required (cookie or header)" },
+        401,
+      );
     }
 
     const payload = verifyAccessToken(token);

@@ -6,14 +6,10 @@ import { Button, Card } from "@brisa/ui";
 import type { Property, PropertyType } from "@/types/api";
 
 interface PropertyFormProps {
-  accessToken: string;
   property?: Property;
 }
 
-export default function PropertyForm({
-  accessToken,
-  property,
-}: PropertyFormProps) {
+export default function PropertyForm({ property }: PropertyFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,9 +66,9 @@ export default function PropertyForm({
       const response = await fetch(url, {
         method: property ? "PATCH" : "POST",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 

@@ -66,7 +66,6 @@ function buildQuery(filters?: AuditTrailFilters) {
 }
 
 export async function getAuditTrail(
-  accessToken: string,
   filters?: AuditTrailFilters,
 ): Promise<AuditTrailResponse> {
   const query = buildQuery(filters);
@@ -74,20 +73,23 @@ export async function getAuditTrail(
   const [alertsResponse, resolvedResponse, openResponse] = await Promise.all([
     fetch(`${API_BASE_URL}/api/alerts/payment${query}`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     }),
     fetch(`${API_BASE_URL}/api/reconciliation/history/resolved${query}`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     }),
     fetch(`${API_BASE_URL}/api/reconciliation/history/open${query}`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     }),
   ]);

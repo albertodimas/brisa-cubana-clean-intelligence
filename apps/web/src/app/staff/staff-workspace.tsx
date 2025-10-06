@@ -5,7 +5,6 @@ import { Badge } from "@brisa/ui";
 import { ActiveService } from "./active-service";
 
 interface StaffWorkspaceProps {
-  accessToken: string;
   userName: string;
 }
 
@@ -22,7 +21,7 @@ interface AssignedBooking {
   notes?: string | null;
 }
 
-export function StaffWorkspace({ accessToken, userName }: StaffWorkspaceProps) {
+export function StaffWorkspace({ userName }: StaffWorkspaceProps) {
   const [bookings, setBookings] = useState<AssignedBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] =
@@ -36,8 +35,9 @@ export function StaffWorkspace({ accessToken, userName }: StaffWorkspaceProps) {
           process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
         const response = await fetch(`${apiBase}/api/bookings/mine`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -85,13 +85,12 @@ export function StaffWorkspace({ accessToken, userName }: StaffWorkspaceProps) {
     }
 
     void loadBookings();
-  }, [accessToken]);
+  }, []);
 
   if (selectedBooking) {
     return (
       <ActiveService
         booking={selectedBooking}
-        accessToken={accessToken}
         onBack={() => setSelectedBooking(null)}
         onComplete={() => {
           setSelectedBooking(null);

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SentryErrorBoundary } from "@/components/sentry-error-boundary";
@@ -28,13 +29,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Extract nonce from middleware for CSP
+  const nonce = (await headers()).get("x-csp-nonce") ?? undefined;
+
   return (
     <html lang="es">
+      <head>{nonce && <meta property="csp-nonce" content={nonce} />}</head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

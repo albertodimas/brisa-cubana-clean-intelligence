@@ -61,6 +61,10 @@ test.describe("Staff workspace", () => {
 
     await page.addInitScript((booking) => {
       const originalFetch = window.fetch.bind(window);
+      const globals = window as unknown as {
+        e2eRecordPatch?: (payload: Record<string, unknown>) => void;
+        e2eRecordReport?: (payload: Record<string, unknown>) => void;
+      };
 
       window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
         const url =
@@ -92,7 +96,7 @@ test.describe("Staff workspace", () => {
                   : "{}";
 
           const parsedBody = JSON.parse(bodyText) as Record<string, unknown>;
-          window.e2eRecordPatch?.(parsedBody);
+          globals.e2eRecordPatch?.(parsedBody);
 
           return new Response(
             JSON.stringify({
@@ -124,7 +128,7 @@ test.describe("Staff workspace", () => {
                   : "{}";
 
           const parsedBody = JSON.parse(bodyText) as Record<string, unknown>;
-          window.e2eRecordReport?.(parsedBody);
+          globals.e2eRecordReport?.(parsedBody);
 
           return new Response(
             JSON.stringify({

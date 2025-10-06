@@ -12,7 +12,6 @@ import {
   type CreateReconciliationNoteState,
   type ResolveReconciliationNoteState,
 } from "./actions";
-import { useSession } from "next-auth/react";
 
 const statusOptions = [
   "TODOS",
@@ -91,8 +90,6 @@ function ManageBookingRow({ booking, useFakeData }: ManageBookingRowProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const stripeUrl = stripeDashboardUrl(booking);
   const [note, setNote] = useState("");
-  const sessionResult = useSession();
-  const session = sessionResult?.data;
   const [notes, setNotes] = useState<
     Array<{
       id: string;
@@ -125,11 +122,6 @@ function ManageBookingRow({ booking, useFakeData }: ManageBookingRowProps) {
       return;
     }
 
-    const token = session?.user?.accessToken;
-    if (!token) {
-      return;
-    }
-
     async function loadNotes() {
       try {
         setLoadingNotes(true);
@@ -139,8 +131,9 @@ function ManageBookingRow({ booking, useFakeData }: ManageBookingRowProps) {
           `${apiBase}/api/reconciliation/booking/${booking.id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
+            credentials: "include",
           },
         );
 
@@ -166,13 +159,7 @@ function ManageBookingRow({ booking, useFakeData }: ManageBookingRowProps) {
     }
 
     void loadNotes();
-  }, [
-    booking.id,
-    session?.user?.accessToken,
-    noteState.ok,
-    resolveState.ok,
-    useFakeData,
-  ]);
+  }, [booking.id, noteState.ok, resolveState.ok, useFakeData]);
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-neutral-200">

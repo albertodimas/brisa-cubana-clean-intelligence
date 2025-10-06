@@ -31,6 +31,7 @@ import {
   performanceMonitoringMiddleware,
 } from "./middleware/observability";
 import { nonceMiddleware } from "./middleware/csp-nonce";
+import { buildAllowedOrigins, originMatcher } from "./lib/cors-origins";
 
 export const app = new Hono();
 
@@ -76,54 +77,41 @@ app.use("*", requestLogger); // Legacy logger (TODO: migrate to requestLoggingMi
 app.use("*", requestLoggingMiddleware); // Structured logging with correlation IDs
 app.use("*", performanceMonitoringMiddleware); // Slow request detection
 app.use("*", errorTrackingMiddleware); // Error tracking
+
 // Production-grade CORS configuration
+// Security audit: FASE 3 - Explicit origins only (no wildcards with credentials)
 // References:
 // - https://hono.dev/docs/middleware/builtin/cors
 // - https://app.studyraid.com/en/read/11303/352730/cors-configuration-in-hono
-// Consulted: 2025-10-02 (updated 2025-10-04)
+// - ~/.codex/cors-hardening-analysis.md (Codex GPT-5 audit)
+// Consulted: 2025-10-02 (updated 2025-10-06)
+
+const allowedOrigins = buildAllowedOrigins();
+
 app.use(
   "*",
   cors({
-    origin: (origin) => {
-      // Development: explicit whitelist (never use wildcards)
-      if (process.env.NODE_ENV !== "production") {
-        const devOrigins = [
-          "http://localhost:3000",
-          "http://127.0.0.1:3000",
-          "http://localhost:3001",
-          "http://127.0.0.1:3001",
-        ];
-        if (!origin) return "*"; // Postman/curl requests
-        return devOrigins.includes(origin) ? origin : null;
-      }
-
-      // Production: explicit allowlist (never use wildcards)
-      const allowedOrigins = [
-        "https://brisacubana.com",
-        "https://www.brisacubana.com",
-        "https://brisa-cubana.vercel.app",
-        process.env.WEB_APP_URL,
-        process.env.CORS_ORIGIN,
-      ].filter(Boolean) as string[];
-
-      if (!origin) {
-        return origin;
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return origin;
-      }
-
-      logger.warn({ origin }, "Blocked CORS origin");
-      return null;
-    },
+    origin: originMatcher(allowedOrigins),
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    exposeHeaders: ["Content-Length", "X-Request-Id"],
-    maxAge: 86400, // 24 hours for preflight cache
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Accept",
+      "X-Requested-With",
+      "If-Match",
+      "If-None-Match",
+    ],
+    exposeHeaders: ["Content-Length", "Content-Type"],
+    maxAge: process.env.NODE_ENV === "production" ? 86400 : 3600,
     credentials: true,
   }),
 );
+
+// Add Vary: Origin header for cache safety
+app.use("*", async (c, next) => {
+  await next();
+  c.header("Vary", "Origin", { append: true });
+});
 
 // Apply global API rate limiting (can be overridden by specific routes)
 app.use("/api/*", rateLimiter(RateLimits.api));

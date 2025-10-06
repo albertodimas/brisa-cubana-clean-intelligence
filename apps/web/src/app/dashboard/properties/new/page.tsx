@@ -5,7 +5,7 @@ import PropertyForm from "../components/PropertyForm";
 export default async function NewPropertyPage() {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
@@ -23,7 +23,7 @@ export default async function NewPropertyPage() {
         </p>
       </div>
 
-      <PropertyForm accessToken={session.user.accessToken} />
+      <PropertyForm />
     </section>
   );
 }

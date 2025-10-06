@@ -29,11 +29,7 @@ export default async function DashboardPage() {
     redirect("/auth/signin");
   }
 
-  if (!session.user.accessToken) {
-    redirect("/auth/signin");
-  }
   const user = session.user;
-  const accessToken = user.accessToken!;
   const role = user.role;
   const useFakeData = isFakeDataEnabled();
 
@@ -47,7 +43,7 @@ export default async function DashboardPage() {
     });
   } else {
     const { getDashboardData } = await import("@/server/api/client");
-    data = await getDashboardData(user.id, accessToken, role);
+    data = await getDashboardData(user.id, role);
   }
 
   const hasProperties = data.user.properties.length > 0;
@@ -67,7 +63,6 @@ export default async function DashboardPage() {
     const queued = await queuePaymentAlert({
       failedPayments,
       pendingPayments,
-      accessToken,
     });
     if (!queued) {
       console.warn(

@@ -9,21 +9,14 @@ const API_BASE_URL =
 interface PaymentAlertPayload {
   failedPayments: number;
   pendingPayments: number;
-  accessToken?: string | null;
 }
 
 export async function queuePaymentAlert({
   failedPayments,
   pendingPayments,
-  accessToken,
 }: PaymentAlertPayload): Promise<boolean> {
   if (isFakeDataEnabled()) {
     return true;
-  }
-
-  if (!accessToken) {
-    console.warn("[alerts] missing access token, skipping alert");
-    return false;
   }
 
   try {
@@ -31,8 +24,8 @@ export async function queuePaymentAlert({
       method: "POST",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include", // Forward cookies (brisa_access, brisa_refresh)
       body: JSON.stringify({ failedPayments, pendingPayments }),
     });
 

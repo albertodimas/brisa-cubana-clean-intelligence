@@ -4,7 +4,7 @@ import { auth } from "@/server/auth/config";
 import { Sparkles, Clock, DollarSign, CheckCircle2 } from "lucide-react";
 import type { Service } from "@/types/api";
 
-async function getServices(accessToken: string): Promise<Service[]> {
+async function getServices(): Promise<Service[]> {
   const API_BASE_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -12,9 +12,9 @@ async function getServices(accessToken: string): Promise<Service[]> {
 
   const response = await fetch(`${API_BASE_URL}/api/services`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -33,11 +33,11 @@ const currencyFormatter = new Intl.NumberFormat("es-US", {
 export default async function ServicesPage() {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
-  const services = await getServices(session.user.accessToken);
+  const services = await getServices();
   const activeServices = services.filter((s) => s.active);
 
   return (

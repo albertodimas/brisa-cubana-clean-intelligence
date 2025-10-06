@@ -6,7 +6,7 @@ import CleanScoreDashboard from "./clean-score-dashboard";
 const baseReport = {
   id: "csr_123",
   bookingId: "booking-1",
-  status: "DRAFT",
+  status: "DRAFT" as const,
   score: 92.5,
   metrics: {
     generalCleanliness: 4.6,
@@ -69,7 +69,6 @@ describe("CleanScoreDashboard", () => {
           baseReport,
           { ...baseReport, id: "csr_456", status: "PUBLISHED" as const },
         ]}
-        accessToken="token"
         apiBase="http://localhost:3001"
       />,
     );
@@ -110,7 +109,6 @@ describe("CleanScoreDashboard", () => {
     render(
       <CleanScoreDashboard
         initialReports={[baseReport]}
-        accessToken="token"
         apiBase="http://localhost:3001"
       />,
     );
@@ -121,7 +119,10 @@ describe("CleanScoreDashboard", () => {
       expect(fetch).toHaveBeenCalledWith(
         "http://localhost:3001/api/reports/cleanscore/booking-1",
         expect.objectContaining({
-          headers: { Authorization: "Bearer token" },
+          credentials: "include",
+          headers: expect.not.objectContaining({
+            Authorization: expect.anything(),
+          }),
         }),
       );
     });
@@ -147,7 +148,6 @@ describe("CleanScoreDashboard", () => {
     render(
       <CleanScoreDashboard
         initialReports={[baseReport]}
-        accessToken="token"
         apiBase="http://localhost:3001"
       />,
     );
@@ -159,10 +159,10 @@ describe("CleanScoreDashboard", () => {
         "http://localhost:3001/api/reports/cleanscore/booking-1",
         expect.objectContaining({
           method: "PATCH",
-          headers: {
-            Authorization: "Bearer token",
+          credentials: "include",
+          headers: expect.objectContaining({
             "Content-Type": "application/json",
-          },
+          }),
         }),
       );
     });

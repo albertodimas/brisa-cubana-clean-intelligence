@@ -28,14 +28,8 @@ interface BookingWithDetails extends Booking {
   };
 }
 
-async function getBooking(
-  id: string,
-  accessToken: string,
-): Promise<BookingWithDetails> {
-  const useFakeData =
-    isFakeDataEnabled() ||
-    accessToken.startsWith("fake.") ||
-    id.startsWith("fake-");
+async function getBooking(id: string): Promise<BookingWithDetails> {
+  const useFakeData = isFakeDataEnabled() || id.startsWith("fake-");
 
   if (useFakeData) {
     const now = new Date().toISOString();
@@ -82,15 +76,14 @@ async function getBooking(
     "http://localhost:3001";
 
   console.log("[bookings/[id]] fetching real booking", {
-    tokenSample: accessToken.slice(0, 10),
     useFakeFlag: isFakeDataEnabled(),
   });
 
   const response = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    credentials: "include", // HttpOnly cookies
     cache: "no-store",
   });
 
@@ -140,12 +133,12 @@ export default async function BookingDetailPage({
 }: BookingDetailPageProps) {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
   const { id } = await params;
-  const booking = await getBooking(id, session.user.accessToken);
+  const booking = await getBooking(id);
 
   const isAdmin = session.user.role === "ADMIN";
   const isStaff = session.user.role === "STAFF";
@@ -311,7 +304,6 @@ export default async function BookingDetailPage({
           <BookingActions
             bookingId={booking.id}
             currentStatus={booking.status}
-            accessToken={session.user.accessToken}
           />
         </Section>
       )}

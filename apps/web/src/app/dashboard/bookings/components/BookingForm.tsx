@@ -7,14 +7,12 @@ import { Calendar, MapPin, Clock, DollarSign } from "lucide-react";
 import type { Service, Property } from "@/types/api";
 
 interface BookingFormProps {
-  accessToken: string;
   userId: string;
   services: Service[];
   properties: Property[];
 }
 
 export default function BookingForm({
-  accessToken,
   userId,
   services,
   properties,
@@ -53,9 +51,9 @@ export default function BookingForm({
       const response = await fetch(`${API_BASE_URL}/api/bookings`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 

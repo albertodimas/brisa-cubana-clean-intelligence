@@ -45,7 +45,7 @@ export interface ResolveReconciliationNoteState {
   error?: string;
 }
 
-async function postBooking(body: unknown, accessToken: string, userId: string) {
+async function postBooking(body: unknown, userId: string) {
   if (isFakeDataEnabled()) {
     return {
       booking: {
@@ -61,8 +61,8 @@ async function postBooking(body: unknown, accessToken: string, userId: string) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include",
       body: JSON.stringify({
         ...(body as Record<string, unknown>),
         userId,
@@ -91,7 +91,7 @@ export async function createBooking(
 ): Promise<CreateBookingState> {
   const session = await auth();
 
-  if (!session?.user?.accessToken || !session.user.id) {
+  if (!session?.user?.id) {
     return { ok: false, error: "Sesión inválida. Inicia sesión nuevamente." };
   }
 
@@ -118,11 +118,7 @@ export async function createBooking(
   }
 
   try {
-    const result = await postBooking(
-      parsed.data,
-      session.user.accessToken,
-      session.user.id,
-    );
+    const result = await postBooking(parsed.data, session.user.id);
     console.info("Booking created", {
       userId: session.user.id,
       serviceId: parsed.data.serviceId,
@@ -149,7 +145,7 @@ export async function updateBookingStatus(
 ): Promise<UpdateBookingState> {
   const session = await auth();
 
-  if (!session?.user?.accessToken || !session.user.id) {
+  if (!session?.user?.id) {
     return { ok: false, error: "Sesión inválida. Inicia sesión nuevamente." };
   }
 
@@ -172,8 +168,8 @@ export async function updateBookingStatus(
         method: "PATCH",
         headers: {
           "content-type": "application/json",
-          Authorization: `Bearer ${session.user.accessToken}`,
         },
+        credentials: "include",
         body: JSON.stringify({ status }),
       },
     );
@@ -209,7 +205,7 @@ export async function createReconciliationNoteAction(
 ): Promise<CreateReconciliationNoteState> {
   const session = await auth();
 
-  if (!session?.user?.accessToken || !session.user.id) {
+  if (!session?.user?.id) {
     return { ok: false, error: "Sesión inválida. Inicia sesión nuevamente." };
   }
 
@@ -238,11 +234,7 @@ export async function createReconciliationNoteAction(
   }
 
   try {
-    await createReconciliationNote(
-      bookingId,
-      message.trim(),
-      session.user.accessToken,
-    );
+    await createReconciliationNote(bookingId, message.trim());
     revalidatePath("/dashboard");
     return { ok: true };
   } catch (error) {
@@ -263,7 +255,7 @@ export async function resolveReconciliationNoteAction(
 ): Promise<ResolveReconciliationNoteState> {
   const session = await auth();
 
-  if (!session?.user?.accessToken) {
+  if (!session?.user?.id) {
     return { ok: false, error: "Sesión inválida. Inicia sesión nuevamente." };
   }
 
@@ -278,7 +270,7 @@ export async function resolveReconciliationNoteAction(
   }
 
   try {
-    await resolveReconciliationNote(noteId, session.user.accessToken);
+    await resolveReconciliationNote(noteId);
     revalidatePath("/dashboard");
     return { ok: true };
   } catch (error) {

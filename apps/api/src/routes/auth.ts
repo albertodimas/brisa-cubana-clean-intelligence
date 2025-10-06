@@ -10,6 +10,11 @@ import {
   revokeRefreshToken,
   verifyRefreshToken,
 } from "../lib/token";
+import {
+  setAccessTokenCookie,
+  setRefreshTokenCookie,
+  clearAuthCookies,
+} from "../lib/cookies";
 import { requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 
@@ -65,11 +70,16 @@ auth.post("/login", async (c) => {
 
   const refreshToken = await generateRefreshToken(user.id);
 
+  // Set HttpOnly cookies (new secure method)
+  setAccessTokenCookie(c, accessToken);
+  setRefreshTokenCookie(c, refreshToken);
+
   return c.json({
     id: user.id,
     email: user.email,
     name: user.name,
     role: user.role,
+    // Keep tokens in response for backward compatibility
     accessToken,
     refreshToken,
     // Legacy field for backwards compatibility
@@ -119,6 +129,10 @@ auth.post("/refresh", async (c) => {
 
   const newRefreshToken = await generateRefreshToken(user.id);
 
+  // Set new HttpOnly cookies
+  setAccessTokenCookie(c, accessToken);
+  setRefreshTokenCookie(c, newRefreshToken);
+
   return c.json({
     accessToken,
     refreshToken: newRefreshToken,
@@ -133,6 +147,9 @@ auth.post("/logout", requireAuth(), async (c) => {
 
   // Revoke all refresh tokens for this user
   await revokeAllRefreshTokens(authUser.sub);
+
+  // Clear HttpOnly cookies
+  clearAuthCookies(c);
 
   return c.json({ message: "Logged out successfully" });
 });

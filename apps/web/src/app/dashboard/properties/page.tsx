@@ -4,7 +4,7 @@ import { auth } from "@/server/auth/config";
 import { Plus, MapPin, Home, Building2, Bed, Bath } from "lucide-react";
 import type { Property } from "@/types/api";
 
-async function getProperties(accessToken: string): Promise<Property[]> {
+async function getProperties(): Promise<Property[]> {
   const API_BASE_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -12,9 +12,9 @@ async function getProperties(accessToken: string): Promise<Property[]> {
 
   const response = await fetch(`${API_BASE_URL}/api/properties`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    credentials: "include", // HttpOnly cookies
     cache: "no-store",
   });
 
@@ -42,11 +42,11 @@ const propertyTypeLabels: Record<string, string> = {
 export default async function PropertiesPage() {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
-  const properties = await getProperties(session.user.accessToken);
+  const properties = await getProperties();
   const hasProperties = properties.length > 0;
 
   return (

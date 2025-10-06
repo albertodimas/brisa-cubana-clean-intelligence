@@ -9,10 +9,6 @@ export default async function CalendarPage() {
     redirect("/auth/signin");
   }
 
-  if (!session.user.accessToken) {
-    redirect("/auth/signin");
-  }
-
   // Only STAFF and ADMIN can access calendar
   if (session.user.role === "CLIENT") {
     redirect("/dashboard");
@@ -33,7 +29,7 @@ export default async function CalendarPage() {
         </p>
       </div>
 
-      <CalendarView accessToken={session.user.accessToken} />
+      <CalendarView />
     </div>
   );
 }

@@ -31,7 +31,6 @@ interface ActiveServiceProps {
     propertyAddress: string;
     notes?: string | null;
   };
-  accessToken: string;
   onBack: () => void;
   onComplete: () => void;
 }
@@ -44,7 +43,6 @@ interface ChecklistTask {
 
 export function ActiveService({
   booking,
-  accessToken,
   onBack,
   onComplete,
 }: ActiveServiceProps) {
@@ -84,9 +82,9 @@ export function ActiveService({
       const response = await fetch(`${apiBase}/api/bookings/${booking.id}`, {
         method: "PATCH",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ status: "IN_PROGRESS" }),
       });
 
@@ -123,9 +121,9 @@ export function ActiveService({
       const response = await fetch(`${apiBase}/api/bookings/${booking.id}`, {
         method: "PATCH",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ status: "COMPLETED" }),
       });
 
@@ -141,9 +139,9 @@ export function ActiveService({
       const reportResponse = await fetch(`${apiBase}/api/reports/cleanscore`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           bookingId: booking.id,
           images: photos,
@@ -195,7 +193,6 @@ export function ActiveService({
   const minutes = Math.floor((elapsedSeconds % 3600) / 60);
   const seconds = elapsedSeconds % 60;
   const completedCount = tasks.filter((t) => t.completed).length;
-  const progress = (completedCount / tasks.length) * 100;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-6 pb-24">
@@ -256,12 +253,12 @@ export function ActiveService({
                 {completedCount}/{tasks.length}
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full bg-gradient-to-r from-teal-500 to-teal-400 transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            <progress
+              value={completedCount}
+              max={tasks.length}
+              className="brisa-progress"
+              aria-label="Progreso del checklist"
+            />
           </div>
 
           {/* Checklist */}

@@ -62,7 +62,6 @@ describe("ActiveService component", () => {
     render(
       <ActiveService
         booking={baseBooking}
-        accessToken="token"
         onBack={vi.fn()}
         onComplete={vi.fn()}
       />,
@@ -83,7 +82,6 @@ describe("ActiveService component", () => {
     render(
       <ActiveService
         booking={baseBooking}
-        accessToken="token"
         onBack={vi.fn()}
         onComplete={onComplete}
       />,

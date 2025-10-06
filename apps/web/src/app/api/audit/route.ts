@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const minFailed = searchParams.get("minFailed");
     const minPending = searchParams.get("minPending");
 
-    const audit = await getAuditTrail(session.user.accessToken ?? "", {
+    const audit = await getAuditTrail({
       startDate,
       endDate,
       limit: limit ? Number.parseInt(limit, 10) : undefined,

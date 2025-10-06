@@ -55,18 +55,15 @@ export default async function AuditTrailPage(props: AuditTrailPageProps) {
   const currentTab =
     typeof searchParams?.tab === "string" ? searchParams?.tab : "resueltas";
 
-  const { alerts, notesResolved, notesOpen } = await getAuditTrail(
-    session.user.accessToken ?? "",
-    {
-      startDate: startDateParam,
-      endDate: endDateParam,
-      limit: limitParam && !Number.isNaN(limitParam) ? limitParam : undefined,
-      authorEmail: authorEmailParam,
-      bookingId: bookingIdParam,
-      minFailed: minFailedValid ? minFailedRaw : undefined,
-      minPending: minPendingValid ? minPendingRaw : undefined,
-    },
-  );
+  const { alerts, notesResolved, notesOpen } = await getAuditTrail({
+    startDate: startDateParam,
+    endDate: endDateParam,
+    limit: limitParam && !Number.isNaN(limitParam) ? limitParam : undefined,
+    authorEmail: authorEmailParam,
+    bookingId: bookingIdParam,
+    minFailed: minFailedValid ? minFailedRaw : undefined,
+    minPending: minPendingValid ? minPendingRaw : undefined,
+  });
 
   const activeNotes = currentTab === "abiertas" ? notesOpen : notesResolved;
 

@@ -1,33 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
-const baseConnectSources = [
-  "'self'",
-  "https://api.brisacubana.com",
-  "https://vitals.vercel-insights.com",
-  "https://*.sentry.io", // Sentry error reporting
-];
-
-const connectSrc = new Set(baseConnectSources);
-
-const apiUrlFromEnv = process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL;
-
-if (apiUrlFromEnv) {
-  try {
-    const apiOrigin = new URL(apiUrlFromEnv).origin;
-    connectSrc.add(apiOrigin);
-  } catch {
-    // ignore invalid URLs; fallback to defaults only
-  }
-}
-
-if (process.env.NODE_ENV !== "production") {
-  connectSrc.add("http://localhost:3001");
-  connectSrc.add("http://127.0.0.1:3001");
-}
-
-const connectSrcValue = Array.from(connectSrc).join(" ");
-
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
@@ -36,9 +9,12 @@ const nextConfig: NextConfig = {
     externalDir: true,
     serverActions: {
       allowedOrigins: [
-        "localhost",
-        "brisa-cubana.vercel.app",
-        "brisacubana.com",
+        "https://brisacubana.com",
+        "https://www.brisacubana.com",
+        "https://app.brisacubana.com",
+        "https://brisa-cubana.vercel.app",
+        "localhost:3000",
+        "127.0.0.1:3000",
       ],
     },
   },
@@ -47,6 +23,9 @@ const nextConfig: NextConfig = {
   // - https://nextjs.org/docs/pages/guides/content-security-policy
   // - https://blog.arcjet.com/next-js-security-checklist/
   // Consulted: 2025-10-02
+  //
+  // Note: CSP is now applied dynamically in middleware.ts with nonce-based directives
+  // to eliminate 'unsafe-inline' and prevent XSS attacks.
   async headers() {
     return [
       {
@@ -77,23 +56,6 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value:
               "camera=(), microphone=(), geolocation=(self), payment=(self)",
-          },
-          // Content Security Policy (CSP) - Enhanced
-          // Note: 'unsafe-inline' required for Next.js styles and Vercel Analytics
-          // TODO: Implement nonce-based CSP in future iteration
-          {
-            key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; " +
-              "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://*.sentry.io; " +
-              "style-src 'self' 'unsafe-inline'; " +
-              "img-src 'self' data: https: blob:; " +
-              "font-src 'self' data:; " +
-              `connect-src ${connectSrcValue}; ` +
-              "frame-ancestors 'none'; " +
-              "base-uri 'self'; " +
-              "form-action 'self'; " +
-              "upgrade-insecure-requests;",
           },
         ],
       },

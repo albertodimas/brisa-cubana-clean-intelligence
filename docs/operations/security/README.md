@@ -2,6 +2,13 @@
 
 Documentación completa de seguridad: OWASP Top 10, pen testing, y auditorías automatizadas.
 
+> **Actualización 2025-10-06** · FASE 2 completada
+>
+> - CSP con nonce per-request (Next.js middleware) y directiva `strict-dynamic`.
+> - CORS endurecido en la API con lista blanca explícita y `Vary: Origin`.
+> - Suite de pruebas `apps/api/src/lib/cors-origins.test.ts` incorporada al pipeline local.
+> - Documentos afectados: deployment, architecture, production readiness, testing.
+
 ## 🏆 Score de Seguridad: 10.0/10 OWASP Compliance
 
 ## 📚 Documentación Disponible

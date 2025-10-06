@@ -9,7 +9,6 @@ type StatusFilter = "all" | "draft" | "published";
 
 interface CleanScoreDashboardProps {
   initialReports: CleanScoreReport[];
-  accessToken: string;
   apiBase: string;
 }
 
@@ -21,7 +20,6 @@ interface DetailState {
 
 export default function CleanScoreDashboard({
   initialReports,
-  accessToken,
   apiBase,
 }: CleanScoreDashboardProps) {
   const [reports, setReports] = useState(initialReports);
@@ -78,8 +76,9 @@ export default function CleanScoreDashboard({
         `${apiBase}/api/reports/cleanscore?limit=50`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
+          credentials: "include",
           cache: "no-store",
         },
       );
@@ -109,9 +108,9 @@ export default function CleanScoreDashboard({
         {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({ sendEmail: true }),
         },
       );
@@ -155,8 +154,9 @@ export default function CleanScoreDashboard({
         `${apiBase}/api/reports/cleanscore/${bookingId}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
+          credentials: "include",
           cache: "no-store",
         },
       );

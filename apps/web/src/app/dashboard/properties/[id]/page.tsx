@@ -22,10 +22,7 @@ interface PropertyWithBookings extends Property {
   }>;
 }
 
-async function getProperty(
-  id: string,
-  accessToken: string,
-): Promise<PropertyWithBookings> {
+async function getProperty(id: string): Promise<PropertyWithBookings> {
   const API_BASE_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -33,9 +30,9 @@ async function getProperty(
 
   const response = await fetch(`${API_BASE_URL}/api/properties/${id}`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -85,12 +82,12 @@ export default async function PropertyDetailPage({
 }: PropertyDetailPageProps) {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
   const { id } = await params;
-  const property = await getProperty(id, session.user.accessToken);
+  const property = await getProperty(id);
 
   const Icon = propertyTypeIcons[property.type] ?? Home;
   const typeLabel = propertyTypeLabels[property.type] ?? property.type;

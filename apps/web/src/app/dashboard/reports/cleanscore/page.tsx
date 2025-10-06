@@ -11,17 +11,17 @@ export const metadata = {
 export default async function CleanScoreReportsPage() {
   const session = await auth();
 
-  if (!session?.user?.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
-  const accessToken = session.user.accessToken;
   const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3001";
 
   const response = await fetch(`${apiBase}/api/reports/cleanscore?limit=50`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
     },
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -33,7 +33,6 @@ export default async function CleanScoreReportsPage() {
   return (
     <CleanScoreDashboard
       initialReports={(data.reports as CleanScoreReport[]) ?? []}
-      accessToken={accessToken}
       apiBase={apiBase}
     />
   );

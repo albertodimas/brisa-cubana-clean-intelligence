@@ -153,6 +153,11 @@ jobs:
         run: pnpm turbo run test -- --coverage
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/brisa_cubana_test
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: brisa_cubana_test
+          PGHOST: localhost
+          PGPORT: 5432
 
   build:
     name: Build
@@ -269,6 +274,11 @@ jobs:
         run: pnpm test:e2e
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: brisa_cubana_dev
+          PGHOST: localhost
+          PGPORT: 5433
           REDIS_URL: redis://localhost:6380
 
   docs:

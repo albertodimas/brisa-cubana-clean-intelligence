@@ -58,6 +58,13 @@ Brisa Cubana Clean Intelligence centraliza la experiencia del cliente, las opera
 - Integraciones con PMS (Hostaway, Guesty, Mews) y facturación vía Stripe.
 - Reportes ESG y de riesgo para cumplir con regulaciones locales.
 
+### Seguridad y Confiabilidad
+
+- **FASE 2 (2025-10-06)**: CSP con nonce per-request (sin `unsafe-inline`), `strict-dynamic` y headers reforzados.
+- **FASE 1 (2025-10-05)**: Autenticación JWT con cookies `HttpOnly` + rotación de tokens.
+- Lista blanca de orígenes explícitos en CORS (sin comodines) y `Vary: Origin` para cache seguro.
+- Análisis automatizado diario (`security-scan.yml`) y reportes manuales en `security-reports/`.
+
 ## Arquitectura del Sistema
 
 - `apps/web`: Next.js 15.5.4 (App Router), React 19, Tailwind CSS 4.1.13, Auth.js v5.

@@ -17,8 +17,8 @@ DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
 # JWT Authentication
 JWT_SECRET=<strong-random-secret-min-32-chars>
 
-# CORS Configuration
-CORS_ORIGIN=https://brisacubana.com
+# Frontend URL (used by CORS builder)
+WEB_APP_URL=https://brisacubana.com
 ```
 
 ### External Services
@@ -141,7 +141,7 @@ These variables MUST be set for production security:
 - `JWT_SECRET`: Minimum 32 characters, cryptographically random
 - `STRIPE_WEBHOOK_SECRET`: Required for webhook signature verification
 - `DATABASE_URL`: Must use SSL mode (`?sslmode=require`)
-- `CORS_ORIGIN`: Must be explicit production domain (no wildcards)
+- `WEB_APP_URL`: Must be explicit production domain (no wildcards)
 
 ### Generating Secrets
 
@@ -160,7 +160,7 @@ openssl rand -hex 32
 ```bash
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
 JWT_SECRET=dev-secret-key-not-for-production
-CORS_ORIGIN=http://localhost:3000
+WEB_APP_URL=http://localhost:3000
 STRIPE_SECRET_KEY=sk_test_...
 RESEND_API_KEY=re_test_...
 ```
@@ -181,7 +181,7 @@ Before deploying to production:
 - [ ] `STRIPE_WEBHOOK_SECRET` configured in Railway
 - [ ] `JWT_SECRET` is strong random value (not default)
 - [ ] `DATABASE_URL` uses SSL mode
-- [ ] `CORS_ORIGIN` set to exact production domain
+- [ ] `WEB_APP_URL` set to exact production domain
 - [ ] Sentry DSN configured for error tracking
 - [ ] Email service (Resend) configured and verified
 - [ ] Twilio credentials configured for SMS
@@ -205,8 +205,8 @@ Before deploying to production:
 
 **CORS errors in production**
 
-- Verify `CORS_ORIGIN` matches exact frontend URL
-- Check no trailing slash in CORS_ORIGIN
+- Verify `WEB_APP_URL` matches exact frontend URL
+- Check no trailing slash in WEB_APP_URL
 - Ensure credentials: true is set in CORS config
 
 ## References

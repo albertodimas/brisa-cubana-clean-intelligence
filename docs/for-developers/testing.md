@@ -48,6 +48,8 @@ brisa-cubana-clean-intelligence/
 │   ├── api/
 │   │   ├── src/
 │   │   │   ├── app.test.ts              # Tests de la app Hono
+│   │   │   ├── lib/
+│   │   │   │   └── cors-origins.test.ts # Suite CSP/CORS (FASE 2)
 │   │   │   └── routes/
 │   │   │       ├── auth.test.ts         # Tests de autenticación
 │   │   │       ├── users.test.ts        # Tests de usuarios
@@ -89,6 +91,9 @@ pnpm test -- --coverage
 # Ejecutar tests específicos
 pnpm test auth.test.ts
 pnpm test users
+
+# Ejecutar suite CSP/CORS
+pnpm test lib/cors-origins.test.ts
 ```
 
 ### Configuración Vitest
@@ -142,6 +147,8 @@ export default defineConfig({
 ```
 
 > **Nota:** Mantén la cobertura en ≥75 % (líneas/estadísticas) y ≥70 % (funciones/branches). Los módulos de concierge e IA ya cuentan con pruebas, por lo que cualquier cambio debe actualizar sus suites correspondientes.
+
+> **Nueva suite (2025-10-06)**: `cors-origins.test.ts` valida normalización, deduplicación y spoofing en CORS. Ejecuta `pnpm test lib/cors-origins.test.ts` tras modificar dominios u orígenes permitidos.
 
 ### Ejemplo: Test de Autenticación
 

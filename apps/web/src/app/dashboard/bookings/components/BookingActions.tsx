@@ -9,7 +9,6 @@ import type { BookingStatus } from "@/types/api";
 interface BookingActionsProps {
   bookingId: string;
   currentStatus: BookingStatus;
-  accessToken: string;
 }
 
 const statusTransitions: Record<
@@ -34,7 +33,6 @@ const statusTransitions: Record<
 export default function BookingActions({
   bookingId,
   currentStatus,
-  accessToken,
 }: BookingActionsProps) {
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -64,9 +62,9 @@ export default function BookingActions({
         {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify(payload),
         },
       );

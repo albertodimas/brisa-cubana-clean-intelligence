@@ -43,10 +43,6 @@ interface BookingDetail {
   notes?: string;
 }
 
-interface CalendarViewProps {
-  accessToken: string;
-}
-
 function getEventColor(status: string): {
   backgroundColor: string;
   borderColor: string;
@@ -67,7 +63,7 @@ function getEventColor(status: string): {
   }
 }
 
-export function CalendarView({ accessToken }: CalendarViewProps) {
+export function CalendarView() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<BookingDetail | null>(
     null,
@@ -83,8 +79,9 @@ export function CalendarView({ accessToken }: CalendarViewProps) {
         process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
       const response = await fetch(`${apiBase}/api/bookings?pageSize=100`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -140,7 +137,7 @@ export function CalendarView({ accessToken }: CalendarViewProps) {
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  }, []);
 
   useEffect(() => {
     void fetchBookings();
@@ -201,91 +198,6 @@ export function CalendarView({ accessToken }: CalendarViewProps) {
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       {/* Calendar */}
       <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-lg">
-        <style jsx global>{`
-          .fc {
-            --fc-border-color: rgba(255, 255, 255, 0.1);
-            --fc-button-bg-color: rgba(20, 184, 166, 0.2);
-            --fc-button-border-color: rgba(20, 184, 166, 0.3);
-            --fc-button-hover-bg-color: rgba(20, 184, 166, 0.3);
-            --fc-button-hover-border-color: rgba(20, 184, 166, 0.4);
-            --fc-button-active-bg-color: rgba(20, 184, 166, 0.4);
-            --fc-button-active-border-color: rgba(20, 184, 166, 0.5);
-            --fc-today-bg-color: rgba(20, 184, 166, 0.08);
-          }
-
-          .fc .fc-button {
-            font-size: 0.875rem;
-            padding: 0.5rem 1rem;
-            text-transform: capitalize;
-            font-weight: 500;
-          }
-
-          .fc .fc-button-primary:not(:disabled):active,
-          .fc .fc-button-primary:not(:disabled).fc-button-active {
-            background-color: var(--fc-button-active-bg-color);
-            border-color: var(--fc-button-active-border-color);
-          }
-
-          .fc-theme-standard .fc-scrollgrid {
-            border-color: var(--fc-border-color);
-          }
-
-          .fc-theme-standard td,
-          .fc-theme-standard th {
-            border-color: var(--fc-border-color);
-          }
-
-          .fc .fc-col-header-cell {
-            background: rgba(255, 255, 255, 0.03);
-            color: #d4d4d8;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 0.75rem 0;
-          }
-
-          .fc .fc-daygrid-day-number {
-            color: #e5e5e5;
-            font-weight: 500;
-            padding: 0.5rem;
-          }
-
-          .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-            background: rgba(20, 184, 166, 0.2);
-            color: #5eead4;
-            border-radius: 0.375rem;
-          }
-
-          .fc-event {
-            border-radius: 0.375rem;
-            padding: 2px 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-          }
-
-          .fc-event:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-          }
-
-          .fc-event-title {
-            font-weight: 500;
-          }
-
-          .fc .fc-toolbar-title {
-            color: #ffffff;
-            font-size: 1.5rem;
-            font-weight: 600;
-          }
-
-          .fc .fc-view-harness {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 0.75rem;
-          }
-        `}</style>
-
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cookies } from "next/headers";
 import { isFakeDataEnabled } from "@/server/utils/fake";
 import { buildFakeDashboardData } from "./fake-dashboard";
 
@@ -10,6 +11,7 @@ const API_BASE_URL =
 
 type FetchOptions = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
+  forwardCookies?: boolean; // Forward brisa_access/brisa_refresh cookies from request
 };
 
 class ApiError extends Error {
@@ -24,17 +26,41 @@ class ApiError extends Error {
 
 async function fetchJson<T>(
   path: string,
-  accessToken?: string,
   options: FetchOptions = {},
 ): Promise<T> {
+  const { forwardCookies = true, ...fetchOptions } = options;
+
+  // Server-side: forward auth cookies from user's request to API
+  let cookieHeader: string | undefined;
+  if (forwardCookies && typeof window === "undefined") {
+    try {
+      const cookieStore = await cookies();
+      const brisaAccess = cookieStore.get("brisa_access");
+      const brisaRefresh = cookieStore.get("brisa_refresh");
+
+      const cookiePairs: string[] = [];
+      if (brisaAccess) cookiePairs.push(`brisa_access=${brisaAccess.value}`);
+      if (brisaRefresh) cookiePairs.push(`brisa_refresh=${brisaRefresh.value}`);
+
+      if (cookiePairs.length > 0) {
+        cookieHeader = cookiePairs.join("; ");
+      }
+    } catch (error) {
+      console.warn("[api] Could not read cookies", error);
+    }
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       "content-type": "application/json",
+      // Server-side: forward cookies from user's request
+      // Client-side: cookies are sent automatically via credentials: include
+      ...(cookieHeader ? { cookie: cookieHeader } : {}),
       ...(options.headers ?? {}),
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
     cache: "no-store",
+    credentials: "include", // Client-side: include cookies automatically
   });
 
   if (!response.ok) {
@@ -183,13 +209,8 @@ function mapBooking(booking: ApiBooking): BookingSummary {
 
 export async function getDashboardData(
   userId: string,
-  accessToken: string,
   userRole?: string | null,
 ): Promise<DashboardData> {
-  if (!accessToken) {
-    throw new Error("Missing access token");
-  }
-
   const canManageBookings = userRole === "ADMIN" || userRole === "STAFF";
   if (isFakeDataEnabled()) {
     return buildFakeDashboardData({
@@ -201,10 +222,7 @@ export async function getDashboardData(
   }
 
   try {
-    const userPromise = fetchJson<ApiUserResponse>(
-      `/api/users/${userId}`,
-      accessToken,
-    );
+    const userPromise = fetchJson<ApiUserResponse>(`/api/users/${userId}`);
     const servicesPromise = fetchJson<ApiService[]>(`/api/services`);
 
     let personalBookings: ApiBooking[] = [];
@@ -212,23 +230,15 @@ export async function getDashboardData(
 
     if (canManageBookings) {
       const [managedResponse, personalResponse] = await Promise.all([
-        fetchJson<{ data: ApiBooking[] }>(
-          `/api/bookings?limit=20`,
-          accessToken,
-        ),
-        fetchJson<ApiBooking[]>(`/api/bookings/mine`, accessToken).catch(
-          () => [],
-        ),
+        fetchJson<{ data: ApiBooking[] }>(`/api/bookings?limit=20`),
+        fetchJson<ApiBooking[]>(`/api/bookings/mine`).catch(() => []),
       ]);
       managedBookings = managedResponse.data;
       personalBookings = Array.isArray(personalResponse)
         ? personalResponse
         : [];
     } else {
-      personalBookings = await fetchJson<ApiBooking[]>(
-        `/api/bookings/mine`,
-        accessToken,
-      );
+      personalBookings = await fetchJson<ApiBooking[]>(`/api/bookings/mine`);
     }
 
     const [user, services] = await Promise.all([userPromise, servicesPromise]);

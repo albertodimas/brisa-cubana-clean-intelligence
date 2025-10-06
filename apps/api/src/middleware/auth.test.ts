@@ -45,7 +45,9 @@ describe("Auth Middleware", () => {
       const res = await app.request("/protected");
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body).toEqual({ error: "Authorization header missing" });
+      expect(body).toEqual({
+        error: "Authentication required (cookie or header)",
+      });
     });
 
     it("should reject request with empty Authorization header", async () => {
@@ -58,7 +60,9 @@ describe("Auth Middleware", () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body).toEqual({ error: "Authorization header missing" });
+      expect(body).toEqual({
+        error: "Authentication required (cookie or header)",
+      });
     });
 
     it("should reject request with invalid token format", async () => {
@@ -96,7 +100,9 @@ describe("Auth Middleware", () => {
       expect(res.status).toBe(401);
       const body = await res.json();
       // Empty string after trim is treated as missing
-      expect(body).toEqual({ error: "Authorization header missing" });
+      expect(body).toEqual({
+        error: "Authentication required (cookie or header)",
+      });
     });
   });
 

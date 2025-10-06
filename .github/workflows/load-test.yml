@@ -44,23 +44,29 @@ on:
 env:
   STAGING_URL: ${{ inputs.staging_url || 'https://staging.brisacubanaclean.com' }}
   NODE_VERSION: '20.x'
-  K6_VERSION: '0.47.0'
+  K6_VERSION: '0.54.0'
 
 jobs:
   load-test:
     name: Run Load Tests
     runs-on: ubuntu-latest
     timeout-minutes: 90 # Max timeout for soak tests
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
 
       - name: Install k6
         run: |
@@ -72,7 +78,7 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | \
             sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
-          sudo apt-get install k6=${{ env.K6_VERSION }}-* -y
+          sudo apt-get install k6 -y
           k6 version
 
       - name: Verify staging availability

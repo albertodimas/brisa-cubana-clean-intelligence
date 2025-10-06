@@ -63,7 +63,6 @@ describe("BookingForm", () => {
   it("solo muestra servicios activos y refleja la selección", () => {
     render(
       <BookingForm
-        accessToken="token"
         userId="user-1"
         services={baseServices}
         properties={baseProperties}
@@ -86,7 +85,6 @@ describe("BookingForm", () => {
 
     render(
       <BookingForm
-        accessToken="token"
         userId="user-1"
         services={baseServices}
         properties={baseProperties}
@@ -118,8 +116,9 @@ describe("BookingForm", () => {
         "http://localhost:3001/api/bookings",
         expect.objectContaining({
           method: "POST",
-          headers: expect.objectContaining({
-            Authorization: "Bearer token",
+          credentials: "include",
+          headers: expect.not.objectContaining({
+            Authorization: expect.anything(),
           }),
         }),
       );
@@ -136,7 +135,6 @@ describe("BookingForm", () => {
 
     render(
       <BookingForm
-        accessToken="token"
         userId="user-1"
         services={baseServices}
         properties={baseProperties}

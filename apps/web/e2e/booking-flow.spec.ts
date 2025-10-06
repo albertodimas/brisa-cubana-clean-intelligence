@@ -137,7 +137,7 @@ test.describe("Booking Flow", () => {
     const bookingCalls: Array<Record<string, unknown>> = [];
 
     await page.exposeBinding("_recordBookingCall", async (_source, payload) => {
-      bookingCalls.push(payload as Record<string, unknown>);
+      bookingCalls.push(payload as unknown as Record<string, unknown>);
     });
 
     await page.addInitScript(
@@ -215,7 +215,7 @@ test.describe("Booking Flow", () => {
             const payload =
               typeof rawBody === "string"
                 ? JSON.parse(rawBody)
-                : (rawBody as Record<string, unknown>);
+                : (rawBody as unknown as Record<string, unknown>);
 
             await (
               window as unknown as {

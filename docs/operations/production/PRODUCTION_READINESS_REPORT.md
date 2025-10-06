@@ -14,6 +14,13 @@
 - **Riesgos**: Cobertura no subida a Codecov, secretos críticos sin validar, falta de evidencia de despliegues reales en Railway/Vercel y necesidad de reforzar políticas de ramas.
 - **Recomendación**: Mantener la plataforma en modo _staging_ mientras se cierran los puntos de riesgo descritos en la sección 9.
 
+> **Actualización 2025-10-06** · Rama `feat/nonce-csp-fase2`
+>
+> - CSP nonce-based aplicada en middleware web (sin `unsafe-inline`, `strict-dynamic`).
+> - API con CORS endurecido (orígenes explícitos, `Vary: Origin`).
+> - Guardias locales (`pnpm lint`, `pnpm typecheck`, `pnpm test`) re-ejecutados con éxito.
+> - Falta validar cabeceras en staging/producción antes de mover el semáforo a 🟢.
+
 ---
 
 ## 2. Evidencia verificada (2025-10-03)

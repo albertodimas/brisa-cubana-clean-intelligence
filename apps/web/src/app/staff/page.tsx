@@ -14,10 +14,6 @@ export default async function StaffPage() {
     redirect("/auth/signin");
   }
 
-  if (!session.user.accessToken) {
-    redirect("/auth/signin");
-  }
-
   // Only STAFF can access this app
   if (session.user.role !== "STAFF") {
     redirect("/dashboard");
@@ -26,7 +22,6 @@ export default async function StaffPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-black">
       <StaffWorkspace
-        accessToken={session.user.accessToken}
         userName={session.user.name ?? session.user.email ?? "Usuario"}
       />
     </div>

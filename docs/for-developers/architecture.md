@@ -143,8 +143,8 @@ brisa-cubana-clean-intelligence/
 │   ├── api/                    # Backend Hono + Prisma
 │   │   ├── src/
 │   │   │   ├── routes/         # API endpoints
-│   │   │   ├── middleware/     # Auth, rate-limit (futuro)
-│   │   │   ├── lib/            # Utilities (db, token, password)
+│   │   │   ├── middleware/     # Auth, rate-limit, CSP nonce
+│   │   │   ├── lib/            # Utilities (db, token, password, CORS)
 │   │   │   ├── schemas.ts      # Zod validation schemas
 │   │   │   └── generated/      # Prisma client
 │   │   ├── prisma/
@@ -158,9 +158,9 @@ brisa-cubana-clean-intelligence/
 │       │   │   ├── auth/       # Sign in/up
 │       │   │   └── dashboard/  # Protected area
 │       │   ├── components/     # React components
-│       │   ├── server/         # Server actions & API clients
+│       │   ├── server/         # Server actions, API clients, security helpers
 │       │   └── types/          # TypeScript definitions
-│       └── middleware.ts       # Auth middleware
+│       └── middleware.ts       # Auth + CSP nonce middleware
 │
 ├── packages/
 │   └── ui/                     # Shared design system

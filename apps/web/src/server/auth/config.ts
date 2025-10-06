@@ -42,7 +42,6 @@ export const {
             email: user.email,
             name: user.name ?? user.email,
             role: user.role ?? "CLIENT",
-            accessToken: user.token,
           };
         }
 
@@ -60,7 +59,6 @@ export const {
           email: user.email,
           name: user.name ?? user.email,
           role: user.role ?? "CLIENT",
-          accessToken: user.token,
         };
       },
     }),
@@ -73,7 +71,6 @@ export const {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.accessToken = (user as { accessToken?: string }).accessToken;
       }
       return token;
     },
@@ -81,7 +78,6 @@ export const {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string | undefined;
-        session.user.accessToken = token.accessToken as string | undefined;
       }
       return session;
     },

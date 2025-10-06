@@ -55,7 +55,7 @@ git log origin/main..HEAD --oneline | head -10
 4. Conectar base de datos
 5. Deploy automático via GitHub Actions
 
-**Documentación:** `docs/operations/DEPLOYMENT_SETUP_COMPLETE.md`
+**Documentación:** `docs/operations/reports/deployment-setup-complete-2025-10-05.md`
 
 ---
 

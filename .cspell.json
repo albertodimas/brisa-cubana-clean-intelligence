@@ -386,6 +386,7 @@
     "sullo",
     "mgmt",
     "escalación",
-    "TOTP"
+    "TOTP",
+    "chequeos"
   ]
 }

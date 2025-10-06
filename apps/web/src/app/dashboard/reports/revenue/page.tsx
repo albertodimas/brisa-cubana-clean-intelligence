@@ -36,7 +36,6 @@ interface RevenueData {
 }
 
 async function getRevenueData(
-  accessToken: string,
   from?: string,
   to?: string,
 ): Promise<RevenueData> {
@@ -53,9 +52,9 @@ async function getRevenueData(
 
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -87,7 +86,7 @@ interface RevenuePageProps {
 export default async function RevenuePage({ searchParams }: RevenuePageProps) {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
@@ -96,7 +95,7 @@ export default async function RevenuePage({ searchParams }: RevenuePageProps) {
   }
 
   const { from, to } = await searchParams;
-  const revenueData = await getRevenueData(session.user.accessToken, from, to);
+  const revenueData = await getRevenueData(from, to);
 
   const currencyFormatter = new Intl.NumberFormat("es-US", {
     style: "currency",

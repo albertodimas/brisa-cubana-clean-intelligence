@@ -1,7 +1,7 @@
 # Production Readiness Checklist
 
 **Project:** Brisa Cubana Clean Intelligence
-**Last Updated:** 6 de octubre de 2025
+**Last Updated:** 6 de octubre de 2025 (FASE 2 CSP + CORS hardened)
 **Status:** ✅ **READY FOR PRODUCTION**
 
 ---
@@ -20,7 +20,7 @@ This checklist validates that Brisa Cubana Clean Intelligence meets all requirem
 
 ### Unit Tests
 
-- [x] **820/820 tests passing** ✅
+- [x] **834/834 tests passing** ✅
 - [x] Coverage ≥ 80% ✅
 - [x] No flaky tests ✅
 - [x] Test execution < 30s ✅
@@ -30,7 +30,7 @@ This checklist validates that Brisa Cubana Clean Intelligence meets all requirem
 ```bash
 pnpm test
 # ✓ Test Files  50 passed (50)
-# ✓ Tests  820 passed (820)
+# ✓ Tests  834 passed (834)
 ```
 
 ### E2E Tests
@@ -103,7 +103,7 @@ pnpm lint && pnpm typecheck
 
 ### Security Headers
 
-- [x] CSP (Content Security Policy) ✅
+- [x] CSP (Content Security Policy) ✅ — Nonce por solicitud, sin `unsafe-inline`, `strict-dynamic`
 - [x] HSTS (HTTP Strict Transport Security) ✅
 - [x] X-Frame-Options ✅
 - [x] X-Content-Type-Options ✅
@@ -489,21 +489,21 @@ railway run --service postgres psql -c "SELECT pg_last_wal_receive_lsn();"
 
 ### Technical Lead
 
-- **Name:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
-- **Date:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
-- **Signature:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Name:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
+- **Date:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
+- **Signature:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ### Product Owner
 
-- **Name:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
-- **Date:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
-- **Signature:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Name:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
+- **Date:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
+- **Signature:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ### Security Officer
 
-- **Name:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
-- **Date:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
-- **Signature:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
+- **Name:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
+- **Date:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
+- **Signature:** \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 ---
 

@@ -204,6 +204,25 @@ vercel.com → Project → Settings → Environment Variables
 
 ---
 
+## Cabeceras de seguridad (FASE 2)
+
+- `apps/web/middleware.ts` genera un **nonce de 128 bits** por request y aplica la política CSP construida en `apps/web/src/server/security/csp.ts`.
+- Validar que los entornos (preview/prod) propaguen los headers `Content-Security-Policy` y `x-csp-nonce`.
+  - Production/Staging: inspeccionar la respuesta de `/dashboard` y confirmar ausencia de `unsafe-inline`.
+  - Development: el middleware incluye `localhost:3001` como excepción temporal.
+- `apps/api/src/app.ts` usa `buildAllowedOrigins()` y `originMatcher()` para CORS. Se debe mantener la variable `WEB_APP_URL` actualizada por entorno.
+<!-- cspell:word Fastly -->
+- Añadir `Vary: Origin` en cualquier CDN inverso (Cloudflare, Fastly) para evitar cache poisoning.
+- Modificar `NEXT_PUBLIC_API_URL` / `WEB_APP_URL` antes de desplegar a nuevos dominios; ejecutar `pnpm typecheck` para validar la configuración.
+
+> **Checklist**
+>
+> - [ ] Revisar cabeceras en staging tras cada release.
+> - [ ] Registrar incidentes CSP en `docs/operations/security/SECURITY_AUDIT_CHECKLIST.md`.
+> - [ ] Mantener sincronizado el listado de orígenes en documentación y variables.
+
+---
+
 ## Deployment en Vercel (Frontend)
 
 ### Setup Inicial

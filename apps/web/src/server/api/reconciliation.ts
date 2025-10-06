@@ -27,14 +27,14 @@ export interface ReconciliationNote {
 
 export async function getReconciliationNotes(
   bookingId: string,
-  accessToken: string,
 ): Promise<ReconciliationNote[]> {
   const response = await fetch(
     `${API_BASE_URL}/api/reconciliation/booking/${bookingId}`,
     {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
+      credentials: "include", // HttpOnly cookies
       cache: "no-store",
     },
   );
@@ -52,7 +52,6 @@ export async function getReconciliationNotes(
 export async function createReconciliationNote(
   bookingId: string,
   message: string,
-  accessToken: string,
 ): Promise<ReconciliationNote> {
   const response = await fetch(
     `${API_BASE_URL}/api/reconciliation/booking/${bookingId}`,
@@ -60,8 +59,8 @@ export async function createReconciliationNote(
       method: "POST",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include",
       body: JSON.stringify({ message }),
     },
   );
@@ -77,7 +76,6 @@ export async function createReconciliationNote(
 
 export async function resolveReconciliationNote(
   noteId: string,
-  accessToken: string,
 ): Promise<ReconciliationNote> {
   const response = await fetch(
     `${API_BASE_URL}/api/reconciliation/note/${noteId}`,
@@ -85,8 +83,8 @@ export async function resolveReconciliationNote(
       method: "PATCH",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
+      credentials: "include",
       body: JSON.stringify({ status: "RESOLVED" }),
     },
   );

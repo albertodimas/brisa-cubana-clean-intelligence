@@ -3,7 +3,7 @@ import { auth } from "@/server/auth/config";
 import PropertyForm from "../../components/PropertyForm";
 import type { Property } from "@/types/api";
 
-async function getProperty(id: string, accessToken: string): Promise<Property> {
+async function getProperty(id: string): Promise<Property> {
   const API_BASE_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -11,9 +11,9 @@ async function getProperty(id: string, accessToken: string): Promise<Property> {
 
   const response = await fetch(`${API_BASE_URL}/api/properties/${id}`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -33,12 +33,12 @@ export default async function EditPropertyPage({
 }: EditPropertyPageProps) {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
   const { id } = await params;
-  const property = await getProperty(id, session.user.accessToken);
+  const property = await getProperty(id);
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-16 text-neutral-100">
@@ -54,10 +54,7 @@ export default async function EditPropertyPage({
         </p>
       </div>
 
-      <PropertyForm
-        accessToken={session.user.accessToken}
-        property={property}
-      />
+      <PropertyForm property={property} />
     </section>
   );
 }

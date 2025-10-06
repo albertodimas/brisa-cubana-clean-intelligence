@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   const minFailedParam = searchParams.get("minFailed");
   const minPendingParam = searchParams.get("minPending");
 
-  const audit = await getAuditTrail(session.user.accessToken ?? "", {
+  const audit = await getAuditTrail({
     startDate,
     endDate,
     limit,

@@ -4,9 +4,10 @@ import BookingForm from "../components/BookingForm";
 import type { Service, Property } from "@/types/api";
 import { isFakeDataEnabled } from "@/server/utils/fake";
 
-async function getServicesAndProperties(
-  accessToken: string,
-): Promise<{ services: Service[]; properties: Property[] }> {
+async function getServicesAndProperties(): Promise<{
+  services: Service[];
+  properties: Property[];
+}> {
   if (isFakeDataEnabled()) {
     const now = new Date().toISOString();
     const services: Service[] = [
@@ -93,11 +94,17 @@ async function getServicesAndProperties(
 
   const [servicesRes, propertiesRes] = await Promise.all([
     fetch(`${API_BASE_URL}/api/services`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
       cache: "no-store",
     }),
     fetch(`${API_BASE_URL}/api/properties`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
       cache: "no-store",
     }),
   ]);
@@ -117,13 +124,11 @@ async function getServicesAndProperties(
 export default async function NewBookingPage() {
   const session = await auth();
 
-  if (!session?.user || !session.user.accessToken) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 
-  const { services, properties } = await getServicesAndProperties(
-    session.user.accessToken,
-  );
+  const { services, properties } = await getServicesAndProperties();
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-16 text-neutral-100">
@@ -140,7 +145,6 @@ export default async function NewBookingPage() {
       </div>
 
       <BookingForm
-        accessToken={session.user.accessToken}
         userId={session.user.id}
         services={services}
         properties={properties}
