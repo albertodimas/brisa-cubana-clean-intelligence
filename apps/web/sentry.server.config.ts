@@ -15,7 +15,7 @@ if (dsn) {
     profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
     // Enhanced error context
-    beforeSend(event, hint) {
+    beforeSend(event, _hint) {
       // Don't send errors in development or test
       if (
         process.env.NODE_ENV === "development" ||

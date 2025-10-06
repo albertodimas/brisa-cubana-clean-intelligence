@@ -48,7 +48,7 @@ export function SentryErrorBoundary({ children }: ErrorBoundaryProps) {
                   Detalles del error (solo en desarrollo)
                 </summary>
                 <pre className="mt-2 overflow-auto text-xs text-red-700">
-                  {error.toString()}
+                  {String(error)}
                 </pre>
               </details>
             )}

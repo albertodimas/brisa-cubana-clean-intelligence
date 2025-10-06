@@ -27,7 +27,7 @@ if (dsn) {
     ],
 
     // Enhanced error context
-    beforeSend(event, hint) {
+    beforeSend(event, _hint) {
       // Don't send errors in development
       if (process.env.NODE_ENV === "development") {
         return null;

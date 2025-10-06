@@ -41,8 +41,6 @@ const nextConfig: NextConfig = {
         "brisacubana.com",
       ],
     },
-    // Enable instrumentation for Sentry
-    instrumentationHook: true,
   },
   // Production-grade security headers
   // References:
@@ -122,9 +120,6 @@ process.env.NEXT_PUBLIC_SENTRY_DSN
 
       // Automatically tree-shake Sentry logger statements
       disableLogger: true,
-
-      // Hides source maps from generated client bundles
-      hideSourceMaps: true,
 
       // Automatically annotate React components for better error grouping
       reactComponentAnnotation: {
