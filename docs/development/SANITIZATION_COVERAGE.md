@@ -465,7 +465,7 @@ grep -A 3 "db\.\w*\.create\|db\.\w*\.update" apps/api/src/routes/*.ts | grep san
 
 - **DOMPurify**: https://github.com/cure53/DOMPurify
 - **OWASP XSS Prevention**: https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
-- **Sprint 2 Implementation**: [SPRINT_2_IMPLEMENTATION.md](../../SPRINT_2_IMPLEMENTATION.md)
+- **Sprint 2 Implementation**: [SPRINT_2_IMPLEMENTATION.md](./sprints/SPRINT_2_IMPLEMENTATION.md)
 
 ---
 

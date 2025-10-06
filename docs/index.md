@@ -57,11 +57,11 @@ Servicios locales relevantes:
 
 | Dato                 | Valor                   |
 | -------------------- | ----------------------- |
-| Archivos Markdown    | 120 (2025-10-04)        |
+| Archivos Markdown    | 132 (2025-10-06)        |
 | Stack                | MkDocs 1.6.1 + Material |
 | Búsqueda             | Integrada (lunr + ES)   |
 | Modo oscuro          | Disponible              |
-| Última actualización | 2025-10-03              |
+| Última actualización | 2025-10-06              |
 
 Las contribuciones siguen el flujo descrito en [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md). Cada cambio debe plantearse mediante Pull Request y revisión cruzada.
 

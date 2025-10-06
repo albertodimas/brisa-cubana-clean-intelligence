@@ -18,6 +18,10 @@ nav:
       - Inventario Diátaxis: development/diataxis-mapping.md
       - Estándares de documentación: development/documentation-standards.md
       - KPIs & métricas: development/kpi-dashboard.md
+      - Sprints:
+          - Sprint 1 Implementation: development/sprints/SPRINT_1_IMPLEMENTATION.md
+          - Sprint 1 Summary: development/sprints/SPRINT_1_SUMMARY.md
+          - Sprint 2 Implementation: development/sprints/SPRINT_2_IMPLEMENTATION.md
       - Referencia de API: for-developers/api-reference.md
       - Configuración OpenAPI/Swagger: for-developers/openapi-setup.md
       - Guía de testing: for-developers/testing.md
@@ -66,10 +70,15 @@ nav:
           - Go-Live: operations/runbooks/GO_LIVE.md
           - Rollback: operations/runbooks/ROLLBACK.md
           - Incident Response: operations/runbooks/INCIDENT_RESPONSE.md
-      - Reportes:
-          - GitHub Status Report: operations/GITHUB_STATUS_REPORT.md
-          - Documentation Improvements 2025-10-04: operations/DOCUMENTATION_IMPROVEMENTS_2025-10-04.md
+      - Estado y reportes:
+          - Plan de acción inmediato: operations/immediate-action-plan.md
+          - Estado de la plataforma: operations/status/platform-status.md
           - Security Accepted Risks: operations/SECURITY_ACCEPTED_RISKS.md
+          - Reportes de sesiones:
+              - GitHub Status Report: operations/reports/GITHUB_STATUS_REPORT.md
+              - Documentation Improvements 2025-10-04: operations/reports/DOCUMENTATION_IMPROVEMENTS_2025-10-04.md
+              - Deployment Session 2025-10-05: operations/reports/deployment-session-2025-10-05.md
+              - Deployment Setup Complete 2025-10-05: operations/reports/deployment-setup-complete-2025-10-05.md
 
   - Negocio y operaciones:
       - Panorama general: for-business/README.md

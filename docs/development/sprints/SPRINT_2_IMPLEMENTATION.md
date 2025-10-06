@@ -626,8 +626,8 @@ Antes de considerar Sprint 2 completado al 100%:
 ### Documentación
 
 - [Sprint 1 Implementation](./SPRINT_1_IMPLEMENTATION.md)
-- [Security Improvements](./SECURITY_IMPROVEMENTS.md)
-- [Security Fixes Summary](./SECURITY_FIXES_SUMMARY.md)
+- [Security Policy](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/SECURITY.md)
+- [Changelog](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CHANGELOG.md)
 
 ### Recursos Externos
 

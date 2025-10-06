@@ -269,17 +269,16 @@ lsof -i :5433  # PostgreSQL
 
 ### Documentos Clave
 
-- [README.md](./README.md) - Overview del proyecto
-- [CONTRIBUTING.md](./CONTRIBUTING.md) - Guía de contribución
-- [SECURITY.md](./SECURITY.md) - Políticas de seguridad
-- [PROXIMOS_PASOS.md](./PROXIMOS_PASOS.md) - Roadmap
-- [docs/operations/DEPLOYMENT.md](./docs/operations/DEPLOYMENT.md) - Guía de deploy
+- [README.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/README.md) - Overview del proyecto
+- [CONTRIBUTING.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/CONTRIBUTING.md) - Guía de contribución
+- [SECURITY.md](https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/SECURITY.md) - Políticas de seguridad
+- [Plan de Acción](../immediate-action-plan.md) - Roadmap y próximos pasos
+- [Deployment Guide](../../for-developers/deployment.md) - Guía de deploy
 
 ### Documentación Técnica
 
-- **API Endpoints**: [apps/api/API_ENDPOINTS.md](./apps/api/API_ENDPOINTS.md)
-- **Observability**: [apps/api/OBSERVABILITY.md](./apps/api/OBSERVABILITY.md)
-- **Changelog**: [docs/changelog/](./docs/changelog/)
+- **Changelog**: [Session Logs](../../changelog/index.md)
+- **Runbooks**: [Operations Runbooks](../runbooks/README.md)
 
 ---
 

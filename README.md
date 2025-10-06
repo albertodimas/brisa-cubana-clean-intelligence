@@ -26,9 +26,9 @@ Brisa Cubana Clean Intelligence centraliza la experiencia del cliente, las opera
 
 **¿Primera vez aquí?** Lee estas guías primero:
 
-- 📖 **[QUICKSTART.md](./QUICKSTART.md)** - Puesta en marcha en 5 minutos
-- 📊 **[PLATFORM_STATUS.md](./PLATFORM_STATUS.md)** - Estado actual y métricas
-- 🎯 **[PROXIMOS_PASOS.md](./PROXIMOS_PASOS.md)** - Roadmap y próximos pasos
+- 📖 **[Quickstart Guide](https://albertodimas.github.io/brisa-cubana-clean-intelligence/latest/for-developers/quickstart/)** - Puesta en marcha en 20 minutos
+- 📚 **[Documentación Completa](https://albertodimas.github.io/brisa-cubana-clean-intelligence/)** - Guías, referencias y tutoriales
+- 🎯 **[Plan de Acción](./docs/operations/immediate-action-plan.md)** - Roadmap y próximos pasos
 - 🛠️ **[scripts/start-local.sh](./scripts/start-local.sh)** - Script de inicio automático
 
 ## Contenido
@@ -63,7 +63,7 @@ Brisa Cubana Clean Intelligence centraliza la experiencia del cliente, las opera
 - `apps/web`: Next.js 15.5.4 (App Router), React 19, Tailwind CSS 4.1.13, Auth.js v5.
 - `apps/api`: Hono 4.9.9 sobre Node.js 24.9.0, Prisma 6.16.2 y validaciones Zod.
 - `packages/ui`: Design system compartido utilizado por la web.
-- `docs`: Base de conocimiento en MkDocs con 120 documentos.
+- `docs`: Base de conocimiento en MkDocs con 132 documentos.
 - Tooling: pnpm 10.17.1, Turborepo 2.5.8, Vitest 3.2.4, Playwright 1.55.1, GitHub Actions.
 
 La arquitectura detallada, principios de diseño y diagramas están disponibles en `docs/for-developers/architecture.md` y `docs/for-developers/diagrams/`.
