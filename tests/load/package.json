@@ -1,0 +1,24 @@
+{
+  "name": "@brisa/load-tests",
+  "version": "1.0.0",
+  "description": "Load testing suite with k6 for Brisa Cubana Clean Intelligence",
+  "private": true,
+  "scripts": {
+    "test:smoke": "k6 run smoke.test.js",
+    "test:load": "k6 run load.test.js",
+    "test:stress": "k6 run stress.test.js",
+    "test:spike": "k6 run spike.test.js",
+    "test:soak": "k6 run soak.test.js",
+    "test:all": "pnpm test:smoke && pnpm test:load",
+    "test:ci": "k6 run --out json=results-smoke.json smoke.test.js && k6 run --out json=results-load.json load.test.js",
+    "install-k6": "echo 'See README.md for k6 installation instructions'"
+  },
+  "keywords": [
+    "k6",
+    "load-testing",
+    "performance",
+    "stress-testing"
+  ],
+  "author": "Brisa Cubana Clean Intelligence",
+  "license": "MIT"
+}

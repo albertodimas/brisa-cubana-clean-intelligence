@@ -35,6 +35,13 @@
     "stripe:trigger": "./scripts/stripe_trigger.sh",
     "prepare": "husky",
     "test:e2e": "DYLD_USE_FAKE_API_DATA=1 USE_FAKE_API_DATA=1 NEXT_PUBLIC_USE_FAKE_API_DATA=1 pnpm --filter=web build && PLAYWRIGHT_HTML_REPORT=./.playwright-report DYLD_USE_FAKE_API_DATA=1 USE_FAKE_API_DATA=1 NEXT_PUBLIC_USE_FAKE_API_DATA=1 pnpm exec playwright test",
+    "test:load": "cd tests/load && pnpm test:smoke",
+    "test:load:all": "cd tests/load && pnpm test:all",
+    "test:load:smoke": "cd tests/load && pnpm test:smoke",
+    "test:load:load": "cd tests/load && pnpm test:load",
+    "test:load:stress": "cd tests/load && pnpm test:stress",
+    "test:load:spike": "cd tests/load && pnpm test:spike",
+    "test:load:soak": "cd tests/load && pnpm test:soak",
     "pre-push": "./scripts/pre-push-check.sh",
     "verify": "./scripts/pre-push-check.sh"
   },
