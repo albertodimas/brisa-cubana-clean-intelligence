@@ -99,7 +99,9 @@ const apiEnv = {
   API_PORT: apiPort,
   PORT: apiPort,
   DATABASE_URL: defaultDatabaseUrl,
-  JWT_SECRET: process.env.JWT_SECRET ?? "test-secret",
+  JWT_SECRET: process.env.JWT_SECRET ?? "test-secret-for-e2e-minimum-32-chars-required",
+  JWT_ACCESS_EXPIRATION: process.env.JWT_ACCESS_EXPIRATION ?? "15m",
+  JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION ?? "7d",
   AUTH_DEMO_USERS:
     process.env.AUTH_DEMO_USERS ??
     [

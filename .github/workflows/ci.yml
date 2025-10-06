@@ -200,78 +200,76 @@ jobs:
         run: |
           ls -la apps/web/.next
 
-  # TEMPORALMENTE DESHABILITADO - API failing en CI (investigar db:seed o server.ts)
-  # Habilitar cuando se resuelva el issue: https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues/TBD
-  # e2e:
-  #   name: E2E
-  #   needs: [test]
-  #   runs-on: ubuntu-latest
-  #   services:
-  #     postgres:
-  #       image: postgres:17-alpine
-  #       env:
-  #         POSTGRES_USER: postgres
-  #         POSTGRES_PASSWORD: postgres
-  #         POSTGRES_DB: brisa_cubana_dev
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #       ports:
-  #         - 5433:5432
-  #     redis:
-  #       image: redis:8-alpine
-  #       options: >-
-  #         --health-cmd "redis-cli ping"
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #       ports:
-  #         - 6380:6379
-  #
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Setup Node
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "24"
-  #
-  #     - name: Setup pnpm
-  #       uses: pnpm/action-setup@v4
-  #       with:
-  #         version: 10.17.1
-  #
-  #     - name: Get pnpm store directory
-  #       shell: bash
-  #       run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-  #
-  #     - name: Setup pnpm cache
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ${{ env.STORE_PATH }}
-  #         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-pnpm-store-
-  #
-  #     - name: Install dependencies
-  #       run: pnpm install --frozen-lockfile
-  #
-  #     - name: Generate Prisma Client
-  #       run: pnpm --filter=@brisa/api db:generate
-  #       env:
-  #         DATABASE_URL: postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
-  #
-  #     - name: Install Playwright browsers
-  #       run: pnpm exec playwright install --with-deps chromium
-  #
-  #     - name: Run E2E tests
-  #       run: pnpm test:e2e
-  #       env:
-  #         DATABASE_URL: postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
-  #         REDIS_URL: redis://localhost:6380
+  e2e:
+    name: E2E
+    needs: [test]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: brisa_cubana_dev
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+      redis:
+        image: redis:8-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6380:6379
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter=@brisa/api db:generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev
+          REDIS_URL: redis://localhost:6380
 
   docs:
     name: Docs Artifacts
