@@ -383,6 +383,9 @@
     "loggeados",
     "ASVS",
     "rwxrwxr",
-    "sullo"
+    "sullo",
+    "mgmt",
+    "escalación",
+    "TOTP"
   ]
 }
