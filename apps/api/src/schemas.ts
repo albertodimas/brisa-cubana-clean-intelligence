@@ -74,15 +74,15 @@ export const createBookingSchema = z
   )
   .refine(
     (data) => {
-      // Don't allow bookings more than 6 months (180 days) in the future
+      // Don't allow bookings more than 90 days in the future
       const now = new Date();
       const maxScheduleTime = new Date(
-        now.getTime() + 180 * 24 * 60 * 60 * 1000,
+        now.getTime() + 90 * 24 * 60 * 60 * 1000,
       );
       return data.scheduledAt <= maxScheduleTime;
     },
     {
-      message: "Booking cannot be scheduled more than 6 months in advance",
+      message: "Booking cannot be scheduled more than 90 days in advance",
       path: ["scheduledAt"],
     },
   )

@@ -2,14 +2,14 @@
 import type { Context, Next } from "hono";
 import type Redis from "ioredis";
 import { logger } from "../lib/logger";
-import { getRedisClient } from "../lib/redis";
 import {
-  rateLimitStorage,
-  rateLimitHitsTotal,
   rateLimitExceededTotal,
   rateLimitFallbackTotal,
+  rateLimitHitsTotal,
   rateLimitRedisErrorsTotal,
+  rateLimitStorage,
 } from "../lib/metrics";
+import { getRedisClient } from "../lib/redis";
 
 type RateLimitStore = Record<
   string,

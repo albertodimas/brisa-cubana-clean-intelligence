@@ -1,5 +1,5 @@
-import { PrismaClient } from "../generated/prisma";
 import type * as Prisma from "../generated/prisma";
+import { PrismaClient } from "../generated/prisma";
 
 export { Prisma };
 

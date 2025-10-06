@@ -1,20 +1,20 @@
-import { db } from "../lib/db";
-import { logger } from "../lib/logger";
 import type { User } from "../generated/prisma";
+import { db } from "../lib/db";
+import {
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "../lib/errors";
+import { logger } from "../lib/logger";
 import { hashPassword, verifyPassword } from "../lib/password";
 import {
   generateAccessToken,
   generateRefreshToken,
-  verifyRefreshToken,
-  revokeRefreshToken,
   revokeAllRefreshTokens,
+  revokeRefreshToken,
+  verifyRefreshToken,
 } from "../lib/token";
-import {
-  NotFoundError,
-  UnauthorizedError,
-  ValidationError,
-  ConflictError,
-} from "../lib/errors";
 
 export interface RegisterData {
   email: string;

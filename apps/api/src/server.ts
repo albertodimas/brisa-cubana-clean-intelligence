@@ -1,9 +1,9 @@
 /* cSpell:ignore otlp */
 import { serve } from "@hono/node-server";
 import { app } from "./app";
-import { initializeOpenTelemetry } from "./lib/observability";
 import { validateEnv } from "./lib/env";
 import { logger } from "./lib/logger";
+import { initializeOpenTelemetry } from "./lib/observability";
 
 // Validate environment variables first (fail-fast if missing critical vars)
 try {
