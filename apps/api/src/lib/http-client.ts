@@ -128,6 +128,7 @@ export async function fetchWithRetry(
 
     if (signal) {
       if (signal.aborted) {
+        // eslint-disable-next-line no-undef
         clearTimeout(timeout);
         throw new DOMException("Aborted", "AbortError");
       }
@@ -140,6 +141,7 @@ export async function fetchWithRetry(
         body,
         signal: controller.signal,
       });
+      // eslint-disable-next-line no-undef
       clearTimeout(timeout);
       if (signal) {
         signal.removeEventListener("abort", abortListener);
@@ -165,6 +167,7 @@ export async function fetchWithRetry(
         retryReason,
       );
     } catch (error) {
+      // eslint-disable-next-line no-undef
       clearTimeout(timeout);
       if (signal) {
         signal.removeEventListener("abort", abortListener);
