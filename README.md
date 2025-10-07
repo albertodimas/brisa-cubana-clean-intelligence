@@ -2,18 +2,18 @@
 
 Monorepo reiniciado para convertir el proyecto en una plataforma real y comprobable. El stack actual contiene:
 
-- **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`)
-- **API:** Hono 4.9.10 desplegable en Vercel Functions o Railway (`apps/api`)
+- **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`) con panel operativo para crear servicios y activarlos/desactivarlos
+- **API:** Hono 4.9.10 con autenticación JWT vía cookies y RBAC, desplegable en Vercel Functions o Railway (`apps/api`)
 - **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local / Railway gestionado)
-- **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto
+- **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto y CI en GitHub Actions
 
 ## Estado al 7 de octubre de 2025
 
 | Área          | Estado | Detalle                                                                 |
 | ------------- | ------ | ----------------------------------------------------------------------- |
-| Frontend web  | 🟡     | Landing mínimo sin autenticación ni datos en vivo.                      |
-| API           | 🟡     | Servicios REST con Prisma y validaciones; falta autenticación real.     |
-| Tests         | 🟢     | Vitest `run` en API y web (9 pruebas) pasan sin modo watch.             |
+| Frontend web  | 🟡     | Landing dinámico con datos reales + panel para crear/activar servicios. |
+| API           | 🟢     | Endpoints JWT + RBAC (ADMIN/COORD) y ruta `/api/auth/login` operativa.   |
+| Tests         | 🟢     | Vitest `run` en API y web (10 + 1) pasan sin modo watch.                |
 | Documentación | 🔴     | Solo README. Se reescribirá en paralelo a las funcionalidades reales.   |
 | Deploy        | 🔴     | Sin pipelines. Pendiente conectar con Vercel (web) y Railway (API/DB).  |
 
@@ -53,12 +53,21 @@ pnpm test
 | `pnpm typecheck` | Verifica TypeScript en cada paquete   |
 | `pnpm db:push`   | Sincroniza el esquema Prisma con PostgreSQL   |
 | `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings) |
+| `pnpm build`     | Genera artefactos de producción (Next + API) |
+
+## Autenticación y RBAC
+
+- Login: `POST http://localhost:3001/api/auth/login` con `email` y `password`.
+  - Credenciales sembradas: `admin@brisacubanaclean.com / Brisa123!` y `ops@brisacubanaclean.com / Brisa123!`.
+- El token JWT se envía vía cookie `auth_token` (HttpOnly) y puede usarse como header `Authorization: Bearer <token>`.
+- Endpoints protegidos (`POST /api/services`, `PATCH /api/services/:id`, `POST /api/bookings`) requieren rol `ADMIN` u `COORDINATOR`.
+- El panel operativo de la web usa server actions con el `API_TOKEN` interno; para pruebas de usuario se recomienda iniciar sesión con `curl` o un cliente HTTP y reutilizar el token.
 
 ## Próximos hitos
 
-1. Implementar autenticación (JWT/cookies) y control RBAC.
-2. Ampliar CRUD de reservas/propiedades con permisos y filtros reales.
-3. Configurar CI/CD (GitHub Actions) con matrices Node 22/24 y despliegue Vercel/Railway.
+1. Extender CRUD de reservas/propiedades con permisos, filtros y formularios web.
+2. Exponer flujos de login/logout en la interfaz pública (NextAuth/Auth.js).
+3. Conectar CI/CD con despliegues automatizados (Vercel + Railway) y monitoreo.
 4. Redactar documentación honesta basada en funcionalidades verificadas.
 
 ---
