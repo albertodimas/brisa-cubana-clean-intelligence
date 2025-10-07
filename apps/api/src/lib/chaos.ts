@@ -21,6 +21,8 @@
  * Created: October 2, 2025
  */
 
+import { logger } from "./logger";
+
 /**
  * Chaos experiment configuration
  */
@@ -107,7 +109,7 @@ export function shouldTriggerChaos(
       ? chaosMetrics.chaosInjected / chaosMetrics.totalRequests
       : 0;
   if (errorRate > config.safetyLimits.maxErrorRate) {
-    console.warn("[Chaos] Auto-disabled: error rate exceeded safety limit");
+    logger.warn("[Chaos] Auto-disabled: error rate exceeded safety limit");
     return false;
   }
 
@@ -131,7 +133,7 @@ export async function injectLatency(
       (config.experiments.latency.maxMs - config.experiments.latency.minMs) +
     config.experiments.latency.minMs;
 
-  console.log(`[Chaos] Injecting ${delayMs.toFixed(0)}ms latency`);
+  logger.info(`[Chaos] Injecting ${delayMs.toFixed(0)}ms latency`);
   chaosMetrics.chaosInjected++;
   chaosMetrics.latencyInjections++;
 
@@ -154,7 +156,7 @@ export function injectError(config: ChaosConfig = DEFAULT_CHAOS_CONFIG): {
       Math.floor(Math.random() * config.experiments.errors.statusCodes.length)
     ];
 
-  console.log(`[Chaos] Injecting error ${statusCode}`);
+  logger.info(`[Chaos] Injecting error ${statusCode}`);
   chaosMetrics.chaosInjected++;
   chaosMetrics.errorInjections++;
 
@@ -181,7 +183,7 @@ export function injectMemoryLeak(
     return;
   }
 
-  console.warn(
+  logger.warn(
     `[Chaos] Injecting ${config.experiments.resourceExhaustion.memoryLeakMB}MB memory leak`,
   );
   chaosMetrics.chaosInjected++;

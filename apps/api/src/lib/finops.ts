@@ -21,6 +21,7 @@
  */
 
 import type { FinOpsMetrics } from "../types/canary";
+import { logger } from "./logger";
 
 /**
  * Fetch Railway project metrics and costs
@@ -31,7 +32,7 @@ export async function fetchRailwayMetrics(): Promise<FinOpsMetrics["railway"]> {
   const railwayProjectId = process.env.RAILWAY_PROJECT_ID;
 
   if (!railwayToken || !railwayProjectId) {
-    console.warn("[FinOps] Railway credentials not configured");
+    logger.warn("[FinOps] Railway credentials not configured");
     return {
       monthToDateCost: 0,
       projectedMonthlyCost: 0,
@@ -127,7 +128,10 @@ export async function fetchRailwayMetrics(): Promise<FinOpsMetrics["railway"]> {
       estimatedSavings,
     };
   } catch (error) {
-    console.error("[FinOps] Failed to fetch Railway metrics:", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[FinOps] Failed to fetch Railway metrics",
+    );
     return {
       monthToDateCost: 0,
       projectedMonthlyCost: 0,
@@ -148,7 +152,7 @@ export async function fetchVercelMetrics(): Promise<FinOpsMetrics["vercel"]> {
   const vercelTeamId = process.env.VERCEL_TEAM_ID;
 
   if (!vercelToken || !vercelTeamId) {
-    console.warn("[FinOps] Vercel credentials not configured");
+    logger.warn("[FinOps] Vercel credentials not configured");
     return {
       monthToDateCost: 0,
       projectedMonthlyCost: 0,
@@ -217,7 +221,10 @@ export async function fetchVercelMetrics(): Promise<FinOpsMetrics["vercel"]> {
       estimatedSavings,
     };
   } catch (error) {
-    console.error("[FinOps] Failed to fetch Vercel metrics:", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[FinOps] Failed to fetch Vercel metrics",
+    );
     return {
       monthToDateCost: 0,
       projectedMonthlyCost: 0,
@@ -238,7 +245,7 @@ export async function fetchNeonMetrics(): Promise<FinOpsMetrics["neon"]> {
   const neonProjectId = process.env.NEON_PROJECT_ID;
 
   if (!neonApiKey || !neonProjectId) {
-    console.warn("[FinOps] Neon credentials not configured");
+    logger.warn("[FinOps] Neon credentials not configured");
     return {
       monthToDateCost: 0,
       projectedMonthlyCost: 0,
@@ -307,7 +314,10 @@ export async function fetchNeonMetrics(): Promise<FinOpsMetrics["neon"]> {
       estimatedSavings,
     };
   } catch (error) {
-    console.error("[FinOps] Failed to fetch Neon metrics:", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[FinOps] Failed to fetch Neon metrics",
+    );
     return {
       monthToDateCost: 0,
       projectedMonthlyCost: 0,

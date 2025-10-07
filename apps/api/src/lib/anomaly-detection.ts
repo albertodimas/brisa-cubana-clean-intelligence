@@ -20,6 +20,8 @@
  * Created: October 2, 2025
  */
 
+import { logger } from "./logger";
+
 export interface TimeSeries {
   timestamp: number; // Unix timestamp
   value: number;
@@ -317,7 +319,13 @@ export async function monitorMetricForAnomalies(
       totalPoints: timeseries.length,
     };
   } catch (error) {
-    console.error(`[AnomalyDetection] Failed to monitor ${metricName}:`, error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : "unknown",
+        metricName,
+      },
+      "[AnomalyDetection] Failed to monitor metric",
+    );
     return {
       anomaliesDetected: false,
       anomalies: [],

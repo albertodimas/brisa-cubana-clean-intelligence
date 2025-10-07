@@ -1,3 +1,5 @@
+import { logger } from "@/server/logger";
+
 export interface FakeTokenPayload {
   sub: string;
   email: string;
@@ -93,7 +95,10 @@ export function tryDecodeFakeToken(token: string): FakeTokenPayload | null {
       return parsed;
     }
   } catch (error) {
-    console.warn("[auth] failed to decode fake token", error);
+    logger.warn(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[auth] failed to decode fake token",
+    );
   }
   return null;
 }

@@ -23,6 +23,7 @@ import type {
   CanaryDecision,
   CanaryConfig,
 } from "../types/canary";
+import { logger } from "./logger";
 
 /**
  * Default canary configuration
@@ -87,7 +88,13 @@ export async function fetchCanaryMetrics(
 
       return parseFloat(data.data.result[0].value[1]);
     } catch (error) {
-      console.error(`Failed to fetch metric: ${query}`, error);
+      logger.error(
+        {
+          error: error instanceof Error ? error.message : "unknown",
+          query,
+        },
+        "Failed to fetch metric for canary analysis",
+      );
       return null;
     }
   };
@@ -236,13 +243,18 @@ export async function runCanaryDeployment(
   baselineVersion: string,
   config: CanaryConfig = DEFAULT_CANARY_CONFIG,
 ): Promise<{ success: boolean; finalDecision: CanaryDecision }> {
-  console.log(
-    `[Canary] Starting deployment: ${baselineVersion} → ${canaryVersion}`,
+  logger.info(
+    {
+      baselineVersion,
+      canaryVersion,
+    },
+    "[Canary] Starting deployment",
   );
 
   for (const trafficPercent of config.trafficSteps) {
-    console.log(
-      `[Canary] Shifting ${trafficPercent}% traffic to canary version`,
+    logger.info(
+      { trafficPercent },
+      "[Canary] Shifting traffic to canary version",
     );
 
     // Simulate traffic shifting (in real deployment, this would call Vercel/Railway API)
@@ -250,8 +262,9 @@ export async function runCanaryDeployment(
 
     // Wait for metrics to stabilize
     const stabilizationMs = config.stepDurationMinutes * 60 * 1000;
-    console.log(
-      `[Canary] Waiting ${config.stepDurationMinutes} minutes for metrics...`,
+    logger.info(
+      { stepMinutes: config.stepDurationMinutes },
+      "[Canary] Waiting for metrics stabilization",
     );
     await new Promise((resolve) => setTimeout(resolve, stabilizationMs));
 
@@ -263,18 +276,25 @@ export async function runCanaryDeployment(
     );
     const decision = analyzeCanaryMetrics(metrics, config);
 
-    console.log(`[Canary] Analysis result: ${decision.action}`);
-    console.log(`[Canary] Reason: ${decision.reason}`);
+    logger.info(
+      {
+        action: decision.action,
+        reason: decision.reason,
+        violations: decision.violations,
+      },
+      "[Canary] Analysis result",
+    );
 
     if (decision.action === "ROLLBACK") {
-      console.error(
-        `[Canary] Rolling back due to violations: ${decision.violations.join(", ")}`,
+      logger.error(
+        { violations: decision.violations },
+        "[Canary] Rolling back due to violations",
       );
       return { success: false, finalDecision: decision };
     }
 
     if (decision.action === "PROMOTE" && trafficPercent === 100) {
-      console.log("[Canary] Deployment successful, promoting to 100%");
+      logger.info("[Canary] Deployment successful, promoting to 100%");
       return { success: true, finalDecision: decision };
     }
   }

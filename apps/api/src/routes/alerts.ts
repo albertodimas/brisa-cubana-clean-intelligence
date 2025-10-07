@@ -2,6 +2,9 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { db } from "../lib/db";
 import { getAuthUser, requireAuth } from "../middleware/auth";
+import { env } from "../config/env";
+import { fetchWithRetry, CircuitOpenError } from "../lib/http-client";
+import { logger } from "../lib/logger";
 
 const createPaymentAlertSchema = z.object({
   failedPayments: z.number().int().min(0),
@@ -94,26 +97,64 @@ alerts.post("/payment", async (c) => {
     },
   });
 
-  const webhook = process.env.ALERTS_SLACK_WEBHOOK;
+  const webhook = env.alerts.slackWebhook;
   const text = `:rotating_light: Alertas de pago detectadas (por ${authUser?.email ?? "sistema"}). Failed: ${failedPayments}. Pending: ${pendingPayments}.`;
 
   if (webhook) {
     try {
-      await fetch(webhook, {
+      const response = await fetchWithRetry(webhook, {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
         body: JSON.stringify({ text }),
+        timeoutMs: 3000,
+        retries: 1,
+        retryDelayMs: 250,
+        circuitBreakerKey: "slack-webhook",
+        circuitBreakerThreshold: 3,
+        circuitBreakerCooldownMs: 120_000,
+        name: "slack-webhook",
       });
+
+      if (!response.ok) {
+        logger.warn(
+          {
+            status: response.status,
+            failedPayments,
+            pendingPayments,
+          },
+          "Slack webhook responded with non-OK status",
+        );
+      }
     } catch (error) {
-      console.error("Failed to send Slack alert", error);
+      if (error instanceof CircuitOpenError) {
+        logger.warn(
+          {
+            failedPayments,
+            pendingPayments,
+          },
+          "Slack webhook circuit open, skipping notification",
+        );
+      } else {
+        logger.error(
+          {
+            error: error instanceof Error ? error.message : "unknown",
+            failedPayments,
+            pendingPayments,
+          },
+          "Failed to send Slack alert",
+        );
+      }
     }
   } else {
-    console.info("[alerts] slack webhook not configured", {
-      failedPayments,
-      pendingPayments,
-    });
+    logger.info(
+      {
+        failedPayments,
+        pendingPayments,
+      },
+      "Slack webhook not configured; skipping notification",
+    );
   }
 
   return c.json({ queued: true, alert });

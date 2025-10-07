@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@brisa/ui";
 import { ActiveService } from "./active-service";
+import { publicEnv } from "@/config/public-env";
+import { clientLogger } from "@/lib/client-logger";
 
 interface StaffWorkspaceProps {
   userName: string;
@@ -31,8 +33,7 @@ export function StaffWorkspace({ userName }: StaffWorkspaceProps) {
     async function loadBookings() {
       try {
         setLoading(true);
-        const apiBase =
-          process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+        const apiBase = publicEnv.apiUrl;
         const response = await fetch(`${apiBase}/api/bookings/mine`, {
           headers: {
             "Content-Type": "application/json",
@@ -78,7 +79,7 @@ export function StaffWorkspace({ userName }: StaffWorkspaceProps) {
 
         setBookings(active);
       } catch (error) {
-        console.error("Error loading bookings", error);
+        clientLogger.error("Error loading bookings", error);
       } finally {
         setLoading(false);
       }

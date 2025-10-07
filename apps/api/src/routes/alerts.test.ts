@@ -21,6 +21,7 @@ const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
 
 const { default: alerts } = await import("./alerts");
+const { env } = await import("../config/env");
 
 // Get reference to the mocked db for test assertions
 const { db } = await import("../lib/db");
@@ -44,6 +45,7 @@ describe("alerts routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fetchMock.mockReset();
+    env.alerts.slackWebhook = process.env.ALERTS_SLACK_WEBHOOK ?? undefined;
   });
 
   it("rejects unauthenticated access", async () => {
@@ -91,6 +93,7 @@ describe("alerts routes", () => {
 
   it("creates alert and sends slack", async () => {
     process.env.ALERTS_SLACK_WEBHOOK = "https://hooks.slack.test";
+    env.alerts.slackWebhook = process.env.ALERTS_SLACK_WEBHOOK;
     fetchMock.mockResolvedValueOnce({ ok: true } as Response);
     const app = buildApp();
     paymentAlertMock.findFirst.mockResolvedValueOnce(null);
@@ -111,5 +114,6 @@ describe("alerts routes", () => {
     expect(paymentAlertMock.create).toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalled();
     process.env.ALERTS_SLACK_WEBHOOK = "";
+    env.alerts.slackWebhook = undefined;
   });
 });

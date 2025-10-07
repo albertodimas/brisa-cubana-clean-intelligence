@@ -21,6 +21,7 @@ vi.stubGlobal("fetch", fetchMock);
 
 // Import after mocking
 const alerts = (await import("./alerts")).default;
+const { env } = await import("../config/env");
 
 // Get reference to the mocked db for test assertions
 const { db } = await import("../lib/db");
@@ -45,16 +46,19 @@ function authHeader(role: "ADMIN" | "STAFF" | "CLIENT", sub: string) {
 describe("Alerts Extended - GET /payment", () => {
   let app: Hono;
   let originalEnv: NodeJS.ProcessEnv;
+  let originalSlackWebhook: string | undefined;
 
   beforeEach(() => {
     app = buildApp();
     originalEnv = { ...process.env };
+    originalSlackWebhook = env.alerts.slackWebhook ?? undefined;
     vi.clearAllMocks();
     fetchMock.mockReset();
   });
 
   afterEach(() => {
     process.env = originalEnv;
+    env.alerts.slackWebhook = originalSlackWebhook;
   });
 
   describe("Authorization", () => {
@@ -694,6 +698,7 @@ describe("Alerts Extended - POST /payment", () => {
   describe("Slack Integration", () => {
     it("should not send Slack notification when webhook not configured", async () => {
       delete process.env.ALERTS_SLACK_WEBHOOK;
+      env.alerts.slackWebhook = undefined;
 
       paymentAlertMock.findFirst.mockResolvedValueOnce(null);
       paymentAlertMock.create.mockResolvedValueOnce({ id: "alert-1" });
@@ -712,6 +717,7 @@ describe("Alerts Extended - POST /payment", () => {
 
     it("should send Slack notification when webhook configured", async () => {
       process.env.ALERTS_SLACK_WEBHOOK = "https://hooks.slack.com/test";
+      env.alerts.slackWebhook = process.env.ALERTS_SLACK_WEBHOOK;
       fetchMock.mockResolvedValueOnce({ ok: true } as Response);
 
       paymentAlertMock.findFirst.mockResolvedValueOnce(null);
@@ -738,6 +744,7 @@ describe("Alerts Extended - POST /payment", () => {
 
     it("should include user email in Slack message", async () => {
       process.env.ALERTS_SLACK_WEBHOOK = "https://hooks.slack.com/test";
+      env.alerts.slackWebhook = process.env.ALERTS_SLACK_WEBHOOK;
       fetchMock.mockResolvedValueOnce({ ok: true } as Response);
 
       paymentAlertMock.findFirst.mockResolvedValueOnce(null);
@@ -761,6 +768,7 @@ describe("Alerts Extended - POST /payment", () => {
 
     it("should handle Slack webhook failure gracefully", async () => {
       process.env.ALERTS_SLACK_WEBHOOK = "https://hooks.slack.com/test";
+      env.alerts.slackWebhook = process.env.ALERTS_SLACK_WEBHOOK;
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
       paymentAlertMock.findFirst.mockResolvedValueOnce(null);

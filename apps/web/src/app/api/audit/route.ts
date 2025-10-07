@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/server/auth/config";
 import { getAuditTrail } from "@/server/api/audit";
+import { logger } from "@/server/logger";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -33,7 +34,10 @@ export async function GET(request: Request) {
     });
     return NextResponse.json(audit);
   } catch (error) {
-    console.error("Failed to load audit trail", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "Failed to load audit trail",
+    );
     return NextResponse.json(
       { error: "Unable to load audit trail" },
       { status: 500 },

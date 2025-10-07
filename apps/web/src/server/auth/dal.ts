@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { findFakeUser, isFakeDataEnabled } from "@/server/utils/fake";
+import { env } from "@/config/env";
+import { logger } from "@/server/logger";
 
 const loginResponseSchema = z.object({
   id: z.string(),
@@ -10,14 +12,6 @@ const loginResponseSchema = z.object({
 });
 
 export type VerifiedUser = z.infer<typeof loginResponseSchema>;
-
-function resolveApiBaseUrl() {
-  return (
-    process.env.API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:3001"
-  );
-}
 
 export async function verifyUserCredentials(
   email: string,
@@ -32,7 +26,7 @@ export async function verifyUserCredentials(
   }
 
   try {
-    const response = await fetch(`${resolveApiBaseUrl()}/api/auth/login`, {
+    const response = await fetch(`${env.apiUrl}/api/auth/login`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -41,11 +35,13 @@ export async function verifyUserCredentials(
     });
 
     if (!response.ok) {
-      const errorBody = await response.text();
-      console.error(
+      const errorBody = await response.text().catch(() => "<unreadable>");
+      logger.warn(
+        {
+          status: response.status,
+          errorBody,
+        },
         "[auth] Failed to verify credentials",
-        response.status,
-        errorBody,
       );
       return null;
     }
@@ -53,13 +49,21 @@ export async function verifyUserCredentials(
     const json = await response.json();
     const parsed = loginResponseSchema.safeParse(json);
     if (!parsed.success) {
-      console.error("[auth] Invalid login payload", parsed.error.flatten());
+      logger.error(
+        {
+          issues: parsed.error.flatten(),
+        },
+        "[auth] Invalid login payload",
+      );
       return null;
     }
 
     return parsed.data;
   } catch (error) {
-    console.error("[auth] Error verifying credentials", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[auth] Error verifying credentials",
+    );
     return null;
   }
 }

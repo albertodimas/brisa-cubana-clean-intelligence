@@ -17,6 +17,8 @@
  * Created: October 2, 2025
  */
 
+import { logger } from "./logger";
+
 export interface GitOpsStatus {
   repository: {
     url: string;
@@ -105,14 +107,17 @@ export function triggerReconciliation(): {
     // In production, this would call Flux API:
     // flux reconcile kustomization brisa-production --with-source
 
-    console.log("[GitOps] Triggering manual reconciliation...");
+    logger.info("[GitOps] Triggering manual reconciliation...");
 
     return {
       success: true,
       message: "Reconciliation triggered successfully",
     };
   } catch (error) {
-    console.error("[GitOps] Failed to trigger reconciliation:", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[GitOps] Failed to trigger reconciliation",
+    );
     return {
       success: false,
       message: "Failed to trigger reconciliation",
@@ -131,14 +136,17 @@ export function suspendReconciliation(): {
   try {
     // flux suspend kustomization brisa-production
 
-    console.log("[GitOps] Suspending reconciliation...");
+    logger.info("[GitOps] Suspending reconciliation...");
 
     return {
       success: true,
       message: "Reconciliation suspended",
     };
   } catch (error) {
-    console.error("[GitOps] Failed to suspend reconciliation:", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[GitOps] Failed to suspend reconciliation",
+    );
     return {
       success: false,
       message: "Failed to suspend reconciliation",
@@ -156,14 +164,17 @@ export function resumeReconciliation(): {
   try {
     // flux resume kustomization brisa-production
 
-    console.log("[GitOps] Resuming reconciliation...");
+    logger.info("[GitOps] Resuming reconciliation...");
 
     return {
       success: true,
       message: "Reconciliation resumed",
     };
   } catch (error) {
-    console.error("[GitOps] Failed to resume reconciliation:", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[GitOps] Failed to resume reconciliation",
+    );
     return {
       success: false,
       message: "Failed to resume reconciliation",
@@ -187,14 +198,17 @@ export function detectDrift(): {
   try {
     // In production, this would use flux diff
 
-    console.log("[GitOps] Detecting configuration drift...");
+    logger.info("[GitOps] Detecting configuration drift...");
 
     return {
       hasDrift: false,
       driftedResources: [],
     };
   } catch (error) {
-    console.error("[GitOps] Failed to detect drift:", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[GitOps] Failed to detect drift",
+    );
     return {
       hasDrift: false,
       driftedResources: [],
