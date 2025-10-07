@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import HomePage from "./page";
 import { fetchServices, fetchUpcomingBookings } from "@/lib/api";

@@ -1,5 +1,11 @@
+import React from "react";
 import Link from "next/link";
+import { AdminPanel } from "@/components/admin-panel";
+import { createServiceAction, toggleServiceActiveAction } from "@/app/actions";
 import { fetchServices, fetchUpcomingBookings } from "@/lib/api";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const currencyFormatter = new Intl.NumberFormat("es-US", {
   style: "currency",
@@ -52,9 +58,14 @@ export default async function HomePage() {
           <Link href="https://github.com/albertodimas/brisa-cubana-clean-intelligence" style={{ color: "#7ee7c4" }}>
             Repositorio en GitHub
           </Link>
-          <Link href="/docs" style={{ color: "#7ee7c4" }}>
-            Documentación (en progreso)
-          </Link>
+          <a
+            href="https://albertodimas.github.io/brisa-cubana-clean-intelligence/"
+            style={{ color: "#7ee7c4" }}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Documentación pública
+          </a>
         </div>
       </header>
 
@@ -170,8 +181,14 @@ export default async function HomePage() {
               ))}
             </ul>
           )}
-        </article>
+    </article>
       </section>
+
+      <AdminPanel
+        services={services}
+        createService={createServiceAction}
+        toggleService={toggleServiceActiveAction}
+      />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-process.env.API_TOKEN = "test-token";
+process.env.API_TOKEN = "test-service-token";
+process.env.JWT_SECRET = "test-secret";
 
 let servicesFixture: any[] = [];
 let bookingsFixture: any[] = [];
@@ -72,9 +73,17 @@ const mockPrisma = {
     }),
   },
   user: {
-    findUnique: vi.fn().mockImplementation(async ({ where }: { where: any }) =>
-      usersFixture.find((item) => item.id === where.id) ?? null,
-    ),
+    findUnique: vi
+      .fn()
+      .mockImplementation(async ({ where }: { where: any }) => {
+        if (where.id) {
+          return usersFixture.find((item) => item.id === where.id) ?? null;
+        }
+        if (where.email) {
+          return usersFixture.find((item) => item.email === where.email) ?? null;
+        }
+        return null;
+      }),
   },
   property: {
     findUnique: vi.fn().mockImplementation(async ({ where }: { where: any }) =>
@@ -83,14 +92,36 @@ const mockPrisma = {
   },
 };
 
+const mockVerify = vi.fn((token: string) =>
+  token === "jwt-admin"
+    ? { sub: makeCuid(999), email: "admin@brisacubanaclean.com", role: "ADMIN" }
+    : token === "jwt-coordinator"
+      ? { sub: makeCuid(998), email: "ops@brisacubanaclean.com", role: "COORDINATOR" }
+      : null,
+);
+
+const mockSign = vi.fn(() => "jwt-admin");
+
+const mockCompare = vi.fn().mockResolvedValue(true);
+
 vi.mock("./lib/prisma", () => ({
   prisma: mockPrisma,
+}));
+
+vi.mock("./lib/jwt", () => ({
+  signAuthToken: mockSign,
+  verifyAuthToken: mockVerify,
+}));
+
+vi.mock("bcryptjs", () => ({
+  default: { compare: mockCompare },
+  compare: mockCompare,
 }));
 
 const app = (await import("./app")).default;
 
 const authorizedHeaders = {
-  Authorization: "Bearer test-token",
+  Authorization: "Bearer jwt-admin",
 };
 
 describe("app", () => {
@@ -113,6 +144,15 @@ describe("app", () => {
         id: makeCuid(101),
         fullName: "Cliente Piloto",
         email: "client@test.com",
+        passwordHash: "$2a$10$hashed",
+        role: "CLIENT",
+      },
+      {
+        id: makeCuid(102),
+        fullName: "Admin Brisa",
+        email: "admin@brisacubanaclean.com",
+        passwordHash: "$2a$10$hashed",
+        role: "ADMIN",
       },
     ];
     propertiesFixture = [
@@ -176,7 +216,11 @@ describe("app", () => {
   });
 
   it("rejects service creation when unauthorized", async () => {
-    const res = await app.request("/api/services", { method: "POST", body: "{}" });
+    const res = await app.request("/api/services", {
+      method: "POST",
+      headers: { Authorization: "Bearer bad" },
+      body: "{}",
+    });
     expect(res.status).toBe(401);
   });
 
@@ -205,5 +249,31 @@ describe("app", () => {
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.data.service.id).toBe(service.id);
+  });
+
+  it("logs in a user and returns a token", async () => {
+    const res = await app.request("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email: "admin@brisacubanaclean.com", password: "Brisa123!" }),
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.email).toBe("admin@brisacubanaclean.com");
+    expect(json.token).toBe("jwt-admin");
+    expect(mockSign).toHaveBeenCalled();
+  });
+
+  it("rejects login with invalid credentials", async () => {
+    mockCompare.mockResolvedValueOnce(false);
+
+    const res = await app.request("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email: "admin@brisacubanaclean.com", password: "WrongPwd!" }),
+    });
+
+    expect(res.status).toBe(401);
+    const json = await res.json();
+    expect(json.error).toBe("Invalid credentials");
   });
 });

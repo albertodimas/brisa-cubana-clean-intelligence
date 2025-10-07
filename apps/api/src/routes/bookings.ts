@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
-import { requireAuth } from "../middleware/auth";
+import { authenticate, requireRoles } from "../middleware/auth";
 
 const createBookingSchema = z.object({
   customerId: z.string().cuid(),
@@ -27,7 +27,11 @@ router.get("/", async (c) => {
   return c.json({ data: bookings });
 });
 
-router.post("/", requireAuth, async (c) => {
+router.post(
+  "/",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR"]),
+  async (c) => {
   const parsed = createBookingSchema.safeParse(await c.req.json());
   if (!parsed.success) {
     return c.json({ error: parsed.error.flatten() }, 400);
@@ -49,24 +53,25 @@ router.post("/", requireAuth, async (c) => {
     return c.json({ error: "Property not found" }, 404);
   }
 
-  const booking = await prisma.booking.create({
-    data: {
-      ...rest,
-      serviceId,
-      customerId,
-      propertyId,
-      durationMin: durationMin ?? service.durationMin,
-      totalAmount: service.basePrice,
-      code: `BRISA-${randomUUID().slice(0, 8)}`,
-    },
-    include: {
-      customer: { select: { id: true, fullName: true, email: true } },
-      property: { select: { id: true, label: true, city: true } },
-      service: { select: { id: true, name: true, basePrice: true } },
-    },
-  });
+    const booking = await prisma.booking.create({
+      data: {
+        ...rest,
+        serviceId,
+        customerId,
+        propertyId,
+        durationMin: durationMin ?? service.durationMin,
+        totalAmount: service.basePrice,
+        code: `BRISA-${randomUUID().slice(0, 8)}`,
+      },
+      include: {
+        customer: { select: { id: true, fullName: true, email: true } },
+        property: { select: { id: true, label: true, city: true } },
+        service: { select: { id: true, name: true, basePrice: true } },
+      },
+    });
 
-  return c.json({ data: booking }, 201);
-});
+    return c.json({ data: booking }, 201);
+  },
+);
 
 export default router;

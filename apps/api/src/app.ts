@@ -1,9 +1,20 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { prisma } from "./lib/prisma";
 import bookings from "./routes/bookings";
 import services from "./routes/services";
+import auth from "./routes/auth";
 
 const app = new Hono();
+
+const allowedOrigin = process.env.WEB_APP_URL ?? "http://localhost:3000";
+
+app.use("*", cors({
+  origin: allowedOrigin,
+  allowMethods: ["GET", "POST", "PATCH", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
 
 app.get("/", (c) =>
   c.json({
@@ -42,5 +53,6 @@ app.get("/health", async (c) => {
 
 app.route("/api/services", services);
 app.route("/api/bookings", bookings);
+app.route("/api/auth", auth);
 
 export default app;
