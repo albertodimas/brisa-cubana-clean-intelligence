@@ -88,6 +88,7 @@ apps/api/prisma/migrations/**/migration.sql.bak
 tmp/
 temp/
 *.tmp
+backups/
 
 # Archives
 _archived/
