@@ -4,7 +4,7 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 
 - **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`) con sesión gestionada por Auth.js (NextAuth v5) y panel operativo para alta/edición de servicios, propiedades y reservas con filtros dinámicos
 - **API:** Hono 4.9.10 (`apps/api`) con autenticación JWT, middlewares RBAC, rate limiting en `/api/auth/login` y CRUD completo para servicios, propiedades, clientes y reservas (incluye filtros por fecha/estado)
-- **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local / Railway gestionado)
+- **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local)
 - **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto y CI en GitHub Actions
 
 ## Estado al 7 de octubre de 2025
@@ -14,8 +14,8 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 | Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.       |
 | API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas. |
 | Tests         | 🟡     | Vitest (`pnpm test`) y suites Playwright iniciales (`pnpm test:e2e`).             |
-| Documentación | 🟡     | README + quickstart + deployment + runbook sincronizados con la implementación.   |
-| Deploy        | 🔴     | CI listo pero falta habilitar despliegues automáticos (Vercel/Railway).           |
+| Documentación | 🟢     | README + quickstart verificados con setup local.                                  |
+| Deploy        | 🔴     | Solo desarrollo local. Deploy no configurado.                                     |
 
 ## Requisitos
 
@@ -77,11 +77,9 @@ pnpm test
 | `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings)   |
 | `pnpm build`     | Genera artefactos de producción (Next + API)       |
 
-## Documentación actualizada
+## Documentación
 
-- [`docs/quickstart.md`](docs/quickstart.md): onboarding local paso a paso.
-- [`docs/deployment.md`](docs/deployment.md): configuración de CI/CD, Vercel y Railway.
-- [`docs/runbooks/incident-response.md`](docs/runbooks/incident-response.md): procedimiento ante incidentes 5xx.
+- [`docs/quickstart.md`](docs/quickstart.md): onboarding local paso a paso (verificado).
 
 ## Autenticación y RBAC
 
@@ -92,12 +90,9 @@ pnpm test
 - Endpoints protegidos (`POST /api/services`, `PATCH /api/services/:id`, `POST/PATCH /api/bookings`, `GET /api/customers`) requieren rol `ADMIN` o `COORDINATOR`.
 - El `API_TOKEN` queda reservado para integraciones servidor-servidor; la UI ya no depende de él y exige sesión real.
 
-## Próximos hitos
+## Desarrollo activo
 
-1. Configurar despliegues automáticos (Vercel + Railway) con secretos reales.
-2. Ampliar cobertura Playwright (reservas complejas, cierres de sesión, regresiones UI).
-3. Integrar observabilidad (OTel/Grafana/Sentry) y alertas en staging.
-4. Redactar documentación honesta basada en funcionalidades verificadas.
+El proyecto está en fase de desarrollo local activo. Solo se documenta funcionalidad verificada y probada.
 
 ---
 
