@@ -16,10 +16,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(
   "*",
   cors({
-    origin: (origin) => {
-      if (!origin) return true; // Allow requests with no origin (e.g., mobile apps, curl)
-      return allowedOrigins.includes(origin);
-    },
+    origin: allowedOrigins,
     allowMethods: ["GET", "POST", "PATCH", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
