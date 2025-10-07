@@ -146,7 +146,7 @@ export default defineConfig({
 });
 ```
 
-> **Nota:** Mantén la cobertura en ≥75 % (líneas/estadísticas) y ≥70 % (funciones/branches). Los módulos de concierge e IA ya cuentan con pruebas, por lo que cualquier cambio debe actualizar sus suites correspondientes.
+> **Nota sobre Coverage:** El proyecto tiene coverage configurado con vitest pero actualmente no se está midiendo/reportando activamente. Los thresholds configurados son: lines 35%, functions 40%, branches 55%, statements 35% (ver `apps/api/vitest.config.ts`). Los módulos de concierge e IA ya cuentan con pruebas, por lo que cualquier cambio debe actualizar sus suites correspondientes.
 
 > **Nueva suite (2025-10-06)**: `cors-origins.test.ts` valida normalización, deduplicación y spoofing en CORS. Ejecuta `pnpm test lib/cors-origins.test.ts` tras modificar dominios u orígenes permitidos.
 
@@ -645,19 +645,23 @@ open coverage/index.html
 
 ### Coverage en CI
 
-El workflow `.github/workflows/ci.yml` ya genera coverage automáticamente.
+El workflow `.github/workflows/ci.yml` ejecuta tests con el flag `--coverage`, pero actualmente no está publicando/archivando el reporte generado.
 
-### Umbrales Recomendados
+### Umbrales Configurados (Actuales)
 
 ```typescript
-// vitest.config.ts
+// apps/api/vitest.config.ts (estado actual)
 export default defineConfig({
   test: {
     coverage: {
-      lines: 80,
-      functions: 80,
-      branches: 80,
-      statements: 80,
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
+      thresholds: {
+        lines: 35,
+        functions: 40,
+        branches: 55,
+        statements: 35,
+      },
     },
   },
 });
