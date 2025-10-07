@@ -192,7 +192,97 @@ export default async function HomePage() {
               ))}
             </ul>
           )}
-    </article>
+        </article>
+
+        <article
+          style={{
+            background: "rgba(11,23,28,0.6)",
+            padding: "1.5rem",
+            borderRadius: "1rem",
+            border: "1px solid rgba(126,231,196,0.2)",
+          }}
+        >
+          <header style={{ marginBottom: "1rem" }}>
+            <h2 style={{ margin: 0, fontSize: "1.4rem" }}>Inventario de propiedades</h2>
+            <p style={{ margin: 0, color: "#a7dcd0" }}>
+              {properties.length} propiedades activas listas para asignación.
+            </p>
+          </header>
+          {properties.length === 0 ? (
+            <p style={{ color: "#d5f6eb" }}>Crea una propiedad desde el panel operativo para iniciar programación.</p>
+          ) : (
+            <div style={{ display: "grid", gap: "1rem" }}>
+              {properties.slice(0, 4).map((property) => (
+                <div
+                  key={property.id}
+                  style={{
+                    padding: "1rem",
+                    borderRadius: "0.75rem",
+                    border: "1px solid rgba(126,231,196,0.15)",
+                    background: "rgba(18,34,40,0.6)",
+                  }}
+                >
+                  <strong>{property.label}</strong>
+                  <p style={{ margin: "0.35rem 0", color: "#a7dcd0" }}>
+                    {property.addressLine}, {property.city}, {property.state} {property.zipCode}
+                  </p>
+                  <span style={{ fontSize: "0.85rem", color: "#6fb8a6" }}>
+                    Propietario: {property.owner?.fullName ?? property.owner?.email ?? "N/A"}
+                  </span>
+                </div>
+              ))}
+              {properties.length > 4 ? (
+                <span style={{ color: "#7ee7c4", fontSize: "0.9rem" }}>
+                  {properties.length - 4} propiedades adicionales no mostradas.
+                </span>
+              ) : null}
+            </div>
+          )}
+        </article>
+
+        <article
+          style={{
+            background: "rgba(11,23,28,0.6)",
+            padding: "1.5rem",
+            borderRadius: "1rem",
+            border: "1px solid rgba(126,231,196,0.2)",
+          }}
+        >
+          <header style={{ marginBottom: "1rem" }}>
+            <h2 style={{ margin: 0, fontSize: "1.4rem" }}>Clientes activos</h2>
+            <p style={{ margin: 0, color: "#a7dcd0" }}>
+              {customers.length} clientes con reservas o propiedades registradas.
+            </p>
+          </header>
+          {customers.length === 0 ? (
+            <p style={{ color: "#d5f6eb" }}>Registra clientes desde el panel operativo o mediante seed.</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.75rem" }}>
+              {customers.slice(0, 5).map((customer) => (
+                <li
+                  key={customer.id}
+                  style={{
+                    padding: "0.85rem",
+                    borderRadius: "0.75rem",
+                    border: "1px solid rgba(126,231,196,0.15)",
+                    background: "rgba(18,34,40,0.6)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.25rem",
+                  }}
+                >
+                  <strong>{customer.fullName ?? "Cliente sin nombre"}</strong>
+                  <span style={{ color: "#a7dcd0", fontSize: "0.9rem" }}>{customer.email}</span>
+                </li>
+              ))}
+              {customers.length > 5 ? (
+                <span style={{ color: "#7ee7c4", fontSize: "0.9rem" }}>
+                  {customers.length - 5} clientes adicionales no mostrados.
+                </span>
+              ) : null}
+            </ul>
+          )}
+        </article>
       </section>
 
       {isAuthenticated ? (
