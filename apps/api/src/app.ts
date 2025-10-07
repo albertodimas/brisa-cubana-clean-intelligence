@@ -9,14 +9,22 @@ import auth from "./routes/auth";
 
 const app = new Hono();
 
-const allowedOrigin = process.env.WEB_APP_URL ?? "http://localhost:3000";
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
+  : ["http://localhost:3000"];
 
-app.use("*", cors({
-  origin: allowedOrigin,
-  allowMethods: ["GET", "POST", "PATCH", "OPTIONS"],
-  allowHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-}));
+app.use(
+  "*",
+  cors({
+    origin: (origin) => {
+      if (!origin) return true; // Allow requests with no origin (e.g., mobile apps, curl)
+      return allowedOrigins.includes(origin);
+    },
+    allowMethods: ["GET", "POST", "PATCH", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
 
 app.get("/", (c) =>
   c.json({
@@ -48,7 +56,9 @@ app.get("/health", async (c) => {
       },
       status: "fail",
       error:
-        error instanceof Error ? error.message : "Unknown database connectivity issue",
+        error instanceof Error
+          ? error.message
+          : "Unknown database connectivity issue",
     });
   }
 });
