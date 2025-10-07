@@ -23,11 +23,11 @@
 
 ### Code Quality Gates
 
-- [ ] All tests passing: `pnpm test` (171 tests)
-- [ ] E2E tests green: `pnpm test:e2e` (15 tests)
+- [ ] All tests passing: `pnpm test` (865 tests: 850 API + 10 Web + 5 UI)
+- [ ] E2E tests green: `pnpm test:e2e` (6 Playwright suites)
 - [ ] Type checking clean: `pnpm typecheck`
 - [ ] Linting clean: `pnpm lint`
-- [ ] Code coverage ≥75%: `pnpm test:coverage`
+- [ ] Coverage measurement: Not currently configured (TODO)
 - [ ] Build successful: `pnpm build`
 
 ### Security Review

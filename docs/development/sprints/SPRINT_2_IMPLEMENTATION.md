@@ -552,7 +552,7 @@ Total: 7 archivos
 | **Servicios creados**  | 3                      |
 | **Middleware creados** | 1                      |
 | **Tests creados**      | 0 (pendiente Sprint 3) |
-| **Cobertura de tests** | ~75% (estimado)        |
+| **Cobertura de tests** | No medida              |
 
 ### Tiempo Invertido
 
@@ -615,7 +615,7 @@ Antes de considerar Sprint 2 completado al 100%:
 ### Próximas Metas (Sprint 3)
 
 🎯 **Security Score**: 9.8/10 (+0.3)
-🎯 **Test Coverage**: 80%+ (actualmente ~0%)
+🎯 **Test Suite**: Implementar suite comprehensiva de tests unitarios
 🎯 **Complete Service Layer**: 100% de rutas refactorizadas
 🎯 **Full Sanitization**: Todos los inputs protegidos contra XSS
 

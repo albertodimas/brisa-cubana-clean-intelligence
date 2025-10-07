@@ -10,15 +10,15 @@ Norma para mantener la documentación sincronizada con el estado real del proyec
 
 ## Checklist antes de merge
 
-| Paso | Comando / acción                                           | Resultado esperado                                                              |
-| ---- | ---------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 1    | `pnpm lint`                                                | Sin errores ni warnings                                                         |
-| 2    | `pnpm typecheck`                                           | Sin errores                                                                     |
-| 3    | `pnpm --filter=@brisa/api exec vitest run --reporter=json` | 171/171 tests OK                                                                |
-| 4    | `pnpm test:e2e`                                            | 15/15 escenarios OK (usar datos fake)                                           |
-| 5    | `pnpm docs:build`                                          | Sin warnings estructurales (excepto enlaces intencionalmente pendientes)        |
-| 6    | Actualizar tablas de estado                                | `README.md`, `PRODUCTION_READINESS_REPORT.md`, `PRODUCTION_DEPLOYMENT_GUIDE.md` |
-| 7    | Registrar cambios mayor > menor                            | `CHANGELOG.md` + etiqueta Git si aplica                                         |
+| Paso | Comando / acción                | Resultado esperado                                                       |
+| ---- | ------------------------------- | ------------------------------------------------------------------------ |
+| 1    | `pnpm lint`                     | Sin errores ni warnings                                                  |
+| 2    | `pnpm typecheck`                | Sin errores                                                              |
+| 3    | `pnpm test`                     | 865/865 tests OK (850 API + 10 Web + 5 UI)                               |
+| 4    | `pnpm test:e2e` (opcional)      | 6 suites E2E con Playwright                                              |
+| 5    | `pnpm docs:build`               | Sin warnings estructurales (excepto enlaces intencionalmente pendientes) |
+| 6    | Actualizar tablas de estado     | `README.md` y `docs/operations/production/CURRENT_STATUS.md`             |
+| 7    | Registrar cambios mayor > menor | `CHANGELOG.md` + etiqueta Git si aplica                                  |
 
 ## Guía de Estilo (Markdown + Voz)
 
