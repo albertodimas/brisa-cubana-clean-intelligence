@@ -387,6 +387,7 @@
     "mgmt",
     "escalación",
     "TOTP",
-    "chequeos"
+    "chequeos",
+    "vulns"
   ]
 }
