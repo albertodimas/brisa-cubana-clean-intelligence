@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { prisma } from "./lib/prisma";
-import bookings from "./routes/bookings";
-import services from "./routes/services";
-import properties from "./routes/properties";
-import customers from "./routes/customers";
-import auth from "./routes/auth";
+import { prisma } from "./lib/prisma.js";
+import bookings from "./routes/bookings.js";
+import services from "./routes/services.js";
+import properties from "./routes/properties.js";
+import customers from "./routes/customers.js";
+import auth from "./routes/auth.js";
 
 const app = new Hono();
 

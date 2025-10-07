@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { prisma } from "../lib/prisma";
-import { authenticate, requireRoles } from "../middleware/auth";
+import { prisma } from "../lib/prisma.js";
+import { authenticate, requireRoles } from "../middleware/auth.js";
 
 const propertySchema = z.object({
   label: z.string().min(3),

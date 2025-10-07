@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { BookingStatus, Prisma } from "@prisma/client";
-import { prisma } from "../lib/prisma";
-import { authenticate, requireRoles } from "../middleware/auth";
+import { prisma } from "../lib/prisma.js";
+import { authenticate, requireRoles } from "../middleware/auth.js";
 
 const createBookingSchema = z.object({
   customerId: z.string().cuid(),

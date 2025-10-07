@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from "hono";
 import { getCookie } from "hono/cookie";
 import type { UserRole } from "@prisma/client";
-import { verifyAuthToken } from "../lib/jwt";
+import { verifyAuthToken } from "../lib/jwt.js";
 
 const API_TOKEN = process.env.API_TOKEN ?? null;
 
@@ -77,6 +77,8 @@ export const requireRoles = (roles: UserRole[]): MiddlewareHandler => {
   };
 };
 
-export function getAuthenticatedUser(c: Parameters<MiddlewareHandler>[0]): AuthInfo | undefined {
+export function getAuthenticatedUser(
+  c: Parameters<MiddlewareHandler>[0],
+): AuthInfo | undefined {
   return c.get("authUser");
 }

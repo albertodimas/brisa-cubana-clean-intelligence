@@ -4,9 +4,9 @@ import { setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import honoRateLimiter from "hono-rate-limiter";
-import { prisma } from "../lib/prisma";
-import { signAuthToken, verifyAuthToken } from "../lib/jwt";
-import { authenticate, getAuthenticatedUser } from "../middleware/auth";
+import { prisma } from "../lib/prisma.js";
+import { signAuthToken, verifyAuthToken } from "../lib/jwt.js";
+import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
