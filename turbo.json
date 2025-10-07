@@ -5,6 +5,10 @@
       "cache": false,
       "persistent": true
     },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**"]
+    },
     "lint": {
       "outputs": []
     },
@@ -13,14 +17,6 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": []
-    },
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**"]
-    },
-    "deploy": {
-      "dependsOn": ["build"],
       "outputs": []
     }
   }

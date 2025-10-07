@@ -1,20 +1,24 @@
 {
   "name": "brisa-cubana-clean-intelligence",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.18.0",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "format": "prettier --write .",
-    "clean": "turbo run clean && rm -rf node_modules .turbo"
+    "format": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "clean": "rm -rf node_modules .turbo"
   },
   "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "eslint": "^9.11.1",
     "prettier": "^3.4.2",
     "turbo": "^2.5.8",
-    "typescript": "^5.9.3"
+    "typescript": "^5.6.3"
   }
 }
