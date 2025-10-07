@@ -1,17 +1,16 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { loginAction } from "@/app/actions";
 import { LoginForm } from "@/components/login-form";
+import { auth } from "@/auth";
 
 export const metadata = {
   title: "Iniciar sesión · Brisa Cubana",
 };
 
 export default async function LoginPage() {
-  const store = await cookies();
-  const token = store.get("auth_token");
-  if (token) {
+  const session = await auth();
+  if (session?.user) {
     redirect("/");
   }
 
@@ -30,10 +29,12 @@ export default async function LoginPage() {
       }}
     >
       <header style={{ textAlign: "center", maxWidth: "420px" }}>
-        <h1 style={{ marginBottom: "0.75rem", fontSize: "2.2rem" }}>Bienvenido</h1>
+        <h1 style={{ marginBottom: "0.75rem", fontSize: "2.2rem" }}>
+          Bienvenido
+        </h1>
         <p style={{ margin: 0, color: "#a7dcd0" }}>
-          Usa tus credenciales internas para administrar servicios y reservas. Si no tienes acceso,
-          contacta a Plataforma & Engineering.
+          Usa tus credenciales internas para administrar servicios y reservas.
+          Si no tienes acceso, contacta a Plataforma & Engineering.
         </p>
       </header>
       <LoginForm action={loginAction} />

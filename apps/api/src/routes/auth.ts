@@ -1,7 +1,9 @@
+import type { Context } from "hono";
 import { Hono } from "hono";
 import { setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import honoRateLimiter from "hono-rate-limiter";
 import { prisma } from "../lib/prisma";
 import { signAuthToken, verifyAuthToken } from "../lib/jwt";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth";
@@ -12,6 +14,56 @@ const loginSchema = z.object({
 });
 
 const router = new Hono();
+
+const { rateLimiter } =
+  honoRateLimiter as unknown as typeof import("hono-rate-limiter");
+
+const loginRateLimiter = rateLimiter({
+  windowMs: Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS ?? "60000"),
+  limit: Number(process.env.LOGIN_RATE_LIMIT ?? "5"),
+  standardHeaders: "draft-7",
+  keyGenerator: (c) => {
+    const forwarded = c.req.header("x-forwarded-for");
+    if (forwarded) {
+      return forwarded.split(",")[0]?.trim() ?? forwarded;
+    }
+    const realIp =
+      c.req.header("x-real-ip") ??
+      c.req.header("cf-connecting-ip") ??
+      c.req.header("fastly-client-ip");
+    if (realIp) {
+      return realIp;
+    }
+    const fallback =
+      c.req.raw.headers.get("x-forwarded-for") ??
+      c.req.raw.headers.get("x-real-ip") ??
+      c.req.raw.headers.get("cf-connecting-ip") ??
+      c.req.header("user-agent") ??
+      "anonymous";
+    return fallback;
+  },
+  handler: async (ctx) =>
+    ctx.json(
+      { error: "Too many login attempts. Please wait before retrying." },
+      429,
+    ),
+});
+
+type SameSitePolicy = "lax" | "strict";
+
+function resolveCookiePolicy(c: Context): {
+  secure: boolean;
+  sameSite: SameSitePolicy;
+} {
+  if (process.env.NODE_ENV === "production") {
+    return { secure: true, sameSite: "strict" };
+  }
+  const forwardedProto = c.req.header("x-forwarded-proto");
+  const secure = forwardedProto === "https" || c.req.url.startsWith("https");
+  return { secure, sameSite: secure ? "strict" : "lax" };
+}
+
+router.use("/login", loginRateLimiter);
 
 router.post("/login", async (c) => {
   const body = await c.req.json();
@@ -32,13 +84,17 @@ router.post("/login", async (c) => {
     return c.json({ error: "Invalid credentials" }, 401);
   }
 
-  const token = signAuthToken({ sub: user.id, email: user.email, role: user.role });
+  const token = signAuthToken({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+  });
 
-  const secure = c.req.header("x-forwarded-proto") === "https" || c.req.url.startsWith("https");
+  const { secure, sameSite } = resolveCookiePolicy(c);
 
   setCookie(c, "auth_token", token, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite,
     secure,
     maxAge: 60 * 60 * 24,
     path: "/",
@@ -55,7 +111,8 @@ router.post("/login", async (c) => {
 });
 
 router.post("/logout", (c) => {
-  deleteCookie(c, "auth_token", { path: "/" });
+  const { secure, sameSite } = resolveCookiePolicy(c);
+  deleteCookie(c, "auth_token", { path: "/", secure, sameSite });
   return c.json({ success: true });
 });
 

@@ -56,6 +56,12 @@ jobs:
           echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> $GITHUB_ENV
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
           echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci" >> $GITHUB_ENV
+          echo "AUTH_SECRET=${{ secrets.AUTH_SECRET || 'test-auth-secret' }}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_API_URL=http://localhost:3001" >> $GITHUB_ENV
+          echo "LOGIN_RATE_LIMIT=${{ secrets.LOGIN_RATE_LIMIT || '5' }}" >> $GITHUB_ENV
+          echo "LOGIN_RATE_LIMIT_WINDOW_MS=${{ secrets.LOGIN_RATE_LIMIT_WINDOW_MS || '60000' }}" >> $GITHUB_ENV
+          echo "E2E_ADMIN_EMAIL=admin@brisacubanaclean.com" >> $GITHUB_ENV
+          echo "E2E_ADMIN_PASSWORD=Brisa123!" >> $GITHUB_ENV
 
       - name: Lint
         run: pnpm lint
@@ -65,6 +71,16 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      - name: Install Playwright browsers
+        if: matrix.node == '22.x'
+        run: pnpm exec playwright install --with-deps
+
+      - name: E2E tests
+        if: matrix.node == '22.x'
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+        run: pnpm test:e2e
 
       - name: Build
         env:

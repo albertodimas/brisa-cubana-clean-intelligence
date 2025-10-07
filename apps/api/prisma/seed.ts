@@ -1,12 +1,18 @@
-import { PrismaClient, UserRole, PropertyType, BookingStatus } from "@prisma/client";
+import {
+  PrismaClient,
+  UserRole,
+  PropertyType,
+  BookingStatus,
+} from "@prisma/client";
 import { addHours } from "date-fns";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = "$2a$10$7HLPlG1nKVG/hjmOYEuHPO3aMc.P4b2SMvkkXqsrtVmQ0Yo6zqiFe"; // bcrypt hash for "Brisa123!"
+  const passwordHash =
+    "$2a$10$X2vDDrIu9FjFjbfQgddDD.i4sICyHjdgZwf0NPQiYTiC3YroUAr1S"; // bcrypt hash for "Brisa123!"
 
-  const [admin, coordinator, client] = await Promise.all([
+  const [_admin, coordinator, client] = await Promise.all([
     prisma.user.upsert({
       where: { email: "admin@brisacubanaclean.com" },
       update: {},
@@ -55,7 +61,8 @@ async function main() {
       update: {},
       create: {
         name: "Turnover Vacation Rental",
-        description: "Cambio completo entre huéspedes con reposición de amenities.",
+        description:
+          "Cambio completo entre huéspedes con reposición de amenities.",
         basePrice: 185.0,
         durationMin: 150,
       },

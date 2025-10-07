@@ -2,20 +2,20 @@
 
 Monorepo reiniciado para convertir el proyecto en una plataforma real y comprobable. El stack actual contiene:
 
-- **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`) con panel operativo para crear servicios y activarlos/desactivarlos
-- **API:** Hono 4.9.10 con autenticación JWT vía cookies y RBAC, desplegable en Vercel Functions o Railway (`apps/api`)
+- **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`) con sesión gestionada por Auth.js (NextAuth v5) y panel operativo para alta/edición de servicios, propiedades y reservas con filtros dinámicos
+- **API:** Hono 4.9.10 (`apps/api`) con autenticación JWT, middlewares RBAC, rate limiting en `/api/auth/login` y CRUD completo para servicios, propiedades, clientes y reservas (incluye filtros por fecha/estado)
 - **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local / Railway gestionado)
 - **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto y CI en GitHub Actions
 
 ## Estado al 7 de octubre de 2025
 
-| Área          | Estado | Detalle                                                                 |
-| ------------- | ------ | ----------------------------------------------------------------------- |
-| Frontend web  | 🟡     | Landing dinámico con datos reales + panel para crear/activar servicios. |
-| API           | 🟢     | Endpoints JWT + RBAC (ADMIN/COORD) y ruta `/api/auth/login` operativa.   |
-| Tests         | 🟢     | Vitest `run` en API y web (10 + 1) pasan sin modo watch.                |
-| Documentación | 🔴     | Solo README. Se reescribirá en paralelo a las funcionalidades reales.   |
-| Deploy        | 🔴     | Sin pipelines. Pendiente conectar con Vercel (web) y Railway (API/DB).  |
+| Área          | Estado | Detalle                                                                           |
+| ------------- | ------ | --------------------------------------------------------------------------------- |
+| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.       |
+| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas. |
+| Tests         | 🟡     | Vitest (`pnpm test`) y suites Playwright iniciales (`pnpm test:e2e`).             |
+| Documentación | 🟡     | README + quickstart + deployment + runbook sincronizados con la implementación.   |
+| Deploy        | 🔴     | CI listo pero falta habilitar despliegues automáticos (Vercel/Railway).           |
 
 ## Requisitos
 
@@ -24,18 +24,39 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 
 ## Puesta en marcha
 
-```bash
-cp .env.example .env
-cp apps/api/.env.example apps/api/.env
-pnpm install
-docker compose up -d
-pnpm db:push
-pnpm db:seed
-pnpm dev -- --parallel
-```
+1. Instala dependencias:
+   ```bash
+   pnpm install
+   ```
+2. Define variables de entorno (archivo `.env` en la raíz o exportadas en tu shell):
+   ```bash
+   export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/brisa"
+   export JWT_SECRET="local-jwt-secret"
+   export AUTH_SECRET="local-auth-secret"
+   export NEXT_PUBLIC_API_URL="http://localhost:3001"
+   # Opcional: token de servicio si necesitas integraciones
+   export API_TOKEN="local-service-token"
+   # Opcional: personaliza el rate limiting de login (intentos / ventana en ms)
+   export LOGIN_RATE_LIMIT="5"
+   export LOGIN_RATE_LIMIT_WINDOW_MS="60000"
+   ```
+3. Levanta PostgreSQL (Docker Compose):
+   ```bash
+   docker compose up -d
+   ```
+4. Sincroniza y siembra la base:
+   ```bash
+   pnpm db:push
+   pnpm db:seed
+   ```
+5. Ejecuta el stack (Next.js + API):
 
-- `apps/api`: escucha en `http://localhost:3001`
-- `apps/web`: escucha en `http://localhost:3000`
+   ```bash
+   pnpm dev -- --parallel
+   ```
+
+   - API: <http://localhost:3001>
+   - Web: <http://localhost:3000>
 
 Para ejecutar los test básicos:
 
@@ -45,15 +66,16 @@ pnpm test
 
 ## Scripts útiles
 
-| Comando          | Descripción                           |
-| ---------------- | ------------------------------------- |
-| `pnpm dev`       | Ejecuta los `dev` scripts en paralelo |
-| `pnpm lint`      | Lanza ESLint en todos los paquetes    |
-| `pnpm test`      | Ejecuta Vitest (`vitest run`) en cada paquete |
-| `pnpm typecheck` | Verifica TypeScript en cada paquete   |
-| `pnpm db:push`   | Sincroniza el esquema Prisma con PostgreSQL   |
-| `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings) |
-| `pnpm build`     | Genera artefactos de producción (Next + API) |
+| Comando          | Descripción                                        |
+| ---------------- | -------------------------------------------------- |
+| `pnpm dev`       | Ejecuta los `dev` scripts en paralelo              |
+| `pnpm lint`      | Lanza ESLint en todos los paquetes                 |
+| `pnpm test`      | Ejecuta Vitest (`vitest run`) en cada paquete      |
+| `pnpm typecheck` | Verifica TypeScript en cada paquete                |
+| `pnpm test:e2e`  | Ejecuta Playwright (requiere servidores en marcha) |
+| `pnpm db:push`   | Sincroniza el esquema Prisma con PostgreSQL        |
+| `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings)   |
+| `pnpm build`     | Genera artefactos de producción (Next + API)       |
 
 ## Documentación actualizada
 
@@ -63,17 +85,18 @@ pnpm test
 
 ## Autenticación y RBAC
 
-- Login: `POST http://localhost:3001/api/auth/login` con `email` y `password`.
+- Login API: `POST http://localhost:3001/api/auth/login` con `email` y `password`.
   - Credenciales sembradas: `admin@brisacubanaclean.com / Brisa123!` y `ops@brisacubanaclean.com / Brisa123!`.
-- El token JWT se envía vía cookie `auth_token` (HttpOnly) y puede usarse como header `Authorization: Bearer <token>`.
-- Endpoints protegidos (`POST /api/services`, `PATCH /api/services/:id`, `POST /api/bookings`) requieren rol `ADMIN` u `COORDINATOR`.
-- El panel operativo de la web usa server actions con el `API_TOKEN` interno; para pruebas de usuario se recomienda iniciar sesión con `curl` o un cliente HTTP y reutilizar el token.
+- La web usa Auth.js (NextAuth v5) para guardar el JWT en cookies HttpOnly (`AUTH_SECRET`) y obtener el bearer token en cada server action.
+- El login aplica rate limiting configurable (`LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`) y endurece cookies (`SameSite=Strict`, `Secure`) cuando la aplicación se sirve vía HTTPS.
+- Endpoints protegidos (`POST /api/services`, `PATCH /api/services/:id`, `POST/PATCH /api/bookings`, `GET /api/customers`) requieren rol `ADMIN` o `COORDINATOR`.
+- El `API_TOKEN` queda reservado para integraciones servidor-servidor; la UI ya no depende de él y exige sesión real.
 
 ## Próximos hitos
 
-1. Extender CRUD de reservas/propiedades con permisos, filtros y formularios web.
-2. Exponer flujos de login/logout en la interfaz pública (NextAuth/Auth.js).
-3. Conectar CI/CD con despliegues automatizados (Vercel + Railway) y monitoreo.
+1. Configurar despliegues automáticos (Vercel + Railway) con secretos reales.
+2. Ampliar cobertura Playwright (reservas complejas, cierres de sesión, regresiones UI).
+3. Integrar observabilidad (OTel/Grafana/Sentry) y alertas en staging.
 4. Redactar documentación honesta basada en funcionalidades verificadas.
 
 ---

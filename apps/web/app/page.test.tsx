@@ -1,6 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import HomePage from "./page";
-import { fetchServices, fetchUpcomingBookings, fetchProperties, fetchCustomers } from "@/lib/api";
 
 vi.mock("@/lib/api", () => ({
   fetchServices: vi.fn().mockResolvedValue([
@@ -14,7 +12,7 @@ vi.mock("@/lib/api", () => ({
       updatedAt: new Date().toISOString(),
     },
   ]),
-  fetchUpcomingBookings: vi.fn().mockResolvedValue([
+  fetchBookings: vi.fn().mockResolvedValue([
     {
       id: "booking_1",
       code: "BRISA-001",
@@ -46,17 +44,23 @@ vi.mock("@/lib/api", () => ({
   ]),
 }));
 
-vi.mock("next/headers", () => ({
-  cookies: () => Promise.resolve({ get: () => null }),
+vi.mock("@/auth", () => ({
+  auth: vi.fn().mockResolvedValue(null),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
 }));
 
 describe("HomePage", () => {
   it("renders with data from the API", async () => {
+    const api = await import("@/lib/api");
+    const { fetchServices, fetchBookings, fetchProperties, fetchCustomers } =
+      api;
+    const { default: HomePage } = await import("./page");
     const component = await HomePage();
     expect(component).toBeTruthy();
 
     const mockedServices = vi.mocked(fetchServices);
-    const mockedBookings = vi.mocked(fetchUpcomingBookings);
+    const mockedBookings = vi.mocked(fetchBookings);
     const mockedProperties = vi.mocked(fetchProperties);
     const mockedCustomers = vi.mocked(fetchCustomers);
 

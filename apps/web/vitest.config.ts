@@ -5,12 +5,13 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: [],
+    setupFiles: ["./test/setup.ts"],
     passWithNoTests: false,
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      "next/server": "next/server.js",
     },
   },
 });

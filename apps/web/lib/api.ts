@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { auth } from "@/auth";
 
 export type Service = {
   id: string;
@@ -14,10 +14,13 @@ export type Booking = {
   id: string;
   code: string;
   scheduledAt: string;
+  durationMin: number;
   totalAmount: number;
   status: string;
+  notes?: string | null;
   service: { id: string; name: string; basePrice: number };
   property: { id: string; label: string; city: string };
+  customer?: { id: string; fullName: string | null; email: string };
 };
 
 export type Property = {
@@ -29,6 +32,10 @@ export type Property = {
   zipCode: string;
   type: string;
   ownerId: string;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  sqft?: number | null;
+  notes?: string | null;
   owner?: {
     id: string;
     email: string;
@@ -49,15 +56,30 @@ type ApiListResponse<T> = {
 };
 
 async function resolveAuthHeader(): Promise<string | null> {
-  const store = await cookies();
-  const token = store.get("auth_token")?.value ?? process.env.API_TOKEN;
+  const session = await auth();
+  const token = session?.accessToken;
   return token ? `Bearer ${token}` : null;
+}
+
+type QueryValue = string | number | null | undefined;
+
+function buildQuery(params: Record<string, QueryValue>): string {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      search.append(key, String(value));
+    }
+  });
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
 }
 
 async function safeFetch<T>(path: string): Promise<T | null> {
   const authorization = await resolveAuthHeader();
   try {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     if (authorization) {
       headers.Authorization = authorization;
     }
@@ -86,8 +108,20 @@ export async function fetchServices(): Promise<Service[]> {
   return data ?? [];
 }
 
-export async function fetchUpcomingBookings(): Promise<Booking[]> {
-  const data = await safeFetch<Booking[]>("/api/bookings");
+export type BookingFilters = {
+  from?: string;
+  to?: string;
+  status?: string;
+  propertyId?: string;
+  serviceId?: string;
+  customerId?: string;
+};
+
+export async function fetchBookings(
+  filters: BookingFilters = {},
+): Promise<Booking[]> {
+  const query = buildQuery(filters);
+  const data = await safeFetch<Booking[]>(`/api/bookings${query}`);
   return data ?? [];
 }
 

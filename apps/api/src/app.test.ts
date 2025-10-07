@@ -2,14 +2,15 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 process.env.API_TOKEN = "test-service-token";
 process.env.JWT_SECRET = "test-secret";
+process.env.LOGIN_RATE_LIMIT = "3";
+process.env.LOGIN_RATE_LIMIT_WINDOW_MS = "1000";
 
 let servicesFixture: any[] = [];
 let bookingsFixture: any[] = [];
 let usersFixture: any[] = [];
 let propertiesFixture: any[] = [];
 
-const makeCuid = (index: number) =>
-  `c${index.toString(36).padStart(24, "0")}`;
+const makeCuid = (index: number) => `c${index.toString(36).padStart(24, "0")}`;
 
 const mockPrisma = {
   $queryRaw: vi.fn().mockResolvedValue([{ ok: 1 }]),
@@ -25,52 +26,155 @@ const mockPrisma = {
       servicesFixture.push(record);
       return record;
     }),
-    update: vi.fn().mockImplementation(async ({ where, data }: { where: any; data: any }) => {
-      const record = servicesFixture.find((item) => item.id === where.id);
-      if (!record) {
-        throw new Error("Service not found");
-      }
-      Object.assign(record, data, { updatedAt: new Date() });
-      return record;
-    }),
-    findUnique: vi.fn().mockImplementation(async ({ where }: { where: any }) =>
-      servicesFixture.find((item) => item.id === where.id) ?? null,
-    ),
+    update: vi
+      .fn()
+      .mockImplementation(
+        async ({ where, data }: { where: any; data: any }) => {
+          const record = servicesFixture.find((item) => item.id === where.id);
+          if (!record) {
+            throw new Error("Service not found");
+          }
+          Object.assign(record, data, { updatedAt: new Date() });
+          return record;
+        },
+      ),
+    findUnique: vi
+      .fn()
+      .mockImplementation(
+        async ({ where }: { where: any }) =>
+          servicesFixture.find((item) => item.id === where.id) ?? null,
+      ),
   },
   booking: {
-    findMany: vi.fn().mockImplementation(async () => bookingsFixture),
-    create: vi.fn().mockImplementation(async ({ data, include }: { data: any; include: any }) => {
-      const service = servicesFixture.find((item) => item.id === data.serviceId);
-      if (!service) {
-        throw new Error("Service not found");
-      }
-      const record = {
-        id: `booking_${bookingsFixture.length + 1}`,
-        code: data.code,
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      bookingsFixture.push(record);
-      return {
-        ...record,
-        customer: include?.customer
-          ? usersFixture.find((user) => user.id === data.customerId) ?? {
-              id: data.customerId,
-              fullName: "Cliente",
-              email: "client@test.com",
+    findMany: vi
+      .fn()
+      .mockImplementation(
+        async ({ where, include }: { where?: any; include?: any } = {}) => {
+          const filtered = bookingsFixture.filter((booking) => {
+            if (!where) return true;
+            if (where.status && booking.status !== where.status) return false;
+            if (where.propertyId && booking.propertyId !== where.propertyId)
+              return false;
+            if (where.serviceId && booking.serviceId !== where.serviceId)
+              return false;
+            if (where.customerId && booking.customerId !== where.customerId)
+              return false;
+            if (where.scheduledAt) {
+              const date = new Date(booking.scheduledAt);
+              if (
+                where.scheduledAt.gte &&
+                date < new Date(where.scheduledAt.gte)
+              )
+                return false;
+              if (
+                where.scheduledAt.lte &&
+                date > new Date(where.scheduledAt.lte)
+              )
+                return false;
             }
-          : undefined,
-        property: include?.property
-          ? propertiesFixture.find((property) => property.id === data.propertyId) ?? {
-              id: data.propertyId,
-              label: "Prop",
-              city: "Miami",
-            }
-          : undefined,
-        service: include?.service ? service : undefined,
-      };
-    }),
+            return true;
+          });
+
+          return filtered.map((booking) =>
+            include
+              ? {
+                  ...booking,
+                  customer: include.customer
+                    ? (usersFixture.find(
+                        (user) => user.id === booking.customerId,
+                      ) ?? null)
+                    : undefined,
+                  property: include.property
+                    ? (propertiesFixture.find(
+                        (property) => property.id === booking.propertyId,
+                      ) ?? null)
+                    : undefined,
+                  service: include.service
+                    ? (servicesFixture.find(
+                        (service) => service.id === booking.serviceId,
+                      ) ?? null)
+                    : undefined,
+                }
+              : booking,
+          );
+        },
+      ),
+    create: vi
+      .fn()
+      .mockImplementation(
+        async ({ data, include }: { data: any; include: any }) => {
+          const service = servicesFixture.find(
+            (item) => item.id === data.serviceId,
+          );
+          if (!service) {
+            throw new Error("Service not found");
+          }
+          const record = {
+            id: `booking_${bookingsFixture.length + 1}`,
+            code: data.code,
+            ...data,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+          bookingsFixture.push(record);
+          return {
+            ...record,
+            customer: include?.customer
+              ? (usersFixture.find((user) => user.id === data.customerId) ?? {
+                  id: data.customerId,
+                  fullName: "Cliente",
+                  email: "client@test.com",
+                })
+              : undefined,
+            property: include?.property
+              ? (propertiesFixture.find(
+                  (property) => property.id === data.propertyId,
+                ) ?? {
+                  id: data.propertyId,
+                  label: "Prop",
+                  city: "Miami",
+                })
+              : undefined,
+            service: include?.service ? service : undefined,
+          };
+        },
+      ),
+    update: vi
+      .fn()
+      .mockImplementation(
+        async ({
+          where,
+          data,
+          include,
+        }: {
+          where: any;
+          data: any;
+          include?: any;
+        }) => {
+          const booking = bookingsFixture.find((item) => item.id === where.id);
+          if (!booking) {
+            throw new Error("Booking not found");
+          }
+          Object.assign(booking, data, { updatedAt: new Date() });
+          return {
+            ...booking,
+            customer: include?.customer
+              ? (usersFixture.find((user) => user.id === booking.customerId) ??
+                null)
+              : undefined,
+            property: include?.property
+              ? (propertiesFixture.find(
+                  (property) => property.id === booking.propertyId,
+                ) ?? null)
+              : undefined,
+            service: include?.service
+              ? (servicesFixture.find(
+                  (service) => service.id === booking.serviceId,
+                ) ?? null)
+              : undefined,
+          };
+        },
+      ),
   },
   user: {
     findUnique: vi
@@ -80,7 +184,9 @@ const mockPrisma = {
           return usersFixture.find((item) => item.id === where.id) ?? null;
         }
         if (where.email) {
-          return usersFixture.find((item) => item.email === where.email) ?? null;
+          return (
+            usersFixture.find((item) => item.email === where.email) ?? null
+          );
         }
         return null;
       }),
@@ -103,9 +209,26 @@ const mockPrisma = {
       propertiesFixture.push(record);
       return record;
     }),
-    findUnique: vi.fn().mockImplementation(async ({ where }: { where: any }) =>
-      propertiesFixture.find((item) => item.id === where.id) ?? null,
-    ),
+    findUnique: vi
+      .fn()
+      .mockImplementation(
+        async ({ where }: { where: any }) =>
+          propertiesFixture.find((item) => item.id === where.id) ?? null,
+      ),
+    update: vi
+      .fn()
+      .mockImplementation(
+        async ({ where, data }: { where: any; data: any }) => {
+          const property = propertiesFixture.find(
+            (item) => item.id === where.id,
+          );
+          if (!property) {
+            throw new Error("Property not found");
+          }
+          Object.assign(property, data, { updatedAt: new Date() });
+          return property;
+        },
+      ),
   },
 };
 
@@ -113,7 +236,11 @@ const mockVerify = vi.fn((token: string) =>
   token === "jwt-admin"
     ? { sub: makeCuid(999), email: "admin@brisacubanaclean.com", role: "ADMIN" }
     : token === "jwt-coordinator"
-      ? { sub: makeCuid(998), email: "ops@brisacubanaclean.com", role: "COORDINATOR" }
+      ? {
+          sub: makeCuid(998),
+          email: "ops@brisacubanaclean.com",
+          role: "COORDINATOR",
+        }
       : null,
 );
 
@@ -156,7 +283,6 @@ describe("app", () => {
         updatedAt: new Date(),
       },
     ];
-    bookingsFixture = [];
     usersFixture = [
       {
         id: makeCuid(101),
@@ -178,6 +304,23 @@ describe("app", () => {
         id: makeCuid(201),
         label: "Brickell Loft",
         city: "Miami",
+        ownerId: makeCuid(101),
+      },
+    ];
+    bookingsFixture = [
+      {
+        id: "booking_fixture_1",
+        code: "BRISA-DEMO",
+        scheduledAt: new Date("2024-10-01T10:00:00Z"),
+        durationMin: 120,
+        notes: null,
+        status: "CONFIRMED",
+        totalAmount: 220,
+        customerId: usersFixture[0].id,
+        propertyId: propertiesFixture[0].id,
+        serviceId: servicesFixture[0].id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ];
     mockPrisma.$queryRaw.mockClear();
@@ -250,6 +393,17 @@ describe("app", () => {
     expect(json.data).toBeDefined();
   });
 
+  it("filters bookings by date range", async () => {
+    const from = new Date("2024-09-30T00:00:00Z").toISOString();
+    const to = new Date("2024-10-02T23:59:59Z").toISOString();
+    const res = await app.request(
+      `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.length).toBeGreaterThan(0);
+  });
+
   it("creates a booking", async () => {
     const service = servicesFixture[0];
     const payload = {
@@ -268,6 +422,19 @@ describe("app", () => {
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.data.service.id).toBe(service.id);
+  });
+
+  it("updates a booking", async () => {
+    const res = await app.request("/api/bookings/booking_fixture_1", {
+      method: "PATCH",
+      headers: authorizedHeaders,
+      body: JSON.stringify({ status: "COMPLETED", notes: "Finalizada" }),
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.status).toBe("COMPLETED");
+    expect(json.data.notes).toBe("Finalizada");
   });
 
   it("lists properties", async () => {
@@ -302,6 +469,20 @@ describe("app", () => {
     expect(json.data.label).toBe("Sunset Villa");
   });
 
+  it("updates a property when authorized", async () => {
+    const existing = propertiesFixture[0];
+    const res = await app.request(`/api/properties/${existing.id}`, {
+      method: "PATCH",
+      headers: authorizedHeaders,
+      body: JSON.stringify({ notes: "Actualizada", bedrooms: 4 }),
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.bedrooms).toBe(4);
+    expect(json.data.notes).toBe("Actualizada");
+  });
+
   it("lists customers with authorization", async () => {
     const res = await app.request("/api/customers", {
       headers: authorizedHeaders,
@@ -315,7 +496,10 @@ describe("app", () => {
   it("logs in a user and returns a token", async () => {
     const res = await app.request("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email: "admin@brisacubanaclean.com", password: "Brisa123!" }),
+      body: JSON.stringify({
+        email: "admin@brisacubanaclean.com",
+        password: "Brisa123!",
+      }),
     });
 
     expect(res.status).toBe(200);
@@ -325,12 +509,47 @@ describe("app", () => {
     expect(mockSign).toHaveBeenCalled();
   });
 
+  it("rate limits repeated login attempts", async () => {
+    const windowMs = Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS ?? "1000");
+    const limit = Number(process.env.LOGIN_RATE_LIMIT ?? "3");
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 100));
+
+    for (let i = 0; i < limit; i += 1) {
+      const res = await app.request("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: "unknown@brisacubanaclean.com",
+          password: "WrongPass!",
+        }),
+      });
+      expect(res.status).toBe(401);
+    }
+
+    const blocked = await app.request("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "unknown@brisacubanaclean.com",
+        password: "WrongPass!",
+      }),
+    });
+
+    expect(blocked.status).toBe(429);
+    const blockedBody = await blocked.json();
+    expect(blockedBody.error).toContain("Too many login attempts");
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 100));
+  });
+
   it("rejects login with invalid credentials", async () => {
     mockCompare.mockResolvedValueOnce(false);
 
     const res = await app.request("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email: "admin@brisacubanaclean.com", password: "WrongPwd!" }),
+      body: JSON.stringify({
+        email: "admin@brisacubanaclean.com",
+        password: "WrongPwd!",
+      }),
     });
 
     expect(res.status).toBe(401);

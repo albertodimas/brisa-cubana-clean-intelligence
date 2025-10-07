@@ -9,23 +9,31 @@ El workflow `.github/workflows/ci.yml` ejecuta en cada push/PR:
 1. `pnpm install --frozen-lockfile`
 2. `pnpm --filter @brisa/api db:push --force-reset`
 3. `pnpm --filter @brisa/api db:seed`
-4. `pnpm lint`
-5. `pnpm typecheck`
-6. `pnpm test`
-7. `pnpm build`
+4. Exporta secretos y variables (`JWT_SECRET`, `AUTH_SECRET`, `DATABASE_URL`, etc.)
+5. `pnpm lint`
+6. `pnpm typecheck`
+7. `pnpm test`
+8. `pnpm exec playwright install --with-deps` (solo matriz Node 22)
+9. `pnpm test:e2e`
+10. `pnpm build`
 
 ### Servicios
+
 - Postgres 16 se levanta como servicio (`postgres:16-alpine`) y se usa el `DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci`.
 
 ### Secretos requeridos
+
 Configura en **Repository Settings → Secrets and variables → Actions**:
 
-| Clave         | Descripción |
-| ------------- | ----------- |
-| `API_TOKEN`   | Token interno para operaciones server-to-server |
-| `JWT_SECRET`  | Secreto de firma JWT (64+ chars) |
-| `VERCEL_TOKEN` *(opcional)* | Para despliegues automáticos desde CI |
-| `RAILWAY_TOKEN` *(opcional)* | Para despliegues automáticos desde CI |
+| Clave                                     | Descripción                                                  |
+| ----------------------------------------- | ------------------------------------------------------------ |
+| `API_TOKEN`                               | Token interno para integraciones server-to-server (opcional) |
+| `JWT_SECRET`                              | Secreto de firma JWT (64+ chars)                             |
+| `AUTH_SECRET`                             | Secreto para Auth.js (NextAuth) en la capa web               |
+| `LOGIN_RATE_LIMIT` _(opcional)_           | Intentos permitidos por IP en `/api/auth/login`              |
+| `LOGIN_RATE_LIMIT_WINDOW_MS` _(opcional)_ | Ventana de rate limiting en milisegundos                     |
+| `VERCEL_TOKEN` _(opcional)_               | Para despliegues automáticos desde CI                        |
+| `RAILWAY_TOKEN` _(opcional)_              | Para despliegues automáticos desde CI                        |
 
 > Si un secreto no está definido, el pipeline usará valores vacíos y los pasos seguirán ejecutándose, pero las acciones autenticadas (login/panel) fallarán, por lo que se recomienda configurarlos antes de abrir PRs.
 
@@ -34,7 +42,8 @@ Configura en **Repository Settings → Secrets and variables → Actions**:
 1. `vercel link` y selecciona `apps/web` como directorio raíz.
 2. Variables en Vercel:
    - `NEXT_PUBLIC_API_URL` → URL pública de la API (Railway/Vercel serverless).
-   - `API_TOKEN` → mismo valor definido en GitHub.
+   - `AUTH_SECRET` → mismo valor que en GitHub Actions (Auth.js).
+   - `API_TOKEN` → opcional si se requiere comunicación server-to-server.
 3. Comando de build: `pnpm --filter @brisa/web build`
 4. Output: `.next`
 
@@ -44,12 +53,15 @@ Configura en **Repository Settings → Secrets and variables → Actions**:
    - **PostgreSQL** (plan gratuito o pago según demanda)
    - **Node** para la API (`apps/api`)
 2. Variables de entorno en el servicio API:
-   | Variable       | Valor |
+   | Variable | Valor |
    | -------------- | ----- |
    | `DATABASE_URL` | URL provista por Railway |
-   | `API_TOKEN`    | Token compartido con frontend |
-   | `JWT_SECRET`   | Secreto JWT |
-   | `NODE_ENV`     | `production` |
+   | `API_TOKEN` | Token compartido con frontend |
+   | `JWT_SECRET` | Secreto JWT |
+   | `LOGIN_RATE_LIMIT` _(opcional)_ | Ajusta intentos permitidos por ventana |
+   | `LOGIN_RATE_LIMIT_WINDOW_MS` _(opcional)_ | Ventana de rate limiting |
+   | `AUTH_SECRET` | **No requerido** por la API, pero mantén consistencia si deseas compartir configs |
+   | `NODE_ENV` | `production` |
 3. Nixpacks build commands (definidos en `railway.toml`):
    - Install: `pnpm install --frozen-lockfile --filter @brisa/api`
    - Build: `pnpm --filter @brisa/api build`
@@ -73,6 +85,6 @@ Configura en **Repository Settings → Secrets and variables → Actions**:
 - [ ] CI en verde (lint, typecheck, tests, build)
 - [ ] Base de datos migrada (`pnpm db:push`)
 - [ ] Seeds ejecutados (`pnpm db:seed`)
-- [ ] Secrets actualizados (`API_TOKEN`, `JWT_SECRET`, claves externas)
+- [ ] Secrets actualizados (`JWT_SECRET`, `AUTH_SECRET`, `API_TOKEN` si aplica, claves externas)
 - [ ] Verificación en staging de creación de servicio, propiedad y reserva
 - [ ] Monitoreo/alertas activadas (OTel/Grafana pendiente)

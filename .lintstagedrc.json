@@ -1,5 +1,4 @@
 {
-  "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-  "*.{json,md}": ["prettier --write"],
-  "*.md": ["markdownlint --fix"]
+  "*.{ts,tsx}": ["pnpm exec eslint --fix", "pnpm exec prettier --write"],
+  "*.{json,md}": ["pnpm exec prettier --write"]
 }
