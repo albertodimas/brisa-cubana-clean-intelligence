@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import { ActiveService } from "./active-service";
+import { clientLogger } from "@/lib/client-logger";
+
+vi.mock("@/lib/client-logger", () => ({
+  clientLogger: {
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
 
 const baseBooking = {
   id: "booking-1",
@@ -52,9 +62,6 @@ describe("ActiveService component", () => {
   });
 
   it("muestra errores cuando los fetch fallan", async () => {
-    const errorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
     vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: false,
     } as Response);
@@ -70,9 +77,8 @@ describe("ActiveService component", () => {
     fireEvent.click(screen.getByRole("button", { name: /iniciar/i }));
 
     await waitFor(() => {
-      expect(errorSpy).toHaveBeenCalled();
+      expect(clientLogger.error).toHaveBeenCalled();
     });
-    errorSpy.mockRestore();
   });
 
   it("ejecuta el flujo completo de completar servicio con generación CleanScore", async () => {
