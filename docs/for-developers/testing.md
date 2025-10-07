@@ -28,7 +28,7 @@ Guía completa de testing para Brisa Cubana Clean Intelligence. Este proyecto us
 
 ### Frontend (Web)
 
-- **E2E Framework:** [Playwright 1.55.1](https://playwright.dev/)
+- **E2E Framework:** [Playwright 1.56.0](https://playwright.dev/)
 - **Browser:** Chromium (Desktop Chrome)
 - **Reporters:** List + HTML
 

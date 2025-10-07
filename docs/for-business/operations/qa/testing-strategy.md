@@ -8,7 +8,7 @@ Garantizar calidad funcional, seguridad y experiencia IA antes de releases.
 
 1. **Unitarias backend** – Vitest (Hono + Prisma) con mocks, validaciones Zod, escenarios JWT/RBAC y coverage V8 (Codecov).
 2. **Unitarias frontend** – Vitest + Testing Library (design system) con jsdom y thresholds ≥80 %.
-3. **Smoke E2E** – Playwright 1.55 (Chromium) validando la landing (`pnpm test:e2e`, reporte HTML + trazas on-first-retry).
+3. **Smoke E2E** – Playwright 1.56 (Chromium) validando la landing (`pnpm test:e2e`, reporte HTML + trazas on-first-retry).
 4. **Calidad editorial** – Husky + lint-staged (ESLint, Prettier, markdownlint, cspell) obligatorios en cada commit.
 5. **CI** – GitHub Actions (lint → typecheck → test con PostgreSQL 17 → build) + subida automática de coverage.
 

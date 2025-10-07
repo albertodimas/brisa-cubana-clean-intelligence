@@ -48,7 +48,7 @@ Next.js 15.5.4 (App Router + Turbopack)
 ### Backend API
 
 ```
-Hono 4.9.9 (Node.js 24.9.0)
+Hono 4.9.10 (Node.js 24.9.0)
 ├── Prisma 6.16.2 (ORM)
 ├── Zod 3.23.8 (validación)
 ├── bcryptjs 2.4.3 (hashing)

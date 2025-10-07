@@ -14,7 +14,7 @@
 | Runtime        | **Node 24.9.0** (nvm) + Bun 1.2.23 para pruebas cruzadas                             |
 | Web            | Next.js 15.5.4 (App Router + Turbopack), React 19.1.1, Tailwind CSS 4                |
 | Mobile         | Expo 54, React Native 0.81, Expo Router 6 _(roadmap)_                                |
-| Backend        | Hono 4.9.9 (Node) + Prisma 6 + Zod 3 (API REST @brisa/api)                           |
+| Backend        | Hono 4.9.10 (Node) + Prisma 6 + Zod 3 (API REST @brisa/api)                          |
 | Datos          | PostgreSQL 17 (Docker Compose); Redis 8 planificado para próximas iteraciones        |
 | IA             | LangChain 0.3.35, OpenAI/Anthropic _(experimentos documentados)_                     |
 | Auth           | Auth.js v5 (DAL + cookies HttpOnly) + JWT firmado para API externa                   |

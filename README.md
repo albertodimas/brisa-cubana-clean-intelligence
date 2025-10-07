@@ -68,10 +68,10 @@ Brisa Cubana Clean Intelligence centraliza la experiencia del cliente, las opera
 ## Arquitectura del Sistema
 
 - `apps/web`: Next.js 15.5.4 (App Router), React 19, Tailwind CSS 4.1.13, Auth.js v5.
-- `apps/api`: Hono 4.9.9 sobre Node.js 24.9.0, Prisma 6.16.2 y validaciones Zod.
+- `apps/api`: Hono 4.9.10 sobre Node.js 24.9.0, Prisma 6.16.2 y validaciones Zod.
 - `packages/ui`: Design system compartido utilizado por la web.
-- `docs`: Base de conocimiento en MkDocs con 132 documentos.
-- Tooling: pnpm 10.17.1, Turborepo 2.5.8, Vitest 3.2.4, Playwright 1.55.1, GitHub Actions.
+- `docs`: Base de conocimiento en MkDocs con 177 documentos markdown.
+- Tooling: pnpm 10.17.1, Turborepo 2.5.8, Vitest 3.2.4, Playwright 1.56.0, GitHub Actions.
 
 La arquitectura detallada, principios de diseño y diagramas están disponibles en `docs/for-developers/architecture.md` y `docs/for-developers/diagrams/`.
 
