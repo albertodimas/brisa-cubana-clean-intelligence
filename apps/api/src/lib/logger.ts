@@ -1,17 +1,18 @@
 import pino from "pino";
+import { env } from "../config/env";
 
-const isProduction = process.env.NODE_ENV === "production";
-const isDevelopment = process.env.NODE_ENV === "development";
-const isTest = process.env.NODE_ENV === "test";
+const isProduction = env.nodeEnv === "production";
+const isDevelopment = env.nodeEnv === "development";
+const isTest = env.nodeEnv === "test";
 
 // Create the logger instance
 export const logger = pino({
-  level: process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug"),
+  level: env.logLevel ?? (isProduction ? "info" : "debug"),
 
   // Pretty print in development, JSON in production
   // Only use pino-pretty if explicitly in development mode (not just non-production)
   transport:
-    isDevelopment && process.env.USE_PINO_PRETTY !== "false"
+    isDevelopment && (env.logger.usePretty ?? true)
       ? {
           target: "pino-pretty",
           options: {
@@ -42,12 +43,12 @@ export const logger = pino({
 
   // Base context for all logs
   base: {
-    env: process.env.NODE_ENV,
+    env: env.nodeEnv,
     service: "brisa-api",
   },
 
   // Silence logs in test environment unless explicitly enabled
-  enabled: !isTest || process.env.ENABLE_TEST_LOGS === "true",
+  enabled: !isTest || env.logger.enableTestLogs === true,
 
   // Timestamp format
   timestamp: pino.stdTimeFunctions.isoTime,

@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { verifyUserCredentials } from "./dal";
 import { findFakeUser, isFakeDataEnabled } from "@/server/utils/fake";
+import { env } from "@/config/env";
 
 const sessionMaxAgeSeconds = 60 * 60 * 8; // 8 horas
 
@@ -11,6 +12,7 @@ export const {
   signOut,
   handlers: { GET, POST },
 } = NextAuth({
+  secret: env.nextAuth.secret,
   session: {
     strategy: "jwt",
     maxAge: sessionMaxAgeSeconds,
@@ -88,7 +90,7 @@ export const {
       options: {
         httpOnly: true,
         sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
+        secure: env.nodeEnv === "production",
       },
     },
   },

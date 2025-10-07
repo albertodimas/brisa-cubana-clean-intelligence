@@ -20,6 +20,24 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "no-console": "error",
+    },
+  },
+  {
+    files: ["src/lib/client-logger.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

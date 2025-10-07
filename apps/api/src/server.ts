@@ -30,17 +30,25 @@ serve(
     hostname: "0.0.0.0", // Listen on all network interfaces for Docker
   },
   (info) => {
-    console.log(
-      `API ready on http://localhost:${info.port} (pid ${process.pid}, env ${process.env.NODE_ENV ?? "development"})`,
+    logger.info(
+      {
+        port: info.port,
+        pid: process.pid,
+        environment: process.env.NODE_ENV ?? "development",
+      },
+      "API server ready",
     );
-    console.log(
-      `Metrics: http://localhost:9464/metrics (Prometheus scrape endpoint)`,
+    logger.info(
+      {
+        metricsUrl: "http://localhost:9464/metrics",
+      },
+      "Prometheus metrics endpoint exposed",
     );
     const otlpEndpoint = process.env.OTLP_ENDPOINT;
     const tracingTarget =
       otlpEndpoint && otlpEndpoint.trim().length > 0
         ? otlpEndpoint
         : "Console only (set OTLP_ENDPOINT for external collector)";
-    console.log(`Tracing: ${tracingTarget}`);
+    logger.info({ tracingTarget }, "Tracing exporter configured");
   },
 );

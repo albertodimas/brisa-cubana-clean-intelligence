@@ -19,7 +19,6 @@ import features from "./routes/features";
 import sentryTest from "./routes/sentry-test";
 import { Sentry, sentryEnabled } from "./telemetry/sentry";
 import { rateLimiter, RateLimits } from "./middleware/rate-limit";
-import { requestLogger } from "./middleware/logger";
 import { metricsMiddleware } from "./middleware/metrics";
 import { logger } from "./lib/logger";
 import { isAppError } from "./lib/errors";
@@ -32,6 +31,7 @@ import {
 } from "./middleware/observability";
 import { nonceMiddleware } from "./middleware/csp-nonce";
 import { buildAllowedOrigins, originMatcher } from "./lib/cors-origins";
+import { env } from "./config/env";
 
 export const app = new Hono();
 
@@ -73,7 +73,6 @@ app.use("*", correlationIdMiddleware); // Correlation IDs for distributed tracin
 app.use("*", metricsMiddleware); // Legacy Prometheus metrics
 
 // 4. Logging and monitoring
-app.use("*", requestLogger); // Legacy logger (TODO: migrate to requestLoggingMiddleware)
 app.use("*", requestLoggingMiddleware); // Structured logging with correlation IDs
 app.use("*", performanceMonitoringMiddleware); // Slow request detection
 app.use("*", errorTrackingMiddleware); // Error tracking
@@ -102,7 +101,7 @@ app.use(
       "If-None-Match",
     ],
     exposeHeaders: ["Content-Length", "Content-Type"],
-    maxAge: process.env.NODE_ENV === "production" ? 86400 : 3600,
+    maxAge: env.nodeEnv === "production" ? 86400 : 3600,
     credentials: true,
   }),
 );

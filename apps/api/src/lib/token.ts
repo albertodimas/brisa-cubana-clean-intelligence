@@ -1,16 +1,11 @@
 import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import type { UserRole } from "../generated/prisma";
+import { env } from "../config/env";
 import { db } from "./db";
+import { logger } from "./logger";
 
-const secret =
-  process.env.JWT_SECRET ??
-  (process.env.NODE_ENV === "test" ? "test-secret" : undefined);
-
-if (!secret) {
-  // Fail fast in development to prevent silent misconfiguration
-  throw new Error("JWT_SECRET environment variable is required");
-}
+const secret = env.jwtSecret;
 
 export interface AccessTokenPayload {
   sub: string;
@@ -89,15 +84,21 @@ export async function verifyRefreshToken(
     })) as { id: string; token: string } | null;
 
     if (!storedToken) {
-      console.warn("[token] Refresh token not found or revoked", {
-        tokenId: payload.tokenId,
-      });
+      logger.warn(
+        {
+          tokenId: payload.tokenId,
+        },
+        "[token] Refresh token not found or revoked",
+      );
       return null;
     }
 
     return payload;
   } catch (error) {
-    console.warn("[token] Invalid refresh token", error);
+    logger.warn(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[token] Invalid refresh token",
+    );
     return null;
   }
 }
@@ -150,7 +151,10 @@ export function verifyAccessToken(token: string): AccessTokenPayload | null {
   try {
     return jwt.verify(token, secret) as AccessTokenPayload;
   } catch (error) {
-    console.warn("Invalid access token", error);
+    logger.warn(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "Invalid access token",
+    );
     return null;
   }
 }
@@ -172,10 +176,13 @@ function decodeFakeToken(token: string): AccessTokenPayload | null {
         role: parsed.role,
       };
     }
-    console.warn("[auth] Invalid fake token payload", parsed);
+    logger.warn({ payload: parsed }, "[auth] Invalid fake token payload");
     return null;
   } catch (error) {
-    console.warn("[auth] Failed to decode fake token", error);
+    logger.warn(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[auth] Failed to decode fake token",
+    );
     return null;
   }
 }
