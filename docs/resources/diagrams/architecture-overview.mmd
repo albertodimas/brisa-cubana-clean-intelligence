@@ -1,7 +1,0 @@
-%% Mermaid diagram placeholder for automated exports
-flowchart LR
-  Client -->|HTTPS| WebApp[Next.js Web]
-  WebApp -->|REST| ApiService[Hono API]
-  ApiService -->|ORM| Postgres[(PostgreSQL)]
-  ApiService -->|Payments| Stripe[(Stripe)]
-  ApiService -. roadmap .-> Redis[(Redis Cache)]
