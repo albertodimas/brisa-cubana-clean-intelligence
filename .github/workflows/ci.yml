@@ -46,11 +46,13 @@ jobs:
       - name: Prepare database schema
         env:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci
+          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci
         run: pnpm --filter @brisa/api db:push --force-reset
 
       - name: Seed database
         env:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci
+          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci
         run: pnpm --filter @brisa/api db:seed
 
       - name: Export test env vars
@@ -58,6 +60,7 @@ jobs:
           echo "API_TOKEN=${{ secrets.API_TOKEN || 'test-api-token' }}" >> $GITHUB_ENV
           echo "JWT_SECRET=${{ secrets.JWT_SECRET || 'test-jwt-secret-for-ci-only' }}" >> $GITHUB_ENV
           echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci" >> $GITHUB_ENV
+          echo "DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci" >> $GITHUB_ENV
           echo "AUTH_SECRET=${{ secrets.AUTH_SECRET || 'test-auth-secret-for-ci-only' }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_API_URL=http://localhost:3001" >> $GITHUB_ENV
           echo "LOGIN_RATE_LIMIT=${{ secrets.LOGIN_RATE_LIMIT || '5' }}" >> $GITHUB_ENV
