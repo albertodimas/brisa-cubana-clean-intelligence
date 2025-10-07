@@ -4,6 +4,7 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 
 - **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`)
 - **API:** Hono 4.9.10 desplegable en Vercel Functions o Railway (`apps/api`)
+- **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local / Railway gestionado)
 - **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto
 
 ## Estado al 7 de octubre de 2025
@@ -11,8 +12,8 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 | Área          | Estado | Detalle                                                                 |
 | ------------- | ------ | ----------------------------------------------------------------------- |
 | Frontend web  | 🟡     | Landing mínimo sin autenticación ni datos en vivo.                      |
-| API           | 🟡     | Endpoints `/` y `/health` operativos; pendiente integrar PostgreSQL.    |
-| Tests         | 🟡     | Vitest configurado; cobertura inicial con pruebas de humo.              |
+| API           | 🟡     | Servicios REST con Prisma y validaciones; falta autenticación real.     |
+| Tests         | 🟢     | Vitest `run` en API y web (9 pruebas) pasan sin modo watch.             |
 | Documentación | 🔴     | Solo README. Se reescribirá en paralelo a las funcionalidades reales.   |
 | Deploy        | 🔴     | Sin pipelines. Pendiente conectar con Vercel (web) y Railway (API/DB).  |
 
@@ -24,7 +25,12 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 ## Puesta en marcha
 
 ```bash
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
 pnpm install
+docker compose up -d
+pnpm db:push
+pnpm db:seed
 pnpm dev -- --parallel
 ```
 
@@ -43,14 +49,16 @@ pnpm test
 | ---------------- | ------------------------------------- |
 | `pnpm dev`       | Ejecuta los `dev` scripts en paralelo |
 | `pnpm lint`      | Lanza ESLint en todos los paquetes    |
-| `pnpm test`      | Ejecuta Vitest con Turborepo          |
+| `pnpm test`      | Ejecuta Vitest (`vitest run`) en cada paquete |
 | `pnpm typecheck` | Verifica TypeScript en cada paquete   |
+| `pnpm db:push`   | Sincroniza el esquema Prisma con PostgreSQL   |
+| `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings) |
 
 ## Próximos hitos
 
-1. Añadir Prisma 6.12, migraciones y PostgreSQL gestionado.
-2. Implementar autenticación y CRUD de reservas reales.
-3. Configurar CI/CD (GitHub Actions) con matrices Node 22/24.
+1. Implementar autenticación (JWT/cookies) y control RBAC.
+2. Ampliar CRUD de reservas/propiedades con permisos y filtros reales.
+3. Configurar CI/CD (GitHub Actions) con matrices Node 22/24 y despliegue Vercel/Railway.
 4. Redactar documentación honesta basada en funcionalidades verificadas.
 
 ---
