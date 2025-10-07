@@ -5,6 +5,8 @@ import { Calendar, MapPin, DollarSign, Clock, User } from "lucide-react";
 import type { Booking } from "@/types/api";
 import BookingActions from "../components/BookingActions";
 import { isFakeDataEnabled } from "@/server/utils/fake";
+import { env } from "@/config/env";
+import { logger } from "@/server/logger";
 
 interface BookingWithDetails extends Booking {
   service: {
@@ -70,14 +72,15 @@ async function getBooking(id: string): Promise<BookingWithDetails> {
     } satisfies BookingWithDetails;
   }
 
-  const API_BASE_URL =
-    process.env.API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:3001";
+  const API_BASE_URL = env.apiUrl;
 
-  console.log("[bookings/[id]] fetching real booking", {
-    useFakeFlag: isFakeDataEnabled(),
-  });
+  logger.info(
+    {
+      useFakeFlag: isFakeDataEnabled(),
+      bookingId: id,
+    },
+    "[bookings/[id]] fetching real booking",
+  );
 
   const response = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
     headers: {

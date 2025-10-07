@@ -1,11 +1,9 @@
 import "server-only";
 
 import { ApiError } from "./client";
+import { env } from "@/config/env";
 
-const API_BASE_URL =
-  process.env.API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:3001";
+const API_BASE_URL = env.apiUrl;
 
 export interface ReconciliationNote {
   id: string;

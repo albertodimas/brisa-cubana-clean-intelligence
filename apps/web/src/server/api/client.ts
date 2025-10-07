@@ -3,11 +3,10 @@ import "server-only";
 import { cookies } from "next/headers";
 import { isFakeDataEnabled } from "@/server/utils/fake";
 import { buildFakeDashboardData } from "./fake-dashboard";
+import { env } from "@/config/env";
+import { logger } from "@/server/logger";
 
-const API_BASE_URL =
-  process.env.API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:3001";
+const API_BASE_URL = env.apiUrl;
 
 type FetchOptions = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
@@ -46,7 +45,10 @@ async function fetchJson<T>(
         cookieHeader = cookiePairs.join("; ");
       }
     } catch (error) {
-      console.warn("[api] Could not read cookies", error);
+      logger.warn(
+        { error: error instanceof Error ? error.message : "unknown" },
+        "[api] Could not read cookies",
+      );
     }
   }
 
@@ -65,11 +67,14 @@ async function fetchJson<T>(
 
   if (!response.ok) {
     const body = await response.text().catch(() => "<unreadable>");
-    console.error("[api] Request failed", {
-      path,
-      status: response.status,
-      body,
-    });
+    logger.error(
+      {
+        path,
+        status: response.status,
+        body,
+      },
+      "[api] Request failed",
+    );
     const message = await response
       .json()
       .catch(() => ({ error: response.statusText }));
@@ -313,7 +318,10 @@ export async function getDashboardData(
       failedPaymentsLast24h,
     };
   } catch (error) {
-    console.warn("[api] Falling back to static dashboard data", error);
+    logger.warn(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[api] Falling back to static dashboard data",
+    );
     return buildFakeDashboardData({
       userId,
       userRole,

@@ -27,6 +27,7 @@ import {
   SEMRESATTRS_SERVICE_NAME,
   SEMRESATTRS_SERVICE_VERSION,
 } from "@opentelemetry/semantic-conventions";
+import { logger } from "./logger";
 
 // Initialize OpenTelemetry SDK
 let sdk: NodeSDK | null = null;
@@ -49,7 +50,10 @@ function parseOtlpHeaders(value: string | undefined): HeaderRecord {
       }, {});
     }
   } catch (error) {
-    console.warn("[OpenTelemetry] Invalid OTLP_HEADERS value ignored", error);
+    logger.warn(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "[OpenTelemetry] Invalid OTLP_HEADERS value ignored",
+    );
   }
 
   return {};
@@ -141,8 +145,9 @@ export function initializeOpenTelemetry() {
   sdk.start();
 
   const metricsPort = resolveMetricsPort();
-  console.log("[OpenTelemetry] Instrumentation initialized");
-  console.log(
+  logger.info("[OpenTelemetry] Instrumentation initialized");
+  logger.info(
+    { port: metricsPort },
     `[Prometheus] Metrics available at http://localhost:${metricsPort}/metrics`,
   );
 
@@ -151,9 +156,12 @@ export function initializeOpenTelemetry() {
     void (async () => {
       try {
         await sdk?.shutdown();
-        console.log("[OpenTelemetry] Shutdown complete");
+        logger.info("[OpenTelemetry] Shutdown complete");
       } catch (error) {
-        console.error("[OpenTelemetry] Shutdown error:", error);
+        logger.error(
+          { error: error instanceof Error ? error.message : "unknown" },
+          "[OpenTelemetry] Shutdown error",
+        );
       }
     })();
   });
@@ -234,15 +242,12 @@ export function logStructured(
   message: string,
   context: Record<string, unknown> = {},
 ) {
-  const log = {
-    timestamp: new Date().toISOString(),
-    level,
+  logger[level](
+    {
+      service: process.env.SERVICE_NAME ?? "brisa-api",
+      environment: process.env.NODE_ENV ?? "development",
+      ...context,
+    },
     message,
-    service: process.env.SERVICE_NAME ?? "brisa-api",
-    environment: process.env.NODE_ENV ?? "development",
-    ...context,
-  };
-
-  // Output as JSON for log aggregators (e.g., Loki, CloudWatch)
-  console[level](JSON.stringify(log));
+  );
 }

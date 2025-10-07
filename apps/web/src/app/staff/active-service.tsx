@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@brisa/ui";
 import { ChecklistSection } from "./checklist-section";
 import { PhotoCapture } from "./photo-capture";
+import { clientLogger } from "@/lib/client-logger";
+import { publicEnv } from "@/config/public-env";
 
-const configuredApiBase = process.env.NEXT_PUBLIC_API_URL?.trim();
+const configuredApiBase = publicEnv.apiUrl?.trim();
 
 function resolveApiBase(): string {
   if (configuredApiBase) {
@@ -94,7 +96,7 @@ export function ActiveService({
 
       setStarted(true);
     } catch (error) {
-      console.error("Error starting service", error);
+      clientLogger.error("Error starting service", error);
       alert("Error al iniciar el servicio. Intenta de nuevo.");
     }
   }
@@ -166,7 +168,7 @@ export function ActiveService({
 
       onComplete();
     } catch (error) {
-      console.error("Error completing service", error);
+      clientLogger.error("Error completing service", error);
       alert("Error al completar el servicio. Intenta de nuevo.");
     } finally {
       setCompleting(false);

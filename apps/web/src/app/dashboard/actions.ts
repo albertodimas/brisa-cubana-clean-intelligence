@@ -9,6 +9,8 @@ import {
   resolveReconciliationNote,
 } from "@/server/api/reconciliation";
 import { isFakeDataEnabled } from "@/server/utils/fake";
+import { env } from "@/config/env";
+import { logger } from "@/server/logger";
 
 const createBookingSchema = z.object({
   propertyId: z.string().min(1, "Selecciona una propiedad"),
@@ -55,20 +57,17 @@ async function postBooking(body: unknown, userId: string) {
     } satisfies BookingApiResponse;
   }
 
-  const response = await fetch(
-    `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/api/bookings`,
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        ...(body as Record<string, unknown>),
-        userId,
-      }),
+  const response = await fetch(`${env.apiUrl}/api/bookings`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
     },
-  );
+    credentials: "include",
+    body: JSON.stringify({
+      ...(body as Record<string, unknown>),
+      userId,
+    }),
+  });
 
   if (!response.ok) {
     const message = await response
@@ -119,19 +118,25 @@ export async function createBooking(
 
   try {
     const result = await postBooking(parsed.data, session.user.id);
-    console.info("Booking created", {
-      userId: session.user.id,
-      serviceId: parsed.data.serviceId,
-      propertyId: parsed.data.propertyId,
-      scheduledAt: parsed.data.scheduledAt,
-    });
+    logger.info(
+      {
+        userId: session.user.id,
+        serviceId: parsed.data.serviceId,
+        propertyId: parsed.data.propertyId,
+        scheduledAt: parsed.data.scheduledAt,
+      },
+      "Booking created via dashboard action",
+    );
     revalidatePath("/dashboard");
     return { ok: true, checkoutUrl: result.checkoutUrl ?? null };
   } catch (error) {
     if (error instanceof ApiError) {
       return { ok: false, error: error.message };
     }
-    console.error("Error creating booking", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "Error creating booking from dashboard action",
+    );
     return {
       ok: false,
       error: "No se pudo crear la reserva. Intenta nuevamente.",
@@ -162,17 +167,14 @@ export async function updateBookingStatus(
   }
 
   try {
-    const response = await fetch(
-      `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/api/bookings/${bookingId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ status }),
+    const response = await fetch(`${env.apiUrl}/api/bookings/${bookingId}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
       },
-    );
+      credentials: "include",
+      body: JSON.stringify({ status }),
+    });
 
     if (!response.ok) {
       const message = await response
@@ -191,7 +193,10 @@ export async function updateBookingStatus(
     if (error instanceof ApiError) {
       return { ok: false, error: error.message };
     }
-    console.error("Error updating booking status", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "Error updating booking status from dashboard action",
+    );
     return {
       ok: false,
       error: "No se pudo actualizar la reserva. Intenta nuevamente.",
@@ -241,7 +246,10 @@ export async function createReconciliationNoteAction(
     if (error instanceof ApiError) {
       return { ok: false, error: error.message };
     }
-    console.error("Error creating reconciliation note", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "Error creating reconciliation note",
+    );
     return {
       ok: false,
       error: "No se pudo guardar la nota. Intenta nuevamente.",
@@ -277,7 +285,10 @@ export async function resolveReconciliationNoteAction(
     if (error instanceof ApiError) {
       return { ok: false, error: error.message };
     }
-    console.error("Error resolving reconciliation note", error);
+    logger.error(
+      { error: error instanceof Error ? error.message : "unknown" },
+      "Error resolving reconciliation note",
+    );
     return { ok: false, error: "No se pudo actualizar la nota." };
   }
 }

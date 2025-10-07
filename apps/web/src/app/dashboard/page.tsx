@@ -4,6 +4,7 @@ import { auth, signOut } from "@/server/auth/config";
 import { buildFakeDashboardData } from "@/server/api/fake-dashboard";
 import { queuePaymentAlert } from "@/server/notifications/alerts";
 import { isFakeDataEnabled } from "@/server/utils/fake";
+import { logger } from "@/server/logger";
 import { CreateBookingForm } from "./create-booking-form";
 import { ManageBookings } from "./manage-bookings";
 
@@ -65,7 +66,12 @@ export default async function DashboardPage() {
       pendingPayments,
     });
     if (!queued) {
-      console.warn(
+      logger.warn(
+        {
+          failedPayments,
+          pendingPayments,
+          userId: user.id,
+        },
         "[dashboard] unable to enqueue payment alert for finance team",
       );
     }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Badge, Button, Card } from "@brisa/ui";
 import type { CleanScoreReport } from "./page";
+import { clientLogger } from "@/lib/client-logger";
 
 type StatusFilter = "all" | "draft" | "published";
 
@@ -90,7 +91,7 @@ export default function CleanScoreDashboard({
       const data = (await response.json()) as { reports?: CleanScoreReport[] };
       setReports(data.reports ?? []);
     } catch (err) {
-      console.error(err);
+      clientLogger.error(err);
       setError(
         err instanceof Error
           ? err.message
@@ -138,7 +139,7 @@ export default function CleanScoreDashboard({
         throw new Error("Hubo un problema al publicar el reporte");
       }
     } catch (err) {
-      console.error(err);
+      clientLogger.error(err);
       setError(
         err instanceof Error ? err.message : "Error al publicar el reporte",
       );
@@ -168,7 +169,7 @@ export default function CleanScoreDashboard({
       const report = (await response.json()) as CleanScoreReport;
       setDetail({ loading: false, report });
     } catch (err) {
-      console.error(err);
+      clientLogger.error(err);
       setDetail({
         loading: false,
         error:

@@ -1,10 +1,9 @@
 import "server-only";
 import { isFakeDataEnabled } from "@/server/utils/fake";
+import { env } from "@/config/env";
+import { logger } from "@/server/logger";
 
-const API_BASE_URL =
-  process.env.API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:3001";
+const API_BASE_URL = env.apiUrl;
 
 interface PaymentAlertPayload {
   failedPayments: number;
@@ -31,16 +30,28 @@ export async function queuePaymentAlert({
 
     if (!response.ok) {
       const text = await response.text().catch(() => "<no-body>");
-      console.error("[alerts] failed to queue alert", {
-        status: response.status,
-        body: text,
-      });
+      logger.warn(
+        {
+          status: response.status,
+          body: text,
+          failedPayments,
+          pendingPayments,
+        },
+        "[alerts] failed to queue alert: non-OK response",
+      );
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error("[alerts] failed to queue alert", error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : "unknown",
+        failedPayments,
+        pendingPayments,
+      },
+      "[alerts] failed to queue alert",
+    );
     return false;
   }
 }

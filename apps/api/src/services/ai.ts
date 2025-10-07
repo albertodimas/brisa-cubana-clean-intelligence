@@ -1,4 +1,6 @@
 import { logger } from "../lib/logger";
+import { env } from "../config/env";
+import { fetchWithRetry } from "../lib/http-client";
 
 export interface AIMessage {
   role: "USER" | "ASSISTANT" | "SYSTEM";
@@ -14,9 +16,9 @@ export interface AIResponse {
 /**
  * AI Provider configuration
  */
-const AI_PROVIDER = process.env.AI_PROVIDER ?? "mock"; // mock, openai, anthropic
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const AI_PROVIDER = env.ai.provider; // mock, openai, anthropic
+const OPENAI_API_KEY = env.ai.openAIApiKey;
+const ANTHROPIC_API_KEY = env.ai.anthropicApiKey;
 
 /**
  * System prompt for Brisa Cubana Concierge AI
@@ -104,25 +106,35 @@ async function generateOpenAIResponse(
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+    const response = await fetchWithRetry(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages.map((m) => ({
+              role: m.role.toLowerCase(),
+              content: m.content,
+            })),
+          ],
+          temperature: 0.7,
+          max_tokens: 500,
+        }),
+        timeoutMs: 8000,
+        retries: 2,
+        retryDelayMs: 300,
+        circuitBreakerKey: "openai",
+        circuitBreakerThreshold: 3,
+        circuitBreakerCooldownMs: 60_000,
+        name: "openai",
       },
-      body: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages.map((m) => ({
-            role: m.role.toLowerCase(),
-            content: m.content,
-          })),
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`OpenAI API error: ${response.statusText}`);
@@ -157,23 +169,33 @@ async function generateAnthropicResponse(
   }
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
+    const response = await fetchWithRetry(
+      "https://api.anthropic.com/v1/messages",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-3-sonnet-20240229",
+          system: systemPrompt,
+          messages: messages.map((m) => ({
+            role: m.role === "USER" ? "user" : "assistant",
+            content: m.content,
+          })),
+          max_tokens: 500,
+        }),
+        timeoutMs: 8000,
+        retries: 2,
+        retryDelayMs: 300,
+        circuitBreakerKey: "anthropic",
+        circuitBreakerThreshold: 3,
+        circuitBreakerCooldownMs: 60_000,
+        name: "anthropic",
       },
-      body: JSON.stringify({
-        model: "claude-3-sonnet-20240229",
-        system: systemPrompt,
-        messages: messages.map((m) => ({
-          role: m.role === "USER" ? "user" : "assistant",
-          content: m.content,
-        })),
-        max_tokens: 500,
-      }),
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Anthropic API error: ${response.statusText}`);

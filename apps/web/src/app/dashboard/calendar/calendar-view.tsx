@@ -8,6 +8,8 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg, DateSelectArg } from "@fullcalendar/core";
 import { Badge, Button, Card } from "@brisa/ui";
 import { Calendar, Clock, User, MapPin } from "lucide-react";
+import { publicEnv } from "@/config/public-env";
+import { clientLogger } from "@/lib/client-logger";
 
 interface CalendarEvent {
   id: string;
@@ -75,8 +77,7 @@ export function CalendarView() {
     try {
       setLoading(true);
       setError(null);
-      const apiBase =
-        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const apiBase = publicEnv.apiUrl;
       const response = await fetch(`${apiBase}/api/bookings?pageSize=100`, {
         headers: {
           "Content-Type": "application/json",
@@ -132,7 +133,7 @@ export function CalendarView() {
 
       setEvents(calendarEvents);
     } catch (err) {
-      console.error("Error fetching bookings:", err);
+      clientLogger.error("Error fetching bookings:", err);
       setError(err instanceof Error ? err.message : "Error al cargar reservas");
     } finally {
       setLoading(false);
@@ -164,7 +165,11 @@ export function CalendarView() {
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     // Future: Open modal to create new booking
-    console.log("Selected date range:", selectInfo.startStr, selectInfo.endStr);
+    clientLogger.info(
+      "Selected date range:",
+      selectInfo.startStr,
+      selectInfo.endStr,
+    );
   };
 
   if (loading) {

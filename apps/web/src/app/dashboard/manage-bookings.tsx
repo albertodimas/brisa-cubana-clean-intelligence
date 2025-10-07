@@ -12,6 +12,8 @@ import {
   type CreateReconciliationNoteState,
   type ResolveReconciliationNoteState,
 } from "./actions";
+import { publicEnv } from "@/config/public-env";
+import { clientLogger } from "@/lib/client-logger";
 
 const statusOptions = [
   "TODOS",
@@ -125,8 +127,7 @@ function ManageBookingRow({ booking, useFakeData }: ManageBookingRowProps) {
     async function loadNotes() {
       try {
         setLoadingNotes(true);
-        const apiBase =
-          process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+        const apiBase = publicEnv.apiUrl;
         const response = await fetch(
           `${apiBase}/api/reconciliation/booking/${booking.id}`,
           {
@@ -152,7 +153,7 @@ function ManageBookingRow({ booking, useFakeData }: ManageBookingRowProps) {
         }>;
         setNotes(json);
       } catch (error) {
-        console.error("Error fetching reconciliation notes", error);
+        clientLogger.error("Error fetching reconciliation notes", error);
       } finally {
         setLoadingNotes(false);
       }
