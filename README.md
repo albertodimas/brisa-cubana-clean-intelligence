@@ -19,8 +19,8 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 
 ## Requisitos
 
-- Node.js 22.x (se migrará a 24 LTS cuando esté disponible)
-- pnpm 10.18 (`corepack enable`)
+- Node.js 22.11.0+ (compatible con Vercel, Node 24 LTS disponible en octubre 2025)
+- pnpm 10.18.0+ (`corepack enable`)
 
 ## Puesta en marcha
 
