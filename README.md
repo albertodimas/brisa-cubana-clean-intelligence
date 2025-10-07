@@ -55,6 +55,12 @@ pnpm test
 | `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings) |
 | `pnpm build`     | Genera artefactos de producción (Next + API) |
 
+## Documentación actualizada
+
+- [`docs/quickstart.md`](docs/quickstart.md): onboarding local paso a paso.
+- [`docs/deployment.md`](docs/deployment.md): configuración de CI/CD, Vercel y Railway.
+- [`docs/runbooks/incident-response.md`](docs/runbooks/incident-response.md): procedimiento ante incidentes 5xx.
+
 ## Autenticación y RBAC
 
 - Login: `POST http://localhost:3001/api/auth/login` con `email` y `password`.

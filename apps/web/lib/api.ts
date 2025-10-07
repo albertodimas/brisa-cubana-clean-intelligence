@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+
 export type Service = {
   id: string;
   name: string;
@@ -18,17 +20,52 @@ export type Booking = {
   property: { id: string; label: string; city: string };
 };
 
+export type Property = {
+  id: string;
+  label: string;
+  addressLine: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  type: string;
+  ownerId: string;
+  owner?: {
+    id: string;
+    email: string;
+    fullName: string | null;
+  };
+};
+
+export type Customer = {
+  id: string;
+  email: string;
+  fullName: string | null;
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 type ApiListResponse<T> = {
   data: T;
 };
 
+async function resolveAuthHeader(): Promise<string | null> {
+  const store = await cookies();
+  const token = store.get("auth_token")?.value ?? process.env.API_TOKEN;
+  return token ? `Bearer ${token}` : null;
+}
+
 async function safeFetch<T>(path: string): Promise<T | null> {
+  const authorization = await resolveAuthHeader();
   try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (authorization) {
+      headers.Authorization = authorization;
+    }
+
     const res = await fetch(`${API_URL}${path}`, {
-      headers: { "Content-Type": "application/json" },
+      headers,
       cache: "no-store",
+      credentials: "include",
     });
 
     if (!res.ok) {
@@ -51,5 +88,15 @@ export async function fetchServices(): Promise<Service[]> {
 
 export async function fetchUpcomingBookings(): Promise<Booking[]> {
   const data = await safeFetch<Booking[]>("/api/bookings");
+  return data ?? [];
+}
+
+export async function fetchProperties(): Promise<Property[]> {
+  const data = await safeFetch<Property[]>("/api/properties");
+  return data ?? [];
+}
+
+export async function fetchCustomers(): Promise<Customer[]> {
+  const data = await safeFetch<Customer[]>("/api/customers");
   return data ?? [];
 }

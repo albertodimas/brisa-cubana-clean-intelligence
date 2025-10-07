@@ -11,6 +11,17 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: brisa_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       matrix:
         node: ["22.x", "24.x"]
@@ -29,6 +40,22 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Prepare database schema
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci
+        run: pnpm --filter @brisa/api db:push --force-reset
+
+      - name: Seed database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci
+        run: pnpm --filter @brisa/api db:seed
+
+      - name: Export test env vars
+        run: |
+          echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci" >> $GITHUB_ENV
 
       - name: Lint
         run: pnpm lint

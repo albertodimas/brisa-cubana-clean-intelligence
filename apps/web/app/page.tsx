@@ -1,8 +1,15 @@
 import React from "react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { AdminPanel } from "@/components/admin-panel";
-import { createServiceAction, toggleServiceActiveAction } from "@/app/actions";
-import { fetchServices, fetchUpcomingBookings } from "@/lib/api";
+import {
+  createServiceAction,
+  createPropertyAction,
+  createBookingAction,
+  toggleServiceActiveAction,
+  logoutAction,
+} from "@/app/actions";
+import { fetchServices, fetchUpcomingBookings, fetchProperties, fetchCustomers } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,9 +26,13 @@ const dateFormatter = new Intl.DateTimeFormat("es-US", {
 });
 
 export default async function HomePage() {
-  const [services, bookings] = await Promise.all([
+  const store = await cookies();
+  const isAuthenticated = Boolean(store.get("auth_token"));
+  const [services, bookings, properties, customers] = await Promise.all([
     fetchServices(),
     fetchUpcomingBookings(),
+    fetchProperties(),
+    fetchCustomers(),
   ]);
 
   const activeServices = services.filter((service) => service.active).slice(0, 4);
@@ -184,11 +195,38 @@ export default async function HomePage() {
     </article>
       </section>
 
-      <AdminPanel
-        services={services}
-        createService={createServiceAction}
-        toggleService={toggleServiceActiveAction}
-      />
+      {isAuthenticated ? (
+        <AdminPanel
+          services={services}
+          properties={properties}
+          customers={customers}
+          createService={createServiceAction}
+          createProperty={createPropertyAction}
+          createBooking={createBookingAction}
+          toggleService={toggleServiceActiveAction}
+          logout={logoutAction}
+        />
+      ) : (
+        <section
+          style={{
+            marginTop: "3rem",
+            padding: "1.5rem",
+            borderRadius: "1rem",
+            border: "1px solid rgba(126,231,196,0.2)",
+            background: "rgba(7,15,18,0.6)",
+            display: "grid",
+            gap: "0.75rem",
+          }}
+        >
+          <h2 style={{ margin: 0 }}>Acceso restringido</h2>
+          <p style={{ margin: 0, color: "#a7dcd0" }}>
+            Inicia sesión para crear o gestionar servicios operativos.
+          </p>
+          <Link href="/login" style={{ color: "#7ee7c4" }}>
+            Ir a iniciar sesión
+          </Link>
+        </section>
+      )}
     </main>
   );
 }

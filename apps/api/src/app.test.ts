@@ -84,8 +84,25 @@ const mockPrisma = {
         }
         return null;
       }),
+    findMany: vi.fn().mockImplementation(async ({ where }: { where?: any }) => {
+      if (where?.role === "CLIENT") {
+        return usersFixture.filter((user) => user.role === "CLIENT");
+      }
+      return usersFixture;
+    }),
   },
   property: {
+    findMany: vi.fn().mockImplementation(async () => propertiesFixture),
+    create: vi.fn().mockImplementation(async ({ data }: { data: any }) => {
+      const record = {
+        id: makeCuid(propertiesFixture.length + 201),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ...data,
+      };
+      propertiesFixture.push(record);
+      return record;
+    }),
     findUnique: vi.fn().mockImplementation(async ({ where }: { where: any }) =>
       propertiesFixture.find((item) => item.id === where.id) ?? null,
     ),
@@ -126,6 +143,7 @@ const authorizedHeaders = {
 
 describe("app", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     servicesFixture = [
       {
         id: makeCuid(1),
@@ -163,6 +181,7 @@ describe("app", () => {
       },
     ];
     mockPrisma.$queryRaw.mockClear();
+    mockCompare.mockResolvedValue(true);
   });
 
   it("responds on /", async () => {
@@ -249,6 +268,48 @@ describe("app", () => {
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.data.service.id).toBe(service.id);
+  });
+
+  it("lists properties", async () => {
+    const res = await app.request("/api/properties");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.length).toBeGreaterThan(0);
+  });
+
+  it("creates a property when authorized", async () => {
+    const payload = {
+      label: "Sunset Villa",
+      addressLine: "123 Sunset Blvd",
+      city: "Miami",
+      state: "FL",
+      zipCode: "33101",
+      type: "VACATION_RENTAL",
+      ownerId: makeCuid(101),
+      bedrooms: 3,
+      bathrooms: 2,
+      sqft: 1500,
+    };
+
+    const res = await app.request("/api/properties", {
+      method: "POST",
+      headers: authorizedHeaders,
+      body: JSON.stringify(payload),
+    });
+
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.label).toBe("Sunset Villa");
+  });
+
+  it("lists customers with authorization", async () => {
+    const res = await app.request("/api/customers", {
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data[0].email).toBeDefined();
   });
 
   it("logs in a user and returns a token", async () => {

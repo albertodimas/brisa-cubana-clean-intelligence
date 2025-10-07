@@ -3,6 +3,8 @@ import { cors } from "hono/cors";
 import { prisma } from "./lib/prisma";
 import bookings from "./routes/bookings";
 import services from "./routes/services";
+import properties from "./routes/properties";
+import customers from "./routes/customers";
 import auth from "./routes/auth";
 
 const app = new Hono();
@@ -52,6 +54,8 @@ app.get("/health", async (c) => {
 });
 
 app.route("/api/services", services);
+app.route("/api/properties", properties);
+app.route("/api/customers", customers);
 app.route("/api/bookings", bookings);
 app.route("/api/auth", auth);
 
