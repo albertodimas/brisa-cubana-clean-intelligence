@@ -83,7 +83,8 @@ Documentación completa para operaciones de producción, monitoreo, seguridad y 
 
 **Ubicación:** [`production/`](production/)
 
-- [**PRODUCTION_READINESS_CHECKLIST.md**](PRODUCTION_READINESS_CHECKLIST.md) - Checklist completo (95/100 score)
+- [**CURRENT_STATUS.md**](production/CURRENT_STATUS.md) - Estado actual verificado localmente
+- [**PRE_DEPLOYMENT_CHECKLIST.md**](production/PRE_DEPLOYMENT_CHECKLIST.md) - Checklist pre-deployment
 - [**OPERATIONAL_READINESS_REVIEW.md**](runbooks/OPERATIONAL_READINESS_REVIEW.md) - ORR completo
 - **Status Reports:** [`reports/`](reports/)
 
@@ -121,17 +122,19 @@ pnpm test:load:smoke
 
 - **Resumen de Seguridad:** [security/SECURITY_SUMMARY.md](security/SECURITY_SUMMARY.md)
 - **Resumen de DR:** [disaster-recovery/DR_EXECUTIVE_SUMMARY.md](disaster-recovery/DR_EXECUTIVE_SUMMARY.md)
-- **Production Readiness:** [PRODUCTION_READINESS_CHECKLIST.md](PRODUCTION_READINESS_CHECKLIST.md)
+- **Estado Actual:** [production/CURRENT_STATUS.md](production/CURRENT_STATUS.md)
 
 ## 📈 Métricas de Calidad
 
-| Área              | Métrica                               | Estado                |
-| ----------------- | ------------------------------------- | --------------------- |
-| **Tests**         | 825 tests (820 unit + 5 E2E + 5 load) | ✅ 100% passing       |
-| **Security**      | OWASP Top 10 2021                     | ✅ 10.0/10 compliance |
-| **Documentation** | 132 archivos + 9,000 líneas nuevas    | ✅ Complete           |
-| **Monitoring**    | Sentry configurado                    | 🟡 Pending activation |
-| **Production**    | Readiness score                       | ✅ 95/100             |
+| Área              | Métrica                             | Estado                        |
+| ----------------- | ----------------------------------- | ----------------------------- |
+| **Tests**         | 865 tests (850 API + 10 Web + 5 UI) | ✅ 100% passing               |
+| **E2E Tests**     | 6 Playwright suites                 | ✅ Active (1 skipped flaky)   |
+| **Load Tests**    | 5 k6 scenarios                      | ✅ Implemented (not executed) |
+| **Security**      | OWASP Top 10 2021                   | ✅ 10.0/10 compliance         |
+| **Documentation** | 177 archivos markdown               | ✅ Complete                   |
+| **Monitoring**    | Sentry configured in code           | 🟡 Pending DSN activation     |
+| **Production**    | Infrastructure                      | 🟡 Local 100%, deploy pending |
 
 ## 🔗 Enlaces Relacionados
 
@@ -142,10 +145,11 @@ pnpm test:load:smoke
 
 ## 📝 Changelog
 
+- **2025-10-07:** Corrección de métricas falsas - solo información verificada
 - **2025-10-06:** Creación de estructura organizacional
 - **2025-10-06:** Sprint 4 Production Readiness completado
-  - Sentry monitoring configurado
-  - Load testing suite completo
+  - Sentry monitoring configurado en código
+  - Load testing suite implementado (5 escenarios)
   - Security audit 10/10 OWASP
   - DR procedures documentados
-  - On-call rotation establecido
+  - On-call rotation documentado
