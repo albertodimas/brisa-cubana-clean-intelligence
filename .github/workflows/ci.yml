@@ -55,10 +55,10 @@ jobs:
 
       - name: Export test env vars
         run: |
-          echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> $GITHUB_ENV
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "API_TOKEN=${{ secrets.API_TOKEN || 'test-api-token' }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET || 'test-jwt-secret-for-ci-only' }}" >> $GITHUB_ENV
           echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci" >> $GITHUB_ENV
-          echo "AUTH_SECRET=${{ secrets.AUTH_SECRET || 'test-auth-secret' }}" >> $GITHUB_ENV
+          echo "AUTH_SECRET=${{ secrets.AUTH_SECRET || 'test-auth-secret-for-ci-only' }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_API_URL=http://localhost:3001" >> $GITHUB_ENV
           echo "LOGIN_RATE_LIMIT=${{ secrets.LOGIN_RATE_LIMIT || '5' }}" >> $GITHUB_ENV
           echo "LOGIN_RATE_LIMIT_WINDOW_MS=${{ secrets.LOGIN_RATE_LIMIT_WINDOW_MS || '60000' }}" >> $GITHUB_ENV
