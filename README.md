@@ -2,11 +2,11 @@
 
 **Sistema operativo para operaciones de limpieza premium en Miami-Dade.**
 
-[![CI Status](https://github.com/albertodimas/brisa-cubana-clean-intelligence/workflows/CI/badge.svg)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions)
+[![CI](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/ci.yml)
 [![Docs](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/docs-deploy.yml/badge.svg)](https://albertodimas.github.io/brisa-cubana-clean-intelligence/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)](https://nextjs.org/)
-[![Hono](https://img.shields.io/badge/Hono-4.9.9-orange)](https://hono.dev/)
+[![Hono](https://img.shields.io/badge/Hono-4.9.10-orange)](https://hono.dev/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.16.2-2D3748)](https://www.prisma.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -16,7 +16,7 @@
 
 ---
 
-**Estado Actual**: ✅ **100% Operativo en Local** | 🧪 Tests: 820/820 Passing | 📊 Coverage: 80% | 🚀 Ready for Production
+**Estado Actual**: ✅ **100% Operativo en Local** | 🧪 Tests: 865/865 Passing | 🚧 Infrastructure Setup Required
 
 ---
 
@@ -171,7 +171,7 @@ La base completa se publica con MkDocs (`mkdocs.yml`).
 | Frontend Web             | Beta        | Dashboard y flujo de reservas listos; workspace de concierge en curso.       |
 | Autenticación            | Operativo   | Auth.js v5 + JWT con roles RBAC.                                             |
 | Pagos                    | En progreso | Endpoints Stripe y webhooks listos; requieren claves reales end-to-end.      |
-| Testing                  | Operativo   | 171 pruebas Vitest y 15 escenarios Playwright pasan en ejecución local.      |
+| Testing                  | Operativo   | 865 pruebas Vitest (850 API + 10 Web + 5 UI) pasan en ejecución local.       |
 | CI/CD                    | En progreso | Siete workflows en GitHub Actions; falta publicar cobertura automática.      |
 | Documentación            | Completa    | Sitio MkDocs, Typedoc y Storybook generados localmente.                      |
 | Artefactos de despliegue | En progreso | Plantillas Railway y Vercel disponibles; endurecimiento continuo.            |
