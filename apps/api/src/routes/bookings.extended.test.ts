@@ -583,6 +583,25 @@ describe("Bookings Extended Tests - POST create booking", () => {
 describe("Bookings Extended Tests - PATCH update booking", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    bookingMock.findUnique.mockResolvedValue({
+      id: "booking-1",
+      status: "PENDING",
+      scheduledAt: new Date(),
+      totalPrice: 150,
+      user: {
+        id: "user-1",
+        name: "User 1",
+        email: "user1@test.com",
+        phone: "+1234567890",
+      },
+      property: { id: "property-1", name: "Prop 1", address: "123 St" },
+      service: {
+        id: "service-1",
+        name: "Service 1",
+        basePrice: 150,
+        description: "Deep clean",
+      },
+    } as any);
   });
 
   it("should prevent clients from updating bookings", async () => {
@@ -626,6 +645,25 @@ describe("Bookings Extended Tests - PATCH update booking", () => {
   });
 
   it("should update booking status to COMPLETED and set completedAt", async () => {
+    bookingMock.findUnique.mockResolvedValueOnce({
+      id: "booking-1",
+      status: "IN_PROGRESS",
+      scheduledAt: new Date(),
+      totalPrice: 150,
+      user: {
+        id: "user-1",
+        name: "User 1",
+        email: "user1@test.com",
+        phone: "+1234567890",
+      },
+      property: { id: "property-1", name: "Prop 1", address: "123 St" },
+      service: {
+        id: "service-1",
+        name: "Service 1",
+        basePrice: 150,
+        description: "Deep clean",
+      },
+    } as any);
     bookingMock.update.mockResolvedValue({
       id: "booking-1",
       status: "COMPLETED",
@@ -679,6 +717,25 @@ describe("Bookings Extended Tests - PATCH update booking", () => {
   });
 
   it("should update status to IN_PROGRESS", async () => {
+    bookingMock.findUnique.mockResolvedValueOnce({
+      id: "booking-1",
+      status: "CONFIRMED",
+      scheduledAt: new Date(),
+      totalPrice: 150,
+      user: {
+        id: "user-1",
+        name: "User 1",
+        email: "user1@test.com",
+        phone: "+1234567890",
+      },
+      property: { id: "property-1", name: "Prop 1", address: "123 St" },
+      service: {
+        id: "service-1",
+        name: "Service 1",
+        basePrice: 150,
+        description: "Deep clean",
+      },
+    } as any);
     bookingMock.update.mockResolvedValue({
       id: "booking-1",
       status: "IN_PROGRESS",
@@ -741,7 +798,7 @@ describe("Bookings Extended Tests - PATCH update booking", () => {
         "content-type": "application/json",
         ...authHeader("STAFF", "staff-1"),
       },
-      body: JSON.stringify({ status: "PENDING", notes: "" }),
+      body: JSON.stringify({ notes: "" }),
     });
 
     expect(response.status).toBe(200);

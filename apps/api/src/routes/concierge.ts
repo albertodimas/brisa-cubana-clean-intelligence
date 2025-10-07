@@ -13,14 +13,9 @@ import {
 } from "../services/concierge-metrics";
 import { sendConciergeEmail } from "../services/notifications";
 import { ValidationError, NotFoundError, ForbiddenError } from "../lib/errors";
+import { env } from "../config/env";
 
 const concierge = new Hono();
-
-function envFlag(value?: string | null): boolean {
-  if (!value) return false;
-  const normalized = value.trim().toLowerCase();
-  return normalized === "true" || normalized === "1" || normalized === "on";
-}
 
 // Apply rate limiting - more restrictive for AI endpoints
 concierge.use("/*", rateLimiter(RateLimits.write));
@@ -39,20 +34,18 @@ const sendMessageSchema = z.object({
 });
 
 concierge.get("/status", requireAuth(), (c) => {
-  const mode = (
-    process.env.CONCIERGE_MODE ??
-    (envFlag(process.env.ENABLE_AI_CONCIERGE) ? "llm" : "mock")
-  ).toLowerCase();
-  const provider =
-    process.env.AI_PROVIDER ?? (mode === "mock" ? "mock" : "openai");
+  const fallbackMode = env.ai.enableConcierge ? "llm" : "mock";
+  const mode = (env.ai.conciergeMode ?? fallbackMode).toLowerCase();
+  const provider = env.ai.provider ?? (mode === "mock" ? "mock" : "openai");
 
   return c.json({
     mode,
     provider,
     emailDeliveryEnabled: resendEnabled(),
     flags: {
-      conciergeMode: process.env.CONCIERGE_MODE ?? null,
-      aiProvider: process.env.AI_PROVIDER ?? null,
+      conciergeMode: env.ai.conciergeMode ?? null,
+      aiProvider: env.ai.provider,
+      enableConcierge: env.ai.enableConcierge ?? null,
     },
     timestamp: new Date().toISOString(),
   });

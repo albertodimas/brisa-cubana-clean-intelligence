@@ -4,6 +4,8 @@ import { db } from "../lib/db";
 import { getStripe, stripeEnabled } from "../lib/stripe";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
+import { env } from "../config/env";
+import { logger } from "../lib/logger";
 
 const payments = new Hono();
 
@@ -43,11 +45,8 @@ payments.post("/checkout-session", requireAuth(), async (c) => {
   }
 
   try {
-    const webUrl = process.env.WEB_APP_URL ?? "http://localhost:3000";
-    const successUrl =
-      process.env.STRIPE_SUCCESS_URL ?? `${webUrl}/dashboard?payment=success`;
-    const cancelUrl =
-      process.env.STRIPE_CANCEL_URL ?? `${webUrl}/dashboard?payment=cancelled`;
+    const successUrl = env.stripe.successUrl;
+    const cancelUrl = env.stripe.cancelUrl;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       success_url: successUrl,
@@ -93,7 +92,13 @@ payments.post("/checkout-session", requireAuth(), async (c) => {
       checkoutUrl: session.url,
     });
   } catch (error) {
-    console.error("Stripe checkout session error", error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : "unknown",
+        bookingId,
+      },
+      "Stripe checkout session error",
+    );
     return c.json({ error: "Unable to create checkout session" }, 500);
   }
 });
@@ -105,7 +110,7 @@ payments.post("/webhook", async (c) => {
 
   const stripe = getStripe();
   const signature = c.req.header("stripe-signature");
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecret = env.stripe.webhookSecret;
 
   if (!signature || !webhookSecret) {
     return c.text("Missing signature", 400);
@@ -118,7 +123,12 @@ payments.post("/webhook", async (c) => {
   try {
     event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
   } catch (error) {
-    console.error("Stripe webhook signature verification failed", error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : "unknown",
+      },
+      "Stripe webhook signature verification failed",
+    );
     return c.text("Signature verification failed", 400);
   }
 
@@ -177,7 +187,13 @@ payments.post("/webhook", async (c) => {
         break;
     }
   } catch (error) {
-    console.error("Error processing Stripe webhook", error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : "unknown",
+        eventType: event.type,
+      },
+      "Error processing Stripe webhook",
+    );
     return c.text("Webhook handler failed", 500);
   }
 

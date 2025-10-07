@@ -1,7 +1,23 @@
 import { db } from "../lib/db";
 import { logger } from "../lib/logger";
 import type { Booking, BookingStatus } from "../generated/prisma";
-import { NotFoundError, ValidationError, ConflictError } from "../lib/errors";
+import {
+  NotFoundError,
+  ValidationError,
+  ConflictError,
+  ForbiddenError,
+  BadRequestError,
+} from "../lib/errors";
+import { sanitizePlainText } from "../lib/sanitize";
+import { stripeEnabled, getStripe } from "../lib/stripe";
+import {
+  sendBookingConfirmation,
+  sendStatusUpdate,
+  sendCompletionNotification,
+} from "./notifications";
+import { env } from "../config/env";
+import type { AccessTokenPayload } from "../lib/token";
+import type { CreateBookingInput } from "../schemas";
 
 export interface CreateBookingData {
   propertyId: string;
@@ -9,6 +25,7 @@ export interface CreateBookingData {
   scheduledAt: Date;
   notes?: string;
   userId: string;
+  totalPrice?: number;
 }
 
 export interface UpdateBookingData {
@@ -26,9 +43,25 @@ export interface BookingFilters {
   status?: BookingStatus;
 }
 
+type BookingWithRelations = Booking & {
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    phone: string | null;
+  };
+  property: { id: string; name: string; address: string };
+  service: {
+    id: string;
+    name: string;
+    basePrice: unknown;
+    description?: string | null;
+  };
+};
+
 /**
  * Booking Service
- * 
+ *
  * Handles all business logic related to bookings:
  * - CRUD operations
  * - Status transitions
@@ -127,112 +160,328 @@ export class BookingService {
   }
 
   /**
-   * Create a new booking
-   * 
-   * Validates property and service exist, creates booking, sends confirmation email
+   * Create a new booking with full domain validation
    */
-  async create(data: CreateBookingData): Promise<Booking> {
-    // Validate property exists
+  async create(
+    data: CreateBookingData,
+    options: { authUser?: AccessTokenPayload | null } = {},
+  ): Promise<BookingWithRelations> {
+    const scheduledDate = new Date(data.scheduledAt);
+
     const property = await db.property.findUnique({
       where: { id: data.propertyId },
+      select: { id: true, userId: true, name: true, address: true },
     });
 
     if (!property) {
       throw new NotFoundError(`Property with ID ${data.propertyId} not found`);
     }
 
-    // Validate service exists
     const service = await db.service.findUnique({
       where: { id: data.serviceId },
+      select: {
+        id: true,
+        name: true,
+        basePrice: true,
+        duration: true,
+        active: true,
+        description: true,
+      },
     });
 
     if (!service) {
-      throw new NotFoundError(
-        `Service with ID ${data.serviceId} not found`,
-      );
+      throw new NotFoundError(`Service with ID ${data.serviceId} not found`);
     }
 
-    // Validate user exists
+    if (!service.active) {
+      throw new BadRequestError("This service is currently unavailable");
+    }
+
     const user = await db.user.findUnique({
       where: { id: data.userId },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, name: true, phone: true },
     });
 
     if (!user) {
       throw new NotFoundError(`User with ID ${data.userId} not found`);
     }
 
-    // Check for overlapping bookings
-    const scheduledDate = new Date(data.scheduledAt);
-    const existingBooking = await db.booking.findFirst({
-      where: {
-        propertyId: data.propertyId,
-        scheduledAt: scheduledDate,
-        status: { in: ["CONFIRMED", "IN_PROGRESS"] },
-      },
-    });
-
-    if (existingBooking) {
-      throw new ConflictError(
-        "There is already a booking scheduled for this property at this time",
+    if (
+      options.authUser?.role === "CLIENT" &&
+      options.authUser.sub !== data.userId
+    ) {
+      throw new ForbiddenError(
+        "You can only create bookings for your own user",
       );
     }
 
-    // Create booking
-    const booking = await db.booking.create({
+    if (
+      options.authUser?.role === "CLIENT" &&
+      property.userId &&
+      property.userId !== options.authUser.sub
+    ) {
+      throw new ForbiddenError(
+        "You can only create bookings for your own properties",
+      );
+    }
+
+    const serviceDurationMs = service.duration * 60 * 1000;
+    const bookingEndTime = new Date(
+      scheduledDate.getTime() + serviceDurationMs,
+    );
+
+    const conflictingBookings = await db.booking.findMany({
+      where: {
+        propertyId: data.propertyId,
+        status: {
+          in: ["PENDING", "CONFIRMED", "IN_PROGRESS"],
+        },
+        OR: [
+          {
+            AND: [
+              { scheduledAt: { lte: scheduledDate } },
+              {
+                scheduledAt: {
+                  gte: new Date(scheduledDate.getTime() - serviceDurationMs),
+                },
+              },
+            ],
+          },
+          {
+            AND: [
+              { scheduledAt: { lte: bookingEndTime } },
+              { scheduledAt: { gte: scheduledDate } },
+            ],
+          },
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (conflictingBookings.length > 0) {
+      throw new ConflictError(
+        "This time slot conflicts with an existing booking for this property",
+        {
+          conflictingBookingIds: conflictingBookings.map((b) => b.id),
+        },
+      );
+    }
+
+    const totalPrice =
+      data.totalPrice ?? Number.parseFloat(String(service.basePrice));
+
+    const sanitizedNotes = data.notes
+      ? sanitizePlainText(data.notes)
+      : undefined;
+
+    const booking = (await db.booking.create({
       data: {
         propertyId: data.propertyId,
         serviceId: data.serviceId,
         userId: data.userId,
         scheduledAt: scheduledDate,
         status: "PENDING",
-        notes: data.notes,
-        totalPrice: service.basePrice,
+        notes: sanitizedNotes,
+        totalPrice,
       },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true, phone: true } },
         property: { select: { id: true, name: true, address: true } },
-        service: { select: { id: true, name: true, basePrice: true } },
+        service: {
+          select: { id: true, name: true, basePrice: true, description: true },
+        },
       },
-    });
+    })) as BookingWithRelations;
 
-    // Log booking creation (notifications can be added later)
-    logger.info(`Booking created: ${booking.id} for user ${user.id}`);
+    logger.info(
+      {
+        bookingId: booking.id,
+        userId: user.id,
+      },
+      "Booking created",
+    );
 
     return booking;
   }
 
+  async createWithIntegrations(
+    payload: CreateBookingInput,
+    authUser: AccessTokenPayload | null,
+  ): Promise<{ booking: BookingWithRelations; checkoutUrl: string | null }> {
+    let bookingRecord = await this.create(
+      {
+        propertyId: payload.propertyId,
+        serviceId: payload.serviceId,
+        scheduledAt: payload.scheduledAt,
+        notes: payload.notes,
+        userId: payload.userId,
+        totalPrice: payload.totalPrice,
+      },
+      { authUser },
+    );
+
+    let checkoutUrl: string | null = null;
+
+    if (stripeEnabled()) {
+      try {
+        const stripe = getStripe();
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          success_url: env.stripe.successUrl,
+          cancel_url: env.stripe.cancelUrl,
+          customer_email: bookingRecord.user.email,
+          metadata: {
+            bookingId: bookingRecord.id,
+          },
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: bookingRecord.service.name,
+                  description: bookingRecord.service.description ?? undefined,
+                },
+                unit_amount: Math.round(Number(bookingRecord.totalPrice) * 100),
+              },
+              quantity: 1,
+            },
+          ],
+        });
+
+        bookingRecord = (await db.booking.update({
+          where: { id: bookingRecord.id },
+          data: {
+            checkoutSessionId: session.id,
+            paymentStatus: "PENDING_PAYMENT",
+            paymentIntentId:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : (session.payment_intent?.id ?? undefined),
+          },
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, phone: true },
+            },
+            property: { select: { id: true, name: true, address: true } },
+            service: {
+              select: {
+                id: true,
+                name: true,
+                basePrice: true,
+                description: true,
+              },
+            },
+          },
+        })) as BookingWithRelations;
+
+        checkoutUrl = session.url ?? null;
+      } catch (error) {
+        logger.error(
+          {
+            error: error instanceof Error ? error.message : "unknown",
+            bookingId: bookingRecord.id,
+          },
+          "Stripe checkout session error",
+        );
+      }
+    }
+
+    if (bookingRecord.user.phone) {
+      const scheduledAt = new Date(bookingRecord.scheduledAt);
+      const scheduledDate = scheduledAt.toLocaleDateString("es-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      const scheduledTime = scheduledAt.toLocaleTimeString("es-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      void sendBookingConfirmation(
+        {
+          clientName: bookingRecord.user.name ?? "Cliente",
+          clientPhone: bookingRecord.user.phone,
+          serviceName: bookingRecord.service.name,
+          propertyName: bookingRecord.property.name,
+          propertyAddress: bookingRecord.property.address,
+          scheduledDate,
+          scheduledTime,
+          totalPrice: Number(bookingRecord.totalPrice).toFixed(2),
+          bookingId: bookingRecord.id,
+        },
+        "PENDING",
+      );
+    }
+
+    return { booking: bookingRecord, checkoutUrl };
+  }
+
   /**
    * Update a booking
-   * 
+   *
    * Handles status transitions and sends appropriate notifications
    */
-  async update(id: string, data: UpdateBookingData): Promise<Booking> {
-    const existingBooking = await this.getById(id);
+  async update(
+    id: string,
+    data: UpdateBookingData,
+    options: { authUser?: AccessTokenPayload | null } = {},
+  ): Promise<BookingWithRelations> {
+    const existingBooking = await db.booking.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, name: true, email: true, phone: true } },
+        property: { select: { id: true, name: true, address: true } },
+        service: {
+          select: { id: true, name: true, basePrice: true, description: true },
+        },
+      },
+    });
+
+    if (!existingBooking) {
+      throw new NotFoundError(`Booking with ID ${id} not found`);
+    }
+
+    if (options.authUser?.role === "CLIENT") {
+      throw new ForbiddenError("Clients cannot update bookings");
+    }
 
     // Validate status transitions
     if (data.status) {
       this.validateStatusTransition(existingBooking.status, data.status);
     }
 
-    // Update booking
-    const booking = await db.booking.update({
-      where: { id },
-      data: {
-        ...(data.scheduledAt && { scheduledAt: data.scheduledAt }),
-        ...(data.status && { status: data.status }),
-        ...(data.notes !== undefined && { notes: data.notes }),
-        ...(data.completedAt && { completedAt: data.completedAt }),
-        ...(data.totalPrice && { totalPrice: data.totalPrice }),
-      },
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        property: { select: { id: true, name: true, address: true } },
-        service: { select: { id: true, name: true, basePrice: true } },
-      },
-    });
+    const sanitizedNotes =
+      data.notes === undefined
+        ? undefined
+        : data.notes === ""
+          ? undefined
+          : sanitizePlainText(data.notes);
 
-    // Send notifications based on status change
+    const updatePayload: Record<string, unknown> = {
+      ...(data.scheduledAt && { scheduledAt: data.scheduledAt }),
+      ...(data.status && { status: data.status }),
+      ...(sanitizedNotes !== undefined && { notes: sanitizedNotes }),
+      ...(data.totalPrice && { totalPrice: data.totalPrice }),
+    };
+
+    if (data.status === "COMPLETED") {
+      updatePayload.completedAt = data.completedAt ?? new Date();
+    }
+
+    const booking = (await db.booking.update({
+      where: { id },
+      data: updatePayload,
+      include: {
+        user: { select: { id: true, name: true, email: true, phone: true } },
+        property: { select: { id: true, name: true, address: true } },
+        service: {
+          select: { id: true, name: true, basePrice: true, description: true },
+        },
+      },
+    })) as BookingWithRelations;
+
     if (data.status && data.status !== existingBooking.status) {
       this.handleStatusNotification(booking, data.status);
     }
@@ -242,7 +491,7 @@ export class BookingService {
 
   /**
    * Delete a booking
-   * 
+   *
    * Only allows deletion of SCHEDULED or CANCELLED bookings
    */
   async delete(id: string): Promise<void> {
@@ -286,18 +535,89 @@ export class BookingService {
    * Send notifications based on status change
    */
   private handleStatusNotification(
-    booking: Booking & {
-      user: { id: string; name: string | null; email: string };
-      property: { id: string; name: string; address: string };
-      service: { id: string; name: string; basePrice: unknown };
-    },
+    booking: BookingWithRelations,
     newStatus: BookingStatus,
   ): void {
-    // Notifications are handled by a separate system
-    // This is a placeholder for future implementation
-    logger.info(
-      `Booking ${booking.id} status changed to ${newStatus} for user ${booking.user.id}`,
-    );
+    if (!booking.user.phone) {
+      logger.info(
+        {
+          bookingId: booking.id,
+          status: newStatus,
+        },
+        "Booking status changed (no phone available for notification)",
+      );
+      return;
+    }
+
+    const formattedPrice = Number(booking.totalPrice).toFixed(2);
+    const scheduledAt = new Date(booking.scheduledAt);
+    const scheduledDate = scheduledAt.toLocaleDateString("es-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const scheduledTime = scheduledAt.toLocaleTimeString("es-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    switch (newStatus) {
+      case "IN_PROGRESS":
+        void sendStatusUpdate({
+          clientName: booking.user.name ?? "Cliente",
+          clientPhone: booking.user.phone,
+          serviceName: booking.service.name,
+          propertyName: booking.property.name,
+          status: newStatus,
+          bookingId: booking.id,
+        });
+        break;
+      case "COMPLETED":
+        void sendCompletionNotification({
+          clientName: booking.user.name ?? "Cliente",
+          clientPhone: booking.user.phone,
+          serviceName: booking.service.name,
+          propertyName: booking.property.name,
+          bookingId: booking.id,
+        });
+        break;
+      case "CANCELLED":
+        void sendStatusUpdate({
+          clientName: booking.user.name ?? "Cliente",
+          clientPhone: booking.user.phone,
+          serviceName: booking.service.name,
+          propertyName: booking.property.name,
+          status: newStatus,
+          bookingId: booking.id,
+        });
+        break;
+      case "CONFIRMED":
+        void sendBookingConfirmation(
+          {
+            clientName: booking.user.name ?? "Cliente",
+            clientPhone: booking.user.phone,
+            serviceName: booking.service.name,
+            propertyName: booking.property.name,
+            propertyAddress: booking.property.address,
+            scheduledDate,
+            scheduledTime,
+            totalPrice: formattedPrice,
+            bookingId: booking.id,
+          },
+          "CONFIRMED",
+        );
+        break;
+      default:
+        logger.info(
+          {
+            bookingId: booking.id,
+            status: newStatus,
+          },
+          "Booking status change without notification handler",
+        );
+        break;
+    }
   }
 }
 

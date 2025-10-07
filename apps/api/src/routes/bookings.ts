@@ -1,14 +1,9 @@
 import { Hono } from "hono";
 import { db } from "../lib/db";
-import { sanitizePlainText } from "../lib/sanitize";
-import { getStripe, stripeEnabled } from "../lib/stripe";
 import { getAuthUser, requireAuth } from "../middleware/auth";
 import { rateLimiter, RateLimits } from "../middleware/rate-limit";
 import {
-  BadRequestError,
-  ConflictError,
   ForbiddenError,
-  NotFoundError,
   UnauthorizedError,
   ValidationError,
 } from "../lib/errors";
@@ -17,16 +12,7 @@ import {
   paginationSchema,
   updateBookingSchema,
 } from "../schemas";
-import type {
-  CreateBookingInput,
-  PaginationInput,
-  UpdateBookingInput,
-} from "../schemas";
-import {
-  sendBookingConfirmation,
-  sendStatusUpdate,
-  sendCompletionNotification,
-} from "../services/notifications";
+import type { CreateBookingInput, PaginationInput } from "../schemas";
 import { bookingService } from "../services/booking.service";
 
 const bookings = new Hono();
@@ -119,187 +105,10 @@ bookings.post("/", requireAuth(), async (c) => {
     throw new ForbiddenError("You can only create bookings for your own user");
   }
 
-  const [service, userRecord, property] = await Promise.all([
-    db.service.findUnique({
-      where: { id: payload.serviceId },
-    }),
-    db.user.findUnique({ where: { id: payload.userId } }),
-    db.property.findUnique({ where: { id: payload.propertyId } }),
-  ]);
-
-  if (!service) {
-    throw new NotFoundError("Service");
-  }
-
-  if (!userRecord) {
-    throw new NotFoundError("User");
-  }
-
-  if (!property) {
-    throw new NotFoundError("Property");
-  }
-
-  if (authUser?.role === "CLIENT" && property.userId !== authUser.sub) {
-    throw new ForbiddenError(
-      "You can only create bookings for your own properties",
-    );
-  }
-
-  // Validate service is active
-  if (!service.active) {
-    throw new BadRequestError("This service is currently unavailable");
-  }
-
-  const scheduledAt = payload.scheduledAt;
-  const basePrice = Number(service.basePrice);
-  const totalPrice = payload.totalPrice ?? basePrice;
-
-  // Check for scheduling conflicts (same property within service duration window)
-  const serviceDurationMs = service.duration * 60 * 1000; // duration is in minutes
-  const bookingEndTime = new Date(scheduledAt.getTime() + serviceDurationMs);
-  const conflictingBookings = await db.booking.findMany({
-    where: {
-      propertyId: payload.propertyId,
-      status: {
-        in: ["PENDING", "CONFIRMED", "IN_PROGRESS"],
-      },
-      OR: [
-        // New booking starts during existing booking
-        {
-          AND: [
-            { scheduledAt: { lte: scheduledAt } },
-            {
-              scheduledAt: {
-                gte: new Date(scheduledAt.getTime() - serviceDurationMs),
-              },
-            },
-          ],
-        },
-        // New booking ends during existing booking
-        {
-          AND: [
-            { scheduledAt: { lte: bookingEndTime } },
-            { scheduledAt: { gte: scheduledAt } },
-          ],
-        },
-      ],
-    },
-  });
-
-  if (conflictingBookings.length > 0) {
-    throw new ConflictError(
-      "This time slot conflicts with an existing booking for this property",
-      {
-        conflictingBookingIds: conflictingBookings.map(
-          (b: { id: string }) => b.id,
-        ),
-      },
-    );
-  }
-
-  let booking = await db.booking.create({
-    data: {
-      userId: payload.userId,
-      propertyId: payload.propertyId,
-      serviceId: payload.serviceId,
-      scheduledAt,
-      totalPrice,
-      notes: payload.notes ? sanitizePlainText(payload.notes) : undefined,
-      status: "PENDING",
-    },
-    include: {
-      user: true,
-      property: true,
-      service: true,
-    },
-  });
-
-  let checkoutUrl: string | null = null;
-
-  if (stripeEnabled()) {
-    try {
-      const stripe = getStripe();
-      const webUrl = process.env.WEB_APP_URL ?? "http://localhost:3000";
-      const successUrl =
-        process.env.STRIPE_SUCCESS_URL ?? `${webUrl}/dashboard?payment=success`;
-      const cancelUrl =
-        process.env.STRIPE_CANCEL_URL ??
-        `${webUrl}/dashboard?payment=cancelled`;
-
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        success_url: successUrl,
-        cancel_url: cancelUrl,
-        customer_email: userRecord.email,
-        metadata: {
-          bookingId: booking.id,
-        },
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: service.name,
-                description: service.description ?? undefined,
-              },
-              unit_amount: Math.round(Number(totalPrice) * 100),
-            },
-            quantity: 1,
-          },
-        ],
-      });
-
-      booking = await db.booking.update({
-        where: { id: booking.id },
-        data: {
-          checkoutSessionId: session.id,
-          paymentStatus: "PENDING_PAYMENT",
-          paymentIntentId:
-            typeof session.payment_intent === "string"
-              ? session.payment_intent
-              : (session.payment_intent?.id ?? undefined),
-        },
-        include: {
-          user: true,
-          property: true,
-          service: true,
-        },
-      });
-
-      checkoutUrl = session.url ?? null;
-    } catch (error) {
-      console.error("Stripe checkout session error", error);
-    }
-  }
-
-  // Send booking notification (async, non-blocking)
-  if (userRecord.phone) {
-    const scheduledDate = new Date(scheduledAt).toLocaleDateString("es-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    const scheduledTime = new Date(scheduledAt).toLocaleTimeString("es-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    void sendBookingConfirmation(
-      {
-        clientName: userRecord.name ?? "Cliente",
-        clientPhone: userRecord.phone,
-        serviceName: service.name,
-        propertyName: property.name,
-        propertyAddress: property.address,
-        scheduledDate,
-        scheduledTime,
-        totalPrice: totalPrice.toFixed(2),
-        bookingId: booking.id,
-      },
-      booking.status === "CONFIRMED" ? "CONFIRMED" : "PENDING",
-    );
-  }
+  const { booking, checkoutUrl } = await bookingService.createWithIntegrations(
+    payload,
+    authUser,
+  );
 
   return c.json({ booking, checkoutUrl }, 201);
 });
@@ -320,107 +129,15 @@ bookings.patch("/:id", requireAuth(), async (c) => {
     );
   }
 
-  const payload: UpdateBookingInput = parseResult.data;
   const authUser = getAuthUser(c);
 
   if (!authUser) {
     throw new UnauthorizedError();
   }
 
-  if (authUser.role === "CLIENT") {
-    throw new ForbiddenError("Clients cannot update bookings");
-  }
-
-  const updateData: Partial<UpdateBookingInput> & {
-    completedAt?: Date | null;
-  } = {};
-
-  if (payload.status !== undefined) {
-    updateData.status = payload.status;
-    updateData.completedAt =
-      payload.status === "COMPLETED" ? new Date() : undefined;
-  }
-
-  if (payload.notes !== undefined) {
-    updateData.notes =
-      payload.notes === "" ? undefined : sanitizePlainText(payload.notes);
-  }
-
-  if (Object.keys(updateData).length === 0) {
-    throw new BadRequestError("No updates supplied");
-  }
-
-  const booking = await db.booking.update({
-    where: { id },
-    data: updateData,
-    include: {
-      user: true,
-      property: true,
-      service: true,
-    },
+  const booking = await bookingService.update(id, parseResult.data, {
+    authUser,
   });
-
-  // Send status update notifications (async, non-blocking)
-  if (payload.status && booking.user.phone) {
-    if (payload.status === "IN_PROGRESS") {
-      void sendStatusUpdate({
-        clientName: booking.user.name ?? "Cliente",
-        clientPhone: booking.user.phone,
-        serviceName: booking.service.name,
-        propertyName: booking.property.name,
-        status: payload.status,
-        bookingId: booking.id,
-      });
-    } else if (payload.status === "COMPLETED") {
-      void sendCompletionNotification({
-        clientName: booking.user.name ?? "Cliente",
-        clientPhone: booking.user.phone,
-        serviceName: booking.service.name,
-        propertyName: booking.property.name,
-        bookingId: booking.id,
-      });
-    } else if (payload.status === "CANCELLED") {
-      void sendStatusUpdate({
-        clientName: booking.user.name ?? "Cliente",
-        clientPhone: booking.user.phone,
-        serviceName: booking.service.name,
-        propertyName: booking.property.name,
-        status: payload.status,
-        bookingId: booking.id,
-      });
-    } else if (payload.status === "CONFIRMED") {
-      // Send confirmation notification when status changes to CONFIRMED
-      const scheduledDate = new Date(
-        booking.scheduledAt as string | Date,
-      ).toLocaleDateString("es-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      const scheduledTime = new Date(
-        booking.scheduledAt as string | Date,
-      ).toLocaleTimeString("es-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      void sendBookingConfirmation(
-        {
-          clientName: booking.user.name ?? "Cliente",
-          clientPhone: booking.user.phone,
-          serviceName: booking.service.name,
-          propertyName: booking.property.name,
-          propertyAddress: booking.property.address,
-          scheduledDate,
-          scheduledTime,
-          totalPrice: Number(booking.totalPrice).toFixed(2),
-          bookingId: booking.id,
-        },
-        "CONFIRMED",
-      );
-    }
-  }
 
   return c.json(booking);
 });

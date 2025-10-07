@@ -27,6 +27,7 @@ vi.mock("../lib/stripe", () => ({
 
 // Import after mocking
 const payments = (await import("./payments")).default;
+const { env } = await import("../config/env");
 
 // Get mock references for assertions
 const { db } = await import("../lib/db");
@@ -69,6 +70,7 @@ describe("Payments Extended - POST /checkout-session", () => {
 
     getStripeMock.mockReturnValue(mockStripe);
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
+    env.stripe.webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     process.env.WEB_APP_URL = "https://example.com";
   });
 
@@ -573,6 +575,7 @@ describe("Payments Extended - POST /checkout-session", () => {
   describe("Environment Configuration", () => {
     it("should use custom success URL from env", async () => {
       process.env.STRIPE_SUCCESS_URL = "https://custom.com/success";
+      env.stripe.successUrl = process.env.STRIPE_SUCCESS_URL;
       stripeEnabledMock.mockReturnValue(true);
 
       bookingMock.findUnique.mockResolvedValueOnce({
@@ -612,10 +615,12 @@ describe("Payments Extended - POST /checkout-session", () => {
       );
 
       delete process.env.STRIPE_SUCCESS_URL;
+      env.stripe.successUrl = undefined;
     });
 
     it("should use custom cancel URL from env", async () => {
       process.env.STRIPE_CANCEL_URL = "https://custom.com/cancelled";
+      env.stripe.cancelUrl = process.env.STRIPE_CANCEL_URL;
       stripeEnabledMock.mockReturnValue(true);
 
       bookingMock.findUnique.mockResolvedValueOnce({
@@ -655,6 +660,9 @@ describe("Payments Extended - POST /checkout-session", () => {
       );
 
       delete process.env.STRIPE_CANCEL_URL;
+      env.stripe.cancelUrl = env.webAppUrl
+        ? `${env.webAppUrl}/dashboard?payment=cancelled`
+        : undefined;
     });
   });
 });
@@ -680,6 +688,7 @@ describe("Payments Extended - POST /webhook", () => {
 
     getStripeMock.mockReturnValue(mockStripe);
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_secret";
+    env.stripe.webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   });
 
   describe("Webhook Validation", () => {
@@ -713,6 +722,7 @@ describe("Payments Extended - POST /webhook", () => {
     it("should return 400 when webhook secret is not configured", async () => {
       stripeEnabledMock.mockReturnValue(true);
       delete process.env.STRIPE_WEBHOOK_SECRET;
+      env.stripe.webhookSecret = undefined;
 
       const response = await app.request("/api/payments/webhook", {
         method: "POST",
@@ -725,6 +735,7 @@ describe("Payments Extended - POST /webhook", () => {
       expect(text).toBe("Missing signature");
 
       process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_secret";
+      env.stripe.webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     });
 
     it("should return 400 when signature verification fails", async () => {

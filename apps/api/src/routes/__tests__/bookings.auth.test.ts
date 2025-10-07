@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import bookings from "../bookings";
 import jwt from "jsonwebtoken";
 import { db } from "../../lib/db";
+import { ForbiddenError } from "../../lib/errors";
 
 // Mock de db
 vi.mock("../../lib/db", () => ({
@@ -378,6 +379,10 @@ describe("Bookings Routes - Authorization Tests", () => {
         sub: "user-1",
         email: "user@test.com",
         role: "CLIENT",
+      });
+
+      vi.mocked(bookingService.update).mockImplementation(() => {
+        throw new ForbiddenError("Clients cannot update bookings");
       });
 
       const response = await app.request("/bookings/booking-1", {

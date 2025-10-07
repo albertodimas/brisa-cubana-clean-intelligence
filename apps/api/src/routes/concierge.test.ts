@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import concierge from "./concierge";
 import { clearRateLimitStore } from "../middleware/rate-limit";
 import { resetConciergeMetrics } from "../services/concierge-metrics";
+import { env } from "../config/env";
 
 const mockMessages: Array<Record<string, unknown>> = [];
 const mockConversation = {
@@ -201,6 +202,9 @@ describe("Concierge routes", () => {
     process.env.CONCIERGE_MODE = "llm";
     process.env.AI_PROVIDER = "anthropic";
     process.env.ENABLE_AI_CONCIERGE = "true";
+    env.ai.conciergeMode = process.env.CONCIERGE_MODE;
+    env.ai.provider = process.env.AI_PROVIDER;
+    env.ai.enableConcierge = true;
 
     const app = new Hono();
     app.route("/api/concierge", concierge);

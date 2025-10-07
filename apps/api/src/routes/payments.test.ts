@@ -28,6 +28,7 @@ vi.mock("../lib/stripe", () => ({
 
 // Import after mocking
 const { default: payments } = await import("./payments");
+const { env } = await import("../config/env");
 
 // Get mock references for assertions
 const { db } = await import("../lib/db");
@@ -61,6 +62,7 @@ describe("payments route", () => {
       },
     });
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
+    env.stripe.webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   });
 
   it("rejects checkout when Stripe está deshabilitado", async () => {

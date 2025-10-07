@@ -234,14 +234,22 @@ describe("BookingService", () => {
       vi.spyOn(db.property, "findUnique").mockResolvedValue({
         id: "property-1",
         name: "Test Property",
+        address: "123 Main St",
+        userId: "user-1",
       } as any);
       vi.spyOn(db.service, "findUnique").mockResolvedValue({
         id: "service-1",
         name: "Deep Cleaning",
+        basePrice: 150,
+        duration: 120,
+        active: true,
+        description: "Deep cleaning service",
       } as any);
       vi.spyOn(db.user, "findUnique").mockResolvedValue({
         id: "user-1",
         email: "user@test.com",
+        name: "Test User",
+        phone: "+1234567890",
       } as any);
       // Sin conflictos por defecto
       vi.spyOn(db.booking, "findMany").mockResolvedValue([]);
@@ -270,12 +278,19 @@ describe("BookingService", () => {
           scheduledAt: validBookingData.scheduledAt,
           status: "PENDING",
           notes: undefined,
-          totalPrice: undefined,
+          totalPrice: 150,
         },
         include: {
-          user: { select: { id: true, name: true, email: true } },
+          user: { select: { id: true, name: true, email: true, phone: true } },
           property: { select: { id: true, name: true, address: true } },
-          service: { select: { id: true, name: true, basePrice: true } },
+          service: {
+            select: {
+              id: true,
+              name: true,
+              basePrice: true,
+              description: true,
+            },
+          },
         },
       });
     });
@@ -321,15 +336,15 @@ describe("BookingService", () => {
         status: "CONFIRMED",
       };
 
-      vi.spyOn(db.booking, "findFirst").mockResolvedValue(
-        conflictingBooking as any,
-      );
+      vi.spyOn(db.booking, "findMany").mockResolvedValue([
+        conflictingBooking,
+      ] as any);
 
       await expect(bookingService.create(validBookingData)).rejects.toThrow(
         ConflictError,
       );
       await expect(bookingService.create(validBookingData)).rejects.toThrow(
-        "There is already a booking scheduled for this property at this time",
+        "This time slot conflicts with an existing booking for this property",
       );
     });
 
@@ -341,7 +356,7 @@ describe("BookingService", () => {
         status: "CANCELLED",
       };
 
-      vi.spyOn(db.booking, "findFirst").mockResolvedValue(null); // No hay conflicto porque CANCELLED no se incluye
+      vi.spyOn(db.booking, "findMany").mockResolvedValue([]);
       vi.spyOn(db.booking, "create").mockResolvedValue({
         ...validBookingData,
         id: "booking-new",
@@ -364,13 +379,23 @@ describe("BookingService", () => {
       status: "PENDING",
       price: 150,
       currency: "usd",
-      user: { id: "user-1", name: "Test User", email: "test@example.com" },
+      user: {
+        id: "user-1",
+        name: "Test User",
+        email: "test@example.com",
+        phone: "+1234567890",
+      },
       property: {
         id: "property-1",
         name: "Test Property",
         address: "123 Main St",
       },
-      service: { id: "service-1", name: "Deep Cleaning", basePrice: 100 },
+      service: {
+        id: "service-1",
+        name: "Deep Cleaning",
+        basePrice: 100,
+        description: "Deep cleaning service",
+      },
     };
 
     beforeEach(() => {
@@ -397,11 +422,21 @@ describe("BookingService", () => {
       expect(result).toEqual(updatedBooking);
       expect(db.booking.update).toHaveBeenCalledWith({
         where: { id: "booking-1" },
-        data: updateData,
+        data: {
+          status: "CONFIRMED",
+          notes: "Confirmed by admin",
+        },
         include: {
-          user: { select: { id: true, name: true, email: true } },
+          user: { select: { id: true, name: true, email: true, phone: true } },
           property: { select: { id: true, name: true, address: true } },
-          service: { select: { id: true, name: true, basePrice: true } },
+          service: {
+            select: {
+              id: true,
+              name: true,
+              basePrice: true,
+              description: true,
+            },
+          },
         },
       });
     });
