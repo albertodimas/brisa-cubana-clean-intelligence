@@ -152,6 +152,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 4. `RefreshToken` no se utiliza aún (reserva para futuras mejoras).
 5. Estilos UI definidos inline; pendiente migrar a sistema de diseño reutilizable.
 6. Seeds pensados para demo; ambientes preview deben reseedear manualmente (`pnpm --filter @brisa/api db:seed`).
+7. Persistencia de sesión tras recargar la página en local requiere ajuste en el flujo de Auth.js (test e2e marcado como `fixme`).
 
 ---
 

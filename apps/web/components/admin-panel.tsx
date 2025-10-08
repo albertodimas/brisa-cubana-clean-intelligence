@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { ReactNode, CSSProperties } from "react";
 import type { Session } from "next-auth";
@@ -71,6 +72,7 @@ export function AdminPanel({
   updateBooking,
   logout,
 }: AdminPanelProps) {
+  const router = useRouter();
   const [serviceMessage, setServiceMessage] = useState<string | null>(null);
   const [propertyMessage, setPropertyMessage] = useState<string | null>(null);
   const [bookingMessage, setBookingMessage] = useState<string | null>(null);
@@ -194,6 +196,10 @@ export function AdminPanel({
                 ? `Error: ${result.error}`
                 : (result.success ?? null),
             );
+            if (result.success) {
+              router.replace("/login");
+              router.refresh();
+            }
           }}
           style={{
             marginTop: "0.75rem",

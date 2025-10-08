@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const passwordHash =
-    "$2a$10$IvVmAwm6RG7yijDbnbiq8.qHhvrTwY3EeE559UaDlrY0lProxcWUu"; // bcrypt hash for "BrisaClean2025"
+    "$2a$10$Rh8ljaYqrkUNe4l.rxkDKek/pixK3GkjRuHM47fOjf80gZIydzoL."; // bcrypt hash for "Brisa123!"
 
   const [_admin, coordinator, client] = await Promise.all([
     prisma.user.upsert({

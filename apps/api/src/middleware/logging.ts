@@ -17,12 +17,20 @@ export async function loggingMiddleware(c: Context, next: Next) {
   const path = c.req.path;
 
   // Log request incoming (solo en modo debug para no saturar)
-  const userId = c.get("userId") as string | undefined;
   const context: Record<string, unknown> = {};
 
-  if (userId) {
-    context.userId = userId;
+  const authUser = c.get("authUser") as
+    | { id?: string; role?: string }
+    | undefined;
+
+  if (authUser?.id) {
+    context.userId = authUser.id;
   }
+  if (authUser?.role) {
+    context.role = authUser.role;
+  }
+
+  httpLogger.logRequest(method, path, context);
 
   try {
     await next();
