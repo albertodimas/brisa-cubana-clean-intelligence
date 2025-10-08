@@ -8,7 +8,7 @@ const databaseUrl =
   process.env.DATABASE_URL ??
   "postgresql://postgres:postgres@localhost:5433/brisa_cubana_e2e";
 const heartbeatSeconds = Number(process.env.E2E_HEARTBEAT_SECONDS ?? "15");
-const loginRateLimit = "50"; // Increased for parallel E2E tests
+const loginRateLimit = process.env.E2E_LOGIN_RATE_LIMIT ?? "20"; // Increased for parallel E2E tests
 const loginRateLimitWindow = "60000";
 
 export default defineConfig({

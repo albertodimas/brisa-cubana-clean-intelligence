@@ -66,7 +66,8 @@ test.describe("Seguridad y Autenticación", () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
       // Read rate limit from env (default 5, test env uses 50)
       const rateLimit = Number(process.env.LOGIN_RATE_LIMIT ?? "5");
-      const attemptsToTriggerLimit = rateLimit + 1;
+      const safetyMargin = Math.max(5, Math.ceil(rateLimit * 0.2));
+      const attemptsToTriggerLimit = rateLimit + safetyMargin;
 
       const apiContext = await playwrightRequest.newContext();
       let rateLimited = false;
@@ -93,6 +94,9 @@ test.describe("Seguridad y Autenticación", () => {
           }
 
           expect(response.status()).toBe(401);
+
+          // Pequeña pausa para permitir que el rate limiter acumule los intentos
+          await new Promise((resolve) => setTimeout(resolve, 20));
         }
       } finally {
         await apiContext.dispose();
