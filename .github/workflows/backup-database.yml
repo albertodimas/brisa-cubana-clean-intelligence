@@ -82,6 +82,7 @@ jobs:
         run: |
           echo "🔄 Creating PostgreSQL backup..."
 
+          set +e  # Don't exit on error, we want to capture logs
           pg_dump "$DATABASE_URL" \
             --no-owner \
             --no-privileges \
@@ -89,12 +90,19 @@ jobs:
             --if-exists \
             --verbose \
             > "${{ steps.backup_info.outputs.backup_file }}" 2> backup.log
+          DUMP_EXIT_CODE=$?
+          set -e  # Re-enable exit on error
+
+          echo "📋 pg_dump log:"
+          cat backup.log || echo "No log file found"
+
+          if [ $DUMP_EXIT_CODE -ne 0 ]; then
+            echo "❌ pg_dump failed with exit code $DUMP_EXIT_CODE"
+            exit $DUMP_EXIT_CODE
+          fi
 
           echo "✅ Backup created: ${{ steps.backup_info.outputs.backup_file }}"
           ls -lh "${{ steps.backup_info.outputs.backup_file }}"
-
-          echo "📋 Backup log:"
-          cat backup.log
 
       - name: Compress backup
         run: |
