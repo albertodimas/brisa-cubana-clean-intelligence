@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { prisma } from "./lib/prisma.js";
 import bookings from "./routes/bookings.js";
@@ -23,16 +23,15 @@ app.use(
   }),
 );
 
-app.get("/", (c) =>
+const rootHandler = (c: Context) =>
   c.json({
     service: "Brisa Cubana Clean Intelligence API",
     status: "ok",
     version: "0.1.0",
     timestamp: new Date().toISOString(),
-  }),
-);
+  });
 
-app.get("/health", async (c) => {
+const healthHandler = async (c: Context) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     return c.json({
@@ -58,7 +57,15 @@ app.get("/health", async (c) => {
           : "Unknown database connectivity issue",
     });
   }
-});
+};
+
+// Routes for standalone deployment (without /api prefix)
+app.get("/", rootHandler);
+app.get("/health", healthHandler);
+
+// Routes for monorepo deployment (with /api prefix)
+app.get("/api", rootHandler);
+app.get("/api/health", healthHandler);
 
 app.route("/api/services", services);
 app.route("/api/properties", properties);
