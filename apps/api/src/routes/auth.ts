@@ -21,7 +21,7 @@ const loginRateLimiter = rateLimiter({
   windowMs: Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS ?? "60000"),
   limit: Number(process.env.LOGIN_RATE_LIMIT ?? "5"),
   standardHeaders: "draft-7",
-  keyGenerator: (c) => {
+  keyGenerator: (c: Context) => {
     const forwarded = c.req.header("x-forwarded-for");
     if (forwarded) {
       return forwarded.split(",")[0]?.trim() ?? forwarded;
@@ -41,7 +41,7 @@ const loginRateLimiter = rateLimiter({
       "anonymous";
     return fallback;
   },
-  handler: async (ctx) =>
+  handler: async (ctx: Context) =>
     ctx.json(
       { error: "Too many login attempts. Please wait before retrying." },
       429,
