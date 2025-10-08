@@ -1,5 +1,9 @@
 import { handle } from "hono/vercel";
-import app from "../src/app.js";
+import app from "../apps/api/src/app.js";
+
+export const config = {
+  runtime: "nodejs",
+};
 
 export const GET = handle(app);
 export const POST = handle(app);

@@ -1,9 +1,9 @@
 {
-  "extends": "../apps/api/tsconfig.json",
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "."
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true
   },
-  "include": ["."],
-  "exclude": ["node_modules", "dist"]
+  "include": ["."]
 }
