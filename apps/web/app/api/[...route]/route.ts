@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import type { NextRequest } from "next/server";
 
 const API_BASE_URL = (() => {
@@ -41,10 +42,10 @@ async function proxy(request: NextRequest, context: any) {
     request.headers.get("origin") ?? "*",
   );
 
-  const body = await upstream.arrayBuffer();
-  responseHeaders.delete("content-length");
+  const buffer = Buffer.from(await upstream.arrayBuffer());
+  responseHeaders.set("content-length", buffer.byteLength.toString());
 
-  return new Response(body, {
+  return new Response(buffer, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: responseHeaders,
