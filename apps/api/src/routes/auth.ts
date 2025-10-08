@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
 import * as bcrypt from "bcryptjs";
-import { rateLimiter } from "hono-rate-limiter";
+import honoRateLimiter from "hono-rate-limiter";
 import { prisma } from "../lib/prisma.js";
 import { signAuthToken, verifyAuthToken } from "../lib/jwt.js";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
@@ -14,6 +14,8 @@ const loginSchema = z.object({
 });
 
 const router = new Hono();
+
+const { rateLimiter } = honoRateLimiter as any;
 
 const loginRateLimiter = rateLimiter({
   windowMs: Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS ?? "60000"),
