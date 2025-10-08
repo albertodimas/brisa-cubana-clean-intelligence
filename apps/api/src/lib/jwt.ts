@@ -1,4 +1,5 @@
-import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+import type { Secret, SignOptions } from "jsonwebtoken";
 import type { UserRole } from "@prisma/client";
 
 let cachedSecret: Secret | null = null;
