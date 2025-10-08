@@ -1,0 +1,257 @@
+name: Database Backup
+
+on:
+  # Ejecutar diariamente a las 2:00 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Permitir ejecución manual
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: 'Días de retención para este backup'
+        required: false
+        default: '7'
+        type: choice
+        options:
+          - '7'
+          - '30'
+          - '365'
+
+env:
+  BACKUP_PREFIX: 'backup_brisa'
+  POSTGRES_VERSION: '16'
+
+jobs:
+  backup:
+    name: PostgreSQL Backup
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-${{ env.POSTGRES_VERSION }}
+
+      - name: Generate backup filename
+        id: backup_info
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          DAY_OF_WEEK=$(date +%u)  # 1=Monday, 7=Sunday
+          DAY_OF_MONTH=$(date +%d)
+
+          # Determinar tipo de backup y retención
+          if [ "$DAY_OF_MONTH" = "01" ]; then
+            BACKUP_TYPE="monthly"
+            RETENTION_DAYS=365
+          elif [ "$DAY_OF_WEEK" = "7" ]; then
+            BACKUP_TYPE="weekly"
+            RETENTION_DAYS=30
+          else
+            BACKUP_TYPE="daily"
+            RETENTION_DAYS=7
+          fi
+
+          # Override si es manual
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            BACKUP_TYPE="manual"
+            RETENTION_DAYS="${{ github.event.inputs.retention_days }}"
+          fi
+
+          BACKUP_FILE="${{ env.BACKUP_PREFIX }}_${BACKUP_TYPE}_${TIMESTAMP}.sql"
+
+          echo "backup_file=$BACKUP_FILE" >> $GITHUB_OUTPUT
+          echo "backup_type=$BACKUP_TYPE" >> $GITHUB_OUTPUT
+          echo "retention_days=$RETENTION_DAYS" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+          echo "📦 Backup: $BACKUP_FILE"
+          echo "📅 Type: $BACKUP_TYPE"
+          echo "⏰ Retention: $RETENTION_DAYS days"
+
+      - name: Create database backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "🔄 Creating PostgreSQL backup..."
+
+          pg_dump "$DATABASE_URL" \
+            --no-owner \
+            --no-privileges \
+            --clean \
+            --if-exists \
+            --verbose \
+            > "${{ steps.backup_info.outputs.backup_file }}" 2>&1 | tee backup.log
+
+          echo "✅ Backup created: ${{ steps.backup_info.outputs.backup_file }}"
+          ls -lh "${{ steps.backup_info.outputs.backup_file }}"
+
+      - name: Compress backup
+        run: |
+          echo "🗜️ Compressing backup..."
+          gzip -9 "${{ steps.backup_info.outputs.backup_file }}"
+
+          COMPRESSED_FILE="${{ steps.backup_info.outputs.backup_file }}.gz"
+          echo "compressed_file=$COMPRESSED_FILE" >> $GITHUB_OUTPUT
+
+          echo "✅ Compressed: $COMPRESSED_FILE"
+          ls -lh "$COMPRESSED_FILE"
+        id: compress
+
+      - name: Generate backup metadata
+        run: |
+          cat > backup_metadata.json <<EOF
+          {
+            "backup_file": "${{ steps.compress.outputs.compressed_file }}",
+            "backup_type": "${{ steps.backup_info.outputs.backup_type }}",
+            "timestamp": "${{ steps.backup_info.outputs.timestamp }}",
+            "retention_days": ${{ steps.backup_info.outputs.retention_days }},
+            "database": "neondb",
+            "postgres_version": "${{ env.POSTGRES_VERSION }}",
+            "workflow_run_id": "${{ github.run_id }}",
+            "workflow_run_number": "${{ github.run_number }}",
+            "git_sha": "${{ github.sha }}",
+            "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          echo "📋 Metadata created:"
+          cat backup_metadata.json
+
+      - name: Verify backup integrity
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "🔍 Verifying backup integrity..."
+
+          # Descomprimir temporalmente para verificar
+          gunzip -c "${{ steps.compress.outputs.compressed_file }}" > temp_verify.sql
+
+          # Verificar que el archivo no está vacío
+          if [ ! -s temp_verify.sql ]; then
+            echo "❌ ERROR: Backup file is empty!"
+            exit 1
+          fi
+
+          # Verificar que contiene SQL válido
+          if ! head -20 temp_verify.sql | grep -q "PostgreSQL database dump"; then
+            echo "❌ ERROR: Backup file doesn't appear to be a valid PostgreSQL dump!"
+            exit 1
+          fi
+
+          # Contar líneas
+          LINES=$(wc -l < temp_verify.sql)
+          echo "📊 Backup contains $LINES lines"
+
+          if [ "$LINES" -lt 100 ]; then
+            echo "⚠️  WARNING: Backup seems suspiciously small ($LINES lines)"
+          fi
+
+          # Limpiar
+          rm temp_verify.sql
+
+          echo "✅ Backup integrity verified"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.backup_info.outputs.backup_type }}-backup-${{ steps.backup_info.outputs.timestamp }}
+          path: |
+            ${{ steps.compress.outputs.compressed_file }}
+            backup_metadata.json
+            backup.log
+          retention-days: ${{ steps.backup_info.outputs.retention_days }}
+          compression-level: 0  # Ya está comprimido con gzip
+
+      - name: Cleanup old artifacts
+        if: github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Obtener todos los artifacts del repositorio
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            const now = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+
+            // Política de retención
+            const retentionPolicy = {
+              'daily-backup': 7,    // 7 días
+              'weekly-backup': 30,  // 4 semanas
+              'monthly-backup': 365 // 12 meses
+            };
+
+            for (const artifact of artifacts.data.artifacts) {
+              const artifactName = artifact.name;
+              const createdAt = new Date(artifact.created_at).getTime();
+              const ageInDays = (now - createdAt) / oneDayMs;
+
+              // Determinar tipo de backup
+              let maxAge = 7; // default
+              for (const [type, days] of Object.entries(retentionPolicy)) {
+                if (artifactName.startsWith(type)) {
+                  maxAge = days;
+                  break;
+                }
+              }
+
+              // Eliminar si excede retención
+              if (ageInDays > maxAge) {
+                console.log(`🗑️  Deleting old artifact: ${artifactName} (${ageInDays.toFixed(1)} days old, max ${maxAge})`);
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id
+                });
+              }
+            }
+
+            console.log('✅ Cleanup completed');
+
+      - name: Backup summary
+        if: always()
+        run: |
+          echo "## 📦 Database Backup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backup Type:** ${{ steps.backup_info.outputs.backup_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** ${{ steps.backup_info.outputs.timestamp }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Retention:** ${{ steps.backup_info.outputs.retention_days }} days" >> $GITHUB_STEP_SUMMARY
+          echo "- **File:** \`${{ steps.compress.outputs.compressed_file }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "${{ steps.compress.outputs.compressed_file }}" ]; then
+            SIZE=$(ls -lh "${{ steps.compress.outputs.compressed_file }}" | awk '{print $5}')
+            echo "- **Size:** $SIZE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Status:** Backup completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status:** Backup failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Metadata" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          cat backup_metadata.json >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ BACKUP FAILED!"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Please check the logs immediately."
+
+          # Aquí se puede integrar notificación a Slack/Email
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} ...

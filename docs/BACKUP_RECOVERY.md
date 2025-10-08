@@ -42,7 +42,7 @@
 
 ### 1.2 Backups pg_dump Automatizados
 
-**Estado actual:** ⚠️ PENDIENTE IMPLEMENTACIÓN
+**Estado actual:** ✅ ACTIVO
 
 **Objetivo:** Backup tradicional para:
 
@@ -51,64 +51,104 @@
 - Migración entre proveedores
 - Retención a largo plazo (>30 días)
 
-**Configuración planeada:**
+**Implementación actual:**
 
 #### GitHub Actions Workflow
 
-```yaml
-# .github/workflows/backup-database.yml
-name: Database Backup
+Ubicación: `.github/workflows/backup-database.yml`
 
-on:
-  schedule:
-    - cron: "0 2 * * *" # Diario a las 2:00 AM UTC
-  workflow_dispatch: # Manual trigger
+**Triggers configurados:**
 
-jobs:
-  backup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+- **Automático:** Diario a las 2:00 AM UTC (cron: `0 2 * * *`)
+- **Manual:** Disponible en Actions → Database Backup → Run workflow
 
-      - name: Create backup
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          BACKUP_FILE="backup_brisa_$TIMESTAMP.sql"
+**Características del workflow:**
 
-          pg_dump "$DATABASE_URL" \
-            --no-owner \
-            --no-privileges \
-            --clean \
-            --if-exists \
-            > "$BACKUP_FILE"
+1. **Tipos de backup automáticos:**
+   - **Daily:** Lunes a sábado → Retención 7 días
+   - **Weekly:** Domingos → Retención 30 días
+   - **Monthly:** Día 1 de cada mes → Retención 365 días
+   - **Manual:** Trigger manual → Retención configurable (7/30/365 días)
 
-          gzip "$BACKUP_FILE"
-          echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
+2. **Proceso de backup:**
 
-      - name: Upload to S3 (optional)
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          # Instalar AWS CLI y subir
-          # aws s3 cp "$BACKUP_FILE" s3://bucket-name/backups/
-          echo "Placeholder: Subir a storage externo"
+   ```bash
+   # Instalación PostgreSQL 16 client
+   sudo apt-get install -y postgresql-client-16
 
-      - name: Retention policy
-        run: |
-          # Mantener últimos 30 backups
-          # Eliminar backups > 30 días
-          echo "Placeholder: Aplicar política de retención"
+   # Creación del backup con pg_dump
+   pg_dump "$DATABASE_URL" \
+     --no-owner \
+     --no-privileges \
+     --clean \
+     --if-exists \
+     --verbose \
+     > backup_brisa_[type]_[timestamp].sql
+
+   # Compresión gzip nivel 9
+   gzip -9 backup_brisa_[type]_[timestamp].sql
+   ```
+
+3. **Verificación de integridad:**
+   - Validación de archivo no vacío
+   - Verificación de header PostgreSQL
+   - Conteo de líneas (alerta si < 100)
+
+4. **Metadata generada:**
+
+   ```json
+   {
+     "backup_file": "backup_brisa_daily_20251008_020000.sql.gz",
+     "backup_type": "daily",
+     "timestamp": "20251008_020000",
+     "retention_days": 7,
+     "database": "neondb",
+     "postgres_version": "16",
+     "workflow_run_id": "...",
+     "git_sha": "...",
+     "created_at": "2025-10-08T02:00:00Z"
+   }
+   ```
+
+5. **Almacenamiento:**
+   - GitHub Actions Artifacts
+   - Compresión: gzip -9 (sin compresión adicional de GitHub)
+   - Nombres: `[type]-backup-[timestamp]`
+   - Archivos incluidos: `.sql.gz`, `backup_metadata.json`, `backup.log`
+
+6. **Limpieza automática:**
+   - Ejecuta solo en backups programados (no manuales)
+   - Política de retención por tipo:
+     - `daily-backup-*`: 7 días
+     - `weekly-backup-*`: 30 días
+     - `monthly-backup-*`: 365 días
+   - Elimina artifacts que exceden su retención
+
+**Cómo ejecutar backup manual:**
+
+```bash
+# Opción 1: Desde GitHub UI
+# 1. Ir a Actions → Database Backup → Run workflow
+# 2. Seleccionar branch: main
+# 3. Elegir retention_days: 7/30/365
+# 4. Click "Run workflow"
+
+# Opción 2: Desde CLI con gh
+gh workflow run backup-database.yml --field retention_days=30
+
+# Ver estado de ejecución
+gh run list --workflow=backup-database.yml --limit 5
+gh run watch
+
+# Descargar último backup
+gh run download [run-id]
 ```
 
-**Política de retención recomendada:**
+**Política de retención implementada:**
 
-- **Diarios:** 7 días
-- **Semanales:** 4 semanas
-- **Mensuales:** 12 meses
+- **Diarios:** 7 días (Lun-Sáb)
+- **Semanales:** 30 días (Domingos)
+- **Mensuales:** 365 días (día 1 de mes)
 
 ---
 
@@ -184,16 +224,23 @@ jobs:
 
 **Pasos:**
 
-1. **Listar backups disponibles:**
+1. **Listar y descargar backups disponibles:**
 
    ```bash
-   # Si están en GitHub Artifacts:
-   gh run list --workflow=backup-database.yml
+   # Listar workflows recientes
+   gh run list --workflow=backup-database.yml --limit 10
+
+   # Ver detalles de un run específico
+   gh run view [run-id]
+
+   # Descargar artifacts de un run
    gh run download [run-id]
 
-   # Si están en S3:
-   aws s3 ls s3://bucket-name/backups/
-   aws s3 cp s3://bucket-name/backups/backup_brisa_20251008.sql.gz .
+   # Esto descarga en ./[artifact-name]/
+   # Ejemplo: ./daily-backup-20251008_020000/
+   #   - backup_brisa_daily_20251008_020000.sql.gz
+   #   - backup_metadata.json
+   #   - backup.log
    ```
 
 2. **Descomprimir y verificar:**
@@ -364,25 +411,32 @@ echo "✅ Verificación completada"
 
 ## 6. Siguiente Pasos de Implementación
 
+### Completado ✅
+
+- [x] Implementar GitHub Actions para pg_dump diario (`.github/workflows/backup-database.yml`)
+- [x] Automatizar cleanup de backups antiguos (integrado en workflow)
+- [x] Política de retención inteligente (daily/weekly/monthly)
+- [x] Verificación de integridad automática
+- [x] Metadata tracking para cada backup
+
 ### Prioridad ALTA
 
-- [ ] Implementar GitHub Actions para pg_dump diario
-- [ ] Configurar storage S3/GCS para backups externos
-- [ ] Crear script verify-backup.sh y añadir a CI
-- [ ] Documentar primer test de restauración
+- [ ] Ejecutar primer backup manual para validar workflow
+- [ ] Documentar primer test de restauración completo
+- [ ] Configurar alertas en Neon Console
 
 ### Prioridad MEDIA
 
-- [ ] Configurar alertas en Neon Console
-- [ ] Establecer calendario de tests mensuales
-- [ ] Evaluar SimpleBackups como alternativa
-- [ ] Crear runbook de incidentes
+- [ ] Establecer calendario de tests mensuales de restauración
+- [ ] Crear script verify-backup.sh standalone
+- [ ] Crear runbook detallado de incidentes
+- [ ] Configurar storage S3/GCS para backups externos (opcional)
 
 ### Prioridad BAJA
 
-- [ ] Automatizar cleanup de backups antiguos
+- [ ] Evaluar SimpleBackups como alternativa
 - [ ] Integrar métricas de backup en dashboard
-- [ ] Implementar backups incrementales
+- [ ] Implementar backups incrementales (si se necesita optimizar storage)
 
 ---
 
