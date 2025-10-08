@@ -1,7 +1,6 @@
-import { Buffer } from "node:buffer";
 import type { NextRequest } from "next/server";
 
-const API_BASE_URL = (() => {
+function resolveApiBaseUrl(): string {
   const value = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL;
   if (!value) {
     throw new Error(
@@ -9,13 +8,13 @@ const API_BASE_URL = (() => {
     );
   }
   return value.endsWith("/") ? value : `${value}/`;
-})();
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function buildTargetUrl(segments: string[]) {
-  return new URL(segments.join("/"), API_BASE_URL);
+  return new URL(segments.join("/"), resolveApiBaseUrl());
 }
 
 async function proxy(request: NextRequest, context: any) {
@@ -41,11 +40,9 @@ async function proxy(request: NextRequest, context: any) {
     "Access-Control-Allow-Origin",
     request.headers.get("origin") ?? "*",
   );
+  responseHeaders.delete("content-length");
 
-  const buffer = Buffer.from(await upstream.arrayBuffer());
-  responseHeaders.set("content-length", buffer.byteLength.toString());
-
-  return new Response(buffer, {
+  return new Response(await upstream.arrayBuffer(), {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: responseHeaders,
