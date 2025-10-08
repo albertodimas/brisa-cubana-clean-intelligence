@@ -8,7 +8,7 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/server.ts",
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
     "build": "prisma generate && tsc --project tsconfig.json",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",

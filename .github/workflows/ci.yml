@@ -66,7 +66,7 @@ jobs:
           echo "LOGIN_RATE_LIMIT=${{ secrets.LOGIN_RATE_LIMIT || '5' }}" >> $GITHUB_ENV
           echo "LOGIN_RATE_LIMIT_WINDOW_MS=${{ secrets.LOGIN_RATE_LIMIT_WINDOW_MS || '60000' }}" >> $GITHUB_ENV
           echo "E2E_ADMIN_EMAIL=admin@brisacubanaclean.com" >> $GITHUB_ENV
-          echo "E2E_ADMIN_PASSWORD=Brisa123!" >> $GITHUB_ENV
+          echo "E2E_ADMIN_PASSWORD=BrisaClean2025" >> $GITHUB_ENV
 
       - name: Lint
         run: pnpm lint
