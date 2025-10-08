@@ -88,10 +88,13 @@ jobs:
             --clean \
             --if-exists \
             --verbose \
-            > "${{ steps.backup_info.outputs.backup_file }}" 2>&1 | tee backup.log
+            > "${{ steps.backup_info.outputs.backup_file }}" 2> backup.log
 
           echo "✅ Backup created: ${{ steps.backup_info.outputs.backup_file }}"
           ls -lh "${{ steps.backup_info.outputs.backup_file }}"
+
+          echo "📋 Backup log:"
+          cat backup.log
 
       - name: Compress backup
         run: |
