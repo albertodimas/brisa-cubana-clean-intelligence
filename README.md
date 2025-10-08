@@ -97,7 +97,7 @@ La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoi
 
 ## Autenticación y RBAC
 
-- Login API: `POST http://localhost:3001/api/auth/login` con `email` y `password`.
+- Login API: `POST http://localhost:3001/api/authentication/login` con `email` y `password`.
   - Credenciales sembradas: `admin@brisacubanaclean.com / Brisa123!` y `ops@brisacubanaclean.com / Brisa123!`.
 - La web usa Auth.js (NextAuth v5) para guardar el JWT en cookies HttpOnly (`AUTH_SECRET`) y obtener el bearer token en cada server action.
 - El login aplica rate limiting configurable (`LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`) y endurece cookies (`SameSite=Strict`, `Secure`) cuando la aplicación se sirve vía HTTPS.
