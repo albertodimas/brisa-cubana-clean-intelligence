@@ -1,6 +1,6 @@
 // @ts-nocheck - Vercel serverless function wrapper
 import { handle } from "hono/vercel";
-import app from "../../api/dist/app.js";
+import app from "@brisa/api";
 
 export const config = {
   runtime: "nodejs",

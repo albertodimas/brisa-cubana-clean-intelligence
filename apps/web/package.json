@@ -11,6 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@brisa/api": "workspace:*",
+    "hono": "4.9.10",
     "next": "15.5.4",
     "next-auth": "5.0.0-beta.29",
     "react": "19.2.0",
