@@ -13,13 +13,17 @@ function resolveApiBaseUrl(): string {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function buildTargetUrl(segments: string[]) {
-  return new URL(segments.join("/"), resolveApiBaseUrl());
+function buildTargetUrl(request: NextRequest, segments: string[]) {
+  const path = segments.length > 0 ? `api/${segments.join("/")}` : "api";
+  const upstreamUrl = new URL(path, resolveApiBaseUrl());
+  const currentUrl = new URL(request.url);
+  upstreamUrl.search = currentUrl.search;
+  return upstreamUrl;
 }
 
 async function proxy(request: NextRequest, context: any) {
   const segments: string[] = context?.params?.route ?? [];
-  const url = buildTargetUrl(segments);
+  const url = buildTargetUrl(request, segments);
   const headers = new Headers(request.headers);
   headers.delete("host");
 
