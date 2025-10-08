@@ -1,20 +1,20 @@
-// @ts-nocheck - Vercel serverless function wrapper
+import type { NextRequest } from "next/server";
+
 export const runtime = "nodejs";
 
-let cachedApp;
+let appPromise: Promise<(typeof import("@brisa/api"))["default"]> | null = null;
 
 async function resolveApp() {
-  if (!cachedApp) {
-    const mod = await import("@brisa/api");
-    cachedApp = mod.default;
+  if (!appPromise) {
+    appPromise = import("@brisa/api").then((mod) => mod.default);
   }
-  return cachedApp;
+  return appPromise;
 }
 
-const dispatch = async (request) => {
+async function dispatch(request: NextRequest) {
   const app = await resolveApp();
   return app.fetch(request);
-};
+}
 
 export const GET = dispatch;
 export const POST = dispatch;
