@@ -41,7 +41,10 @@ async function proxy(request: NextRequest, context: any) {
     request.headers.get("origin") ?? "*",
   );
 
-  return new Response(upstream.body, {
+  const body = await upstream.arrayBuffer();
+  responseHeaders.delete("content-length");
+
+  return new Response(body, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: responseHeaders,
