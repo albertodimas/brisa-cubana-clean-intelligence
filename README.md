@@ -7,15 +7,15 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 - **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local)
 - **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto y CI en GitHub Actions
 
-## Estado al 7 de octubre de 2025
+## Estado al 7-8 de octubre de 2025
 
-| Área          | Estado | Detalle                                                                           |
-| ------------- | ------ | --------------------------------------------------------------------------------- |
-| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.       |
-| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas. |
-| Tests         | 🟡     | Vitest (`pnpm test`) y suites Playwright iniciales (`pnpm test:e2e`).             |
-| Documentación | 🟢     | README + quickstart verificados con setup local.                                  |
-| Deploy        | 🔴     | Solo desarrollo local. Deploy no configurado.                                     |
+| Área          | Estado | Detalle                                                                              |
+| ------------- | ------ | ------------------------------------------------------------------------------------ |
+| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.          |
+| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas.    |
+| Tests         | 🟡     | Vitest (`pnpm test`) y suites Playwright iniciales (`pnpm test:e2e`).                |
+| Documentación | 🟢     | README + quickstart verificados con setup local.                                     |
+| Deploy        | 🟢     | **API desplegada en Vercel**: https://brisa-cubana-clean-intelligence-api.vercel.app |
 
 ## Requisitos
 
@@ -76,6 +76,20 @@ pnpm test
 | `pnpm db:push`   | Sincroniza el esquema Prisma con PostgreSQL        |
 | `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings)   |
 | `pnpm build`     | Genera artefactos de producción (Next + API)       |
+
+## Deploy en Producción
+
+**API en Vercel:** https://brisa-cubana-clean-intelligence-api.vercel.app
+
+Endpoints verificados funcionando:
+
+- `GET /health` - Health check con estado de la base de datos
+- `GET /` - Información de la API (nombre, versión, timestamp)
+- `GET /api/services` - Listar servicios
+- `GET /api/properties` - Listar propiedades
+- `GET /api/bookings` - Listar reservas (acepta filtros `?from=` y `?to=`)
+
+La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoints POST/PATCH requieren autenticación JWT.
 
 ## Documentación
 
