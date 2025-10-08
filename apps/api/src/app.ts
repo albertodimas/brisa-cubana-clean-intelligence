@@ -60,12 +60,10 @@ app.get("/health", async (c) => {
   }
 });
 
-// Routes are mounted without /api prefix because Vercel Functions
-// already mounts them at /api/[...route]
-app.route("/services", services);
-app.route("/properties", properties);
-app.route("/customers", customers);
-app.route("/bookings", bookings);
-app.route("/auth", auth);
+app.route("/api/services", services);
+app.route("/api/properties", properties);
+app.route("/api/customers", customers);
+app.route("/api/bookings", bookings);
+app.route("/api/auth", auth);
 
 export default app;

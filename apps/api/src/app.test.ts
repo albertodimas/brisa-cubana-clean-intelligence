@@ -352,7 +352,7 @@ describe("app", () => {
   });
 
   it("lists services", async () => {
-    const res = await app.request("/services");
+    const res = await app.request("/api/services");
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data.length).toBeGreaterThan(0);
@@ -366,7 +366,7 @@ describe("app", () => {
       durationMin: 90,
     };
 
-    const res = await app.request("/services", {
+    const res = await app.request("/api/services", {
       method: "POST",
       headers: authorizedHeaders,
       body: JSON.stringify(payload),
@@ -378,7 +378,7 @@ describe("app", () => {
   });
 
   it("rejects service creation when unauthorized", async () => {
-    const res = await app.request("/services", {
+    const res = await app.request("/api/services", {
       method: "POST",
       headers: { Authorization: "Bearer bad" },
       body: "{}",
@@ -387,7 +387,7 @@ describe("app", () => {
   });
 
   it("lists bookings", async () => {
-    const res = await app.request("/bookings");
+    const res = await app.request("/api/bookings");
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data).toBeDefined();
@@ -397,7 +397,7 @@ describe("app", () => {
     const from = new Date("2024-09-30T00:00:00Z").toISOString();
     const to = new Date("2024-10-02T23:59:59Z").toISOString();
     const res = await app.request(
-      `/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+      `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
     );
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -413,7 +413,7 @@ describe("app", () => {
       scheduledAt: new Date().toISOString(),
     };
 
-    const res = await app.request("/bookings", {
+    const res = await app.request("/api/bookings", {
       method: "POST",
       headers: authorizedHeaders,
       body: JSON.stringify(payload),
@@ -425,7 +425,7 @@ describe("app", () => {
   });
 
   it("updates a booking", async () => {
-    const res = await app.request("/bookings/booking_fixture_1", {
+    const res = await app.request("/api/bookings/booking_fixture_1", {
       method: "PATCH",
       headers: authorizedHeaders,
       body: JSON.stringify({ status: "COMPLETED", notes: "Finalizada" }),
@@ -438,7 +438,7 @@ describe("app", () => {
   });
 
   it("lists properties", async () => {
-    const res = await app.request("/properties");
+    const res = await app.request("/api/properties");
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data.length).toBeGreaterThan(0);
@@ -458,7 +458,7 @@ describe("app", () => {
       sqft: 1500,
     };
 
-    const res = await app.request("/properties", {
+    const res = await app.request("/api/properties", {
       method: "POST",
       headers: authorizedHeaders,
       body: JSON.stringify(payload),
@@ -471,7 +471,7 @@ describe("app", () => {
 
   it("updates a property when authorized", async () => {
     const existing = propertiesFixture[0];
-    const res = await app.request(`/properties/${existing.id}`, {
+    const res = await app.request(`/api/properties/${existing.id}`, {
       method: "PATCH",
       headers: authorizedHeaders,
       body: JSON.stringify({ notes: "Actualizada", bedrooms: 4 }),
@@ -484,7 +484,7 @@ describe("app", () => {
   });
 
   it("lists customers with authorization", async () => {
-    const res = await app.request("/customers", {
+    const res = await app.request("/api/customers", {
       headers: authorizedHeaders,
     });
 
@@ -494,7 +494,7 @@ describe("app", () => {
   });
 
   it("logs in a user and returns a token", async () => {
-    const res = await app.request("/auth/login", {
+    const res = await app.request("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
         email: "admin@brisacubanaclean.com",
@@ -516,7 +516,7 @@ describe("app", () => {
     await new Promise((resolve) => setTimeout(resolve, windowMs + 100));
 
     for (let i = 0; i < limit; i += 1) {
-      const res = await app.request("/auth/login", {
+      const res = await app.request("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({
           email: "unknown@brisacubanaclean.com",
@@ -526,7 +526,7 @@ describe("app", () => {
       expect(res.status).toBe(401);
     }
 
-    const blocked = await app.request("/auth/login", {
+    const blocked = await app.request("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
         email: "unknown@brisacubanaclean.com",
@@ -544,7 +544,7 @@ describe("app", () => {
   it("rejects login with invalid credentials", async () => {
     mockCompare.mockResolvedValueOnce(false);
 
-    const res = await app.request("/auth/login", {
+    const res = await app.request("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
         email: "admin@brisacubanaclean.com",
