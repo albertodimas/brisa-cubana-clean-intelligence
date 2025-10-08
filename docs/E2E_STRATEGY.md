@@ -182,6 +182,44 @@ export default defineConfig({
 
 ---
 
+## Problemas Resueltos
+
+### Rate Limiting en Tests Paralelos
+
+**Problema:** Al ejecutar la suite `critical` con 7 workers paralelos, los tests fallaban con error "No se pudo iniciar sesión".
+
+**Causa raíz:**
+
+- El flujo de autenticación es: Navegador → Next.js → Auth Provider → API
+- Los tests configuran `x-forwarded-for` en el navegador, pero este header **no se propaga** al API
+- El Auth Provider hace fetch al API `/api/authentication/login` desde localhost (mismo IP para todos)
+- Con 7 logins paralelos desde la misma IP (localhost), se excede el límite por defecto de `LOGIN_RATE_LIMIT=5`
+
+**Solución aplicada:**
+Aumentar el rate limit en entorno de test en `playwright.config.ts`:
+
+```typescript
+{
+  command: "pnpm --filter @brisa/api dev",
+  env: {
+    NODE_ENV: "test",
+    LOGIN_RATE_LIMIT: "50", // Increased for parallel E2E tests
+    LOGIN_RATE_LIMIT_WINDOW_MS: "60000",
+  },
+}
+```
+
+**Resultado:**
+
+- ✅ Critical suite: 7/7 tests passing (7.8s)
+- ✅ Full suite: 13/13 tests passing
+- ✅ Smoke suite: 2/2 tests passing (7.1s)
+
+**Mejora futura (opcional):**
+Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, permitiendo usar el rate limiting real por IP.
+
+---
+
 ## Integración CI/CD
 
 ### GitHub Actions Workflows

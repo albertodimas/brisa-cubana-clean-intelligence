@@ -60,6 +60,8 @@ export default defineConfig({
         DATABASE_URL: databaseUrl,
         DATABASE_URL_UNPOOLED: databaseUrl,
         JWT_SECRET: jwtSecret,
+        LOGIN_RATE_LIMIT: "50", // Increased for parallel E2E tests
+        LOGIN_RATE_LIMIT_WINDOW_MS: "60000",
       },
       timeout: 120_000,
     },
