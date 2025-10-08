@@ -225,7 +225,7 @@ test.describe("Seguridad y Autenticación", () => {
   });
 
   test.describe("Sesión y logout", () => {
-    test.fixme("permite cerrar sesión correctamente", async ({ page }) => {
+    test("permite cerrar sesión correctamente", async ({ page }) => {
       // Login
       await page.goto("/login");
       await page.getByLabel("Correo").fill(adminEmail);
@@ -251,34 +251,24 @@ test.describe("Seguridad y Autenticación", () => {
       ).not.toBeVisible();
     });
 
-    test.fixme(
-      "sesión persiste después de recargar página",
-      async ({ page }) => {
-        // Login
-        await page.goto("/login");
-        await page.getByLabel("Correo").fill(adminEmail);
-        await page.getByLabel("Contraseña").fill(adminPassword);
-        await page.getByRole("button", { name: "Ingresar" }).click();
-        await page.waitForURL("/**");
+    test("sesión persiste después de recargar página", async ({ page }) => {
+      // Login
+      await page.goto("/login");
+      await page.getByLabel("Correo").fill(adminEmail);
+      await page.getByLabel("Contraseña").fill(adminPassword);
+      await page.getByRole("button", { name: "Ingresar" }).click();
+      await page.waitForURL("/**");
 
-        await expect(
-          page.getByText("Sesión activa", { exact: false }),
-        ).toBeVisible({ timeout: 5000 });
+      await expect(
+        page.getByText("Sesión activa", { exact: false }),
+      ).toBeVisible({ timeout: 5000 });
 
-        // Recargar página
-        await page.reload();
+      // Recargar página
+      await page.reload();
 
-        await expect(
-          page.getByText("Sesión activa", { exact: false }),
-        ).toBeVisible({ timeout: 5000 });
-      },
-      {
-        annotation: {
-          type: "issue",
-          description:
-            "Session cookie not persisted across reloads - investigate NextAuth credentials flow",
-        },
-      },
-    );
+      await expect(
+        page.getByText("Sesión activa", { exact: false }),
+      ).toBeVisible({ timeout: 5000 });
+    });
   });
 });
