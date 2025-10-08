@@ -89,7 +89,7 @@ jobs:
           echo "🔄 Creating PostgreSQL backup..."
 
           set +e  # Don't exit on error, we want to capture logs
-          pg_dump "$DATABASE_URL" \
+          /usr/lib/postgresql/${{ env.POSTGRES_VERSION }}/bin/pg_dump "$DATABASE_URL" \
             --no-owner \
             --no-privileges \
             --clean \
