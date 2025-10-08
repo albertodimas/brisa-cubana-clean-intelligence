@@ -1,12 +1,13 @@
 // @ts-nocheck - Vercel serverless function wrapper
-import { handle } from "hono/vercel";
 import app from "@brisa/api";
 
 export const runtime = "nodejs";
 
-export const GET = handle(app);
-export const POST = handle(app);
-export const PUT = handle(app);
-export const PATCH = handle(app);
-export const DELETE = handle(app);
-export const OPTIONS = handle(app);
+const dispatch = (request) => app.fetch(request);
+
+export const GET = dispatch;
+export const POST = dispatch;
+export const PUT = dispatch;
+export const PATCH = dispatch;
+export const DELETE = dispatch;
+export const OPTIONS = dispatch;

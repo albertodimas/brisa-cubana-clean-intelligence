@@ -99,9 +99,6 @@ importers:
       '@brisa/api':
         specifier: workspace:*
         version: link:../api
-      hono:
-        specifier: 4.9.10
-        version: 4.9.10
       next:
         specifier: 15.5.4
         version: 15.5.4(@playwright/test@1.56.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
