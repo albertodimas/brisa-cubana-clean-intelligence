@@ -29,6 +29,7 @@ export default defineConfig({
       stderr: "pipe",
       env: {
         DATABASE_URL: databaseUrl,
+        DATABASE_URL_UNPOOLED: databaseUrl,
         JWT_SECRET: jwtSecret,
       },
     },
@@ -41,6 +42,7 @@ export default defineConfig({
       env: {
         NODE_ENV: "test",
         DATABASE_URL: databaseUrl,
+        DATABASE_URL_UNPOOLED: databaseUrl,
         JWT_SECRET: jwtSecret,
       },
       timeout: 120_000,
