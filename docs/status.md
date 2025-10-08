@@ -135,12 +135,35 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ## 7. Calidad y pruebas
 
-- **Unitarias/e2e**:
-  - `apps/api` → 17 pruebas Vitest (auth, rate limiting, CRUD).
-  - `apps/web` → pruebas Vitest para componentes.
-  - `pnpm test:e2e` → 13 pruebas Playwright (auth, operaciones, seguridad) todas passing.
-- **TypeScript**: `pnpm typecheck`.
-- **Lint:** `pnpm lint`.
+### 7.1 Tests Unitarios
+
+- **`apps/api`**: 17 pruebas Vitest
+- **`apps/web`**: 1 prueba Vitest
+- **Total**: 18 pruebas passing
+
+### 7.2 Tests E2E - Estrategia Piramidal
+
+| Suite    | Tests | Duración | Comando                  |
+| -------- | ----- | -------- | ------------------------ |
+| Smoke    | 2     | ~7s      | `pnpm test:e2e:smoke`    |
+| Critical | 7     | ~8s      | `pnpm test:e2e:critical` |
+| Full     | 13    | ~8s      | `pnpm test:e2e:full`     |
+
+**Documentación:** [E2E_STRATEGY.md](./E2E_STRATEGY.md)
+
+### 7.3 CI/CD Workflows
+
+- **PR Checks**: Smoke suite en pull requests (~7s)
+- **Main CI**: Critical suite en push a main (~8s)
+- **Nightly**: Full suite diario 2AM UTC (~8s)
+
+**Estado**: ✅ Workflows activos en GitHub Actions
+
+### 7.4 Calidad de Código
+
+- **TypeScript**: `pnpm typecheck` ✅
+- **Lint**: `pnpm lint` ✅
+- **Deuda técnica**: 0 TODOs/FIXME
 
 ---
 

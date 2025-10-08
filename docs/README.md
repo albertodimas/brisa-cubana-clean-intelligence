@@ -23,6 +23,12 @@ Este directorio contiene la documentación verificada del proyecto. Usa la sigui
 | ---------------------------------------- | ----------------------------------------------------------------- |
 | [`OBSERVABILITY.md`](./OBSERVABILITY.md) | Logging estructurado, métricas, alertas y runbooks de incidentes. |
 
+## Testing y CI/CD
+
+| Documento                              | Descripción                                                                      |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| [`E2E_STRATEGY.md`](./E2E_STRATEGY.md) | Estrategia E2E piramidal (smoke/critical/full), configuración y workflows CI/CD. |
+
 ---
 
 > **Nota:** Todos los documentos reflejan únicamente funcionalidades implementadas y probadas en `main`. Cualquier contribución nueva debe actualizar esta documentación.
