@@ -64,12 +64,15 @@ test.describe("Seguridad y Autenticación", () => {
   test.describe("Rate limiting", () => {
     test("bloquea múltiples intentos fallidos de login", async () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      // Read rate limit from env (default 5, test env uses 50)
+      const rateLimit = Number(process.env.LOGIN_RATE_LIMIT ?? "5");
+      const attemptsToTriggerLimit = rateLimit + 1;
 
       const apiContext = await playwrightRequest.newContext();
       let rateLimited = false;
 
       try {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < attemptsToTriggerLimit; i++) {
           const response = await apiContext.post(
             `${apiUrl}/api/authentication/login`,
             {

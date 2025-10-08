@@ -8,6 +8,8 @@ const databaseUrl =
   process.env.DATABASE_URL ??
   "postgresql://postgres:postgres@localhost:5433/brisa_cubana_e2e";
 const heartbeatSeconds = Number(process.env.E2E_HEARTBEAT_SECONDS ?? "15");
+const loginRateLimit = "50"; // Increased for parallel E2E tests
+const loginRateLimitWindow = "60000";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -60,8 +62,8 @@ export default defineConfig({
         DATABASE_URL: databaseUrl,
         DATABASE_URL_UNPOOLED: databaseUrl,
         JWT_SECRET: jwtSecret,
-        LOGIN_RATE_LIMIT: "50", // Increased for parallel E2E tests
-        LOGIN_RATE_LIMIT_WINDOW_MS: "60000",
+        LOGIN_RATE_LIMIT: loginRateLimit,
+        LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
       },
       timeout: 120_000,
     },
