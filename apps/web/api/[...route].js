@@ -1,9 +1,20 @@
 // @ts-nocheck - Vercel serverless function wrapper
-import app from "@brisa/api";
-
 export const runtime = "nodejs";
 
-const dispatch = (request) => app.fetch(request);
+let cachedApp;
+
+async function resolveApp() {
+  if (!cachedApp) {
+    const mod = await import("@brisa/api");
+    cachedApp = mod.default;
+  }
+  return cachedApp;
+}
+
+const dispatch = async (request) => {
+  const app = await resolveApp();
+  return app.fetch(request);
+};
 
 export const GET = dispatch;
 export const POST = dispatch;
