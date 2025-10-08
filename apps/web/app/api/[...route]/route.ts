@@ -42,7 +42,9 @@ async function proxy(request: NextRequest, context: any) {
   );
   responseHeaders.delete("content-length");
 
-  return new Response(await upstream.arrayBuffer(), {
+  const bodyText = await upstream.text();
+
+  return new Response(bodyText, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: responseHeaders,
