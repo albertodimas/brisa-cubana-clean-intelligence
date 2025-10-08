@@ -494,7 +494,7 @@ describe("app", () => {
   });
 
   it("logs in a user and returns a token", async () => {
-    const res = await app.request("/api/auth/login", {
+    const res = await app.request("/api/authentication/login", {
       method: "POST",
       body: JSON.stringify({
         email: "admin@brisacubanaclean.com",
@@ -516,7 +516,7 @@ describe("app", () => {
     await new Promise((resolve) => setTimeout(resolve, windowMs + 100));
 
     for (let i = 0; i < limit; i += 1) {
-      const res = await app.request("/api/auth/login", {
+      const res = await app.request("/api/authentication/login", {
         method: "POST",
         body: JSON.stringify({
           email: "unknown@brisacubanaclean.com",
@@ -526,7 +526,7 @@ describe("app", () => {
       expect(res.status).toBe(401);
     }
 
-    const blocked = await app.request("/api/auth/login", {
+    const blocked = await app.request("/api/authentication/login", {
       method: "POST",
       body: JSON.stringify({
         email: "unknown@brisacubanaclean.com",
@@ -544,7 +544,7 @@ describe("app", () => {
   it("rejects login with invalid credentials", async () => {
     mockCompare.mockResolvedValueOnce(false);
 
-    const res = await app.request("/api/auth/login", {
+    const res = await app.request("/api/authentication/login", {
       method: "POST",
       body: JSON.stringify({
         email: "admin@brisacubanaclean.com",

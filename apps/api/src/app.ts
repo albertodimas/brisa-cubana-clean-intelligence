@@ -64,6 +64,8 @@ app.route("/api/services", services);
 app.route("/api/properties", properties);
 app.route("/api/customers", customers);
 app.route("/api/bookings", bookings);
-app.route("/api/auth", auth);
+// Note: Using /api/authentication instead of /api/auth because Vercel
+// reserves /api/auth/* for NextAuth in Next.js projects
+app.route("/api/authentication", auth);
 
 export default app;
