@@ -37,7 +37,15 @@ async function proxy(request: NextRequest, context: any) {
     init.body = request.body;
   }
 
+  console.log("[api proxy] →", request.method, url.toString());
   const upstream = await fetch(url, init);
+  console.log(
+    "[api proxy] ←",
+    upstream.status,
+    upstream.statusText,
+    "for",
+    url.toString(),
+  );
   const responseHeaders = new Headers(upstream.headers);
 
   responseHeaders.set(

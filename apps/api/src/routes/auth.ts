@@ -78,7 +78,21 @@ router.post("/login", async (c) => {
     return c.json({ error: "Invalid credentials" }, 401);
   }
 
-  const isValid = await bcrypt.compare(password, user.passwordHash);
+  const namespace = bcrypt as unknown as {
+    compare?: typeof bcrypt.compare;
+    default?: { compare?: typeof bcrypt.compare };
+  };
+  const compareFn = namespace.compare ?? namespace.default?.compare;
+
+  if (!compareFn) {
+    console.error(
+      "[auth] bcrypt.compare unavailable. Namespace keys:",
+      Object.keys(namespace),
+    );
+    return c.json({ error: "Authentication service misconfigured" }, 500);
+  }
+
+  const isValid = await compareFn(password, user.passwordHash);
   if (!isValid) {
     return c.json({ error: "Invalid credentials" }, 401);
   }
