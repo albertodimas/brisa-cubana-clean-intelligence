@@ -1,9 +1,21 @@
 import { test, expect, Page } from "@playwright/test";
+import type { TestInfo } from "@playwright/test";
 
 const adminEmail = process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanaclean.com";
 const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? "Brisa123!";
 
-async function login(page: Page) {
+function ipForTest(testInfo: TestInfo): string {
+  let hash = 0;
+  for (const char of testInfo.title) {
+    hash = (hash * 31 + char.charCodeAt(0)) % 200;
+  }
+  const octet = 10 + (hash % 200);
+  return `198.51.100.${octet}`;
+}
+
+async function login(page: Page, testInfo: TestInfo) {
+  const ip = ipForTest(testInfo);
+  await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
   await page.goto("/login");
   await page.getByLabel("Correo").fill(adminEmail);
   await page.getByLabel("Contraseña").fill(adminPassword);
@@ -15,8 +27,8 @@ async function login(page: Page) {
 }
 
 test.describe("Operaciones", () => {
-  test("permite crear un nuevo servicio", async ({ page }) => {
-    await login(page);
+  test("permite crear un nuevo servicio", async ({ page }, testInfo) => {
+    await login(page, testInfo);
 
     const uniqueName = `Servicio E2E ${Date.now().toString().slice(-6)}`;
     const serviceForm = page.locator("form").filter({
@@ -35,8 +47,8 @@ test.describe("Operaciones", () => {
     await expect(page.getByText(uniqueName).first()).toBeVisible();
   });
 
-  test("filtra reservas por estado", async ({ page }) => {
-    await login(page);
+  test("filtra reservas por estado", async ({ page }, testInfo) => {
+    await login(page, testInfo);
 
     const statusSelect = page.getByTestId("booking-status-filter");
     await statusSelect.selectOption("CONFIRMED");

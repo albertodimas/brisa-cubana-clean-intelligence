@@ -1,11 +1,23 @@
 import { test, expect, request as playwrightRequest } from "@playwright/test";
+import type { TestInfo } from "@playwright/test";
 
 const adminEmail = process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanaclean.com";
 const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? "Brisa123!";
 
+function ipForTest(testInfo: TestInfo, namespace = 102): string {
+  let hash = 0;
+  for (const char of testInfo.title) {
+    hash = (hash * 33 + char.charCodeAt(0)) % 200;
+  }
+  const octet = 10 + (hash % 200);
+  return `198.51.${namespace}.${octet}`;
+}
+
 test.describe("Seguridad y Autenticación", () => {
   test.describe("Escenarios negativos de login", () => {
-    test("rechaza credenciales inválidas", async ({ page }) => {
+    test("rechaza credenciales inválidas", async ({ page }, testInfo) => {
+      const ip = ipForTest(testInfo);
+      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       await page.goto("/login");
 
       await page.getByLabel("Correo").fill("invalido@example.com");
@@ -18,7 +30,9 @@ test.describe("Seguridad y Autenticación", () => {
       ).toBeVisible();
     });
 
-    test("rechaza email inválido", async ({ page }) => {
+    test("rechaza email inválido", async ({ page }, testInfo) => {
+      const ip = ipForTest(testInfo, 103);
+      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       await page.goto("/login");
 
       await page.getByLabel("Correo").fill("no-es-un-email");
@@ -30,7 +44,9 @@ test.describe("Seguridad y Autenticación", () => {
       await expect(page).toHaveURL(/\/login/);
     });
 
-    test("rechaza password vacío", async ({ page }) => {
+    test("rechaza password vacío", async ({ page }, testInfo) => {
+      const ip = ipForTest(testInfo, 104);
+      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       await page.goto("/login");
 
       await page.getByLabel("Correo").fill(adminEmail);
@@ -84,7 +100,9 @@ test.describe("Seguridad y Autenticación", () => {
   test.describe("Acceso sin autenticación", () => {
     test("redirige a login cuando se accede al panel sin sesión", async ({
       page,
-    }) => {
+    }, testInfo) => {
+      const ip = ipForTest(testInfo, 105);
+      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Intentar acceder directamente al panel
       await page.goto("/");
 
@@ -111,7 +129,11 @@ test.describe("Seguridad y Autenticación", () => {
   });
 
   test.describe("Permisos y roles", () => {
-    test("usuario CLIENT no debe poder crear servicios", async ({ page }) => {
+    test("usuario CLIENT no debe poder crear servicios", async ({
+      page,
+    }, testInfo) => {
+      const ip = ipForTest(testInfo, 106);
+      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Este test requiere credenciales de usuario CLIENT
       // Por ahora lo marcamos como ejemplo de test futuro
 
@@ -225,7 +247,9 @@ test.describe("Seguridad y Autenticación", () => {
   });
 
   test.describe("Sesión y logout", () => {
-    test("permite cerrar sesión correctamente", async ({ page }) => {
+    test("permite cerrar sesión correctamente", async ({ page }, testInfo) => {
+      const ip = ipForTest(testInfo, 107);
+      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Login
       await page.goto("/login");
       await page.getByLabel("Correo").fill(adminEmail);
@@ -251,7 +275,11 @@ test.describe("Seguridad y Autenticación", () => {
       ).not.toBeVisible();
     });
 
-    test("sesión persiste después de recargar página", async ({ page }) => {
+    test("sesión persiste después de recargar página", async ({
+      page,
+    }, testInfo) => {
+      const ip = ipForTest(testInfo, 108);
+      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Login
       await page.goto("/login");
       await page.getByLabel("Correo").fill(adminEmail);

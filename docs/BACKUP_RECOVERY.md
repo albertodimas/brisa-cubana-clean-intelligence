@@ -73,11 +73,11 @@ Ubicación: `.github/workflows/backup-database.yml`
 2. **Proceso de backup:**
 
    ```bash
-   # Instalación PostgreSQL 16 client
-   sudo apt-get install -y postgresql-client-16
+   # Instalación PostgreSQL 17 client (pg_dump v17)
+   sudo apt-get install -y postgresql-client-17
 
    # Creación del backup con pg_dump
-   pg_dump "$DATABASE_URL" \
+   /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" \
      --no-owner \
      --no-privileges \
      --clean \
@@ -103,7 +103,7 @@ Ubicación: `.github/workflows/backup-database.yml`
      "timestamp": "20251008_020000",
      "retention_days": 7,
      "database": "neondb",
-     "postgres_version": "16",
+     "postgres_version": "17",
      "workflow_run_id": "...",
      "git_sha": "...",
      "created_at": "2025-10-08T02:00:00Z"
