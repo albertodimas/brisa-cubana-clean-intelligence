@@ -14,7 +14,7 @@ function ipForTest(testInfo: TestInfo): string {
 }
 
 test.describe("Autenticación", () => {
-  test("permite iniciar sesión y acceder al panel operativo", async ({
+  test("permite iniciar sesión y acceder al panel operativo @smoke @critical", async ({
     page,
   }, testInfo) => {
     const ip = ipForTest(testInfo);

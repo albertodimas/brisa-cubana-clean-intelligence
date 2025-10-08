@@ -15,8 +15,24 @@ export default defineConfig({
   timeout: 60_000,
   retries: isCI ? 1 : 0,
   projects: [
+    // Smoke Tests: Critical functionality only (~2-3s)
     {
-      name: "chromium",
+      name: "smoke",
+      testMatch: /.*\.spec\.ts$/,
+      grep: /@smoke/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    // Critical Tests: Main business flows + smoke (~5-6s)
+    {
+      name: "critical",
+      testMatch: /.*\.spec\.ts$/,
+      grep: /@critical/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    // Full Suite: All tests (~8-10s)
+    {
+      name: "full",
+      testMatch: /.*\.spec\.ts$/,
       use: { ...devices["Desktop Chrome"] },
     },
   ],

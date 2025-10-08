@@ -27,7 +27,9 @@ async function login(page: Page, testInfo: TestInfo) {
 }
 
 test.describe("Operaciones", () => {
-  test("permite crear un nuevo servicio", async ({ page }, testInfo) => {
+  test("permite crear un nuevo servicio @smoke @critical", async ({
+    page,
+  }, testInfo) => {
     await login(page, testInfo);
 
     const uniqueName = `Servicio E2E ${Date.now().toString().slice(-6)}`;
@@ -47,7 +49,7 @@ test.describe("Operaciones", () => {
     await expect(page.getByText(uniqueName).first()).toBeVisible();
   });
 
-  test("filtra reservas por estado", async ({ page }, testInfo) => {
+  test("filtra reservas por estado @critical", async ({ page }, testInfo) => {
     await login(page, testInfo);
 
     const statusSelect = page.getByTestId("booking-status-filter");

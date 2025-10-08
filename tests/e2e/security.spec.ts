@@ -15,7 +15,9 @@ function ipForTest(testInfo: TestInfo, namespace = 102): string {
 
 test.describe("Seguridad y Autenticación", () => {
   test.describe("Escenarios negativos de login", () => {
-    test("rechaza credenciales inválidas", async ({ page }, testInfo) => {
+    test("rechaza credenciales inválidas @critical", async ({
+      page,
+    }, testInfo) => {
       const ip = ipForTest(testInfo);
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       await page.goto("/login");
@@ -129,7 +131,7 @@ test.describe("Seguridad y Autenticación", () => {
   });
 
   test.describe("Permisos y roles", () => {
-    test("usuario CLIENT no debe poder crear servicios", async ({
+    test("usuario CLIENT no debe poder crear servicios @critical", async ({
       page,
     }, testInfo) => {
       const ip = ipForTest(testInfo, 106);
@@ -247,7 +249,9 @@ test.describe("Seguridad y Autenticación", () => {
   });
 
   test.describe("Sesión y logout", () => {
-    test("permite cerrar sesión correctamente", async ({ page }, testInfo) => {
+    test("permite cerrar sesión correctamente @critical", async ({
+      page,
+    }, testInfo) => {
       const ip = ipForTest(testInfo, 107);
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Login
@@ -275,7 +279,7 @@ test.describe("Seguridad y Autenticación", () => {
       ).not.toBeVisible();
     });
 
-    test("sesión persiste después de recargar página", async ({
+    test("sesión persiste después de recargar página @critical", async ({
       page,
     }, testInfo) => {
       const ip = ipForTest(testInfo, 108);
