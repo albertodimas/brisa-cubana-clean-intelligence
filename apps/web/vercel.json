@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm build --filter=@brisa/api --filter=@brisa/web",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@brisa/api && pnpm turbo run build --filter=@brisa/web",
   "framework": "nextjs",
   "installCommand": "pnpm install",
   "ignoreCommand": "npx turbo-ignore --fallback=HEAD^1"
