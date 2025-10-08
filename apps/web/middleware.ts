@@ -6,7 +6,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/login", "/api/authentication"];
+  const publicRoutes = ["/login", "/api/auth"];
 
   // Check if current route is public
   const isPublicRoute = publicRoutes.some((route) =>
@@ -33,7 +33,7 @@ export const config = {
     /*
      * Match all request paths except:
      * - /api/* (API routes - handled by Hono serverless functions)
-     * - /api/authentication/* (Auth API routes)
+     * - /api/auth/* (NextAuth API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
