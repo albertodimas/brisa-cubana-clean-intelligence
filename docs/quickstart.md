@@ -23,17 +23,15 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    pnpm install
    ```
 3. **Configurar variables de entorno**
-   Crea un archivo `.env` en la raíz (o exporta variables en tu terminal) con al menos:
+
    ```bash
-   export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/brisa"
-   export JWT_SECRET="local-jwt-secret"
-   export AUTH_SECRET="local-auth-secret"
-   export NEXT_PUBLIC_API_URL="http://localhost:3001"
-   # Opcional para integraciones: export API_TOKEN="local-service-token"
-   # Opcionales: controlar el rate limiting de login
-    export LOGIN_RATE_LIMIT="5"
-    export LOGIN_RATE_LIMIT_WINDOW_MS="60000"
+   # Copia el template con valores seguros para desarrollo local
+   cp apps/api/.env.example apps/api/.env.local
+
+   # El archivo .env.local ya contiene credenciales de desarrollo local seguras
+   # Para más información sobre seguridad, ver docs/SECURITY.md
    ```
+
 4. **Levantar PostgreSQL (local)**
    ```bash
    docker compose up -d
