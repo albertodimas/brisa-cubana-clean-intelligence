@@ -20,7 +20,7 @@
 ## 2. Arquitectura y componentes
 
 - **Frontend (apps/web)**
-  - Next.js 15.5 + React 19.
+  - Next.js 15.5.4 + React 19.
   - Autenticación con Auth.js (NextAuth v5) y session strategy `jwt`.
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
@@ -32,7 +32,7 @@
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me/verify + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`: CRUD con autorización por rol.
   - Middleware `authenticate` y `requireRoles` (JWT/`API_TOKEN`).
-  - Prisma Client (PostgreSQL 16). Seed (`prisma/seed.ts`) crea datos funcionales.
+  - Prisma Client 6.12.0 (PostgreSQL 16). Seed (`prisma/seed.ts`) crea datos funcionales.
 
 - **Datos y persistencia**
   - Tablas principales:
@@ -128,7 +128,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Logs**:
   - `/favicon.ico` 404 → resueltos tras subir assets a `public/`.
   - `prisma:error … Closed` → ocurrieron antes del fix JWT/bcrypt; no presentes en despliegues vigentes.
-- **Rate limiting login**: límite 10 intentos / 60 segundos (configurable).
+- **Rate limiting login**: límite 5 intentos / 60 segundos (configurable vía `LOGIN_RATE_LIMIT` y `LOGIN_RATE_LIMIT_WINDOW_MS`).
 - **Proxy**: limpia `content-length`/`content-encoding` para evitar inconsistencias con respuestas comprimidas.
 
 ---
