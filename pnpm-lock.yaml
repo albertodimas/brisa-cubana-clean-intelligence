@@ -96,9 +96,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@brisa/api':
-        specifier: workspace:*
-        version: link:../api
       next:
         specifier: 15.5.4
         version: 15.5.4(@playwright/test@1.56.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
