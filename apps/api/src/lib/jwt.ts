@@ -36,8 +36,18 @@ export function signAuthToken(
     throw new Error("JWT secret not configured");
   }
 
+  const namespace = jwt as unknown as {
+    sign?: typeof jwt.sign;
+    default?: { sign?: typeof jwt.sign };
+  };
+  const signFn = namespace.sign ?? namespace.default?.sign;
+
+  if (!signFn) {
+    throw new Error("JWT sign function unavailable");
+  }
+
   const options: SignOptions = { expiresIn };
-  return jwt.sign(payload, secret, options);
+  return signFn(payload, secret, options);
 }
 
 export function verifyAuthToken(token: string): AuthPayload | null {
@@ -46,8 +56,18 @@ export function verifyAuthToken(token: string): AuthPayload | null {
     return null;
   }
 
+  const namespace = jwt as unknown as {
+    verify?: typeof jwt.verify;
+    default?: { verify?: typeof jwt.verify };
+  };
+  const verifyFn = namespace.verify ?? namespace.default?.verify;
+
+  if (!verifyFn) {
+    return null;
+  }
+
   try {
-    return jwt.verify(token, secret) as AuthPayload;
+    return verifyFn(token, secret) as AuthPayload;
   } catch {
     return null;
   }
