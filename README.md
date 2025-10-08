@@ -28,18 +28,16 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
    ```bash
    pnpm install
    ```
-2. Define variables de entorno (archivo `.env` en la raíz o exportadas en tu shell):
+2. Define variables de entorno:
+
    ```bash
-   export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/brisa"
-   export JWT_SECRET="local-jwt-secret"
-   export AUTH_SECRET="local-auth-secret"
-   export NEXT_PUBLIC_API_URL="http://localhost:3001"
-   # Opcional: token de servicio si necesitas integraciones
-   export API_TOKEN="local-service-token"
-   # Opcional: personaliza el rate limiting de login (intentos / ventana en ms)
-   export LOGIN_RATE_LIMIT="5"
-   export LOGIN_RATE_LIMIT_WINDOW_MS="60000"
+   # Copia el template y edita con tus valores locales
+   cp apps/api/.env.example apps/api/.env.local
+
+   # El archivo .env.local ya contiene valores seguros por defecto para desarrollo local
+   # Ver docs/SECURITY.md para más información sobre manejo de credenciales
    ```
+
 3. Levanta PostgreSQL (Docker Compose):
    ```bash
    docker compose up -d
