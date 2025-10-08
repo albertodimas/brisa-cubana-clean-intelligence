@@ -203,7 +203,7 @@ Aumentar el rate limit en entorno de test en `playwright.config.ts`:
   command: "pnpm --filter @brisa/api dev",
   env: {
     NODE_ENV: "test",
-    LOGIN_RATE_LIMIT: "50", // Increased for parallel E2E tests
+    LOGIN_RATE_LIMIT: "20", // Increased for parallel E2E tests
     LOGIN_RATE_LIMIT_WINDOW_MS: "60000",
   },
 }
@@ -222,88 +222,103 @@ Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, p
 
 ## Integración CI/CD
 
-### GitHub Actions Workflows
+### GitHub Actions Workflows Implementados
 
 #### 1. PR Checks (`.github/workflows/pr-checks.yml`)
 
-```yaml
-name: PR Checks
+**Trigger:** Pull requests a `main`
+**Suite:** Smoke (2 tests, ~7s)
+**Propósito:** Feedback rápido en PRs validando funcionalidad crítica
 
-on:
-  pull_request:
-    branches: [main]
+**Configuración:**
 
-jobs:
-  smoke-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup
-        # ... setup steps
-      - name: Run Smoke Tests
-        run: pnpm test:e2e:smoke
-```
+- PostgreSQL 17
+- LOGIN_RATE_LIMIT=20
+- Solo instala Chromium
+- Sube reporte de Playwright solo en fallos
 
-#### 2. Main Branch (`.github/workflows/main.yml`)
+**Incluye:**
 
-```yaml
-name: Main Branch Tests
+- ✅ Lint
+- ✅ Unit tests
+- ✅ Smoke E2E tests
 
-on:
-  push:
-    branches: [main]
+#### 2. Main Branch CI (`.github/workflows/ci.yml`)
 
-jobs:
-  critical-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup
-        # ... setup steps
-      - name: Run Critical Tests
-        run: pnpm test:e2e:critical
-```
+**Trigger:** Push a `main`
+**Suite:** Critical (7 tests, ~8s)
+**Propósito:** Validar flujos principales después de merge
+
+**Configuración:**
+
+- PostgreSQL 17
+- LOGIN_RATE_LIMIT=20
+- Instala todos los browsers de Playwright
+- Sube reporte solo en fallos
+
+**Incluye:**
+
+- ✅ Verificación de secretos
+- ✅ Lint
+- ✅ Typecheck
+- ✅ Unit tests
+- ✅ Critical E2E tests
+- ✅ Build de producción
 
 #### 3. Nightly Full Suite (`.github/workflows/nightly.yml`)
 
-```yaml
-name: Nightly E2E Full Suite
+**Trigger:**
 
-on:
-  schedule:
-    - cron: "0 2 * * *" # 2 AM UTC daily
-  workflow_dispatch:
+- Cron diario a las 2:00 AM UTC
+- Manual via `workflow_dispatch`
 
-jobs:
-  full-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup
-        # ... setup steps
-      - name: Run Full E2E Suite
-        run: pnpm test:e2e:full
-      - name: Upload Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-```
+**Suite:** Full (13 tests, ~8s)
+**Propósito:** Cobertura completa incluyendo rate limiting y edge cases
+
+**Configuración:**
+
+- PostgreSQL 17
+- LOGIN_RATE_LIMIT=20
+- Solo Chromium
+- Sube reportes siempre (14 días retención)
+
+**Incluye:**
+
+- ✅ Full E2E suite
+- ✅ Upload de test results
+- ✅ Upload de Playwright report
 
 ---
 
 ## Matriz de Ejecución
 
-| Evento                | Suite    | Duración Estimada | Costo CI |
-| --------------------- | -------- | ----------------- | -------- |
-| Push a feature branch | Smoke    | ~3s               | Bajo     |
-| PR a main             | Critical | ~6s               | Medio    |
-| Merge a main          | Critical | ~6s               | Medio    |
-| Deploy staging        | Critical | ~6s               | Medio    |
-| Deploy production     | Full     | ~10s              | Alto     |
-| Nightly               | Full     | ~10s              | Alto     |
-| Manual                | Full     | ~10s              | Variable |
+| Evento           | Workflow      | Suite    | Tests | Duración | Trigger      |
+| ---------------- | ------------- | -------- | ----- | -------- | ------------ |
+| PR a main        | pr-checks.yml | Smoke    | 2     | ~7s      | pull_request |
+| Push a main      | ci.yml        | Critical | 7     | ~8s      | push         |
+| Nightly / Manual | nightly.yml   | Full     | 13    | ~8s      | cron/manual  |
+
+### Beneficios de la Estrategia
+
+**Feedback Rápido:**
+
+- PRs obtienen validación en ~7s (solo smoke)
+- Reduce tiempo de espera para developers
+
+**Validación Robusta:**
+
+- Main branch ejecuta critical suite (7 tests)
+- Cubre flujos principales de negocio
+
+**Cobertura Completa:**
+
+- Full suite nocturna detecta regresiones
+- Incluye tests de rate limiting y edge cases
+
+**Optimización de Recursos:**
+
+- Solo Chromium en smoke/nightly (más rápido)
+- Todos los browsers en CI main (más cobertura)
 
 ---
 

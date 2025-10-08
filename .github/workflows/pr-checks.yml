@@ -1,12 +1,12 @@
-name: CI (Main Branch)
+name: PR Checks
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
 jobs:
-  quality:
+  smoke-tests:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -19,9 +19,7 @@ jobs:
           - 5433:5432
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
-    strategy:
-      matrix:
-        node: ["22.x"]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -34,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: "22.x"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -45,46 +43,35 @@ jobs:
 
       - name: Export test env vars
         run: |
-          echo "API_TOKEN=${{ secrets.API_TOKEN || 'test-api-token' }}" >> $GITHUB_ENV
           echo "JWT_SECRET=${{ secrets.JWT_SECRET || 'test-jwt-secret-for-ci-only' }}" >> $GITHUB_ENV
-          echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
-          echo "DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
           echo "AUTH_SECRET=${{ secrets.AUTH_SECRET || 'test-auth-secret-for-ci-only' }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_API_URL=http://localhost:3001" >> $GITHUB_ENV
-          echo "LOGIN_RATE_LIMIT=20" >> $GITHUB_ENV
-          echo "LOGIN_RATE_LIMIT_WINDOW_MS=60000" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
+          echo "DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
           echo "E2E_ADMIN_EMAIL=admin@brisacubanaclean.com" >> $GITHUB_ENV
           echo "E2E_ADMIN_PASSWORD=Brisa123!" >> $GITHUB_ENV
+          echo "LOGIN_RATE_LIMIT=20" >> $GITHUB_ENV
+          echo "LOGIN_RATE_LIMIT_WINDOW_MS=60000" >> $GITHUB_ENV
 
       - name: Lint
         run: pnpm lint
 
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Test
+      - name: Unit tests
         run: pnpm test
 
       - name: Install Playwright browsers
-        if: matrix.node == '22.x'
-        run: pnpm exec playwright install --with-deps
+        run: pnpm exec playwright install --with-deps chromium
 
-      - name: Critical E2E tests
-        if: matrix.node == '22.x'
+      - name: Smoke tests (E2E)
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           CI: true
-        run: pnpm test:e2e:critical
+        run: pnpm test:e2e:smoke
 
       - name: Upload Playwright report on failure
-        if: failure() && matrix.node == '22.x'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-critical
+          name: playwright-report-smoke
           path: playwright-report/
           retention-days: 7
-
-      - name: Build
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:3001
-        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
