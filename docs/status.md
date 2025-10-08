@@ -155,18 +155,135 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ---
 
-## 9. Próximos pasos recomendados
+## 9. Seguridad y Operaciones
 
-1. Generar documentación de la API (OpenAPI/Swagger o colección Postman).
-2. Automatizar pipeline de seeds y smoke tests en desplegues preview/producción.
-3. Añadir paginación/búsquedas avanzadas en `/api/bookings` y `/api/services`.
-4. Crear UI para gestión de usuarios y asignación de staff.
-5. Incorporar monitorización (alerts de Neon o Sentry) para la capa de datos.
-6. Sustituir estilos inline con componentes reutilizables y feedback visual (toasts).
+### 9.1 Protección de Credenciales
+
+**Scripts automatizados:**
+
+- `scripts/verify-no-secrets.sh`: Verifica que no se commiteen archivos `.env` con credenciales
+- Ejecutado en: Pre-commit hook (husky) y CI workflow
+- Detecta patrones: URLs de Neon, AWS keys, tokens de OpenAI
+
+**Pre-commit hooks (husky):**
+
+```bash
+# .husky/pre-commit
+bash scripts/verify-no-secrets.sh
+pnpm exec lint-staged  # Prettier + ESLint automático
+```
+
+**CI verification:**
+
+- GitHub Actions ejecuta `verify-no-secrets.sh` antes de tests
+- Falla el build si detecta `.env` files o patrones de producción
+
+**Política de .env files:**
+
+- `.env.local` → desarrollo local (nunca commiteado)
+- `.env.example` → template sin credenciales reales (commiteado)
+- `.env` → solo en Vercel (nunca commiteado)
+
+### 9.2 Backups y Recuperación
+
+**Point-in-Time Recovery (PITR):**
+
+- Retención: 7 días en Neon (configurable hasta 30)
+- RPO: < 1 minuto
+- RTO: < 5 minutos
+
+**Backups pg_dump (planeado):**
+
+- GitHub Actions workflow diario
+- Retención: 7 diarios, 4 semanales, 12 mensuales
+- Storage: GitHub Artifacts o S3
+
+**Documentación:** Ver [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md)
+
+**Script de verificación:**
+
+```bash
+bash scripts/verify-backup.sh "$DATABASE_URL"
+```
+
+### 9.3 Logging Estructurado
+
+**Stack de logging:**
+
+- **Pino** para logging estructurado en API
+- Formato JSON en producción, pretty en desarrollo
+- Redacción automática de campos sensibles
+
+**Logs automáticos:**
+
+- HTTP requests/responses con status y duración
+- Errores con stack traces
+- Operaciones de autenticación
+- Rate limiting hits
+
+**Componentes especializados:**
+
+```typescript
+import { logger, authLogger, dbLogger } from "./lib/logger.js";
+```
+
+**Middleware HTTP:**
+
+- `loggingMiddleware`: Loguea todas las requests automáticamente
+- Incluye: method, path, status, durationMs, userId (si auth)
+
+**Documentación:** Ver [OBSERVABILITY.md](./OBSERVABILITY.md)
+
+### 9.4 Tests de Seguridad
+
+**Tests E2E expandidos:**
+
+- Escenarios negativos: credenciales inválidas, email mal formateado
+- Rate limiting: 6+ intentos fallidos de login
+- Permisos por rol: CLIENT no puede crear servicios
+- Validación de datos: precios negativos, campos vacíos
+- Sesión persistente: logout correcto, cookies HttpOnly
+
+**Archivo:** `tests/e2e/security.spec.ts` (10+ tests)
+
+**Checklist de regresión:**
+
+- 100+ verificaciones antes de cada deployment
+- Categorías: Auth, API, Frontend, Database, Security, Performance
+- Documentación: [REGRESSION_CHECKLIST.md](./REGRESSION_CHECKLIST.md)
 
 ---
 
-## 10. Referencias
+## 10. Próximos pasos prioritarios
+
+### Implementado ✅
+
+1. ✅ Backups automatizados: Documentación completa de PITR y pg_dump
+2. ✅ Guardas de entorno: Pre-commit hooks y CI checks para .env files
+3. ✅ Cobertura fortalecida: Tests de seguridad con escenarios negativos
+4. ✅ Logging estructurado: Pino integrado con redacción automática
+
+### Pendiente 🔄
+
+1. **Pruebas de API contractuales:**
+   - Implementar OpenAPI/Swagger spec
+   - Tests automatizados con Postman/Newman o Vitest API tests
+   - Validación de schemas en CI
+
+2. **Observabilidad avanzada:**
+   - Integrar Sentry para tracking de errores
+   - Alertas en Slack/Email para errores críticos
+   - Dashboard de métricas de negocio (Grafana)
+
+3. **Roadmap funcional:**
+   - UI de gestión de usuarios (CRUD completo)
+   - Paginación en `/api/bookings` y `/api/services`
+   - Sistema de estilos compartido (Tailwind o Vanilla Extract)
+   - Notificaciones push para coordinadores
+
+---
+
+## 11. Referencias
 
 - Repositorio: <https://github.com/albertodimas/brisa-cubana-clean-intelligence>
 - Despliegue web: <https://brisa-cubana-clean-intelligence.vercel.app>

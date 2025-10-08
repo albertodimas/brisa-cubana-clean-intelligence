@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { prisma } from "./lib/prisma.js";
+import { loggingMiddleware } from "./middleware/logging.js";
 import bookings from "./routes/bookings.js";
 import services from "./routes/services.js";
 import properties from "./routes/properties.js";
@@ -12,6 +13,9 @@ const app = new Hono();
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
   : ["http://localhost:3000"];
+
+// Logging middleware global
+app.use("*", loggingMiddleware);
 
 app.use(
   "*",
@@ -36,7 +40,7 @@ const healthHandler = async (c: Context) => {
     await prisma.$queryRaw`SELECT 1`;
     return c.json({
       checks: {
-        uptime: process.uptime(),
+        uptime: Math.floor(process.uptime()),
         environment: process.env.NODE_ENV ?? "development",
         database: "ok",
       },
@@ -46,7 +50,7 @@ const healthHandler = async (c: Context) => {
     c.status(500);
     return c.json({
       checks: {
-        uptime: process.uptime(),
+        uptime: Math.floor(process.uptime()),
         environment: process.env.NODE_ENV ?? "development",
         database: "error",
       },

@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify no secrets in repo
+        run: bash scripts/verify-no-secrets.sh
+
       - name: Prepare database schema
         env:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/brisa_ci
