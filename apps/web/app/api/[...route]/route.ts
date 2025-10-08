@@ -41,6 +41,7 @@ async function proxy(request: NextRequest, context: any) {
     request.headers.get("origin") ?? "*",
   );
   responseHeaders.delete("content-length");
+  responseHeaders.delete("content-encoding");
 
   const bodyText = await upstream.text();
 
