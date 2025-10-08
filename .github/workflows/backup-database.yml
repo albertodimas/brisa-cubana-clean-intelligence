@@ -20,7 +20,7 @@ on:
 
 env:
   BACKUP_PREFIX: 'backup_brisa'
-  POSTGRES_VERSION: '16'
+  POSTGRES_VERSION: '17'
 
 jobs:
   backup:
