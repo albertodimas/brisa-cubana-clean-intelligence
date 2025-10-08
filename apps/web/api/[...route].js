@@ -2,9 +2,7 @@
 import { handle } from "hono/vercel";
 import app from "@brisa/api";
 
-export const config = {
-  runtime: "nodejs",
-};
+export const runtime = "nodejs";
 
 export const GET = handle(app);
 export const POST = handle(app);

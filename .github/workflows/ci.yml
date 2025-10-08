@@ -90,4 +90,4 @@ jobs:
       - name: Build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
-        run: pnpm build
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
