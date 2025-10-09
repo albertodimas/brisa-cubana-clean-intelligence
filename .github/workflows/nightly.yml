@@ -39,6 +39,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
+          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
+        run: pnpm --filter @brisa/api prisma generate
+
       - name: Export test env vars
         run: |
           echo "JWT_SECRET=${{ secrets.JWT_SECRET || 'test-jwt-secret-for-ci-only' }}" >> $GITHUB_ENV

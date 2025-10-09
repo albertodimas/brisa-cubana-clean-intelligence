@@ -43,6 +43,12 @@ jobs:
       - name: Verify no secrets in repo
         run: bash scripts/verify-no-secrets.sh
 
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
+          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
+        run: pnpm --filter @brisa/api prisma generate
+
       - name: Export test env vars
         run: |
           echo "API_TOKEN=${{ secrets.API_TOKEN || 'test-api-token' }}" >> $GITHUB_ENV
