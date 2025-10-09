@@ -4,7 +4,10 @@
 
 El sistema de gestión de usuarios permite a los administradores crear, actualizar y gestionar usuarios de la plataforma Brisa Cubana Clean Intelligence.
 
-**Implementado en**: Commit `43c799c` (9 Oct 2025)
+**Implementado en**:
+
+- Backend: Commit `43c799c` (9 Oct 2025)
+- UI Activación: Commit `c815843` (9 Oct 2025)
 
 ## Roles de Usuario
 
@@ -157,7 +160,8 @@ Actualizar un usuario existente
 #### 1. Lista de Usuarios
 
 - Tabla con todos los usuarios del sistema
-- Columnas: Nombre, Email, Rol, Estado, Acciones
+- Columnas: Usuario (email), Nombre, Rol, Estado, Última actualización, Acciones
+- Estado visible con badge coloreado (verde: Activo, rojo: Inactivo)
 - Orden cronológico por fecha de creación
 
 #### 2. Crear Usuario
@@ -184,19 +188,21 @@ Actualizar un usuario existente
 
 #### 4. Activar/Desactivar Usuario
 
-- Toggle rápido de estado
-- Confirmación antes de desactivar
-- Impide auto-desactivación con mensaje claro
+- Checkbox toggle en cada fila de usuario
+- Cambio instantáneo con feedback visual
+- Impide auto-desactivación con alert y checkbox deshabilitado
+- Actualización automática del badge de estado al cambiar
 
 #### 5. Indicadores Visuales
 
-- Badge de rol con colores:
-  - 🔴 ADMIN (rojo)
-  - 🟠 COORDINATOR (naranja)
-  - 🟢 STAFF (verde)
-  - 🔵 CLIENT (azul)
-- Estado activo/inactivo con iconos
-- Validación visual de campos
+- Badge de rol con colores (Chip component)
+- Badge de estado con colores:
+  - 🟢 **Activo**: Fondo verde claro (`rgba(34, 197, 94, 0.2)`), texto verde (`#22c55e`)
+  - 🔴 **Inactivo**: Fondo rojo claro (`rgba(239, 68, 68, 0.2)`), texto rojo (`#ef4444`)
+- Checkbox de activación:
+  - Habilitado para otros usuarios
+  - Deshabilitado y semi-transparente para el usuario actual (opacidad 50%)
+- Validación visual de campos en formularios
 
 ### Server Actions
 
