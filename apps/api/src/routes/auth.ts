@@ -5,7 +5,7 @@ import { z } from "zod";
 import * as bcrypt from "bcryptjs";
 import honoRateLimiter from "hono-rate-limiter";
 import { prisma } from "../lib/prisma.js";
-import { signAuthToken, verifyAuthToken } from "../lib/jwt.js";
+import { signAuthToken } from "../lib/jwt.js";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
 
 const loginSchema = z.object({
@@ -136,17 +136,6 @@ router.get("/me", authenticate, async (c) => {
   }
 
   return c.json({ data: authUser });
-});
-
-router.post("/verify", async (c) => {
-  const body = await c.req.json();
-  const token = typeof body?.token === "string" ? body.token : undefined;
-  if (!token) {
-    return c.json({ valid: false }, 400);
-  }
-
-  const payload = verifyAuthToken(token);
-  return c.json({ valid: Boolean(payload) });
 });
 
 export default router;

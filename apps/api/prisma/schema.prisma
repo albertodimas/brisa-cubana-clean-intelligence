@@ -33,7 +33,6 @@ model User {
   id           String    @id @default(cuid())
   email        String    @unique
   fullName     String
-  phone        String?
   role         UserRole  @default(CLIENT)
   isActive     Boolean   @default(true)
   passwordHash String
@@ -42,8 +41,6 @@ model User {
 
   properties   Property[]
   bookings     Booking[] @relation("BookingCustomer")
-  assignments  Booking[] @relation("BookingCrew")
-  tokens       RefreshToken[]
 }
 
 model Property {
@@ -80,30 +77,19 @@ model Service {
 }
 
 model Booking {
-  id              String        @id @default(cuid())
-  code            String        @unique
-  scheduledAt     DateTime
-  durationMin     Int
-  notes           String?
-  status          BookingStatus @default(PENDING)
-  totalAmount     Decimal       @db.Decimal(10, 2)
-  customerId      String
-  customer        User          @relation("BookingCustomer", fields: [customerId], references: [id])
-  assignedStaffId String?
-  assignedStaff   User?         @relation("BookingCrew", fields: [assignedStaffId], references: [id])
-  propertyId      String
-  property        Property      @relation(fields: [propertyId], references: [id])
-  serviceId       String
-  service         Service       @relation(fields: [serviceId], references: [id])
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-}
-
-model RefreshToken {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id          String        @id @default(cuid())
+  code        String        @unique
+  scheduledAt DateTime
+  durationMin Int
+  notes       String?
+  status      BookingStatus @default(PENDING)
+  totalAmount Decimal       @db.Decimal(10, 2)
+  customerId  String
+  customer    User          @relation("BookingCustomer", fields: [customerId], references: [id])
+  propertyId  String
+  property    Property      @relation(fields: [propertyId], references: [id])
+  serviceId   String
+  service     Service       @relation(fields: [serviceId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
