@@ -1,5 +1,4 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { Prisma } from "@prisma/client";
 
 process.env.API_TOKEN = "test-service-token";
 process.env.JWT_SECRET = "test-secret";
