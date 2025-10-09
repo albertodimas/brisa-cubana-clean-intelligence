@@ -95,7 +95,6 @@ async function main() {
     create: {
       code: "BRISA-0001",
       customerId: client.id,
-      assignedStaffId: coordinator.id,
       propertyId: property.id,
       serviceId: deepClean.id,
       scheduledAt: addHours(new Date(), 24),
