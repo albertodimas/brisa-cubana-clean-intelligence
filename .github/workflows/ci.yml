@@ -44,10 +44,11 @@ jobs:
         run: bash scripts/verify-no-secrets.sh
 
       - name: Generate Prisma Client
+        working-directory: apps/api
         env:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
           DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
-        run: pnpm --filter @brisa/api prisma generate
+        run: pnpm exec prisma generate
 
       - name: Export test env vars
         run: |
