@@ -1,8 +1,10 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
+import { apiReference } from "@scalar/hono-api-reference";
 import { prisma } from "./lib/prisma.js";
 import { loggingMiddleware } from "./middleware/logging.js";
 import { initSentry, Sentry } from "./lib/sentry.js";
+import { openApiSpec } from "./lib/openapi-spec.js";
 import bookings from "./routes/bookings.js";
 import services from "./routes/services.js";
 import properties from "./routes/properties.js";
@@ -76,6 +78,20 @@ app.get("/health", healthHandler);
 app.get("/api", rootHandler);
 app.get("/api/health", healthHandler);
 
+// OpenAPI Specification JSON endpoint
+app.get("/api/openapi.json", (c) => c.json(openApiSpec));
+
+// API Documentation with Scalar
+app.get(
+  "/api/docs",
+  apiReference({
+    url: "/api/openapi.json",
+    theme: "purple",
+    pageTitle: "Brisa Cubana Clean Intelligence API",
+  }),
+);
+
+// Business endpoints
 app.route("/api/services", services);
 app.route("/api/properties", properties);
 app.route("/api/customers", customers);
