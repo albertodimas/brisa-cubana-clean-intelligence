@@ -34,7 +34,7 @@
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me/verify + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`: CRUD con autorización por rol.
   - Middleware `authenticate` y `requireRoles` (JWT/`API_TOKEN`).
-  - Prisma Client 6.12.0 (PostgreSQL 16). Seed (`prisma/seed.ts`) crea datos funcionales.
+  - Prisma Client 6.12.0 (PostgreSQL 17). Seed (`prisma/seed.ts`) crea datos funcionales.
 
 - **Datos y persistencia**
   - Tablas principales:
@@ -42,7 +42,6 @@
     - `Service`: oferta de limpieza (`basePrice`, `durationMin`, `active`).
     - `Property`: datos de inmuebles.
     - `Booking`: reservas con estado (`PENDING`, `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
-    - `RefreshToken`: reservado (no utilizado actualmente).
   - Semilla genera:
     - Usuarios demo: Admin, Coordinador, Cliente (`Brisa123!`).
     - Servicios “Deep Clean Residencial”, “Turnover Vacation Rental”.
@@ -102,7 +101,6 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 | POST   | `/api/authentication/login`  | Pública (rate limited)       | Devuelve `{ data: user, token }` y cookie HttpOnly.                      |
 | POST   | `/api/authentication/logout` | Cookie/JWT                   | Borra cookie `auth_token`.                                               |
 | GET    | `/api/authentication/me`     | Cookie/JWT                   | Retorna usuario autenticado.                                             |
-| POST   | `/api/authentication/verify` | Pública                      | Verifica token JWT.                                                      |
 | GET    | `/api/services`              | Pública                      | Lista servicios ordenados.                                               |
 | POST   | `/api/services`              | Roles `ADMIN`, `COORDINATOR` | Crea servicio.                                                           |
 | PATCH  | `/api/services/:id`          | Roles `ADMIN`, `COORDINATOR` | Actualiza servicio.                                                      |
@@ -129,9 +127,8 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Vercel web**: build `pnpm turbo run build --filter=@brisa/web`.
 - **Vercel API**: build `pnpm build` (Prisma + TypeScript).
 - **URLs producción**:
-  - Web: https://brisa-cubana-clean-intelligence-brisa-cubana.vercel.app
+  - Web: https://brisa-cubana-clean-intelligence.vercel.app
   - API: https://brisa-cubana-clean-intelligence-api.vercel.app
-- **Docs**: workflow `Publish Docs to GitHub Pages` despliega `docs/` en la rama `gh-pages` tras cada push a `main`.
 - **Logs**:
   - `/favicon.ico` 404 → resueltos tras subir assets a `public/`.
   - `prisma:error … Closed` → ocurrieron antes del fix JWT/bcrypt; no presentes en despliegues vigentes.
@@ -144,9 +141,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 17 pruebas Vitest
+- **`apps/api`**: 24 pruebas Vitest
 - **`apps/web`**: 1 prueba Vitest
-- **Total**: 18 pruebas passing
+- **Total**: 25 pruebas passing
 
 ### 7.2 Tests E2E - Estrategia Piramidal
 
