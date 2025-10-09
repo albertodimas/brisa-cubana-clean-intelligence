@@ -96,7 +96,7 @@ export const openApiSpec = {
         tags: ["Authentication"],
         summary: "User login",
         description:
-          "Authenticate user and receive JWT token. Rate limited to 20 attempts per 60 seconds per IP.",
+          "Authenticate user and receive JWT token. Rate limited to 5 attempts per 60 seconds per IP (configurable via LOGIN_RATE_LIMIT env var).",
         requestBody: {
           required: true,
           content: {
@@ -879,8 +879,8 @@ export const openApiSpec = {
           zipCode: { type: "string", example: "33139" },
           type: {
             type: "string",
-            enum: ["HOUSE", "APARTMENT", "CONDO", "OFFICE", "OTHER"],
-            example: "HOUSE",
+            enum: ["RESIDENTIAL", "VACATION_RENTAL", "OFFICE"],
+            example: "RESIDENTIAL",
           },
           ownerId: { type: "string", example: "clxyz987654321" },
           bedrooms: { type: "integer", nullable: true, example: 3 },
@@ -926,8 +926,8 @@ export const openApiSpec = {
           zipCode: { type: "string", example: "33130" },
           type: {
             type: "string",
-            enum: ["HOUSE", "APARTMENT", "CONDO", "OFFICE", "OTHER"],
-            example: "APARTMENT",
+            enum: ["RESIDENTIAL", "VACATION_RENTAL", "OFFICE"],
+            example: "VACATION_RENTAL",
           },
           ownerId: { type: "string", example: "clxyz987654321" },
           bedrooms: { type: "integer", example: 2 },
@@ -947,7 +947,7 @@ export const openApiSpec = {
           zipCode: { type: "string" },
           type: {
             type: "string",
-            enum: ["HOUSE", "APARTMENT", "CONDO", "OFFICE", "OTHER"],
+            enum: ["RESIDENTIAL", "VACATION_RENTAL", "OFFICE"],
           },
           ownerId: { type: "string" },
           bedrooms: { type: "integer" },

@@ -120,7 +120,7 @@ security:
 
 ### Authentication
 
-- `POST /api/authentication/login` - Login de usuario (rate limited: 20/60s)
+- `POST /api/authentication/login` - Login de usuario (rate limited: 5/60s, configurable)
 - `POST /api/authentication/logout` - Logout de usuario
 - `GET /api/authentication/me` - Obtener usuario actual
 
@@ -235,7 +235,7 @@ Todos los schemas están completamente documentados en la especificación OpenAP
 
 - **User**: Usuario del sistema con roles (ADMIN, COORDINATOR, STAFF, CLIENT)
 - **Service**: Servicio de limpieza con precio y duración
-- **Property**: Propiedad inmobiliaria (HOUSE, APARTMENT, CONDO, OFFICE, OTHER)
+- **Property**: Propiedad inmobiliaria (RESIDENTIAL, VACATION_RENTAL, OFFICE)
 - **Booking**: Reserva de servicio con estados (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED)
 - **Customer**: Cliente del sistema
 
