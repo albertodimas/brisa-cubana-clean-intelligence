@@ -1,0 +1,845 @@
+openapi: 3.1.0
+info:
+  title: Brisa Cubana Clean Intelligence API
+  version: "0.1.0"
+  description: |
+    API REST oficial para la plataforma Brisa Cubana Clean Intelligence.
+    Todas las rutas están operativas en producción a partir del 9 de octubre de 2025.
+servers:
+  - url: https://brisa-cubana-clean-intelligence-api.vercel.app
+    description: Producción (Vercel)
+  - url: http://localhost:3001
+    description: Desarrollo local
+tags:
+  - name: Auth
+  - name: Services
+  - name: Properties
+  - name: Bookings
+  - name: Customers
+  - name: Users
+paths:
+  /api/authentication/login:
+    post:
+      tags: [Auth]
+      summary: Inicia sesión y devuelve token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Cookie HttpOnly `auth_token`
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit alcanzado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/authentication/logout:
+    post:
+      tags: [Auth]
+      summary: Cierra la sesión actual
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sesión cerrada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          description: Token inválido o ausente
+  /api/authentication/me:
+    get:
+      tags: [Auth]
+      summary: Devuelve el usuario autenticado
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Usuario actual
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AuthContext'
+        '401':
+          description: No autenticado
+  /api/authentication/verify:
+    post:
+      tags: [Auth]
+      summary: Verifica si un token JWT es válido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Resultado de validación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+        '400':
+          description: Payload inválido
+  /api/services:
+    get:
+      tags: [Services]
+      summary: Lista todos los servicios disponibles
+      responses:
+        '200':
+          description: Colección de servicios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceListResponse'
+    post:
+      tags: [Services]
+      summary: Crea un nuevo servicio
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicePayload'
+      responses:
+        '201':
+          description: Servicio creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+  /api/services/{serviceId}:
+    patch:
+      tags: [Services]
+      summary: Actualiza un servicio existente
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ServiceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdatePayload'
+      responses:
+        '200':
+          description: Servicio actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Servicio no encontrado
+  /api/properties:
+    get:
+      tags: [Properties]
+      summary: Lista todas las propiedades registradas
+      responses:
+        '200':
+          description: Colección de propiedades
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyListResponse'
+    post:
+      tags: [Properties]
+      summary: Crea una propiedad
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyPayload'
+      responses:
+        '201':
+          description: Propiedad creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+  /api/properties/{propertyId}:
+    patch:
+      tags: [Properties]
+      summary: Actualiza una propiedad
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PropertyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyUpdatePayload'
+      responses:
+        '200':
+          description: Propiedad actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Propiedad no encontrada
+  /api/customers:
+    get:
+      tags: [Customers]
+      summary: Lista clientes (requiere rol administrativo)
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Colección de clientes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerListResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+  /api/users:
+    get:
+      tags: [Users]
+      summary: Lista usuarios con sus roles
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Colección de usuarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos (requiere rol ADMIN)
+  /api/users/{userId}:
+    patch:
+      tags: [Users]
+      summary: Actualiza rol o credenciales de un usuario
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdatePayload'
+      responses:
+        '200':
+          description: Usuario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Usuario no encontrado
+  /api/bookings:
+    get:
+      tags: [Bookings]
+      summary: Lista reservas con filtros opcionales
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/BookingStatus'
+        - in: query
+          name: propertyId
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+        - in: query
+          name: serviceId
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+        - in: query
+          name: customerId
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+      responses:
+        '200':
+          description: Colección de reservas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingListResponse'
+        '400':
+          description: Filtros inválidos
+    post:
+      tags: [Bookings]
+      summary: Crea una reserva
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingPayload'
+      responses:
+        '201':
+          description: Reserva creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Entidad relacionada no encontrada
+  /api/bookings/{bookingId}:
+    patch:
+      tags: [Bookings]
+      summary: Actualiza una reserva existente
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookingIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingUpdatePayload'
+      responses:
+        '200':
+          description: Reserva actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Reserva no encontrada
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth_token
+  parameters:
+    ServiceIdParam:
+      name: serviceId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identificador del servicio (cuid)
+    PropertyIdParam:
+      name: propertyId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identificador de la propiedad (cuid)
+    BookingIdParam:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identificador de la reserva (cuid)
+    UserIdParam:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identificador del usuario (cuid)
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          oneOf:
+            - type: string
+            - type: object
+              description: Estructura de errores Zod serializada
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    LoginResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AuthUser'
+        token:
+          type: string
+    AuthContext:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        kind:
+          type: string
+          enum: [user, service]
+    AuthUser:
+      type: object
+      required: [id, email, role]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+    UserRole:
+      type: string
+      enum: [ADMIN, COORDINATOR, STAFF, CLIENT]
+    Service:
+      type: object
+      required: [id, name, basePrice, durationMin, active]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        basePrice:
+          type: number
+          format: float
+        durationMin:
+          type: integer
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ServicePayload:
+      type: object
+      required: [name, basePrice, durationMin]
+      properties:
+        name:
+          type: string
+          minLength: 3
+        description:
+          type: string
+          nullable: true
+        basePrice:
+          type: number
+          minimum: 0
+        durationMin:
+          type: integer
+          minimum: 1
+        active:
+          type: boolean
+          default: true
+    ServiceUpdatePayload:
+      allOf:
+        - $ref: '#/components/schemas/ServicePayload'
+      description: Campos opcionales a actualizar (al menos uno)
+    ServiceResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Service'
+    ServiceListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+    Property:
+      type: object
+      required:
+        [id, label, addressLine, city, state, zipCode, type, ownerId]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        addressLine:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        type:
+          $ref: '#/components/schemas/PropertyType'
+        ownerId:
+          type: string
+        bedrooms:
+          type: integer
+          nullable: true
+        bathrooms:
+          type: integer
+          nullable: true
+        sqft:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        owner:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+              format: email
+            fullName:
+              type: string
+              nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PropertyPayload:
+      type: object
+      required:
+        [label, addressLine, city, state, zipCode, type, ownerId]
+      properties:
+        label:
+          type: string
+        addressLine:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+          minLength: 2
+          maxLength: 2
+        zipCode:
+          type: string
+        type:
+          $ref: '#/components/schemas/PropertyType'
+        ownerId:
+          type: string
+        bedrooms:
+          type: integer
+          minimum: 0
+          nullable: true
+        bathrooms:
+          type: integer
+          minimum: 0
+          nullable: true
+        sqft:
+          type: integer
+          minimum: 0
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+    PropertyUpdatePayload:
+      allOf:
+        - $ref: '#/components/schemas/PropertyPayload'
+      description: Campos opcionales a actualizar (al menos uno)
+    PropertyResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Property'
+    PropertyListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    PropertyType:
+      type: string
+      enum: [RESIDENTIAL, VACATION_RENTAL, OFFICE]
+    Customer:
+      type: object
+      required: [id, email]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+          nullable: true
+    CustomerListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+    Booking:
+      type: object
+      required:
+        [id, code, scheduledAt, durationMin, status, totalAmount, service, property]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        durationMin:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        totalAmount:
+          type: number
+        customer:
+          $ref: '#/components/schemas/Customer'
+          nullable: true
+        property:
+          type: object
+          properties:
+            id:
+              type: string
+            label:
+              type: string
+            city:
+              type: string
+        service:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            basePrice:
+              type: number
+    BookingPayload:
+      type: object
+      required: [customerId, propertyId, serviceId, scheduledAt]
+      properties:
+        customerId:
+          type: string
+        propertyId:
+          type: string
+        serviceId:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        durationMin:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
+    BookingUpdatePayload:
+      type: object
+      properties:
+        scheduledAt:
+          type: string
+          format: date-time
+        durationMin:
+          type: integer
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        notes:
+          type: string
+          nullable: true
+        propertyId:
+          type: string
+        serviceId:
+          type: string
+    BookingResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+    BookingListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    BookingStatus:
+      type: string
+      enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED]
+    User:
+      type: object
+      required: [id, email, role, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+          nullable: true
+        role:
+          $ref: '#/components/schemas/UserRole'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    UserResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+              format: email
+            fullName:
+              type: string
+              nullable: true
+            role:
+              $ref: '#/components/schemas/UserRole'
+            updatedAt:
+              type: string
+              format: date-time
+    UserUpdatePayload:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/UserRole'
+        fullName:
+          type: string
+          minLength: 3
+          maxLength: 120
+        password:
+          type: string
+          minLength: 8
+          maxLength: 64
+      description: Enviar al menos un campo para actualizar

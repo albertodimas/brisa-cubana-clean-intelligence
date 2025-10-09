@@ -8,6 +8,7 @@ import services from "./routes/services.js";
 import properties from "./routes/properties.js";
 import customers from "./routes/customers.js";
 import auth from "./routes/auth.js";
+import users from "./routes/users.js";
 
 // Initialize Sentry
 initSentry();
@@ -79,6 +80,7 @@ app.route("/api/services", services);
 app.route("/api/properties", properties);
 app.route("/api/customers", customers);
 app.route("/api/bookings", bookings);
+app.route("/api/users", users);
 // Note: Using /api/authentication instead of /api/auth because Vercel
 // reserves /api/auth/* for NextAuth in Next.js projects
 app.route("/api/authentication", auth);

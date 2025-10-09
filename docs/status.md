@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 8 de octubre de 2025
+**Última revisión:** 9 de octubre de 2025
 
 ---
 
@@ -9,9 +9,11 @@
 - Plataforma verificada con frontend Next.js 15 + Auth.js y API Hono 4 + Prisma 6.
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
+- Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
+- Deploy web operativo en Vercel (Next.js 15) sincronizado con la API.
 
 [Ver Quickstart local](./quickstart.md) para puesta en marcha.
 
@@ -71,6 +73,7 @@
 - Propiedades: listar (público), crear/actualizar (roles ADMIN/COORDINATOR).
 - Clientes: listar (roles ADMIN/COORDINATOR).
 - Reservas: listar con filtros (público), crear/actualizar (roles ADMIN/COORDINATOR). Genera códigos BRISA-xxxx y copia precio/duración.
+- Usuarios: listar (rol ADMIN) y actualizar rol/contraseña desde `/api/users`.
 - Middleware soporta Bearer `JWT` o `API_TOKEN` para integraciones.
 
 ---
@@ -125,6 +128,10 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **CI local**: `pnpm lint`, `pnpm typecheck`, `pnpm test`.
 - **Vercel web**: build `pnpm turbo run build --filter=@brisa/web`.
 - **Vercel API**: build `pnpm build` (Prisma + TypeScript).
+- **URLs producción**:
+  - Web: https://brisa-cubana-clean-intelligence-brisa-cubana.vercel.app
+  - API: https://brisa-cubana-clean-intelligence-api.vercel.app
+- **Docs**: workflow `Publish Docs to GitHub Pages` despliega `docs/` en la rama `gh-pages` tras cada push a `main`.
 - **Logs**:
   - `/favicon.ico` 404 → resueltos tras subir assets a `public/`.
   - `prisma:error … Closed` → ocurrieron antes del fix JWT/bcrypt; no presentes en despliegues vigentes.
@@ -170,11 +177,10 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 ## 8. Limitaciones conocidas
 
 1. El proxy sólo cubre rutas `/api/*`. Nuevos prefijos requieren actualizar `buildTargetUrl`.
-2. No existe UI para gestionar usuarios (alta/baja); sólo seeds o llamados directos a la API.
-3. Falta OpenAPI/Postman para describir el contrato REST.
-4. `RefreshToken` no se utiliza aún (reserva para futuras mejoras).
-5. Estilos UI definidos inline; pendiente migrar a sistema de diseño reutilizable.
-6. Seeds pensados para demo; ambientes preview deben reseedear manualmente (`pnpm --filter @brisa/api db:seed`).
+2. Falta soporte de alta/baja de usuarios (por ahora sólo actualización de roles y contraseñas).
+3. `RefreshToken` no se utiliza aún (reserva para futuras mejoras).
+4. Estilos heredados aún mezclan inline styles y tokens; migración completa en progreso.
+5. Seeds pensados para demo; ambientes preview deben reseedear manualmente (`pnpm --filter @brisa/api db:seed`).
 
 ---
 

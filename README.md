@@ -7,15 +7,15 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 - **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local)
 - **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto y CI en GitHub Actions
 
-## Estado al 7-8 de octubre de 2025
+## Estado al 9 de octubre de 2025
 
-| Área          | Estado | Detalle                                                                              |
-| ------------- | ------ | ------------------------------------------------------------------------------------ |
-| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.          |
-| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas.    |
-| Tests         | 🟡     | Vitest (`pnpm test`) y suites Playwright iniciales (`pnpm test:e2e`).                |
-| Documentación | 🟢     | README + quickstart verificados con setup local.                                     |
-| Deploy        | 🟢     | **API desplegada en Vercel**: https://brisa-cubana-clean-intelligence-api.vercel.app |
+| Área          | Estado | Detalle                                                                                                                                  |
+| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.                                                              |
+| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas.                                                        |
+| Tests         | 🟢     | Vitest (`pnpm test`) + suites Playwright smoke/critical/full (`pnpm test:e2e:*`).                                                        |
+| Documentación | 🟢     | README + quickstart + docs/status.md actualizados y verificados.                                                                         |
+| Deploy        | 🟢     | **API** https://brisa-cubana-clean-intelligence-api.vercel.app · **Web** https://brisa-cubana-clean-intelligence-brisa-cubana.vercel.app |
 
 ## Requisitos
 
@@ -77,9 +77,10 @@ pnpm test
 
 ## Deploy en Producción
 
-**API en Vercel:** https://brisa-cubana-clean-intelligence-api.vercel.app
+- **API en Vercel:** https://brisa-cubana-clean-intelligence-api.vercel.app
+- **Web en Vercel:** https://brisa-cubana-clean-intelligence-brisa-cubana.vercel.app
 
-Endpoints verificados funcionando:
+Endpoints verificados funcionando (API):
 
 - `GET /health` - Health check con estado de la base de datos
 - `GET /` - Información de la API (nombre, versión, timestamp)
@@ -92,6 +93,8 @@ La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoi
 ## Documentación
 
 - [`docs/quickstart.md`](docs/quickstart.md): onboarding local paso a paso (verificado).
+- [`docs/openapi.yaml`](docs/openapi.yaml): especificación OpenAPI 3.1 de la API (actualizada al 9 de octubre de 2025).
+- Las actualizaciones en `docs/` se publican automáticamente en GitHub Pages (`gh-pages`) mediante `.github/workflows/docs-pages.yml`.
 
 ## Autenticación y RBAC
 
@@ -101,6 +104,7 @@ La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoi
 - El login aplica rate limiting configurable (`LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`) y endurece cookies (`SameSite=Strict`, `Secure`) cuando la aplicación se sirve vía HTTPS.
 - Endpoints protegidos (`POST /api/services`, `PATCH /api/services/:id`, `POST/PATCH /api/bookings`, `GET /api/customers`) requieren rol `ADMIN` o `COORDINATOR`.
 - El `API_TOKEN` queda reservado para integraciones servidor-servidor; la UI ya no depende de él y exige sesión real.
+- Los usuarios con rol `ADMIN` pueden listar y actualizar roles/contraseñas mediante `/api/users` y el panel operativo.
 
 ## Desarrollo activo
 

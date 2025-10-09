@@ -1,0 +1,117 @@
+:root {
+  --surface-primary: rgba(13, 25, 30, 0.6);
+  --surface-secondary: rgba(11, 23, 28, 0.6);
+  --surface-elevated: rgba(18, 34, 40, 0.6);
+  --border-muted: rgba(126, 231, 196, 0.2);
+  --border-strong: rgba(126, 231, 196, 0.3);
+  --text-primary: #d5f6eb;
+  --text-secondary: #a7dcd0;
+  --text-accent: #7ee7c4;
+  --brand-gradient: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+  --shadow-soft: 0 12px 30px rgba(10, 25, 30, 0.35);
+  --spacing-xs: 0.35rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1.25rem;
+  --spacing-lg: 1.75rem;
+  --transition-base: 160ms ease;
+}
+
+.ui-card {
+  background: var(--surface-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-muted);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.ui-card__header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.ui-card__title {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.ui-card__description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.55rem 1.35rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base);
+  background: rgba(126, 231, 196, 0.15);
+  color: var(--text-primary);
+}
+
+.ui-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(14, 40, 45, 0.45);
+}
+
+.ui-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.ui-button--primary {
+  background: var(--brand-gradient);
+  border-color: rgba(126, 231, 196, 0.4);
+  color: #052221;
+}
+
+.ui-button--ghost {
+  background: transparent;
+  border-color: rgba(126, 231, 196, 0.25);
+}
+
+.ui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background: rgba(126, 231, 196, 0.15);
+  color: var(--text-accent);
+  font-size: 0.8rem;
+}
+
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.ui-table thead tr {
+  text-align: left;
+  color: var(--text-secondary);
+}
+
+.ui-table th,
+.ui-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid rgba(126, 231, 196, 0.1);
+}
+
+.ui-stack {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.ui-stack--lg {
+  gap: var(--spacing-lg);
+}

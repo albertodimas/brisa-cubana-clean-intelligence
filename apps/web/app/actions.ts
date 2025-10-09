@@ -444,3 +444,48 @@ export async function updateBookingAction(
     return { error: "Error inesperado" };
   }
 }
+
+export async function updateUserAction(
+  userId: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    const token = await resolveAccessToken();
+    if (!token) {
+      return { error: "Sesión no autenticada" };
+    }
+
+    const role = formData.get("userRole")?.toString();
+    const fullName = coerceOptionalString(formData.get("userFullName"));
+    const passwordRaw = coerceOptionalString(formData.get("userPassword"));
+
+    const payload: Record<string, unknown> = {};
+    if (role) payload.role = role;
+    if (fullName !== undefined) payload.fullName = fullName;
+    if (passwordRaw) payload.password = passwordRaw;
+
+    if (Object.keys(payload).length === 0) {
+      return { error: "Sin cambios para actualizar" };
+    }
+
+    const res = await fetch(`${API_URL}/api/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      return { error: body.error ?? "No se pudo actualizar el usuario" };
+    }
+
+    revalidatePath("/");
+    return { success: "Usuario actualizado" };
+  } catch (error) {
+    console.error("[actions] updateUser", error);
+    return { error: "Error inesperado" };
+  }
+}

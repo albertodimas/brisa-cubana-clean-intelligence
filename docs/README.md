@@ -8,6 +8,9 @@ Este directorio contiene la documentación verificada del proyecto. Usa la sigui
 | ---------------------------------- | ------------------------------------------------------------------- |
 | [`quickstart.md`](./quickstart.md) | Guía para levantar el entorno local (Docker + pnpm + Prisma).       |
 | [`status.md`](./status.md)         | Estado funcional, arquitectura, APIs, operaciones y próximos pasos. |
+| [`openapi.yaml`](./openapi.yaml)   | Especificación OpenAPI 3.1 para integraciones externas.             |
+
+> Las modificaciones en `docs/` se publican automáticamente en GitHub Pages (`gh-pages`).
 
 ## Seguridad y Operaciones
 

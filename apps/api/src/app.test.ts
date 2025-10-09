@@ -196,6 +196,20 @@ const mockPrisma = {
       }
       return usersFixture;
     }),
+    update: vi.fn().mockImplementation(async ({ where, data }: any) => {
+      const user = usersFixture.find((item) => item.id === where.id);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      Object.assign(user, data, { updatedAt: new Date() });
+      return {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName ?? null,
+        role: user.role,
+        updatedAt: user.updatedAt,
+      };
+    }),
   },
   property: {
     findMany: vi.fn().mockImplementation(async () => propertiesFixture),
@@ -247,6 +261,7 @@ const mockVerify = vi.fn((token: string) =>
 const mockSign = vi.fn(() => "jwt-admin");
 
 const mockCompare = vi.fn().mockResolvedValue(true);
+const mockHash = vi.fn().mockResolvedValue("hashed-password");
 
 vi.mock("./lib/prisma", () => ({
   prisma: mockPrisma,
@@ -258,14 +273,19 @@ vi.mock("./lib/jwt", () => ({
 }));
 
 vi.mock("bcryptjs", () => ({
-  default: { compare: mockCompare },
+  default: { compare: mockCompare, hash: mockHash },
   compare: mockCompare,
+  hash: mockHash,
 }));
 
 const app = (await import("./app")).default;
 
 const authorizedHeaders = {
   Authorization: "Bearer jwt-admin",
+};
+
+const coordinatorHeaders = {
+  Authorization: "Bearer jwt-coordinator",
 };
 
 describe("app", () => {
@@ -297,6 +317,13 @@ describe("app", () => {
         email: "admin@brisacubanaclean.com",
         passwordHash: "$2a$10$hashed",
         role: "ADMIN",
+      },
+      {
+        id: makeCuid(103),
+        fullName: "Coordinador",
+        email: "ops@brisacubanaclean.com",
+        passwordHash: "$2a$10$hashed",
+        role: "COORDINATOR",
       },
     ];
     propertiesFixture = [
@@ -491,6 +518,40 @@ describe("app", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data[0].email).toBeDefined();
+  });
+
+  it("lists users for admin", async () => {
+    const res = await app.request("/api/users", {
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.length).toBeGreaterThan(0);
+    expect(json.data[0]).toHaveProperty("role");
+  });
+
+  it("forbids listing users for coordinators", async () => {
+    const res = await app.request("/api/users", {
+      headers: coordinatorHeaders,
+    });
+
+    expect(res.status).toBe(403);
+  });
+
+  it("updates user role and password", async () => {
+    const target = usersFixture[2];
+
+    const res = await app.request(`/api/users/${target.id}`, {
+      method: "PATCH",
+      headers: authorizedHeaders,
+      body: JSON.stringify({ role: "STAFF", password: "NuevoPass123" }),
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.role).toBe("STAFF");
+    expect(mockHash).toHaveBeenCalledWith("NuevoPass123", 10);
   });
 
   it("logs in a user and returns a token", async () => {

@@ -33,9 +33,7 @@ test.describe("Operaciones", () => {
     await login(page, testInfo);
 
     const uniqueName = `Servicio E2E ${Date.now().toString().slice(-6)}`;
-    const serviceForm = page.locator("form").filter({
-      has: page.getByRole("heading", { name: "Crear servicio" }),
-    });
+    const serviceForm = page.getByTestId("service-create-form");
 
     await serviceForm.locator('input[name="name"]').fill(uniqueName);
     await serviceForm

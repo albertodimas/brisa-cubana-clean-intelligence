@@ -9,6 +9,7 @@ import {
   updateServiceAction,
   updatePropertyAction,
   updateBookingAction,
+  updateUserAction,
   logoutAction,
 } from "@/app/actions";
 import {
@@ -16,6 +17,7 @@ import {
   fetchBookings,
   fetchProperties,
   fetchCustomers,
+  fetchUsers,
 } from "@/lib/api";
 import { auth } from "@/auth";
 
@@ -36,6 +38,8 @@ const dateFormatter = new Intl.DateTimeFormat("es-US", {
 export default async function HomePage() {
   const session = await auth();
   const isAuthenticated = Boolean(session?.user);
+  const currentRole = session?.user?.role;
+  const isAdmin = currentRole === "ADMIN";
   const today = new Date();
   const from = new Date(
     today.getFullYear(),
@@ -52,6 +56,8 @@ export default async function HomePage() {
     fetchCustomers(),
   ]);
 
+  const users = isAdmin ? await fetchUsers() : [];
+
   const activeServices = services
     .filter((service) => service.active)
     .slice(0, 4);
@@ -64,7 +70,7 @@ export default async function HomePage() {
     },
     {
       title: "Siguientes pasos",
-      body: "Implementar autenticación real, panel operativo y pipelines CI/CD antes de exponer ambientes externos.",
+      body: "Consolidar sistema de diseño reutilizable, exponer gestión de usuarios en la UI y publicar documentación OpenAPI antes de abrir integraciones externas.",
     },
     {
       title: "Contacto",
@@ -401,6 +407,8 @@ export default async function HomePage() {
           updateService={updateServiceAction}
           updateProperty={updatePropertyAction}
           updateBooking={updateBookingAction}
+          updateUser={updateUserAction}
+          users={users}
           logout={logoutAction}
         />
       ) : (

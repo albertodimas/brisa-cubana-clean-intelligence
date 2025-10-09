@@ -29,8 +29,8 @@ test.describe("Autenticación", () => {
     await expect(
       page.getByRole("heading", { name: "Panel operativo" }),
     ).toBeVisible();
-    await expect(
-      page.getByText("Sesión activa", { exact: false }),
-    ).toContainText(adminEmail);
+    await expect(page.getByText("Sesión:", { exact: false })).toContainText(
+      adminEmail,
+    );
   });
 });

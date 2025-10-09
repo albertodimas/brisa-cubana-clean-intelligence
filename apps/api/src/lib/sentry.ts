@@ -3,7 +3,9 @@ import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 export function initSentry() {
   if (!process.env.SENTRY_DSN) {
-    console.warn("SENTRY_DSN not configured, Sentry will not be initialized");
+    if (process.env.NODE_ENV === "production") {
+      console.warn("SENTRY_DSN not configured, Sentry will not be initialized");
+    }
     return;
   }
 

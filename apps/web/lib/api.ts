@@ -49,6 +49,15 @@ export type Customer = {
   fullName: string | null;
 };
 
+export type User = {
+  id: string;
+  email: string;
+  fullName: string | null;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 type ApiListResponse<T> = {
@@ -132,5 +141,10 @@ export async function fetchProperties(): Promise<Property[]> {
 
 export async function fetchCustomers(): Promise<Customer[]> {
   const data = await safeFetch<Customer[]>("/api/customers");
+  return data ?? [];
+}
+
+export async function fetchUsers(): Promise<User[]> {
+  const data = await safeFetch<User[]>("/api/users");
   return data ?? [];
 }

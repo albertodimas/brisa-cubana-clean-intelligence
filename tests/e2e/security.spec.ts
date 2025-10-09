@@ -269,9 +269,9 @@ test.describe("Seguridad y Autenticación", () => {
       await page.waitForURL("/", { timeout: 10000 });
 
       // Verificar que estamos logueados
-      await expect(
-        page.getByText("Sesión activa", { exact: false }),
-      ).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText("Sesión:", { exact: false })).toBeVisible({
+        timeout: 5000,
+      });
 
       // Cerrar sesión
       await page.getByRole("button", { name: /cerrar sesión|logout/i }).click();
@@ -282,7 +282,7 @@ test.describe("Seguridad y Autenticación", () => {
 
       // Verificar que no hay sesión activa
       await expect(
-        page.getByText("Sesión activa", { exact: false }),
+        page.getByText("Sesión:", { exact: false }),
       ).not.toBeVisible();
     });
 
@@ -298,16 +298,16 @@ test.describe("Seguridad y Autenticación", () => {
       await page.getByRole("button", { name: "Ingresar" }).click();
       await page.waitForURL("/**");
 
-      await expect(
-        page.getByText("Sesión activa", { exact: false }),
-      ).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText("Sesión:", { exact: false })).toBeVisible({
+        timeout: 5000,
+      });
 
       // Recargar página
       await page.reload();
 
-      await expect(
-        page.getByText("Sesión activa", { exact: false }),
-      ).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText("Sesión:", { exact: false })).toBeVisible({
+        timeout: 5000,
+      });
     });
   });
 });

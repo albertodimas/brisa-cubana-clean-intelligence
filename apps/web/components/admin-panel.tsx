@@ -5,30 +5,32 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { ReactNode, CSSProperties } from "react";
 import type { Session } from "next-auth";
-import type { Booking, Customer, Property, Service } from "@/lib/api";
+import type { Booking, Customer, Property, Service, User } from "@/lib/api";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Chip } from "./ui/chip";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 
 type ActionResult = {
   success?: string;
   error?: string;
 };
 
+const USER_ROLES = ["ADMIN", "COORDINATOR", "STAFF", "CLIENT"] as const;
+
 function SubmitButton({ children }: { children: ReactNode }) {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      style={{
-        padding: "0.5rem 1.25rem",
-        borderRadius: "999px",
-        border: "1px solid rgba(126,231,196,0.3)",
-        background: pending ? "rgba(126,231,196,0.2)" : "rgba(11,23,28,0.8)",
-        color: "#d5f6eb",
-        cursor: pending ? "wait" : "pointer",
-      }}
-      disabled={pending}
-    >
+    <Button type="submit" disabled={pending}>
       {pending ? "Enviando..." : children}
-    </button>
+    </Button>
   );
 }
 
@@ -54,6 +56,8 @@ type AdminPanelProps = {
     bookingId: string,
     formData: FormData,
   ) => Promise<ActionResult>;
+  users: User[];
+  updateUser: (userId: string, formData: FormData) => Promise<ActionResult>;
   logout: () => Promise<ActionResult>;
 };
 
@@ -70,6 +74,8 @@ export function AdminPanel({
   updateService,
   updateProperty,
   updateBooking,
+  users,
+  updateUser,
   logout,
 }: AdminPanelProps) {
   const router = useRouter();
@@ -104,6 +110,10 @@ export function AdminPanel({
   const [isLoggingOut, setLoggingOut] = useState(false);
   const [isPropertyPending, startPropertyAction] = useTransition();
   const [isBookingPending, startBookingAction] = useTransition();
+  const [userUpdateMessage, setUserUpdateMessage] = useState<string | null>(
+    null,
+  );
+  const [userUpdatingId, setUserUpdatingId] = useState<string | null>(null);
 
   const filteredBookings = bookings.filter((booking) => {
     const statusMatch =
@@ -156,155 +166,144 @@ export function AdminPanel({
     );
   }
 
+  async function handleUserUpdate(userId: string, formData: FormData) {
+    setUserUpdatingId(userId);
+    const result = await updateUser(userId, formData);
+    setUserUpdatingId(null);
+    setUserUpdateMessage(
+      result.error ? `Error: ${result.error}` : (result.success ?? null),
+    );
+  }
+
   return (
-    <section
-      style={{
-        marginTop: "3rem",
-        display: "grid",
-        gap: "2rem",
-        background: "rgba(7,15,18,0.6)",
-        padding: "1.5rem",
-        borderRadius: "1rem",
-        border: "1px solid rgba(126,231,196,0.2)",
-      }}
-    >
-      <header>
-        <h2 style={{ margin: 0, fontSize: "1.4rem" }}>Panel operativo</h2>
-        <p style={{ margin: 0, color: "#a7dcd0" }}>
-          Crea nuevos servicios y activa/desactiva ofertas para pruebas rápidas.
-        </p>
-        {currentUser ? (
-          <p
-            style={{
-              margin: "0.35rem 0 0",
-              color: "#6fb8a6",
-              fontSize: "0.9rem",
+    <section className="ui-stack ui-stack--lg" style={{ marginTop: "3rem" }}>
+      <Card
+        title="Panel operativo"
+        description="Gestiona servicios, propiedades, reservas y usuarios desde un mismo panel."
+      >
+        <div className="ui-stack">
+          {currentUser ? (
+            <Chip>
+              Sesión: {currentUser.email ?? "usuario sin correo"}
+              {currentUser.role ? ` · Rol ${currentUser.role}` : null}
+            </Chip>
+          ) : null}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={async () => {
+              setLoggingOut(true);
+              const result = await logout();
+              setLoggingOut(false);
+              setLogoutMessage(
+                result.error
+                  ? `Error: ${result.error}`
+                  : (result.success ?? null),
+              );
+              if (result.success) {
+                router.replace("/login");
+                router.refresh();
+              }
             }}
+            disabled={isLoggingOut}
+            style={{ maxWidth: "fit-content" }}
           >
-            Sesión activa: {currentUser.email ?? "usuario sin correo"}
-            {currentUser.role ? ` · Rol ${currentUser.role}` : null}
-          </p>
-        ) : null}
-        <button
-          type="button"
-          onClick={async () => {
-            setLoggingOut(true);
-            const result = await logout();
-            setLoggingOut(false);
-            setLogoutMessage(
+            {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+          </Button>
+          {logoutMessage ? (
+            <p
+              style={{
+                margin: 0,
+                color: logoutMessage.startsWith("Error")
+                  ? "#fda4af"
+                  : "#7ee7c4",
+              }}
+            >
+              {logoutMessage}
+            </p>
+          ) : null}
+        </div>
+      </Card>
+
+      <Card
+        title="Crear servicio"
+        description="Define nuevas ofertas con precio base y duración estandarizada."
+      >
+        <form
+          data-testid="service-create-form"
+          action={async (formData) => {
+            const result = await createService(formData);
+            setServiceMessage(
               result.error
                 ? `Error: ${result.error}`
                 : (result.success ?? null),
             );
-            if (result.success) {
-              router.replace("/login");
-              router.refresh();
-            }
           }}
-          style={{
-            marginTop: "0.75rem",
-            alignSelf: "flex-start",
-            padding: "0.4rem 0.9rem",
-            borderRadius: "999px",
-            border: "1px solid rgba(126,231,196,0.3)",
-            background: "transparent",
-            color: "#d5f6eb",
-            cursor: isLoggingOut ? "wait" : "pointer",
-            opacity: isLoggingOut ? 0.6 : 1,
-          }}
-          disabled={isLoggingOut}
-        >
-          {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
-        </button>
-        {logoutMessage ? (
-          <p
-            style={{
-              marginTop: "0.75rem",
-              color: logoutMessage.startsWith("Error") ? "#fda4af" : "#7ee7c4",
-            }}
-          >
-            {logoutMessage}
-          </p>
-        ) : null}
-      </header>
-
-      <form
-        action={async (formData) => {
-          const result = await createService(formData);
-          setServiceMessage(
-            result.error ? `Error: ${result.error}` : (result.success ?? null),
-          );
-        }}
-        style={{
-          display: "grid",
-          gap: "0.75rem",
-          padding: "1rem",
-          borderRadius: "0.75rem",
-          background: "rgba(18,34,40,0.6)",
-          border: "1px solid rgba(126,231,196,0.15)",
-        }}
-      >
-        <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Crear servicio</h3>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
-          <span>Nombre</span>
-          <input
-            name="name"
-            required
-            placeholder="Ej. Turnover rápido"
-            style={inputStyle}
-          />
-        </label>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
-          <span>Descripción</span>
-          <textarea
-            name="description"
-            rows={3}
-            placeholder="Opcional"
-            style={{ ...inputStyle, resize: "vertical" }}
-          />
-        </label>
-        <div
-          style={{
-            display: "grid",
-            gap: "0.75rem",
-            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          }}
+          className="ui-stack"
         >
           <label style={{ display: "grid", gap: "0.25rem" }}>
-            <span>Precio base (USD)</span>
+            <span>Nombre</span>
             <input
-              name="basePrice"
-              type="number"
+              name="name"
               required
-              min="0"
-              step="0.01"
+              placeholder="Ej. Turnover rápido"
               style={inputStyle}
             />
           </label>
           <label style={{ display: "grid", gap: "0.25rem" }}>
-            <span>Duración (min)</span>
-            <input
-              name="durationMin"
-              type="number"
-              required
-              min="30"
-              step="15"
-              style={inputStyle}
+            <span>Descripción</span>
+            <textarea
+              name="description"
+              rows={3}
+              placeholder="Opcional"
+              style={{ ...inputStyle, resize: "vertical" }}
             />
           </label>
-        </div>
-        <SubmitButton>Guardar</SubmitButton>
-        {serviceMessage ? (
-          <p
+          <div
             style={{
-              margin: 0,
-              color: serviceMessage.startsWith("Error") ? "#fda4af" : "#7ee7c4",
+              display: "grid",
+              gap: "0.75rem",
+              gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
             }}
           >
-            {serviceMessage}
-          </p>
-        ) : null}
-      </form>
+            <label style={{ display: "grid", gap: "0.25rem" }}>
+              <span>Precio base (USD)</span>
+              <input
+                name="basePrice"
+                type="number"
+                required
+                min="0"
+                step="0.01"
+                style={inputStyle}
+              />
+            </label>
+            <label style={{ display: "grid", gap: "0.25rem" }}>
+              <span>Duración (min)</span>
+              <input
+                name="durationMin"
+                type="number"
+                required
+                min="30"
+                step="15"
+                style={inputStyle}
+              />
+            </label>
+          </div>
+          <SubmitButton>Guardar</SubmitButton>
+          {serviceMessage ? (
+            <p
+              style={{
+                margin: 0,
+                color: serviceMessage.startsWith("Error")
+                  ? "#fda4af"
+                  : "#7ee7c4",
+              }}
+            >
+              {serviceMessage}
+            </p>
+          ) : null}
+        </form>
+      </Card>
 
       <div style={{ display: "grid", gap: "1rem" }}>
         <h3 style={{ margin: 0, fontSize: "1.1rem" }}>Reservas programadas</h3>
@@ -889,6 +888,105 @@ export function AdminPanel({
           </p>
         ) : null}
       </form>
+
+      {currentUser?.role === "ADMIN" ? (
+        <Card
+          title="Gestión de usuarios"
+          description="Actualiza roles operativos y rota contraseñas de manera segura."
+        >
+          <div className="ui-stack">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Usuario</TableHeader>
+                  <TableHeader>Nombre</TableHeader>
+                  <TableHeader>Rol</TableHeader>
+                  <TableHeader>Última actualización</TableHeader>
+                  <TableHeader align="right">Acciones</TableHeader>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.fullName ?? "Sin nombre"}</TableCell>
+                    <TableCell>
+                      <Chip>{user.role}</Chip>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(user.updatedAt).toLocaleString("es-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </TableCell>
+                    <TableCell align="right">
+                      <form
+                        action={async (formData) => {
+                          await handleUserUpdate(user.id, formData);
+                        }}
+                        style={{
+                          display: "grid",
+                          gap: "0.35rem",
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(140px, 1fr))",
+                          alignItems: "center",
+                        }}
+                      >
+                        <select
+                          name="userRole"
+                          defaultValue={user.role}
+                          style={inputStyle}
+                          aria-label={`Rol de ${user.email}`}
+                        >
+                          {USER_ROLES.map((role) => (
+                            <option key={role} value={role}>
+                              {role}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          name="userFullName"
+                          type="text"
+                          defaultValue={user.fullName ?? ""}
+                          placeholder="Nombre completo"
+                          style={inputStyle}
+                        />
+                        <input
+                          name="userPassword"
+                          type="password"
+                          placeholder="Nueva contraseña (opcional)"
+                          style={inputStyle}
+                        />
+                        <Button
+                          type="submit"
+                          variant="ghost"
+                          disabled={userUpdatingId === user.id}
+                        >
+                          {userUpdatingId === user.id
+                            ? "Guardando..."
+                            : "Actualizar"}
+                        </Button>
+                      </form>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {userUpdateMessage ? (
+              <p
+                style={{
+                  margin: 0,
+                  color: userUpdateMessage.startsWith("Error")
+                    ? "#fda4af"
+                    : "#7ee7c4",
+                }}
+              >
+                {userUpdateMessage}
+              </p>
+            ) : null}
+          </div>
+        </Card>
+      ) : null}
 
       <div style={{ display: "grid", gap: "1rem" }}>
         <h3 style={{ margin: 0, fontSize: "1.1rem" }}>

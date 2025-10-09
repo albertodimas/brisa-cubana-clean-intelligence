@@ -42,6 +42,7 @@ vi.mock("@/lib/api", () => ({
       fullName: "Cliente Piloto",
     },
   ]),
+  fetchUsers: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("@/auth", () => ({
@@ -53,8 +54,13 @@ vi.mock("@/auth", () => ({
 describe("HomePage", () => {
   it("renders with data from the API", async () => {
     const api = await import("@/lib/api");
-    const { fetchServices, fetchBookings, fetchProperties, fetchCustomers } =
-      api;
+    const {
+      fetchServices,
+      fetchBookings,
+      fetchProperties,
+      fetchCustomers,
+      fetchUsers,
+    } = api;
     const { default: HomePage } = await import("./page");
     const component = await HomePage();
     expect(component).toBeTruthy();
@@ -63,10 +69,12 @@ describe("HomePage", () => {
     const mockedBookings = vi.mocked(fetchBookings);
     const mockedProperties = vi.mocked(fetchProperties);
     const mockedCustomers = vi.mocked(fetchCustomers);
+    const mockedUsers = vi.mocked(fetchUsers);
 
     expect(mockedServices).toHaveBeenCalled();
     expect(mockedBookings).toHaveBeenCalled();
     expect(mockedProperties).toHaveBeenCalled();
     expect(mockedCustomers).toHaveBeenCalled();
+    expect(mockedUsers).not.toHaveBeenCalled();
   });
 });

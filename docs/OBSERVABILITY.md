@@ -1,7 +1,7 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 8 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado implementado, Sentry pendiente
+**Última actualización:** 9 de octubre de 2025
+**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN)
 
 ---
 
@@ -175,7 +175,7 @@ prisma.$on("query", (e) => {
 
 ## 4. Sentry para Error Tracking
 
-### 4.1 Instalación (Pendiente)
+### 4.1 Dependencias instaladas
 
 ```bash
 cd apps/api
@@ -192,22 +192,22 @@ pnpm add @sentry/nextjs
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV,
-  integrations: [nodeProfilingIntegration()],
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-  profilesSampleRate: 0.1,
-  beforeSend(event, hint) {
-    // Filtrar eventos sensibles
-    if (event.request?.cookies) {
-      delete event.request.cookies;
-    }
-    return event;
-  },
-});
+const dsn = process.env.SENTRY_DSN;
 
-export default Sentry;
+if (dsn) {
+  Sentry.init({
+    dsn,
+    environment: process.env.NODE_ENV ?? "development",
+    integrations: [nodeProfilingIntegration()],
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+    profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+    sendDefaultPii: true,
+  });
+} else if (process.env.NODE_ENV === "production") {
+  console.warn("SENTRY_DSN not configured, Sentry will not be initialized");
+}
+
+export { Sentry };
 ```
 
 ```typescript
