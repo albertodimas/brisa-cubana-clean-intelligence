@@ -10,6 +10,7 @@ import {
   updatePropertyAction,
   updateBookingAction,
   updateUserAction,
+  toggleUserActiveAction,
   logoutAction,
 } from "@/app/actions";
 import {
@@ -408,6 +409,7 @@ export default async function HomePage() {
           updateProperty={updatePropertyAction}
           updateBooking={updateBookingAction}
           updateUser={updateUserAction}
+          toggleUserActive={toggleUserActiveAction}
           users={users}
           logout={logoutAction}
         />

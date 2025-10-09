@@ -58,6 +58,7 @@ type AdminPanelProps = {
   ) => Promise<ActionResult>;
   users: User[];
   updateUser: (userId: string, formData: FormData) => Promise<ActionResult>;
+  toggleUserActive: (userId: string, active: boolean) => Promise<ActionResult>;
   logout: () => Promise<ActionResult>;
 };
 
@@ -76,6 +77,7 @@ export function AdminPanel({
   updateBooking,
   users,
   updateUser,
+  toggleUserActive,
   logout,
 }: AdminPanelProps) {
   const router = useRouter();
@@ -901,6 +903,7 @@ export function AdminPanel({
                   <TableHeader>Usuario</TableHeader>
                   <TableHeader>Nombre</TableHeader>
                   <TableHeader>Rol</TableHeader>
+                  <TableHeader>Estado</TableHeader>
                   <TableHeader>Última actualización</TableHeader>
                   <TableHeader align="right">Acciones</TableHeader>
                 </TableRow>
@@ -912,6 +915,19 @@ export function AdminPanel({
                     <TableCell>{user.fullName ?? "Sin nombre"}</TableCell>
                     <TableCell>
                       <Chip>{user.role}</Chip>
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className="ui-chip"
+                        style={{
+                          backgroundColor: user.isActive
+                            ? "rgba(34, 197, 94, 0.2)"
+                            : "rgba(239, 68, 68, 0.2)",
+                          color: user.isActive ? "#22c55e" : "#ef4444",
+                        }}
+                      >
+                        {user.isActive ? "Activo" : "Inactivo"}
+                      </span>
                     </TableCell>
                     <TableCell>
                       {new Date(user.updatedAt).toLocaleString("es-US", {
@@ -957,6 +973,51 @@ export function AdminPanel({
                           placeholder="Nueva contraseña (opcional)"
                           style={inputStyle}
                         />
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            padding: "0.5rem",
+                            cursor:
+                              user.id === currentUser?.id
+                                ? "not-allowed"
+                                : "pointer",
+                            opacity: user.id === currentUser?.id ? 0.5 : 1,
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={user.isActive}
+                            onChange={async (e) => {
+                              if (user.id === currentUser?.id) {
+                                alert("No puedes desactivar tu propia cuenta");
+                                e.target.checked = user.isActive;
+                                return;
+                              }
+                              const result = await toggleUserActive(
+                                user.id,
+                                e.target.checked,
+                              );
+                              if (result.success) {
+                                setUserUpdateMessage(
+                                  result.success ?? "Estado actualizado",
+                                );
+                                setTimeout(() => {
+                                  setUserUpdateMessage("");
+                                }, 3000);
+                              } else {
+                                setUserUpdateMessage(
+                                  `Error: ${result.error ?? "No se pudo actualizar el estado"}`,
+                                );
+                                e.target.checked = user.isActive;
+                              }
+                            }}
+                            disabled={user.id === currentUser?.id}
+                            style={{ cursor: "inherit" }}
+                          />
+                          <span>Activo</span>
+                        </label>
                         <Button
                           type="submit"
                           variant="ghost"
