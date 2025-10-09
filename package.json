@@ -48,5 +48,8 @@
     "*.{json,md}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@sentry/nextjs": "^10.18.0"
   }
 }

@@ -21,6 +21,7 @@ Este directorio contiene la documentación verificada del proyecto. Usa la sigui
 
 | Documento                                | Descripción                                                       |
 | ---------------------------------------- | ----------------------------------------------------------------- |
+| [`SENTRY.md`](./SENTRY.md)               | Integración de Sentry: error tracking, performance y monitoring.  |
 | [`OBSERVABILITY.md`](./OBSERVABILITY.md) | Logging estructurado, métricas, alertas y runbooks de incidentes. |
 
 ## Testing y CI/CD

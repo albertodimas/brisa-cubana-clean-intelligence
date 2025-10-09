@@ -2,11 +2,15 @@ import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { prisma } from "./lib/prisma.js";
 import { loggingMiddleware } from "./middleware/logging.js";
+import { initSentry, Sentry } from "./lib/sentry.js";
 import bookings from "./routes/bookings.js";
 import services from "./routes/services.js";
 import properties from "./routes/properties.js";
 import customers from "./routes/customers.js";
 import auth from "./routes/auth.js";
+
+// Initialize Sentry
+initSentry();
 
 const app = new Hono();
 
@@ -78,5 +82,24 @@ app.route("/api/bookings", bookings);
 // Note: Using /api/authentication instead of /api/auth because Vercel
 // reserves /api/auth/* for NextAuth in Next.js projects
 app.route("/api/authentication", auth);
+
+// Global error handler - capture errors with Sentry
+app.onError((err, c) => {
+  // Only capture errors with status >= 500 (server errors)
+  if (!c.res.ok && c.res.status >= 500) {
+    Sentry.captureException(err, {
+      contexts: {
+        request: {
+          method: c.req.method,
+          url: c.req.url,
+          headers: Object.fromEntries(c.req.raw.headers),
+        },
+      },
+    });
+  }
+
+  // Re-throw to let Hono handle the response
+  throw err;
+});
 
 export default app;
