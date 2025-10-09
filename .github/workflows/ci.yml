@@ -74,7 +74,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: matrix.node == '22.x'
-        run: pnpm exec playwright install --with-deps
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Critical E2E tests
         if: matrix.node == '22.x'
