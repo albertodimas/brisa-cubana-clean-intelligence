@@ -2,7 +2,7 @@
 
 **Última actualización:** 8 de octubre de 2025
 **Responsable:** Equipo DevOps
-**Base de datos productiva:** Neon PostgreSQL 16
+**Base de datos productiva:** Neon PostgreSQL 17
 
 ---
 

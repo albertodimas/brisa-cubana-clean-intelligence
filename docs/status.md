@@ -31,7 +31,7 @@
 - **API (apps/api)**
   - Hono 4.9.10 corriendo en Vercel Node 22.
   - Rutas modulares:
-    - `routes/auth.ts` (`/api/authentication/*`): login/logout/me/verify + rate limiting.
+    - `routes/auth.ts` (`/api/authentication/*`): login/logout/me + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`: CRUD con autorización por rol.
   - Middleware `authenticate` y `requireRoles` (JWT/`API_TOKEN`).
   - Prisma Client 6.12.0 (PostgreSQL 17). Seed (`prisma/seed.ts`) crea datos funcionales.
@@ -67,7 +67,7 @@
 
 ### API (Hono + Prisma)
 
-- Autenticación: login (rate limited), logout, me, verify.
+- Autenticación: login (rate limited), logout, me.
 - Servicios: listar (público), crear/actualizar (roles ADMIN/COORDINATOR).
 - Propiedades: listar (público), crear/actualizar (roles ADMIN/COORDINATOR).
 - Clientes: listar (roles ADMIN/COORDINATOR).
@@ -174,10 +174,8 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 ## 8. Limitaciones conocidas
 
 1. El proxy sólo cubre rutas `/api/*`. Nuevos prefijos requieren actualizar `buildTargetUrl`.
-2. Falta soporte de alta/baja de usuarios (por ahora sólo actualización de roles y contraseñas).
-3. `RefreshToken` no se utiliza aún (reserva para futuras mejoras).
-4. Estilos heredados aún mezclan inline styles y tokens; migración completa en progreso.
-5. Seeds pensados para demo; ambientes preview deben reseedear manualmente (`pnpm --filter @brisa/api db:seed`).
+2. Estilos heredados aún mezclan inline styles y tokens; migración completa en progreso.
+3. Seeds pensados para demo; ambientes preview deben reseedear manualmente (`pnpm --filter @brisa/api db:seed`).
 
 ---
 

@@ -11,8 +11,6 @@ Este directorio contiene la documentación verificada del proyecto. Usa la sigui
 | [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) | Documentación OpenAPI/Swagger con Scalar, ejemplos y generación de clientes. |
 | [`openapi.yaml`](./openapi.yaml)                 | Especificación OpenAPI 3.1 para integraciones externas.                      |
 
-> Las modificaciones en `docs/` se publican automáticamente en GitHub Pages (`gh-pages`).
-
 ## Seguridad y Operaciones
 
 | Documento                                              | Descripción                                                             |
