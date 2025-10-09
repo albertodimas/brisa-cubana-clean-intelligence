@@ -72,23 +72,6 @@ updates:
     commit-message:
       prefix: "chore(deps/api)"
 
-  # UI Package
-  - package-ecosystem: "npm"
-    directory: "/packages/ui"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "America/New_York"
-    open-pull-requests-limit: 3
-    reviewers:
-      - "albertodimas"
-    labels:
-      - "dependencies"
-      - "ui"
-    commit-message:
-      prefix: "chore(deps/ui)"
-
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -106,36 +89,3 @@ updates:
     commit-message:
       prefix: "chore(deps/ci)"
 
-  # Docker
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "America/New_York"
-    open-pull-requests-limit: 2
-    reviewers:
-      - "albertodimas"
-    labels:
-      - "dependencies"
-      - "docker"
-    commit-message:
-      prefix: "chore(deps/docker)"
-
-  # Python (MkDocs documentation)
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "09:00"
-      timezone: "America/New_York"
-    open-pull-requests-limit: 2
-    reviewers:
-      - "albertodimas"
-    labels:
-      - "dependencies"
-      - "documentation"
-    commit-message:
-      prefix: "chore(deps/docs)"
