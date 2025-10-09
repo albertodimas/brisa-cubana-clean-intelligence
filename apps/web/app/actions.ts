@@ -455,14 +455,18 @@ export async function updateUserAction(
       return { error: "Sesión no autenticada" };
     }
 
-    const role = formData.get("userRole")?.toString();
+    const role = coerceOptionalString(formData.get("userRole"));
     const fullName = coerceOptionalString(formData.get("userFullName"));
     const passwordRaw = coerceOptionalString(formData.get("userPassword"));
+    const isActiveRaw = coerceOptionalString(formData.get("userActive"));
 
     const payload: Record<string, unknown> = {};
     if (role) payload.role = role;
     if (fullName !== undefined) payload.fullName = fullName;
     if (passwordRaw) payload.password = passwordRaw;
+    if (typeof isActiveRaw === "string") {
+      payload.isActive = isActiveRaw === "true";
+    }
 
     if (Object.keys(payload).length === 0) {
       return { error: "Sin cambios para actualizar" };
@@ -486,6 +490,59 @@ export async function updateUserAction(
     return { success: "Usuario actualizado" };
   } catch (error) {
     console.error("[actions] updateUser", error);
+    return { error: "Error inesperado" };
+  }
+}
+
+export async function toggleUserActiveAction(
+  userId: string,
+  active: boolean,
+): Promise<ActionResult> {
+  const formData = new FormData();
+  formData.set("userActive", String(active));
+  return updateUserAction(userId, formData);
+}
+
+export async function createUserAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    const token = await resolveAccessToken();
+    if (!token) {
+      return { error: "Sesión no autenticada" };
+    }
+
+    const payload = {
+      email: formData.get("newUserEmail")?.toString() ?? "",
+      fullName: formData.get("newUserFullName")?.toString() ?? "",
+      role: formData.get("newUserRole")?.toString() ?? "STAFF",
+      password: formData.get("newUserPassword")?.toString() ?? "",
+    };
+
+    if (!payload.email || !payload.fullName || !payload.password) {
+      return {
+        error: "Completa correo, nombre y contraseña",
+      };
+    }
+
+    const res = await fetch(`${API_URL}/api/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      return { error: body.error ?? "No se pudo crear el usuario" };
+    }
+
+    revalidatePath("/");
+    return { success: "Usuario creado" };
+  } catch (error) {
+    console.error("[actions] createUser", error);
     return { error: "Error inesperado" };
   }
 }

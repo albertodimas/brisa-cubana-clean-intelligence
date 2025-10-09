@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { Prisma } from "@prisma/client";
 
 process.env.API_TOKEN = "test-service-token";
 process.env.JWT_SECRET = "test-secret";
@@ -196,6 +197,36 @@ const mockPrisma = {
       }
       return usersFixture;
     }),
+    create: vi.fn().mockImplementation(async ({ data, select }: any) => {
+      if (usersFixture.some((user) => user.email === data.email)) {
+        const error: any = new Error(
+          "Unique constraint failed on the fields: (`email`)",
+        );
+        error.code = "P2002";
+        error.meta = { target: ["email"] };
+        error.clientVersion = "6.0.0";
+        throw error;
+      }
+      const record = {
+        id: makeCuid(usersFixture.length + 300),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ...data,
+      };
+      usersFixture.push(record);
+      if (select) {
+        return {
+          id: record.id,
+          email: record.email,
+          fullName: record.fullName,
+          role: record.role,
+          isActive: record.isActive,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt,
+        };
+      }
+      return record;
+    }),
     update: vi.fn().mockImplementation(async ({ where, data }: any) => {
       const user = usersFixture.find((item) => item.id === where.id);
       if (!user) {
@@ -207,6 +238,7 @@ const mockPrisma = {
         email: user.email,
         fullName: user.fullName ?? null,
         role: user.role,
+        isActive: user.isActive,
         updatedAt: user.updatedAt,
       };
     }),
@@ -248,10 +280,10 @@ const mockPrisma = {
 
 const mockVerify = vi.fn((token: string) =>
   token === "jwt-admin"
-    ? { sub: makeCuid(999), email: "admin@brisacubanaclean.com", role: "ADMIN" }
+    ? { sub: makeCuid(102), email: "admin@brisacubanaclean.com", role: "ADMIN" }
     : token === "jwt-coordinator"
       ? {
-          sub: makeCuid(998),
+          sub: makeCuid(103),
           email: "ops@brisacubanaclean.com",
           role: "COORDINATOR",
         }
@@ -310,6 +342,7 @@ describe("app", () => {
         email: "client@test.com",
         passwordHash: "$2a$10$hashed",
         role: "CLIENT",
+        isActive: true,
       },
       {
         id: makeCuid(102),
@@ -317,6 +350,7 @@ describe("app", () => {
         email: "admin@brisacubanaclean.com",
         passwordHash: "$2a$10$hashed",
         role: "ADMIN",
+        isActive: true,
       },
       {
         id: makeCuid(103),
@@ -324,6 +358,7 @@ describe("app", () => {
         email: "ops@brisacubanaclean.com",
         passwordHash: "$2a$10$hashed",
         role: "COORDINATOR",
+        isActive: true,
       },
     ];
     propertiesFixture = [
@@ -528,7 +563,11 @@ describe("app", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data.length).toBeGreaterThan(0);
-    expect(json.data[0]).toHaveProperty("role");
+    expect(json.data[0]).toMatchObject({
+      email: expect.any(String),
+      role: expect.any(String),
+      isActive: true,
+    });
   });
 
   it("forbids listing users for coordinators", async () => {
@@ -537,6 +576,79 @@ describe("app", () => {
     });
 
     expect(res.status).toBe(403);
+  });
+
+  it("creates a user when admin", async () => {
+    const payload = {
+      email: "new.user@test.com",
+      fullName: "Nuevo Usuario",
+      role: "STAFF",
+      password: "ClaveSegura123",
+    };
+
+    const res = await app.request("/api/users", {
+      method: "POST",
+      headers: {
+        ...authorizedHeaders,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.data.email).toBe(payload.email);
+    expect(json.data.role).toBe("STAFF");
+    expect(json.data.isActive).toBe(true);
+    expect(mockHash).toHaveBeenCalledWith("ClaveSegura123", 10);
+  });
+
+  it("rejects duplicate user emails", async () => {
+    const res = await app.request("/api/users", {
+      method: "POST",
+      headers: {
+        ...authorizedHeaders,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        email: usersFixture[0].email,
+        fullName: "Duplicado",
+        password: "ClaveSegura123",
+        role: "STAFF",
+      }),
+    });
+
+    expect(res.status).toBe(409);
+  });
+
+  it("prevents admins from deactivating themselves", async () => {
+    const me = usersFixture[1];
+    const res = await app.request(`/api/users/${me.id}`, {
+      method: "PATCH",
+      headers: {
+        ...authorizedHeaders,
+        Authorization: "Bearer jwt-admin",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ isActive: false }),
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("prevents admins from changing own role", async () => {
+    const me = usersFixture[1];
+    const res = await app.request(`/api/users/${me.id}`, {
+      method: "PATCH",
+      headers: {
+        ...authorizedHeaders,
+        Authorization: "Bearer jwt-admin",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ role: "STAFF" }),
+    });
+
+    expect(res.status).toBe(400);
   });
 
   it("updates user role and password", async () => {
@@ -551,6 +663,7 @@ describe("app", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data.role).toBe("STAFF");
+    expect(json.data.isActive).toBe(true);
     expect(mockHash).toHaveBeenCalledWith("NuevoPass123", 10);
   });
 

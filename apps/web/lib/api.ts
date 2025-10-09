@@ -54,6 +54,7 @@ export type User = {
   email: string;
   fullName: string | null;
   role: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 };
