@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint app components --ext .ts,.tsx",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "VITE_CJS_IGNORE_WARNING=true vitest run"
   },
   "dependencies": {
     "next": "15.5.4",

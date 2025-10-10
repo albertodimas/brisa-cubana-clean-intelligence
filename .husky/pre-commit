@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Verificar que no se commiteen archivos .env con credenciales
 echo "🔒 Verificando seguridad de credenciales..."
 bash scripts/verify-no-secrets.sh

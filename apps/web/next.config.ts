@@ -3,6 +3,22 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
+  webpack: (config, { isServer }) => {
+    // Suprimir warnings conocidos de OpenTelemetry (Sentry)
+    if (isServer) {
+      config.ignoreWarnings = [
+        {
+          module: /@opentelemetry\/instrumentation/,
+          message: /Critical dependency/,
+        },
+        {
+          module: /require-in-the-middle/,
+          message: /Critical dependency/,
+        },
+      ];
+    }
+    return config;
+  },
   async headers() {
     return [
       {
