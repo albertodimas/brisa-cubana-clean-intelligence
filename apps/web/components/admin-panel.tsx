@@ -9,6 +9,7 @@ import type { Booking, Customer, Property, Service, User } from "@/lib/api";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Chip } from "./ui/chip";
+import { InfiniteList } from "./ui/infinite-list";
 import { Skeleton } from "./ui/skeleton";
 import { useToast } from "./ui/toast";
 import {
@@ -423,150 +424,148 @@ export function AdminPanel({
             />
           </label>
         </div>
-        {filteredBookings.length === 0 ? (
-          <p style={{ color: "#d5f6eb" }}>
-            No hay reservas que coincidan con los filtros seleccionados.
-          </p>
-        ) : (
-          <div style={{ display: "grid", gap: "1rem" }}>
-            {filteredBookings.map((booking) => (
-              <form
-                key={booking.id}
-                action={async (formData) => {
-                  await handleBookingUpdate(booking.id, formData);
+        <InfiniteList
+          items={filteredBookings}
+          pageSize={5}
+          getItemKey={(booking) => booking.id}
+          emptyMessage="No hay reservas que coincidan con los filtros seleccionados."
+          loadingMessage="Cargando más reservas..."
+          className="grid gap-4"
+          renderItem={(booking) => (
+            <form
+              action={async (formData) => {
+                await handleBookingUpdate(booking.id, formData);
+              }}
+              style={{
+                display: "grid",
+                gap: "0.75rem",
+                padding: "1rem",
+                borderRadius: "0.75rem",
+                border: "1px solid rgba(126,231,196,0.15)",
+                background: "rgba(11,23,28,0.6)",
+              }}
+              data-testid="booking-card"
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "1rem",
+                  flexWrap: "wrap",
                 }}
+              >
+                <strong>
+                  {booking.code} · {booking.service.name}
+                </strong>
+                <span style={{ color: "#a7dcd0", fontSize: "0.85rem" }}>
+                  Cliente:{" "}
+                  {booking.customer?.fullName ??
+                    booking.customer?.email ??
+                    "N/A"}
+                </span>
+              </div>
+              <div
                 style={{
                   display: "grid",
                   gap: "0.75rem",
-                  padding: "1rem",
-                  borderRadius: "0.75rem",
-                  border: "1px solid rgba(126,231,196,0.15)",
-                  background: "rgba(11,23,28,0.6)",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
                 }}
-                data-testid="booking-card"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "1rem",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <strong>
-                    {booking.code} · {booking.service.name}
-                  </strong>
-                  <span style={{ color: "#a7dcd0", fontSize: "0.85rem" }}>
-                    Cliente:{" "}
-                    {booking.customer?.fullName ??
-                      booking.customer?.email ??
-                      "N/A"}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gap: "0.75rem",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                  }}
-                >
-                  <label style={{ display: "grid", gap: "0.25rem" }}>
-                    <span>Fecha y hora</span>
-                    <input
-                      name="bookingScheduledAt"
-                      type="datetime-local"
-                      defaultValue={formatDateTimeLocal(booking.scheduledAt)}
-                      style={inputStyle}
-                    />
-                  </label>
-                  <label style={{ display: "grid", gap: "0.25rem" }}>
-                    <span>Duración (min)</span>
-                    <input
-                      name="bookingDuration"
-                      type="number"
-                      min="30"
-                      step="15"
-                      defaultValue={booking.durationMin}
-                      style={inputStyle}
-                    />
-                  </label>
-                  <label style={{ display: "grid", gap: "0.25rem" }}>
-                    <span>Estado</span>
-                    <select
-                      name="bookingStatus"
-                      defaultValue={booking.status}
-                      style={inputStyle}
-                    >
-                      <option value="PENDING">Pendiente</option>
-                      <option value="CONFIRMED">Confirmada</option>
-                      <option value="IN_PROGRESS">En curso</option>
-                      <option value="COMPLETED">Completada</option>
-                      <option value="CANCELLED">Cancelada</option>
-                    </select>
-                  </label>
-                  <label style={{ display: "grid", gap: "0.25rem" }}>
-                    <span>Servicio</span>
-                    <select
-                      name="bookingService"
-                      defaultValue={booking.service.id}
-                      style={inputStyle}
-                    >
-                      {services.map((service) => (
-                        <option key={service.id} value={service.id}>
-                          {service.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label style={{ display: "grid", gap: "0.25rem" }}>
-                    <span>Propiedad</span>
-                    <select
-                      name="bookingProperty"
-                      defaultValue={booking.property.id}
-                      style={inputStyle}
-                    >
-                      {properties.map((property) => (
-                        <option key={property.id} value={property.id}>
-                          {property.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
                 <label style={{ display: "grid", gap: "0.25rem" }}>
-                  <span>Notas</span>
-                  <textarea
-                    name="bookingNotes"
-                    rows={2}
-                    defaultValue={booking.notes ?? ""}
-                    style={{ ...inputStyle, resize: "vertical" }}
+                  <span>Fecha y hora</span>
+                  <input
+                    name="bookingScheduledAt"
+                    type="datetime-local"
+                    defaultValue={formatDateTimeLocal(booking.scheduledAt)}
+                    style={inputStyle}
                   />
                 </label>
-                <button
-                  type="submit"
-                  style={{
-                    padding: "0.45rem 1.2rem",
-                    borderRadius: "999px",
-                    border: "1px solid rgba(126,231,196,0.3)",
-                    background:
-                      bookingUpdatingId === booking.id
-                        ? "rgba(126,231,196,0.2)"
-                        : "rgba(11,23,28,0.8)",
-                    color: "#d5f6eb",
-                    cursor:
-                      bookingUpdatingId === booking.id ? "wait" : "pointer",
-                    alignSelf: "flex-start",
-                  }}
-                  disabled={bookingUpdatingId === booking.id}
-                >
-                  {bookingUpdatingId === booking.id
-                    ? "Guardando..."
-                    : "Actualizar reserva"}
-                </button>
-              </form>
-            ))}
-          </div>
-        )}
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  <span>Duración (min)</span>
+                  <input
+                    name="bookingDuration"
+                    type="number"
+                    min="30"
+                    step="15"
+                    defaultValue={booking.durationMin}
+                    style={inputStyle}
+                  />
+                </label>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  <span>Estado</span>
+                  <select
+                    name="bookingStatus"
+                    defaultValue={booking.status}
+                    style={inputStyle}
+                  >
+                    <option value="PENDING">Pendiente</option>
+                    <option value="CONFIRMED">Confirmada</option>
+                    <option value="IN_PROGRESS">En curso</option>
+                    <option value="COMPLETED">Completada</option>
+                    <option value="CANCELLED">Cancelada</option>
+                  </select>
+                </label>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  <span>Servicio</span>
+                  <select
+                    name="bookingService"
+                    defaultValue={booking.service.id}
+                    style={inputStyle}
+                  >
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  <span>Propiedad</span>
+                  <select
+                    name="bookingProperty"
+                    defaultValue={booking.property.id}
+                    style={inputStyle}
+                  >
+                    {properties.map((property) => (
+                      <option key={property.id} value={property.id}>
+                        {property.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <label style={{ display: "grid", gap: "0.25rem" }}>
+                <span>Notas</span>
+                <textarea
+                  name="bookingNotes"
+                  rows={2}
+                  defaultValue={booking.notes ?? ""}
+                  style={{ ...inputStyle, resize: "vertical" }}
+                />
+              </label>
+              <button
+                type="submit"
+                style={{
+                  padding: "0.45rem 1.2rem",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(126,231,196,0.3)",
+                  background:
+                    bookingUpdatingId === booking.id
+                      ? "rgba(126,231,196,0.2)"
+                      : "rgba(11,23,28,0.8)",
+                  color: "#d5f6eb",
+                  cursor: bookingUpdatingId === booking.id ? "wait" : "pointer",
+                  alignSelf: "flex-start",
+                }}
+                disabled={bookingUpdatingId === booking.id}
+              >
+                {bookingUpdatingId === booking.id
+                  ? "Guardando..."
+                  : "Actualizar reserva"}
+              </button>
+            </form>
+          )}
+        />
       </div>
 
       <div style={{ display: "grid", gap: "0.5rem" }}>
