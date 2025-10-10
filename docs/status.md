@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 10 de octubre de 2025
+**Última revisión:** 10 de octubre de 2025 (Sprint 1 completado: Coverage + Paginación + Interfaces)
 
 ---
 
@@ -107,7 +107,8 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 | GET    | `/api/properties`            | Pública                      | Lista propiedades con dueño. Paginado (limit, cursor).                                             |
 | POST   | `/api/properties`            | Roles `ADMIN`, `COORDINATOR` | Crea propiedad.                                                                                    |
 | PATCH  | `/api/properties/:id`        | Roles `ADMIN`, `COORDINATOR` | Actualiza propiedad.                                                                               |
-| GET    | `/api/customers`             | Roles `ADMIN`, `COORDINATOR` | Lista clientes (`id`, `email`, `fullName`).                                                        |
+| GET    | `/api/customers`             | Roles `ADMIN`, `COORDINATOR` | Lista clientes (`id`, `email`, `fullName`). Paginado (limit 50, cursor).                           |
+| GET    | `/api/users`                 | Rol `ADMIN`                  | Lista usuarios con roles. Paginado (limit 50, cursor).                                             |
 | GET    | `/api/bookings`              | Pública                      | Filtros `from`, `to`, `status`, `propertyId`, `serviceId`, `customerId`. Paginado (limit, cursor). |
 | POST   | `/api/bookings`              | Roles `ADMIN`, `COORDINATOR` | Crea reserva (auto código, precio, duración).                                                      |
 | PATCH  | `/api/bookings/:id`          | Roles `ADMIN`, `COORDINATOR` | Actualiza reserva.                                                                                 |
@@ -141,9 +142,10 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 24 pruebas Vitest
-- **`apps/web`**: 1 prueba Vitest
-- **Total**: 25 pruebas passing
+- **`apps/api`**: 36 pruebas Vitest con coverage configurado (85% lines, 65% functions, 50% branches)
+- **`apps/web`**: 1 prueba Vitest con coverage configurado (70% threshold)
+- **Total**: 37 pruebas passing
+- **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
 
@@ -291,7 +293,9 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
 8. ✅ E2E Testing: 13 tests con estrategia piramidal (smoke/critical/full)
 9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)
-10. ✅ Paginación cursor-based: `/api/bookings` (limit 20), `/api/services` (limit 50), `/api/properties` (limit 50)
+10. ✅ Paginación cursor-based: `/api/bookings`, `/api/services`, `/api/properties`, `/api/users`, `/api/customers`
+11. ✅ Code Coverage: Configurado con V8 provider y thresholds automáticos (API: 85%, Web: 70%)
+12. ✅ Interfaces TypeScript: Tipos e interfaces para SOLID (auth, user, booking, service, property)
 
 ### Pendiente 🔄
 
@@ -304,9 +308,13 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
    - Sistema de estilos compartido (Tailwind o Vanilla Extract)
    - Notificaciones push para coordinadores
    - UI de paginación en frontend (infinite scroll / load more)
-   - Paginación en `/api/users` y `/api/customers`
 
-3. **DevOps:**
+3. **Arquitectura (Sprint 2-3):**
+   - Implementar dependency injection con interfaces creadas
+   - Separar tests de integración de tests unitarios
+   - Repositorios concretos implementando interfaces
+
+4. **DevOps:**
    - Postdeploy hook automático para seed inicial
    - Documentar proceso de deployment en `DEPLOYMENT.md`
 
