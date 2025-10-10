@@ -286,28 +286,73 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 2. ✅ Guardas de entorno: Pre-commit hooks y CI checks para .env files
 3. ✅ Cobertura fortalecida: Tests de seguridad con escenarios negativos
 4. ✅ Logging estructurado: Pino integrado con redacción automática
+5. ✅ OpenAPI/Swagger: Documentación automática con Scalar UI en `/docs`
+6. ✅ Observabilidad: Sentry integrado en web y API con error tracking
+7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
+8. ✅ E2E Testing: 13 tests con estrategia piramidal (smoke/critical/full)
+9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)
 
 ### Pendiente 🔄
 
-1. **Pruebas de API contractuales:**
-   - Implementar OpenAPI/Swagger spec
-   - Tests automatizados con Postman/Newman o Vitest API tests
-   - Validación de schemas en CI
-
-2. **Observabilidad avanzada:**
-   - Integrar Sentry para tracking de errores
-   - Alertas en Slack/Email para errores críticos
+1. **Observabilidad avanzada:**
+   - Configurar alertas Sentry en Slack/Email
    - Dashboard de métricas de negocio (Grafana)
+   - Performance budgets y thresholds
 
-3. **Roadmap funcional:**
-   - UI de gestión de usuarios (CRUD completo)
+2. **Roadmap funcional:**
    - Paginación en `/api/bookings` y `/api/services`
    - Sistema de estilos compartido (Tailwind o Vanilla Extract)
    - Notificaciones push para coordinadores
 
+3. **DevOps:**
+   - Postdeploy hook automático para seed inicial
+   - Documentar proceso de deployment en `DEPLOYMENT.md`
+
 ---
 
-## 11. Referencias
+## 11. Incidentes Resueltos
+
+### 2025-10-09: Producción rota por dependencia no actualizada en seed
+
+**Problema:**
+
+- Después de eliminar código muerto (`assignedStaffId` del modelo `Booking` en commit `28010d4`), el login de producción comenzó a fallar con error 500
+- CI/CD estaba fallando silenciosamente
+- Base de datos de producción quedó vacía
+
+**Causa raíz:**
+
+1. Al eliminar `assignedStaffId` del schema Prisma, no se actualizó `apps/api/prisma/seed.ts` que aún lo referenciaba
+2. El seed fallaba con `PrismaClientValidationError: Invalid prisma.booking.upsert() invocation`
+3. Producción nunca ejecuta seed automáticamente (no hay hook postdeploy)
+4. El schema de producción tampoco estaba actualizado (faltaba campo `isActive` agregado en feature de activación de usuarios)
+
+**Lección aprendida:**
+
+> **Cuando se elimina "código muerto", verificar TODAS las dependencias, no solo referencias en TypeScript. Incluir: seeds, migrations, tests, documentación.**
+
+**Resolución:**
+
+1. **Fix inmediato** (commit `747a428`): Eliminado `assignedStaffId` de seed.ts
+2. **Optimización CI** (commit `b03808c`): Cambiado Playwright install de "todos los browsers" a solo `chromium` → CI de 13+ min a 3m18s
+3. **Schema de producción**: Ejecutado manualmente `prisma db push --accept-data-loss` contra Neon production
+4. **Seed de producción**: Ejecutado `tsx prisma/seed.ts` con credenciales de producción
+5. **Verificación**: Login y panel operativo funcionando en producción con todos los datos
+
+**Estado final:**
+✅ Producción operativa con datos completos
+✅ CI pasando en 3m18s (antes: 13+ min)
+✅ UI de activación de usuarios verificada en producción
+✅ Base de datos con schema actualizado (PostgreSQL 17 + campo `isActive`)
+
+**Mejora recomendada:**
+
+- Considerar agregar `postdeploy` script en `package.json` para ejecutar seed automáticamente en deployments iniciales
+- O documentar proceso manual de seed en `docs/DEPLOYMENT.md`
+
+---
+
+## 12. Referencias
 
 - Repositorio: <https://github.com/albertodimas/brisa-cubana-clean-intelligence>
 - Despliegue web: <https://brisa-cubana-clean-intelligence.vercel.app>
