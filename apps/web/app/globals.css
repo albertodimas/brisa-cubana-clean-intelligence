@@ -1,22 +1,22 @@
-:root {
-  color-scheme: dark;
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: #050b0f;
-  color: #e6f4f1;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+@layer base {
+  :root {
+    color-scheme: dark;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+  body {
+    @apply bg-brisa-900 text-brisa-50 min-h-screen flex flex-col;
+  }
 
-main {
-  flex: 1;
+  a {
+    @apply no-underline text-inherit;
+  }
+
+  main {
+    @apply flex-1;
+  }
 }

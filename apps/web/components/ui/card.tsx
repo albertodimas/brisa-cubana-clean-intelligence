@@ -11,26 +11,23 @@ export function Card({
   title,
   description,
   footer,
-  className,
+  className = "",
   children,
 }: CardProps) {
-  const classes = ["ui-card"];
-  if (className) classes.push(className);
-
   return (
-    <section className={classes.join(" ")}>
+    <section
+      className={`bg-brisa-800/60 rounded-xl border border-brisa-600/20 p-6 ${className}`}
+    >
       {title ? (
-        <header className="ui-card__header">
-          <h2 className="ui-card__title">{title}</h2>
+        <header className="mb-4">
+          <h2 className="text-xl font-semibold text-brisa-50 m-0">{title}</h2>
           {description ? (
-            <p className="ui-card__description">{description}</p>
+            <p className="text-brisa-200 text-sm mt-2 m-0">{description}</p>
           ) : null}
         </header>
       ) : null}
       <div>{children}</div>
-      {footer ? (
-        <footer style={{ marginTop: "var(--spacing-sm)" }}>{footer}</footer>
-      ) : null}
+      {footer ? <footer className="mt-4">{footer}</footer> : null}
     </section>
   );
 }
