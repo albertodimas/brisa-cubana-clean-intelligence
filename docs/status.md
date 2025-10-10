@@ -291,7 +291,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
 8. ✅ E2E Testing: 13 tests con estrategia piramidal (smoke/critical/full)
 9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)
-10. ✅ Paginación cursor-based en `/api/bookings`: límite configurable (1-100, default 20)
+10. ✅ Paginación cursor-based: `/api/bookings` (limit 20), `/api/services` (limit 50), `/api/properties` (limit 50)
 
 ### Pendiente 🔄
 
@@ -301,10 +301,10 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
    - Performance budgets y thresholds
 
 2. **Roadmap funcional:**
-   - Paginación en `/api/services` y `/api/properties` (reutilizar patrón de bookings)
    - Sistema de estilos compartido (Tailwind o Vanilla Extract)
    - Notificaciones push para coordinadores
    - UI de paginación en frontend (infinite scroll / load more)
+   - Paginación en `/api/users` y `/api/customers`
 
 3. **DevOps:**
    - Postdeploy hook automático para seed inicial
