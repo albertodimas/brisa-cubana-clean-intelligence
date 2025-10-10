@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light dark;
     font-family: 'Inter', system-ui, sans-serif;
   }
 
   body {
-    @apply bg-brisa-900 text-brisa-50 min-h-screen flex flex-col;
+    @apply bg-white dark:bg-brisa-900 text-gray-900 dark:text-brisa-50 min-h-screen flex flex-col transition-colors duration-200;
   }
 
   a {
