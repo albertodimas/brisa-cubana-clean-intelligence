@@ -15,7 +15,39 @@ const makeCuid = (index: number) => `c${index.toString(36).padStart(24, "0")}`;
 const mockPrisma = {
   $queryRaw: vi.fn().mockResolvedValue([{ ok: 1 }]),
   service: {
-    findMany: vi.fn().mockImplementation(async () => servicesFixture),
+    findMany: vi.fn().mockImplementation(
+      async ({
+        take,
+        skip,
+        cursor,
+      }: {
+        take?: number;
+        skip?: number;
+        cursor?: { id: string };
+      } = {}) => {
+        let filtered = [...servicesFixture];
+
+        // Handle cursor-based pagination
+        if (cursor) {
+          const cursorIndex = filtered.findIndex((s) => s.id === cursor.id);
+          if (cursorIndex !== -1) {
+            filtered = filtered.slice(cursorIndex);
+          }
+        }
+
+        // Handle skip
+        if (skip) {
+          filtered = filtered.slice(skip);
+        }
+
+        // Handle take
+        if (take) {
+          filtered = filtered.slice(0, take);
+        }
+
+        return filtered;
+      },
+    ),
     create: vi.fn().mockImplementation(async ({ data }: { data: any }) => {
       const record = {
         id: makeCuid(servicesFixture.length + 1),
@@ -265,7 +297,39 @@ const mockPrisma = {
     }),
   },
   property: {
-    findMany: vi.fn().mockImplementation(async () => propertiesFixture),
+    findMany: vi.fn().mockImplementation(
+      async ({
+        take,
+        skip,
+        cursor,
+      }: {
+        take?: number;
+        skip?: number;
+        cursor?: { id: string };
+      } = {}) => {
+        let filtered = [...propertiesFixture];
+
+        // Handle cursor-based pagination
+        if (cursor) {
+          const cursorIndex = filtered.findIndex((p) => p.id === cursor.id);
+          if (cursorIndex !== -1) {
+            filtered = filtered.slice(cursorIndex);
+          }
+        }
+
+        // Handle skip
+        if (skip) {
+          filtered = filtered.slice(skip);
+        }
+
+        // Handle take
+        if (take) {
+          filtered = filtered.slice(0, take);
+        }
+
+        return filtered;
+      },
+    ),
     create: vi.fn().mockImplementation(async ({ data }: { data: any }) => {
       const record = {
         id: makeCuid(propertiesFixture.length + 201),
@@ -355,6 +419,16 @@ describe("app", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        id: makeCuid(2),
+        name: "Move-In/Move-Out",
+        description: "Limpieza para mudanzas",
+        basePrice: 350,
+        durationMin: 240,
+        active: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
     usersFixture = [
       {
@@ -388,6 +462,16 @@ describe("app", () => {
         label: "Brickell Loft",
         city: "Miami",
         ownerId: makeCuid(101),
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+      },
+      {
+        id: makeCuid(202),
+        label: "Coral Gables House",
+        city: "Miami",
+        ownerId: makeCuid(101),
+        createdAt: new Date("2024-02-01"),
+        updatedAt: new Date("2024-02-01"),
       },
     ];
     bookingsFixture = [
@@ -467,6 +551,92 @@ describe("app", () => {
       body: "{}",
     });
     expect(res.status).toBe(401);
+  });
+
+  it("paginates services with default limit", async () => {
+    const res = await app.request("/api/services");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data).toBeDefined();
+    expect(json.pagination).toBeDefined();
+    expect(json.pagination.limit).toBe(50);
+    expect(json.pagination.hasMore).toBe(false);
+  });
+
+  it("paginates services with custom limit", async () => {
+    const res = await app.request("/api/services?limit=1");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data.length).toBeLessThanOrEqual(1);
+    expect(json.pagination.limit).toBe(1);
+  });
+
+  it("navigates services pagination with cursor", async () => {
+    const firstPage = await app.request("/api/services?limit=1");
+    const firstJson = await firstPage.json();
+
+    expect(firstJson.pagination.hasMore).toBe(true);
+    expect(firstJson.pagination.nextCursor).toBeDefined();
+
+    const secondPage = await app.request(
+      `/api/services?limit=1&cursor=${firstJson.pagination.nextCursor}`,
+    );
+    const secondJson = await secondPage.json();
+
+    expect(secondJson.data[0]?.id).not.toBe(firstJson.data[0]?.id);
+  });
+
+  it("validates services pagination boundaries", async () => {
+    const invalidLimit = await app.request("/api/services?limit=0");
+    expect(invalidLimit.status).toBe(400);
+
+    const tooHighLimit = await app.request("/api/services?limit=101");
+    expect(tooHighLimit.status).toBe(400);
+  });
+
+  it("paginates properties with default limit", async () => {
+    const res = await app.request("/api/properties");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data).toBeDefined();
+    expect(json.pagination).toBeDefined();
+    expect(json.pagination.limit).toBe(50);
+    expect(json.pagination.hasMore).toBe(false);
+  });
+
+  it("paginates properties with custom limit", async () => {
+    const res = await app.request("/api/properties?limit=1");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data.length).toBeLessThanOrEqual(1);
+    expect(json.pagination.limit).toBe(1);
+  });
+
+  it("navigates properties pagination with cursor", async () => {
+    const firstPage = await app.request("/api/properties?limit=1");
+    const firstJson = await firstPage.json();
+
+    expect(firstJson.pagination.hasMore).toBe(true);
+    expect(firstJson.pagination.nextCursor).toBeDefined();
+
+    const secondPage = await app.request(
+      `/api/properties?limit=1&cursor=${firstJson.pagination.nextCursor}`,
+    );
+    const secondJson = await secondPage.json();
+
+    expect(secondJson.data[0]?.id).not.toBe(firstJson.data[0]?.id);
+  });
+
+  it("validates properties pagination boundaries", async () => {
+    const invalidLimit = await app.request("/api/properties?limit=0");
+    expect(invalidLimit.status).toBe(400);
+
+    const tooHighLimit = await app.request("/api/properties?limit=101");
+    expect(tooHighLimit.status).toBe(400);
   });
 
   it("lists bookings", async () => {

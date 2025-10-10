@@ -25,6 +25,30 @@ La paginación cursor-based es más eficiente que la paginación offset-based pa
 | `limit`   | integer | No        | 20      | Número de resultados por página (1-100)             |
 | `cursor`  | string  | No        | -       | ID del último elemento de la página anterior (CUID) |
 
+**Orden:** `scheduledAt` ASC, `id` ASC
+
+#### GET /api/services
+
+**Parámetros de Query:**
+
+| Parámetro | Tipo    | Requerido | Default | Descripción                                         |
+| --------- | ------- | --------- | ------- | --------------------------------------------------- |
+| `limit`   | integer | No        | 50      | Número de resultados por página (1-100)             |
+| `cursor`  | string  | No        | -       | ID del último elemento de la página anterior (CUID) |
+
+**Orden:** `name` ASC, `id` ASC
+
+#### GET /api/properties
+
+**Parámetros de Query:**
+
+| Parámetro | Tipo    | Requerido | Default | Descripción                                         |
+| --------- | ------- | --------- | ------- | --------------------------------------------------- |
+| `limit`   | integer | No        | 50      | Número de resultados por página (1-100)             |
+| `cursor`  | string  | No        | -       | ID del último elemento de la página anterior (CUID) |
+
+**Orden:** `createdAt` DESC, `id` ASC
+
 **Respuesta:**
 
 ```json
@@ -244,9 +268,19 @@ function useBookings(limit = 20) {
 
 ## Orden de Resultados
 
-Los resultados están ordenados por:
+### GET /api/bookings
 
 1. `scheduledAt` (ascendente)
+2. `id` (ascendente) - como tiebreaker
+
+### GET /api/services
+
+1. `name` (ascendente)
+2. `id` (ascendente) - como tiebreaker
+
+### GET /api/properties
+
+1. `createdAt` (descendente) - más recientes primero
 2. `id` (ascendente) - como tiebreaker
 
 Esto garantiza un orden consistente y predecible en la paginación.
@@ -274,7 +308,23 @@ Esto garantiza un orden consistente y predecible en la paginación.
 
 Ubicación: `apps/api/src/app.test.ts`
 
+**Bookings:**
+
 - ✅ Paginación con límite por defecto (20)
+- ✅ Paginación con límite personalizado
+- ✅ Navegación con cursor
+- ✅ Validación de límites (min/max)
+
+**Services:**
+
+- ✅ Paginación con límite por defecto (50)
+- ✅ Paginación con límite personalizado
+- ✅ Navegación con cursor
+- ✅ Validación de límites (min/max)
+
+**Properties:**
+
+- ✅ Paginación con límite por defecto (50)
 - ✅ Paginación con límite personalizado
 - ✅ Navegación con cursor
 - ✅ Validación de límites (min/max)
@@ -292,17 +342,13 @@ Ubicación: `tests/e2e/operations.spec.ts`
 
 ### Endpoints Pendientes
 
-1. **GET /api/services**
-   - Mismo patrón de paginación
-   - Límite sugerido: 50 (crecimiento más lento)
-
-2. **GET /api/properties**
-   - Mismo patrón de paginación
-   - Límite sugerido: 50 (crecimiento más lento)
-
-3. **GET /api/users** (solo ADMIN)
+1. **GET /api/users** (solo ADMIN)
    - Mismo patrón de paginación
    - Límite sugerido: 100 (lista administrativa)
+
+2. **GET /api/customers** (ADMIN/COORDINATOR)
+   - Mismo patrón de paginación
+   - Límite sugerido: 50
 
 ### UI de Paginación
 
@@ -319,5 +365,10 @@ Ubicación: `tests/e2e/operations.spec.ts`
 
 ---
 
-**Última actualización**: 9 de octubre de 2025
+**Última actualización**: 10 de octubre de 2025
 **Implementado en**: v0.2.1
+
+### Changelog
+
+- **v0.2.1** (9 octubre 2025): Paginación implementada en `/api/bookings`
+- **v0.2.2** (10 octubre 2025): Paginación implementada en `/api/services` y `/api/properties`

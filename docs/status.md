@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 9 de octubre de 2025
+**Última revisión:** 10 de octubre de 2025
 
 ---
 
@@ -96,21 +96,21 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ## 5. Endpoints de la API (producción)
 
-| Método | Ruta                         | Auth                         | Descripción                                                              |
-| ------ | ---------------------------- | ---------------------------- | ------------------------------------------------------------------------ |
-| POST   | `/api/authentication/login`  | Pública (rate limited)       | Devuelve `{ data: user, token }` y cookie HttpOnly.                      |
-| POST   | `/api/authentication/logout` | Cookie/JWT                   | Borra cookie `auth_token`.                                               |
-| GET    | `/api/authentication/me`     | Cookie/JWT                   | Retorna usuario autenticado.                                             |
-| GET    | `/api/services`              | Pública                      | Lista servicios ordenados.                                               |
-| POST   | `/api/services`              | Roles `ADMIN`, `COORDINATOR` | Crea servicio.                                                           |
-| PATCH  | `/api/services/:id`          | Roles `ADMIN`, `COORDINATOR` | Actualiza servicio.                                                      |
-| GET    | `/api/properties`            | Pública                      | Lista propiedades con dueño.                                             |
-| POST   | `/api/properties`            | Roles `ADMIN`, `COORDINATOR` | Crea propiedad.                                                          |
-| PATCH  | `/api/properties/:id`        | Roles `ADMIN`, `COORDINATOR` | Actualiza propiedad.                                                     |
-| GET    | `/api/customers`             | Roles `ADMIN`, `COORDINATOR` | Lista clientes (`id`, `email`, `fullName`).                              |
-| GET    | `/api/bookings`              | Pública                      | Filtros `from`, `to`, `status`, `propertyId`, `serviceId`, `customerId`. |
-| POST   | `/api/bookings`              | Roles `ADMIN`, `COORDINATOR` | Crea reserva (auto código, precio, duración).                            |
-| PATCH  | `/api/bookings/:id`          | Roles `ADMIN`, `COORDINATOR` | Actualiza reserva.                                                       |
+| Método | Ruta                         | Auth                         | Descripción                                                                                        |
+| ------ | ---------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| POST   | `/api/authentication/login`  | Pública (rate limited)       | Devuelve `{ data: user, token }` y cookie HttpOnly.                                                |
+| POST   | `/api/authentication/logout` | Cookie/JWT                   | Borra cookie `auth_token`.                                                                         |
+| GET    | `/api/authentication/me`     | Cookie/JWT                   | Retorna usuario autenticado.                                                                       |
+| GET    | `/api/services`              | Pública                      | Lista servicios ordenados. Paginado (limit, cursor).                                               |
+| POST   | `/api/services`              | Roles `ADMIN`, `COORDINATOR` | Crea servicio.                                                                                     |
+| PATCH  | `/api/services/:id`          | Roles `ADMIN`, `COORDINATOR` | Actualiza servicio.                                                                                |
+| GET    | `/api/properties`            | Pública                      | Lista propiedades con dueño. Paginado (limit, cursor).                                             |
+| POST   | `/api/properties`            | Roles `ADMIN`, `COORDINATOR` | Crea propiedad.                                                                                    |
+| PATCH  | `/api/properties/:id`        | Roles `ADMIN`, `COORDINATOR` | Actualiza propiedad.                                                                               |
+| GET    | `/api/customers`             | Roles `ADMIN`, `COORDINATOR` | Lista clientes (`id`, `email`, `fullName`).                                                        |
+| GET    | `/api/bookings`              | Pública                      | Filtros `from`, `to`, `status`, `propertyId`, `serviceId`, `customerId`. Paginado (limit, cursor). |
+| POST   | `/api/bookings`              | Roles `ADMIN`, `COORDINATOR` | Crea reserva (auto código, precio, duración).                                                      |
+| PATCH  | `/api/bookings/:id`          | Roles `ADMIN`, `COORDINATOR` | Actualiza reserva.                                                                                 |
 
 > **Credenciales demo:**
 >

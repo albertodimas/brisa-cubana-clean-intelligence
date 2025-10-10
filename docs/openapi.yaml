@@ -118,14 +118,31 @@ paths:
   /api/services:
     get:
       tags: [Services]
-      summary: Lista todos los servicios disponibles
+      summary: Lista todos los servicios disponibles con paginación
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Número de resultados por página (1-100)
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+          description: ID del último elemento de la página anterior (cursor-based pagination)
       responses:
         '200':
-          description: Colección de servicios
+          description: Colección paginada de servicios
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceListResponse'
+                $ref: '#/components/schemas/ServicePaginatedResponse'
+        '400':
+          description: Parámetros de paginación inválidos
     post:
       tags: [Services]
       summary: Crea un nuevo servicio
@@ -184,14 +201,31 @@ paths:
   /api/properties:
     get:
       tags: [Properties]
-      summary: Lista todas las propiedades registradas
+      summary: Lista todas las propiedades registradas con paginación
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Número de resultados por página (1-100)
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+          description: ID del último elemento de la página anterior (cursor-based pagination)
       responses:
         '200':
-          description: Colección de propiedades
+          description: Colección paginada de propiedades
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PropertyListResponse'
+                $ref: '#/components/schemas/PropertyPaginatedResponse'
+        '400':
+          description: Parámetros de paginación inválidos
     post:
       tags: [Properties]
       summary: Crea una propiedad
@@ -584,6 +618,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Service'
+    ServicePaginatedResponse:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+        pagination:
+          type: object
+          required: [limit, hasMore]
+          properties:
+            limit:
+              type: integer
+              description: Número de resultados solicitados por página
+              example: 50
+            cursor:
+              type: string
+              nullable: true
+              description: Cursor actual (ID desde donde se comenzó a paginar)
+            nextCursor:
+              type: string
+              nullable: true
+              description: Cursor para la siguiente página (ID del último elemento)
+            hasMore:
+              type: boolean
+              description: Indica si hay más resultados disponibles
     Property:
       type: object
       required:
@@ -687,6 +748,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Property'
+    PropertyPaginatedResponse:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        pagination:
+          type: object
+          required: [limit, hasMore]
+          properties:
+            limit:
+              type: integer
+              description: Número de resultados solicitados por página
+              example: 50
+            cursor:
+              type: string
+              nullable: true
+              description: Cursor actual (ID desde donde se comenzó a paginar)
+            nextCursor:
+              type: string
+              nullable: true
+              description: Cursor para la siguiente página (ID del último elemento)
+            hasMore:
+              type: boolean
+              description: Indica si hay más resultados disponibles
     PropertyType:
       type: string
       enum: [RESIDENTIAL, VACATION_RENTAL, OFFICE]

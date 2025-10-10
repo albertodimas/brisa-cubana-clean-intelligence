@@ -11,13 +11,44 @@ const serviceSchema = z.object({
   active: z.boolean().default(true),
 });
 
+const querySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional().default(50),
+  cursor: z.string().cuid().optional(),
+});
+
 const router = new Hono();
 
 router.get("/", async (c) => {
+  const url = new URL(c.req.url, "http://localhost");
+  const parsed = querySchema.safeParse(
+    Object.fromEntries(url.searchParams.entries()),
+  );
+  if (!parsed.success) {
+    return c.json({ error: parsed.error.flatten() }, 400);
+  }
+
+  const { limit, cursor } = parsed.data;
+
+  // Fetch limit + 1 to determine if there are more results
   const services = await prisma.service.findMany({
-    orderBy: { name: "asc" },
+    take: limit + 1,
+    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+    orderBy: [{ name: "asc" }, { id: "asc" }],
   });
-  return c.json({ data: services });
+
+  const hasMore = services.length > limit;
+  const data = hasMore ? services.slice(0, limit) : services;
+  const nextCursor = hasMore ? data[data.length - 1]?.id : null;
+
+  return c.json({
+    data,
+    pagination: {
+      limit,
+      cursor: cursor ?? null,
+      nextCursor,
+      hasMore,
+    },
+  });
 });
 
 router.post(
