@@ -218,13 +218,7 @@ pnpm exec lint-staged  # Prettier + ESLint automático
 - RPO: < 1 minuto
 - RTO: < 5 minutos
 
-**Backups pg_dump (planeado):**
-
-- GitHub Actions workflow diario
-- Retención: 7 diarios, 4 semanales, 12 mensuales
-- Storage: GitHub Artifacts o S3
-
-**Documentación:** Ver [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md)
+**Documentación:** Ver [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md) para estrategia completa
 
 **Script de verificación:**
 
