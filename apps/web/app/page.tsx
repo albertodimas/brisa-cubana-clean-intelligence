@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { AdminPanel } from "@/components/admin-panel";
+import { Dashboard } from "@/components/dashboard";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   createServiceAction,
@@ -290,24 +291,34 @@ export default async function HomePage() {
       </section>
 
       {isAuthenticated ? (
-        <AdminPanel
-          currentUser={session?.user ?? null}
-          services={services}
-          properties={properties}
-          bookings={bookings}
-          customers={customers}
-          createService={createServiceAction}
-          createProperty={createPropertyAction}
-          createBooking={createBookingAction}
-          toggleService={toggleServiceActiveAction}
-          updateService={updateServiceAction}
-          updateProperty={updatePropertyAction}
-          updateBooking={updateBookingAction}
-          updateUser={updateUserAction}
-          toggleUserActive={toggleUserActiveAction}
-          users={users}
-          logout={logoutAction}
-        />
+        <>
+          <section className="mt-8 sm:mt-10 md:mt-12">
+            <Dashboard
+              bookings={bookings}
+              services={services}
+              customersCount={customers.length}
+            />
+          </section>
+
+          <AdminPanel
+            currentUser={session?.user ?? null}
+            services={services}
+            properties={properties}
+            bookings={bookings}
+            customers={customers}
+            createService={createServiceAction}
+            createProperty={createPropertyAction}
+            createBooking={createBookingAction}
+            toggleService={toggleServiceActiveAction}
+            updateService={updateServiceAction}
+            updateProperty={updatePropertyAction}
+            updateBooking={updateBookingAction}
+            updateUser={updateUserAction}
+            toggleUserActive={toggleUserActiveAction}
+            users={users}
+            logout={logoutAction}
+          />
+        </>
       ) : (
         <section className="mt-8 sm:mt-10 md:mt-12 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-brisa-300/20 bg-gray-100 dark:bg-brisa-900/60 grid gap-3">
           <h2 className="m-0 text-xl sm:text-2xl">Acceso restringido</h2>
