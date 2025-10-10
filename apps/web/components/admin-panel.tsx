@@ -9,6 +9,7 @@ import type { Booking, Customer, Property, Service, User } from "@/lib/api";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Chip } from "./ui/chip";
+import { Skeleton } from "./ui/skeleton";
 import {
   Table,
   TableBody,
@@ -60,6 +61,7 @@ type AdminPanelProps = {
   updateUser: (userId: string, formData: FormData) => Promise<ActionResult>;
   toggleUserActive: (userId: string, active: boolean) => Promise<ActionResult>;
   logout: () => Promise<ActionResult>;
+  isLoading?: boolean;
 };
 
 export function AdminPanel({
@@ -79,6 +81,7 @@ export function AdminPanel({
   updateUser,
   toggleUserActive,
   logout,
+  isLoading = false,
 }: AdminPanelProps) {
   const router = useRouter();
   const [serviceMessage, setServiceMessage] = useState<string | null>(null);
@@ -116,6 +119,97 @@ export function AdminPanel({
     null,
   );
   const [userUpdatingId, setUserUpdatingId] = useState<string | null>(null);
+
+  if (isLoading) {
+    return (
+      <section className="ui-stack ui-stack--lg" style={{ marginTop: "3rem" }}>
+        <Card
+          title="Panel operativo"
+          description="Gestiona servicios, propiedades, reservas y usuarios desde un mismo panel."
+        >
+          <div className="ui-stack">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-10 w-40" />
+          </div>
+        </Card>
+
+        <Card
+          title="Crear servicio"
+          description="Define nuevas ofertas con precio base y duración estandarizada."
+        >
+          <div style={{ display: "grid", gap: "1rem" }}>
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <div
+              style={{
+                display: "grid",
+                gap: "0.75rem",
+                gridTemplateColumns: "1fr 1fr",
+              }}
+            >
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </Card>
+
+        <div style={{ display: "grid", gap: "1rem" }}>
+          <Skeleton className="h-8 w-56" />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+            <Skeleton className="h-10 w-40" />
+            <Skeleton className="h-10 w-40" />
+            <Skeleton className="h-10 w-40" />
+          </div>
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              style={{
+                display: "grid",
+                gap: "0.75rem",
+                padding: "1rem",
+                borderRadius: "0.75rem",
+                border: "1px solid rgba(126,231,196,0.15)",
+                background: "rgba(11,23,28,0.6)",
+              }}
+            >
+              <Skeleton className="h-6 w-48" />
+              <div
+                style={{
+                  display: "grid",
+                  gap: "0.75rem",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                }}
+              >
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <Skeleton className="h-10 w-40" />
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gap: "1rem" }}>
+          <Skeleton className="h-8 w-48" />
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                padding: "0.85rem",
+                borderRadius: "0.75rem",
+                border: "1px solid rgba(126,231,196,0.15)",
+                background: "rgba(18,34,40,0.6)",
+              }}
+            >
+              <Skeleton className="h-5 w-40 mb-2" />
+              <Skeleton className="h-4 w-56" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   const filteredBookings = bookings.filter((booking) => {
     const statusMatch =
@@ -193,6 +287,7 @@ export function AdminPanel({
           <Button
             type="button"
             variant="ghost"
+            isLoading={isLoggingOut}
             onClick={async () => {
               setLoggingOut(true);
               const result = await logout();
@@ -207,10 +302,9 @@ export function AdminPanel({
                 router.refresh();
               }
             }}
-            disabled={isLoggingOut}
             style={{ maxWidth: "fit-content" }}
           >
-            {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+            Cerrar sesión
           </Button>
           {logoutMessage ? (
             <p
