@@ -316,44 +316,64 @@ paths:
   /api/bookings:
     get:
       tags: [Bookings]
-      summary: Lista reservas con filtros opcionales
+      summary: Lista reservas con filtros opcionales y paginación
       parameters:
         - in: query
           name: from
           schema:
             type: string
             format: date-time
+          description: Fecha inicial del rango
         - in: query
           name: to
           schema:
             type: string
             format: date-time
+          description: Fecha final del rango
         - in: query
           name: status
           schema:
             $ref: '#/components/schemas/BookingStatus'
+          description: Filtrar por estado de reserva
         - in: query
           name: propertyId
           schema:
             type: string
             pattern: '^c[0-9a-z]{24}$'
+          description: Filtrar por propiedad
         - in: query
           name: serviceId
           schema:
             type: string
             pattern: '^c[0-9a-z]{24}$'
+          description: Filtrar por servicio
         - in: query
           name: customerId
           schema:
             type: string
             pattern: '^c[0-9a-z]{24}$'
+          description: Filtrar por cliente
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Número de resultados por página (1-100)
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+          description: ID del último elemento de la página anterior (cursor-based pagination)
       responses:
         '200':
-          description: Colección de reservas
+          description: Colección paginada de reservas
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BookingListResponse'
+                $ref: '#/components/schemas/BookingPaginatedResponse'
         '400':
           description: Filtros inválidos
     post:
@@ -780,6 +800,36 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Booking'
+    BookingPaginatedResponse:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+        pagination:
+          type: object
+          required: [limit, hasMore]
+          properties:
+            limit:
+              type: integer
+              description: Número de resultados solicitados por página
+              example: 20
+            cursor:
+              type: string
+              nullable: true
+              description: Cursor actual (ID desde donde se comenzó a paginar)
+              example: "c00000000000000000000001b"
+            nextCursor:
+              type: string
+              nullable: true
+              description: Cursor para la siguiente página (ID del último elemento)
+              example: "c00000000000000000000014b"
+            hasMore:
+              type: boolean
+              description: Indica si hay más resultados disponibles
+              example: true
     BookingStatus:
       type: string
       enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED]

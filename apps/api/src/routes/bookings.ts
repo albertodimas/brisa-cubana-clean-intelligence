@@ -31,6 +31,9 @@ const querySchema = z.object({
   propertyId: z.string().cuid().optional(),
   serviceId: z.string().cuid().optional(),
   customerId: z.string().cuid().optional(),
+  // Pagination
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  cursor: z.string().cuid().optional(),
 });
 
 const updateBookingSchema = z
@@ -55,7 +58,8 @@ router.get("/", async (c) => {
     return c.json({ error: parsed.error.flatten() }, 400);
   }
 
-  const { from, to, status, propertyId, serviceId, customerId } = parsed.data;
+  const { from, to, status, propertyId, serviceId, customerId, limit, cursor } =
+    parsed.data;
   const where: Prisma.BookingWhereInput = {};
 
   if (from || to) {
@@ -77,16 +81,32 @@ router.get("/", async (c) => {
     where.customerId = customerId;
   }
 
+  // Fetch limit + 1 to determine if there are more results
   const bookings = await prisma.booking.findMany({
     where,
-    orderBy: { scheduledAt: "asc" },
+    take: limit + 1,
+    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+    orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
     include: {
       customer: { select: { id: true, fullName: true, email: true } },
       property: { select: { id: true, label: true, city: true } },
       service: { select: { id: true, name: true, basePrice: true } },
     },
   });
-  return c.json({ data: bookings });
+
+  const hasMore = bookings.length > limit;
+  const data = hasMore ? bookings.slice(0, limit) : bookings;
+  const nextCursor = hasMore ? data[data.length - 1]?.id : null;
+
+  return c.json({
+    data,
+    pagination: {
+      limit,
+      cursor: cursor ?? null,
+      nextCursor,
+      hasMore,
+    },
+  });
 });
 
 router.post(

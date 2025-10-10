@@ -36,9 +36,10 @@ Este directorio contiene la documentación verificada del proyecto. Usa la sigui
 
 ## Features y Gestión
 
-| Documento                                    | Descripción                                                                    |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| [`USER_MANAGEMENT.md`](./USER_MANAGEMENT.md) | Panel de administración de usuarios: CRUD, roles, seguridad y testing (9 Oct). |
+| Documento                                    | Descripción                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| [`USER_MANAGEMENT.md`](./USER_MANAGEMENT.md) | Panel de administración de usuarios: CRUD, roles, seguridad y testing (9 Oct).  |
+| [`PAGINATION.md`](./PAGINATION.md)           | Paginación cursor-based: implementación, ejemplos, testing y mejores prácticas. |
 
 ---
 

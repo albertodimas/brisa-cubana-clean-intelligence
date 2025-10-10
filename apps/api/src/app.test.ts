@@ -46,59 +46,81 @@ const mockPrisma = {
       ),
   },
   booking: {
-    findMany: vi
-      .fn()
-      .mockImplementation(
-        async ({ where, include }: { where?: any; include?: any } = {}) => {
-          const filtered = bookingsFixture.filter((booking) => {
-            if (!where) return true;
-            if (where.status && booking.status !== where.status) return false;
-            if (where.propertyId && booking.propertyId !== where.propertyId)
+    findMany: vi.fn().mockImplementation(
+      async ({
+        where,
+        include,
+        take,
+        skip,
+        cursor,
+      }: {
+        where?: any;
+        include?: any;
+        take?: number;
+        skip?: number;
+        cursor?: { id: string };
+      } = {}) => {
+        let filtered = bookingsFixture.filter((booking) => {
+          if (!where) return true;
+          if (where.status && booking.status !== where.status) return false;
+          if (where.propertyId && booking.propertyId !== where.propertyId)
+            return false;
+          if (where.serviceId && booking.serviceId !== where.serviceId)
+            return false;
+          if (where.customerId && booking.customerId !== where.customerId)
+            return false;
+          if (where.scheduledAt) {
+            const date = new Date(booking.scheduledAt);
+            if (where.scheduledAt.gte && date < new Date(where.scheduledAt.gte))
               return false;
-            if (where.serviceId && booking.serviceId !== where.serviceId)
+            if (where.scheduledAt.lte && date > new Date(where.scheduledAt.lte))
               return false;
-            if (where.customerId && booking.customerId !== where.customerId)
-              return false;
-            if (where.scheduledAt) {
-              const date = new Date(booking.scheduledAt);
-              if (
-                where.scheduledAt.gte &&
-                date < new Date(where.scheduledAt.gte)
-              )
-                return false;
-              if (
-                where.scheduledAt.lte &&
-                date > new Date(where.scheduledAt.lte)
-              )
-                return false;
-            }
-            return true;
-          });
+          }
+          return true;
+        });
 
-          return filtered.map((booking) =>
-            include
-              ? {
-                  ...booking,
-                  customer: include.customer
-                    ? (usersFixture.find(
-                        (user) => user.id === booking.customerId,
-                      ) ?? null)
-                    : undefined,
-                  property: include.property
-                    ? (propertiesFixture.find(
-                        (property) => property.id === booking.propertyId,
-                      ) ?? null)
-                    : undefined,
-                  service: include.service
-                    ? (servicesFixture.find(
-                        (service) => service.id === booking.serviceId,
-                      ) ?? null)
-                    : undefined,
-                }
-              : booking,
-          );
-        },
-      ),
+        // Handle cursor-based pagination
+        if (cursor) {
+          const cursorIndex = filtered.findIndex((b) => b.id === cursor.id);
+          if (cursorIndex !== -1) {
+            filtered = filtered.slice(cursorIndex);
+          }
+        }
+
+        // Handle skip
+        if (skip) {
+          filtered = filtered.slice(skip);
+        }
+
+        // Handle take
+        if (take) {
+          filtered = filtered.slice(0, take);
+        }
+
+        return filtered.map((booking) =>
+          include
+            ? {
+                ...booking,
+                customer: include.customer
+                  ? (usersFixture.find(
+                      (user) => user.id === booking.customerId,
+                    ) ?? null)
+                  : undefined,
+                property: include.property
+                  ? (propertiesFixture.find(
+                      (property) => property.id === booking.propertyId,
+                    ) ?? null)
+                  : undefined,
+                service: include.service
+                  ? (servicesFixture.find(
+                      (service) => service.id === booking.serviceId,
+                    ) ?? null)
+                  : undefined,
+              }
+            : booking,
+        );
+      },
+    ),
     create: vi
       .fn()
       .mockImplementation(
@@ -496,6 +518,87 @@ describe("app", () => {
     const json = await res.json();
     expect(json.data.status).toBe("COMPLETED");
     expect(json.data.notes).toBe("Finalizada");
+  });
+
+  it("paginates bookings with default limit", async () => {
+    // Create multiple bookings to test pagination
+    for (let i = 0; i < 25; i++) {
+      bookingsFixture.push({
+        id: makeCuid(1000 + i),
+        code: `BRISA-TEST-${i}`,
+        scheduledAt: new Date(Date.now() + i * 86400000).toISOString(),
+        durationMin: 120,
+        notes: `Test booking ${i}`,
+        status: "PENDING",
+        totalAmount: "150.00",
+        customerId: makeCuid(101),
+        propertyId: makeCuid(201),
+        serviceId: servicesFixture[0]?.id || makeCuid(301),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    const res = await app.request("/api/bookings");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data).toBeDefined();
+    expect(json.pagination).toBeDefined();
+    expect(json.pagination.limit).toBe(20);
+    expect(json.pagination.hasMore).toBe(true);
+    expect(json.pagination.nextCursor).toBeDefined();
+    expect(json.data.length).toBeLessThanOrEqual(20);
+  });
+
+  it("paginates bookings with custom limit", async () => {
+    const res = await app.request("/api/bookings?limit=5");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data.length).toBeLessThanOrEqual(5);
+    expect(json.pagination.limit).toBe(5);
+  });
+
+  it("paginates bookings with cursor", async () => {
+    // First page
+    const res1 = await app.request("/api/bookings?limit=5");
+    expect(res1.status).toBe(200);
+    const json1 = await res1.json();
+
+    // Only test cursor if there are more results
+    if (json1.pagination.hasMore) {
+      const firstPageLastId = json1.data[json1.data.length - 1]?.id;
+      expect(firstPageLastId).toBeDefined();
+      expect(json1.pagination.nextCursor).toBe(firstPageLastId);
+
+      // Second page using cursor
+      const res2 = await app.request(
+        `/api/bookings?limit=5&cursor=${json1.pagination.nextCursor}`,
+      );
+      expect(res2.status).toBe(200);
+      const json2 = await res2.json();
+
+      expect(json2.pagination.cursor).toBe(json1.pagination.nextCursor);
+      expect(json2.data[0]?.id).not.toBe(firstPageLastId);
+    } else {
+      // If no more results, nextCursor should be null
+      expect(json1.pagination.nextCursor).toBeNull();
+    }
+  });
+
+  it("validates pagination limit boundaries", async () => {
+    // limit too small
+    const res1 = await app.request("/api/bookings?limit=0");
+    expect(res1.status).toBe(400);
+
+    // limit too large
+    const res2 = await app.request("/api/bookings?limit=101");
+    expect(res2.status).toBe(400);
+
+    // valid limit
+    const res3 = await app.request("/api/bookings?limit=50");
+    expect(res3.status).toBe(200);
   });
 
   it("lists properties", async () => {
