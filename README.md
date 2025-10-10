@@ -94,7 +94,7 @@ La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoi
 
 - [`docs/quickstart.md`](docs/quickstart.md): onboarding local paso a paso (verificado).
 - [`docs/openapi.yaml`](docs/openapi.yaml): especificación OpenAPI 3.1 de la API (actualizada al 9 de octubre de 2025).
-- Las actualizaciones en `docs/` se publican automáticamente en GitHub Pages (`gh-pages`) mediante `.github/workflows/docs-pages.yml`.
+- Documentación API disponible en `/api/docs` (Scalar UI).
 
 ## Autenticación y RBAC
 

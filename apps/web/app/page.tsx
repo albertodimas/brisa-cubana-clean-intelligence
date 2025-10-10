@@ -111,14 +111,9 @@ export default async function HomePage() {
           >
             Repositorio en GitHub
           </Link>
-          <a
-            href="https://albertodimas.github.io/brisa-cubana-clean-intelligence/"
-            style={{ color: "#7ee7c4" }}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Documentación pública
-          </a>
+          <Link href="/api/docs" style={{ color: "#7ee7c4" }}>
+            Documentación API
+          </Link>
         </div>
       </header>
 
