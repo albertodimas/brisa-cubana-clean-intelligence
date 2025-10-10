@@ -79,7 +79,7 @@ function ToastContainer({
 
   return (
     <div
-      className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"
+      className="fixed top-4 right-4 left-4 sm:left-auto sm:max-w-md z-50 flex flex-col gap-2 pointer-events-none"
       role="region"
       aria-live="polite"
       aria-label="Notificaciones"
@@ -170,7 +170,7 @@ function ToastItem({
 
   return (
     <div
-      className={`flex items-start gap-3 min-w-[320px] max-w-md p-4 rounded-lg border shadow-lg backdrop-blur-sm animate-in slide-in-from-right-full duration-300 pointer-events-auto ${typeStyles[toast.type]}`}
+      className={`flex items-start gap-3 w-full sm:min-w-[320px] sm:max-w-md p-4 rounded-lg border shadow-lg backdrop-blur-sm animate-in slide-in-from-right-full duration-300 pointer-events-auto ${typeStyles[toast.type]}`}
       role="alert"
     >
       {icons[toast.type]}

@@ -80,133 +80,82 @@ export default async function HomePage() {
   ];
 
   return (
-    <main
-      style={{ padding: "4rem 1.5rem", maxWidth: "960px", margin: "0 auto" }}
-    >
-      <header
-        style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
-      >
-        <span
-          style={{
-            fontSize: "0.75rem",
-            letterSpacing: "0.4em",
-            textTransform: "uppercase",
-            color: "#7ee7c4",
-          }}
-        >
+    <main className="px-4 py-8 sm:px-6 md:px-8 md:py-12 lg:py-16 max-w-[960px] mx-auto">
+      <header className="flex flex-col gap-2">
+        <span className="text-xs tracking-[0.4em] uppercase text-brisa-300">
           Brisa Cubana Clean Intelligence
         </span>
-        <h1 style={{ fontSize: "clamp(2.5rem, 5vw, 3.5rem)", margin: 0 }}>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl m-0 leading-tight">
           Plataforma en construcción con código verificable
         </h1>
-        <p style={{ fontSize: "1.1rem", color: "#b8d9d0", maxWidth: "60ch" }}>
+        <p className="text-base sm:text-lg text-brisa-200 max-w-[60ch]">
           Replanteamos el proyecto para que cada afirmación esté respaldada por
           implementación real. Este landing refleja el estado actual y enlaza
           solo a documentación verificada.
         </p>
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+        <div className="flex gap-4 flex-wrap mt-2">
           <Link
             href="https://github.com/albertodimas/brisa-cubana-clean-intelligence"
-            style={{ color: "#7ee7c4" }}
+            className="text-brisa-300 hover:text-brisa-200 transition-colors"
           >
             Repositorio en GitHub
           </Link>
-          <Link href="/api/docs" style={{ color: "#7ee7c4" }}>
+          <Link
+            href="/api/docs"
+            className="text-brisa-300 hover:text-brisa-200 transition-colors"
+          >
             Documentación API
           </Link>
         </div>
       </header>
 
-      <section style={{ marginTop: "3rem", display: "grid", gap: "1.5rem" }}>
+      <section className="mt-8 sm:mt-10 md:mt-12 grid gap-4 sm:gap-5 md:gap-6">
         {sections.map((section) => (
           <article
             key={section.title}
-            style={{
-              background: "rgba(13,25,30,0.6)",
-              padding: "1.5rem",
-              borderRadius: "1rem",
-              border: "1px solid rgba(126,231,196,0.2)",
-            }}
+            className="bg-brisa-900/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-brisa-300/20"
           >
-            <h2
-              style={{
-                marginTop: 0,
-                marginBottom: "0.75rem",
-                fontSize: "1.5rem",
-              }}
-            >
-              {section.title}
-            </h2>
-            <p style={{ margin: 0, color: "#d5f6eb" }}>{section.body}</p>
+            <h2 className="mt-0 mb-3 text-xl sm:text-2xl">{section.title}</h2>
+            <p className="m-0 text-brisa-100 text-sm sm:text-base">
+              {section.body}
+            </p>
           </article>
         ))}
       </section>
 
-      <section style={{ marginTop: "3rem", display: "grid", gap: "1.5rem" }}>
-        <article
-          style={{
-            background: "rgba(11,23,28,0.6)",
-            padding: "1.5rem",
-            borderRadius: "1rem",
-            border: "1px solid rgba(126,231,196,0.2)",
-          }}
-        >
-          <header style={{ marginBottom: "1rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.4rem" }}>
-              Servicios disponibles
-            </h2>
-            <p style={{ margin: 0, color: "#a7dcd0" }}>
+      <section className="mt-8 sm:mt-10 md:mt-12 grid gap-4 sm:gap-5 md:gap-6">
+        <article className="bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-brisa-300/20">
+          <header className="mb-4">
+            <h2 className="m-0 text-xl sm:text-2xl">Servicios disponibles</h2>
+            <p className="m-0 text-brisa-200 text-sm sm:text-base">
               Datos en vivo provenientes de la API REST (`/api/services`).
             </p>
           </header>
           {activeServices.length === 0 ? (
-            <p style={{ color: "#d5f6eb" }}>
+            <p className="text-brisa-100 text-sm sm:text-base">
               Aún no hay servicios configurados en la base de datos.
             </p>
           ) : (
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: 0,
-                display: "grid",
-                gap: "1rem",
-              }}
-            >
+            <ul className="list-none p-0 m-0 grid gap-3 sm:gap-4">
               {activeServices.map((service) => (
                 <li
                   key={service.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.25rem",
-                    background: "rgba(18,34,40,0.6)",
-                    padding: "1rem",
-                    borderRadius: "0.75rem",
-                    border: "1px solid rgba(126,231,196,0.15)",
-                  }}
+                  className="flex flex-col gap-1 bg-brisa-800/60 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-brisa-300/15"
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      gap: "1rem",
-                    }}
-                  >
-                    <strong style={{ fontSize: "1.1rem" }}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-2 sm:gap-4">
+                    <strong className="text-base sm:text-lg">
                       {service.name}
                     </strong>
-                    <span style={{ color: "#7ee7c4", fontWeight: 500 }}>
+                    <span className="text-brisa-300 font-medium text-sm sm:text-base">
                       {currencyFormatter.format(service.basePrice)}
                     </span>
                   </div>
                   {service.description ? (
-                    <p style={{ margin: 0, color: "#b8d9d0" }}>
+                    <p className="m-0 text-brisa-200 text-sm sm:text-base">
                       {service.description}
                     </p>
                   ) : null}
-                  <span style={{ fontSize: "0.85rem", color: "#6fb8a6" }}>
+                  <span className="text-xs sm:text-sm text-brisa-400">
                     Duración estimada: {service.durationMin} min · Última
                     actualización:{" "}
                     {dateFormatter.format(new Date(service.updatedAt))}
@@ -217,57 +166,34 @@ export default async function HomePage() {
           )}
         </article>
 
-        <article
-          style={{
-            background: "rgba(11,23,28,0.6)",
-            padding: "1.5rem",
-            borderRadius: "1rem",
-            border: "1px solid rgba(126,231,196,0.2)",
-          }}
-        >
-          <header style={{ marginBottom: "1rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.4rem" }}>Próximas reservas</h2>
-            <p style={{ margin: 0, color: "#a7dcd0" }}>
+        <article className="bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-brisa-300/20">
+          <header className="mb-4">
+            <h2 className="m-0 text-xl sm:text-2xl">Próximas reservas</h2>
+            <p className="m-0 text-brisa-200 text-sm sm:text-base">
               Mostrando hasta cuatro reservas futuras desde `/api/bookings`.
             </p>
           </header>
           {upcomingBookings.length === 0 ? (
-            <p style={{ color: "#d5f6eb" }}>
+            <p className="text-brisa-100 text-sm sm:text-base">
               Aún no hay reservas programadas en la base de datos.
             </p>
           ) : (
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: 0,
-                display: "grid",
-                gap: "1rem",
-              }}
-            >
+            <ul className="list-none p-0 m-0 grid gap-3 sm:gap-4">
               {upcomingBookings.map((booking) => (
                 <li
                   key={booking.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.25rem",
-                    background: "rgba(18,34,40,0.6)",
-                    padding: "1rem",
-                    borderRadius: "0.75rem",
-                    border: "1px solid rgba(126,231,196,0.15)",
-                  }}
+                  className="flex flex-col gap-1 bg-brisa-800/60 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-brisa-300/15"
                 >
-                  <strong style={{ fontSize: "1.05rem" }}>
+                  <strong className="text-base sm:text-lg">
                     {booking.service.name}
                   </strong>
-                  <span style={{ color: "#b8d9d0" }}>
+                  <span className="text-brisa-200 text-sm sm:text-base">
                     {booking.property.label} · {booking.property.city}
                   </span>
-                  <span style={{ fontSize: "0.95rem", color: "#7ee7c4" }}>
+                  <span className="text-sm sm:text-base text-brisa-300">
                     {dateFormatter.format(new Date(booking.scheduledAt))}
                   </span>
-                  <span style={{ fontSize: "0.85rem", color: "#6fb8a6" }}>
+                  <span className="text-xs sm:text-sm text-brisa-400">
                     Código {booking.code} ·{" "}
                     {currencyFormatter.format(booking.totalAmount)} · Estado{" "}
                     {booking.status}
@@ -278,52 +204,42 @@ export default async function HomePage() {
           )}
         </article>
 
-        <article
-          style={{
-            background: "rgba(11,23,28,0.6)",
-            padding: "1.5rem",
-            borderRadius: "1rem",
-            border: "1px solid rgba(126,231,196,0.2)",
-          }}
-        >
-          <header style={{ marginBottom: "1rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.4rem" }}>
+        <article className="bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-brisa-300/20">
+          <header className="mb-4">
+            <h2 className="m-0 text-xl sm:text-2xl">
               Inventario de propiedades
             </h2>
-            <p style={{ margin: 0, color: "#a7dcd0" }}>
+            <p className="m-0 text-brisa-200 text-sm sm:text-base">
               {properties.length} propiedades activas listas para asignación.
             </p>
           </header>
           {properties.length === 0 ? (
-            <p style={{ color: "#d5f6eb" }}>
+            <p className="text-brisa-100 text-sm sm:text-base">
               Crea una propiedad desde el panel operativo para iniciar
               programación.
             </p>
           ) : (
-            <div style={{ display: "grid", gap: "1rem" }}>
+            <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
               {properties.slice(0, 4).map((property) => (
                 <div
                   key={property.id}
-                  style={{
-                    padding: "1rem",
-                    borderRadius: "0.75rem",
-                    border: "1px solid rgba(126,231,196,0.15)",
-                    background: "rgba(18,34,40,0.6)",
-                  }}
+                  className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-brisa-300/15 bg-brisa-800/60"
                 >
-                  <strong>{property.label}</strong>
-                  <p style={{ margin: "0.35rem 0", color: "#a7dcd0" }}>
+                  <strong className="text-sm sm:text-base">
+                    {property.label}
+                  </strong>
+                  <p className="my-1.5 text-brisa-200 text-xs sm:text-sm">
                     {property.addressLine}, {property.city}, {property.state}{" "}
                     {property.zipCode}
                   </p>
-                  <span style={{ fontSize: "0.85rem", color: "#6fb8a6" }}>
+                  <span className="text-xs sm:text-sm text-brisa-400">
                     Propietario:{" "}
                     {property.owner?.fullName ?? property.owner?.email ?? "N/A"}
                   </span>
                 </div>
               ))}
               {properties.length > 4 ? (
-                <span style={{ color: "#7ee7c4", fontSize: "0.9rem" }}>
+                <span className="text-brisa-300 text-xs sm:text-sm md:col-span-2">
                   {properties.length - 4} propiedades adicionales no mostradas.
                 </span>
               ) : null}
@@ -331,56 +247,35 @@ export default async function HomePage() {
           )}
         </article>
 
-        <article
-          style={{
-            background: "rgba(11,23,28,0.6)",
-            padding: "1.5rem",
-            borderRadius: "1rem",
-            border: "1px solid rgba(126,231,196,0.2)",
-          }}
-        >
-          <header style={{ marginBottom: "1rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.4rem" }}>Clientes activos</h2>
-            <p style={{ margin: 0, color: "#a7dcd0" }}>
+        <article className="bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-brisa-300/20">
+          <header className="mb-4">
+            <h2 className="m-0 text-xl sm:text-2xl">Clientes activos</h2>
+            <p className="m-0 text-brisa-200 text-sm sm:text-base">
               {customers.length} clientes con reservas o propiedades
               registradas.
             </p>
           </header>
           {customers.length === 0 ? (
-            <p style={{ color: "#d5f6eb" }}>
+            <p className="text-brisa-100 text-sm sm:text-base">
               Registra clientes desde el panel operativo o mediante seed.
             </p>
           ) : (
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: 0,
-                display: "grid",
-                gap: "0.75rem",
-              }}
-            >
+            <ul className="list-none p-0 m-0 grid gap-3 sm:gap-4 md:grid-cols-2">
               {customers.slice(0, 5).map((customer) => (
                 <li
                   key={customer.id}
-                  style={{
-                    padding: "0.85rem",
-                    borderRadius: "0.75rem",
-                    border: "1px solid rgba(126,231,196,0.15)",
-                    background: "rgba(18,34,40,0.6)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.25rem",
-                  }}
+                  className="p-3 sm:p-3.5 rounded-lg sm:rounded-xl border border-brisa-300/15 bg-brisa-800/60 flex flex-col gap-1"
                 >
-                  <strong>{customer.fullName ?? "Cliente sin nombre"}</strong>
-                  <span style={{ color: "#a7dcd0", fontSize: "0.9rem" }}>
+                  <strong className="text-sm sm:text-base">
+                    {customer.fullName ?? "Cliente sin nombre"}
+                  </strong>
+                  <span className="text-brisa-200 text-xs sm:text-sm">
                     {customer.email}
                   </span>
                 </li>
               ))}
               {customers.length > 5 ? (
-                <span style={{ color: "#7ee7c4", fontSize: "0.9rem" }}>
+                <span className="text-brisa-300 text-xs sm:text-sm md:col-span-2">
                   {customers.length - 5} clientes adicionales no mostrados.
                 </span>
               ) : null}
@@ -409,22 +304,15 @@ export default async function HomePage() {
           logout={logoutAction}
         />
       ) : (
-        <section
-          style={{
-            marginTop: "3rem",
-            padding: "1.5rem",
-            borderRadius: "1rem",
-            border: "1px solid rgba(126,231,196,0.2)",
-            background: "rgba(7,15,18,0.6)",
-            display: "grid",
-            gap: "0.75rem",
-          }}
-        >
-          <h2 style={{ margin: 0 }}>Acceso restringido</h2>
-          <p style={{ margin: 0, color: "#a7dcd0" }}>
+        <section className="mt-8 sm:mt-10 md:mt-12 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-brisa-300/20 bg-brisa-900/60 grid gap-3">
+          <h2 className="m-0 text-xl sm:text-2xl">Acceso restringido</h2>
+          <p className="m-0 text-brisa-200 text-sm sm:text-base">
             Inicia sesión para crear o gestionar servicios operativos.
           </p>
-          <Link href="/login" style={{ color: "#7ee7c4" }}>
+          <Link
+            href="/login"
+            className="text-brisa-300 hover:text-brisa-200 transition-colors text-sm sm:text-base"
+          >
             Ir a iniciar sesión
           </Link>
         </section>
