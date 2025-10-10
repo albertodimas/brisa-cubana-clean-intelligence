@@ -4,3 +4,4 @@ export { Chip } from "./chip";
 export { Input, type InputProps } from "./input";
 export { Skeleton, type SkeletonProps } from "./skeleton";
 export { Table } from "./table";
+export { ToastProvider, useToast } from "./toast";

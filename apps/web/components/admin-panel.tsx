@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Chip } from "./ui/chip";
 import { Skeleton } from "./ui/skeleton";
+import { useToast } from "./ui/toast";
 import {
   Table,
   TableBody,
@@ -84,19 +85,8 @@ export function AdminPanel({
   isLoading = false,
 }: AdminPanelProps) {
   const router = useRouter();
-  const [serviceMessage, setServiceMessage] = useState<string | null>(null);
-  const [propertyMessage, setPropertyMessage] = useState<string | null>(null);
-  const [bookingMessage, setBookingMessage] = useState<string | null>(null);
-  const [logoutMessage, setLogoutMessage] = useState<string | null>(null);
-  const [serviceUpdateMessage, setServiceUpdateMessage] = useState<
-    string | null
-  >(null);
-  const [propertyUpdateMessage, setPropertyUpdateMessage] = useState<
-    string | null
-  >(null);
-  const [bookingUpdateMessage, setBookingUpdateMessage] = useState<
-    string | null
-  >(null);
+  const { showToast } = useToast();
+
   const [serviceUpdatingId, setServiceUpdatingId] = useState<string | null>(
     null,
   );
@@ -106,6 +96,7 @@ export function AdminPanel({
   const [bookingUpdatingId, setBookingUpdatingId] = useState<string | null>(
     null,
   );
+  const [userUpdatingId, setUserUpdatingId] = useState<string | null>(null);
   const [bookingFilters, setBookingFilters] = useState({
     status: "ALL",
     from: "",
@@ -115,10 +106,6 @@ export function AdminPanel({
   const [isLoggingOut, setLoggingOut] = useState(false);
   const [isPropertyPending, startPropertyAction] = useTransition();
   const [isBookingPending, startBookingAction] = useTransition();
-  const [userUpdateMessage, setUserUpdateMessage] = useState<string | null>(
-    null,
-  );
-  const [userUpdatingId, setUserUpdatingId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -239,36 +226,44 @@ export function AdminPanel({
     setServiceUpdatingId(serviceId);
     const result = await updateService(serviceId, formData);
     setServiceUpdatingId(null);
-    setServiceUpdateMessage(
-      result.error ? `Error: ${result.error}` : (result.success ?? null),
-    );
+    if (result.error) {
+      showToast(result.error, "error");
+    } else if (result.success) {
+      showToast(result.success, "success");
+    }
   }
 
   async function handlePropertyUpdate(propertyId: string, formData: FormData) {
     setPropertyUpdatingId(propertyId);
     const result = await updateProperty(propertyId, formData);
     setPropertyUpdatingId(null);
-    setPropertyUpdateMessage(
-      result.error ? `Error: ${result.error}` : (result.success ?? null),
-    );
+    if (result.error) {
+      showToast(result.error, "error");
+    } else if (result.success) {
+      showToast(result.success, "success");
+    }
   }
 
   async function handleBookingUpdate(bookingId: string, formData: FormData) {
     setBookingUpdatingId(bookingId);
     const result = await updateBooking(bookingId, formData);
     setBookingUpdatingId(null);
-    setBookingUpdateMessage(
-      result.error ? `Error: ${result.error}` : (result.success ?? null),
-    );
+    if (result.error) {
+      showToast(result.error, "error");
+    } else if (result.success) {
+      showToast(result.success, "success");
+    }
   }
 
   async function handleUserUpdate(userId: string, formData: FormData) {
     setUserUpdatingId(userId);
     const result = await updateUser(userId, formData);
     setUserUpdatingId(null);
-    setUserUpdateMessage(
-      result.error ? `Error: ${result.error}` : (result.success ?? null),
-    );
+    if (result.error) {
+      showToast(result.error, "error");
+    } else if (result.success) {
+      showToast(result.success, "success");
+    }
   }
 
   return (
@@ -292,12 +287,10 @@ export function AdminPanel({
               setLoggingOut(true);
               const result = await logout();
               setLoggingOut(false);
-              setLogoutMessage(
-                result.error
-                  ? `Error: ${result.error}`
-                  : (result.success ?? null),
-              );
-              if (result.success) {
+              if (result.error) {
+                showToast(result.error, "error");
+              } else if (result.success) {
+                showToast(result.success, "success");
                 router.replace("/login");
                 router.refresh();
               }
@@ -306,18 +299,6 @@ export function AdminPanel({
           >
             Cerrar sesión
           </Button>
-          {logoutMessage ? (
-            <p
-              style={{
-                margin: 0,
-                color: logoutMessage.startsWith("Error")
-                  ? "#fda4af"
-                  : "#7ee7c4",
-              }}
-            >
-              {logoutMessage}
-            </p>
-          ) : null}
         </div>
       </Card>
 
@@ -329,11 +310,11 @@ export function AdminPanel({
           data-testid="service-create-form"
           action={async (formData) => {
             const result = await createService(formData);
-            setServiceMessage(
-              result.error
-                ? `Error: ${result.error}`
-                : (result.success ?? null),
-            );
+            if (result.error) {
+              showToast(result.error, "error");
+            } else if (result.success) {
+              showToast(result.success, "success");
+            }
           }}
           className="ui-stack"
         >
@@ -386,18 +367,6 @@ export function AdminPanel({
             </label>
           </div>
           <SubmitButton>Guardar</SubmitButton>
-          {serviceMessage ? (
-            <p
-              style={{
-                margin: 0,
-                color: serviceMessage.startsWith("Error")
-                  ? "#fda4af"
-                  : "#7ee7c4",
-              }}
-            >
-              {serviceMessage}
-            </p>
-          ) : null}
         </form>
       </Card>
 
@@ -598,18 +567,6 @@ export function AdminPanel({
             ))}
           </div>
         )}
-        {bookingUpdateMessage ? (
-          <p
-            style={{
-              margin: 0,
-              color: bookingUpdateMessage.startsWith("Error")
-                ? "#fda4af"
-                : "#7ee7c4",
-            }}
-          >
-            {bookingUpdateMessage}
-          </p>
-        ) : null}
       </div>
 
       <div style={{ display: "grid", gap: "0.5rem" }}>
@@ -789,11 +746,11 @@ export function AdminPanel({
                           service.id,
                           !service.active,
                         );
-                        setServiceUpdateMessage(
-                          result.error
-                            ? `Error: ${result.error}`
-                            : (result.success ?? null),
-                        );
+                        if (result.error) {
+                          showToast(result.error, "error");
+                        } else if (result.success) {
+                          showToast(result.success, "success");
+                        }
                       });
                     }}
                     style={{
@@ -814,29 +771,17 @@ export function AdminPanel({
             ))}
           </div>
         )}
-        {serviceUpdateMessage ? (
-          <p
-            style={{
-              margin: 0,
-              color: serviceUpdateMessage.startsWith("Error")
-                ? "#fda4af"
-                : "#7ee7c4",
-            }}
-          >
-            {serviceUpdateMessage}
-          </p>
-        ) : null}
       </div>
 
       <form
         action={(formData) =>
           startPropertyAction(async () => {
             const result = await createProperty(formData);
-            setPropertyMessage(
-              result.error
-                ? `Error: ${result.error}`
-                : (result.success ?? null),
-            );
+            if (result.error) {
+              showToast(result.error, "error");
+            } else if (result.success) {
+              showToast(result.success, "success");
+            }
           })
         }
         style={{
@@ -971,18 +916,6 @@ export function AdminPanel({
         >
           {isPropertyPending ? "Registrando..." : "Guardar propiedad"}
         </button>
-        {propertyMessage ? (
-          <p
-            style={{
-              margin: 0,
-              color: propertyMessage.startsWith("Error")
-                ? "#fda4af"
-                : "#7ee7c4",
-            }}
-          >
-            {propertyMessage}
-          </p>
-        ) : null}
       </form>
 
       {currentUser?.role === "ADMIN" ? (
@@ -1093,18 +1026,18 @@ export function AdminPanel({
                                 user.id,
                                 e.target.checked,
                               );
-                              if (result.success) {
-                                setUserUpdateMessage(
-                                  result.success ?? "Estado actualizado",
-                                );
-                                setTimeout(() => {
-                                  setUserUpdateMessage("");
-                                }, 3000);
-                              } else {
-                                setUserUpdateMessage(
-                                  `Error: ${result.error ?? "No se pudo actualizar el estado"}`,
+                              if (result.error) {
+                                showToast(
+                                  result.error ??
+                                    "No se pudo actualizar el estado",
+                                  "error",
                                 );
                                 e.target.checked = user.isActive;
+                              } else if (result.success) {
+                                showToast(
+                                  result.success ?? "Estado actualizado",
+                                  "success",
+                                );
                               }
                             }}
                             disabled={user.id === currentUser?.id}
@@ -1127,18 +1060,6 @@ export function AdminPanel({
                 ))}
               </TableBody>
             </Table>
-            {userUpdateMessage ? (
-              <p
-                style={{
-                  margin: 0,
-                  color: userUpdateMessage.startsWith("Error")
-                    ? "#fda4af"
-                    : "#7ee7c4",
-                }}
-              >
-                {userUpdateMessage}
-              </p>
-            ) : null}
           </div>
         </Card>
       ) : null}
@@ -1326,29 +1247,17 @@ export function AdminPanel({
             ))}
           </div>
         )}
-        {propertyUpdateMessage ? (
-          <p
-            style={{
-              margin: 0,
-              color: propertyUpdateMessage.startsWith("Error")
-                ? "#fda4af"
-                : "#7ee7c4",
-            }}
-          >
-            {propertyUpdateMessage}
-          </p>
-        ) : null}
       </div>
 
       <form
         action={(formData) =>
           startBookingAction(async () => {
             const result = await createBooking(formData);
-            setBookingMessage(
-              result.error
-                ? `Error: ${result.error}`
-                : (result.success ?? null),
-            );
+            if (result.error) {
+              showToast(result.error, "error");
+            } else if (result.success) {
+              showToast(result.success, "success");
+            }
           })
         }
         style={{
@@ -1446,16 +1355,6 @@ export function AdminPanel({
         >
           {isBookingPending ? "Creando reserva..." : "Guardar reserva"}
         </button>
-        {bookingMessage ? (
-          <p
-            style={{
-              margin: 0,
-              color: bookingMessage.startsWith("Error") ? "#fda4af" : "#7ee7c4",
-            }}
-          >
-            {bookingMessage}
-          </p>
-        ) : null}
       </form>
     </section>
   );
