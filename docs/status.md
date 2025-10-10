@@ -176,7 +176,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 ## 8. Limitaciones conocidas
 
 1. El proxy sólo cubre rutas `/api/*`. Nuevos prefijos requieren actualizar `buildTargetUrl`.
-2. Estilos heredados aún mezclan inline styles y tokens; migración completa en progreso.
+2. Estilos heredados mezclan inline styles y tokens.
 3. Seeds pensados para demo; ambientes preview deben reseedear manualmente (`pnpm --filter @brisa/api db:seed`).
 
 ---
@@ -361,4 +361,3 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 - Repositorio: <https://github.com/albertodimas/brisa-cubana-clean-intelligence>
 - Despliegue web: <https://brisa-cubana-clean-intelligence.vercel.app>
 - Despliegue API: <https://brisa-cubana-clean-intelligence-api.vercel.app>
-- Documentación pública: <https://albertodimas.github.io/brisa-cubana-clean-intelligence/>

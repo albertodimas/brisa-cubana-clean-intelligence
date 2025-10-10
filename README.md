@@ -9,13 +9,13 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 
 ## Estado al 9 de octubre de 2025
 
-| Área          | Estado | Detalle                                                                                                                                  |
-| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.                                                              |
-| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas.                                                        |
-| Tests         | 🟢     | Vitest (`pnpm test`) + suites Playwright smoke/critical/full (`pnpm test:e2e:*`).                                                        |
-| Documentación | 🟢     | README + quickstart + docs/status.md actualizados y verificados.                                                                         |
-| Deploy        | 🟢     | **API** https://brisa-cubana-clean-intelligence-api.vercel.app · **Web** https://brisa-cubana-clean-intelligence-brisa-cubana.vercel.app |
+| Área          | Estado | Detalle                                                                                                                     |
+| ------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.                                                 |
+| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas.                                           |
+| Tests         | 🟢     | Vitest (`pnpm test`) + suites Playwright smoke/critical/full (`pnpm test:e2e:*`).                                           |
+| Documentación | 🟢     | README + quickstart + docs/status.md actualizados y verificados.                                                            |
+| Deploy        | 🟢     | **API** https://brisa-cubana-clean-intelligence-api.vercel.app · **Web** https://brisa-cubana-clean-intelligence.vercel.app |
 
 ## Requisitos
 
@@ -78,7 +78,7 @@ pnpm test
 ## Deploy en Producción
 
 - **API en Vercel:** https://brisa-cubana-clean-intelligence-api.vercel.app
-- **Web en Vercel:** https://brisa-cubana-clean-intelligence-brisa-cubana.vercel.app
+- **Web en Vercel:** https://brisa-cubana-clean-intelligence.vercel.app
 
 Endpoints verificados funcionando (API):
 
