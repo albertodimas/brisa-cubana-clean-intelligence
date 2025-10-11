@@ -48,11 +48,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
-  // Prevent flash of unstyled content
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always provide context to prevent SSR errors
+  // The actual theme will be updated after mounting
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
