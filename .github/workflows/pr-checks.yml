@@ -77,6 +77,11 @@ jobs:
         working-directory: apps/api
         run: pnpm db:seed
 
+      - name: Build applications
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
       - name: Smoke tests (E2E)
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000

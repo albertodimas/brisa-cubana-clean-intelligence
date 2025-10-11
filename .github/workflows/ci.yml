@@ -86,6 +86,12 @@ jobs:
         working-directory: apps/api
         run: pnpm db:seed
 
+      - name: Build applications
+        if: matrix.node == '22.x'
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
       - name: Critical E2E tests
         if: matrix.node == '22.x'
         env:
