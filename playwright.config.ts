@@ -74,18 +74,6 @@ export default defineConfig({
     : [
         // Local dev: Setup DB and use dev servers
         {
-          command:
-            "pnpm --filter @brisa/api db:push --force-reset && pnpm --filter @brisa/api db:seed",
-          reuseExistingServer: true,
-          stdout: "pipe",
-          stderr: "pipe",
-          env: {
-            DATABASE_URL: databaseUrl,
-            DATABASE_URL_UNPOOLED: databaseUrl,
-            JWT_SECRET: jwtSecret,
-          },
-        },
-        {
           command: "pnpm --filter @brisa/api dev",
           url: `${baseApiUrl}/health`,
           reuseExistingServer: true,
@@ -98,6 +86,21 @@ export default defineConfig({
             JWT_SECRET: jwtSecret,
             LOGIN_RATE_LIMIT: loginRateLimit,
             LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
+          },
+          timeout: 120_000,
+        },
+        {
+          // Wait for DB to be seeded after API is ready
+          command:
+            "pnpm --filter @brisa/api db:push --force-reset && pnpm --filter @brisa/api db:seed && echo 'Seed completed'",
+          url: `${baseApiUrl}/health`,
+          reuseExistingServer: true,
+          stdout: "pipe",
+          stderr: "pipe",
+          env: {
+            DATABASE_URL: databaseUrl,
+            DATABASE_URL_UNPOOLED: databaseUrl,
+            JWT_SECRET: jwtSecret,
           },
           timeout: 120_000,
         },

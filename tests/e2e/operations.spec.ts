@@ -43,7 +43,8 @@ test.describe("Operaciones", () => {
     await serviceForm.locator('input[name="durationMin"]').fill("120");
     await serviceForm.getByRole("button", { name: "Guardar" }).click();
 
-    await expect(serviceForm.getByText("Servicio creado")).toBeVisible();
+    // Toast notification appears outside the form
+    await expect(page.getByText("Servicio creado")).toBeVisible();
     await expect(page.getByText(uniqueName).first()).toBeVisible();
   });
 
