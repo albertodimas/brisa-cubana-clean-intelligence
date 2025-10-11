@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import { ServiceRepository } from "./repositories/service-repository.js";
+import { BookingRepository } from "./repositories/booking-repository.js";
 
 /**
  * Dependency Injection Container
@@ -62,6 +64,8 @@ export const container = Container.getInstance();
 export const ServiceKeys = {
   PRISMA: "prisma",
   DATABASE_URL: "databaseUrl",
+  SERVICE_REPOSITORY: "serviceRepository",
+  BOOKING_REPOSITORY: "bookingRepository",
 } as const;
 
 /**
@@ -87,6 +91,19 @@ export function initializeContainer(): void {
 
   // Registrar Database URL (para casos edge donde se necesita la URL directa)
   container.register(ServiceKeys.DATABASE_URL, () => process.env.DATABASE_URL);
+
+  // Registrar Repositorios
+  const prisma = container.resolve<PrismaClient>(ServiceKeys.PRISMA);
+
+  container.register(
+    ServiceKeys.SERVICE_REPOSITORY,
+    () => new ServiceRepository(prisma),
+  );
+
+  container.register(
+    ServiceKeys.BOOKING_REPOSITORY,
+    () => new BookingRepository(prisma),
+  );
 }
 
 /**
@@ -94,6 +111,20 @@ export function initializeContainer(): void {
  */
 export function getPrisma(): PrismaClient {
   return container.resolve<PrismaClient>(ServiceKeys.PRISMA);
+}
+
+/**
+ * Helper para obtener ServiceRepository de forma type-safe
+ */
+export function getServiceRepository(): ServiceRepository {
+  return container.resolve<ServiceRepository>(ServiceKeys.SERVICE_REPOSITORY);
+}
+
+/**
+ * Helper para obtener BookingRepository de forma type-safe
+ */
+export function getBookingRepository(): BookingRepository {
+  return container.resolve<BookingRepository>(ServiceKeys.BOOKING_REPOSITORY);
 }
 
 /**

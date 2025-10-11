@@ -1,0 +1,212 @@
+import type { PrismaClient, Booking, BookingStatus } from "@prisma/client";
+import type {
+  BaseRepository,
+  FindManyOptions,
+  PaginatedResult,
+} from "./base-repository.js";
+
+/**
+ * Tipos para Booking Repository
+ */
+export type BookingCreateInput = {
+  code: string;
+  scheduledAt: Date;
+  durationMin: number;
+  status: BookingStatus;
+  totalAmount: number;
+  serviceId: string;
+  propertyId: string;
+  customerId: string;
+  notes?: string;
+};
+
+export type BookingUpdateInput = Partial<Omit<BookingCreateInput, "code">>;
+
+export type BookingWithRelations = Booking & {
+  service?: any;
+  property?: any;
+  customer?: any;
+};
+
+export interface BookingFilters {
+  status?: BookingStatus;
+  propertyId?: string;
+  serviceId?: string;
+  customerId?: string;
+  from?: Date;
+  to?: Date;
+}
+
+/**
+ * Repositorio para la entidad Booking
+ */
+export class BookingRepository
+  implements BaseRepository<Booking, BookingCreateInput, BookingUpdateInput>
+{
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async findById(id: string): Promise<Booking | null> {
+    return await this.prisma.booking.findUnique({
+      where: { id },
+    });
+  }
+
+  async findByIdWithRelations(
+    id: string,
+  ): Promise<BookingWithRelations | null> {
+    return await this.prisma.booking.findUnique({
+      where: { id },
+      include: {
+        service: true,
+        property: true,
+        customer: true,
+      },
+    });
+  }
+
+  async findMany(options: FindManyOptions = {}): Promise<Booking[]> {
+    const { take, skip, cursor, where, include, orderBy } = options;
+
+    return await this.prisma.booking.findMany({
+      where,
+      include,
+      take,
+      skip,
+      cursor,
+      orderBy: orderBy ?? { scheduledAt: "desc" },
+    });
+  }
+
+  async findManyPaginated(
+    limit: number = 50,
+    cursor?: string,
+    filters?: BookingFilters,
+    includeRelations: boolean = false,
+  ): Promise<PaginatedResult<Booking | BookingWithRelations>> {
+    const take = limit + 1;
+
+    const where = this.buildWhereClause(filters);
+
+    const bookings = await this.prisma.booking.findMany({
+      where,
+      take,
+      ...(cursor && {
+        skip: 1,
+        cursor: { id: cursor },
+      }),
+      ...(includeRelations && {
+        include: {
+          service: true,
+          property: true,
+          customer: true,
+        },
+      }),
+      orderBy: { scheduledAt: "desc" },
+    });
+
+    const hasMore = bookings.length > limit;
+    const data = hasMore ? bookings.slice(0, limit) : bookings;
+    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+
+    return {
+      data,
+      nextCursor,
+      hasMore,
+    };
+  }
+
+  async create(data: BookingCreateInput): Promise<Booking> {
+    return await this.prisma.booking.create({
+      data,
+    });
+  }
+
+  async update(id: string, data: BookingUpdateInput): Promise<Booking> {
+    return await this.prisma.booking.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async count(where?: any): Promise<number> {
+    return await this.prisma.booking.count({
+      where,
+    });
+  }
+
+  /**
+   * Busca reservas por rango de fechas
+   */
+  async findByDateRange(from: Date, to: Date): Promise<Booking[]> {
+    return await this.prisma.booking.findMany({
+      where: {
+        scheduledAt: {
+          gte: from,
+          lte: to,
+        },
+      },
+      orderBy: { scheduledAt: "asc" },
+    });
+  }
+
+  /**
+   * Busca reservas por estado
+   */
+  async findByStatus(status: BookingStatus): Promise<Booking[]> {
+    return await this.prisma.booking.findMany({
+      where: { status },
+      orderBy: { scheduledAt: "desc" },
+    });
+  }
+
+  /**
+   * Busca reservas de una propiedad específica
+   */
+  async findByProperty(propertyId: string): Promise<Booking[]> {
+    return await this.prisma.booking.findMany({
+      where: { propertyId },
+      include: {
+        service: true,
+        customer: true,
+      },
+      orderBy: { scheduledAt: "desc" },
+    });
+  }
+
+  /**
+   * Construye la cláusula WHERE para filtros
+   */
+  private buildWhereClause(filters?: BookingFilters): any {
+    if (!filters) return undefined;
+
+    const where: any = {};
+
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    if (filters.propertyId) {
+      where.propertyId = filters.propertyId;
+    }
+
+    if (filters.serviceId) {
+      where.serviceId = filters.serviceId;
+    }
+
+    if (filters.customerId) {
+      where.customerId = filters.customerId;
+    }
+
+    if (filters.from || filters.to) {
+      where.scheduledDate = {};
+      if (filters.from) {
+        where.scheduledAt.gte = filters.from;
+      }
+      if (filters.to) {
+        where.scheduledAt.lte = filters.to;
+      }
+    }
+
+    return Object.keys(where).length > 0 ? where : undefined;
+  }
+}
