@@ -1,0 +1,109 @@
+import { PrismaClient } from "@prisma/client";
+
+/**
+ * Dependency Injection Container
+ *
+ * Simple IoC container para gestionar dependencias de la aplicación.
+ * Sigue el patrón Singleton para servicios compartidos.
+ */
+
+class Container {
+  private static instance: Container;
+  private services: Map<string, unknown> = new Map();
+
+  private constructor() {
+    // Constructor privado para Singleton
+  }
+
+  static getInstance(): Container {
+    if (!Container.instance) {
+      Container.instance = new Container();
+    }
+    return Container.instance;
+  }
+
+  /**
+   * Registra un servicio en el contenedor
+   */
+  register<T>(key: string, factory: () => T): void {
+    this.services.set(key, factory());
+  }
+
+  /**
+   * Obtiene un servicio del contenedor
+   */
+  resolve<T>(key: string): T {
+    const service = this.services.get(key);
+    if (!service) {
+      throw new Error(`Service '${key}' not found in container`);
+    }
+    return service as T;
+  }
+
+  /**
+   * Verifica si un servicio está registrado
+   */
+  has(key: string): boolean {
+    return this.services.has(key);
+  }
+
+  /**
+   * Limpia todos los servicios (útil para testing)
+   */
+  clear(): void {
+    this.services.clear();
+  }
+}
+
+// Singleton instance
+export const container = Container.getInstance();
+
+// Service Keys (constantes para type safety)
+export const ServiceKeys = {
+  PRISMA: "prisma",
+  DATABASE_URL: "databaseUrl",
+} as const;
+
+/**
+ * Inicializa el contenedor con los servicios por defecto
+ */
+export function initializeContainer(): void {
+  // Registrar PrismaClient
+  container.register(ServiceKeys.PRISMA, () => {
+    const prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
+      },
+      log:
+        process.env.NODE_ENV === "development"
+          ? ["query", "error", "warn"]
+          : ["error"],
+    });
+
+    return prisma;
+  });
+
+  // Registrar Database URL (para casos edge donde se necesita la URL directa)
+  container.register(ServiceKeys.DATABASE_URL, () => process.env.DATABASE_URL);
+}
+
+/**
+ * Helper para obtener PrismaClient de forma type-safe
+ */
+export function getPrisma(): PrismaClient {
+  return container.resolve<PrismaClient>(ServiceKeys.PRISMA);
+}
+
+/**
+ * Cierra todas las conexiones de servicios (útil para shutdown graceful)
+ */
+export async function closeContainer(): Promise<void> {
+  try {
+    const prisma = container.resolve<PrismaClient>(ServiceKeys.PRISMA);
+    await prisma.$disconnect();
+  } catch {
+    // Si prisma no está registrado, no hacer nada
+  }
+}

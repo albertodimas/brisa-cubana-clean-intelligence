@@ -5,12 +5,16 @@ import { prisma } from "./lib/prisma.js";
 import { loggingMiddleware } from "./middleware/logging.js";
 import { initSentry, Sentry } from "./lib/sentry.js";
 import { openApiSpec } from "./lib/openapi-spec.js";
+import { initializeContainer } from "./container.js";
 import bookings from "./routes/bookings.js";
 import services from "./routes/services.js";
 import properties from "./routes/properties.js";
 import customers from "./routes/customers.js";
 import auth from "./routes/auth.js";
 import users from "./routes/users.js";
+
+// Initialize Dependency Injection Container
+initializeContainer();
 
 // Initialize Sentry
 initSentry();
