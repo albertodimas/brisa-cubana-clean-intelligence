@@ -306,9 +306,9 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 ### 12.1 Consistencia
 
 - [ ] README.md tiene instrucciones actualizadas
-- [ ] docs/quickstart.md es consistente con setup actual
-- [ ] docs/status.md refleja estado real del proyecto
-- [ ] docs/SECURITY.md tiene procedimientos vigentes
+- [ ] docs/guides/quickstart.md es consistente con setup actual
+- [ ] docs/overview/status.md refleja estado real del proyecto
+- [ ] docs/operations/security.md tiene procedimientos vigentes
 - [ ] CHANGELOG.md tiene últimos cambios (si implementado)
 
 ### 12.2 API Docs (futuro)

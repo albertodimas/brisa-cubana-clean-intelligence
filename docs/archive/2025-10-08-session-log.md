@@ -240,10 +240,10 @@ if (result.success) {
 
 ### Documentación (4 nuevos)
 
-- ✅ `docs/BACKUP_RECOVERY.md` (588 líneas)
-- ✅ `docs/OBSERVABILITY.md` (530 líneas)
-- ✅ `docs/REGRESSION_CHECKLIST.md` (650 líneas)
-- ✅ `docs/SESSION_LOG.md` (este archivo)
+- ✅ `docs/operations/backup-recovery.md` (588 líneas)
+- ✅ `docs/operations/observability.md` (530 líneas)
+- ✅ `docs/qa/regression-checklist.md` (650 líneas)
+- ✅ `docs/archive/2025-10-08-session-log.md` (este archivo)
 
 ### Scripts (2 nuevos)
 
@@ -271,7 +271,7 @@ if (result.success) {
 
 ### Documentación actualizada (2 modificados)
 
-- 🔧 `docs/status.md`
+- 🔧 `docs/overview/status.md`
 - 🔧 `docs/README.md`
 
 ---

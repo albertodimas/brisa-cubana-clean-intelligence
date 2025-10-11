@@ -14,7 +14,7 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
 | Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.                                                 |
 | API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas.                                           |
 | Tests         | 🟢     | Vitest (`pnpm test`) + suites Playwright smoke/critical/full (`pnpm test:e2e:*`).                                           |
-| Documentación | 🟢     | README + quickstart + docs/status.md actualizados y verificados.                                                            |
+| Documentación | 🟢     | README + quickstart + docs/overview/status.md actualizados y verificados.                                                   |
 | Deploy        | 🟢     | **API** https://brisa-cubana-clean-intelligence-api.vercel.app · **Web** https://brisa-cubana-clean-intelligence.vercel.app |
 
 ## Requisitos
@@ -35,7 +35,7 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
    cp apps/api/.env.example apps/api/.env.local
 
    # El archivo .env.local ya contiene valores seguros por defecto para desarrollo local
-   # Ver docs/SECURITY.md para más información sobre manejo de credenciales
+   # Ver docs/operations/security.md para más información sobre manejo de credenciales
    ```
 
 3. Levanta PostgreSQL (Docker Compose):
@@ -92,8 +92,8 @@ La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoi
 
 ## Documentación
 
-- [`docs/quickstart.md`](docs/quickstart.md): onboarding local paso a paso (verificado).
-- [`docs/openapi.yaml`](docs/openapi.yaml): especificación OpenAPI 3.1 de la API (actualizada al 9 de octubre de 2025).
+- [`docs/guides/quickstart.md`](docs/guides/quickstart.md): onboarding local paso a paso (verificado).
+- [`docs/reference/openapi.yaml`](docs/reference/openapi.yaml): especificación OpenAPI 3.1 de la API (actualizada al 9 de octubre de 2025).
 - Documentación API disponible en `/api/docs` (Scalar UI).
 - [`CHANGELOG.md`](CHANGELOG.md): historial verificado de cambios aplicados al código y automatizaciones.
 

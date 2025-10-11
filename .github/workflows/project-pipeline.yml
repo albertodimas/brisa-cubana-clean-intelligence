@@ -31,6 +31,10 @@ on:
         required: false
         type: boolean
         default: true
+      run-docs-verify:
+        required: false
+        type: boolean
+        default: true
       run-secret-scan:
         required: false
         type: boolean
@@ -140,6 +144,11 @@ jobs:
         if: ${{ inputs.run-secret-scan }}
         shell: bash
         run: bash scripts/verify-no-secrets.sh
+
+      - name: Verify documentation layout
+        if: ${{ inputs.run-docs-verify }}
+        shell: bash
+        run: pnpm docs:verify
 
       - name: Lint
         if: ${{ inputs.run-lint }}

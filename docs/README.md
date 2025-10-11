@@ -1,46 +1,24 @@
-# Brisa Cubana Clean Intelligence – Documentation
+# Brisa Cubana Clean Intelligence – Handbook
 
-Este directorio contiene la documentación verificada del proyecto. Usa la siguiente tabla de navegación para acceder a cada sección.
+Este directorio concentra documentación verificada y agrupada por dominio. Cada archivo se actualiza únicamente cuando la funcionalidad correspondiente existe en `main` y cuenta con evidencia (tests, despliegues o métricas).
 
-## Documentación Principal
+## Índice rápido
 
-| Documento                                        | Descripción                                                                  |
-| ------------------------------------------------ | ---------------------------------------------------------------------------- |
-| [`quickstart.md`](./quickstart.md)               | Guía para levantar el entorno local (Docker + pnpm + Prisma).                |
-| [`status.md`](./status.md)                       | Estado funcional, arquitectura, APIs, operaciones y próximos pasos.          |
-| [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) | Documentación OpenAPI/Swagger con Scalar, ejemplos y generación de clientes. |
-| [`openapi.yaml`](./openapi.yaml)                 | Especificación OpenAPI 3.1 para integraciones externas.                      |
+| Área                 | Ruta                                                                                                                                                                                                                                                                                                                                                                                                     | Contenido principal                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Visión general       | [`overview/status.md`](overview/status.md)                                                                                                                                                                                                                                                                                                                                                               | Arquitectura actual, estado funcional, próximos pasos y despliegues verificados. |
+| Guías                | [`guides/quickstart.md`](guides/quickstart.md)                                                                                                                                                                                                                                                                                                                                                           | Onboarding local paso a paso (Docker, Prisma, Playwright).                       |
+| Referencia técnica   | [`reference/api-reference.md`](reference/api-reference.md) · [`reference/openapi.yaml`](reference/openapi.yaml)                                                                                                                                                                                                                                                                                          | Documentación exhaustiva de la API (Scalar/OpenAPI) lista para integraciones.    |
+| Operaciones          | [`operations/security.md`](operations/security.md) · [`operations/backup-recovery.md`](operations/backup-recovery.md) · [`operations/deployment.md`](operations/deployment.md) · [`operations/alerts.md`](operations/alerts.md) · [`operations/observability.md`](operations/observability.md) · [`operations/sentry.md`](operations/sentry.md) · [`operations/backup-log.md`](operations/backup-log.md) | Seguridad, backups, despliegues, observabilidad y runbooks operativos.           |
+| Calidad y pruebas    | [`qa/e2e-strategy.md`](qa/e2e-strategy.md) · [`qa/regression-checklist.md`](qa/regression-checklist.md) · [`qa/performance-budgets.md`](qa/performance-budgets.md)                                                                                                                                                                                                                                       | Estrategia de testing, checklist de regresión y presupuestos de rendimiento.     |
+| Dominio del producto | [`product/user-management.md`](product/user-management.md) · [`product/pagination.md`](product/pagination.md)                                                                                                                                                                                                                                                                                            | Funcionalidades clave del panel operativo (roles, paginación cursor-based).      |
+| Historial            | [`archive/2025-10-08-session-log.md`](archive/2025-10-08-session-log.md)                                                                                                                                                                                                                                                                                                                                 | Bitácora histórica (solo lectura) que respalda decisiones previas.               |
 
-## Seguridad y Operaciones
+## Política de documentación
 
-| Documento                                              | Descripción                                                             |
-| ------------------------------------------------------ | ----------------------------------------------------------------------- |
-| [`SECURITY.md`](./SECURITY.md)                         | Guía de seguridad: manejo de credenciales, secrets y mejores prácticas. |
-| [`BACKUP_RECOVERY.md`](./BACKUP_RECOVERY.md)           | Estrategias de backup, recuperación y procedimientos de emergencia.     |
-| [`REGRESSION_CHECKLIST.md`](./REGRESSION_CHECKLIST.md) | Checklist de verificación antes de cada deployment.                     |
+- Todo documento indica fecha de última revisión al inicio.
+- No se incluyen planes aspiracionales; únicamente capacidades existentes y validadas.
+- Cada actualización relevante al proyecto debe enlazarse desde `CHANGELOG.md` y reflejarse aquí.
+- Los documentos de archivo (`archive/`) sirven como evidencia histórica y no deben referenciarse para procedimientos vigentes.
 
-## Observabilidad y Monitoreo
-
-| Documento                                            | Descripción                                                         |
-| ---------------------------------------------------- | ------------------------------------------------------------------- |
-| [`SENTRY.md`](./SENTRY.md)                           | Integración de Sentry: error tracking, performance y monitoring.    |
-| [`OBSERVABILITY.md`](./OBSERVABILITY.md)             | Logging estructurado, métricas, alertas y runbooks de incidentes.   |
-| [`ALERTS.md`](./ALERTS.md)                           | Estrategia de alertas operacionales: Sentry, Slack, email, runbook. |
-| [`PERFORMANCE_BUDGETS.md`](./PERFORMANCE_BUDGETS.md) | Presupuestos de rendimiento: Core Web Vitals, API, bundle, DB.      |
-
-## Testing y CI/CD
-
-| Documento                              | Descripción                                                                      |
-| -------------------------------------- | -------------------------------------------------------------------------------- |
-| [`E2E_STRATEGY.md`](./E2E_STRATEGY.md) | Estrategia E2E piramidal (smoke/critical/full), configuración y workflows CI/CD. |
-
-## Features y Gestión
-
-| Documento                                    | Descripción                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------- |
-| [`USER_MANAGEMENT.md`](./USER_MANAGEMENT.md) | Panel de administración de usuarios: CRUD, roles, seguridad y testing (9 Oct).  |
-| [`PAGINATION.md`](./PAGINATION.md)           | Paginación cursor-based: implementación, ejemplos, testing y mejores prácticas. |
-
----
-
-> **Nota:** Todos los documentos reflejan únicamente funcionalidades implementadas y probadas en `main`. Cualquier contribución nueva debe actualizar esta documentación.
+Para contribuir, actualiza el documento aplicable, añade las evidencias correspondientes (tests, scripts, métricas) y enlaza el cambio en `CHANGELOG.md`.

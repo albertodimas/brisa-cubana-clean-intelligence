@@ -361,7 +361,7 @@ Ubicación: `tests/e2e/operations.spec.ts`
 
 - [Prisma Cursor-based Pagination](https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination)
 - [API Pagination Best Practices](https://www.moesif.com/blog/technical/api-design/REST-API-Design-Filtering-Sorting-and-Pagination/)
-- [OpenAPI Specification](../docs/openapi.yaml)
+- [OpenAPI Specification](../reference/openapi.yaml)
 
 ---
 

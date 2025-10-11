@@ -1,6 +1,6 @@
 # API Documentation - OpenAPI/Swagger
 
-**Última actualización:** 9 de octubre de 2025
+**Última actualización:** 11 de octubre de 2025
 
 ---
 
@@ -120,7 +120,7 @@ security:
 
 ### Authentication
 
-- `POST /api/authentication/login` - Login de usuario (rate limited: 5/60s, configurable)
+- `POST /api/authentication/login` - Login de usuario (rate limited: 5/60s por defecto, configurable vía `LOGIN_RATE_LIMIT`)
 - `POST /api/authentication/logout` - Logout de usuario
 - `GET /api/authentication/me` - Obtener usuario actual
 
@@ -138,7 +138,7 @@ security:
 
 ### Properties
 
-- `GET /api/properties` - Listar propiedades (autenticado)
+- `GET /api/properties` - Listar propiedades (público)
 - `POST /api/properties` - Crear propiedad (ADMIN/COORDINATOR)
 - `PATCH /api/properties/{propertyId}` - Actualizar propiedad (ADMIN/COORDINATOR)
 

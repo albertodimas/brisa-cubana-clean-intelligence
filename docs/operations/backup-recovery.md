@@ -375,17 +375,13 @@ echo "✅ Verificación completada"
 
 ### 4.2 Logs de Auditoría
 
-**Registrar en docs/backup-log.md:**
+**Registrar en [`docs/operations/backup-log.md`](backup-log.md)** una vez completada cada ejecución, incluyendo:
 
-```markdown
-## Log de Backups y Recuperaciones
-
-| Fecha      | Tipo              | Estado | Notas                    |
-| ---------- | ----------------- | ------ | ------------------------ |
-| 2025-10-08 | PITR verificado   | ✅ OK  | Retención 7 días activa  |
-| 2025-10-15 | Test restauración | ✅ OK  | Backup 2025-10-14, 15min |
-| ...        | ...               | ...    | ...                      |
-```
+- Fecha/hora en UTC
+- Responsable
+- Procedimiento ejecutado (pg_dump, PITR, restore test)
+- Resultado (✅/⚠️/❌) con enlace a la evidencia correspondiente
+- Observaciones relevantes (tiempo de recuperación, incidentes detectados)
 
 ---
 

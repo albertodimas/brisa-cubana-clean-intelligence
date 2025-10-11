@@ -29,7 +29,7 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    cp apps/api/.env.example apps/api/.env.local
 
    # El archivo .env.local ya contiene credenciales de desarrollo local seguras
-   # Para más información sobre seguridad, ver docs/SECURITY.md
+   # Para más información sobre seguridad, ver docs/operations/security.md
    ```
 
 4. **Levantar PostgreSQL (local)**

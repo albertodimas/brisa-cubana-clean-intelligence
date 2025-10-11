@@ -15,7 +15,7 @@
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
 - Deploy web operativo en Vercel (Next.js 15) sincronizado con la API.
 
-[Ver Quickstart local](./quickstart.md) para puesta en marcha.
+[Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
 ---
 
@@ -155,7 +155,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 | Critical | 7     | ~8s      | `pnpm test:e2e:critical` |
 | Full     | 13    | ~8s      | `pnpm test:e2e:full`     |
 
-**Documentación:** [E2E_STRATEGY.md](./E2E_STRATEGY.md)
+**Documentación:** [`qa/e2e-strategy.md`](../qa/e2e-strategy.md)
 
 ### 7.3 CI/CD Workflows
 
@@ -221,7 +221,7 @@ pnpm exec lint-staged  # Prettier + ESLint automático
 - RPO: < 1 minuto
 - RTO: < 5 minutos
 
-**Documentación:** Ver [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md) para estrategia completa
+**Documentación:** Ver [`operations/backup-recovery.md`](../operations/backup-recovery.md) para estrategia completa
 
 **Script de verificación:**
 
@@ -255,7 +255,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 - `loggingMiddleware`: Loguea todas las requests automáticamente
 - Incluye: method, path, status, durationMs, userId (si auth)
 
-**Documentación:** Ver [OBSERVABILITY.md](./OBSERVABILITY.md)
+**Documentación:** Ver [`operations/observability.md`](../operations/observability.md)
 
 ### 9.4 Tests de Seguridad
 
@@ -273,7 +273,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 
 - 100+ verificaciones antes de cada deployment
 - Categorías: Auth, API, Frontend, Database, Security, Performance
-- Documentación: [REGRESSION_CHECKLIST.md](./REGRESSION_CHECKLIST.md)
+- Documentación: [`qa/regression-checklist.md`](../qa/regression-checklist.md)
 
 ---
 
@@ -355,7 +355,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 **Mejora recomendada:**
 
 - Considerar agregar `postdeploy` script en `package.json` para ejecutar seed automáticamente en deployments iniciales
-- O documentar proceso manual de seed en `docs/DEPLOYMENT.md`
+- O documentar proceso manual de seed en [`operations/deployment.md`](../operations/deployment.md)
 
 ---
 

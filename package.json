@@ -1,6 +1,6 @@
 {
   "name": "brisa-cubana-clean-intelligence",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.18.0",
@@ -17,6 +17,7 @@
     "db:push": "pnpm --filter @brisa/api db:push",
     "db:migrate": "pnpm --filter @brisa/api db:migrate",
     "db:seed": "pnpm --filter @brisa/api db:seed",
+    "docs:verify": "bash scripts/verify-doc-structure.sh",
     "format": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
     "clean": "rm -rf node_modules .turbo",
     "prepare": "husky"
