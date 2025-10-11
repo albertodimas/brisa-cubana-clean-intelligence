@@ -38,49 +38,83 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: [
-    {
-      command:
-        "pnpm --filter @brisa/api db:push --force-reset && pnpm --filter @brisa/api db:seed",
-      reuseExistingServer: true,
-      stdout: "pipe",
-      stderr: "pipe",
-      env: {
-        DATABASE_URL: databaseUrl,
-        DATABASE_URL_UNPOOLED: databaseUrl,
-        JWT_SECRET: jwtSecret,
-      },
-    },
-    {
-      command: "pnpm --filter @brisa/api dev",
-      url: `${baseApiUrl}/health`,
-      reuseExistingServer: !isCI,
-      stdout: "pipe",
-      stderr: "pipe",
-      env: {
-        NODE_ENV: "test",
-        DATABASE_URL: databaseUrl,
-        DATABASE_URL_UNPOOLED: databaseUrl,
-        JWT_SECRET: jwtSecret,
-        LOGIN_RATE_LIMIT: loginRateLimit,
-        LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
-      },
-      timeout: 120_000,
-    },
-    {
-      command: "pnpm --filter @brisa/web dev",
-      url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
-      reuseExistingServer: !isCI,
-      stdout: "pipe",
-      stderr: "pipe",
-      env: {
-        NODE_ENV: "test",
-        AUTH_SECRET: authSecret,
-        NEXT_PUBLIC_API_URL: baseApiUrl,
-      },
-      timeout: 120_000,
-    },
-  ],
+  webServer: isCI
+    ? [
+        // CI: Use production builds (already compiled by workflow)
+        {
+          command: "pnpm --filter @brisa/api start",
+          url: `${baseApiUrl}/health`,
+          reuseExistingServer: false,
+          stdout: "pipe",
+          stderr: "pipe",
+          env: {
+            NODE_ENV: "production",
+            DATABASE_URL: databaseUrl,
+            DATABASE_URL_UNPOOLED: databaseUrl,
+            JWT_SECRET: jwtSecret,
+            LOGIN_RATE_LIMIT: loginRateLimit,
+            LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
+          },
+          timeout: 120_000,
+        },
+        {
+          command: "pnpm --filter @brisa/web start",
+          url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
+          reuseExistingServer: false,
+          stdout: "pipe",
+          stderr: "pipe",
+          env: {
+            NODE_ENV: "production",
+            AUTH_SECRET: authSecret,
+            NEXT_PUBLIC_API_URL: baseApiUrl,
+          },
+          timeout: 120_000,
+        },
+      ]
+    : [
+        // Local dev: Setup DB and use dev servers
+        {
+          command:
+            "pnpm --filter @brisa/api db:push --force-reset && pnpm --filter @brisa/api db:seed",
+          reuseExistingServer: true,
+          stdout: "pipe",
+          stderr: "pipe",
+          env: {
+            DATABASE_URL: databaseUrl,
+            DATABASE_URL_UNPOOLED: databaseUrl,
+            JWT_SECRET: jwtSecret,
+          },
+        },
+        {
+          command: "pnpm --filter @brisa/api dev",
+          url: `${baseApiUrl}/health`,
+          reuseExistingServer: true,
+          stdout: "pipe",
+          stderr: "pipe",
+          env: {
+            NODE_ENV: "test",
+            DATABASE_URL: databaseUrl,
+            DATABASE_URL_UNPOOLED: databaseUrl,
+            JWT_SECRET: jwtSecret,
+            LOGIN_RATE_LIMIT: loginRateLimit,
+            LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
+          },
+          timeout: 120_000,
+        },
+        {
+          command: "pnpm --filter @brisa/web dev",
+          url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
+          reuseExistingServer: true,
+          stdout: "pipe",
+          stderr: "pipe",
+          env: {
+            NODE_ENV: "test",
+            AUTH_SECRET: authSecret,
+            NEXT_PUBLIC_API_URL: baseApiUrl,
+          },
+          timeout: 120_000,
+        },
+      ],
   workers: isCI ? 2 : undefined,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
