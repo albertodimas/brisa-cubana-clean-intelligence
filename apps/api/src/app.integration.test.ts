@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
 process.env.API_TOKEN = "test-service-token";
 process.env.JWT_SECRET = "test-secret";
 process.env.LOGIN_RATE_LIMIT = "3";
