@@ -1,0 +1,56 @@
+name: Post-Deploy Seed
+
+on:
+  workflow_run:
+    workflows:
+      - CI (Main Branch)
+    types:
+      - completed
+
+jobs:
+  seed-production:
+    if: >
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate production database secret
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Set the PRODUCTION_DATABASE_URL secret to enable automatic seeding."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          install-playwright: false
+          run-prisma-generate: true
+          database-url: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          database-url-unpooled: ${{ secrets.PRODUCTION_DATABASE_URL_UNPOOLED }}
+          api-token: ${{ secrets.API_TOKEN }}
+          jwt-secret: ${{ secrets.JWT_SECRET }}
+          auth-secret: ${{ secrets.AUTH_SECRET }}
+
+      - name: Push Prisma schema
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DATABASE_URL_UNPOOLED: ${{ secrets.PRODUCTION_DATABASE_URL_UNPOOLED }}
+        run: |
+          export DATABASE_URL_UNPOOLED="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
+          pnpm --filter @brisa/api db:push
+
+      - name: Seed production data
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DATABASE_URL_UNPOOLED: ${{ secrets.PRODUCTION_DATABASE_URL_UNPOOLED }}
+        run: |
+          export DATABASE_URL_UNPOOLED="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
+          pnpm --filter @brisa/api db:seed

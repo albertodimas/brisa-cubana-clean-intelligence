@@ -16,10 +16,10 @@ import {
   logoutAction,
 } from "@/app/actions";
 import {
-  fetchServices,
-  fetchBookings,
-  fetchProperties,
-  fetchCustomers,
+  fetchServicesPage,
+  fetchBookingsPage,
+  fetchPropertiesPage,
+  fetchCustomersPage,
   fetchUsers,
 } from "@/lib/api";
 import { auth } from "@/auth";
@@ -52,14 +52,26 @@ export default async function HomePage() {
   const horizon = new Date(
     today.getTime() + 1000 * 60 * 60 * 24 * 30,
   ).toISOString();
-  const [services, bookings, properties, customers] = await Promise.all([
-    fetchServices(),
-    fetchBookings({ from, to: horizon }),
-    fetchProperties(),
-    fetchCustomers(),
-  ]);
+  const bookingFilterDefaults = {
+    status: "ALL" as const,
+    from,
+    to: horizon,
+  };
+
+  const [servicesPage, bookingsPage, propertiesPage, customersPage] =
+    await Promise.all([
+      fetchServicesPage({ limit: 50 }),
+      fetchBookingsPage({ from, to: horizon, limit: 10 }),
+      fetchPropertiesPage({ limit: 50 }),
+      fetchCustomersPage({ limit: 50 }),
+    ]);
 
   const users = isAdmin ? await fetchUsers() : [];
+
+  const services = servicesPage.items;
+  const bookings = bookingsPage.items;
+  const properties = propertiesPage.items;
+  const customers = customersPage.items;
 
   const activeServices = services
     .filter((service) => service.active)
@@ -302,10 +314,11 @@ export default async function HomePage() {
 
           <AdminPanel
             currentUser={session?.user ?? null}
-            services={services}
-            properties={properties}
-            bookings={bookings}
-            customers={customers}
+            services={servicesPage}
+            properties={propertiesPage}
+            bookings={bookingsPage}
+            customers={customersPage}
+            initialBookingFilters={bookingFilterDefaults}
             createService={createServiceAction}
             createProperty={createPropertyAction}
             createBooking={createBookingAction}

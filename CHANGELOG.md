@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [0.2.3] - 2025-10-11
+
+### Added
+
+- `BookingsManager` con paginación real y botón "Cargar más" para las reservas del panel operativo, reutilizando los nuevos tokens de diseño (`ui-field`, `ui-input`, `ui-panel-surface`).
+- Workflow `post-deploy-seed.yml` que sincroniza el esquema y ejecuta el seed de producción tras cada merge exitoso en `main`.
+
+### Changed
+
+- Refactor del módulo `@/lib/api` para devolver resultados paginados (`fetchBookingsPage`, `fetchServicesPage`, etc.) y exponer `PaginatedResult` y `PaginationInfo`.
+- Reorganización del panel de reservas para consumir la API paginada, con filtros que actualizan los datos en el backend en lugar de hacerlo en memoria.
+- Documentación de despliegue actualizada con la automatización post-deploy y tokens UI documentados en el handbook.
+
+### Removed
+
+- Uso del componente `InfiniteList` en el panel operativo; la paginación ahora depende de la API.
+
 ## [0.2.2] - 2025-10-11
 
 ### Added

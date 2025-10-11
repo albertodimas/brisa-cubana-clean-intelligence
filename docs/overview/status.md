@@ -60,7 +60,8 @@
   - Crear servicios / propiedades / reservas (formularios server action).
   - Actualizar servicios/properties/reservas.
   - Cambiar estado `active` de servicios.
-  - Filtrar reservas por estado y rango de fechas.
+  - Filtrar reservas por estado y rango de fechas con paginación remota y carga incremental.
+  - UI reestilizada con tokens (`ui-field`, `ui-input`, `ui-panel-surface`) para formularios y acciones.
   - Cerrar sesión.
 - Proxy `/api/*` funciona para GET/POST/PATCH (sin CORS en el browser).
 - Favicon `.ico` y `.png` servidos desde `public/`.
@@ -165,6 +166,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Nightly** (`nightly.yml`): suite `full` diaria 02:00 UTC con retención de reportes de 14 días.
 - **CodeQL** (`codeql.yml`): escaneo estático para JavaScript/TypeScript en push, PR y weekly schedule.
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
+- **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`.
 
 **Estado**: ✅ Workflows activos y deduplicados en GitHub Actions
 

@@ -61,8 +61,21 @@ export type User = {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
-type ApiListResponse<T> = {
+export type PaginationInfo = {
+  limit: number;
+  cursor: string | null;
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
+type ApiResponse<T> = {
   data: T;
+  pagination?: PaginationInfo;
+};
+
+export type PaginatedResult<T> = {
+  items: T[];
+  pageInfo: PaginationInfo;
 };
 
 async function resolveAuthHeader(): Promise<string | null> {
@@ -84,7 +97,7 @@ function buildQuery(params: Record<string, QueryValue>): string {
   return qs ? `?${qs}` : "";
 }
 
-async function safeFetch<T>(path: string): Promise<T | null> {
+async function safeFetch<T>(path: string): Promise<ApiResponse<T> | null> {
   const authorization = await resolveAuthHeader();
   try {
     const headers: Record<string, string> = {
@@ -105,17 +118,48 @@ async function safeFetch<T>(path: string): Promise<T | null> {
       return null;
     }
 
-    const json = (await res.json()) as ApiListResponse<T>;
-    return json.data;
+    const json = (await res.json()) as ApiResponse<T>;
+    return json;
   } catch (error) {
     console.warn(`[api] request to ${path} threw`, error);
     return null;
   }
 }
 
-export async function fetchServices(): Promise<Service[]> {
-  const data = await safeFetch<Service[]>("/api/services");
-  return data ?? [];
+function normalizePagination(
+  pagination?: PaginationInfo,
+  fallbackLimit = 0,
+): PaginationInfo {
+  return {
+    limit: pagination?.limit ?? fallbackLimit,
+    cursor: pagination?.cursor ?? null,
+    nextCursor: pagination?.nextCursor ?? null,
+    hasMore: pagination?.hasMore ?? false,
+  };
+}
+
+function toPaginatedResult<T>(response: ApiResponse<T[]>): PaginatedResult<T> {
+  const fallbackLimit = response.pagination?.limit ?? response.data.length;
+  return {
+    items: response.data,
+    pageInfo: normalizePagination(response.pagination, fallbackLimit),
+  };
+}
+
+type PaginationQuery = {
+  limit?: number;
+  cursor?: string;
+};
+
+export async function fetchServicesPage(
+  params: PaginationQuery = {},
+): Promise<PaginatedResult<Service>> {
+  const query = buildQuery(params);
+  const response = await safeFetch<Service[]>(`/api/services${query}`);
+  if (!response) {
+    return { items: [], pageInfo: normalizePagination(undefined) };
+  }
+  return toPaginatedResult(response);
 }
 
 export type BookingFilters = {
@@ -127,25 +171,43 @@ export type BookingFilters = {
   customerId?: string;
 };
 
-export async function fetchBookings(
-  filters: BookingFilters = {},
-): Promise<Booking[]> {
-  const query = buildQuery(filters);
-  const data = await safeFetch<Booking[]>(`/api/bookings${query}`);
-  return data ?? [];
+type FetchBookingsOptions = BookingFilters & PaginationQuery;
+
+export async function fetchBookingsPage(
+  options: FetchBookingsOptions = {},
+): Promise<PaginatedResult<Booking>> {
+  const { limit, cursor, ...filters } = options;
+  const query = buildQuery({ limit, cursor, ...filters });
+  const response = await safeFetch<Booking[]>(`/api/bookings${query}`);
+  if (!response) {
+    return { items: [], pageInfo: normalizePagination(undefined) };
+  }
+  return toPaginatedResult(response);
 }
 
-export async function fetchProperties(): Promise<Property[]> {
-  const data = await safeFetch<Property[]>("/api/properties");
-  return data ?? [];
+export async function fetchPropertiesPage(
+  params: PaginationQuery = {},
+): Promise<PaginatedResult<Property>> {
+  const query = buildQuery(params);
+  const response = await safeFetch<Property[]>(`/api/properties${query}`);
+  if (!response) {
+    return { items: [], pageInfo: normalizePagination(undefined) };
+  }
+  return toPaginatedResult(response);
 }
 
-export async function fetchCustomers(): Promise<Customer[]> {
-  const data = await safeFetch<Customer[]>("/api/customers");
-  return data ?? [];
+export async function fetchCustomersPage(
+  params: PaginationQuery = {},
+): Promise<PaginatedResult<Customer>> {
+  const query = buildQuery(params);
+  const response = await safeFetch<Customer[]>(`/api/customers${query}`);
+  if (!response) {
+    return { items: [], pageInfo: normalizePagination(undefined) };
+  }
+  return toPaginatedResult(response);
 }
 
 export async function fetchUsers(): Promise<User[]> {
-  const data = await safeFetch<User[]>("/api/users");
-  return data ?? [];
+  const response = await safeFetch<User[]>("/api/users");
+  return response?.data ?? [];
 }

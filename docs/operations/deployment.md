@@ -70,3 +70,13 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 - Seguridad: `security@brisacubanaclean.com`
 
 > Mantén este documento sincronizado con cada cambio en pipelines o credenciales. Si un paso cambia, actualiza la tabla correspondiente y documenta el ajuste en el changelog.
+
+## 8. Automatización post-deploy
+
+- El workflow `post-deploy-seed.yml` se ejecuta automáticamente cuando `CI (Main Branch)` finaliza en verde sobre `main`.
+- Ejecuta `pnpm --filter @brisa/api db:push` seguido de `pnpm --filter @brisa/api db:seed` contra la base de datos de producción.
+- Requiere configurar los secretos en GitHub:
+  - `PRODUCTION_DATABASE_URL`
+  - `PRODUCTION_DATABASE_URL_UNPOOLED` (opcional, usa el valor anterior si no está definido)
+  - `API_TOKEN`, `JWT_SECRET`, `AUTH_SECRET` para mantener coherencia con los seeds.
+- Los resultados quedan registrados en la pestaña **Actions**. Ante un fallo, revisar la salida y ejecutar manualmente el procedimiento descrito en este documento.
