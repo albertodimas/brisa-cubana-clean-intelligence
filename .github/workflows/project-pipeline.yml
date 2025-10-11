@@ -1,0 +1,196 @@
+name: Project Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      job-name:
+        required: false
+        type: string
+        default: "Quality checks"
+      node-version:
+        required: false
+        type: string
+        default: "22.x"
+      pnpm-version:
+        required: false
+        type: string
+        default: "10.18.0"
+      run-lint:
+        required: false
+        type: boolean
+        default: true
+      run-typecheck:
+        required: false
+        type: boolean
+        default: true
+      run-unit-tests:
+        required: false
+        type: boolean
+        default: true
+      run-build:
+        required: false
+        type: boolean
+        default: true
+      run-secret-scan:
+        required: false
+        type: boolean
+        default: false
+      run-database-prep:
+        required: false
+        type: boolean
+        default: false
+      run-e2e-suite:
+        required: false
+        type: string
+        default: "none"
+      upload-playwright-report:
+        required: false
+        type: boolean
+        default: true
+      upload-playwright-only-on-failure:
+        required: false
+        type: boolean
+        default: false
+      playwright-report-name:
+        required: false
+        type: string
+        default: "playwright-report"
+      playwright-retention-days:
+        required: false
+        type: number
+        default: 7
+      database-url:
+        required: false
+        type: string
+        default: "postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e"
+      database-url-unpooled:
+        required: false
+        type: string
+        default: "postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e"
+      next-public-api-url:
+        required: false
+        type: string
+        default: "http://localhost:3001"
+    secrets:
+      api-token:
+        required: false
+      jwt-secret:
+        required: false
+      auth-secret:
+        required: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    name: ${{ inputs.job-name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: brisa_e2e
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: ${{ inputs.node-version }}
+          pnpm-version: ${{ inputs.pnpm-version }}
+          install-playwright: ${{ inputs.run-e2e-suite != 'none' }}
+          run-prisma-generate: ${{ inputs.run-database-prep || inputs.run-e2e-suite != 'none' }}
+          database-url: ${{ inputs.database-url }}
+          database-url-unpooled: ${{ inputs.database-url-unpooled }}
+          next-public-api-url: ${{ inputs.next-public-api-url }}
+          api-token: ${{ secrets.api-token }}
+          jwt-secret: ${{ secrets.jwt-secret }}
+          auth-secret: ${{ secrets.auth-secret }}
+
+      - name: Initialize database schema
+        if: ${{ inputs.run-database-prep }}
+        working-directory: apps/api
+        shell: bash
+        env:
+          DATABASE_URL: ${{ inputs.database-url }}
+          DATABASE_URL_UNPOOLED: ${{ inputs.database-url-unpooled }}
+        run: pnpm exec prisma db push --accept-data-loss
+
+      - name: Seed database
+        if: ${{ inputs.run-database-prep }}
+        working-directory: apps/api
+        shell: bash
+        env:
+          DATABASE_URL: ${{ inputs.database-url }}
+          DATABASE_URL_UNPOOLED: ${{ inputs.database-url-unpooled }}
+        run: pnpm db:seed
+
+      - name: Verify repository for secrets
+        if: ${{ inputs.run-secret-scan }}
+        shell: bash
+        run: bash scripts/verify-no-secrets.sh
+
+      - name: Lint
+        if: ${{ inputs.run-lint }}
+        shell: bash
+        run: pnpm lint
+
+      - name: Typecheck
+        if: ${{ inputs.run-typecheck }}
+        shell: bash
+        run: pnpm typecheck
+
+      - name: Unit tests
+        if: ${{ inputs.run-unit-tests }}
+        shell: bash
+        run: pnpm test
+
+      - name: Build applications
+        if: ${{ inputs.run-build }}
+        shell: bash
+        env:
+          NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
+      - name: Run Playwright suite
+        if: ${{ inputs.run-e2e-suite != 'none' }}
+        shell: bash
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          CI: true
+        run: |
+          case "${{ inputs.run-e2e-suite }}" in
+            smoke) pnpm test:e2e:smoke ;;
+            critical) pnpm test:e2e:critical ;;
+            full) pnpm test:e2e:full ;;
+            *) echo "Unsupported Playwright suite '${{ inputs.run-e2e-suite }}'"; exit 1 ;;
+          esac
+
+      - name: Upload Playwright report
+        if: ${{ inputs.run-e2e-suite != 'none' && inputs.upload-playwright-report && (!inputs.upload-playwright-only-on-failure || failure()) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.playwright-report-name }}
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: ${{ inputs.playwright-retention-days }}
+
+      - name: Upload Playwright test results
+        if: ${{ inputs.run-e2e-suite != 'none' && inputs.upload-playwright-report && (!inputs.upload-playwright-only-on-failure || failure()) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: ${{ inputs.playwright-retention-days }}

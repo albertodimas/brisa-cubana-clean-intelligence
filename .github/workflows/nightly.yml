@@ -8,90 +8,14 @@ on:
 
 jobs:
   full-e2e:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: brisa_e2e
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.18.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        working-directory: apps/api
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
-          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
-        run: pnpm exec prisma generate
-
-      - name: Export test env vars
-        run: |
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET || 'test-jwt-secret-for-ci-only' }}" >> $GITHUB_ENV
-          echo "AUTH_SECRET=${{ secrets.AUTH_SECRET || 'test-auth-secret-for-ci-only' }}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_API_URL=http://localhost:3001" >> $GITHUB_ENV
-          echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
-          echo "DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
-          echo "E2E_ADMIN_EMAIL=admin@brisacubanaclean.com" >> $GITHUB_ENV
-          echo "E2E_ADMIN_PASSWORD=Brisa123!" >> $GITHUB_ENV
-          echo "LOGIN_RATE_LIMIT=20" >> $GITHUB_ENV
-          echo "LOGIN_RATE_LIMIT_WINDOW_MS=60000" >> $GITHUB_ENV
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Initialize database schema
-        working-directory: apps/api
-        run: pnpm exec prisma db push --accept-data-loss
-
-      - name: Seed database
-        working-directory: apps/api
-        run: pnpm db:seed
-
-      - name: Build applications
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:3001
-        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
-
-      - name: Full E2E suite
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          CI: true
-        run: pnpm test:e2e:full
-
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-full
-          path: playwright-report/
-          retention-days: 14
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: test-results/
-          retention-days: 14
+    uses: ./.github/workflows/project-pipeline.yml
+    with:
+      job-name: Nightly full e2e
+      run-database-prep: true
+      run-e2e-suite: full
+      playwright-report-name: playwright-report-full
+      playwright-retention-days: 14
+    secrets:
+      api-token: ${{ secrets.API_TOKEN }}
+      jwt-secret: ${{ secrets.JWT_SECRET }}
+      auth-secret: ${{ secrets.AUTH_SECRET }}

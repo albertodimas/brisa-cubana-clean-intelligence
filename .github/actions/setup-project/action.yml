@@ -1,0 +1,129 @@
+name: Setup project
+description: Prepare the pnpm workspace with Node.js, dependencies, Prisma artifacts, and test environment variables.
+inputs:
+  node-version:
+    description: Node.js version to install.
+    required: false
+    default: "22.x"
+  pnpm-version:
+    description: pnpm version to install.
+    required: false
+    default: "10.18.0"
+  install-playwright:
+    description: Install Playwright browsers.
+    required: false
+    default: "false"
+  run-prisma-generate:
+    description: Run Prisma generate for the API package.
+    required: false
+    default: "true"
+  database-url:
+    description: Database URL used for Prisma commands and runtime tests.
+    required: false
+    default: "postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e"
+  database-url-unpooled:
+    description: Secondary database URL without pooling.
+    required: false
+    default: "postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e"
+  api-token:
+    description: API token used by integration tests.
+    required: false
+    default: "test-api-token"
+  jwt-secret:
+    description: JWT secret value for tests.
+    required: false
+    default: "test-jwt-secret-for-ci-only"
+  auth-secret:
+    description: Auth secret value for NextAuth.
+    required: false
+    default: "test-auth-secret-for-ci-only"
+  e2e-admin-email:
+    description: Admin email used in seeded data.
+    required: false
+    default: "admin@brisacubanaclean.com"
+  e2e-admin-password:
+    description: Admin password used in seeded data.
+    required: false
+    default: "Brisa123!"
+  login-rate-limit:
+    description: Login rate limit for tests.
+    required: false
+    default: "20"
+  login-rate-limit-window-ms:
+    description: Login rate limit window for tests (ms).
+    required: false
+    default: "60000"
+  next-public-api-url:
+    description: Public API URL consumed by the web app.
+    required: false
+    default: "http://localhost:3001"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: "pnpm"
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Export runtime environment variables
+      shell: bash
+      run: |
+        set -euo pipefail
+        api_token="${{ inputs.api-token }}"
+        jwt_secret="${{ inputs.jwt-secret }}"
+        auth_secret="${{ inputs.auth-secret }}"
+        database_url="${{ inputs.database-url }}"
+        database_url_unpooled="${{ inputs.database-url-unpooled }}"
+        next_public_api_url="${{ inputs.next-public-api-url }}"
+        login_rate_limit="${{ inputs.login-rate-limit }}"
+        login_rate_limit_window_ms="${{ inputs.login-rate-limit-window-ms }}"
+        e2e_admin_email="${{ inputs.e2e-admin-email }}"
+        e2e_admin_password="${{ inputs.e2e-admin-password }}"
+
+        if [ -z "$api_token" ]; then api_token="test-api-token"; fi
+        if [ -z "$jwt_secret" ]; then jwt_secret="test-jwt-secret-for-ci-only"; fi
+        if [ -z "$auth_secret" ]; then auth_secret="test-auth-secret-for-ci-only"; fi
+        if [ -z "$database_url" ]; then database_url="postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e"; fi
+        if [ -z "$database_url_unpooled" ]; then database_url_unpooled="$database_url"; fi
+        if [ -z "$next_public_api_url" ]; then next_public_api_url="http://localhost:3001"; fi
+        if [ -z "$login_rate_limit" ]; then login_rate_limit="20"; fi
+        if [ -z "$login_rate_limit_window_ms" ]; then login_rate_limit_window_ms="60000"; fi
+        if [ -z "$e2e_admin_email" ]; then e2e_admin_email="admin@brisacubanaclean.com"; fi
+        if [ -z "$e2e_admin_password" ]; then e2e_admin_password="Brisa123!"; fi
+
+        {
+          echo "API_TOKEN=$api_token"
+          echo "JWT_SECRET=$jwt_secret"
+          echo "AUTH_SECRET=$auth_secret"
+          echo "DATABASE_URL=$database_url"
+          echo "DATABASE_URL_UNPOOLED=$database_url_unpooled"
+          echo "NEXT_PUBLIC_API_URL=$next_public_api_url"
+          echo "LOGIN_RATE_LIMIT=$login_rate_limit"
+          echo "LOGIN_RATE_LIMIT_WINDOW_MS=$login_rate_limit_window_ms"
+          echo "E2E_ADMIN_EMAIL=$e2e_admin_email"
+          echo "E2E_ADMIN_PASSWORD=$e2e_admin_password"
+        } >> "$GITHUB_ENV"
+
+    - name: Generate Prisma client
+      if: ${{ inputs.run-prisma-generate == 'true' }}
+      working-directory: apps/api
+      env:
+        DATABASE_URL: ${{ inputs.database-url }}
+        DATABASE_URL_UNPOOLED: ${{ inputs.database-url-unpooled }}
+      shell: bash
+      run: pnpm exec prisma generate
+
+    - name: Install Playwright browsers
+      if: ${{ inputs.install-playwright == 'true' }}
+      shell: bash
+      run: pnpm exec playwright install --with-deps chromium

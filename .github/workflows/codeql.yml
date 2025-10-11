@@ -1,0 +1,43 @@
+name: CodeQL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "30 1 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: CodeQL Analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          install-playwright: false
+          run-prisma-generate: true
+
+      - name: Build workspace
+        shell: bash
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

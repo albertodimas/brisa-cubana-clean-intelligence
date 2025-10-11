@@ -7,107 +7,16 @@ on:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: brisa_e2e
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
-    strategy:
-      matrix:
-        node: ["22.x"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.18.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify no secrets in repo
-        run: bash scripts/verify-no-secrets.sh
-
-      - name: Generate Prisma Client
-        working-directory: apps/api
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
-          DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e
-        run: pnpm exec prisma generate
-
-      - name: Export test env vars
-        run: |
-          echo "API_TOKEN=${{ secrets.API_TOKEN || 'test-api-token' }}" >> $GITHUB_ENV
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET || 'test-jwt-secret-for-ci-only' }}" >> $GITHUB_ENV
-          echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
-          echo "DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@127.0.0.1:5433/brisa_e2e" >> $GITHUB_ENV
-          echo "AUTH_SECRET=${{ secrets.AUTH_SECRET || 'test-auth-secret-for-ci-only' }}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_API_URL=http://localhost:3001" >> $GITHUB_ENV
-          echo "LOGIN_RATE_LIMIT=20" >> $GITHUB_ENV
-          echo "LOGIN_RATE_LIMIT_WINDOW_MS=60000" >> $GITHUB_ENV
-          echo "E2E_ADMIN_EMAIL=admin@brisacubanaclean.com" >> $GITHUB_ENV
-          echo "E2E_ADMIN_PASSWORD=Brisa123!" >> $GITHUB_ENV
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Test
-        run: pnpm test
-
-      - name: Install Playwright browsers
-        if: matrix.node == '22.x'
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Initialize database schema
-        if: matrix.node == '22.x'
-        working-directory: apps/api
-        run: pnpm exec prisma db push --accept-data-loss
-
-      - name: Seed database
-        if: matrix.node == '22.x'
-        working-directory: apps/api
-        run: pnpm db:seed
-
-      - name: Build applications
-        if: matrix.node == '22.x'
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:3001
-        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
-
-      - name: Critical E2E tests
-        if: matrix.node == '22.x'
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          CI: true
-        run: pnpm test:e2e:critical
-
-      - name: Upload Playwright report on failure
-        if: failure() && matrix.node == '22.x'
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-critical
-          path: playwright-report/
-          retention-days: 7
-
-      - name: Build
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:3001
-        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+    uses: ./.github/workflows/project-pipeline.yml
+    with:
+      job-name: Main branch safety checks
+      run-secret-scan: true
+      run-database-prep: true
+      run-e2e-suite: critical
+      playwright-report-name: playwright-report-critical
+      playwright-retention-days: 7
+      upload-playwright-only-on-failure: true
+    secrets:
+      api-token: ${{ secrets.API_TOKEN }}
+      jwt-secret: ${{ secrets.JWT_SECRET }}
+      auth-secret: ${{ secrets.AUTH_SECRET }}

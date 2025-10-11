@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 10 de octubre de 2025 (Sprint 1 completado: Coverage + Paginación + Interfaces)
+**Última revisión:** 11 de octubre de 2025 (Sprint 1 completado: Coverage + Paginación + Interfaces)
 
 ---
 
@@ -159,11 +159,14 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.3 CI/CD Workflows
 
-- **PR Checks**: Smoke suite en pull requests (~7s)
-- **Main CI**: Critical suite en push a main (~8s)
-- **Nightly**: Full suite diario 2AM UTC (~8s)
+- **Reusable pipeline (`project-pipeline.yml`)**: centraliza checkout, instalación, Prisma, lint, typecheck, tests, build y suites Playwright; evita duplicar comandos y variables en los workflows públicos.
+- **PR Checks** (`pr-checks.yml`): invoca la pipeline con suite `smoke`, escaneo de secretos y artefactos sólo al fallar.
+- **Main CI** (`ci.yml`): usa la pipeline con suite `critical`, escaneo de secretos y artefactos bajo demanda; dura ~8 min.
+- **Nightly** (`nightly.yml`): suite `full` diaria 02:00 UTC con retención de reportes de 14 días.
+- **CodeQL** (`codeql.yml`): escaneo estático para JavaScript/TypeScript en push, PR y weekly schedule.
+- **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 
-**Estado**: ✅ Workflows activos en GitHub Actions
+**Estado**: ✅ Workflows activos y deduplicados en GitHub Actions
 
 ### 7.4 Calidad de Código
 

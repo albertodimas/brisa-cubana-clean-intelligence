@@ -95,6 +95,7 @@ La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoi
 - [`docs/quickstart.md`](docs/quickstart.md): onboarding local paso a paso (verificado).
 - [`docs/openapi.yaml`](docs/openapi.yaml): especificación OpenAPI 3.1 de la API (actualizada al 9 de octubre de 2025).
 - Documentación API disponible en `/api/docs` (Scalar UI).
+- [`CHANGELOG.md`](CHANGELOG.md): historial verificado de cambios aplicados al código y automatizaciones.
 
 ## Autenticación y RBAC
 
