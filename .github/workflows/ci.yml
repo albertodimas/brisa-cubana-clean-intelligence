@@ -76,6 +76,16 @@ jobs:
         if: matrix.node == '22.x'
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Initialize database schema
+        if: matrix.node == '22.x'
+        working-directory: apps/api
+        run: pnpm exec prisma db push --accept-data-loss
+
+      - name: Seed database
+        if: matrix.node == '22.x'
+        working-directory: apps/api
+        run: pnpm db:seed
+
       - name: Critical E2E tests
         if: matrix.node == '22.x'
         env:
