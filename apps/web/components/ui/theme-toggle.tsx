@@ -1,9 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "../theme-provider";
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent SSR rendering to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Return null during SSR and initial client render
+  if (!mounted) {
+    return (
+      <div
+        className="p-2 rounded-lg bg-brisa-800 dark:bg-brisa-700 border border-brisa-600/20 w-9 h-9"
+        aria-hidden="true"
+      />
+    );
+  }
 
   return (
     <button
