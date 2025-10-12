@@ -36,6 +36,7 @@ describe("PropertyRepository", () => {
       bathrooms: null,
       sqft: null,
       notes: null,
+      deletedAt: null,
       owner: { id: "owner_1", email: "owner@test.com", fullName: "Owner" },
     }));
 
@@ -73,6 +74,7 @@ describe("PropertyRepository", () => {
       bathrooms: null,
       sqft: null,
       notes: null,
+      deletedAt: null,
     };
 
     vi.mocked(prisma.property.create).mockResolvedValue(created);
@@ -102,6 +104,7 @@ describe("PropertyRepository", () => {
       bathrooms: null,
       sqft: null,
       notes: null,
+      deletedAt: null,
     };
 
     vi.mocked(prisma.property.update).mockResolvedValue(updated);
@@ -117,12 +120,52 @@ describe("PropertyRepository", () => {
   });
 
   it("deletes a property", async () => {
-    vi.mocked(prisma.property.delete).mockResolvedValue({} as any);
+    vi.mocked(prisma.property.update).mockResolvedValue({} as any);
 
     await repository.delete("prop_1");
 
-    expect(prisma.property.delete).toHaveBeenCalledWith({
+    expect(prisma.property.update).toHaveBeenCalledWith({
       where: { id: "prop_1" },
+      data: { deletedAt: expect.any(Date) },
+    });
+  });
+
+  it("restores a property", async () => {
+    const restored = {
+      id: "prop_1",
+      label: "Prop",
+      addressLine: "123",
+      city: "Miami",
+      state: "FL",
+      zipCode: "33130",
+      type: "RESIDENTIAL" as PropertyType,
+      ownerId: "owner_1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      bedrooms: null,
+      bathrooms: null,
+      sqft: null,
+      notes: null,
+      deletedAt: null,
+      owner: { id: "owner_1", email: "owner@test.com", fullName: "Owner" },
+    };
+
+    vi.mocked(prisma.property.update).mockResolvedValue(restored);
+
+    const result = await repository.restore("prop_1");
+
+    expect(prisma.property.update).toHaveBeenCalledWith({
+      where: { id: "prop_1" },
+      data: { deletedAt: null },
+      include: { owner: { select: { id: true, email: true, fullName: true } } },
+    });
+    expect(result).toEqual({
+      ...restored,
+      owner: {
+        id: "owner_1",
+        email: "owner@test.com",
+        fullName: "Owner",
+      },
     });
   });
 });

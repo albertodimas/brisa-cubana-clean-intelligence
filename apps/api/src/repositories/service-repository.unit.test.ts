@@ -201,6 +201,47 @@ describe("ServiceRepository (Unit)", () => {
     });
   });
 
+  describe("delete", () => {
+    it("marks a service as deleted", async () => {
+      mockPrisma.service.update.mockResolvedValue({
+        id: "service_1",
+        deletedAt: new Date(),
+      });
+
+      await repository.delete("service_1");
+
+      expect(mockPrisma.service.update).toHaveBeenCalledWith({
+        where: { id: "service_1" },
+        data: { deletedAt: expect.any(Date) },
+      });
+    });
+  });
+
+  describe("restore", () => {
+    it("restores a soft deleted service", async () => {
+      const restored = {
+        id: "service_1",
+        name: "Service",
+        basePrice: 200,
+        durationMin: 60,
+        active: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      };
+
+      mockPrisma.service.update.mockResolvedValue(restored);
+
+      const result = await repository.restore("service_1");
+
+      expect(mockPrisma.service.update).toHaveBeenCalledWith({
+        where: { id: "service_1" },
+        data: { deletedAt: null },
+      });
+      expect(result).toEqual(restored);
+    });
+  });
+
   describe("count", () => {
     it("returns total count", async () => {
       mockPrisma.service.count.mockResolvedValue(42);

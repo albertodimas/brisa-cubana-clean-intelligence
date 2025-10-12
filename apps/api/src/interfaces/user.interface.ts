@@ -54,4 +54,5 @@ export interface IUserRepository {
   create(data: CreateUserDto): Promise<UserResponse>;
   update(id: string, data: UpdateUserDto): Promise<UserResponse>;
   delete(id: string): Promise<void>;
+  restore(id: string): Promise<UserResponse>;
 }

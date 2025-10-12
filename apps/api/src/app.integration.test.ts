@@ -28,7 +28,9 @@ const mockPrisma = {
         skip?: number;
         cursor?: { id: string };
       } = {}) => {
-        let filtered = [...servicesFixture];
+        let filtered = servicesFixture.filter(
+          (service) => service.deletedAt === null,
+        );
 
         // Handle cursor-based pagination
         if (cursor) {
@@ -56,6 +58,7 @@ const mockPrisma = {
         id: makeCuid(servicesFixture.length + 1),
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
         ...data,
       };
       servicesFixture.push(record);
@@ -96,6 +99,9 @@ const mockPrisma = {
         cursor?: { id: string };
       } = {}) => {
         let filtered = bookingsFixture.filter((booking) => {
+          if (booking.deletedAt) {
+            return false;
+          }
           if (!where) return true;
           if (where.status && booking.status !== where.status) return false;
           if (where.propertyId && booking.propertyId !== where.propertyId)
@@ -172,6 +178,7 @@ const mockPrisma = {
             ...data,
             createdAt: new Date(),
             updatedAt: new Date(),
+            deletedAt: null,
           };
           bookingsFixture.push(record);
           return {
@@ -342,7 +349,9 @@ const mockPrisma = {
         cursor?: { id: string };
         include?: any;
       } = {}) => {
-        let filtered = [...propertiesFixture];
+        let filtered = propertiesFixture.filter(
+          (property) => property.deletedAt === null,
+        );
 
         if (cursor) {
           const cursorIndex = filtered.findIndex((p) => p.id === cursor.id);
@@ -378,6 +387,7 @@ const mockPrisma = {
             id: makeCuid(propertiesFixture.length + 201),
             createdAt: new Date(),
             updatedAt: new Date(),
+            deletedAt: null,
             ...data,
           };
           propertiesFixture.push(record);
@@ -488,6 +498,7 @@ describe("app", () => {
         active: true,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       },
       {
         id: makeCuid(2),
@@ -498,6 +509,7 @@ describe("app", () => {
         active: true,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       },
     ];
     usersFixture = [
@@ -508,6 +520,7 @@ describe("app", () => {
         passwordHash: "$2a$10$hashed",
         role: "CLIENT",
         isActive: true,
+        deletedAt: null,
       },
       {
         id: makeCuid(102),
@@ -516,6 +529,7 @@ describe("app", () => {
         passwordHash: "$2a$10$hashed",
         role: "ADMIN",
         isActive: true,
+        deletedAt: null,
       },
       {
         id: makeCuid(103),
@@ -524,6 +538,7 @@ describe("app", () => {
         passwordHash: "$2a$10$hashed",
         role: "COORDINATOR",
         isActive: true,
+        deletedAt: null,
       },
     ];
     propertiesFixture = [
@@ -534,6 +549,7 @@ describe("app", () => {
         ownerId: makeCuid(101),
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
+        deletedAt: null,
       },
       {
         id: makeCuid(202),
@@ -542,6 +558,7 @@ describe("app", () => {
         ownerId: makeCuid(101),
         createdAt: new Date("2024-02-01"),
         updatedAt: new Date("2024-02-01"),
+        deletedAt: null,
       },
     ];
     bookingsFixture = [
@@ -558,6 +575,7 @@ describe("app", () => {
         serviceId: servicesFixture[0].id,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       },
     ];
     mockPrisma.$queryRaw.mockClear();
@@ -634,6 +652,25 @@ describe("app", () => {
       body: "{}",
     });
     expect(res.status).toBe(401);
+  });
+
+  it("soft deletes a service", async () => {
+    const target = servicesFixture[0];
+
+    const res = await app.request(`/api/services/${target.id}`, {
+      method: "DELETE",
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toBe("Service deleted successfully");
+
+    const list = await app.request("/api/services");
+    const listJson = await list.json();
+    expect(listJson.data.some((service: any) => service.id === target.id)).toBe(
+      false,
+    );
   });
 
   it("paginates services with default limit", async () => {
@@ -802,6 +839,7 @@ describe("app", () => {
         serviceId: servicesFixture[0]?.id || makeCuid(301),
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       });
     }
 

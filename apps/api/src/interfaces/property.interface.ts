@@ -47,4 +47,5 @@ export interface IPropertyRepository {
   create(data: CreatePropertyDto): Promise<PropertyResponse>;
   update(id: string, data: UpdatePropertyDto): Promise<PropertyResponse>;
   delete(id: string): Promise<void>;
+  restore(id: string): Promise<PropertyResponse>;
 }

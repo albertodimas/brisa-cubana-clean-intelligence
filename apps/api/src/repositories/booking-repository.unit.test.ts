@@ -7,6 +7,7 @@ describe("BookingRepository (Unit)", () => {
   let mockPrisma: {
     booking: {
       findMany: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
     };
   };
 
@@ -14,6 +15,7 @@ describe("BookingRepository (Unit)", () => {
     mockPrisma = {
       booking: {
         findMany: vi.fn().mockResolvedValue([]),
+        update: vi.fn(),
       },
     };
 
@@ -74,5 +76,32 @@ describe("BookingRepository (Unit)", () => {
       take: 6,
       orderBy,
     });
+  });
+
+  it("marks booking as deleted", async () => {
+    vi.mocked(mockPrisma.booking.update).mockResolvedValue({} as any);
+
+    await repository.delete("booking_1");
+
+    expect(mockPrisma.booking.update).toHaveBeenCalledWith({
+      where: { id: "booking_1" },
+      data: { deletedAt: expect.any(Date) },
+    });
+  });
+
+  it("restores a booking", async () => {
+    const booking = {
+      id: "booking_1",
+      deletedAt: null,
+    };
+    vi.mocked(mockPrisma.booking.update).mockResolvedValue(booking as any);
+
+    const result = await repository.restore("booking_1");
+
+    expect(mockPrisma.booking.update).toHaveBeenCalledWith({
+      where: { id: "booking_1" },
+      data: { deletedAt: null },
+    });
+    expect(result).toEqual(booking);
   });
 });

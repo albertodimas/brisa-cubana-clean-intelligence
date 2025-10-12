@@ -188,6 +188,20 @@ export class BookingRepository
     });
   }
 
+  async delete(id: string): Promise<void> {
+    await this.prisma.booking.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async restore(id: string): Promise<Booking> {
+    return await this.prisma.booking.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+  }
+
   /**
    * Construye la cláusula WHERE para filtros
    */

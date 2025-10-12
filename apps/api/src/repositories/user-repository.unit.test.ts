@@ -30,6 +30,7 @@ describe("UserRepository", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       passwordHash: "hashed",
+      deletedAt: null,
     }));
 
     vi.mocked(prisma.user.findMany).mockResolvedValue(records);
@@ -58,6 +59,7 @@ describe("UserRepository", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       passwordHash: "hashed",
+      deletedAt: null,
     };
 
     vi.mocked(prisma.user.findUnique).mockResolvedValue(user);
@@ -89,6 +91,7 @@ describe("UserRepository", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       passwordHash: "hashed",
+      deletedAt: null,
     };
 
     vi.mocked(prisma.user.findUnique).mockResolvedValue(authUser);
@@ -126,6 +129,7 @@ describe("UserRepository", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       passwordHash: payload.passwordHash,
+      deletedAt: null,
     };
 
     vi.mocked(prisma.user.create).mockResolvedValue(created);
@@ -163,6 +167,7 @@ describe("UserRepository", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       passwordHash: "hashed",
+      deletedAt: null,
     };
 
     vi.mocked(prisma.user.update).mockResolvedValue(updated);
@@ -189,12 +194,46 @@ describe("UserRepository", () => {
   });
 
   it("deletes a user", async () => {
-    vi.mocked(prisma.user.delete).mockResolvedValue({} as any);
+    vi.mocked(prisma.user.update).mockResolvedValue({} as any);
 
     await repository.delete("user_1");
 
-    expect(prisma.user.delete).toHaveBeenCalledWith({
+    expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: "user_1" },
+      data: { deletedAt: expect.any(Date) },
     });
+  });
+
+  it("restores a user", async () => {
+    const restored = {
+      id: "user_1",
+      email: "user@test.com",
+      fullName: "User",
+      role: "ADMIN" as UserRole,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      passwordHash: "hashed",
+      deletedAt: null,
+    };
+
+    vi.mocked(prisma.user.update).mockResolvedValue(restored);
+
+    const result = await repository.restore("user_1");
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: "user_1" },
+      data: { deletedAt: null },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    expect(result).toEqual(restored);
   });
 });

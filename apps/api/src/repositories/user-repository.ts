@@ -112,6 +112,17 @@ export class UserRepository implements IUserRepository {
   }
 
   async delete(id: string) {
-    await this.prisma.user.delete({ where: { id } });
+    await this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async restore(id: string) {
+    return await this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: null },
+      select: defaultSelect,
+    });
   }
 }

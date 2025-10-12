@@ -95,4 +95,19 @@ router.patch(
   },
 );
 
+router.delete("/:id", authenticate, requireRoles(["ADMIN"]), async (c) => {
+  const id = c.req.param("id");
+
+  try {
+    const repository = getServiceRepository();
+    await repository.delete(id);
+    return c.json({ message: "Service deleted successfully" });
+  } catch (error) {
+    return handlePrismaError(c, error, {
+      notFound: "Servicio no encontrado",
+      default: "No se pudo eliminar el servicio",
+    });
+  }
+});
+
 export default router;

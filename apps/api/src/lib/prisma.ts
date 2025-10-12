@@ -1,11 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { softDeleteExtension } from "./soft-delete-extension.js";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma?: PrismaClient;
-};
-
-export const prisma =
-  globalForPrisma.prisma ??
+const createClient = () =>
   new PrismaClient({
     log:
       process.env.NODE_ENV === "development"
@@ -16,7 +12,15 @@ export const prisma =
         url: process.env.DATABASE_URL,
       },
     },
-  });
+  }).$extends(softDeleteExtension);
+
+type ExtendedPrismaClient = ReturnType<typeof createClient>;
+
+const globalForPrisma = globalThis as unknown as {
+  prisma?: ExtendedPrismaClient;
+};
+
+export const prisma = globalForPrisma.prisma ?? createClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

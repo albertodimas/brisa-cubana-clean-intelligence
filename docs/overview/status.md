@@ -52,6 +52,7 @@
     - `Service`: oferta de limpieza (`basePrice`, `durationMin`, `active`).
     - `Property`: datos de inmuebles.
     - `Booking`: reservas con estado (`PENDING`, `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
+  - Soft delete habilitado en todos los modelos (`deletedAt` + índice) usando `softDeleteExtension`.
   - Semilla genera:
     - Usuarios demo: Admin, Coordinador, Cliente (`Brisa123!`).
     - Servicios “Deep Clean Residencial”, “Turnover Vacation Rental”.
@@ -115,6 +116,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 | GET    | `/api/services`              | Pública                      | Lista servicios ordenados. Paginado (limit, cursor).                                               |
 | POST   | `/api/services`              | Roles `ADMIN`, `COORDINATOR` | Crea servicio.                                                                                     |
 | PATCH  | `/api/services/:id`          | Roles `ADMIN`, `COORDINATOR` | Actualiza servicio.                                                                                |
+| DELETE | `/api/services/:id`          | Rol `ADMIN`                  | Soft delete: marca `deletedAt` y excluye el servicio de futuras consultas.                         |
 | GET    | `/api/properties`            | Pública                      | Lista propiedades con dueño. Paginado (limit, cursor).                                             |
 | POST   | `/api/properties`            | Roles `ADMIN`, `COORDINATOR` | Crea propiedad.                                                                                    |
 | PATCH  | `/api/properties/:id`        | Roles `ADMIN`, `COORDINATOR` | Actualiza propiedad.                                                                               |
@@ -389,6 +391,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
    - `serializeService()` para conversión de Decimal a number
    - `serializeBooking()` con soporte para relaciones anidadas
    - Type-safe con generics TypeScript
+6. `lib/soft-delete-extension.ts`: Extensión Prisma que filtra `deletedAt` y transforma los `delete*` en soft delete
 
 **E2E (`tests/e2e`):**
 

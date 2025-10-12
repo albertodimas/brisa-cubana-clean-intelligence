@@ -30,6 +30,16 @@ export interface BaseRepository<T, CreateInput, UpdateInput> {
    * Cuenta el total de registros que cumplen con ciertos criterios
    */
   count(where?: any): Promise<number>;
+
+  /**
+   * Marca un registro como eliminado lógicamente
+   */
+  delete(id: string): Promise<void>;
+
+  /**
+   * Restaura un registro eliminado lógicamente
+   */
+  restore(id: string): Promise<T>;
 }
 
 /**

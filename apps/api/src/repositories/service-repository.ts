@@ -103,6 +103,20 @@ export class ServiceRepository
     });
   }
 
+  async delete(id: string): Promise<void> {
+    await this.prisma.service.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async restore(id: string): Promise<Service> {
+    return await this.prisma.service.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+  }
+
   /**
    * Busca servicios activos
    */

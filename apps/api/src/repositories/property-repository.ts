@@ -101,6 +101,18 @@ export class PropertyRepository implements IPropertyRepository {
   }
 
   async delete(id: string) {
-    await this.prisma.property.delete({ where: { id } });
+    await this.prisma.property.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async restore(id: string) {
+    const property = await this.prisma.property.update({
+      where: { id },
+      data: { deletedAt: null },
+      include: { owner: { select: ownerSelect } },
+    });
+    return toPropertyResponse(property as PrismaPropertyWithOwner);
   }
 }

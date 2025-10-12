@@ -26,6 +26,7 @@ describe("CustomerRepository", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       isActive: true,
+      deletedAt: null,
     }));
 
     vi.mocked(prisma.user.findMany).mockResolvedValue(customers);
