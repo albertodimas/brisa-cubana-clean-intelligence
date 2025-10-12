@@ -41,16 +41,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const showToast = useCallback(
-    (message: string, type: ToastType = "info", duration = 5000) => {
+    (message: string, type: ToastType = "info", duration?: number) => {
       const id = crypto.randomUUID();
-      const toast: Toast = { id, type, message, duration };
+
+      // Smart duration based on toast type if not explicitly provided
+      const defaultDurations: Record<ToastType, number> = {
+        success: 3000, // Quick confirmation - no need to linger
+        info: 4000, // Informational - medium time
+        warning: 5000, // Important - needs attention
+        error: 6000, // Critical - user needs time to read and act
+      };
+
+      const finalDuration = duration ?? defaultDurations[type];
+      const toast: Toast = { id, type, message, duration: finalDuration };
 
       setToasts((prev) => [...prev, toast]);
 
-      if (duration > 0) {
+      if (finalDuration > 0) {
         setTimeout(() => {
           hideToast(id);
-        }, duration);
+        }, finalDuration);
       }
     },
     [hideToast],
