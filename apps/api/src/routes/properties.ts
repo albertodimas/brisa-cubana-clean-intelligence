@@ -2,6 +2,11 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { authenticate, requireRoles } from "../middleware/auth.js";
+import {
+  parsePaginationQuery,
+  buildPaginatedResponse,
+} from "../lib/pagination.js";
+import { validateRequest } from "../lib/validation.js";
 
 const propertySchema = z.object({
   label: z.string().min(3),
@@ -17,23 +22,15 @@ const propertySchema = z.object({
   notes: z.string().optional(),
 });
 
-const querySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(100).optional().default(50),
-  cursor: z.string().cuid().optional(),
-});
-
 const router = new Hono();
 
 router.get("/", async (c) => {
-  const url = new URL(c.req.url, "http://localhost");
-  const parsed = querySchema.safeParse(
-    Object.fromEntries(url.searchParams.entries()),
-  );
-  if (!parsed.success) {
-    return c.json({ error: parsed.error.flatten() }, 400);
+  const paginationResult = parsePaginationQuery(c);
+  if (!paginationResult.success) {
+    return paginationResult.response;
   }
 
-  const { limit, cursor } = parsed.data;
+  const { limit, cursor } = paginationResult.data;
 
   // Fetch limit + 1 to determine if there are more results
   const properties = await prisma.property.findMany({
@@ -45,19 +42,7 @@ router.get("/", async (c) => {
     },
   });
 
-  const hasMore = properties.length > limit;
-  const data = hasMore ? properties.slice(0, limit) : properties;
-  const nextCursor = hasMore ? data[data.length - 1]?.id : null;
-
-  return c.json({
-    data,
-    pagination: {
-      limit,
-      cursor: cursor ?? null,
-      nextCursor,
-      hasMore,
-    },
-  });
+  return c.json(buildPaginatedResponse(properties, limit, cursor));
 });
 
 router.post(
@@ -65,12 +50,12 @@ router.post(
   authenticate,
   requireRoles(["ADMIN", "COORDINATOR"]),
   async (c) => {
-    const parsed = propertySchema.safeParse(await c.req.json());
-    if (!parsed.success) {
-      return c.json({ error: parsed.error.flatten() }, 400);
+    const validation = validateRequest(propertySchema, await c.req.json(), c);
+    if (!validation.success) {
+      return validation.response;
     }
 
-    const property = await prisma.property.create({ data: parsed.data });
+    const property = await prisma.property.create({ data: validation.data });
     return c.json({ data: property }, 201);
   },
 );
@@ -81,15 +66,19 @@ router.patch(
   requireRoles(["ADMIN", "COORDINATOR"]),
   async (c) => {
     const id = c.req.param("id");
-    const parsed = propertySchema.partial().safeParse(await c.req.json());
-    if (!parsed.success) {
-      return c.json({ error: parsed.error.flatten() }, 400);
+    const validation = validateRequest(
+      propertySchema.partial(),
+      await c.req.json(),
+      c,
+    );
+    if (!validation.success) {
+      return validation.response;
     }
 
     try {
       const property = await prisma.property.update({
         where: { id },
-        data: parsed.data,
+        data: validation.data,
       });
       return c.json({ data: property });
     } catch {

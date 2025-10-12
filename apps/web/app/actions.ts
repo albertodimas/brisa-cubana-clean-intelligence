@@ -2,19 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
-import { auth, signIn, signOut } from "@/auth";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
-async function resolveAccessToken(): Promise<string | null> {
-  const session = await auth();
-  return session?.accessToken ?? null;
-}
-
-type ActionResult = {
-  success?: string;
-  error?: string;
-};
+import { signIn, signOut } from "@/auth";
+import {
+  authenticatedFetch,
+  coerceOptionalNumber,
+  coerceOptionalString,
+} from "@/lib/api-client";
+import type { ActionResult } from "@/lib/types";
 
 export async function loginAction(formData: FormData): Promise<ActionResult> {
   const email = formData.get("email")?.toString() ?? "";
@@ -85,27 +79,15 @@ export async function createServiceAction(
       return { error: "Completa los campos obligatorios" };
     }
 
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
-    const res = await fetch(`${API_URL}/api/services`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      "/api/services",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo crear el servicio" };
-    }
-
-    revalidatePath("/");
-    return { success: "Servicio creado" };
+      "No se pudo crear el servicio",
+      "Servicio creado",
+    );
   } catch (error) {
     console.error("[actions] createService", error);
     return { error: "Error inesperado" };
@@ -116,11 +98,6 @@ export async function createPropertyAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
     const payload = {
       label: formData.get("propertyLabel")?.toString() ?? "",
       addressLine: formData.get("propertyAddress")?.toString() ?? "",
@@ -146,22 +123,15 @@ export async function createPropertyAction(
       return { error: "Completa los campos obligatorios de la propiedad" };
     }
 
-    const res = await fetch(`${API_URL}/api/properties`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      "/api/properties",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo crear la propiedad" };
-    }
-
-    revalidatePath("/");
-    return { success: "Propiedad creada" };
+      "No se pudo crear la propiedad",
+      "Propiedad creada",
+    );
   } catch (error) {
     console.error("[actions] createProperty", error);
     return { error: "Error inesperado" };
@@ -172,11 +142,6 @@ export async function createBookingAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
     const scheduledAt = formData.get("bookingScheduledAt")?.toString() ?? "";
     const payload = {
       customerId: formData.get("bookingCustomer")?.toString() ?? "",
@@ -196,22 +161,15 @@ export async function createBookingAction(
       return { error: "Completa todos los campos de la reserva" };
     }
 
-    const res = await fetch(`${API_URL}/api/bookings`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      "/api/bookings",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo crear la reserva" };
-    }
-
-    revalidatePath("/");
-    return { success: "Reserva creada" };
+      "No se pudo crear la reserva",
+      "Reserva creada",
+    );
   } catch (error) {
     console.error("[actions] createBooking", error);
     return { error: "Error inesperado" };
@@ -223,51 +181,19 @@ export async function toggleServiceActiveAction(
   active: boolean,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
-    const res = await fetch(`${API_URL}/api/services/${serviceId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      `/api/services/${serviceId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ active }),
       },
-      body: JSON.stringify({ active }),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo actualizar el servicio" };
-    }
-
-    revalidatePath("/");
-    return {
-      success: active ? "Servicio habilitado" : "Servicio deshabilitado",
-    };
+      "No se pudo actualizar el servicio",
+      active ? "Servicio habilitado" : "Servicio deshabilitado",
+    );
   } catch (error) {
     console.error("[actions] toggleService", error);
     return { error: "Error inesperado" };
   }
-}
-
-function coerceOptionalNumber(
-  value: FormDataEntryValue | null,
-): number | undefined {
-  if (value === null || value === undefined) return undefined;
-  const text = value.toString().trim();
-  if (!text) return undefined;
-  const num = Number(text);
-  return Number.isNaN(num) ? undefined : num;
-}
-
-function coerceOptionalString(
-  value: FormDataEntryValue | null,
-): string | undefined {
-  if (value === null || value === undefined) return undefined;
-  const text = value.toString().trim();
-  return text ? text : undefined;
 }
 
 export async function updateServiceAction(
@@ -275,11 +201,6 @@ export async function updateServiceAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
     const updates: Record<string, unknown> = {};
     const name = coerceOptionalString(formData.get("serviceName"));
     const description = coerceOptionalString(
@@ -301,22 +222,15 @@ export async function updateServiceAction(
       return { error: "Sin cambios para actualizar" };
     }
 
-    const res = await fetch(`${API_URL}/api/services/${serviceId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      `/api/services/${serviceId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(updates),
       },
-      body: JSON.stringify(updates),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo actualizar el servicio" };
-    }
-
-    revalidatePath("/");
-    return { success: "Servicio actualizado" };
+      "No se pudo actualizar el servicio",
+      "Servicio actualizado",
+    );
   } catch (error) {
     console.error("[actions] updateService", error);
     return { error: "Error inesperado" };
@@ -328,11 +242,6 @@ export async function updatePropertyAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
     const updates: Record<string, unknown> = {};
     const label = coerceOptionalString(formData.get("propertyLabel"));
     const addressLine = coerceOptionalString(formData.get("propertyAddress"));
@@ -364,22 +273,15 @@ export async function updatePropertyAction(
       return { error: "Sin cambios para actualizar" };
     }
 
-    const res = await fetch(`${API_URL}/api/properties/${propertyId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      `/api/properties/${propertyId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(updates),
       },
-      body: JSON.stringify(updates),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo actualizar la propiedad" };
-    }
-
-    revalidatePath("/");
-    return { success: "Propiedad actualizada" };
+      "No se pudo actualizar la propiedad",
+      "Propiedad actualizada",
+    );
   } catch (error) {
     console.error("[actions] updateProperty", error);
     return { error: "Error inesperado" };
@@ -391,11 +293,6 @@ export async function updateBookingAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
     const updates: Record<string, unknown> = {};
     const scheduledAt = coerceOptionalString(
       formData.get("bookingScheduledAt"),
@@ -423,22 +320,15 @@ export async function updateBookingAction(
       return { error: "Sin cambios para actualizar" };
     }
 
-    const res = await fetch(`${API_URL}/api/bookings/${bookingId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      `/api/bookings/${bookingId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(updates),
       },
-      body: JSON.stringify(updates),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo actualizar la reserva" };
-    }
-
-    revalidatePath("/");
-    return { success: "Reserva actualizada" };
+      "No se pudo actualizar la reserva",
+      "Reserva actualizada",
+    );
   } catch (error) {
     console.error("[actions] updateBooking", error);
     return { error: "Error inesperado" };
@@ -450,11 +340,6 @@ export async function updateUserAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
     const role = coerceOptionalString(formData.get("userRole"));
     const fullName = coerceOptionalString(formData.get("userFullName"));
     const passwordRaw = coerceOptionalString(formData.get("userPassword"));
@@ -472,22 +357,15 @@ export async function updateUserAction(
       return { error: "Sin cambios para actualizar" };
     }
 
-    const res = await fetch(`${API_URL}/api/users/${userId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      `/api/users/${userId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo actualizar el usuario" };
-    }
-
-    revalidatePath("/");
-    return { success: "Usuario actualizado" };
+      "No se pudo actualizar el usuario",
+      "Usuario actualizado",
+    );
   } catch (error) {
     console.error("[actions] updateUser", error);
     return { error: "Error inesperado" };
@@ -507,11 +385,6 @@ export async function createUserAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const token = await resolveAccessToken();
-    if (!token) {
-      return { error: "Sesión no autenticada" };
-    }
-
     const payload = {
       email: formData.get("newUserEmail")?.toString() ?? "",
       fullName: formData.get("newUserFullName")?.toString() ?? "",
@@ -525,22 +398,15 @@ export async function createUserAction(
       };
     }
 
-    const res = await fetch(`${API_URL}/api/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    return await authenticatedFetch(
+      "/api/users",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { error: body.error ?? "No se pudo crear el usuario" };
-    }
-
-    revalidatePath("/");
-    return { success: "Usuario creado" };
+      "No se pudo crear el usuario",
+      "Usuario creado",
+    );
   } catch (error) {
     console.error("[actions] createUser", error);
     return { error: "Error inesperado" };
