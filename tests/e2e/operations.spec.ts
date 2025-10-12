@@ -1,36 +1,12 @@
-import { test, expect, Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import type { TestInfo } from "@playwright/test";
-
-const adminEmail = process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanaclean.com";
-const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? "Brisa123!";
-
-function ipForTest(testInfo: TestInfo): string {
-  let hash = 0;
-  for (const char of testInfo.title) {
-    hash = (hash * 31 + char.charCodeAt(0)) % 200;
-  }
-  const octet = 10 + (hash % 200);
-  return `198.51.100.${octet}`;
-}
-
-async function login(page: Page, testInfo: TestInfo) {
-  const ip = ipForTest(testInfo);
-  await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(adminEmail);
-  await page.getByLabel("Contraseña").fill(adminPassword);
-  await page.getByRole("button", { name: "Ingresar" }).click();
-  await page.waitForURL("/**");
-  await expect(
-    page.getByRole("heading", { name: "Panel operativo" }),
-  ).toBeVisible();
-}
+import { ipForTest, loginAsAdmin } from "./support/auth";
 
 test.describe("Operaciones", () => {
   test("permite crear un nuevo servicio @smoke @critical", async ({
     page,
   }, testInfo) => {
-    await login(page, testInfo);
+    await loginAsAdmin(page, testInfo);
 
     const uniqueName = `Servicio E2E ${Date.now().toString().slice(-6)}`;
     const serviceForm = page.getByTestId("service-create-form");
@@ -49,10 +25,23 @@ test.describe("Operaciones", () => {
   });
 
   test("filtra reservas por estado @critical", async ({ page }, testInfo) => {
-    await login(page, testInfo);
+    await loginAsAdmin(page, testInfo);
 
     const statusSelect = page.getByTestId("booking-status-filter");
-    await statusSelect.selectOption("CONFIRMED");
+    const [response] = await Promise.all([
+      page.waitForResponse((res) => {
+        const url = res.url();
+        return (
+          res.request().method() === "GET" &&
+          url.includes("/api/bookings") &&
+          url.includes("status=CONFIRMED")
+        );
+      }),
+      statusSelect.selectOption("CONFIRMED"),
+    ]);
+
+    const body = (await response.json()) as { data?: unknown[] };
+    expect(Array.isArray(body.data) && body.data.length > 0).toBe(true);
 
     const reservationCards = page.getByTestId("booking-card");
 

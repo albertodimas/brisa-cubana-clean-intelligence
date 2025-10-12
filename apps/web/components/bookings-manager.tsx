@@ -50,9 +50,9 @@ export function BookingsManager({
           <select
             data-testid="booking-status-filter"
             value={filters.status}
-            onChange={(event) =>
-              onFiltersChange({ status: event.target.value })
-            }
+            onChange={async (event) => {
+              await onFiltersChange({ status: event.target.value });
+            }}
             className="ui-input"
           >
             <option value="ALL">Todos</option>
@@ -69,7 +69,9 @@ export function BookingsManager({
           <input
             type="date"
             value={filters.from}
-            onChange={(event) => onFiltersChange({ from: event.target.value })}
+            onChange={async (event) => {
+              await onFiltersChange({ from: event.target.value });
+            }}
             className="ui-input"
           />
         </label>
@@ -79,7 +81,9 @@ export function BookingsManager({
           <input
             type="date"
             value={filters.to}
-            onChange={(event) => onFiltersChange({ to: event.target.value })}
+            onChange={async (event) => {
+              await onFiltersChange({ to: event.target.value });
+            }}
             className="ui-input"
           />
         </label>

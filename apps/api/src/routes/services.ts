@@ -7,6 +7,8 @@ import {
   buildPaginatedResponse,
 } from "../lib/pagination.js";
 import { validateRequest } from "../lib/validation.js";
+import { serializeService } from "../lib/serializers.js";
+import { handlePrismaError } from "../lib/prisma-error-handler.js";
 
 const serviceSchema = z.object({
   name: z.string().min(3),
@@ -33,7 +35,9 @@ router.get("/", async (c) => {
     orderBy: [{ name: "asc" }, { id: "asc" }],
   });
 
-  return c.json(buildPaginatedResponse(services, limit, cursor));
+  const normalized = services.map(serializeService);
+
+  return c.json(buildPaginatedResponse(normalized, limit, cursor));
 });
 
 router.post(
@@ -46,8 +50,15 @@ router.post(
       return validation.response;
     }
 
-    const service = await prisma.service.create({ data: validation.data });
-    return c.json({ data: service }, 201);
+    try {
+      const service = await prisma.service.create({ data: validation.data });
+      return c.json({ data: serializeService(service) }, 201);
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        conflict: "El nombre del servicio ya está registrado",
+        default: "No se pudo crear el servicio",
+      });
+    }
   },
 );
 
@@ -66,11 +77,19 @@ router.patch(
       return validation.response;
     }
 
-    const service = await prisma.service.update({
-      where: { id },
-      data: validation.data,
-    });
-    return c.json({ data: service });
+    try {
+      const service = await prisma.service.update({
+        where: { id },
+        data: validation.data,
+      });
+      return c.json({ data: serializeService(service) });
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        notFound: "Servicio no encontrado",
+        conflict: "El nombre del servicio ya está registrado",
+        default: "No se pudo actualizar el servicio",
+      });
+    }
   },
 );
 

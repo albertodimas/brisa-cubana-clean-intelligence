@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { ServiceRepository } from "./repositories/service-repository.js";
 import { BookingRepository } from "./repositories/booking-repository.js";
+import { prisma as prismaClient } from "./lib/prisma.js";
 
 /**
  * Dependency Injection Container
@@ -72,22 +73,8 @@ export const ServiceKeys = {
  * Inicializa el contenedor con los servicios por defecto
  */
 export function initializeContainer(): void {
-  // Registrar PrismaClient
-  container.register(ServiceKeys.PRISMA, () => {
-    const prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
-      log:
-        process.env.NODE_ENV === "development"
-          ? ["query", "error", "warn"]
-          : ["error"],
-    });
-
-    return prisma;
-  });
+  // Registrar PrismaClient (singleton compartido)
+  container.register(ServiceKeys.PRISMA, () => prismaClient);
 
   // Registrar Database URL (para casos edge donde se necesita la URL directa)
   container.register(ServiceKeys.DATABASE_URL, () => process.env.DATABASE_URL);

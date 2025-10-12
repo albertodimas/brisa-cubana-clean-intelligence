@@ -1,4 +1,9 @@
-import type { PrismaClient, Booking, BookingStatus } from "@prisma/client";
+import type {
+  PrismaClient,
+  Booking,
+  BookingStatus,
+  Prisma,
+} from "@prisma/client";
 import type {
   BaseRepository,
   FindManyOptions,
@@ -176,10 +181,12 @@ export class BookingRepository
   /**
    * Construye la cláusula WHERE para filtros
    */
-  private buildWhereClause(filters?: BookingFilters): any {
+  private buildWhereClause(
+    filters?: BookingFilters,
+  ): Prisma.BookingWhereInput | undefined {
     if (!filters) return undefined;
 
-    const where: any = {};
+    const where: Prisma.BookingWhereInput = {};
 
     if (filters.status) {
       where.status = filters.status;
@@ -198,13 +205,10 @@ export class BookingRepository
     }
 
     if (filters.from || filters.to) {
-      where.scheduledDate = {};
-      if (filters.from) {
-        where.scheduledAt.gte = filters.from;
-      }
-      if (filters.to) {
-        where.scheduledAt.lte = filters.to;
-      }
+      where.scheduledAt = {
+        ...(filters.from ? { gte: filters.from } : {}),
+        ...(filters.to ? { lte: filters.to } : {}),
+      };
     }
 
     return Object.keys(where).length > 0 ? where : undefined;

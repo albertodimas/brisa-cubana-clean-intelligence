@@ -30,6 +30,7 @@ export default defineConfig({
       testMatch: /.*\.spec\.ts$/,
       grep: /@critical/,
       use: { ...devices["Desktop Chrome"] },
+      workers: 1,
     },
     // Full Suite: All tests (~8-10s)
     {

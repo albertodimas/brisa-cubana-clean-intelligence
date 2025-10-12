@@ -132,7 +132,7 @@ export const openApiSpec = {
               "application/json": {
                 schema: {
                   type: "object",
-                  properties: { message: { type: "string" } },
+                  properties: { success: { type: "boolean" } },
                 },
               },
             },

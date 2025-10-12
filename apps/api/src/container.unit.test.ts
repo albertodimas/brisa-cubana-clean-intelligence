@@ -1,5 +1,14 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { container, ServiceKeys } from "./container.js";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+
+let containerModule: typeof import("./container.js");
+let container: (typeof import("./container.js"))["container"];
+let ServiceKeys: (typeof import("./container.js"))["ServiceKeys"];
+
+beforeAll(async () => {
+  process.env.DATABASE_URL ??= "postgresql://user:pass@localhost:5432/test_db";
+  containerModule = await import("./container.js");
+  ({ container, ServiceKeys } = containerModule);
+});
 
 describe("Container (Unit)", () => {
   beforeEach(() => {

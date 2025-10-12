@@ -1,10 +1,13 @@
 import { test, expect, request as playwrightRequest } from "@playwright/test";
 import type { TestInfo } from "@playwright/test";
+import {
+  adminEmail,
+  adminPassword,
+  ADMIN_STORAGE_STATE_PATH,
+  loginAsAdmin,
+} from "./support/auth";
 
-const adminEmail = process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanaclean.com";
-const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? "Brisa123!";
-
-function ipForTest(testInfo: TestInfo, namespace = 102): string {
+function ipForTestNamespace(testInfo: TestInfo, namespace = 102): string {
   let hash = 0;
   for (const char of testInfo.title) {
     hash = (hash * 33 + char.charCodeAt(0)) % 200;
@@ -18,7 +21,7 @@ test.describe("Seguridad y Autenticación", () => {
     test("rechaza credenciales inválidas @critical", async ({
       page,
     }, testInfo) => {
-      const ip = ipForTest(testInfo);
+      const ip = ipForTestNamespace(testInfo);
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       await page.goto("/login");
 
@@ -33,7 +36,7 @@ test.describe("Seguridad y Autenticación", () => {
     });
 
     test("rechaza email inválido", async ({ page }, testInfo) => {
-      const ip = ipForTest(testInfo, 103);
+      const ip = ipForTestNamespace(testInfo, 103);
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       await page.goto("/login");
 
@@ -47,7 +50,7 @@ test.describe("Seguridad y Autenticación", () => {
     });
 
     test("rechaza password vacío", async ({ page }, testInfo) => {
-      const ip = ipForTest(testInfo, 104);
+      const ip = ipForTestNamespace(testInfo, 104);
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       await page.goto("/login");
 
@@ -110,7 +113,7 @@ test.describe("Seguridad y Autenticación", () => {
     test("redirige a login cuando se accede al panel sin sesión", async ({
       page,
     }, testInfo) => {
-      const ip = ipForTest(testInfo, 105);
+      const ip = ipForTestNamespace(testInfo, 105);
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Intentar acceder directamente al panel
       await page.goto("/");
@@ -141,7 +144,7 @@ test.describe("Seguridad y Autenticación", () => {
     test("usuario CLIENT no debe poder crear servicios @critical", async ({
       page,
     }, testInfo) => {
-      const ip = ipForTest(testInfo, 106);
+      const ip = ipForTestNamespace(testInfo, 106);
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Este test requiere credenciales de usuario CLIENT
       // Por ahora lo marcamos como ejemplo de test futuro
@@ -256,57 +259,28 @@ test.describe("Seguridad y Autenticación", () => {
   });
 
   test.describe("Sesión y logout", () => {
-    test("permite cerrar sesión correctamente @critical", async ({
-      page,
-    }, testInfo) => {
-      const ip = ipForTest(testInfo, 107);
-      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
-      // Login
-      await page.goto("/login");
-      await page.getByLabel("Correo").fill(adminEmail);
-      await page.getByLabel("Contraseña").fill(adminPassword);
-      await page.getByRole("button", { name: "Ingresar" }).click();
-      await page.waitForURL("/", { timeout: 10000 });
+    test.use({ storageState: ADMIN_STORAGE_STATE_PATH });
 
-      // Verificar que estamos logueados
-      await expect(page.getByText("Sesión:", { exact: false })).toBeVisible({
-        timeout: 5000,
+    test("gestiona sesión (persistencia y logout) @critical", async ({
+      page,
+    }) => {
+      await page.goto("/");
+      const sessionIndicator = page.getByText("Sesión:", { exact: false });
+
+      await expect(sessionIndicator).toBeVisible({ timeout: 5000 });
+
+      await test.step("persiste después de recargar", async () => {
+        await page.reload();
+        await expect(sessionIndicator).toBeVisible({ timeout: 5000 });
       });
 
-      // Cerrar sesión
-      await page.getByRole("button", { name: /cerrar sesión|logout/i }).click();
-
-      // Esperar redirección a login
-      await page.waitForURL(/\/login/, { timeout: 5000 });
-      await expect(page.getByLabel("Correo")).toBeVisible({ timeout: 5000 });
-
-      // Verificar que no hay sesión activa
-      await expect(
-        page.getByText("Sesión:", { exact: false }),
-      ).not.toBeVisible();
-    });
-
-    test("sesión persiste después de recargar página @critical", async ({
-      page,
-    }, testInfo) => {
-      const ip = ipForTest(testInfo, 108);
-      await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
-      // Login
-      await page.goto("/login");
-      await page.getByLabel("Correo").fill(adminEmail);
-      await page.getByLabel("Contraseña").fill(adminPassword);
-      await page.getByRole("button", { name: "Ingresar" }).click();
-      await page.waitForURL("/**");
-
-      await expect(page.getByText("Sesión:", { exact: false })).toBeVisible({
-        timeout: 5000,
-      });
-
-      // Recargar página
-      await page.reload();
-
-      await expect(page.getByText("Sesión:", { exact: false })).toBeVisible({
-        timeout: 5000,
+      await test.step("cierra sesión y redirige a login", async () => {
+        await page
+          .getByRole("button", { name: /cerrar sesión|logout/i })
+          .click();
+        await page.waitForURL(/\/login/, { timeout: 5000 });
+        await expect(page.getByLabel("Correo")).toBeVisible({ timeout: 5000 });
+        await expect(sessionIndicator).not.toBeVisible();
       });
     });
   });

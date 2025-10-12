@@ -7,6 +7,7 @@ import {
   buildPaginatedResponse,
 } from "../lib/pagination.js";
 import { validateRequest } from "../lib/validation.js";
+import { handlePrismaError } from "../lib/prisma-error-handler.js";
 
 const propertySchema = z.object({
   label: z.string().min(3),
@@ -55,8 +56,16 @@ router.post(
       return validation.response;
     }
 
-    const property = await prisma.property.create({ data: validation.data });
-    return c.json({ data: property }, 201);
+    try {
+      const property = await prisma.property.create({ data: validation.data });
+      return c.json({ data: property }, 201);
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        conflict: "Ya existe una propiedad con esa etiqueta",
+        foreignKey: "El propietario indicado no existe",
+        default: "No se pudo crear la propiedad",
+      });
+    }
   },
 );
 
@@ -81,8 +90,13 @@ router.patch(
         data: validation.data,
       });
       return c.json({ data: property });
-    } catch {
-      return c.json({ error: "Property not found" }, 404);
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        notFound: "Propiedad no encontrada",
+        conflict: "Ya existe una propiedad con esa etiqueta",
+        foreignKey: "El propietario indicado no existe",
+        default: "No se pudo actualizar la propiedad",
+      });
     }
   },
 );

@@ -4,6 +4,8 @@ import { z } from "zod";
 import type { BookingStatus, Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { authenticate, requireRoles } from "../middleware/auth.js";
+import { serializeBooking } from "../lib/serializers.js";
+import { handlePrismaError } from "../lib/prisma-error-handler.js";
 
 const createBookingSchema = z.object({
   customerId: z.string().cuid(),
@@ -96,10 +98,11 @@ router.get("/", async (c) => {
 
   const hasMore = bookings.length > limit;
   const data = hasMore ? bookings.slice(0, limit) : bookings;
+  const serialized = data.map((booking) => serializeBooking(booking));
   const nextCursor = hasMore ? data[data.length - 1]?.id : null;
 
   return c.json({
-    data,
+    data: serialized,
     pagination: {
       limit,
       cursor: cursor ?? null,
@@ -136,24 +139,32 @@ router.post(
       return c.json({ error: "Property not found" }, 404);
     }
 
-    const booking = await prisma.booking.create({
-      data: {
-        ...rest,
-        serviceId,
-        customerId,
-        propertyId,
-        durationMin: durationMin ?? service.durationMin,
-        totalAmount: service.basePrice,
-        code: `BRISA-${randomUUID().slice(0, 8)}`,
-      },
-      include: {
-        customer: { select: { id: true, fullName: true, email: true } },
-        property: { select: { id: true, label: true, city: true } },
-        service: { select: { id: true, name: true, basePrice: true } },
-      },
-    });
+    try {
+      const booking = await prisma.booking.create({
+        data: {
+          ...rest,
+          serviceId,
+          customerId,
+          propertyId,
+          durationMin: durationMin ?? service.durationMin,
+          totalAmount: service.basePrice,
+          code: `BRISA-${randomUUID().slice(0, 8)}`,
+        },
+        include: {
+          customer: { select: { id: true, fullName: true, email: true } },
+          property: { select: { id: true, label: true, city: true } },
+          service: { select: { id: true, name: true, basePrice: true } },
+        },
+      });
 
-    return c.json({ data: booking }, 201);
+      return c.json({ data: serializeBooking(booking) }, 201);
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        foreignKey: "Relaciones inválidas para cliente, servicio o propiedad",
+        conflict: "El código de la reserva ya existe",
+        default: "No se pudo crear la reserva",
+      });
+    }
   },
 );
 router.patch(
@@ -218,9 +229,12 @@ router.patch(
           service: { select: { id: true, name: true, basePrice: true } },
         },
       });
-      return c.json({ data: booking });
-    } catch {
-      return c.json({ error: "Booking not found" }, 404);
+      return c.json({ data: serializeBooking(booking) });
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        notFound: "Reserva no encontrada",
+        default: "No se pudo actualizar la reserva",
+      });
     }
   },
 );

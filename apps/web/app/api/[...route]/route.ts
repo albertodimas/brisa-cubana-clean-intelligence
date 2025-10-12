@@ -27,18 +27,39 @@ async function proxy(request: NextRequest, context: any) {
   const headers = new Headers(request.headers);
   headers.delete("host");
 
-  const init: RequestInit = {
+  const init: RequestInit & { duplex?: "half" } = {
     method: request.method,
     headers,
     redirect: "manual",
   };
 
   if (request.method !== "GET" && request.method !== "HEAD") {
-    init.body = request.body;
+    if (request.body) {
+      init.body = request.body;
+      init.duplex = "half";
+    } else {
+      const clone = request.clone();
+      const body = await clone.arrayBuffer();
+      init.body = body;
+      init.duplex = "half";
+    }
   }
 
   console.log("[api proxy] →", request.method, url.toString());
-  const upstream = await fetch(url, init);
+  let upstream: Response;
+
+  try {
+    upstream = await fetch(url, init);
+  } catch (error) {
+    console.error("[api proxy] fetch error", error);
+    return new Response(
+      JSON.stringify({ error: "Upstream service unavailable" }),
+      {
+        status: 502,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
   console.log(
     "[api proxy] ←",
     upstream.status,
@@ -55,9 +76,7 @@ async function proxy(request: NextRequest, context: any) {
   responseHeaders.delete("content-length");
   responseHeaders.delete("content-encoding");
 
-  const bodyText = await upstream.text();
-
-  return new Response(bodyText, {
+  return new Response(upstream.body, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: responseHeaders,
