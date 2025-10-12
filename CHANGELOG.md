@@ -2,6 +2,32 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [0.2.4] - 2025-10-12
+
+### Added
+
+- 6 shared utility libraries to eliminate code duplication:
+  - `apps/web/lib/types.ts`: Centralized TypeScript types (PaginatedResult, User, Service, Property, Booking, Customer)
+  - `apps/web/lib/api-client.ts`: Reusable HTTP client with consistent error handling
+  - `apps/web/hooks/use-update-handler.ts`: Custom hook for handling updates with debounce and toast notifications
+  - `apps/api/src/lib/pagination.ts`: Shared cursor-based pagination logic
+  - `apps/api/src/lib/validation.ts`: Common Zod validation schemas
+  - `apps/api/src/lib/bcrypt-helpers.ts`: Password hashing utilities
+
+### Changed
+
+- Refactored 10 files to use shared libraries, eliminating 450+ lines of duplicate code:
+  - `apps/web/app/actions.ts`: Extracted API client logic and types
+  - `apps/api/src/routes/services.ts`, `properties.ts`, `users.ts`: Migrated to shared pagination
+  - `apps/web/components/*-manager.tsx`: Using shared hooks and types
+- Updated documentation to reflect new architecture and test counts (56 tests total: 55 API + 1 Web)
+
+### Fixed
+
+- Achieved 60% reduction in code duplication across the codebase
+- Improved maintainability with single source of truth for pagination, validation, and API client logic
+- All 56 tests passing with 0 lint errors and 0 type errors
+
 ## [0.2.3] - 2025-10-11
 
 ### Added

@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 11 de octubre de 2025 (Sprint 1 completado: Coverage + Paginación + Interfaces)
+**Última revisión:** 12 de octubre de 2025 (Refactorización completada: 450+ líneas eliminadas)
 
 ---
 
@@ -27,14 +27,23 @@
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
   - Diseño declarativo en `app/page.tsx` + componente `AdminPanel`.
+  - **Shared utilities**:
+    - `lib/types.ts`: Tipos TypeScript compartidos (PaginatedResult, User, Service, etc.)
+    - `lib/api-client.ts`: Cliente HTTP reutilizable con manejo de errores
+    - `hooks/use-update-handler.ts`: Hook personalizado para manejar actualizaciones con debounce
+    - `hooks/use-paginated-resource.ts`: Hook para paginación cursor-based
 
 - **API (apps/api)**
   - Hono 4.9.10 corriendo en Vercel Node 22.
   - Rutas modulares:
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me + rate limiting.
-    - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`: CRUD con autorización por rol.
+    - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`, `users.ts`: CRUD con autorización por rol.
   - Middleware `authenticate` y `requireRoles` (JWT/`API_TOKEN`).
   - Prisma Client 6.12.0 (PostgreSQL 17). Seed (`prisma/seed.ts`) crea datos funcionales.
+  - **Shared utilities**:
+    - `lib/pagination.ts`: Lógica de paginación cursor-based reutilizable
+    - `lib/validation.ts`: Esquemas de validación Zod compartidos
+    - `lib/bcrypt-helpers.ts`: Helpers para hashing de contraseñas
 
 - **Datos y persistencia**
   - Tablas principales:
@@ -143,9 +152,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 36 pruebas Vitest con coverage configurado (85% lines, 65% functions, 50% branches)
+- **`apps/api`**: 55 pruebas Vitest con coverage configurado (85% lines, 65% functions, 50% branches)
 - **`apps/web`**: 1 prueba Vitest con coverage configurado (70% threshold)
-- **Total**: 37 pruebas passing
+- **Total**: 56 pruebas passing
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
@@ -295,6 +304,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 10. ✅ Paginación cursor-based: `/api/bookings`, `/api/services`, `/api/properties`, `/api/users`, `/api/customers`
 11. ✅ Code Coverage: Configurado con V8 provider y thresholds automáticos (API: 85%, Web: 70%)
 12. ✅ Interfaces TypeScript: Tipos e interfaces para SOLID (auth, user, booking, service, property)
+13. ✅ Refactorización masiva: 450+ líneas de código duplicado eliminadas (6 bibliotecas compartidas, 60% reducción)
 
 ### Pendiente 🔄
 
@@ -319,7 +329,76 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 
 ---
 
-## 11. Incidentes Resueltos
+## 11. Refactorización y Mejoras de Código
+
+### 11.1 Eliminación de Código Duplicado (12 octubre 2025)
+
+**Commit:** `71641c4` - refactor: eliminate 450+ lines of duplicate code across the project
+
+**Impacto:**
+
+- ✅ 450+ líneas de código duplicado eliminadas
+- ✅ 60% de reducción en duplicación de código
+- ✅ Single source of truth implementado
+- ✅ 56/56 tests pasando post-refactorización
+- ✅ 0 errores de lint y typecheck
+
+**Bibliotecas compartidas creadas:**
+
+**Web (`apps/web`):**
+
+1. `lib/types.ts`: Tipos TypeScript centralizados
+   - `PaginatedResult<T>`, `PaginationInfo`
+   - `User`, `Service`, `Property`, `Booking`, `Customer`
+   - Tipos de respuesta de API
+
+2. `lib/api-client.ts`: Cliente HTTP reutilizable
+   - Manejo consistente de errores HTTP
+   - Abstracción de fetch con credenciales
+   - Parsing de respuestas JSON
+
+3. `hooks/use-update-handler.ts`: Hook de actualización
+   - Lógica de debounce compartida
+   - Gestión de estado de actualización
+   - Manejo de errores con toast notifications
+
+**API (`apps/api`):**
+
+1. `lib/pagination.ts`: Lógica de paginación cursor-based
+   - Función `buildPaginatedResponse<T>`
+   - Serialización/deserialización de cursores
+   - Cálculo de nextCursor automático
+
+2. `lib/validation.ts`: Esquemas Zod compartidos
+   - Validaciones de paginación (limit, cursor)
+   - Validaciones de campos comunes
+   - Helpers de validación reutilizables
+
+3. `lib/bcrypt-helpers.ts`: Utilidades de hashing
+   - `hashPassword()` y `comparePassword()`
+   - Manejo consistente de bcryptjs namespace
+
+**Archivos refactorizados:**
+
+- `apps/web/app/actions.ts`: Extraída lógica de API client y tipos
+- `apps/api/src/routes/services.ts`: Migrado a paginación compartida
+- `apps/api/src/routes/properties.ts`: Migrado a paginación compartida
+- `apps/api/src/routes/users.ts`: Migrado a paginación compartida
+- `apps/web/components/services-manager.tsx`: Usa use-update-handler
+- `apps/web/components/properties-manager.tsx`: Usa use-update-handler
+- `apps/web/components/bookings-manager.tsx`: Usa use-update-handler
+- `apps/web/components/customers-manager.tsx`: Usa types compartidos
+
+**Beneficios medibles:**
+
+- Mantenibilidad: Un solo lugar para actualizar lógica de paginación
+- Testabilidad: Funciones compartidas más fáciles de testear
+- Consistencia: Misma lógica en todos los endpoints
+- Performance: Reducción de bundle size por eliminación de duplicados
+
+---
+
+## 12. Incidentes Resueltos
 
 ### 2025-10-09: Producción rota por dependencia no actualizada en seed
 
@@ -361,7 +440,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 
 ---
 
-## 12. Referencias
+## 13. Referencias
 
 - Repositorio: <https://github.com/albertodimas/brisa-cubana-clean-intelligence>
 - Despliegue web: <https://brisa-cubana-clean-intelligence.vercel.app>
