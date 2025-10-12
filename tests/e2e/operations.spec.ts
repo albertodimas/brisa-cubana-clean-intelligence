@@ -51,6 +51,46 @@ test.describe("Operaciones", () => {
     ).toHaveValue("CONFIRMED");
   });
 
+  test("muestra error cuando faltan datos al crear servicio @critical", async ({
+    page,
+    request,
+  }, testInfo) => {
+    await loginAsAdmin(page, testInfo);
+
+    const apiUrl = process.env.E2E_API_URL || "http://localhost:3001";
+    const initialResponse = await request.get(`${apiUrl}/api/services`);
+    const initialJson = (await initialResponse.json()) as {
+      data?: Array<{ id: string }>;
+    };
+    const initialCount = initialJson.data?.length ?? 0;
+
+    const serviceForm = page.getByTestId("service-create-form");
+
+    await serviceForm
+      .locator('input[name="name"]')
+      .fill("Servicio inválido UI");
+    await serviceForm
+      .locator('textarea[name="description"]')
+      .fill("Caso negativo E2E");
+    await serviceForm.locator('input[name="basePrice"]').fill("-10");
+    await serviceForm.locator('input[name="durationMin"]').fill("0");
+
+    await serviceForm.getByRole("button", { name: "Guardar" }).click();
+
+    await expect
+      .poll(
+        async () => {
+          const snapshot = await request.get(`${apiUrl}/api/services`);
+          const snapshotJson = (await snapshot.json()) as {
+            data?: Array<{ id: string }>;
+          };
+          return snapshotJson.data?.length ?? 0;
+        },
+        { timeout: 3000 },
+      )
+      .toBe(initialCount);
+  });
+
   test("pagina reservas correctamente", async ({ request }, testInfo) => {
     const ip = ipForTest(testInfo);
     // Use localhost API for E2E tests (starts on port 3001)

@@ -1,4 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import OpenAPIResponseValidator from "openapi-response-validator";
+import { openApiSpec } from "./lib/openapi-spec.js";
 
 process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
 process.env.API_TOKEN = "test-service-token";
@@ -1002,5 +1004,91 @@ describe("app", () => {
     expect(res.status).toBe(401);
     const json = await res.json();
     expect(json.error).toBe("Invalid credentials");
+  });
+
+  describe("OpenAPI contract", () => {
+    function assertConforms({
+      path,
+      method,
+      status,
+      body,
+    }: {
+      path: keyof typeof openApiSpec.paths;
+      method: string;
+      status: number;
+      body: unknown;
+    }) {
+      const pathItem = openApiSpec.paths[path];
+      if (!pathItem) {
+        throw new Error(
+          `Path '${String(path)}' not documented in OpenAPI spec`,
+        );
+      }
+
+      const operation = (pathItem as Record<string, unknown>)[method];
+      if (!operation) {
+        throw new Error(
+          `Operation '${method.toUpperCase()}' for path '${String(path)}' missing in OpenAPI spec`,
+        );
+      }
+
+      const validator = new OpenAPIResponseValidator({
+        version: openApiSpec.openapi,
+        responses: (operation as { responses: unknown }).responses,
+        components: openApiSpec.components as Record<string, unknown>,
+      } as any);
+
+      const validationResult = validator.validateResponse(status, body);
+      if (validationResult) {
+        const { message, errors } = validationResult;
+        throw new Error(
+          `Response for ${method.toUpperCase()} ${String(path)} did not match OpenAPI schema: ${message}\n${JSON.stringify(errors, null, 2)}`,
+        );
+      }
+    }
+
+    it("GET /api/services matches documented schema", async () => {
+      const response = await app.request("/api/services");
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      assertConforms({
+        path: "/api/services",
+        method: "get",
+        status: 200,
+        body: json,
+      });
+    });
+
+    it("GET /api/bookings matches documented schema", async () => {
+      const response = await app.request("/api/bookings");
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      assertConforms({
+        path: "/api/bookings",
+        method: "get",
+        status: 200,
+        body: json,
+      });
+    });
+
+    it("POST /api/authentication/login matches documented schema", async () => {
+      const response = await app.request("/api/authentication/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "admin@brisacubanaclean.com",
+          password: "Brisa123!",
+        }),
+      });
+
+      expect(response.status).toBe(200);
+      const json = await response.json();
+      assertConforms({
+        path: "/api/authentication/login",
+        method: "post",
+        status: 200,
+        body: json,
+      });
+    });
   });
 });

@@ -2,6 +2,34 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [0.2.5] - 2025-10-12
+
+### Added
+
+- 3 new shared libraries to improve code quality:
+  - `apps/api/src/lib/prisma-error-handler.ts`: Centralized Prisma error handling (P2002, P2025, P2003)
+  - `apps/api/src/lib/serializers.ts`: Type-safe serialization of Prisma Decimal to JSON
+  - `tests/e2e/support/auth.ts`: Reusable E2E authentication helpers with retry logic
+- New unit test: `apps/api/src/repositories/booking-repository.unit.test.ts` (2 tests)
+
+### Changed
+
+- Refactored 5 API routes to use new shared utilities:
+  - `routes/services.ts`: Now uses `serializeService()` and `handlePrismaError()`
+  - `routes/properties.ts`: Now uses `handlePrismaError()`
+  - `routes/bookings.ts`: Now uses `serializeBooking()` and `handlePrismaError()`
+  - `routes/users.ts`: Migrated to `bcrypt-helpers` and `handlePrismaError()` (eliminated 30 lines)
+- Refactored 3 E2E test files to use centralized auth helpers:
+  - `tests/e2e/auth.spec.ts`, `operations.spec.ts`, `security.spec.ts`
+- Updated test counts throughout documentation: 56 → 58 tests (57 API + 1 Web)
+- Improved web proxy error handling and session management
+
+### Fixed
+
+- Eliminated additional 30 lines of duplicate code from `users.ts`
+- Improved type safety in booking serialization with nested relations
+- Stabilized E2E authentication with IP-based rate limiting avoidance
+
 ## [0.2.4] - 2025-10-12
 
 ### Added

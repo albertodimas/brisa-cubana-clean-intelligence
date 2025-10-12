@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import * as bcrypt from "bcryptjs";
-import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import {
   authenticate,
   requireRoles,
   getAuthenticatedUser,
 } from "../middleware/auth.js";
+import { hashPassword } from "../lib/bcrypt-helpers.js";
+import { handlePrismaError } from "../lib/prisma-error-handler.js";
 
 const router = new Hono();
 
@@ -87,23 +87,19 @@ router.post("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
 
   const { email, fullName, password, role } = parsed.data;
 
-  const namespace = bcrypt as unknown as {
-    hash?: typeof bcrypt.hash;
-    default?: { hash?: typeof bcrypt.hash };
-  };
-  const hashFn = namespace.hash ?? namespace.default?.hash;
-  if (!hashFn) {
-    return c.json({ error: "Servicio de hashing no disponible" }, 500);
-  }
-
   try {
+    const passwordHash = await hashPassword(password);
+    if (!passwordHash) {
+      return c.json({ error: "Servicio de hashing no disponible" }, 500);
+    }
+
     const user = await prisma.user.create({
       data: {
         email,
         fullName,
         role,
         isActive: true,
-        passwordHash: await hashFn(password, 10),
+        passwordHash,
       },
       select: {
         id: true,
@@ -118,23 +114,10 @@ router.post("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
 
     return c.json({ data: user }, 201);
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return c.json({ error: "Email ya registrado" }, 409);
-    }
-    // Also handle errors that look like Prisma errors (for testing)
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "P2002"
-    ) {
-      return c.json({ error: "Email ya registrado" }, 409);
-    }
-    console.error("[users] create", error);
-    return c.json({ error: "No se pudo crear el usuario" }, 500);
+    return handlePrismaError(c, error, {
+      conflict: "Email ya registrado",
+      default: "No se pudo crear el usuario",
+    });
   }
 });
 
@@ -149,15 +132,11 @@ router.patch("/:userId", authenticate, requireRoles(["ADMIN"]), async (c) => {
   const data: Record<string, unknown> = { ...rest };
 
   if (password) {
-    const namespace = bcrypt as unknown as {
-      hash?: typeof bcrypt.hash;
-      default?: { hash?: typeof bcrypt.hash };
-    };
-    const hashFn = namespace.hash ?? namespace.default?.hash;
-    if (!hashFn) {
+    const passwordHash = await hashPassword(password);
+    if (!passwordHash) {
       return c.json({ error: "Servicio de hashing no disponible" }, 500);
     }
-    data.passwordHash = await hashFn(password, 10);
+    data.passwordHash = passwordHash;
   }
 
   const authUser = getAuthenticatedUser(c);

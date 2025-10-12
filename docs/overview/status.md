@@ -152,9 +152,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 55 pruebas Vitest con coverage configurado (85% lines, 65% functions, 50% branches)
+- **`apps/api`**: 57 pruebas Vitest con coverage configurado (85% lines, 65% functions, 50% branches)
 - **`apps/web`**: 1 prueba Vitest con coverage configurado (70% threshold)
-- **Total**: 56 pruebas passing
+- **Total**: 58 pruebas passing
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
@@ -340,7 +340,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 - ✅ 450+ líneas de código duplicado eliminadas
 - ✅ 60% de reducción en duplicación de código
 - ✅ Single source of truth implementado
-- ✅ 56/56 tests pasando post-refactorización
+- ✅ 58/58 tests pasando post-refactorización
 - ✅ 0 errores de lint y typecheck
 
 **Bibliotecas compartidas creadas:**
@@ -378,16 +378,35 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
    - `hashPassword()` y `comparePassword()`
    - Manejo consistente de bcryptjs namespace
 
+4. `lib/prisma-error-handler.ts`: Manejo centralizado de errores Prisma
+   - Función `handlePrismaError()` para errores P2002, P2025, P2003
+   - Mensajes de error configurables por contexto
+   - Logging de errores inesperados
+
+5. `lib/serializers.ts`: Serialización de tipos Prisma a JSON
+   - `serializeService()` para conversión de Decimal a number
+   - `serializeBooking()` con soporte para relaciones anidadas
+   - Type-safe con generics TypeScript
+
+**E2E (`tests/e2e`):**
+
+1. `support/auth.ts`: Helpers de autenticación para E2E
+   - `loginAsAdmin()` con retry logic y manejo de IPs únicas
+   - `ipForTest()` para evitar rate limiting cruzado
+   - Configuración centralizada de credenciales
+
 **Archivos refactorizados:**
 
 - `apps/web/app/actions.ts`: Extraída lógica de API client y tipos
-- `apps/api/src/routes/services.ts`: Migrado a paginación compartida
-- `apps/api/src/routes/properties.ts`: Migrado a paginación compartida
-- `apps/api/src/routes/users.ts`: Migrado a paginación compartida
+- `apps/api/src/routes/services.ts`: Migrado a paginación compartida y serializers
+- `apps/api/src/routes/properties.ts`: Migrado a paginación compartida y prisma-error-handler
+- `apps/api/src/routes/bookings.ts`: Migrado a serializers y prisma-error-handler
+- `apps/api/src/routes/users.ts`: Migrado a bcrypt-helpers y prisma-error-handler
 - `apps/web/components/services-manager.tsx`: Usa use-update-handler
 - `apps/web/components/properties-manager.tsx`: Usa use-update-handler
 - `apps/web/components/bookings-manager.tsx`: Usa use-update-handler
 - `apps/web/components/customers-manager.tsx`: Usa types compartidos
+- `tests/e2e/auth.spec.ts`, `operations.spec.ts`, `security.spec.ts`: Usan support/auth.ts
 
 **Beneficios medibles:**
 
