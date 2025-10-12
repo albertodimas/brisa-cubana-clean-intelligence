@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { prisma } from "../lib/prisma.js";
 import {
   authenticate,
   requireRoles,
@@ -8,6 +7,8 @@ import {
 } from "../middleware/auth.js";
 import { hashPassword } from "../lib/bcrypt-helpers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
+import type { UpdateUserDto } from "../interfaces/user.interface.js";
+import { getUserRepository } from "../container.js";
 
 const router = new Hono();
 
@@ -49,34 +50,9 @@ router.get("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
 
   const { limit, cursor } = parsed.data;
 
-  const users = await prisma.user.findMany({
-    take: limit + 1,
-    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-    select: {
-      id: true,
-      email: true,
-      fullName: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-
-  const hasMore = users.length > limit;
-  const data = hasMore ? users.slice(0, limit) : users;
-  const nextCursor = hasMore ? data[data.length - 1]?.id : null;
-
-  return c.json({
-    data,
-    pagination: {
-      limit,
-      cursor: cursor ?? null,
-      nextCursor,
-      hasMore,
-    },
-  });
+  const repository = getUserRepository();
+  const result = await repository.findMany({ limit, cursor });
+  return c.json(result);
 });
 
 router.post("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
@@ -93,23 +69,13 @@ router.post("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
       return c.json({ error: "Servicio de hashing no disponible" }, 500);
     }
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        fullName,
-        role,
-        isActive: true,
-        passwordHash,
-      },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const repository = getUserRepository();
+    const user = await repository.create({
+      email,
+      fullName,
+      role,
+      passwordHash,
+      isActive: true,
     });
 
     return c.json({ data: user }, 201);
@@ -150,22 +116,16 @@ router.patch("/:userId", authenticate, requireRoles(["ADMIN"]), async (c) => {
   }
 
   try {
-    const user = await prisma.user.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        isActive: true,
-        updatedAt: true,
-      },
-    });
+    const repository = getUserRepository();
+    const user = await repository.update(id, data as unknown as UpdateUserDto);
 
     return c.json({ data: user });
-  } catch {
-    return c.json({ error: "User not found" }, 404);
+  } catch (error) {
+    return handlePrismaError(c, error, {
+      notFound: "User not found",
+      conflict: "Email ya registrado",
+      default: "No se pudo actualizar el usuario",
+    });
   }
 });
 

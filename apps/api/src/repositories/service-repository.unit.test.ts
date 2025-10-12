@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { ServiceRepository } from "./service-repository.js";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 describe("ServiceRepository (Unit)", () => {
   let repository: ServiceRepository;
@@ -126,10 +126,27 @@ describe("ServiceRepository (Unit)", () => {
       await repository.findManyPaginated(10, "cursor_123");
 
       expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
+        where: undefined,
         take: 11,
         skip: 1,
         cursor: { id: "cursor_123" },
         orderBy: { createdAt: "desc" },
+      });
+    });
+
+    it("honors custom orderBy option", async () => {
+      mockPrisma.service.findMany.mockResolvedValue([]);
+
+      const orderBy: Prisma.ServiceOrderByWithRelationInput[] = [
+        { name: "asc" },
+        { id: "asc" },
+      ];
+      await repository.findManyPaginated(5, undefined, { orderBy });
+
+      expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
+        where: undefined,
+        take: 6,
+        orderBy,
       });
     });
   });

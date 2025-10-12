@@ -1,14 +1,11 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { prisma } from "../lib/prisma.js";
 import { authenticate, requireRoles } from "../middleware/auth.js";
-import {
-  parsePaginationQuery,
-  buildPaginatedResponse,
-} from "../lib/pagination.js";
+import { parsePaginationQuery } from "../lib/pagination.js";
 import { validateRequest } from "../lib/validation.js";
 import { serializeService } from "../lib/serializers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
+import { getServiceRepository } from "../container.js";
 
 const serviceSchema = z.object({
   name: z.string().min(3),
@@ -28,16 +25,22 @@ router.get("/", async (c) => {
 
   const { limit, cursor } = paginationResult.data;
 
-  // Fetch limit + 1 to determine if there are more results
-  const services = await prisma.service.findMany({
-    take: limit + 1,
-    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+  const repository = getServiceRepository();
+  const result = await repository.findManyPaginated(limit, cursor, {
     orderBy: [{ name: "asc" }, { id: "asc" }],
   });
 
-  const normalized = services.map(serializeService);
+  const normalized = result.data.map(serializeService);
 
-  return c.json(buildPaginatedResponse(normalized, limit, cursor));
+  return c.json({
+    data: normalized,
+    pagination: {
+      limit,
+      cursor: cursor ?? null,
+      nextCursor: result.nextCursor ?? null,
+      hasMore: result.hasMore,
+    },
+  });
 });
 
 router.post(
@@ -51,7 +54,8 @@ router.post(
     }
 
     try {
-      const service = await prisma.service.create({ data: validation.data });
+      const repository = getServiceRepository();
+      const service = await repository.create(validation.data);
       return c.json({ data: serializeService(service) }, 201);
     } catch (error) {
       return handlePrismaError(c, error, {
@@ -78,10 +82,8 @@ router.patch(
     }
 
     try {
-      const service = await prisma.service.update({
-        where: { id },
-        data: validation.data,
-      });
+      const repository = getServiceRepository();
+      const service = await repository.update(id, validation.data);
       return c.json({ data: serializeService(service) });
     } catch (error) {
       return handlePrismaError(c, error, {

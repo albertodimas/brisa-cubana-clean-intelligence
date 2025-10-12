@@ -69,5 +69,10 @@ describe("Container (Unit)", () => {
   it("defines correct service keys", () => {
     expect(ServiceKeys.PRISMA).toBe("prisma");
     expect(ServiceKeys.DATABASE_URL).toBe("databaseUrl");
+    expect(ServiceKeys.SERVICE_REPOSITORY).toBe("serviceRepository");
+    expect(ServiceKeys.BOOKING_REPOSITORY).toBe("bookingRepository");
+    expect(ServiceKeys.PROPERTY_REPOSITORY).toBe("propertyRepository");
+    expect(ServiceKeys.USER_REPOSITORY).toBe("userRepository");
+    expect(ServiceKeys.CUSTOMER_REPOSITORY).toBe("customerRepository");
   });
 });

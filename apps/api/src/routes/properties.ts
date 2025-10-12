@@ -1,13 +1,10 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { prisma } from "../lib/prisma.js";
 import { authenticate, requireRoles } from "../middleware/auth.js";
-import {
-  parsePaginationQuery,
-  buildPaginatedResponse,
-} from "../lib/pagination.js";
+import { parsePaginationQuery } from "../lib/pagination.js";
 import { validateRequest } from "../lib/validation.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
+import { getPropertyRepository } from "../container.js";
 
 const propertySchema = z.object({
   label: z.string().min(3),
@@ -31,19 +28,9 @@ router.get("/", async (c) => {
     return paginationResult.response;
   }
 
-  const { limit, cursor } = paginationResult.data;
-
-  // Fetch limit + 1 to determine if there are more results
-  const properties = await prisma.property.findMany({
-    take: limit + 1,
-    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-    orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-    include: {
-      owner: { select: { id: true, email: true, fullName: true } },
-    },
-  });
-
-  return c.json(buildPaginatedResponse(properties, limit, cursor));
+  const repository = getPropertyRepository();
+  const result = await repository.findMany(paginationResult.data);
+  return c.json(result);
 });
 
 router.post(
@@ -57,7 +44,8 @@ router.post(
     }
 
     try {
-      const property = await prisma.property.create({ data: validation.data });
+      const repository = getPropertyRepository();
+      const property = await repository.create(validation.data);
       return c.json({ data: property }, 201);
     } catch (error) {
       return handlePrismaError(c, error, {
@@ -85,10 +73,8 @@ router.patch(
     }
 
     try {
-      const property = await prisma.property.update({
-        where: { id },
-        data: validation.data,
-      });
+      const repository = getPropertyRepository();
+      const property = await repository.update(id, validation.data);
       return c.json({ data: property });
     } catch (error) {
       return handlePrismaError(c, error, {

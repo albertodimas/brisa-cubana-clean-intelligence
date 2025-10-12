@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { ServiceRepository } from "./repositories/service-repository.js";
 import { BookingRepository } from "./repositories/booking-repository.js";
+import { PropertyRepository } from "./repositories/property-repository.js";
+import { UserRepository } from "./repositories/user-repository.js";
+import { CustomerRepository } from "./repositories/customer-repository.js";
 import { prisma as prismaClient } from "./lib/prisma.js";
 
 /**
@@ -67,6 +70,9 @@ export const ServiceKeys = {
   DATABASE_URL: "databaseUrl",
   SERVICE_REPOSITORY: "serviceRepository",
   BOOKING_REPOSITORY: "bookingRepository",
+  PROPERTY_REPOSITORY: "propertyRepository",
+  USER_REPOSITORY: "userRepository",
+  CUSTOMER_REPOSITORY: "customerRepository",
 } as const;
 
 /**
@@ -91,6 +97,21 @@ export function initializeContainer(): void {
     ServiceKeys.BOOKING_REPOSITORY,
     () => new BookingRepository(prisma),
   );
+
+  container.register(
+    ServiceKeys.PROPERTY_REPOSITORY,
+    () => new PropertyRepository(prisma),
+  );
+
+  container.register(
+    ServiceKeys.USER_REPOSITORY,
+    () => new UserRepository(prisma),
+  );
+
+  container.register(
+    ServiceKeys.CUSTOMER_REPOSITORY,
+    () => new CustomerRepository(prisma),
+  );
 }
 
 /**
@@ -112,6 +133,18 @@ export function getServiceRepository(): ServiceRepository {
  */
 export function getBookingRepository(): BookingRepository {
   return container.resolve<BookingRepository>(ServiceKeys.BOOKING_REPOSITORY);
+}
+
+export function getPropertyRepository(): PropertyRepository {
+  return container.resolve<PropertyRepository>(ServiceKeys.PROPERTY_REPOSITORY);
+}
+
+export function getUserRepository(): UserRepository {
+  return container.resolve<UserRepository>(ServiceKeys.USER_REPOSITORY);
+}
+
+export function getCustomerRepository(): CustomerRepository {
+  return container.resolve<CustomerRepository>(ServiceKeys.CUSTOMER_REPOSITORY);
 }
 
 /**

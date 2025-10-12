@@ -6,22 +6,22 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
-- 3 new shared libraries to improve code quality:
-  - `apps/api/src/lib/prisma-error-handler.ts`: Centralized Prisma error handling (P2002, P2025, P2003)
-  - `apps/api/src/lib/serializers.ts`: Type-safe serialization of Prisma Decimal to JSON
-  - `tests/e2e/support/auth.ts`: Reusable E2E authentication helpers with retry logic
-- New unit test: `apps/api/src/repositories/booking-repository.unit.test.ts` (2 tests)
+- Shared libraries para manejo de errores, serialización y autenticación E2E:
+  - `apps/api/src/lib/prisma-error-handler.ts`
+  - `apps/api/src/lib/serializers.ts`
+  - `tests/e2e/support/auth.ts`
+- Repository pattern completo en la API:
+  - `property-repository.ts`, `user-repository.ts`, `customer-repository.ts`
+  - Nuevas suites unitarias (10 tests) para los repositories
+- Validación automática de contratos OpenAPI incorporada en `app.integration.test.ts`
+- Escenario Playwright crítico que valida la creación inválida de servicios
 
 ### Changed
 
-- Refactored 5 API routes to use new shared utilities:
-  - `routes/services.ts`: Now uses `serializeService()` and `handlePrismaError()`
-  - `routes/properties.ts`: Now uses `handlePrismaError()`
-  - `routes/bookings.ts`: Now uses `serializeBooking()` and `handlePrismaError()`
-  - `routes/users.ts`: Migrated to `bcrypt-helpers` and `handlePrismaError()` (eliminated 30 lines)
-- Refactored 3 E2E test files to use centralized auth helpers:
-  - `tests/e2e/auth.spec.ts`, `operations.spec.ts`, `security.spec.ts`
-- Updated test counts throughout documentation: 56 → 58 tests (57 API + 1 Web)
+- Rutas de negocio refactorizadas para delegar en repositories y helpers compartidos:
+  - `routes/services.ts`, `routes/bookings.ts`, `routes/properties.ts`, `routes/users.ts`, `routes/customers.ts`
+- Playwright crítico (`auth.spec.ts`, `operations.spec.ts`, `security.spec.ts`) ahora reutiliza storage state persistente
+- Documentación actualizada con 92 pruebas unitarias/integración (91 API + 1 Web)
 - Improved web proxy error handling and session management
 
 ### Fixed

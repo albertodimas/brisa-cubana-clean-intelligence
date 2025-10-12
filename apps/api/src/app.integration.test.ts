@@ -232,6 +232,36 @@ const mockPrisma = {
           };
         },
       ),
+    findUnique: vi
+      .fn()
+      .mockImplementation(
+        async ({ where, include }: { where: any; include?: any }) => {
+          const booking = bookingsFixture.find((item) => item.id === where.id);
+          if (!booking) {
+            return null;
+          }
+          if (!include) {
+            return booking;
+          }
+          return {
+            ...booking,
+            customer: include.customer
+              ? (usersFixture.find((user) => user.id === booking.customerId) ??
+                null)
+              : undefined,
+            property: include.property
+              ? (propertiesFixture.find(
+                  (property) => property.id === booking.propertyId,
+                ) ?? null)
+              : undefined,
+            service: include.service
+              ? (servicesFixture.find(
+                  (service) => service.id === booking.serviceId,
+                ) ?? null)
+              : undefined,
+          };
+        },
+      ),
   },
   user: {
     findUnique: vi
@@ -305,14 +335,15 @@ const mockPrisma = {
         take,
         skip,
         cursor,
+        include,
       }: {
         take?: number;
         skip?: number;
         cursor?: { id: string };
+        include?: any;
       } = {}) => {
         let filtered = [...propertiesFixture];
 
-        // Handle cursor-based pagination
         if (cursor) {
           const cursorIndex = filtered.findIndex((p) => p.id === cursor.id);
           if (cursorIndex !== -1) {
@@ -320,29 +351,46 @@ const mockPrisma = {
           }
         }
 
-        // Handle skip
         if (skip) {
           filtered = filtered.slice(skip);
         }
 
-        // Handle take
         if (take) {
           filtered = filtered.slice(0, take);
+        }
+
+        if (include?.owner) {
+          filtered = filtered.map((property) => ({
+            ...property,
+            owner:
+              usersFixture.find((user) => user.id === property.ownerId) ?? null,
+          }));
         }
 
         return filtered;
       },
     ),
-    create: vi.fn().mockImplementation(async ({ data }: { data: any }) => {
-      const record = {
-        id: makeCuid(propertiesFixture.length + 201),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ...data,
-      };
-      propertiesFixture.push(record);
-      return record;
-    }),
+    create: vi
+      .fn()
+      .mockImplementation(
+        async ({ data, include }: { data: any; include?: any }) => {
+          const record = {
+            id: makeCuid(propertiesFixture.length + 201),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...data,
+          };
+          propertiesFixture.push(record);
+          if (include?.owner) {
+            return {
+              ...record,
+              owner:
+                usersFixture.find((user) => user.id === record.ownerId) ?? null,
+            };
+          }
+          return record;
+        },
+      ),
     findUnique: vi
       .fn()
       .mockImplementation(
@@ -352,7 +400,15 @@ const mockPrisma = {
     update: vi
       .fn()
       .mockImplementation(
-        async ({ where, data }: { where: any; data: any }) => {
+        async ({
+          where,
+          data,
+          include,
+        }: {
+          where: any;
+          data: any;
+          include?: any;
+        }) => {
           const property = propertiesFixture.find(
             (item) => item.id === where.id,
           );
@@ -360,6 +416,14 @@ const mockPrisma = {
             throw new Error("Property not found");
           }
           Object.assign(property, data, { updatedAt: new Date() });
+          if (include?.owner) {
+            return {
+              ...property,
+              owner:
+                usersFixture.find((user) => user.id === property.ownerId) ??
+                null,
+            };
+          }
           return property;
         },
       ),
@@ -399,6 +463,9 @@ vi.mock("bcryptjs", () => ({
 }));
 
 const app = (await import("./app")).default;
+const { getServiceRepository, getBookingRepository } = await import(
+  "./container.js"
+);
 
 const authorizedHeaders = {
   Authorization: "Bearer jwt-admin",
@@ -528,6 +595,19 @@ describe("app", () => {
     expect(json.data.length).toBeGreaterThan(0);
   });
 
+  it("delegates service listing to the service repository", async () => {
+    const repository = getServiceRepository();
+    const spy = vi.spyOn(repository, "findManyPaginated");
+
+    const res = await app.request("/api/services");
+    expect(res.status).toBe(200);
+    expect(spy).toHaveBeenCalledWith(50, undefined, {
+      orderBy: [{ name: "asc" }, { id: "asc" }],
+    });
+
+    spy.mockRestore();
+  });
+
   it("creates a service when authorized", async () => {
     const payload = {
       name: "Servicio Test",
@@ -647,6 +727,19 @@ describe("app", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data).toBeDefined();
+  });
+
+  it("delegates booking listing to the booking repository", async () => {
+    const repository = getBookingRepository();
+    const spy = vi.spyOn(repository, "findManyPaginated");
+
+    const res = await app.request("/api/bookings");
+    expect(res.status).toBe(200);
+    expect(spy).toHaveBeenCalledWith(20, undefined, {}, true, {
+      orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
+    });
+
+    spy.mockRestore();
   });
 
   it("filters bookings by date range", async () => {

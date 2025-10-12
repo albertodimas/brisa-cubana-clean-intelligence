@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { BookingRepository } from "./booking-repository.js";
 
 describe("BookingRepository (Unit)", () => {
@@ -56,6 +56,23 @@ describe("BookingRepository (Unit)", () => {
       where: undefined,
       take: 6,
       orderBy: { scheduledAt: "desc" },
+    });
+  });
+
+  it("applies custom ordering when provided", async () => {
+    const orderBy: Prisma.BookingOrderByWithRelationInput[] = [
+      { scheduledAt: "asc" },
+      { id: "asc" },
+    ];
+
+    await repository.findManyPaginated(5, undefined, undefined, false, {
+      orderBy,
+    });
+
+    expect(mockPrisma.booking.findMany).toHaveBeenCalledWith({
+      where: undefined,
+      take: 6,
+      orderBy,
     });
   });
 });

@@ -25,7 +25,11 @@ export type BookingCreateInput = {
   notes?: string;
 };
 
-export type BookingUpdateInput = Partial<Omit<BookingCreateInput, "code">>;
+export type BookingUpdateInput = Partial<
+  Omit<BookingCreateInput, "code" | "notes">
+> & {
+  notes?: string | null;
+};
 
 export type BookingWithRelations = Booking & {
   service?: any;
@@ -87,10 +91,16 @@ export class BookingRepository
     cursor?: string,
     filters?: BookingFilters,
     includeRelations: boolean = false,
+    options: {
+      orderBy?:
+        | Prisma.BookingOrderByWithRelationInput
+        | Prisma.BookingOrderByWithRelationInput[];
+    } = {},
   ): Promise<PaginatedResult<Booking | BookingWithRelations>> {
     const take = limit + 1;
 
     const where = this.buildWhereClause(filters);
+    const { orderBy } = options;
 
     const bookings = await this.prisma.booking.findMany({
       where,
@@ -106,7 +116,7 @@ export class BookingRepository
           customer: true,
         },
       }),
-      orderBy: { scheduledAt: "desc" },
+      orderBy: orderBy ?? { scheduledAt: "desc" },
     });
 
     const hasMore = bookings.length > limit;

@@ -44,6 +44,7 @@
     - `lib/pagination.ts`: Lógica de paginación cursor-based reutilizable
     - `lib/validation.ts`: Esquemas de validación Zod compartidos
     - `lib/bcrypt-helpers.ts`: Helpers para hashing de contraseñas
+  - **Repository pattern** registrado en `container.ts` (`ServiceRepository`, `BookingRepository`, `PropertyRepository`, `UserRepository`, `CustomerRepository`) para desacoplar rutas de Prisma y facilitar tests; rutas `services`, `bookings`, `properties`, `customers`, `users` y `auth` ahora resuelven los repositories vía el contenedor y los tests de integración verifican esa delegación.
 
 - **Datos y persistencia**
   - Tablas principales:
@@ -152,9 +153,10 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 57 pruebas Vitest con coverage configurado (85% lines, 65% functions, 50% branches)
-- **`apps/web`**: 1 prueba Vitest con coverage configurado (70% threshold)
-- **Total**: 58 pruebas passing
+- **`apps/api`**: 31 pruebas unitarias Vitest (coverage thresholds: 85% lines, 65% functions, 50% branches)
+- **`apps/api`**: 60 pruebas de integración (incluyen validación de contratos OpenAPI)
+- **`apps/web`**: 1 prueba Vitest con threshold 70%
+- **Total**: 92 pruebas unitarias/integración passing
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal

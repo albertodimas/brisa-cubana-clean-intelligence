@@ -3,13 +3,14 @@ import type { UserRole } from "@prisma/client";
 export interface CreateUserDto {
   email: string;
   fullName: string;
-  password: string;
+  passwordHash: string;
   role: UserRole;
+  isActive?: boolean;
 }
 
 export interface UpdateUserDto {
   fullName?: string;
-  password?: string;
+  passwordHash?: string;
   role?: UserRole;
   isActive?: boolean;
 }
@@ -22,6 +23,10 @@ export interface UserResponse {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface AuthUserResponse extends UserResponse {
+  passwordHash: string;
 }
 
 export interface PaginationParams {
@@ -45,6 +50,7 @@ export interface IUserRepository {
   findMany(params: PaginationParams): Promise<PaginatedResponse<UserResponse>>;
   findById(id: string): Promise<UserResponse | null>;
   findByEmail(email: string): Promise<UserResponse | null>;
+  findAuthByEmail(email: string): Promise<AuthUserResponse | null>;
   create(data: CreateUserDto): Promise<UserResponse>;
   update(id: string, data: UpdateUserDto): Promise<UserResponse>;
   delete(id: string): Promise<void>;

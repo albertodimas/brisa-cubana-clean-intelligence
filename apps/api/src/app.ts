@@ -1,11 +1,10 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { apiReference } from "@scalar/hono-api-reference";
-import { prisma } from "./lib/prisma.js";
 import { loggingMiddleware } from "./middleware/logging.js";
 import { initSentry, Sentry } from "./lib/sentry.js";
 import { openApiSpec } from "./lib/openapi-spec.js";
-import { initializeContainer } from "./container.js";
+import { getPrisma, initializeContainer } from "./container.js";
 import bookings from "./routes/bookings.js";
 import services from "./routes/services.js";
 import properties from "./routes/properties.js";
@@ -48,7 +47,7 @@ const rootHandler = (c: Context) =>
 
 const healthHandler = async (c: Context) => {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await getPrisma().$queryRaw`SELECT 1`;
     return c.json({
       checks: {
         uptime: Math.floor(process.uptime()),

@@ -1,4 +1,4 @@
-import type { PrismaClient, Service } from "@prisma/client";
+import type { Prisma, PrismaClient, Service } from "@prisma/client";
 import type {
   BaseRepository,
   FindManyOptions,
@@ -51,21 +51,31 @@ export class ServiceRepository
   async findManyPaginated(
     limit: number = 50,
     cursor?: string,
+    options: {
+      orderBy?:
+        | Prisma.ServiceOrderByWithRelationInput
+        | Prisma.ServiceOrderByWithRelationInput[];
+      where?: Prisma.ServiceWhereInput;
+    } = {},
   ): Promise<PaginatedResult<Service>> {
     const take = limit + 1; // Traer uno extra para saber si hay más
+    const { orderBy, where } = options;
 
     const services = await this.prisma.service.findMany({
+      where,
       take,
       ...(cursor && {
         skip: 1,
         cursor: { id: cursor },
       }),
-      orderBy: { createdAt: "desc" },
+      orderBy: orderBy ?? { createdAt: "desc" },
     });
 
     const hasMore = services.length > limit;
     const data = hasMore ? services.slice(0, limit) : services;
-    const nextCursor = hasMore ? data[data.length - 1]?.id : undefined;
+    const nextCursor = hasMore
+      ? (data[data.length - 1]?.id ?? undefined)
+      : undefined;
 
     return {
       data,

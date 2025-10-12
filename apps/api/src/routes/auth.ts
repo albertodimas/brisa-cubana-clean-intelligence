@@ -4,9 +4,9 @@ import { setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
 import * as bcrypt from "bcryptjs";
 import honoRateLimiter from "hono-rate-limiter";
-import { prisma } from "../lib/prisma.js";
 import { signAuthToken } from "../lib/jwt.js";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
+import { getUserRepository } from "../container.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -72,7 +72,8 @@ router.post("/login", async (c) => {
   }
 
   const { email, password } = parsed.data;
-  const user = await prisma.user.findUnique({ where: { email } });
+  const userRepository = getUserRepository();
+  const user = await userRepository.findAuthByEmail(email);
 
   if (!user) {
     return c.json({ error: "Invalid credentials" }, 401);
@@ -97,10 +98,13 @@ router.post("/login", async (c) => {
     return c.json({ error: "Invalid credentials" }, 401);
   }
 
+  const { passwordHash: _passwordHash, ...publicUser } = user;
+  void _passwordHash;
+
   const token = signAuthToken({
-    sub: user.id,
-    email: user.email,
-    role: user.role,
+    sub: publicUser.id,
+    email: publicUser.email,
+    role: publicUser.role,
   });
 
   const { secure, sameSite } = resolveCookiePolicy(c);
@@ -115,9 +119,9 @@ router.post("/login", async (c) => {
 
   return c.json({
     data: {
-      id: user.id,
-      email: user.email,
-      role: user.role,
+      id: publicUser.id,
+      email: publicUser.email,
+      role: publicUser.role,
     },
     token,
   });
