@@ -147,8 +147,10 @@ DEBUG="prisma:query"
 ```
 
 ```typescript
-// En código
-import { prisma } from "./lib/prisma.js";
+// En código (mantén la DI consistente)
+import { getPrisma } from "../container.js";
+
+const prisma = getPrisma();
 
 // Habilitar query logging
 prisma.$on("query", (e) => {

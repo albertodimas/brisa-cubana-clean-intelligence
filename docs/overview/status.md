@@ -400,10 +400,10 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 **Archivos refactorizados:**
 
 - `apps/web/app/actions.ts`: Extraída lógica de API client y tipos
-- `apps/api/src/routes/services.ts`: Migrado a paginación compartida y serializers
-- `apps/api/src/routes/properties.ts`: Migrado a paginación compartida y prisma-error-handler
-- `apps/api/src/routes/bookings.ts`: Migrado a serializers y prisma-error-handler
-- `apps/api/src/routes/users.ts`: Migrado a bcrypt-helpers y prisma-error-handler
+- `apps/api/src/routes/services.ts`: Usa el contenedor DI y delega en `ServiceRepository`
+- `apps/api/src/routes/properties.ts`: Usa `PropertyRepository` + paginación compartida
+- `apps/api/src/routes/bookings.ts`: Delegación a `BookingRepository` con serializers
+- `apps/api/src/routes/users.ts`: Delegación a `UserRepository` + bcrypt-helpers
 - `apps/web/components/services-manager.tsx`: Usa use-update-handler
 - `apps/web/components/properties-manager.tsx`: Usa use-update-handler
 - `apps/web/components/bookings-manager.tsx`: Usa use-update-handler
