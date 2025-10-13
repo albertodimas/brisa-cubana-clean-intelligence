@@ -157,8 +157,8 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 - **`apps/api`**: 31 pruebas unitarias Vitest (coverage thresholds: 85% lines, 65% functions, 50% branches)
 - **`apps/api`**: 60 pruebas de integración (incluyen validación de contratos OpenAPI)
-- **`apps/web`**: 1 prueba Vitest con threshold 70%
-- **Total**: 92 pruebas unitarias/integración passing
+- **`apps/web`**: 42 pruebas Vitest (hooks, server actions y componentes UI) con threshold 70%
+- **Total**: 133 pruebas unitarias/integración passing
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal

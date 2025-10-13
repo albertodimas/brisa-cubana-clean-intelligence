@@ -34,4 +34,8 @@ export default defineConfig({
       "next/server": "next/server.js",
     },
   },
+  esbuild: {
+    jsx: "automatic",
+    jsxImportSource: "react",
+  },
 });
