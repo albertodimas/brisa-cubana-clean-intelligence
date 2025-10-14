@@ -51,4 +51,4 @@ Cada fase debe:
 
 ---
 
-**Registro histórico:** Esta decisión se revisará después de ejecutar Fase 3 o antes del siguiente ciclo de release, lo que ocurra primero.
+**Registro histórico:** Esta decisión se revisará al retomar la Fase 5 o antes del siguiente ciclo de release, lo que ocurra primero.
