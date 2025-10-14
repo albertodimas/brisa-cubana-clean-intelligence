@@ -56,6 +56,7 @@ Diferir la actualización a Tailwind CSS v4 hasta Q1 2026.
 ## Seguimiento
 
 - Issue #40 “Phase 5: Tailwind v4 migration” abierto para coordinar la ejecución en Q1 2026.
+- Plan detallado documentado en [`docs/decisions/tailwind-v4-plan.md`](tailwind-v4-plan.md); actualizar antes de iniciar el sprint.
 - Revisar esta decisión en la planificación trimestral de Q1 2026.
 
 ---

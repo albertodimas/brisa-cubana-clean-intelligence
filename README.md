@@ -102,7 +102,7 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
 - Estado y métricas: `docs/overview/status.md`.
 - Quickstart de desarrollo local: `docs/guides/quickstart.md`.
 - Referencia API: `docs/reference/api-reference.md` + `docs/reference/openapi.yaml`.
-- Decisiones técnicas: `docs/decisions/dependency-updates.md` y `docs/decisions/tailwind-v4-deferral.md` (Issue #40).
+- Decisiones técnicas: `docs/decisions/dependency-updates.md`, `docs/decisions/tailwind-v4-deferral.md` y `docs/decisions/tailwind-v4-plan.md` (Issue #40).
 
 ## Desarrollo activo
 

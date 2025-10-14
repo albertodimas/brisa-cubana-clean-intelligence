@@ -316,8 +316,8 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 ### Pendiente 🔄
 
 1. **Fase 5 – Tailwind v4 (Issue #40, Q1 2026):**
-   - Investigar breaking changes y nueva configuración basada en CSS.
-   - Seguir el checklist de `docs/decisions/tailwind-v4-deferral.md` antes del merge.
+   - Ejecutar las Fases 5.1–5.6 detalladas en `docs/decisions/tailwind-v4-plan.md`.
+   - Validar hitos de la checklist de `docs/decisions/tailwind-v4-deferral.md` antes del merge.
    - Ejecutar QA visual en previews de Vercel y validar con stakeholders.
 
 2. **Observabilidad avanzada:**

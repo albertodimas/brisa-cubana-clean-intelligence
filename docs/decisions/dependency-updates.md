@@ -30,7 +30,7 @@
 | **Fase 2** (completada 14-oct-2025, PR #37) | Herramientas de desarrollo | Actualizar dev deps (PR #33) en rama dedicada. Añadir `@testing-library/dom` y ajustar configuración ESLint/TypeScript si es necesario.       |
 | **Fase 3** (completada 14-oct-2025, PR #38) | Prisma & bcrypt            | Rama `upgrade/major-deps-2025-10`: actualizar Prisma 6.17+, regenerar cliente, re-ejecutar seeds, ajustar `hashPassword`, revisar CodeQL.     |
 | **Fase 4** (completada 14-oct-2025, PR #39) | Zod 4.x                    | Migrar validaciones reemplazando `required_error`, revisar `safeParse` y tipos. Ejecutar test suite + contract tests.                         |
-| **Fase 5** (diferida Q1 2026)               | Tailwind 4.x               | Investigación de breaking changes, generar design tokens equivalentes, ajustar build (PostCSS), validar UI manualmente.                       |
+| **Fase 5** (diferida Q1 2026)               | Tailwind 4.x               | Ejecutar plan de migración documentado en `docs/decisions/tailwind-v4-plan.md` (upgrade tooling, config CSS, QA visual, rollout).             |
 
 Cada fase debe:
 
@@ -46,7 +46,7 @@ Cada fase debe:
 ## 5. Próximos pasos
 
 1. ~~Completar Fase 4 (Zod 4.x)~~ ✅ COMPLETADA (PR #39).
-2. Evaluar Fase 5 (Tailwind 4.x) – DIFERIDA para Q1 2026; ver `docs/decisions/tailwind-v4-deferral.md` e impulsar Issue #40 antes de retomar trabajos.
+2. Evaluar Fase 5 (Tailwind 4.x) – DIFERIDA para Q1 2026; revisar `docs/decisions/tailwind-v4-deferral.md` y el plan operativo `docs/decisions/tailwind-v4-plan.md` antes de retomar trabajos (Issue #40).
 3. Mantener Dependabot activo pero revisar manualmente cada PR conforme a esta estrategia.
 
 ---
