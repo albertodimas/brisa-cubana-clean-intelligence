@@ -259,11 +259,12 @@ test.describe("Seguridad y Autenticación", () => {
   });
 
   test.describe("Sesión y logout", () => {
-    test.use({ storageState: ADMIN_STORAGE_STATE_PATH });
-
     test("gestiona sesión (persistencia y logout) @critical", async ({
       page,
-    }) => {
+    }, testInfo) => {
+      // Login as admin first
+      await loginAsAdmin(page, testInfo);
+
       await page.goto("/");
       const sessionIndicator = page.getByText("Sesión:", { exact: false });
 
