@@ -16,6 +16,7 @@ export default defineConfig({
   fullyParallel: true,
   timeout: 60_000,
   retries: isCI ? 1 : 0,
+  globalSetup: "./tests/e2e/global.setup.ts",
   projects: [
     // Smoke Tests: Critical functionality only (~2-3s)
     {
