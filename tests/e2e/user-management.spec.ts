@@ -1,11 +1,35 @@
 import { expect, test } from "@playwright/test";
-import { loginAsAdmin, loginAsCoordinator } from "./support/auth";
+import {
+  adminEmail,
+  adminPassword,
+  loginAsAdmin,
+  loginAsCoordinator,
+} from "./support/auth";
+
+let cachedAdminToken: string | null = null;
 
 test.describe.serial("Gestión de usuarios", () => {
   let createdUser: {
     id: string;
     email: string;
   } | null = null;
+
+  async function getAdminToken(page: Parameters<typeof test>[0]["page"]) {
+    if (cachedAdminToken) {
+      return cachedAdminToken;
+    }
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+    const response = await page.request.post(
+      `${apiBase}/api/authentication/login`,
+      {
+        data: { email: adminEmail, password: adminPassword },
+      },
+    );
+    expect(response.status(), "admin login for API token").toBe(200);
+    const body = await response.json();
+    cachedAdminToken = body?.token as string;
+    return cachedAdminToken;
+  }
 
   async function createUserViaApi(
     page: Parameters<typeof test>[0]["page"],
@@ -16,27 +40,25 @@ test.describe.serial("Gestión de usuarios", () => {
       role: string;
     },
   ) {
-    return await page.evaluate(async (userPayload) => {
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(userPayload),
-      });
-      const body = await response.json();
-      return { status: response.status, body };
-    }, payload);
+    const token = await getAdminToken(page);
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+    const response = await page.request.post(`${apiBase}/api/users`, {
+      data: payload,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const body = await response.json();
+    return { status: response.status(), body };
   }
 
   async function deleteUserViaApi(
     page: Parameters<typeof test>[0]["page"],
     userId: string,
   ) {
-    await page.evaluate(async (id) => {
-      await fetch(`/api/users/${id}`, {
-        method: "DELETE",
-        headers: { "content-type": "application/json" },
-      });
-    }, userId);
+    const token = await getAdminToken(page);
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+    await page.request.delete(`${apiBase}/api/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   }
 
   test("Admin can create new user @critical", async ({ page }, testInfo) => {
@@ -45,6 +67,7 @@ test.describe.serial("Gestión de usuarios", () => {
     const uniqueSuffix = Date.now().toString(36);
     const email = `qa.user+${uniqueSuffix}@brisacubanaclean.test`;
     const fullName = `QA User ${uniqueSuffix}`;
+    const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     const { status, body } = await createUserViaApi(page, {
       email,
@@ -63,7 +86,7 @@ test.describe.serial("Gestión de usuarios", () => {
 
     await page.reload({ waitUntil: "networkidle" });
 
-    const row = page.getByRole("row", { name: new RegExp(email, "i") });
+    const row = page.getByRole("row", { name: new RegExp(escapedEmail, "i") });
     await expect(row).toBeVisible();
     await expect(row.getByText("STAFF").first()).toBeVisible();
   });
@@ -72,8 +95,12 @@ test.describe.serial("Gestión de usuarios", () => {
     test.skip(!createdUser, "Usuario de prueba no disponible");
     await loginAsAdmin(page, testInfo);
 
+    const escapedEmail = createdUser!.email.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&",
+    );
     const row = page.getByRole("row", {
-      name: new RegExp(createdUser!.email, "i"),
+      name: new RegExp(escapedEmail, "i"),
     });
     await expect(row).toBeVisible();
 
@@ -94,21 +121,31 @@ test.describe.serial("Gestión de usuarios", () => {
     test.skip(!createdUser, "Usuario de prueba no disponible");
     await loginAsAdmin(page, testInfo);
 
+    const escapedEmail = createdUser!.email.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&",
+    );
     const row = page.getByRole("row", {
-      name: new RegExp(createdUser!.email, "i"),
+      name: new RegExp(escapedEmail, "i"),
     });
     await expect(row).toBeVisible();
 
-    const checkbox = row.getByRole("checkbox", { name: "Activo" });
+    const checkbox = row
+      .getByRole("checkbox", { name: "Activo", exact: true })
+      .first();
     await expect(checkbox).toBeChecked();
 
     await checkbox.click();
     await expect(checkbox).not.toBeChecked();
-    await expect(row.getByText("Inactivo")).toBeVisible();
+    await expect(
+      row.locator("td").nth(3).getByText("Inactivo", { exact: true }),
+    ).toBeVisible();
 
     await checkbox.click();
     await expect(checkbox).toBeChecked();
-    await expect(row.getByText("Activo")).toBeVisible();
+    await expect(
+      row.locator("td").nth(3).getByText("Activo", { exact: true }),
+    ).toBeVisible();
 
     await deleteUserViaApi(page, createdUser!.id);
     createdUser = null;
