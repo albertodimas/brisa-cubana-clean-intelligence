@@ -23,9 +23,10 @@ function buildTargetUrl(request: NextRequest, segments: string[]) {
 
 async function proxy(
   request: NextRequest,
-  { params }: { params: { route: string[] } },
+  { params }: { params: Promise<{ route: string[] }> },
 ) {
-  const segments: string[] = params?.route ?? [];
+  const resolvedParams = await params;
+  const segments: string[] = resolvedParams?.route ?? [];
   const url = buildTargetUrl(request, segments);
   const headers = new Headers(request.headers);
   headers.delete("host");
