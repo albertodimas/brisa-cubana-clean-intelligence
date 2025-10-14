@@ -1,6 +1,6 @@
 # Checklist de Regresiones
 
-**Última actualización:** 8 de octubre de 2025
+**Última actualización:** 14 de octubre de 2025
 
 Este documento define los escenarios críticos que deben verificarse antes de cada despliegue a producción para prevenir regresiones.
 
@@ -43,7 +43,6 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] ADMIN puede crear/editar/eliminar todos los recursos
 - [ ] COORDINATOR puede crear/editar servicios, propiedades, reservas
 - [ ] CLIENT no puede crear servicios ni propiedades
-- [ ] CLIENT puede ver sus propias reservas (scope futuro)
 - [ ] Endpoints protegidos retornan 401 sin autenticación
 - [ ] Endpoints con permisos insuficientes retornan 403
 
@@ -76,6 +75,13 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Valida datos igual que creación
 - [ ] Retorna 404 si servicio no existe
 - [ ] Retorna servicio actualizado
+
+### 2.4 Eliminar Servicio (ADMIN)
+
+- [ ] DELETE `/api/services/:id` marca el servicio como eliminado (`deletedAt` no nulo)
+- [ ] Requiere autenticación y permisos ADMIN
+- [ ] Retorna 404 si el servicio no existe o ya fue eliminado
+- [ ] Servicio eliminado no aparece en listados (soft delete aplicado)
 
 ---
 
@@ -292,15 +298,6 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Errores incluyen stack traces (en desarrollo)
 - [ ] No se loguean datos sensibles (passwords, tokens)
 
-### 11.2 Alertas (cuando implementado)
-
-- [ ] Alerta en tasa de error > 5%
-- [ ] Alerta en latencia p99 > 2s
-- [ ] Alerta en tasa de login fallido > 20%
-- [ ] Alerta en uso de base de datos > 90%
-
----
-
 ## 12. Documentación
 
 ### 12.1 Consistencia
@@ -310,12 +307,6 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] docs/overview/status.md refleja estado real del proyecto
 - [ ] docs/operations/security.md tiene procedimientos vigentes
 - [ ] CHANGELOG.md tiene últimos cambios (si implementado)
-
-### 12.2 API Docs (futuro)
-
-- [ ] OpenAPI/Swagger disponible
-- [ ] Ejemplos de requests funcionan
-- [ ] Ejemplos de responses son actuales
 
 ---
 
@@ -338,18 +329,6 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - Verificar logs de Vercel
 - Ejecutar smoke tests en producción
 - Verificar métricas clave (latencia, errores)
-
----
-
-## Automatización Futura
-
-Estos checks deben automatizarse progresivamente:
-
-- [ ] Script de smoke tests post-deployment
-- [ ] Dashboard de métricas en tiempo real
-- [ ] Alertas automáticas en Slack/Email
-- [ ] Tests de carga periódicos
-- [ ] Auditoría de seguridad mensual
 
 ---
 

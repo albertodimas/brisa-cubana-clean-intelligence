@@ -1,6 +1,6 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 9 de octubre de 2025
+**Última actualización:** 14 de octubre de 2025
 **Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN)
 
 ---
@@ -307,20 +307,6 @@ logBusinessEvent("login_failed", {
 - **Grafana Cloud** (free tier): Visualización de logs estructurados
 - **Vercel Analytics** (incluido): Web Vitals y performance
 - **Neon Monitoring** (incluido): Database metrics
-
-**Setup futuro:**
-
-1. Exportar logs de Vercel a S3/GCS
-2. Ingerir logs en Grafana Loki
-3. Crear dashboards:
-   - Requests por endpoint
-   - Latencia por ruta
-   - Tasa de errores por tipo
-   - Usuarios activos
-   - Reservas creadas por día
-   - Rate limit hits
-
----
 
 ## 6. Health Checks
 

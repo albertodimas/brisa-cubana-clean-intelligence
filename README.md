@@ -1,26 +1,32 @@
 # Brisa Cubana Clean Intelligence
 
-Monorepo reiniciado para convertir el proyecto en una plataforma real y comprobable. El stack actual contiene:
+Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
+Actualizado al **14 de octubre de 2025** con **124 pruebas automatizadas** (Vitest + Playwright) pasando en CI.
 
-- **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`) con sesión gestionada por Auth.js (NextAuth v5) y panel operativo para alta/edición de servicios, propiedades y reservas con filtros dinámicos
-- **API:** Hono 4.9.10 (`apps/api`) con autenticación JWT, middlewares RBAC, rate limiting en `/api/auth/login` y CRUD completo para servicios, propiedades, clientes y reservas (incluye filtros por fecha/estado)
-- **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker Compose local)
-- **Herramientas base:** pnpm 10.18, Turborepo 2.5, TypeScript estricto y CI en GitHub Actions
+## Stack actualizado
 
-## Estado al 9 de octubre de 2025
+- **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`) con Auth.js (NextAuth v5), server actions y proxy interno `/api/*` hacia la API Hono (`INTERNAL_API_URL`).
+- **API:** Hono 4.9.10 (`apps/api`) sobre Node.js 22, autenticación JWT, RBAC por middleware, rate limiting configurable y repositorios Prisma desacoplados.
+- **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker local) / PostgreSQL 17 (Neon en producción) con soft delete (`deletedAt`) en todos los modelos.
+- **Observabilidad:** Logging con Pino, métricas básicas en `/health` y captura de errores con Sentry.
+- **Tooling base:** pnpm 10.18, Turborepo 2.5.8, TypeScript 5.9, Vitest 3.2, Playwright 1.56, Husky + lint-staged, CI en GitHub Actions.
 
-| Área          | Estado | Detalle                                                                                                                     |
-| ------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Frontend web  | 🟢     | Auth.js (cookies HttpOnly) + panel operativo con edición y filtros en vivo.                                                 |
-| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes) con filtros y pruebas.                                           |
-| Tests         | 🟢     | Vitest (`pnpm test`) + suites Playwright smoke/critical/full (`pnpm test:e2e:*`).                                           |
-| Documentación | 🟢     | README + quickstart + docs/overview/status.md actualizados y verificados.                                                   |
-| Deploy        | 🟢     | **API** https://brisa-cubana-clean-intelligence-api.vercel.app · **Web** https://brisa-cubana-clean-intelligence.vercel.app |
+## Estado al 14 de octubre de 2025
+
+| Área          | Estado | Detalle                                                                                                                      |
+| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Frontend web  | 🟢     | Panel operativo con filtros en vivo, gestión de usuarios (roles), formularios server action y proxy interno `/api/*`.        |
+| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes, usuarios) con repositorios, soft delete y rate limiting en login. |
+| Tests         | 🟢     | 124 pruebas: Vitest (unit/integration) + suites Playwright smoke/critical/full (`pnpm test:e2e:*`).                          |
+| Documentación | 🟢     | README, `docs/guides/quickstart.md`, `docs/overview/status.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados.      |
+| Deploy        | 🟢     | Web (Next.js) y API (Hono) corriendo en Vercel, conectados a PostgreSQL Neon; pipelines CI/CD verdes.                        |
 
 ## Requisitos
 
-- Node.js 22.11.0+ (compatible con Vercel, Node 24 LTS disponible en octubre 2025)
-- pnpm 10.18.0+ (`corepack enable`)
+- Node.js 22.x (LTS, compatible con Vercel).
+- pnpm 10.18 (`corepack enable` lo instala).
+- Docker 24+ (para PostgreSQL local).
+- Git 2.40+.
 
 ## Puesta en marcha
 
@@ -28,17 +34,11 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
    ```bash
    pnpm install
    ```
-2. Define variables de entorno:
-
+2. Copia variables de entorno:
    ```bash
-   # Copia el template y edita con tus valores locales
    cp apps/api/.env.example apps/api/.env.local
-
-   # El archivo .env.local ya contiene valores seguros por defecto para desarrollo local
-   # Ver docs/operations/security.md para más información sobre manejo de credenciales
    ```
-
-3. Levanta PostgreSQL (Docker Compose):
+3. Levanta PostgreSQL local:
    ```bash
    docker compose up -d
    ```
@@ -48,69 +48,59 @@ Monorepo reiniciado para convertir el proyecto en una plataforma real y comproba
    pnpm db:seed
    ```
 5. Ejecuta el stack (Next.js + API):
-
    ```bash
    pnpm dev -- --parallel
    ```
 
-   - API: <http://localhost:3001>
    - Web: <http://localhost:3000>
+   - API: <http://localhost:3001>
 
-Para ejecutar los test básicos:
+Para los tests de humo:
 
 ```bash
-pnpm test
+pnpm test           # Vitest en todos los paquetes
+pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera vez)
 ```
 
 ## Scripts útiles
 
-| Comando          | Descripción                                        |
-| ---------------- | -------------------------------------------------- |
-| `pnpm dev`       | Ejecuta los `dev` scripts en paralelo              |
-| `pnpm lint`      | Lanza ESLint en todos los paquetes                 |
-| `pnpm test`      | Ejecuta Vitest (`vitest run`) en cada paquete      |
-| `pnpm typecheck` | Verifica TypeScript en cada paquete                |
-| `pnpm test:e2e`  | Ejecuta Playwright (requiere servidores en marcha) |
-| `pnpm db:push`   | Sincroniza el esquema Prisma con PostgreSQL        |
-| `pnpm db:seed`   | Carga datos base (usuarios, servicios, bookings)   |
-| `pnpm build`     | Genera artefactos de producción (Next + API)       |
+| Comando                         | Descripción                                        |
+| ------------------------------- | -------------------------------------------------- |
+| `pnpm dev`                      | Ejecuta los `dev` scripts en paralelo (web + api). |
+| `pnpm lint`                     | ESLint sobre todos los paquetes.                   |
+| `pnpm typecheck`                | Verifica TypeScript de forma estricta.             |
+| `pnpm test`                     | Ejecuta Vitest (unit + integration).               |
+| `pnpm test:e2e:*`               | Ejecuta Playwright (`smoke`, `critical`, `full`).  |
+| `pnpm docs:verify`              | Valida la estructura mínima de documentación.      |
+| `pnpm db:push` / `pnpm db:seed` | Sincroniza y popula la base de datos local.        |
+| `pnpm build`                    | Compila Next.js y genera `dist` de la API.         |
+| `pnpm format`                   | Ejecuta Prettier en código y markdown.             |
 
-## Deploy en Producción
+## Infraestructura y despliegue
 
-- **API en Vercel:** https://brisa-cubana-clean-intelligence-api.vercel.app
-- **Web en Vercel:** https://brisa-cubana-clean-intelligence.vercel.app
-
-Endpoints verificados funcionando (API):
-
-- `GET /health` - Health check con estado de la base de datos
-- `GET /` - Información de la API (nombre, versión, timestamp)
-- `GET /api/services` - Listar servicios
-- `GET /api/properties` - Listar propiedades
-- `GET /api/bookings` - Listar reservas (acepta filtros `?from=` y `?to=`)
-
-La base de datos de producción está conectada (PostgreSQL en Neon). Los endpoints POST/PATCH requieren autenticación JWT.
-
-## Documentación
-
-- [`docs/guides/quickstart.md`](docs/guides/quickstart.md): onboarding local paso a paso (verificado).
-- [`docs/reference/openapi.yaml`](docs/reference/openapi.yaml): especificación OpenAPI 3.1 de la API (actualizada al 9 de octubre de 2025).
-- Documentación API disponible en `/api/docs` (Scalar UI).
-- [`CHANGELOG.md`](CHANGELOG.md): historial verificado de cambios aplicados al código y automatizaciones.
+- **Producción Vercel:**
+  - Web: https://brisa-cubana-clean-intelligence.vercel.app
+  - API: https://brisa-cubana-clean-intelligence-api.vercel.app
+- **Base de datos:** PostgreSQL Neon (17) con seed de usuarios, servicios, propiedades y reservas demo.
+- **Proxy interno:** La web reexpone `/api/*` hacia la API Hono vía `INTERNAL_API_URL`, evitando exponer secretos en el navegador.
+- **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API).
 
 ## Autenticación y RBAC
 
-- Login API: `POST http://localhost:3001/api/authentication/login` con `email` y `password`.
-  - Credenciales sembradas: `admin@brisacubanaclean.com / Brisa123!` y `ops@brisacubanaclean.com / Brisa123!`.
-- La web usa Auth.js (NextAuth v5) para guardar el JWT en cookies HttpOnly (`AUTH_SECRET`) y obtener el bearer token en cada server action.
-- El login aplica rate limiting configurable (`LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`) y endurece cookies (`SameSite=Strict`, `Secure`) cuando la aplicación se sirve vía HTTPS.
-- Endpoints protegidos (`POST /api/services`, `PATCH /api/services/:id`, `POST/PATCH /api/bookings`, `GET /api/customers`) requieren rol `ADMIN` o `COORDINATOR`.
-- El `API_TOKEN` queda reservado para integraciones servidor-servidor; la UI ya no depende de él y exige sesión real.
-- Los usuarios con rol `ADMIN` pueden listar y actualizar roles/contraseñas mediante `/api/users` y el panel operativo.
+- Login API (`POST /api/authentication/login`) con rate limiting configurable (`LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`).
+- Credenciales sembradas: `admin@brisacubanaclean.com / Brisa123!`, `ops@brisacubanaclean.com / Brisa123!`, `client@brisacubanaclean.com / Brisa123!`.
+- Cookies HttpOnly gestionadas por Auth.js; el panel muestra la sesión activa y permite cerrar sesión con seguridad.
+- Endpoints protegidos (`/api/services`, `/api/properties`, `/api/bookings`, `/api/users`, `/api/customers`) exigen roles `ADMIN` o `COORDINATOR`.
+- `API_TOKEN` reservado para integraciones servidor-servidor (la UI no depende de él).
+- Rotación de contraseñas y actualización de roles disponibles para usuarios `ADMIN` desde la UI y la API.
+
+## Documentación verificada
+
+- Índice maestro: `docs/README.md` (estructura por dominios y reglas de mantenimiento).
+- Estado y métricas: `docs/overview/status.md`.
+- Quickstart de desarrollo local: `docs/guides/quickstart.md`.
+- Referencia API: `docs/reference/api-reference.md` + `docs/reference/openapi.yaml`.
 
 ## Desarrollo activo
 
-El proyecto está en fase de desarrollo local activo. Solo se documenta funcionalidad verificada y probada.
-
----
-
-Cualquier contribución debe mantener la regla de oro: **solo documentamos lo que existe y ha sido probado.**
+El proyecto continúa en desarrollo controlado. Se aceptan contribuciones que mantengan la regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI.** Usa `pnpm docs:verify` antes de abrir un PR y mantén Playwright/Vitest verdes.

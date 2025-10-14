@@ -47,7 +47,7 @@ cp apps/api/.env.example apps/api/.env.local
 
 ```bash
 # En .env.local
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/brisa_cubana_dev"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev"
 ```
 
 ### 3. Levantar PostgreSQL local
@@ -143,5 +143,5 @@ Antes de cada commit:
 
 ---
 
-**Última actualización:** 8 de octubre de 2025
+**Última actualización:** 14 de octubre de 2025
 **Mantenido por:** Equipo Brisa Cubana

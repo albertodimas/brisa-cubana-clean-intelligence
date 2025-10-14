@@ -32,6 +32,8 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    # Para más información sobre seguridad, ver docs/operations/security.md
    ```
 
+   > El contenedor de PostgreSQL expone el puerto **5433** en tu máquina (`postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev`).
+
 4. **Levantar PostgreSQL (local)**
    ```bash
    docker compose up -d

@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [0.2.6] - 2025-10-14
+
+### Changed
+
+- Sincronizado el índice maestro de documentación (`docs/README.md`) y el README raíz con enlaces por dominio.
+- Actualizados los manuales de seguridad, quickstart y archivos `.env` para usar PostgreSQL local en `localhost:5433`.
+- Referencia API revisada para reflejar endpoints vigentes (incluye `DELETE /api/services/:id`) y eliminar secciones aspiracionales.
+
+### Fixed
+
+- `pnpm docs:verify` vuelve a pasar tras restaurar la estructura esperada y alinear fechas de revisión (14/oct/2025).
+- Checklist de regresión ahora cubre el flujo de eliminación de servicios con soft delete.
+
 ## [0.2.5] - 2025-10-12
 
 ### Added

@@ -335,7 +335,6 @@ test("Admin can create new user", async ({ page }) => {
 
 - ✅ Nunca exponer `passwordHash` en responses
 - ✅ Logs de auditoría para cambios de usuarios (recomendado)
-- ✅ 2FA para admins (futuro)
 - ✅ Password policies enforcement
 - ✅ Session timeout después de inactividad
 

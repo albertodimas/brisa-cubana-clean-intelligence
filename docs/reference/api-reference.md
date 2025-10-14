@@ -1,6 +1,6 @@
 # API Documentation - OpenAPI/Swagger
 
-**Última actualización:** 11 de octubre de 2025
+**Última actualización:** 14 de octubre de 2025
 
 ---
 
@@ -135,6 +135,7 @@ security:
 - `GET /api/services` - Listar servicios (público)
 - `POST /api/services` - Crear servicio (ADMIN/COORDINATOR)
 - `PATCH /api/services/{serviceId}` - Actualizar servicio (ADMIN/COORDINATOR)
+- `DELETE /api/services/{serviceId}` - Desactivar servicio (ADMIN, soft delete)
 
 ### Properties
 
@@ -597,21 +598,7 @@ pnpm dev
 - [Hono Framework](https://hono.dev/)
 - [Scalar for Hono](https://guides.scalar.com/scalar/scalar-api-references/integrations/hono)
 
----
-
-## Próximas Mejoras
-
-- [ ] Agregar ejemplos de autenticación en cada endpoint
-- [ ] Documentar rate limits específicos por endpoint
-- [ ] Agregar diagramas de flujo de autenticación
-- [ ] Webhooks documentation (futuro)
-- [ ] API changelog automático desde Git commits
-- [ ] Versioning con `/v1/`, `/v2/` paths (futuro)
-- [ ] GraphQL schema documentation (si se implementa)
-
----
-
-**Última actualización:** 9 de octubre de 2025
+**Última actualización:** 14 de octubre de 2025
 **Versión de la API:** 0.1.0
 **Versión de OpenAPI:** 3.1.0
 **Interfaz:** Scalar API Reference v0.9.21

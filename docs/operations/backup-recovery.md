@@ -1,6 +1,6 @@
 # Backup y Recuperación de Datos
 
-**Última actualización:** 8 de octubre de 2025
+**Última actualización:** 14 de octubre de 2025
 **Responsable:** Equipo DevOps
 **Base de datos productiva:** Neon PostgreSQL 17
 
