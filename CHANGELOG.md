@@ -4,11 +4,16 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [0.2.6] - 2025-10-14
 
+### Added
+
+- Nueva entrada en `docs/operations/backup-log.md` con verificación local de `scripts/verify-backup.sh` (14/oct/2025).
+
 ### Changed
 
 - Sincronizado el índice maestro de documentación (`docs/README.md`) y el README raíz con enlaces por dominio.
 - Actualizados los manuales de seguridad, quickstart y archivos `.env` para usar PostgreSQL local en `localhost:5433`.
 - Referencia API revisada para reflejar endpoints vigentes (incluye `DELETE /api/services/:id`) y eliminar secciones aspiracionales.
+- Versiones internas `@brisa/api` y `@brisa/web` alineadas a 0.2.6 para mantener semver homogéneo.
 
 ### Fixed
 

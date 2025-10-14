@@ -2,9 +2,9 @@
 
 Registro verificado de ejecuciones de respaldo para Brisa Cubana Clean Intelligence. Completa una entrada cada vez que se ejecuta `scripts/verify-backup.sh` o se realiza un `pg_dump` manual.
 
-| Fecha (UTC) | Ejecutado por | Procedimiento | Resultado | Evidencia |
-| ----------- | ------------- | ------------- | --------- | --------- |
-| _Pendiente_ | —             | —             | —         | —         |
+| Fecha (UTC) | Ejecutado por | Procedimiento                                 | Resultado | Evidencia                                         |
+| ----------- | ------------- | --------------------------------------------- | --------- | ------------------------------------------------- |
+| 2025-10-14  | Codex (local) | `scripts/verify-backup.sh` contra base seeded | ✅ OK     | `scripts/verify-backup.sh` log (`localhost:5433`) |
 
 ## Cómo registrar un respaldo
 

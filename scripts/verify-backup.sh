@@ -38,20 +38,19 @@ echo ""
 # Verificar conteos de tablas críticas
 echo "📊 Verificando conteos de tablas críticas..."
 COUNTS=$(psql "$DATABASE_URL" -t -A -F'|' <<EOF
-SELECT 'User' AS table, COUNT(*) FROM "User"
+SELECT 'User' AS table_name, COUNT(*) FROM "User"
 UNION ALL SELECT 'Service', COUNT(*) FROM "Service"
 UNION ALL SELECT 'Property', COUNT(*) FROM "Property"
 UNION ALL SELECT 'Booking', COUNT(*) FROM "Booking"
-UNION ALL SELECT 'RefreshToken', COUNT(*) FROM "RefreshToken"
-ORDER BY table;
+ORDER BY table_name;
 EOF
 )
 
-echo "$COUNTS" | while IFS='|' read -r table count; do
+echo "$COUNTS" | while IFS='|' read -r table_name count; do
   if [ "$count" = "0" ]; then
-    echo -e "  ${YELLOW}⚠️  $table: $count registros (vacía)${NC}"
+    echo -e "  ${YELLOW}⚠️  $table_name: $count registros (vacía)${NC}"
   else
-    echo -e "  ${GREEN}✅ $table: $count registros${NC}"
+    echo -e "  ${GREEN}✅ $table_name: $count registros${NC}"
   fi
 done
 echo ""
