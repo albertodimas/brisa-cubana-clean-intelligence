@@ -170,8 +170,8 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 | Suite    | Tests | Duración | Comando                  |
 | -------- | ----- | -------- | ------------------------ |
 | Smoke    | 2     | ~7s      | `pnpm test:e2e:smoke`    |
-| Critical | 7     | ~8s      | `pnpm test:e2e:critical` |
-| Full     | 13    | ~8s      | `pnpm test:e2e:full`     |
+| Critical | 10    | ~9s      | `pnpm test:e2e:critical` |
+| Full     | 18    | ~10s     | `pnpm test:e2e:full`     |
 
 **Documentación:** [`qa/e2e-strategy.md`](../qa/e2e-strategy.md)
 
@@ -307,7 +307,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 5. ✅ OpenAPI/Swagger: Documentación automática con Scalar UI en `/docs`
 6. ✅ Observabilidad: Sentry integrado en web y API con error tracking
 7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
-8. ✅ E2E Testing: 13 tests con estrategia piramidal (smoke/critical/full)
+8. ✅ E2E Testing: 18 tests con estrategia piramidal (smoke/critical/full)
 9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)
 10. ✅ Paginación cursor-based: `/api/bookings`, `/api/services`, `/api/properties`, `/api/users`, `/api/customers`
 11. ✅ Code Coverage: Configurado con V8 provider y thresholds automáticos (API: 85%, Web: 70%)
@@ -329,6 +329,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 3. **Roadmap funcional:**
    - Sistema de estilos compartido (definir tras migración Tailwind v4)
    - Notificaciones push para coordinadores
+   - Búsqueda y filtros en listados (plan detallado en `docs/decisions/search-filters-plan.md`)
    - UI de paginación en frontend (infinite scroll / load more)
 
 4. **Arquitectura (Sprint 2-3):**

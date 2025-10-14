@@ -3,6 +3,10 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 export const adminEmail =
   process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanaclean.com";
 export const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? "Brisa123!";
+export const coordinatorEmail =
+  process.env.E2E_COORDINATOR_EMAIL ?? "ops@brisacubanaclean.com";
+export const coordinatorPassword =
+  process.env.E2E_COORDINATOR_PASSWORD ?? "Brisa123!";
 export const ADMIN_STORAGE_STATE_PATH =
   process.env.E2E_ADMIN_STATE_PATH ?? "tests/e2e/.auth/admin.json";
 
@@ -15,18 +19,22 @@ export function ipForTest(testInfo: TestInfo): string {
   return `198.51.101.${octet}`;
 }
 
-export async function loginAsAdmin(
+export async function loginWithCredentials(
   page: Page,
   testInfo: TestInfo,
-  { retries = 4 }: { retries?: number } = {},
+  {
+    email,
+    password,
+    retries = 4,
+  }: { email: string; password: string; retries?: number },
 ) {
   const ip = ipForTest(testInfo);
   await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
 
   for (let attempt = 0; attempt < retries; attempt++) {
     await page.goto("/login", { waitUntil: "domcontentloaded" });
-    await page.getByLabel("Correo").fill(adminEmail);
-    await page.getByLabel("Contraseña").fill(adminPassword);
+    await page.getByLabel("Correo").fill(email);
+    await page.getByLabel("Contraseña").fill(password);
 
     let navigationSucceeded = false;
     await Promise.all([
@@ -72,4 +80,28 @@ export async function loginAsAdmin(
     await expect(panelHeading).toBeVisible({ timeout: 10_000 });
     return;
   }
+}
+
+export async function loginAsAdmin(
+  page: Page,
+  testInfo: TestInfo,
+  options: { retries?: number } = {},
+) {
+  await loginWithCredentials(page, testInfo, {
+    email: adminEmail,
+    password: adminPassword,
+    retries: options.retries ?? 4,
+  });
+}
+
+export async function loginAsCoordinator(
+  page: Page,
+  testInfo: TestInfo,
+  options: { retries?: number } = {},
+) {
+  await loginWithCredentials(page, testInfo, {
+    email: coordinatorEmail,
+    password: coordinatorPassword,
+    retries: options.retries ?? 4,
+  });
 }
