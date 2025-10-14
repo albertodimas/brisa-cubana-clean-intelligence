@@ -54,7 +54,7 @@ Cada fase debe:
 ## 6. Verificación de release 0.2.8
 
 - Etiqueta `v0.2.8` publicada el 14-oct-2025 con CRUD 100 % RESTful (soft delete en servicios, propiedades, reservas y usuarios) y validación `isActive` en login.
-- Despliegues Vercel (`vercel[bot]`) y pipelines (`CI`, `CodeQL`) ejecutándose en verde sobre el commit del tag.
+- Despliegues Vercel (`vercel[bot]`) y pipelines (`CI`, `CodeQL`) ejecutándose en verde sobre el commit `5254ef4`.
 - Cambios documentados en `CHANGELOG.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados con la versión 0.2.8.
 
 **Registro histórico:** Esta decisión se revisará al retomar la Fase 5 o antes del siguiente ciclo de release, lo que ocurra primero.
