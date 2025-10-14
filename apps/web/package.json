@@ -11,7 +11,7 @@
     "test": "VITE_CJS_IGNORE_WARNING=true vitest run"
   },
   "dependencies": {
-    "next": "15.5.4",
+    "next": "15.5.5",
     "next-auth": "5.0.0-beta.29",
     "react": "19.2.0",
     "react-dom": "19.2.0"
