@@ -1,7 +1,7 @@
 # Brisa Cubana Clean Intelligence
 
 Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
-Actualizado al **14 de octubre de 2025** con **129 pruebas automatizadas** (Vitest + Playwright) pasando en CI; release etiquetado como **v0.2.8** tras completar las Fases 1-4 y consolidar el CRUD completo.
+Actualizado al **14 de octubre de 2025** con **150 pruebas automatizadas** (131 unit/integration + 19 E2E) pasando en CI; release etiquetado como **v0.3.0** tras completar Sprint 1 con paginación visible en la UI.
 
 ## Stack actualizado
 
@@ -18,7 +18,7 @@ Actualizado al **14 de octubre de 2025** con **129 pruebas automatizadas** (Vite
 | ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | Frontend web  | 🟢     | Panel operativo con filtros en vivo, gestión de usuarios (roles), formularios server action y proxy interno `/api/*`.        |
 | API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes, usuarios) con repositorios, soft delete y rate limiting en login. |
-| Tests         | 🟢     | 124 pruebas: Vitest (unit/integration) + suites Playwright smoke/critical/full (`pnpm test:e2e:*`).                          |
+| Tests         | 🟢     | 131 pruebas unitarias/integración + 19 E2E (smoke/critical/full); `pnpm test`, `pnpm test:e2e:*`.                            |
 | Documentación | 🟢     | README, `docs/guides/quickstart.md`, `docs/overview/status.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados.      |
 | Deploy        | 🟢     | Web (Next.js) y API (Hono) corriendo en Vercel, conectados a PostgreSQL Neon; pipelines CI/CD verdes.                        |
 

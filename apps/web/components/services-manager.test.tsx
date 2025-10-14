@@ -2,7 +2,7 @@ import React from "react";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { Service } from "@/lib/api";
+import type { PaginationInfo, Service } from "@/lib/api";
 import { ServicesManager } from "./services-manager";
 
 type ActionResult = { success?: string; error?: string };
@@ -14,7 +14,7 @@ function getFormAction(
     key.startsWith("__reactProps$"),
   );
   if (!reactPropsKey) {
-    throw new Error("Unable to locate React props for form");
+    throw new Error("Unable to locate React action props");
   }
   const props = (
     form as unknown as Record<
@@ -35,58 +35,60 @@ const baseService: Service = {
   updatedAt: "2025-10-12T10:00:00.000Z",
 };
 
-const defaultCreate = async (_form: FormData): Promise<ActionResult> => ({
-  success: "ok",
-});
+const pageInfo: PaginationInfo = {
+  limit: 50,
+  cursor: null,
+  nextCursor: null,
+  hasMore: false,
+};
 
-const defaultUpdate = async (
-  _id: string,
-  _form: FormData,
-): Promise<ActionResult> => ({ success: "ok" });
+const defaultCreate = async (): Promise<ActionResult> => ({ success: "ok" });
+const defaultUpdate = async (): Promise<ActionResult> => ({ success: "ok" });
+const defaultToggle = async (): Promise<ActionResult> => ({ success: "ok" });
 
-const defaultToggle = async (
-  _id: string,
-  _active: boolean,
-): Promise<ActionResult> => ({ success: "ok" });
+function renderManager(
+  overrides: Partial<React.ComponentProps<typeof ServicesManager>> = {},
+) {
+  const onToast = vi.fn();
+  const onRefresh = vi.fn();
+  const props: React.ComponentProps<typeof ServicesManager> = {
+    services: [],
+    createService: defaultCreate,
+    updateService: defaultUpdate,
+    toggleService: defaultToggle,
+    onToast,
+    pageInfo,
+    isLoading: false,
+    isLoadingMore: false,
+    onLoadMore: vi.fn(),
+    onRefresh,
+    ...overrides,
+  };
+
+  const utils = render(<ServicesManager {...props} />);
+  return { ...props, onToast, onRefresh, utils };
+}
 
 describe("ServicesManager", () => {
-  it("renders empty state when no services loaded", () => {
-    const onToast = vi.fn();
-
-    render(
-      <ServicesManager
-        services={[]}
-        createService={defaultCreate}
-        updateService={defaultUpdate}
-        toggleService={defaultToggle}
-        onToast={onToast}
-      />,
-    );
-
+  it("renders fallback when list is empty", () => {
+    const { onToast } = renderManager();
+    expect(onToast).not.toHaveBeenCalled();
     expect(
       screen.getByText("No hay servicios configurados todavía."),
     ).toBeInTheDocument();
   });
 
-  it("executes createService action and shows success toast", async () => {
+  it("executes createService action and refreshes data on success", async () => {
     const createService = vi
       .fn<(formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ success: "Servicio creado" });
-    const onToast = vi.fn();
-
-    render(
-      <ServicesManager
-        services={[]}
-        createService={createService}
-        updateService={defaultUpdate}
-        toggleService={defaultToggle}
-        onToast={onToast}
-      />,
-    );
+    const { onToast, onRefresh } = renderManager({
+      createService,
+    });
 
     const form = screen.getByTestId("service-create-form") as HTMLFormElement;
     const action = getFormAction(form);
-    if (!action) throw new Error("Missing action handler");
+    if (!action) throw new Error("Missing form action");
 
     await act(async () => {
       await action(new FormData());
@@ -94,50 +96,87 @@ describe("ServicesManager", () => {
 
     expect(createService).toHaveBeenCalledTimes(1);
     expect(onToast).toHaveBeenCalledWith("Servicio creado", "success");
+    expect(onRefresh).toHaveBeenCalled();
   });
 
-  it("shows error toast when createService fails", async () => {
+  it("propagates errors from createService without refreshing", async () => {
     const createService = vi
       .fn<(formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ error: "Duplicado" });
-    const onToast = vi.fn();
-
-    render(
-      <ServicesManager
-        services={[]}
-        createService={createService}
-        updateService={defaultUpdate}
-        toggleService={defaultToggle}
-        onToast={onToast}
-      />,
-    );
+    const { onToast, onRefresh } = renderManager({ createService });
 
     const form = screen.getByTestId("service-create-form") as HTMLFormElement;
     const action = getFormAction(form);
-    if (!action) throw new Error("Missing action handler");
+    if (!action) throw new Error("Missing form action");
 
     await act(async () => {
       await action(new FormData());
     });
 
     expect(onToast).toHaveBeenCalledWith("Duplicado", "error");
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 
-  it("toggles service state through action button", async () => {
+  it("invokes update flow and triggers refresh on success", async () => {
+    const updateService = vi
+      .fn<(serviceId: string, formData: FormData) => Promise<ActionResult>>()
+      .mockResolvedValue({ success: "Servicio actualizado" });
+    const { onToast, onRefresh } = renderManager({
+      services: [baseService],
+      updateService,
+    });
+
+    const card = screen.getByText(baseService.name).closest("form");
+    if (!(card instanceof HTMLFormElement)) {
+      throw new Error("Service form not found");
+    }
+    const action = getFormAction(card);
+    if (!action) throw new Error("Missing service action");
+
+    await act(async () => {
+      await action(new FormData());
+    });
+
+    expect(updateService).toHaveBeenCalledWith(
+      baseService.id,
+      expect.any(FormData),
+    );
+    expect(onToast).toHaveBeenCalledWith("Servicio actualizado", "success");
+    expect(onRefresh).toHaveBeenCalled();
+  });
+
+  it("does not refresh when update fails", async () => {
+    const updateService = vi
+      .fn<(serviceId: string, formData: FormData) => Promise<ActionResult>>()
+      .mockResolvedValue({ error: "Sin cambios" });
+    const { onToast, onRefresh } = renderManager({
+      services: [baseService],
+      updateService,
+    });
+
+    const card = screen.getByText(baseService.name).closest("form");
+    if (!(card instanceof HTMLFormElement)) {
+      throw new Error("Service form not found");
+    }
+    const action = getFormAction(card);
+    if (!action) throw new Error("Missing service action");
+
+    await act(async () => {
+      await action(new FormData());
+    });
+
+    expect(onToast).toHaveBeenCalledWith("Sin cambios", "error");
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
+  it("toggles service availability and requests refresh on success", async () => {
     const toggleService = vi
       .fn<(serviceId: string, active: boolean) => Promise<ActionResult>>()
       .mockResolvedValue({ success: "Actualizado" });
-    const onToast = vi.fn();
-
-    render(
-      <ServicesManager
-        services={[baseService]}
-        createService={defaultCreate}
-        updateService={defaultUpdate}
-        toggleService={toggleService}
-        onToast={onToast}
-      />,
-    );
+    const { onToast, onRefresh } = renderManager({
+      services: [baseService],
+      toggleService,
+    });
 
     const user = userEvent.setup();
     const card = screen.getByText(baseService.name).closest("form");
@@ -150,90 +189,17 @@ describe("ServicesManager", () => {
 
     expect(toggleService).toHaveBeenCalledWith(baseService.id, false);
     expect(onToast).toHaveBeenCalledWith("Actualizado", "success");
+    expect(onRefresh).toHaveBeenCalled();
   });
 
-  it("submits inline update forms and shows toast on success", async () => {
-    const updateService = vi
-      .fn<(serviceId: string, formData: FormData) => Promise<ActionResult>>()
-      .mockResolvedValue({ success: "Servicio actualizado" });
-    const onToast = vi.fn();
-
-    render(
-      <ServicesManager
-        services={[baseService]}
-        createService={defaultCreate}
-        updateService={updateService}
-        toggleService={defaultToggle}
-        onToast={onToast}
-      />,
-    );
-
-    const card = screen.getByText(baseService.name).closest("form");
-    if (!(card instanceof HTMLFormElement)) {
-      throw new Error("Service form not found");
-    }
-    const action = getFormAction(card);
-    if (!action) throw new Error("Missing service form action");
-
-    const formData = new FormData();
-    formData.set("serviceName", "Express Clean");
-
-    await act(async () => {
-      await action(formData);
-    });
-
-    expect(updateService).toHaveBeenCalledWith(
-      baseService.id,
-      expect.any(FormData),
-    );
-    expect(onToast).toHaveBeenCalledWith("Servicio actualizado", "success");
-  });
-
-  it("surfaces errors from inline update forms", async () => {
-    const updateService = vi
-      .fn<(serviceId: string, formData: FormData) => Promise<ActionResult>>()
-      .mockResolvedValue({ error: "Sin cambios" });
-    const onToast = vi.fn();
-
-    render(
-      <ServicesManager
-        services={[baseService]}
-        createService={defaultCreate}
-        updateService={updateService}
-        toggleService={defaultToggle}
-        onToast={onToast}
-      />,
-    );
-
-    const form = screen.getByText(baseService.name).closest("form");
-    if (!(form instanceof HTMLFormElement)) {
-      throw new Error("Service form not found");
-    }
-    const action = getFormAction(form);
-    if (!action) throw new Error("Missing form action");
-
-    await act(async () => {
-      await action(new FormData());
-    });
-
-    expect(onToast).toHaveBeenCalledWith("Sin cambios", "error");
-  });
-
-  it("notifies errors when toggling service fails", async () => {
+  it("surfaces toggle errors without refreshing data", async () => {
     const toggleService = vi
       .fn<(serviceId: string, active: boolean) => Promise<ActionResult>>()
       .mockResolvedValue({ error: "No se pudo actualizar" });
-    const onToast = vi.fn();
-
-    render(
-      <ServicesManager
-        services={[baseService]}
-        createService={defaultCreate}
-        updateService={defaultUpdate}
-        toggleService={toggleService}
-        onToast={onToast}
-      />,
-    );
+    const { onToast, onRefresh } = renderManager({
+      services: [baseService],
+      toggleService,
+    });
 
     const user = userEvent.setup();
     const card = screen.getByText(baseService.name).closest("form");
@@ -245,5 +211,6 @@ describe("ServicesManager", () => {
     await user.click(toggleButton);
 
     expect(onToast).toHaveBeenCalledWith("No se pudo actualizar", "error");
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 });

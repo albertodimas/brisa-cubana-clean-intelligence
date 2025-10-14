@@ -2,7 +2,7 @@ import React from "react";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { Customer, Property } from "@/lib/api";
+import type { Customer, Property, PaginationInfo } from "@/lib/api";
 import { PropertiesManager } from "./properties-manager";
 
 type ActionResult = { success?: string; error?: string };
@@ -28,6 +28,13 @@ function getFormAction(
 const customers: Customer[] = [
   { id: "cus-1", email: "owner@demo.com", fullName: "Owner Demo" },
 ];
+
+const pageInfo: PaginationInfo = {
+  limit: 50,
+  cursor: null,
+  nextCursor: null,
+  hasMore: false,
+};
 
 const baseProperty: Property = {
   id: "prop-1",
@@ -56,6 +63,11 @@ describe("PropertiesManager", () => {
         createProperty={async () => ({ success: "ok" })}
         updateProperty={async () => ({ success: "ok" })}
         onToast={onToast}
+        pageInfo={pageInfo}
+        isLoading={false}
+        isLoadingMore={false}
+        onLoadMore={vi.fn()}
+        onRefresh={vi.fn()}
       />,
     );
 
@@ -69,6 +81,7 @@ describe("PropertiesManager", () => {
       .fn<(formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ success: "Propiedad creada" });
     const onToast = vi.fn();
+    const onRefresh = vi.fn();
 
     render(
       <PropertiesManager
@@ -77,6 +90,11 @@ describe("PropertiesManager", () => {
         createProperty={createProperty}
         updateProperty={async () => ({ success: "ok" })}
         onToast={onToast}
+        pageInfo={pageInfo}
+        isLoading={false}
+        isLoadingMore={false}
+        onLoadMore={vi.fn()}
+        onRefresh={onRefresh}
       />,
     );
 
@@ -92,6 +110,7 @@ describe("PropertiesManager", () => {
 
     expect(createProperty).toHaveBeenCalledTimes(1);
     expect(onToast).toHaveBeenCalledWith("Propiedad creada", "success");
+    expect(onRefresh).toHaveBeenCalled();
   });
 
   it("calls updateProperty and displays feedback", async () => {
@@ -99,6 +118,7 @@ describe("PropertiesManager", () => {
       .fn<(propertyId: string, formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ error: "Conflicto" });
     const onToast = vi.fn();
+    const onRefresh = vi.fn();
 
     render(
       <PropertiesManager
@@ -107,6 +127,11 @@ describe("PropertiesManager", () => {
         createProperty={async () => ({ success: "ok" })}
         updateProperty={updateProperty}
         onToast={onToast}
+        pageInfo={pageInfo}
+        isLoading={false}
+        isLoadingMore={false}
+        onLoadMore={vi.fn()}
+        onRefresh={onRefresh}
       />,
     );
 
@@ -134,6 +159,7 @@ describe("PropertiesManager", () => {
       expect.any(FormData),
     );
     expect(onToast).toHaveBeenCalledWith("Conflicto", "error");
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 
   it("shows success toast and forwards payload on property update", async () => {
@@ -141,6 +167,7 @@ describe("PropertiesManager", () => {
       .fn<(propertyId: string, formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ success: "Propiedad actualizada" });
     const onToast = vi.fn();
+    const onRefresh = vi.fn();
 
     render(
       <PropertiesManager
@@ -149,6 +176,11 @@ describe("PropertiesManager", () => {
         createProperty={async () => ({ success: "ok" })}
         updateProperty={updateProperty}
         onToast={onToast}
+        pageInfo={pageInfo}
+        isLoading={false}
+        isLoadingMore={false}
+        onLoadMore={vi.fn()}
+        onRefresh={onRefresh}
       />,
     );
 
@@ -171,5 +203,6 @@ describe("PropertiesManager", () => {
       expect.any(FormData),
     );
     expect(onToast).toHaveBeenCalledWith("Propiedad actualizada", "success");
+    expect(onRefresh).toHaveBeenCalled();
   });
 });

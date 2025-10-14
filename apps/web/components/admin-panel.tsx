@@ -100,9 +100,44 @@ export function AdminPanel({
   const router = useRouter();
   const { showToast } = useToast();
 
-  const serviceList = useMemo(() => services.items, [services.items]);
-  const propertyList = useMemo(() => properties.items, [properties.items]);
-  const customerList = useMemo(() => customers.items, [customers.items]);
+  const {
+    items: serviceItems,
+    pageInfo: servicePageInfo,
+    isLoading: isServicesRefreshing,
+    isLoadingMore: isLoadingMoreServices,
+    loadMore: loadMoreServices,
+    refresh: refreshServices,
+  } = usePaginatedResource<Service>({
+    initial: services,
+    endpoint: "/api/services",
+    initialQuery: { limit: services.pageInfo.limit },
+  });
+
+  const {
+    items: propertyItems,
+    pageInfo: propertyPageInfo,
+    isLoading: isPropertiesRefreshing,
+    isLoadingMore: isLoadingMoreProperties,
+    loadMore: loadMoreProperties,
+    refresh: refreshProperties,
+  } = usePaginatedResource<Property>({
+    initial: properties,
+    endpoint: "/api/properties",
+    initialQuery: { limit: properties.pageInfo.limit },
+  });
+
+  const {
+    items: customerItems,
+    pageInfo: customerPageInfo,
+    isLoading: isCustomersRefreshing,
+    isLoadingMore: isLoadingMoreCustomers,
+    loadMore: loadMoreCustomers,
+    refresh: refreshCustomers,
+  } = usePaginatedResource<Customer>({
+    initial: customers,
+    endpoint: "/api/customers",
+    initialQuery: { limit: customers.pageInfo.limit },
+  });
 
   const BOOKINGS_PAGE_SIZE = 10;
 
@@ -283,11 +318,16 @@ export function AdminPanel({
       </Card>
 
       <ServicesManager
-        services={serviceList}
+        services={serviceItems}
         createService={createService}
         updateService={updateService}
         toggleService={toggleService}
         onToast={showToast}
+        pageInfo={servicePageInfo}
+        isLoading={isServicesRefreshing}
+        isLoadingMore={isLoadingMoreServices}
+        onLoadMore={loadMoreServices}
+        onRefresh={refreshServices}
       />
 
       <BookingsManager
@@ -300,18 +340,29 @@ export function AdminPanel({
         onLoadMore={loadMoreBookings}
         onUpdate={handleBookingUpdate}
         updatingId={bookingUpdatingId}
-        services={serviceList}
-        properties={propertyList}
+        services={serviceItems}
+        properties={propertyItems}
         formatDateTime={formatDateTimeLocal}
       />
-      <CustomersManager customers={customerList} />
+      <CustomersManager
+        customers={customerItems}
+        pageInfo={customerPageInfo}
+        isLoading={isCustomersRefreshing}
+        isLoadingMore={isLoadingMoreCustomers}
+        onLoadMore={loadMoreCustomers}
+      />
 
       <PropertiesManager
-        properties={propertyList}
-        customers={customerList}
+        properties={propertyItems}
+        customers={customerItems}
         createProperty={createProperty}
         updateProperty={updateProperty}
         onToast={showToast}
+        pageInfo={propertyPageInfo}
+        isLoading={isPropertiesRefreshing}
+        isLoadingMore={isLoadingMoreProperties}
+        onLoadMore={loadMoreProperties}
+        onRefresh={refreshProperties}
       />
 
       {currentUser?.role === "ADMIN" ? (
@@ -466,7 +517,7 @@ export function AdminPanel({
             <span className="ui-field__label">Servicio</span>
             <select name="bookingService" required className="ui-input">
               <option value="">Selecciona servicio</option>
-              {serviceList.map((service) => (
+              {serviceItems.map((service) => (
                 <option key={service.id} value={service.id}>
                   {service.name}
                 </option>
@@ -477,7 +528,7 @@ export function AdminPanel({
             <span className="ui-field__label">Propiedad</span>
             <select name="bookingProperty" required className="ui-input">
               <option value="">Selecciona propiedad</option>
-              {propertyList.map((property) => (
+              {propertyItems.map((property) => (
                 <option key={property.id} value={property.id}>
                   {property.label} ({property.city})
                 </option>
@@ -488,7 +539,7 @@ export function AdminPanel({
             <span className="ui-field__label">Cliente</span>
             <select name="bookingCustomer" required className="ui-input">
               <option value="">Selecciona cliente</option>
-              {customerList.map((customer) => (
+              {customerItems.map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.fullName ?? customer.email}
                 </option>

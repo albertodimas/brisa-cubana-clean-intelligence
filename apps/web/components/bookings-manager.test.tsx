@@ -191,7 +191,7 @@ describe("BookingsManager", () => {
       />,
     );
 
-    const button = screen.getByRole("button", { name: "Cargar más reservas" });
+    const button = screen.getByRole("button", { name: "Cargar más" });
     await user.click(button);
 
     expect(onLoadMore).toHaveBeenCalled();

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { Property, Customer } from "@/lib/api";
+import type { Property, Customer, PaginationInfo } from "@/lib/api";
 import { Button } from "./ui/button";
+import { Pagination } from "./ui/pagination";
+import { Skeleton } from "./ui/skeleton";
 
 type ActionResult = {
   success?: string;
@@ -18,6 +20,11 @@ type PropertiesManagerProps = {
     formData: FormData,
   ) => Promise<ActionResult>;
   onToast: (message: string, type: "success" | "error") => void;
+  pageInfo: PaginationInfo;
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => Promise<void> | void;
+  onRefresh: () => Promise<void> | void;
 };
 
 export function PropertiesManager({
@@ -26,6 +33,11 @@ export function PropertiesManager({
   createProperty,
   updateProperty,
   onToast,
+  pageInfo,
+  isLoading,
+  isLoadingMore,
+  onLoadMore,
+  onRefresh,
 }: PropertiesManagerProps) {
   const [propertyUpdatingId, setPropertyUpdatingId] = useState<string | null>(
     null,
@@ -40,6 +52,7 @@ export function PropertiesManager({
       onToast(result.error, "error");
     } else if (result.success) {
       onToast(result.success, "success");
+      await onRefresh();
     }
   }
 
@@ -55,6 +68,7 @@ export function PropertiesManager({
               onToast(result.error, "error");
             } else if (result.success) {
               onToast(result.success, "success");
+              await onRefresh();
             }
           })
         }
@@ -168,7 +182,17 @@ export function PropertiesManager({
       {/* Manage Properties List */}
       <section className="ui-stack">
         <h3 className="ui-section-title">Inventario de propiedades</h3>
-        {properties.length === 0 ? (
+        {isLoading ? (
+          <div className="grid gap-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="ui-panel-surface">
+                <Skeleton className="h-5 w-48 mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            ))}
+          </div>
+        ) : properties.length === 0 ? (
           <p className="ui-helper-text">
             Aún no tienes propiedades registradas.
           </p>
@@ -316,6 +340,13 @@ export function PropertiesManager({
                 </Button>
               </form>
             ))}
+            <Pagination
+              count={properties.length}
+              hasMore={pageInfo.hasMore}
+              isLoading={isLoadingMore}
+              onLoadMore={onLoadMore}
+              label="propiedades"
+            />
           </div>
         )}
       </section>

@@ -1,13 +1,13 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 129 tests passing)
+**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 131 tests passing)
 
 ---
 
 ## 1. Resumen ejecutivo
 
 - Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
-- Versionado actual: `@brisa/api` 0.2.9 · `@brisa/web` 0.2.9 (tag `v0.2.9`, 14-oct-2025).
+- Versionado actual: `@brisa/api` 0.3.0 · `@brisa/web` 0.3.0 (tag `v0.3.0`, 14-oct-2025).
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
@@ -15,7 +15,7 @@
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
-- Release etiquetado `v0.2.9` (14-oct-2025) completando Sprint 1 (soft delete, guardas de login, suite E2E de usuarios, plan de búsqueda/filtros); Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
+- Release etiquetado `v0.3.0` (14-oct-2025) completa Sprint 1 con paginación visible en la UI; Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
@@ -34,6 +34,7 @@
     - `lib/api-client.ts`: Cliente HTTP reutilizable con manejo de errores
     - `hooks/use-update-handler.ts`: Hook personalizado para manejar actualizaciones con debounce
     - `hooks/use-paginated-resource.ts`: Hook para paginación cursor-based
+  - Componente UI `Pagination` con contador y botón “Cargar más” integrado en paneles de servicios, propiedades, reservas y clientes.
 
 - **API (apps/api)**
   - Hono 4.9.12 corriendo en Vercel Node 22.
@@ -75,6 +76,7 @@
   - Actualizar servicios/properties/reservas.
   - Cambiar estado `active` de servicios.
   - Filtrar reservas por estado y rango de fechas con paginación remota y carga incremental.
+  - Controles de paginación visibles (contador + botón “Cargar más”) en servicios, propiedades, reservas y clientes con loaders esqueléticos durante el refresh.
   - UI reestilizada con tokens (`ui-field`, `ui-input`, `ui-panel-surface`) para formularios y acciones.
   - Cerrar sesión.
 - Proxy `/api/*` funciona para GET/POST/PATCH (sin CORS en el browser).
@@ -160,9 +162,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 - **`apps/api`**: 87 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI)
   - Coverage thresholds: 85% lines, 65% functions, 50% branches
-- **`apps/web`**: 42 pruebas Vitest (hooks, server actions y componentes UI)
+- **`apps/web`**: 44 pruebas Vitest (hooks, server actions y componentes UI)
   - Coverage threshold: 70%
-- **Total**: 129 pruebas unitarias/integración passing
+- **Total**: 131 pruebas unitarias/integración passing
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal

@@ -338,24 +338,24 @@ Ubicación: `tests/e2e/operations.spec.ts`
 - ✅ Navegación entre páginas con cursor
 - ✅ Validación de límites
 
-## Próximos Pasos
+## UI de Paginación (Frontend)
 
-### Endpoints Pendientes
+### Estado actual (14-oct-2025)
 
-1. **GET /api/users** (solo ADMIN)
-   - Mismo patrón de paginación
-   - Límite sugerido: 100 (lista administrativa)
+- Componente reusable `Pagination` en `apps/web/components/ui/pagination.tsx`.
+- Muestra contador “Mostrando X de Y registros” y botón “Cargar más” con estados de carga y mensaje “No hay más resultados”.
+- Integrado en los managers de servicios, propiedades, reservas y clientes, refrescando datos tras crear/actualizar/togglear elementos.
+- Cobertura de pruebas:
+  - `apps/web/components/ui/pagination.test.tsx`
+  - `apps/web/components/services-manager.test.tsx`
+  - `apps/web/components/properties-manager.test.tsx`
+  - `apps/web/components/bookings-manager.test.tsx`
+- Validado via `pnpm test:e2e:smoke` para garantizar la experiencia end-to-end.
 
-2. **GET /api/customers** (ADMIN/COORDINATOR)
-   - Mismo patrón de paginación
-   - Límite sugerido: 50
+### Próximos pasos sugeridos
 
-### UI de Paginación
-
-- Implementar componente de paginación en frontend
-- Infinite scroll para mobile
-- Load more button para desktop
-- Indicadores de progreso (página X de Y estimado)
+- Explorar infinite scroll adaptativo para mobile como mejora opcional.
+- Añadir métricas de paginación (total estimado) cuando la API exponga conteos.
 
 ## Referencias
 
@@ -365,10 +365,11 @@ Ubicación: `tests/e2e/operations.spec.ts`
 
 ---
 
-**Última actualización**: 10 de octubre de 2025
-**Implementado en**: v0.2.1
+**Última actualización**: 14 de octubre de 2025
+**Implementado en**: v0.3.0 (API + UI)
 
 ### Changelog
 
 - **v0.2.1** (9 octubre 2025): Paginación implementada en `/api/bookings`
 - **v0.2.2** (10 octubre 2025): Paginación implementada en `/api/services` y `/api/properties`
+- **v0.3.0** (14 octubre 2025): Controles de paginación visibles en frontend (`Pagination` UI component)

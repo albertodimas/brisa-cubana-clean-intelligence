@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [0.3.0] - 2025-10-14
+
+### Added
+
+- Componente UI `Pagination` (`apps/web/components/ui/pagination.tsx`) con botón “Cargar más”, contador de elementos mostrados y mensaje final.
+- Prueba unitaria dedicada del componente y nuevas coberturas para los managers (`services`, `properties`, `bookings`, `customers`).
+
+### Changed
+
+- Panel operativo muestra controles de paginación visibles en servicios, propiedades, reservas y clientes, con loaders esqueléticos durante refresh.
+- `AdminPanel` reutiliza `usePaginatedResource` para sincronizar datos tras altas/actualizaciones y mantener la paginación consistente.
+- Documentación actualizada (`docs/product/pagination.md`, `docs/overview/status.md`, README) para reflejar la UI de paginación y nuevos conteos de pruebas.
+
+### Testing
+
+- `pnpm --filter @brisa/web test` (Vitest, 44 pruebas) ✔️
+- `pnpm test:e2e:smoke` (Playwright) ✔️
+
 ## [0.2.9] - 2025-10-14
 
 ### Added

@@ -2,8 +2,10 @@
 
 import { useFormStatus } from "react-dom";
 import { useState, useTransition, type ReactNode } from "react";
-import type { Service } from "@/lib/api";
+import type { Service, PaginationInfo } from "@/lib/api";
 import { Button } from "./ui/button";
+import { Pagination } from "./ui/pagination";
+import { Skeleton } from "./ui/skeleton";
 
 type ActionResult = {
   success?: string;
@@ -28,6 +30,11 @@ type ServicesManagerProps = {
   ) => Promise<ActionResult>;
   toggleService: (serviceId: string, active: boolean) => Promise<ActionResult>;
   onToast: (message: string, type: "success" | "error") => void;
+  pageInfo: PaginationInfo;
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => Promise<void> | void;
+  onRefresh: () => Promise<void> | void;
 };
 
 export function ServicesManager({
@@ -36,6 +43,11 @@ export function ServicesManager({
   updateService,
   toggleService,
   onToast,
+  pageInfo,
+  isLoading,
+  isLoadingMore,
+  onLoadMore,
+  onRefresh,
 }: ServicesManagerProps) {
   const [serviceUpdatingId, setServiceUpdatingId] = useState<string | null>(
     null,
@@ -53,6 +65,7 @@ export function ServicesManager({
       onToast(result.error, "error");
     } else if (result.success) {
       onToast(result.success, "success");
+      await onRefresh();
     }
   }
 
@@ -72,6 +85,7 @@ export function ServicesManager({
               onToast(result.error, "error");
             } else if (result.success) {
               onToast(result.success, "success");
+              await onRefresh();
             }
           }}
           className="ui-stack"
@@ -125,7 +139,21 @@ export function ServicesManager({
       {/* Manage Services List */}
       <section className="ui-stack">
         <h3 className="ui-section-title">Gestionar servicios</h3>
-        {services.length === 0 ? (
+        {isLoading ? (
+          <div className="grid gap-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="ui-panel-surface">
+                <Skeleton className="h-5 w-40 mb-2" />
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-32 mt-3" />
+              </div>
+            ))}
+          </div>
+        ) : services.length === 0 ? (
           <p className="ui-helper-text">
             No hay servicios configurados todavía.
           </p>
@@ -239,6 +267,7 @@ export function ServicesManager({
                             onToast(result.error, "error");
                           } else if (result.success) {
                             onToast(result.success, "success");
+                            await onRefresh();
                           }
                         } finally {
                           setTogglingServiceId(null);
@@ -251,6 +280,13 @@ export function ServicesManager({
                 </div>
               </form>
             ))}
+            <Pagination
+              count={services.length}
+              hasMore={pageInfo.hasMore}
+              isLoading={isLoadingMore}
+              onLoadMore={onLoadMore}
+              label="servicios"
+            />
           </div>
         )}
       </section>

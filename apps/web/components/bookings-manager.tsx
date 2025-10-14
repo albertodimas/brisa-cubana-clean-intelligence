@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "./ui/button";
+import { Pagination } from "./ui/pagination";
 import { Skeleton } from "./ui/skeleton";
 import type { Booking, PaginationInfo, Property, Service } from "@/lib/api";
 
@@ -214,21 +215,15 @@ export function BookingsManager({
               </Button>
             </form>
           ))}
+          <Pagination
+            count={bookings.length}
+            hasMore={pageInfo.hasMore}
+            isLoading={isLoadingMore}
+            onLoadMore={onLoadMore}
+            label="reservas"
+          />
         </div>
       )}
-
-      {pageInfo.hasMore ? (
-        <Button
-          type="button"
-          variant="ghost"
-          className="max-w-fit"
-          isLoading={isLoadingMore}
-          disabled={isLoadingMore}
-          onClick={() => onLoadMore()}
-        >
-          Cargar más reservas
-        </Button>
-      ) : null}
     </section>
   );
 }
