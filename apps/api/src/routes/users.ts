@@ -129,4 +129,24 @@ router.patch("/:userId", authenticate, requireRoles(["ADMIN"]), async (c) => {
   }
 });
 
+router.delete("/:userId", authenticate, requireRoles(["ADMIN"]), async (c) => {
+  const id = c.req.param("userId");
+  const authUser = getAuthenticatedUser(c);
+
+  if (authUser?.id === id) {
+    return c.json({ error: "No puedes eliminar tu propia cuenta" }, 400);
+  }
+
+  try {
+    const repository = getUserRepository();
+    await repository.delete(id);
+    return c.json({ message: "User deleted successfully" });
+  } catch (error) {
+    return handlePrismaError(c, error, {
+      notFound: "User not found",
+      default: "No se pudo eliminar el usuario",
+    });
+  }
+});
+
 export default router;

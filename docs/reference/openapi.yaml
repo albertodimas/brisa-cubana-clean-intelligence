@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Brisa Cubana Clean Intelligence API
-  version: "0.2.6"
+  version: "0.2.8"
   description: |
     API REST oficial para la plataforma Brisa Cubana Clean Intelligence.
     Todas las rutas están operativas en producción a partir del 9 de octubre de 2025.
@@ -42,6 +42,12 @@ paths:
                 $ref: '#/components/schemas/LoginResponse'
         '401':
           description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Cuenta desactivada
           content:
             application/json:
               schema:
@@ -198,6 +204,27 @@ paths:
           description: Sin permisos
         '404':
           description: Servicio no encontrado
+    delete:
+      tags: [Services]
+      summary: Realiza soft delete de un servicio
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ServiceIdParam'
+      responses:
+        '200':
+          description: Servicio eliminado lógicamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Servicio no encontrado
   /api/properties:
     get:
       tags: [Properties]
@@ -281,6 +308,27 @@ paths:
           description: Sin permisos
         '404':
           description: Propiedad no encontrada
+    delete:
+      tags: [Properties]
+      summary: Realiza soft delete de una propiedad
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PropertyIdParam'
+      responses:
+        '200':
+          description: Propiedad eliminada lógicamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Propiedad no encontrada
   /api/customers:
     get:
       tags: [Customers]
@@ -341,6 +389,29 @@ paths:
                 $ref: '#/components/schemas/UserResponse'
         '400':
           description: Datos inválidos
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Usuario no encontrado
+    delete:
+      tags: [Users]
+      summary: Realiza soft delete de un usuario
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Usuario eliminado lógicamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Operación inválida (ej. intentar eliminarse a sí mismo)
         '401':
           description: No autenticado
         '403':
@@ -467,6 +538,27 @@ paths:
           description: Sin permisos
         '404':
           description: Reserva no encontrada
+    delete:
+      tags: [Bookings]
+      summary: Realiza soft delete de una reserva
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookingIdParam'
+      responses:
+        '200':
+          description: Reserva eliminada lógicamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos
+        '404':
+          description: Reserva no encontrada
 components:
   securitySchemes:
     bearerAuth:
@@ -515,6 +607,11 @@ components:
             - type: string
             - type: object
               description: Estructura de errores Zod serializada
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
     LoginRequest:
       type: object
       required: [email, password]

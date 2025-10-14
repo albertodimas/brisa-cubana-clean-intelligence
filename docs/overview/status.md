@@ -1,13 +1,13 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 124 tests passing)
+**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 129 tests passing)
 
 ---
 
 ## 1. Resumen ejecutivo
 
 - Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
-- Versionado actual: `@brisa/api` 0.2.6 · `@brisa/web` 0.2.6 (tag `v0.2.7`, 14-oct-2025).
+- Versionado actual: `@brisa/api` 0.2.8 · `@brisa/web` 0.2.8 (tag `v0.2.8`, 14-oct-2025).
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
@@ -15,7 +15,7 @@
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
-- Release etiquetado `v0.2.7` (14-oct-2025) consolidando la modernización de dependencias Fases 1-4; Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
+- Release etiquetado `v0.2.8` (14-oct-2025) con CRUD 100% RESTful (soft delete en servicios, propiedades, reservas y usuarios) y endurecimiento de autenticación; Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
@@ -46,6 +46,7 @@
     - `lib/pagination.ts`: Lógica de paginación cursor-based reutilizable
     - `lib/validation.ts`: Esquemas de validación Zod compartidos
     - `lib/bcrypt-helpers.ts`: Helpers para hashing de contraseñas
+  - Soft delete expuesto en servicios, propiedades, reservas y usuarios (`DELETE`); la autenticación rechaza cuentas desactivadas.
   - **Repository pattern** registrado en `container.ts` (`ServiceRepository`, `BookingRepository`, `PropertyRepository`, `UserRepository`, `CustomerRepository`) para desacoplar rutas de Prisma y facilitar tests; rutas `services`, `bookings`, `properties`, `customers`, `users` y `auth` ahora resuelven los repositories vía el contenedor y los tests de integración verifican esa delegación.
 
 - **Datos y persistencia**
@@ -157,11 +158,11 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 82 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI)
+- **`apps/api`**: 87 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI)
   - Coverage thresholds: 85% lines, 65% functions, 50% branches
 - **`apps/web`**: 42 pruebas Vitest (hooks, server actions y componentes UI)
   - Coverage threshold: 70%
-- **Total**: 124 pruebas unitarias/integración passing
+- **Total**: 129 pruebas unitarias/integración passing
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal

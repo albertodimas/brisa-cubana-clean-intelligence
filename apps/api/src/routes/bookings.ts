@@ -252,4 +252,24 @@ router.patch(
   },
 );
 
+router.delete(
+  "/:id",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR"]),
+  async (c) => {
+    const id = c.req.param("id");
+
+    try {
+      const repository = getBookingRepository();
+      await repository.delete(id);
+      return c.json({ message: "Booking deleted successfully" });
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        notFound: "Reserva no encontrada",
+        default: "No se pudo eliminar la reserva",
+      });
+    }
+  },
+);
+
 export default router;

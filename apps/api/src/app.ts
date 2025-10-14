@@ -31,7 +31,7 @@ app.use(
   "*",
   cors({
     origin: allowedOrigins,
-    allowMethods: ["GET", "POST", "PATCH", "OPTIONS"],
+    allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
@@ -41,7 +41,7 @@ const rootHandler = (c: Context) =>
   c.json({
     service: "Brisa Cubana Clean Intelligence API",
     status: "ok",
-    version: "0.2.6",
+    version: "0.2.8",
     timestamp: new Date().toISOString(),
   });
 

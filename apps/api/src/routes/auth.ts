@@ -79,6 +79,10 @@ router.post("/login", async (c) => {
     return c.json({ error: "Invalid credentials" }, 401);
   }
 
+  if (!user.isActive) {
+    return c.json({ error: "Account has been deactivated" }, 403);
+  }
+
   const namespace = bcrypt as unknown as {
     compare?: typeof bcrypt.compare;
     default?: { compare?: typeof bcrypt.compare };

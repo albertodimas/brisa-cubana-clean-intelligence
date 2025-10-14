@@ -87,4 +87,19 @@ router.patch(
   },
 );
 
+router.delete("/:id", authenticate, requireRoles(["ADMIN"]), async (c) => {
+  const id = c.req.param("id");
+
+  try {
+    const repository = getPropertyRepository();
+    await repository.delete(id);
+    return c.json({ message: "Property deleted successfully" });
+  } catch (error) {
+    return handlePrismaError(c, error, {
+      notFound: "Propiedad no encontrada",
+      default: "No se pudo eliminar la propiedad",
+    });
+  }
+});
+
 export default router;

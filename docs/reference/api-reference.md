@@ -60,7 +60,7 @@ Especificación completa en formato JSON, útil para:
 openapi: 3.1.0
 info:
   title: Brisa Cubana Clean Intelligence API
-  version: 0.2.6
+  version: 0.2.8
   description: API para gestión de servicios de limpieza, reservas, propiedades y usuarios
   contact:
     name: Brisa Cubana Support
@@ -129,6 +129,7 @@ security:
 - `GET /api/users` - Listar todos los usuarios
 - `POST /api/users` - Crear nuevo usuario
 - `PATCH /api/users/{userId}` - Actualizar usuario
+- `DELETE /api/users/{userId}` - Desactivar usuario (ADMIN, soft delete)
 
 ### Services
 
@@ -142,12 +143,14 @@ security:
 - `GET /api/properties` - Listar propiedades (público)
 - `POST /api/properties` - Crear propiedad (ADMIN/COORDINATOR)
 - `PATCH /api/properties/{propertyId}` - Actualizar propiedad (ADMIN/COORDINATOR)
+- `DELETE /api/properties/{propertyId}` - Desactivar propiedad (ADMIN, soft delete)
 
 ### Bookings
 
 - `GET /api/bookings` - Listar reservas (con filtros)
 - `POST /api/bookings` - Crear reserva (ADMIN/COORDINATOR)
 - `PATCH /api/bookings/{bookingId}` - Actualizar reserva
+- `DELETE /api/bookings/{bookingId}` - Desactivar reserva (ADMIN/COORDINATOR, soft delete)
 
 ### Customers
 
@@ -511,13 +514,13 @@ La versión de la API está sincronizada con `apps/api/package.json`:
 
 ```json
 {
-  "version": "0.2.6"
+  "version": "0.2.8"
 }
 ```
 
 Cuando haya breaking changes:
 
-1. Incrementar `MAJOR` version (0.2.6 → 1.0.0)
+1. Incrementar `MAJOR` version (0.2.8 → 1.0.0)
 2. Actualizar `openapi-spec.ts`:
    ```typescript
    info: {
@@ -599,6 +602,6 @@ pnpm dev
 - [Scalar for Hono](https://guides.scalar.com/scalar/scalar-api-references/integrations/hono)
 
 **Última actualización:** 14 de octubre de 2025
-**Versión de la API:** 0.2.6
+**Versión de la API:** 0.2.8
 **Versión de OpenAPI:** 3.1.0
 **Interfaz:** Scalar API Reference v0.9.21

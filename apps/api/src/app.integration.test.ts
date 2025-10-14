@@ -274,22 +274,74 @@ const mockPrisma = {
     findUnique: vi
       .fn()
       .mockImplementation(async ({ where }: { where: any }) => {
-        if (where.id) {
-          return usersFixture.find((item) => item.id === where.id) ?? null;
+        const match = (() => {
+          if (where.id) {
+            return usersFixture.find((item) => item.id === where.id) ?? null;
+          }
+          if (where.email) {
+            return (
+              usersFixture.find((item) => item.email === where.email) ?? null
+            );
+          }
+          return null;
+        })();
+        if (match?.deletedAt) {
+          return null;
         }
-        if (where.email) {
-          return (
-            usersFixture.find((item) => item.email === where.email) ?? null
-          );
-        }
-        return null;
+        return match;
       }),
-    findMany: vi.fn().mockImplementation(async ({ where }: { where?: any }) => {
-      if (where?.role === "CLIENT") {
-        return usersFixture.filter((user) => user.role === "CLIENT");
-      }
-      return usersFixture;
-    }),
+    findMany: vi.fn().mockImplementation(
+      async ({
+        where,
+        take,
+        skip,
+        cursor,
+        select,
+      }: {
+        where?: any;
+        take?: number;
+        skip?: number;
+        cursor?: { id: string };
+        select?: Record<string, boolean>;
+      } = {}) => {
+        let filtered = usersFixture.filter((user) => user.deletedAt === null);
+
+        if (where?.role) {
+          filtered = filtered.filter((user) => user.role === where.role);
+        }
+
+        if (cursor?.id) {
+          const cursorIndex = filtered.findIndex(
+            (user) => user.id === cursor.id,
+          );
+          if (cursorIndex !== -1) {
+            filtered = filtered.slice(cursorIndex);
+          }
+        }
+
+        if (skip) {
+          filtered = filtered.slice(skip);
+        }
+
+        if (take) {
+          filtered = filtered.slice(0, take);
+        }
+
+        if (select) {
+          return filtered.map((user) => {
+            const picked: Record<string, unknown> = {};
+            for (const key of Object.keys(select)) {
+              if (select[key]) {
+                picked[key] = (user as any)[key];
+              }
+            }
+            return picked;
+          });
+        }
+
+        return filtered;
+      },
+    ),
     create: vi.fn().mockImplementation(async ({ data, select }: any) => {
       if (usersFixture.some((user) => user.email === data.email)) {
         const error: any = new Error(
@@ -305,6 +357,7 @@ const mockPrisma = {
         createdAt: new Date(),
         updatedAt: new Date(),
         ...data,
+        deletedAt: null,
       };
       usersFixture.push(record);
       if (select) {
@@ -810,6 +863,37 @@ describe("app", () => {
     expect(json.data.service.id).toBe(service.id);
   });
 
+  it("soft deletes a booking", async () => {
+    const service = servicesFixture[0];
+    const createRes = await app.request("/api/bookings", {
+      method: "POST",
+      headers: authorizedHeaders,
+      body: JSON.stringify({
+        customerId: makeCuid(101),
+        propertyId: makeCuid(201),
+        serviceId: service.id,
+        scheduledAt: new Date().toISOString(),
+      }),
+    });
+    expect(createRes.status).toBe(201);
+    const created = await createRes.json();
+
+    const res = await app.request(`/api/bookings/${created.data.id}`, {
+      method: "DELETE",
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toBe("Booking deleted successfully");
+
+    const list = await app.request("/api/bookings");
+    const listJson = await list.json();
+    expect(
+      listJson.data.some((booking: any) => booking.id === created.data.id),
+    ).toBe(false);
+  });
+
   it("updates a booking", async () => {
     const res = await app.request("/api/bookings/booking_fixture_1", {
       method: "PATCH",
@@ -951,6 +1035,40 @@ describe("app", () => {
     expect(json.data.notes).toBe("Actualizada");
   });
 
+  it("soft deletes a property", async () => {
+    const createRes = await app.request("/api/properties", {
+      method: "POST",
+      headers: authorizedHeaders,
+      body: JSON.stringify({
+        label: "Ocean Breeze Condo",
+        addressLine: "250 Ocean Dr",
+        city: "Miami",
+        state: "FL",
+        zipCode: "33139",
+        type: "VACATION_RENTAL",
+        ownerId: makeCuid(101),
+      }),
+    });
+
+    expect(createRes.status).toBe(201);
+    const created = await createRes.json();
+
+    const res = await app.request(`/api/properties/${created.data.id}`, {
+      method: "DELETE",
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toBe("Property deleted successfully");
+
+    const list = await app.request("/api/properties");
+    const listJson = await list.json();
+    expect(
+      listJson.data.some((property: any) => property.id === created.data.id),
+    ).toBe(false);
+  });
+
   it("lists customers with authorization", async () => {
     const res = await app.request("/api/customers", {
       headers: authorizedHeaders,
@@ -1073,6 +1191,55 @@ describe("app", () => {
     expect(mockHash).toHaveBeenCalledWith("NuevoPass123", 10);
   });
 
+  it("prevents admins from deleting themselves", async () => {
+    const self = usersFixture[1];
+
+    const res = await app.request(`/api/users/${self.id}`, {
+      method: "DELETE",
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toBe("No puedes eliminar tu propia cuenta");
+  });
+
+  it("soft deletes a user", async () => {
+    const createRes = await app.request("/api/users", {
+      method: "POST",
+      headers: {
+        ...authorizedHeaders,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        email: "delete.me@test.com",
+        fullName: "Usuario Temporal",
+        role: "STAFF",
+        password: "Temporal123",
+      }),
+    });
+
+    expect(createRes.status).toBe(201);
+    const created = await createRes.json();
+
+    const res = await app.request(`/api/users/${created.data.id}`, {
+      method: "DELETE",
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toBe("User deleted successfully");
+
+    const list = await app.request("/api/users", {
+      headers: authorizedHeaders,
+    });
+    const listJson = await list.json();
+    expect(listJson.data.some((user: any) => user.id === created.data.id)).toBe(
+      false,
+    );
+  });
+
   it("logs in a user and returns a token", async () => {
     const res = await app.request("/api/authentication/login", {
       method: "POST",
@@ -1087,6 +1254,24 @@ describe("app", () => {
     expect(json.data.email).toBe("admin@brisacubanaclean.com");
     expect(json.token).toBe("jwt-admin");
     expect(mockSign).toHaveBeenCalled();
+  });
+
+  it("rejects login for inactive users", async () => {
+    usersFixture[0].isActive = false;
+
+    const res = await app.request("/api/authentication/login", {
+      method: "POST",
+      body: JSON.stringify({
+        email: usersFixture[0].email,
+        password: "AnyPassword123",
+      }),
+    });
+
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.error).toBe("Account has been deactivated");
+
+    usersFixture[0].isActive = true;
   });
 
   it("rate limits repeated login attempts", async () => {

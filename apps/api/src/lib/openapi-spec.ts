@@ -12,7 +12,7 @@ export const openApiSpec = {
   openapi: "3.1.0",
   info: {
     title: "Brisa Cubana Clean Intelligence API",
-    version: "0.2.6",
+    version: "0.2.8",
     description:
       "API para gestión de servicios de limpieza, reservas, propiedades y usuarios",
     contact: {
@@ -116,6 +116,7 @@ export const openApiSpec = {
           },
           "400": { $ref: "#/components/responses/ValidationError" },
           "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/AccountDeactivated" },
           "429": { $ref: "#/components/responses/RateLimited" },
         },
       },
@@ -270,6 +271,46 @@ export const openApiSpec = {
           "404": { $ref: "#/components/responses/NotFound" },
         },
       },
+      delete: {
+        tags: ["Users"],
+        summary: "Soft delete user",
+        description:
+          "Admin only. Performs a logical delete by setting `deletedAt`. It is not possible to delete the authenticated admin account.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "userId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "User ID (CUID)",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "User soft deleted",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "User deleted successfully" },
+              },
+            },
+          },
+          "400": {
+            description:
+              "Invalid operation (e.g. attempting to delete yourself)",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                example: { error: "No puedes eliminar tu propia cuenta" },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
     },
     "/api/services": {
       get: {
@@ -365,6 +406,36 @@ export const openApiSpec = {
             },
           },
           "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      delete: {
+        tags: ["Services"],
+        summary: "Soft delete service",
+        description:
+          "Admin only. Performs a logical delete by setting `deletedAt`.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "serviceId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "Service ID (CUID)",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Service soft deleted",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "Service deleted successfully" },
+              },
+            },
+          },
           "401": { $ref: "#/components/responses/Unauthorized" },
           "403": { $ref: "#/components/responses/Forbidden" },
           "404": { $ref: "#/components/responses/NotFound" },
@@ -467,6 +538,36 @@ export const openApiSpec = {
             },
           },
           "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      delete: {
+        tags: ["Properties"],
+        summary: "Soft delete property",
+        description:
+          "Admin only. Performs a logical delete by setting `deletedAt`.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "propertyId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "Property ID (CUID)",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Property soft deleted",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "Property deleted successfully" },
+              },
+            },
+          },
           "401": { $ref: "#/components/responses/Unauthorized" },
           "403": { $ref: "#/components/responses/Forbidden" },
           "404": { $ref: "#/components/responses/NotFound" },
@@ -619,6 +720,36 @@ export const openApiSpec = {
             },
           },
           "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      delete: {
+        tags: ["Bookings"],
+        summary: "Soft delete booking",
+        description:
+          "Admin/Coordinator only. Performs a logical delete by setting `deletedAt`.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "bookingId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "Booking ID (CUID)",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Booking soft deleted",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "Booking deleted successfully" },
+              },
+            },
+          },
           "401": { $ref: "#/components/responses/Unauthorized" },
           "403": { $ref: "#/components/responses/Forbidden" },
           "404": { $ref: "#/components/responses/NotFound" },
@@ -1086,6 +1217,15 @@ export const openApiSpec = {
           },
         },
       },
+      MessageResponse: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            example: "Operación realizada correctamente",
+          },
+        },
+      },
     },
     responses: {
       Unauthorized: {
@@ -1094,6 +1234,15 @@ export const openApiSpec = {
           "application/json": {
             schema: { $ref: "#/components/schemas/ErrorResponse" },
             example: { error: "Unauthorized" },
+          },
+        },
+      },
+      AccountDeactivated: {
+        description: "Cuenta desactivada",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+            example: { error: "Account has been deactivated" },
           },
         },
       },

@@ -1,7 +1,7 @@
 # Brisa Cubana Clean Intelligence
 
 Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
-Actualizado al **14 de octubre de 2025** con **124 pruebas automatizadas** (Vitest + Playwright) pasando en CI; release etiquetado como **v0.2.7** tras completar las Fases 1-4 de modernización.
+Actualizado al **14 de octubre de 2025** con **129 pruebas automatizadas** (Vitest + Playwright) pasando en CI; release etiquetado como **v0.2.8** tras completar las Fases 1-4 y consolidar el CRUD completo.
 
 ## Stack actualizado
 

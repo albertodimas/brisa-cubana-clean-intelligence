@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [0.2.8] - 2025-10-14
+
+### Added
+
+- Endpoints `DELETE` para propiedades, reservas y usuarios (soft delete) con pruebas de integración y actualización de OpenAPI/Scalar.
+- Validación de cuentas desactivadas en `POST /api/authentication/login` (respuesta 403).
+- Nueva cobertura documental para el plan de migración Tailwind v4 (`docs/decisions/tailwind-v4-plan.md`).
+
+### Changed
+
+- Versiones `@brisa/api`, `@brisa/web` y monorepo actualizadas a 0.2.8.
+- CORS habilitado para métodos `DELETE` en la API.
+- OpenAPI `info.version`, README y overview sincronizados con el release `v0.2.8`.
+
+### Testing
+
+- +5 pruebas Vitest en `app.integration.test.ts` (soft delete y guardas de autenticación), totalizando **129** tests unitarios/integración.
+
 ## [0.2.6] - 2025-10-14
 
 ### Added
