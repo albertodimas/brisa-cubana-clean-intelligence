@@ -24,7 +24,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - **Phase 1:** paquetes de producción actualizados con cambios seguros (`next` 15.5.5, `hono` 4.9.12, `pino-pretty` 13.1.2) manteniendo pipelines verdes.
 - **Phase 2:** stack de testing/desarrollo actualizado (`@testing-library/react` 16.3.0 + `@testing-library/dom`, `@types/node` 24.7.2, `eslint-config-next` 15.5.5).
-- **Phase 3 (WIP):** Prisma Client 6.17.1 y bcryptjs 3.0.2 integrados en API, regenerando cliente y verificando suites existentes.
+- **Phase 3:** Prisma Client 6.17.1 y bcryptjs 3.0.2 integrados en API, regenerando cliente y verificando suites existentes.
+- **Phase 4 (WIP):** Zod actualizado a 4.1.12 (API) para preparar migración completa de validaciones.
 
 ## [0.2.5] - 2025-10-12
 
