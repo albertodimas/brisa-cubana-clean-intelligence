@@ -1,12 +1,12 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks fallando en dependabot/npm_and_yarn/production-dependencies-d7805deed1; 124 tests passing)
+**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 124 tests passing)
 
 ---
 
 ## 1. Resumen ejecutivo
 
-- Plataforma verificada con frontend Next.js 15 + Auth.js y API Hono 4 + Prisma 6.
+- Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
 - Versionado actual: `@brisa/api` 0.2.6 · `@brisa/web` 0.2.6 (release 14-oct-2025).
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
@@ -14,7 +14,7 @@
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
-- Deploy web operativo en Vercel (Next.js 15) sincronizado con la API.
+- Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
@@ -23,7 +23,7 @@
 ## 2. Arquitectura y componentes
 
 - **Frontend (apps/web)**
-  - Next.js 15.5.4 + React 19.
+  - Next.js 15.5.5 + React 19.
   - Autenticación con Auth.js (NextAuth v5) y session strategy `jwt`.
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
@@ -35,12 +35,12 @@
     - `hooks/use-paginated-resource.ts`: Hook para paginación cursor-based
 
 - **API (apps/api)**
-  - Hono 4.9.10 corriendo en Vercel Node 22.
+  - Hono 4.9.12 corriendo en Vercel Node 22.
   - Rutas modulares:
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`, `users.ts`: CRUD con autorización por rol.
   - Middleware `authenticate` y `requireRoles` (JWT/`API_TOKEN`).
-  - Prisma Client 6.12.0 (PostgreSQL 17). Seed (`prisma/seed.ts`) crea datos funcionales.
+  - Prisma Client 6.17.1 (PostgreSQL 17). Seed (`prisma/seed.ts`) crea datos funcionales.
   - **Shared utilities**:
     - `lib/pagination.ts`: Lógica de paginación cursor-based reutilizable
     - `lib/validation.ts`: Esquemas de validación Zod compartidos
