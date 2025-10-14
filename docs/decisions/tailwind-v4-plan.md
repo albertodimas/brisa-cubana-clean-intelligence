@@ -197,9 +197,9 @@ git push origin v0.3.0
 
 ## 10. Cronograma sugerido
 
-- **Semana 1 (Q1 2026):** Ejecución Fases 5.1–5.3.
-- **Semana 2 (Q1 2026):** QA visual, preview y E2E (Fases 5.4–5.6).
-- **Responsable propuesto:** Equipo Frontend (Coord. TBD); QA manual con apoyo de stakeholders de producto.
+- **Semana 1 (13–17 enero 2026):** Kick-off del sprint “Q1 2026 Tailwind v4” (milestone asignado). Ejecutar Fases 5.1–5.3, incluyendo la corrida inicial de `npx @tailwindcss/upgrade` y validación de dependencias.
+- **Semana 2 (20–24 enero 2026):** QA visual, Vercel Preview y Playwright completo (Fases 5.4–5.6), preparación del PR y monitoreo post-merge.
+- **Responsables propuestos:** Equipo Frontend (coordinar programación y cambios), Equipo QA (validaciones manuales y E2E) y stakeholders de producto para aprobación final.
 
 ---
 
