@@ -2,6 +2,11 @@
 echo "🔒 Verificando seguridad de credenciales..."
 bash scripts/verify-no-secrets.sh
 
+# Verificar sincronía de versiones entre código y docs
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm verify:versions
+fi
+
 # Ejecutar lint-staged si está configurado
 if command -v pnpm >/dev/null 2>&1; then
   pnpm exec lint-staged
