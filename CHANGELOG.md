@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [0.2.9] - 2025-10-14
+
+### Added
+
+- Suite completa de tests E2E para gestión de usuarios (`tests/e2e/user-management.spec.ts`) con 5 casos críticos.
+- Plan de implementación de búsqueda y filtros documentado (`docs/decisions/search-filters-plan.md`, Fase 6).
+
+### Changed
+
+- Suite E2E expandida: 19 tests totales (2 smoke, ~8 critical, 19 full).
+- Optimizaciones E2E: token compartido de admin, IPs únicas, selectores refinados.
+- Documentación sincronizada con nueva Fase 6 (búsqueda/filtros) en roadmap.
+
+### Testing
+
+- +5 pruebas E2E en `user-management.spec.ts` (crear, actualizar rol, activar/desactivar, guards).
+- Optimización de suite crítica para evitar rate limiting y mejorar estabilidad.
+- Total: **129 tests unitarios/integración + 19 tests E2E = 148 tests totales**.
+
 ## [0.2.8] - 2025-10-14
 
 ### Added
@@ -156,3 +175,22 @@ All notable changes to this project are documented here. The format follows [Kee
 ---
 
 For upcoming work and open items, see `docs/overview/status.md` section “Próximos pasos prioritarios”.
+
+# [0.2.9] - 2025-10-14
+
+### Added
+
+- Suite completa de tests E2E para gestión de usuarios (`tests/e2e/user-management.spec.ts`) con 5 casos críticos.
+- Plan de implementación de búsqueda y filtros documentado (`docs/decisions/search-filters-plan.md`, Fase 6).
+
+### Changed
+
+- Suite E2E expandida: 19 tests totales (2 smoke, ~8 critical, 19 full).
+- Optimizaciones E2E: token compartido de admin, IPs únicas, selectores refinados.
+- Documentación sincronizada con nueva Fase 6 (búsqueda/filtros) en roadmap.
+
+### Testing
+
+- +5 pruebas E2E en `user-management.spec.ts` (crear, actualizar rol, activar/desactivar, guards).
+- Optimización de suite crítica para evitar rate limiting y mejorar estabilidad.
+- Total: **129 tests unitarios/integración + 19 tests E2E = 148 tests totales**.

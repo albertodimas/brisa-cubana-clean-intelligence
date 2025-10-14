@@ -7,7 +7,7 @@
 ## 1. Resumen ejecutivo
 
 - Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
-- Versionado actual: `@brisa/api` 0.2.8 · `@brisa/web` 0.2.8 (tag `v0.2.8`, 14-oct-2025).
+- Versionado actual: `@brisa/api` 0.2.9 · `@brisa/web` 0.2.9 (tag `v0.2.9`, 14-oct-2025).
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
@@ -15,7 +15,7 @@
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
-- Release etiquetado `v0.2.8` (14-oct-2025) con CRUD 100% RESTful (soft delete en servicios, propiedades, reservas y usuarios) y endurecimiento de autenticación; Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
+- Release etiquetado `v0.2.9` (14-oct-2025) completando Sprint 1 (soft delete, guardas de login, suite E2E de usuarios, plan de búsqueda/filtros); Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 

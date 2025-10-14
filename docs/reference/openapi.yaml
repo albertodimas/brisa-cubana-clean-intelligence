@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Brisa Cubana Clean Intelligence API
-  version: "0.2.8"
+  version: "0.2.9"
   description: |
     API REST oficial para la plataforma Brisa Cubana Clean Intelligence.
     Todas las rutas están operativas en producción a partir del 9 de octubre de 2025.
