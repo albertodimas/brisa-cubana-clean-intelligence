@@ -284,6 +284,8 @@ describe("booking actions", () => {
       }),
     );
 
+    expect(result).toEqual({ success: "Reserva actualizada" });
+
     const [, options] = authenticatedFetchMock.mock.calls[0] ?? [];
     expect(options).toBeTruthy();
     const rawBody = options?.body as string | undefined;
