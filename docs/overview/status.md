@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 12 de octubre de 2025 (Refactorización completada: 450+ líneas eliminadas)
+**Última revisión:** 14 de octubre de 2025 (CI/CD completamente funcional: 124 tests passing)
 
 ---
 
@@ -155,10 +155,11 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 31 pruebas unitarias Vitest (coverage thresholds: 85% lines, 65% functions, 50% branches)
-- **`apps/api`**: 60 pruebas de integración (incluyen validación de contratos OpenAPI)
-- **`apps/web`**: 42 pruebas Vitest (hooks, server actions y componentes UI) con threshold 70%
-- **Total**: 133 pruebas unitarias/integración passing
+- **`apps/api`**: 82 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI)
+  - Coverage thresholds: 85% lines, 65% functions, 50% branches
+- **`apps/web`**: 42 pruebas Vitest (hooks, server actions y componentes UI)
+  - Coverage threshold: 70%
+- **Total**: 124 pruebas unitarias/integración passing
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
