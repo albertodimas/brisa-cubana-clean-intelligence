@@ -13,7 +13,7 @@ import { getUserRepository } from "../container.js";
 const router = new Hono();
 
 const roleSchema = z.enum(["ADMIN", "COORDINATOR", "STAFF", "CLIENT"], {
-  required_error: "role es requerido",
+  message: "role es requerido",
 });
 
 const updateUserSchema = z
