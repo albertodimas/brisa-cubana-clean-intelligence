@@ -46,7 +46,9 @@ Cada fase debe:
 ## 5. Próximos pasos
 
 1. Abrir rama `upgrade/major-deps-2025-10` desde `main` para preparar Fase 3 (Prisma/bcrypt).
+   - Estado: **realizado** (rama creada y publicada).
 2. Agendar sprint dedicado para Fase 2 (dev deps) y documentar impactos.
+   - Seguimiento: **Issue #35** – _Fase 2: actualizar dependencias de desarrollo_.
 3. Mantener Dependabot activo pero revisar manualmente cada PR conforme a esta estrategia.
 
 ---
