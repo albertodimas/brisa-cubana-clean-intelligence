@@ -1,13 +1,14 @@
 # Brisa Cubana Clean Intelligence
 
 Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
-Actualizado al **14 de octubre de 2025** con **124 pruebas automatizadas** (Vitest + Playwright) pasando en CI.
+Actualizado al **14 de octubre de 2025** con **124 pruebas automatizadas** (Vitest + Playwright) pasando en CI; release etiquetado como **v0.2.7** tras completar las Fases 1-4 de modernización.
 
 ## Stack actualizado
 
-- **Frontend:** Next.js 15.5.4 + React 19.2.0 (`apps/web`) con Auth.js (NextAuth v5), server actions y proxy interno `/api/*` hacia la API Hono (`INTERNAL_API_URL`).
-- **API:** Hono 4.9.10 (`apps/api`) sobre Node.js 22, autenticación JWT, RBAC por middleware, rate limiting configurable y repositorios Prisma desacoplados.
-- **Persistencia:** Prisma ORM 6.12.0 sobre PostgreSQL 16 (Docker local) / PostgreSQL 17 (Neon en producción) con soft delete (`deletedAt`) en todos los modelos.
+- **Frontend:** Next.js 15.5.5 + React 19.2.0 (`apps/web`) con Auth.js (NextAuth v5), server actions y proxy interno `/api/*` hacia la API Hono (`INTERNAL_API_URL`).
+- **API:** Hono 4.9.12 (`apps/api`) sobre Node.js 22, autenticación JWT, RBAC por middleware, rate limiting configurable y repositorios Prisma desacoplados.
+- **Persistencia:** Prisma ORM 6.17.1 sobre PostgreSQL 16 (Docker local) / PostgreSQL 17 (Neon en producción) con soft delete (`deletedAt`) en todos los modelos.
+- **Estilos:** Tailwind CSS 3.4.18 (migración a Tailwind v4 planificada para Q1 2026 en el Issue #40 siguiendo el ADR `docs/decisions/tailwind-v4-deferral.md`).
 - **Observabilidad:** Logging con Pino, métricas básicas en `/health` y captura de errores con Sentry.
 - **Tooling base:** pnpm 10.18, Turborepo 2.5.8, TypeScript 5.9, Vitest 3.2, Playwright 1.56, Husky + lint-staged, CI en GitHub Actions.
 
@@ -48,6 +49,7 @@ Actualizado al **14 de octubre de 2025** con **124 pruebas automatizadas** (Vite
    pnpm db:seed
    ```
 5. Ejecuta el stack (Next.js + API):
+
    ```bash
    pnpm dev -- --parallel
    ```
@@ -100,7 +102,9 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
 - Estado y métricas: `docs/overview/status.md`.
 - Quickstart de desarrollo local: `docs/guides/quickstart.md`.
 - Referencia API: `docs/reference/api-reference.md` + `docs/reference/openapi.yaml`.
+- Decisiones técnicas: `docs/decisions/dependency-updates.md` y `docs/decisions/tailwind-v4-deferral.md` (Issue #40).
 
 ## Desarrollo activo
 
-El proyecto continúa en desarrollo controlado. Se aceptan contribuciones que mantengan la regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI.** Usa `pnpm docs:verify` antes de abrir un PR y mantén Playwright/Vitest verdes.
+El proyecto continúa en desarrollo controlado. Siguiente hito: **Fase 5 – migración a Tailwind v4 (Issue #40, Q1 2026)** con investigación previa documentada en el ADR correspondiente.  
+Se aceptan contribuciones que mantengan la regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI.** Usa `pnpm docs:verify` antes de abrir un PR y mantén Playwright/Vitest verdes.

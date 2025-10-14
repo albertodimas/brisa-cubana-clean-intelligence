@@ -7,7 +7,7 @@
 ## 1. Resumen ejecutivo
 
 - Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
-- Versionado actual: `@brisa/api` 0.2.6 · `@brisa/web` 0.2.6 (release 14-oct-2025).
+- Versionado actual: `@brisa/api` 0.2.6 · `@brisa/web` 0.2.6 (tag `v0.2.7`, 14-oct-2025).
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
@@ -15,6 +15,7 @@
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
+- Release etiquetado `v0.2.7` (14-oct-2025) consolidando la modernización de dependencias Fases 1-4; Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
@@ -314,22 +315,27 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 
 ### Pendiente 🔄
 
-1. **Observabilidad avanzada:**
+1. **Fase 5 – Tailwind v4 (Issue #40, Q1 2026):**
+   - Investigar breaking changes y nueva configuración basada en CSS.
+   - Seguir el checklist de `docs/decisions/tailwind-v4-deferral.md` antes del merge.
+   - Ejecutar QA visual en previews de Vercel y validar con stakeholders.
+
+2. **Observabilidad avanzada:**
    - Configurar alertas Sentry en Slack/Email
    - Dashboard de métricas de negocio (Grafana)
    - Performance budgets y thresholds
 
-2. **Roadmap funcional:**
-   - Sistema de estilos compartido (Tailwind o Vanilla Extract)
+3. **Roadmap funcional:**
+   - Sistema de estilos compartido (definir tras migración Tailwind v4)
    - Notificaciones push para coordinadores
    - UI de paginación en frontend (infinite scroll / load more)
 
-3. **Arquitectura (Sprint 2-3):**
+4. **Arquitectura (Sprint 2-3):**
    - Implementar dependency injection con interfaces creadas
    - Separar tests de integración de tests unitarios
    - Repositorios concretos implementando interfaces
 
-4. **DevOps:**
+5. **DevOps:**
    - Postdeploy hook automático para seed inicial
    - Documentar proceso de deployment en `DEPLOYMENT.md`
 
