@@ -1,12 +1,13 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 14 de octubre de 2025 (CI/CD completamente funcional: 124 tests passing)
+**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks fallando en dependabot/npm_and_yarn/production-dependencies-d7805deed1; 124 tests passing)
 
 ---
 
 ## 1. Resumen ejecutivo
 
 - Plataforma verificada con frontend Next.js 15 + Auth.js y API Hono 4 + Prisma 6.
+- Versionado actual: `@brisa/api` 0.2.6 · `@brisa/web` 0.2.6 (release 14-oct-2025).
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
@@ -182,7 +183,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 - **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`.
 
-**Estado**: ✅ Workflows activos y deduplicados en GitHub Actions
+**Estado (14-oct-2025)**: ✅ Pipelines en `main` (CI, CodeQL, Post-Deploy Seed) completados; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` con fallos en CodeQL y PR Checks pendientes.
 
 ### 7.4 Calidad de Código
 
@@ -393,6 +394,11 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
    - `serializeBooking()` con soporte para relaciones anidadas
    - Type-safe con generics TypeScript
 6. `lib/soft-delete-extension.ts`: Extensión Prisma que filtra `deletedAt` y transforma los `delete*` en soft delete
+7. `lib/logger.ts`: Configuración de Pino (formato JSON en prod, pretty en dev) reutilizada por toda la API
+8. `lib/jwt.ts`: Helpers para emitir y validar tokens (`signJwt`, `verifyJwt`) con manejo de expiración y secretos
+9. `lib/openapi-spec.ts`: Generador del objeto OpenAPI 3.1 consumido por Scalar y endpoint `/api/openapi.json`
+10. `lib/prisma.ts`: Cliente Prisma extendido con soft delete y reutilización global (singleton seguro en dev/serverless)
+11. `lib/sentry.ts`: Inicialización unificada de Sentry (tracing, profiling) usada por middlewares y server
 
 **E2E (`tests/e2e`):**
 

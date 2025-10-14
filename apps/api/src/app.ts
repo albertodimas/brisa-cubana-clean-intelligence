@@ -41,7 +41,7 @@ const rootHandler = (c: Context) =>
   c.json({
     service: "Brisa Cubana Clean Intelligence API",
     status: "ok",
-    version: "0.1.0",
+    version: "0.2.6",
     timestamp: new Date().toISOString(),
   });
 
