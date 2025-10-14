@@ -21,8 +21,11 @@ function buildTargetUrl(request: NextRequest, segments: string[]) {
   return upstreamUrl;
 }
 
-async function proxy(request: NextRequest, context: any) {
-  const segments: string[] = context?.params?.route ?? [];
+async function proxy(
+  request: NextRequest,
+  { params }: { params: { route: string[] } },
+) {
+  const segments: string[] = params?.route ?? [];
   const url = buildTargetUrl(request, segments);
   const headers = new Headers(request.headers);
   headers.delete("host");

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import type { TestInfo } from "@playwright/test";
 import { ipForTest, loginAsAdmin } from "./support/auth";
 
-test.describe("Operaciones", () => {
+test.describe.serial("Operaciones", () => {
   test("permite crear un nuevo servicio @smoke @critical", async ({
     page,
   }, testInfo) => {
