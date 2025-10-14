@@ -132,7 +132,6 @@ export function AdminPanel({
     isLoading: isCustomersRefreshing,
     isLoadingMore: isLoadingMoreCustomers,
     loadMore: loadMoreCustomers,
-    refresh: refreshCustomers,
   } = usePaginatedResource<Customer>({
     initial: customers,
     endpoint: "/api/customers",
