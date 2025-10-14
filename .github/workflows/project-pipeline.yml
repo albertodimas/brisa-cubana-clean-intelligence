@@ -150,6 +150,10 @@ jobs:
         shell: bash
         run: pnpm docs:verify
 
+      - name: Verify version sync
+        shell: bash
+        run: pnpm verify:versions
+
       - name: Lint
         if: ${{ inputs.run-lint }}
         shell: bash
