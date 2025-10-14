@@ -46,9 +46,15 @@ Cada fase debe:
 ## 5. Próximos pasos
 
 1. ~~Completar Fase 4 (Zod 4.x)~~ ✅ COMPLETADA (PR #39).
-2. Evaluar Fase 5 (Tailwind 4.x) – DIFERIDA para Q1 2026; ver `docs/decisions/tailwind-v4-deferral.md` y crear issue dedicado antes de retomarla.
+2. Evaluar Fase 5 (Tailwind 4.x) – DIFERIDA para Q1 2026; ver `docs/decisions/tailwind-v4-deferral.md` e impulsar Issue #40 antes de retomar trabajos.
 3. Mantener Dependabot activo pero revisar manualmente cada PR conforme a esta estrategia.
 
 ---
+
+## 6. Verificación de release 0.2.7
+
+- Etiqueta `v0.2.7` publicada el 14-oct-2025 con las fases 1–4 completadas.
+- Despliegues Vercel (`vercel[bot]`) confirmados como `success` para commit `a18f06f`.
+- CodeQL y pipeline `CI (Main Branch)` ejecutándose en verde sobre `main` tras el tag.
 
 **Registro histórico:** Esta decisión se revisará al retomar la Fase 5 o antes del siguiente ciclo de release, lo que ocurra primero.
