@@ -11,7 +11,7 @@
 - **Cobertura de estilos:** 18 archivos `.tsx` con 403 ocurrencias de `className`
 - **Configuración:** `tailwind.config.ts` con tema custom `brisa` (10 colores)
 - **Uso de `@apply`:** 1 archivo (`app/globals.css`) con 4 directivas
-- **Compatibilidad Node.js:** 24.9.0 (≥ 20 requerido por Tailwind v4)
+- **Compatibilidad Node.js:** 22.13.0 (Active LTS actual). Ejecutaremos la migración cuando Node.js 24 alcance estatus LTS (28-oct-2025) y pase validaciones en CI/CD.
 
 ## 2. Objetivo
 

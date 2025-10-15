@@ -37,6 +37,15 @@ export async function loginWithCredentials(
     await page.getByLabel("Contraseña").fill(password);
 
     let navigationSucceeded = false;
+    const loginResponsePromise = page
+      .waitForResponse(
+        (response) =>
+          response.url().includes("/api/authentication/login") &&
+          response.request().method() === "POST",
+        { timeout: 15_000 },
+      )
+      .catch(() => null);
+
     await Promise.all([
       (async () => {
         try {
@@ -61,9 +70,44 @@ export async function loginWithCredentials(
       await page.waitForLoadState("load");
     }
 
+    const loginResponse = await loginResponsePromise;
+    if (loginResponse?.ok()) {
+      navigationSucceeded = true;
+    }
+
+    const chunkErrorHeading = page
+      .getByRole("heading", { name: "Something went wrong!" })
+      .first();
+    const retryButton = page.getByRole("button", { name: "Try again" }).first();
+    if (await chunkErrorHeading.isVisible().catch(() => false)) {
+      if (await retryButton.isVisible().catch(() => false)) {
+        await retryButton.click();
+        await page.waitForLoadState("domcontentloaded");
+      }
+      if (attempt < retries - 1) {
+        await page.waitForTimeout(500);
+        continue;
+      }
+    }
+
     const panelHeading = page.getByRole("heading", {
       name: "Panel operativo",
     });
+    const stillOnLogin = (() => {
+      try {
+        return new URL(page.url()).pathname === "/login";
+      } catch {
+        return false;
+      }
+    })();
+    if (
+      stillOnLogin &&
+      attempt < retries - 1 &&
+      !(await panelHeading.isVisible().catch(() => false))
+    ) {
+      await page.waitForTimeout(1_000);
+      continue;
+    }
     if (navigationSucceeded) {
       await expect(panelHeading).toBeVisible({ timeout: 10_000 });
       return;

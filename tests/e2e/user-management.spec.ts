@@ -77,6 +77,7 @@ test.describe.serial("Gestión de usuarios", () => {
     const users = (body?.data ?? []) as Array<{
       email: string;
       isActive: boolean;
+      role: string;
     }>;
     return users.find((user) => user.email === email) ?? null;
   }
@@ -104,7 +105,7 @@ test.describe.serial("Gestión de usuarios", () => {
       email,
     };
 
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "domcontentloaded" });
 
     const row = page.getByRole("row", { name: new RegExp(escapedEmail, "i") });
     await expect(row).toBeVisible();
@@ -127,12 +128,24 @@ test.describe.serial("Gestión de usuarios", () => {
     const roleSelect = row.getByRole("combobox").first();
     await roleSelect.selectOption("COORDINATOR");
     await row.getByRole("button", { name: /actualizar/i }).click();
-    await expect(roleSelect).toHaveValue("COORDINATOR");
+    await expect
+      .poll(async () => {
+        const user = await getUserByEmailViaApi(page, createdUser!.email);
+        return user?.role;
+      })
+      .toBe("COORDINATOR");
+    await expect(row.getByRole("combobox").first()).toHaveValue("COORDINATOR");
 
     // Revert to STAFF so subsequent tests operate on the original state.
-    await roleSelect.selectOption("STAFF");
+    await row.getByRole("combobox").first().selectOption("STAFF");
     await row.getByRole("button", { name: /actualizar/i }).click();
-    await expect(roleSelect).toHaveValue("STAFF");
+    await expect
+      .poll(async () => {
+        const user = await getUserByEmailViaApi(page, createdUser!.email);
+        return user?.role;
+      })
+      .toBe("STAFF");
+    await expect(row.getByRole("combobox").first()).toHaveValue("STAFF");
   });
 
   test("Admin can activate and deactivate users @critical", async ({
@@ -171,14 +184,14 @@ test.describe.serial("Gestión de usuarios", () => {
     // Desactivar usuario
     await checkboxLocator().click();
     await waitForUserActive(false);
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "domcontentloaded" });
     await expect(rowLocator().locator("td").nth(3)).toHaveText(/Inactivo/i);
     await expect(checkboxLocator()).not.toBeChecked();
 
     // Reactivar usuario
     await checkboxLocator().click();
     await waitForUserActive(true);
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "domcontentloaded" });
     await expect(rowLocator().locator("td").nth(3)).toHaveText(/Activo/i);
     await expect(checkboxLocator()).toBeChecked();
 

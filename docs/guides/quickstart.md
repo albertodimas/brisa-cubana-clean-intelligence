@@ -6,7 +6,7 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
 
 | Herramienta | Versión recomendada | Notas                                        |
 | ----------- | ------------------- | -------------------------------------------- |
-| Node.js     | 22.x (LTS)          | Usa `nvm install 22 && nvm use`              |
+| Node.js     | 22.13.0 (LTS)       | Usa `nvm install 22.13.0 && nvm use`         |
 | pnpm        | 10.18               | `corepack enable` lo instala automáticamente |
 | Docker      | 24+                 | Necesario para PostgreSQL                    |
 | Git         | 2.40+               | Requiere acceso a GitHub                     |

@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 15 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 180 tests passing – 161 unit/integration + 19 E2E)
+**Última revisión:** 15 de octubre de 2025 (CI main – run 18539604606 – falló en la suite Playwright `critical`; corrección alineada a Node.js 22.13.0 y re-ejecución pendiente; CodeQL y Post-Deploy Seed en verde; 180 tests locales passing – 161 unit/integration + 19 E2E)
 
 ---
 
@@ -8,6 +8,7 @@
 
 - Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
 - Versionado actual: `@brisa/api` 0.3.0 · `@brisa/web` 0.3.0 (tag `v0.3.0`, 14-oct-2025).
+- Entorno estándar: Node.js 22.13.0 (Active LTS). Evaluaremos Node.js 24 cuando entre a ciclo LTS el 28-oct-2025 y tras validar CI/CD completo.
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; búsqueda con debounce y chips de filtros activos; mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
@@ -37,7 +38,7 @@
   - Componente UI `Pagination` con contador y botón “Cargar más” integrado en paneles de servicios, propiedades, reservas y clientes.
 
 - **API (apps/api)**
-  - Hono 4.9.12 corriendo en Vercel Node 22.
+  - Hono 4.9.12 corriendo en Vercel Node 22.x (builds apuntan a 22.13.0).
   - Rutas modulares:
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`, `users.ts`: CRUD con autorización por rol.

@@ -1,14 +1,14 @@
 # Plan de Canal en Tiempo Real para Notificaciones Operativas
 
 **Fecha:** 15 de octubre de 2025  
-**Estado:** IMPLEMENTADO (16 octubre 2025)  
+**Estado:** IMPLEMENTADO (15 octubre 2025)  
 **Stakeholders:** Plataforma (API + Web), Operaciones, QA
 
 ## 1. Contexto
 
 - El panel operativo consume `/api/notifications`, permite marcar individuales y masivas, y muestra badge lateral mediante `NotificationBell`.
 - Antes de esta decisión, el refresco dependía de abrir el panel o recargar la página (acciones server). Coordinadores/admins no veían nuevas alertas si la vista quedaba inactiva.
-- La API se ejecuta en Hono (Node 22) con autenticación vía `auth_token` o `Bearer` (NextAuth). Infraestructura actual corre sobre Vercel (frontend) y el API puede vivir en Vercel/Render.
+- La API se ejecuta en Hono (Node 22.13.0) con autenticación vía `auth_token` o `Bearer` (NextAuth). Infraestructura actual corre sobre Vercel (frontend) y el API puede vivir en Vercel/Render.
 - Navegadores objetivo: escritorio (Chrome ≥ 123, Edge ≥ 123, Safari ≥ 17) en operación diaria; móviles son secundarios.
 
 ## 2. Objetivo
