@@ -38,6 +38,7 @@ required_files=(
   "docs/product/user-management.md"
   "docs/product/pagination.md"
   "docs/product/phase-2-roadmap.md"
+  "docs/product/rfc-public-components.md"
   "docs/archive/2025-10-08-session-log.md"
 )
 

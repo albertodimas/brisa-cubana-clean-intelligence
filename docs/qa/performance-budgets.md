@@ -10,7 +10,7 @@ Mantener una experiencia de usuario rápida y fluida estableciendo límites cuan
 
 - **Web Vitals en producción**: el componente `WebVitalsReporter` envía CLS, FCP, LCP, FID/INP y TTFB a Sentry como métricas agregadas (`web_vital.*`) para detectar regresiones en tiempo real.citeturn2search1turn3search6
 - **Vercel Speed Insights**: la aplicación Next.js renderiza `<SpeedInsights />`, habilitando la captura automática de métricas en el dashboard de Vercel.citeturn3search7
-- **Nightly Lighthouse CI**: el workflow `nightly.yml` ejecuta `lhci autorun` con los budgets definidos en este documento; si el score de Performance cae por debajo de 90 o se violan límites, la ejecución falla poniéndolo en evidencia dentro del pipeline.
+- **Nightly Lighthouse CI**: el workflow `nightly.yml` ejecuta `lhci autorun` contra la URL de producción de Vercel usando `.lighthouserc.preview.json`; si el score de Performance cae por debajo de 90 o se violan límites, la ejecución falla y el pipeline nightly queda en rojo.
 
 ## Core Web Vitals
 
@@ -101,4 +101,4 @@ Mantener una experiencia de usuario rápida y fluida estableciendo límites cuan
 
 ---
 
-**Última actualización**: 10 de octubre de 2025
+**Última actualización**: 15 de octubre de 2025

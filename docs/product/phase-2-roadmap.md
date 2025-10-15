@@ -32,3 +32,30 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 1. Definir estructura de componentes públicos en un RFC corto (link pendiente).
 2. Configurar Stripe (modo test) en entornos Preview/Prod.
 3. Planificar migración de seeds para separar datos operativos vs. demo comercial.
+
+## 6. Artefactos en elaboración
+
+### 6.1 RFC de componentes públicos (landing, checkout, portal)
+
+- **Objetivo:** consolidar la arquitectura de páginas públicas reutilizando tokens UI existentes sin duplicar estilos.
+- **Acciones:**
+  - Documentar layout base (Hero, evidencia social, servicios destacados, CTA) y componentes compartidos (`FeatureList`, `PricingTier`, `FAQAccordion`).
+  - Definir contrato para el formulario de solicitud de reserva rápida (campos, validaciones, errores accesibles).
+  - Incluir esquema de telemetría (eventos a capturar en Analytics/Sentry) y comportamiento responsive (desktop, tablet, móvil).
+- **Entregable:** markdown en `docs/product/rfc-public-components.md` con wireframes de referencia y checklist de accesibilidad WCAG AA.
+
+### 6.2 Plan de migración de seeds (operativos vs. demo)
+
+- **Objetivo:** separar datos usados por el equipo operativo del contenido demo que se expone en landing/checkout sin filtrar credenciales internas.
+- **Acciones:**
+  - Crear seeds diferenciados (`prisma/seed.operativo.ts`, `prisma/seed.demo.ts`) y registrar en `package.json` scripts `db:seed:operativo` / `db:seed:demo`.
+  - Mantener usuarios operativos (admin, coordinator) sólo en seed interno; generar perfiles ficticios para demos públicas.
+  - Documentar en `docs/operations/deployment.md` la secuencia de ejecución (operativo → demo) tanto en staging como en producción.
+
+### 6.3 Configuración Stripe (modo test)
+
+- **Objetivo:** habilitar el checkout público con pagos simulados antes de integrar modo live.
+- **Acciones:**
+  - Registrar cuentas y claves en Stripe Dashboard (modo test) y documentar variables (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`) en `docs/operations/security.md`.
+  - Implementar webhook receiver en API (`/api/payments/stripe/webhook`) validado con CLI de Stripe; añadir pruebas de integración.
+  - Actualizar checklist QA (`docs/qa/regression-checklist.md`) con escenarios de pago exitoso/fallido y validación de recibos.
