@@ -1,7 +1,7 @@
 # Brisa Cubana Clean Intelligence
 
 Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
-Actualizado al **15 de octubre de 2025** con **180 pruebas automatizadas** (161 unit/integration + 19 E2E) pasando en CI; release etiquetado como **v0.3.0** tras completar la Fase 2 con búsquedas y filtros visibles en la UI.
+Actualizado al **15 de octubre de 2025** con **180 pruebas automatizadas** (161 unit/integration + 19 E2E) pasando en CI; release etiquetado como **v0.3.0** tras completar la fase de búsqueda/filtros en el panel operativo. La expansión comercial (landing, checkout, portal cliente) está planificada en `docs/product/phase-2-roadmap.md`.
 
 ## Stack actualizado
 

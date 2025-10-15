@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 15 de octubre de 2025 (CI main – run 18541947751 – ✅ Playwright `critical`; CodeQL y Post-Deploy Seed en verde; 180 tests locales passing – 161 unit/integration + 19 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 15 de octubre de 2025 (CI main – run 18542267689 – ✅ Playwright `critical`; CodeQL y Post-Deploy Seed en verde; 180 tests locales passing – 161 unit/integration + 19 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -16,7 +16,7 @@
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
-- Release etiquetado `v0.3.0` (14-oct-2025) completa Sprint 1 con paginación visible en la UI; Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
+- Release etiquetado `v0.3.0` (14-oct-2025) completa las mejoras de búsqueda y filtros en el panel operativo; la Fase 2 comercial (landing, checkout, portal cliente) está documentada en `product/phase-2-roadmap.md`. La migración Tailwind v4 (Fase 5) sigue programada para Q1 2026 (Issue #40).
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 

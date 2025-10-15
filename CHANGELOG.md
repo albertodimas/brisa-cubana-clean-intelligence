@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Política de divulgación responsable en `SECURITY.md` y `docs/README.md` con el enlace al índice.
+- Roadmap Fase 2 (`docs/product/phase-2-roadmap.md`) para landing comercial, checkout público y portal cliente.
+
+### Changed
+
+- README y `docs/overview/status.md` actualizados con el run CI `18542267689`, la estandarización en Node.js 22.13.0 y el alcance real del release `v0.3.0` (búsqueda/filtros).
+- `scripts/verify-doc-structure.sh` exige `SECURITY.md` y la nueva documentación de producto para mantener la verificación.
+
+### Fixed
+
+- Dependabot alert `GHSA-52f5-9888-hmc6` resuelta fijando `tmp@0.2.5` vía override pnpm.
+
 - Componente `SearchBar` con debounce interno y botón de limpieza reutilizado en servicios, propiedades, reservas y clientes (`apps/web/components/ui/search-bar.tsx`).
 - Componente `FilterChips` para visualizar y limpiar filtros activos en los paneles operativos.
 - Nuevas pruebas unitarias (SearchBar, FilterChips, managers y `usePaginatedResource`) elevan la suite web a 60 tests.
