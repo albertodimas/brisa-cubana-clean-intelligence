@@ -3,6 +3,7 @@ import {
   UserRole,
   PropertyType,
   BookingStatus,
+  NotificationType,
 } from "@prisma/client";
 import { addHours } from "date-fns";
 
@@ -118,6 +119,23 @@ async function main() {
       status: BookingStatus.PENDING,
       totalAmount: turnover.basePrice,
     },
+  });
+
+  await prisma.notification.createMany({
+    data: [
+      {
+        userId: coordinator.id,
+        type: NotificationType.BOOKING_CREATED,
+        message: "Se creó una nueva reserva para Brickell Loft",
+      },
+      {
+        userId: coordinator.id,
+        type: NotificationType.SERVICE_UPDATED,
+        message: "El servicio Deep Clean Residencial cambió su precio base",
+        readAt: addHours(new Date(), -2),
+      },
+    ],
+    skipDuplicates: true,
   });
 }
 

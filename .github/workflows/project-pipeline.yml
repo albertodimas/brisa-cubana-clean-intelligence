@@ -31,6 +31,10 @@ on:
         required: false
         type: boolean
         default: true
+      run-lighthouse:
+        required: false
+        type: boolean
+        default: false
       run-docs-verify:
         required: false
         type: boolean
@@ -175,6 +179,14 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
         run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
+      - name: Lighthouse CI
+        if: ${{ inputs.run-lighthouse }}
+        shell: bash
+        env:
+          NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
+          INTERNAL_API_URL: ${{ inputs.next-public-api-url }}
+        run: pnpm exec lhci autorun
 
       - name: Run Playwright suite
         if: ${{ inputs.run-e2e-suite != 'none' }}

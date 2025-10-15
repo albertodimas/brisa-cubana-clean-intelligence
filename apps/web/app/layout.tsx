@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import "../styles/theme.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/theme-provider";
+import { WebVitalsReporter } from "@/components/analytics/web-vitals-reporter";
 
 export const metadata: Metadata = {
   title: {
@@ -53,7 +55,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <ThemeProvider>
           <ToastProvider>{children}</ToastProvider>
+          <WebVitalsReporter />
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

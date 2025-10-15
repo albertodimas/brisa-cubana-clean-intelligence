@@ -1,7 +1,7 @@
 # Plan de Implementación: Búsquedas y Filtros en Listados Operativos
 
 **Fecha:** 15 de octubre de 2025  
-**Estado:** EN PROGRESO — Fases 1 y 2 completadas (servicios, propiedades, reservas, clientes y usuarios); Fase 3 (QA automatizada) pendiente.  
+**Estado:** COMPLETADO — Fases 1, 2 y 3 implementadas con cobertura QA y documentación sincronizada.  
 **Stakeholders:** Equipo Frontend, Equipo Producto, QA
 
 ## 1. Contexto
@@ -47,14 +47,15 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
 - Inyectar controles en `ServicesManager`, `PropertiesManager`, `BookingsManager`, `CustomersManager`, `UsersManager` (admin panel).
 - Añadir estados visuales (spinner, mensaje “sin resultados”).
 
-### Fase 3 – QA Automatizada (1.5 h) ⏳ en progreso
+### Fase 3 – QA Automatizada (1.5 h) ✅ completada 15/oct/2025
 
-- Vitest: unidad para hook (`use-paginated-resource.test.ts`) cubriendo cambios de query y sucesión de cursores.
-- Playwright: nuevo archivo `tests/e2e/search-and-filters.spec.ts` con escenarios:
-  1. Buscar servicio por nombre.
-  2. Filtrar usuarios por rol.
-  3. Buscar reserva inexistente → mensaje “sin resultados”.
-- Etiquetar pruebas con `@critical` para suite principal.
+- Vitest: unidad para hook (`use-paginated-resource.test.ts`) cubriendo cambios de query y sucesión de cursores. (existente)
+- Playwright: archivo `tests/e2e/search-and-filters.spec.ts` con escenarios críticos:
+  1. Buscar servicio por nombre y visualizar coincidencias únicas. (`@critical`)
+  2. Filtrar usuarios por rol/estado y limpiar filtros activos. (`@critical`)
+  3. Combinar búsqueda + estado en reservas con chips activos y botón “Limpiar todos”. (`@critical`)
+  4. Búsqueda de servicios sin resultados → mensaje accesible.
+- Integrado en suites `critical` y `full`; documentación y budgets actualizados en `docs/qa/performance-budgets.md`.
 
 ### Fase 4 – Documentación y Rollout (0.5-1 h) ✅ completada 15/oct/2025
 

@@ -12,6 +12,7 @@ let servicesFixture: any[] = [];
 let bookingsFixture: any[] = [];
 let usersFixture: any[] = [];
 let propertiesFixture: any[] = [];
+let notificationsFixture: any[] = [];
 
 const makeCuid = (index: number) => `c${index.toString(36).padStart(24, "0")}`;
 
@@ -658,6 +659,94 @@ const mockPrisma = {
         },
       ),
   },
+  notification: {
+    findMany: vi.fn().mockImplementation(
+      async ({
+        where = {},
+        take,
+        skip,
+        cursor,
+      }: {
+        where?: any;
+        take?: number;
+        skip?: number;
+        cursor?: { id: string };
+      } = {}) => {
+        let filtered = notificationsFixture
+          .filter((notification) =>
+            where.userId ? notification.userId === where.userId : true,
+          )
+          .filter((notification) =>
+            where.readAt === null ? notification.readAt === null : true,
+          )
+          .sort((a, b) => {
+            const dateDiff = b.createdAt.getTime() - a.createdAt.getTime();
+            if (dateDiff !== 0) {
+              return dateDiff;
+            }
+            return b.id.localeCompare(a.id);
+          });
+
+        if (cursor?.id) {
+          const cursorIndex = filtered.findIndex(
+            (item) => item.id === cursor.id,
+          );
+          if (cursorIndex !== -1) {
+            filtered = filtered.slice(cursorIndex + 1);
+          }
+        }
+
+        if (skip) {
+          filtered = filtered.slice(skip);
+        }
+
+        if (take) {
+          filtered = filtered.slice(0, take);
+        }
+
+        return filtered;
+      },
+    ),
+    update: vi
+      .fn()
+      .mockImplementation(
+        async ({ where, data }: { where: any; data: any }) => {
+          const notification = notificationsFixture.find(
+            (item) => item.id === where.id && item.userId === where.userId,
+          );
+          if (!notification) {
+            const error: any = new Error("Notification not found");
+            error.code = "P2025";
+            throw error;
+          }
+          Object.assign(notification, data);
+          return notification;
+        },
+      ),
+    updateMany: vi.fn().mockImplementation(async ({ where, data }: any) => {
+      let count = 0;
+      notificationsFixture.forEach((notification) => {
+        if (
+          notification.userId === where.userId &&
+          (where.readAt === null ? notification.readAt === null : true)
+        ) {
+          Object.assign(notification, data);
+          count += 1;
+        }
+      });
+      return { count };
+    }),
+    create: vi.fn().mockImplementation(async ({ data }: any) => {
+      const record = {
+        id: makeCuid(900 + notificationsFixture.length),
+        createdAt: new Date(),
+        readAt: null,
+        ...data,
+      };
+      notificationsFixture.unshift(record);
+      return record;
+    }),
+  },
 };
 
 const mockVerify = vi.fn((token: string) =>
@@ -826,6 +915,32 @@ describe("app", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
+      },
+    ];
+    notificationsFixture = [
+      {
+        id: makeCuid(900),
+        userId: usersFixture[1].id,
+        type: "BOOKING_CREATED",
+        message: "Nueva reserva confirmada para Brickell Loft",
+        readAt: null,
+        createdAt: new Date("2025-10-15T09:00:00Z"),
+      },
+      {
+        id: makeCuid(901),
+        userId: usersFixture[1].id,
+        type: "SERVICE_UPDATED",
+        message: "El servicio Deep Clean Residencial fue actualizado",
+        readAt: new Date("2025-10-14T15:00:00Z"),
+        createdAt: new Date("2025-10-14T12:00:00Z"),
+      },
+      {
+        id: makeCuid(902),
+        userId: usersFixture[2].id,
+        type: "BOOKING_CANCELLED",
+        message: "Reserva BRISA-DEMO cancelada por el cliente",
+        readAt: null,
+        createdAt: new Date("2025-10-13T08:00:00Z"),
       },
     ];
     mockPrisma.$queryRaw.mockClear();
@@ -1520,6 +1635,67 @@ describe("app", () => {
     expect(listJson.data.some((user: any) => user.id === created.data.id)).toBe(
       false,
     );
+  });
+
+  it("lists notifications for the authenticated admin", async () => {
+    const res = await app.request("/api/notifications", {
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data).toHaveLength(2);
+    expect(json.pagination.limit).toBe(25);
+  });
+
+  it("filters notifications by unreadOnly flag", async () => {
+    const res = await app.request("/api/notifications?unreadOnly=true", {
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.every((notif: any) => notif.readAt === null)).toBe(true);
+    expect(json.data).toHaveLength(1);
+  });
+
+  it("marks a notification as read", async () => {
+    const target = notificationsFixture.find(
+      (notif) => notif.userId === usersFixture[1].id && notif.readAt === null,
+    );
+    const res = await app.request(`/api/notifications/${target?.id}/read`, {
+      method: "PATCH",
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.readAt).not.toBeNull();
+    const updated = notificationsFixture.find(
+      (notif) => notif.id === target?.id,
+    );
+    expect(updated?.readAt).not.toBeNull();
+  });
+
+  it("marks all notifications as read", async () => {
+    const res = await app.request("/api/notifications/read-all", {
+      method: "PATCH",
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data.updatedCount).toBeGreaterThanOrEqual(1);
+    expect(
+      notificationsFixture
+        .filter((notif) => notif.userId === usersFixture[1].id)
+        .every((notif) => notif.readAt !== null),
+    ).toBe(true);
+  });
+
+  it("rejects notification listing without authentication", async () => {
+    const res = await app.request("/api/notifications");
+    expect(res.status).toBe(401);
   });
 
   it("logs in a user and returns a token", async () => {

@@ -15,6 +15,7 @@ jobs:
       run-e2e-suite: full
       playwright-report-name: playwright-report-full
       playwright-retention-days: 14
+      run-lighthouse: true
     secrets:
       api-token: ${{ secrets.API_TOKEN }}
       jwt-secret: ${{ secrets.JWT_SECRET }}

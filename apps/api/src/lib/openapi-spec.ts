@@ -40,6 +40,10 @@ export const openApiSpec = {
     { name: "Properties", description: "Gestión de propiedades" },
     { name: "Bookings", description: "Reservas de servicios" },
     { name: "Customers", description: "Clientes del sistema" },
+    {
+      name: "Notifications",
+      description: "Alertas operativas para usuarios autenticados",
+    },
     { name: "Health", description: "Health checks y monitoreo" },
   ],
   paths: {
@@ -309,6 +313,108 @@ export const openApiSpec = {
           "401": { $ref: "#/components/responses/Unauthorized" },
           "403": { $ref: "#/components/responses/Forbidden" },
           "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/notifications": {
+      get: {
+        tags: ["Notifications"],
+        summary: "List notifications for the authenticated user",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "limit",
+            in: "query",
+            schema: { type: "integer", minimum: 1, maximum: 100 },
+            description: "Number of notifications to return (default 25)",
+          },
+          {
+            name: "cursor",
+            in: "query",
+            schema: { type: "string" },
+            description: "Cursor for pagination (notification ID)",
+          },
+          {
+            name: "unreadOnly",
+            in: "query",
+            schema: { type: "string", enum: ["true", "false"] },
+            description: "Return only unread notifications when set to true",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "List of notifications",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/NotificationList" },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
+    "/api/notifications/{notificationId}/read": {
+      patch: {
+        tags: ["Notifications"],
+        summary: "Mark a notification as read",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "notificationId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "Notification ID",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Notification marked as read",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/Notification" },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/notifications/read-all": {
+      patch: {
+        tags: ["Notifications"],
+        summary: "Mark all notifications for the user as read",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Number of notifications updated",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: {
+                      type: "object",
+                      properties: {
+                        updatedCount: {
+                          type: "integer",
+                          example: 5,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
         },
       },
     },
@@ -877,6 +983,59 @@ export const openApiSpec = {
             type: "string",
             format: "date-time",
             example: "2025-10-09T12:00:00.000Z",
+          },
+        },
+      },
+      Notification: {
+        type: "object",
+        properties: {
+          id: { type: "string", example: "clnotif123" },
+          type: {
+            type: "string",
+            enum: [
+              "BOOKING_CREATED",
+              "BOOKING_CANCELLED",
+              "USER_DEACTIVATED",
+              "SERVICE_UPDATED",
+            ],
+            example: "BOOKING_CREATED",
+          },
+          message: {
+            type: "string",
+            example: "Se creó una nueva reserva para Brickell Loft",
+          },
+          readAt: {
+            type: "string",
+            format: "date-time",
+            nullable: true,
+            example: null,
+          },
+          createdAt: {
+            type: "string",
+            format: "date-time",
+            example: "2025-10-15T14:30:00.000Z",
+          },
+        },
+      },
+      NotificationList: {
+        type: "object",
+        properties: {
+          data: {
+            type: "array",
+            items: { $ref: "#/components/schemas/Notification" },
+          },
+          pagination: {
+            type: "object",
+            properties: {
+              limit: { type: "integer", example: 25 },
+              cursor: { type: "string", nullable: true, example: null },
+              nextCursor: {
+                type: "string",
+                nullable: true,
+                example: "clnotif789",
+              },
+              hasMore: { type: "boolean", example: true },
+            },
           },
         },
       },

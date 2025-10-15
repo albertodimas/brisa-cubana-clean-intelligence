@@ -307,7 +307,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 3. ✅ Cobertura fortalecida: Tests de seguridad con escenarios negativos
 4. ✅ Logging estructurado: Pino integrado con redacción automática
 5. ✅ OpenAPI/Swagger: Documentación automática con Scalar UI en `/docs`
-6. ✅ Observabilidad: Sentry integrado en web y API con error tracking
+6. ✅ Observabilidad: Sentry + Web Vitals + Speed Insights instrumentados para detectar regresiones de performance en tiempo real.citeturn2search1turn3search7
 7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
 8. ✅ E2E Testing: 19 tests con estrategia piramidal (smoke/critical/full)
 9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)
@@ -315,6 +315,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 11. ✅ Code Coverage: Configurado con V8 provider y thresholds automáticos (API: 85%, Web: 70%)
 12. ✅ Interfaces TypeScript: Tipos e interfaces para SOLID (auth, user, booking, service, property)
 13. ✅ Refactorización masiva: 450+ líneas de código duplicado eliminadas (6 bibliotecas compartidas, 60% reducción)
+14. ✅ API de notificaciones: Modelo Prisma, repositorio y endpoints GET/PATCH listos para UI de coordinadores.
 
 ### Pendiente 🔄
 
@@ -326,13 +327,12 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 2. **Observabilidad avanzada:**
    - Configurar alertas Sentry en Slack/Email
    - Dashboard de métricas de negocio (Grafana)
-   - Performance budgets y thresholds
+   - Expandir reportes automatizados con dashboards (Nightly Lighthouse ya en ejecución)
 
 3. **Roadmap funcional:**
    - Sistema de estilos compartido (definir tras migración Tailwind v4)
-   - Notificaciones push para coordinadores
+   - Notificaciones push para coordinadores (UI + canal en tiempo real)
 
-- Completar suite E2E para búsquedas y filtros (ver `docs/decisions/search-filters-plan.md`)
 - UI de paginación en frontend (infinite scroll / load more)
 
 4. **Arquitectura (Sprint 2-3):**

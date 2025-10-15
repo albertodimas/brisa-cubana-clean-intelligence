@@ -4,6 +4,7 @@ import { BookingRepository } from "./repositories/booking-repository.js";
 import { PropertyRepository } from "./repositories/property-repository.js";
 import { UserRepository } from "./repositories/user-repository.js";
 import { CustomerRepository } from "./repositories/customer-repository.js";
+import { NotificationRepository } from "./repositories/notification-repository.js";
 import { prisma as prismaClient } from "./lib/prisma.js";
 
 /**
@@ -73,6 +74,7 @@ export const ServiceKeys = {
   PROPERTY_REPOSITORY: "propertyRepository",
   USER_REPOSITORY: "userRepository",
   CUSTOMER_REPOSITORY: "customerRepository",
+  NOTIFICATION_REPOSITORY: "notificationRepository",
 } as const;
 
 /**
@@ -112,6 +114,11 @@ export function initializeContainer(): void {
     ServiceKeys.CUSTOMER_REPOSITORY,
     () => new CustomerRepository(prisma),
   );
+
+  container.register(
+    ServiceKeys.NOTIFICATION_REPOSITORY,
+    () => new NotificationRepository(prisma),
+  );
 }
 
 /**
@@ -145,6 +152,12 @@ export function getUserRepository(): UserRepository {
 
 export function getCustomerRepository(): CustomerRepository {
   return container.resolve<CustomerRepository>(ServiceKeys.CUSTOMER_REPOSITORY);
+}
+
+export function getNotificationRepository(): NotificationRepository {
+  return container.resolve<NotificationRepository>(
+    ServiceKeys.NOTIFICATION_REPOSITORY,
+  );
 }
 
 /**

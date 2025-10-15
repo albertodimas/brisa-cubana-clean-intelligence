@@ -4,3 +4,4 @@ export * from "./booking.interface.js";
 export * from "./service.interface.js";
 export * from "./property.interface.js";
 export * from "./customer.interface.js";
+export * from "./notification.interface.js";

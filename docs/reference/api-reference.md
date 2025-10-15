@@ -133,6 +133,12 @@ security:
 - `PATCH /api/users/{userId}` - Actualizar usuario
 - `DELETE /api/users/{userId}` - Desactivar usuario (ADMIN, soft delete)
 
+### Notifications
+
+- `GET /api/notifications` - Listar notificaciones del usuario autenticado (`limit`, `cursor`, `unreadOnly`)
+- `PATCH /api/notifications/{notificationId}/read` - Marcar una notificación como leída
+- `PATCH /api/notifications/read-all` - Marcar todas las notificaciones del usuario como leídas
+
 ### Services
 
 - `GET /api/services` - Listar servicios (público)

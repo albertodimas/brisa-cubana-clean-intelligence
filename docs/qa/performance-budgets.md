@@ -6,6 +6,12 @@ Este documento define los performance budgets (límites de rendimiento) para el 
 
 Mantener una experiencia de usuario rápida y fluida estableciendo límites cuantificables para métricas clave de rendimiento.
 
+## Monitoreo activo
+
+- **Web Vitals en producción**: el componente `WebVitalsReporter` envía CLS, FCP, LCP, FID/INP y TTFB a Sentry como métricas agregadas (`web_vital.*`) para detectar regresiones en tiempo real.citeturn2search1
+- **Vercel Speed Insights**: la aplicación Next.js renderiza `<SpeedInsights />`, habilitando la captura automática de métricas en el dashboard de Vercel.citeturn3search7
+- **Nightly Lighthouse CI**: el workflow `nightly.yml` ejecuta `lhci autorun` con los budgets definidos en este documento; si el score de Performance cae por debajo de 90 o se violan límites, la ejecución falla poniéndolo en evidencia dentro del pipeline.
+
 ## Core Web Vitals
 
 ### First Contentful Paint (FCP)

@@ -11,6 +11,7 @@ import properties from "./routes/properties.js";
 import customers from "./routes/customers.js";
 import auth from "./routes/auth.js";
 import users from "./routes/users.js";
+import notifications from "./routes/notifications.js";
 
 // Initialize Dependency Injection Container
 initializeContainer();
@@ -100,6 +101,7 @@ app.route("/api/properties", properties);
 app.route("/api/customers", customers);
 app.route("/api/bookings", bookings);
 app.route("/api/users", users);
+app.route("/api/notifications", notifications);
 // Note: Using /api/authentication instead of /api/auth because Vercel
 // reserves /api/auth/* for NextAuth in Next.js projects
 app.route("/api/authentication", auth);
