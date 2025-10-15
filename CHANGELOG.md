@@ -19,7 +19,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Testing
 
-- `pnpm --filter @brisa/web test` (60 pruebas) ✅
+- `pnpm --filter @brisa/web test` (66 pruebas) ✅
 - `pnpm --filter @brisa/api test` (95 pruebas) ✅
 
 ## [0.3.0] - 2025-10-14

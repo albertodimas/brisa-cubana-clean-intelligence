@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { logger } from "@/lib/logger";
 
 function resolveApiBaseUrl(): string {
   const value = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL;
@@ -49,13 +50,23 @@ async function proxy(
     }
   }
 
-  console.log("[api proxy] →", request.method, url.toString());
+  logger.info("api proxy request.forward", {
+    method: request.method,
+    url: url.toString(),
+  });
   let upstream: Response;
 
   try {
     upstream = await fetch(url, init);
   } catch (error) {
-    console.error("[api proxy] fetch error", error);
+    logger.error("api proxy request.error", {
+      method: request.method,
+      url: url.toString(),
+      error:
+        error instanceof Error
+          ? { message: error.message, stack: error.stack }
+          : error,
+    });
     return new Response(
       JSON.stringify({ error: "Upstream service unavailable" }),
       {
@@ -64,13 +75,12 @@ async function proxy(
       },
     );
   }
-  console.log(
-    "[api proxy] ←",
-    upstream.status,
-    upstream.statusText,
-    "for",
-    url.toString(),
-  );
+  logger.info("api proxy request.complete", {
+    method: request.method,
+    url: url.toString(),
+    status: upstream.status,
+    statusText: upstream.statusText,
+  });
   const responseHeaders = new Headers(upstream.headers);
 
   responseHeaders.set(
