@@ -41,10 +41,14 @@ Revisar y, si aplica, actualizar los valores en Vercel:
    pnpm --filter @brisa/api db:push
    ```
    > Ejecutar desde una máquina segura con `DATABASE_URL` apuntando a producción.
-2. Después de cada schema change, corre el seed manual:
+2. Después de cada schema change, corre los seeds en este orden:
    ```bash
-   pnpm --filter @brisa/api db:seed
+   pnpm --filter @brisa/api db:seed:operativo
+   pnpm --filter @brisa/api db:seed:demo
    ```
+
+   - **Producción:** ejecuta únicamente `db:seed:operativo` (credenciales internas). Usa `db:seed:demo` solo en entornos de demo/preview.
+   - **Staging/Local:** ejecuta ambos para contar con datos ficticios del landing y checkout.
 3. Registra la ejecución en [`operations/backup-log.md`](backup-log.md) con fecha, responsable y resultado.
 
 ## 5. Verificación post-deploy

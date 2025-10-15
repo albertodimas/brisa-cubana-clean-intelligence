@@ -44,13 +44,11 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
   - Incluir esquema de telemetría (eventos a capturar en Analytics/Sentry) y comportamiento responsive (desktop, tablet, móvil).
 - **Entregable:** markdown en `docs/product/rfc-public-components.md` con wireframes de referencia y checklist de accesibilidad WCAG AA.
 
-### 6.2 Plan de migración de seeds (operativos vs. demo)
+### 6.2 Plan de migración de seeds (operativos vs. demo) ✅
 
 - **Objetivo:** separar datos usados por el equipo operativo del contenido demo que se expone en landing/checkout sin filtrar credenciales internas.
-- **Acciones:**
-  - Crear seeds diferenciados (`prisma/seed.operativo.ts`, `prisma/seed.demo.ts`) y registrar en `package.json` scripts `db:seed:operativo` / `db:seed:demo`.
-  - Mantener usuarios operativos (admin, coordinator) sólo en seed interno; generar perfiles ficticios para demos públicas.
-  - Documentar en `docs/operations/deployment.md` la secuencia de ejecución (operativo → demo) tanto en staging como en producción.
+- **Estado:** Implementado (`prisma/seed.operativo.ts`, `prisma/seed.demo.ts`) con scripts `pnpm --filter @brisa/api db:seed:operativo` y `pnpm --filter @brisa/api db:seed:demo`.
+- **Documentación:** `docs/operations/deployment.md` actualizada con la secuencia recomendada (producción solo operativo; staging/local operativo + demo).
 
 ### 6.3 Configuración Stripe (modo test)
 

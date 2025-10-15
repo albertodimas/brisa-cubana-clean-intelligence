@@ -40,8 +40,9 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    ```
 5. **Sincronizar y sembrar base de datos**
    ```bash
-   pnpm db:push
-   pnpm db:seed
+   pnpm --filter @brisa/api db:push --force-reset
+   pnpm --filter @brisa/api db:seed:operativo
+   pnpm --filter @brisa/api db:seed:demo
    ```
 6. **Ejecutar el stack**
 

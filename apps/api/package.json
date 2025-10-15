@@ -26,7 +26,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.operativo.ts && tsx prisma/seed.demo.ts",
+    "db:seed:operativo": "tsx prisma/seed.operativo.ts",
+    "db:seed:demo": "tsx prisma/seed.demo.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.11.5",
