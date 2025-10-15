@@ -1,9 +1,11 @@
-import type { PrismaClient, Property } from "@prisma/client";
+import type { Prisma, PrismaClient, Property } from "@prisma/client";
 import type {
   CreatePropertyDto,
   IPropertyRepository,
+  PropertyPagination,
   PropertyPaginationParams,
   PropertyResponse,
+  PropertySearchParams,
   UpdatePropertyDto,
 } from "../interfaces/property.interface.js";
 
@@ -114,5 +116,60 @@ export class PropertyRepository implements IPropertyRepository {
       include: { owner: { select: ownerSelect } },
     });
     return toPropertyResponse(property as PrismaPropertyWithOwner);
+  }
+
+  async findManyWithSearch({
+    search,
+    city,
+    type,
+    limit = 50,
+    cursor,
+  }: PropertySearchParams): Promise<{
+    data: PropertyResponse[];
+    pagination: PropertyPagination;
+  }> {
+    const where: Prisma.PropertyWhereInput = {};
+
+    if (city) {
+      where.city = city;
+    }
+
+    if (type) {
+      where.type = type;
+    }
+
+    if (search) {
+      where.OR = [
+        { label: { contains: search, mode: "insensitive" } },
+        { city: { contains: search, mode: "insensitive" } },
+        { addressLine: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const take = limit + 1;
+    const properties = await this.prisma.property.findMany({
+      where,
+      take,
+      ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      include: { owner: { select: ownerSelect } },
+    });
+
+    const hasMore = properties.length > limit;
+    const data = hasMore ? properties.slice(0, limit) : properties;
+    const normalized = data.map((property) =>
+      toPropertyResponse(property as PrismaPropertyWithOwner),
+    );
+    const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
+
+    return {
+      data: normalized,
+      pagination: {
+        limit,
+        cursor: cursor ?? null,
+        nextCursor,
+        hasMore,
+      },
+    } satisfies { data: PropertyResponse[]; pagination: PropertyPagination };
   }
 }

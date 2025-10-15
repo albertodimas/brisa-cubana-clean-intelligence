@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import type { QueryParams } from "@/hooks/use-paginated-resource";
 import type { Property, Customer, PaginationInfo } from "@/lib/api";
 import { Button } from "./ui/button";
+import { FilterChips, type FilterChip } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
+import { SearchBar } from "./ui/search-bar";
 import { Skeleton } from "./ui/skeleton";
 
 type ActionResult = {
@@ -25,6 +28,9 @@ type PropertiesManagerProps = {
   isLoadingMore: boolean;
   onLoadMore: () => Promise<void> | void;
   onRefresh: () => Promise<void> | void;
+  currentQuery: QueryParams;
+  setQuery: (query: QueryParams) => Promise<void>;
+  resetQuery: () => Promise<void>;
 };
 
 export function PropertiesManager({
@@ -38,11 +44,132 @@ export function PropertiesManager({
   isLoadingMore,
   onLoadMore,
   onRefresh,
+  currentQuery,
+  setQuery,
+  resetQuery,
 }: PropertiesManagerProps) {
   const [propertyUpdatingId, setPropertyUpdatingId] = useState<string | null>(
     null,
   );
   const [isPropertyPending, startPropertyAction] = useTransition();
+  const PROPERTY_TYPE_LABELS: Record<string, string> = {
+    RESIDENTIAL: "Residencial",
+    VACATION_RENTAL: "Alquiler vacacional",
+    OFFICE: "Oficina",
+  };
+  const [searchTerm, setSearchTerm] = useState<string>(
+    typeof currentQuery.search === "string" ? String(currentQuery.search) : "",
+  );
+  const [cityFilter, setCityFilter] = useState<string>(
+    typeof currentQuery.city === "string" ? String(currentQuery.city) : "",
+  );
+  const [typeFilter, setTypeFilter] = useState<string>(
+    typeof currentQuery.type === "string" ? String(currentQuery.type) : "",
+  );
+
+  useEffect(() => {
+    const nextSearch =
+      typeof currentQuery.search === "string"
+        ? String(currentQuery.search)
+        : "";
+    if (nextSearch !== searchTerm) {
+      setSearchTerm(nextSearch);
+    }
+
+    const nextCity =
+      typeof currentQuery.city === "string" ? String(currentQuery.city) : "";
+    if (nextCity !== cityFilter) {
+      setCityFilter(nextCity);
+    }
+
+    const nextType =
+      typeof currentQuery.type === "string" ? String(currentQuery.type) : "";
+    if (nextType !== typeFilter) {
+      setTypeFilter(nextType);
+    }
+  }, [currentQuery.search, currentQuery.city, currentQuery.type]);
+
+  useEffect(() => {
+    const query: QueryParams = {};
+    if (searchTerm.trim()) {
+      query.search = searchTerm.trim();
+    }
+    if (cityFilter) {
+      query.city = cityFilter;
+    }
+    if (typeFilter) {
+      query.type = typeFilter;
+    }
+    void setQuery(query);
+  }, [cityFilter, searchTerm, setQuery, typeFilter]);
+
+  const cityOptions = useMemo(() => {
+    const unique = new Set<string>();
+    properties.forEach((property) => {
+      if (property.city) {
+        unique.add(property.city);
+      }
+    });
+    if (cityFilter && !unique.has(cityFilter)) {
+      unique.add(cityFilter);
+    }
+    return Array.from(unique).sort((a, b) => a.localeCompare(b));
+  }, [properties, cityFilter]);
+
+  const typeOptions = useMemo(() => {
+    const baseTypes = ["RESIDENTIAL", "VACATION_RENTAL", "OFFICE"];
+    const unique = new Set<string>(baseTypes);
+    properties.forEach((property) => {
+      if (property.type) {
+        unique.add(property.type);
+      }
+    });
+    if (typeFilter && !unique.has(typeFilter)) {
+      unique.add(typeFilter);
+    }
+    return Array.from(unique);
+  }, [properties, typeFilter]);
+
+  const filterChips = useMemo<FilterChip[]>(() => {
+    const chips: FilterChip[] = [];
+    if (searchTerm.trim()) {
+      chips.push({
+        key: "search",
+        label: "Búsqueda",
+        value: searchTerm.trim(),
+      });
+    }
+    if (cityFilter) {
+      chips.push({ key: "city", label: "Ciudad", value: cityFilter });
+    }
+    if (typeFilter) {
+      chips.push({
+        key: "type",
+        label: "Tipo",
+        value: PROPERTY_TYPE_LABELS[typeFilter] ?? typeFilter,
+      });
+    }
+    return chips;
+  }, [PROPERTY_TYPE_LABELS, cityFilter, searchTerm, typeFilter]);
+
+  const handleRemoveFilter = (key: string) => {
+    if (key === "search") {
+      setSearchTerm("");
+    }
+    if (key === "city") {
+      setCityFilter("");
+    }
+    if (key === "type") {
+      setTypeFilter("");
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setCityFilter("");
+    setTypeFilter("");
+    void resetQuery();
+  };
 
   async function handlePropertyUpdate(propertyId: string, formData: FormData) {
     setPropertyUpdatingId(propertyId);
@@ -182,6 +309,53 @@ export function PropertiesManager({
       {/* Manage Properties List */}
       <section className="ui-stack">
         <h3 className="ui-section-title">Inventario de propiedades</h3>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full sm:max-w-xs">
+            <SearchBar
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar propiedades..."
+              isLoading={isLoading}
+            />
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <label className="ui-field w-full sm:w-48">
+              <span className="ui-field__label">Filtrar por ciudad</span>
+              <select
+                value={cityFilter}
+                onChange={(event) => setCityFilter(event.target.value)}
+                className="ui-input"
+              >
+                <option value="">Todas</option>
+                {cityOptions.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="ui-field w-full sm:w-56">
+              <span className="ui-field__label">Filtrar por tipo</span>
+              <select
+                value={typeFilter}
+                onChange={(event) => setTypeFilter(event.target.value)}
+                className="ui-input"
+              >
+                <option value="">Todos los tipos</option>
+                {typeOptions.map((type) => (
+                  <option key={type} value={type}>
+                    {PROPERTY_TYPE_LABELS[type] ?? type}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+        <FilterChips
+          filters={filterChips}
+          onRemove={handleRemoveFilter}
+          onClearAll={filterChips.length > 1 ? handleClearFilters : undefined}
+        />
         {isLoading ? (
           <div className="grid gap-4">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -194,7 +368,9 @@ export function PropertiesManager({
           </div>
         ) : properties.length === 0 ? (
           <p className="ui-helper-text">
-            Aún no tienes propiedades registradas.
+            {filterChips.length > 0
+              ? "No se encontraron propiedades para los filtros seleccionados."
+              : "Aún no tienes propiedades registradas."}
           </p>
         ) : (
           <div className="ui-stack">

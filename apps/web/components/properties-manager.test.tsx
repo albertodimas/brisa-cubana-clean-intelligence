@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Customer, Property, PaginationInfo } from "@/lib/api";
@@ -52,24 +52,39 @@ const baseProperty: Property = {
   owner: customers[0],
 };
 
+function renderManager(
+  overrides: Partial<React.ComponentProps<typeof PropertiesManager>> = {},
+) {
+  const onToast = vi.fn();
+  const onRefresh = vi.fn();
+  const setQuery = vi
+    .fn<(query: Record<string, unknown>) => Promise<void>>()
+    .mockResolvedValue();
+  const resetQuery = vi.fn<() => Promise<void>>().mockResolvedValue();
+  const props: React.ComponentProps<typeof PropertiesManager> = {
+    properties: [],
+    customers,
+    createProperty: async () => ({ success: "ok" }),
+    updateProperty: async () => ({ success: "ok" }),
+    onToast,
+    pageInfo,
+    isLoading: false,
+    isLoadingMore: false,
+    onLoadMore: vi.fn(),
+    onRefresh,
+    currentQuery: {},
+    setQuery,
+    resetQuery,
+    ...overrides,
+  };
+
+  const utils = render(<PropertiesManager {...props} />);
+  return { ...props, onToast, onRefresh, setQuery, resetQuery, utils };
+}
+
 describe("PropertiesManager", () => {
   it("shows empty state message when no properties exist", () => {
-    const onToast = vi.fn();
-
-    render(
-      <PropertiesManager
-        properties={[]}
-        customers={customers}
-        createProperty={async () => ({ success: "ok" })}
-        updateProperty={async () => ({ success: "ok" })}
-        onToast={onToast}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onRefresh={vi.fn()}
-      />,
-    );
+    renderManager();
 
     expect(
       screen.getByText("Aún no tienes propiedades registradas."),
@@ -80,23 +95,9 @@ describe("PropertiesManager", () => {
     const createProperty = vi
       .fn<(formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ success: "Propiedad creada" });
-    const onToast = vi.fn();
-    const onRefresh = vi.fn();
-
-    render(
-      <PropertiesManager
-        properties={[]}
-        customers={customers}
-        createProperty={createProperty}
-        updateProperty={async () => ({ success: "ok" })}
-        onToast={onToast}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onRefresh={onRefresh}
-      />,
-    );
+    const { onToast, onRefresh } = renderManager({
+      createProperty,
+    });
 
     const form = screen
       .getByText("Registrar propiedad")
@@ -117,23 +118,10 @@ describe("PropertiesManager", () => {
     const updateProperty = vi
       .fn<(propertyId: string, formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ error: "Conflicto" });
-    const onToast = vi.fn();
-    const onRefresh = vi.fn();
-
-    render(
-      <PropertiesManager
-        properties={[baseProperty]}
-        customers={customers}
-        createProperty={async () => ({ success: "ok" })}
-        updateProperty={updateProperty}
-        onToast={onToast}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onRefresh={onRefresh}
-      />,
-    );
+    const { onToast, onRefresh } = renderManager({
+      properties: [baseProperty],
+      updateProperty,
+    });
 
     const form = screen.getByText(baseProperty.label).closest("form");
     if (!(form instanceof HTMLFormElement)) {
@@ -166,23 +154,10 @@ describe("PropertiesManager", () => {
     const updateProperty = vi
       .fn<(propertyId: string, formData: FormData) => Promise<ActionResult>>()
       .mockResolvedValue({ success: "Propiedad actualizada" });
-    const onToast = vi.fn();
-    const onRefresh = vi.fn();
-
-    render(
-      <PropertiesManager
-        properties={[baseProperty]}
-        customers={customers}
-        createProperty={async () => ({ success: "ok" })}
-        updateProperty={updateProperty}
-        onToast={onToast}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onRefresh={onRefresh}
-      />,
-    );
+    const { onToast, onRefresh } = renderManager({
+      properties: [baseProperty],
+      updateProperty,
+    });
 
     const form = screen.getByText(baseProperty.label).closest("form");
     if (!(form instanceof HTMLFormElement)) {
@@ -204,5 +179,36 @@ describe("PropertiesManager", () => {
     );
     expect(onToast).toHaveBeenCalledWith("Propiedad actualizada", "success");
     expect(onRefresh).toHaveBeenCalled();
+  });
+
+  it("updates query when property search changes", async () => {
+    const user = userEvent.setup();
+    const { setQuery } = renderManager({ properties: [baseProperty] });
+
+    const searchInput = screen.getByPlaceholderText("Buscar propiedades...");
+    await user.type(searchInput, "Miami");
+
+    await waitFor(
+      () => {
+        expect(setQuery).toHaveBeenCalledWith({ search: "Miami" });
+      },
+      { timeout: 500 },
+    );
+  });
+
+  it("updates query when city and type filters change", async () => {
+    const user = userEvent.setup();
+    const { setQuery } = renderManager({ properties: [baseProperty] });
+
+    const citySelect = screen.getByLabelText("Filtrar por ciudad");
+    await user.selectOptions(citySelect, "Miami");
+    expect(setQuery).toHaveBeenCalledWith({ city: "Miami" });
+
+    const typeSelect = screen.getByLabelText("Filtrar por tipo");
+    await user.selectOptions(typeSelect, "RESIDENTIAL");
+    expect(setQuery).toHaveBeenCalledWith({
+      city: "Miami",
+      type: "RESIDENTIAL",
+    });
   });
 });

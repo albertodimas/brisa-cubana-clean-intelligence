@@ -34,6 +34,12 @@ export interface PaginationParams {
   cursor?: string;
 }
 
+export interface UserSearchParams extends PaginationParams {
+  search?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}
+
 export interface PaginationMeta {
   limit: number;
   cursor: string | null;
@@ -48,6 +54,9 @@ export interface PaginatedResponse<T> {
 
 export interface IUserRepository {
   findMany(params: PaginationParams): Promise<PaginatedResponse<UserResponse>>;
+  findManyWithSearch(
+    params: UserSearchParams,
+  ): Promise<PaginatedResponse<UserResponse>>;
   findById(id: string): Promise<UserResponse | null>;
   findByEmail(email: string): Promise<UserResponse | null>;
   findAuthByEmail(email: string): Promise<AuthUserResponse | null>;

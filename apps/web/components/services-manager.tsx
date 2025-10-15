@@ -1,10 +1,19 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { useState, useTransition, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
+import type { QueryParams } from "@/hooks/use-paginated-resource";
 import type { Service, PaginationInfo } from "@/lib/api";
 import { Button } from "./ui/button";
+import { FilterChips, type FilterChip } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
+import { SearchBar } from "./ui/search-bar";
 import { Skeleton } from "./ui/skeleton";
 
 type ActionResult = {
@@ -35,6 +44,9 @@ type ServicesManagerProps = {
   isLoadingMore: boolean;
   onLoadMore: () => Promise<void> | void;
   onRefresh: () => Promise<void> | void;
+  currentQuery: QueryParams;
+  setQuery: (query: QueryParams) => Promise<void>;
+  resetQuery: () => Promise<void>;
 };
 
 export function ServicesManager({
@@ -48,6 +60,9 @@ export function ServicesManager({
   isLoadingMore,
   onLoadMore,
   onRefresh,
+  currentQuery,
+  setQuery,
+  resetQuery,
 }: ServicesManagerProps) {
   const [serviceUpdatingId, setServiceUpdatingId] = useState<string | null>(
     null,
@@ -56,6 +71,82 @@ export function ServicesManager({
     null,
   );
   const [isToggling, startToggle] = useTransition();
+  const [searchTerm, setSearchTerm] = useState<string>(
+    typeof currentQuery.search === "string" ? String(currentQuery.search) : "",
+  );
+  const [activeFilter, setActiveFilter] = useState<"all" | "true" | "false">(
+    currentQuery.active === true
+      ? "true"
+      : currentQuery.active === false
+        ? "false"
+        : "all",
+  );
+
+  useEffect(() => {
+    const nextSearch =
+      typeof currentQuery.search === "string"
+        ? String(currentQuery.search)
+        : "";
+    if (nextSearch !== searchTerm) {
+      setSearchTerm(nextSearch);
+    }
+    const nextActive =
+      currentQuery.active === true
+        ? "true"
+        : currentQuery.active === false
+          ? "false"
+          : "all";
+    if (nextActive !== activeFilter) {
+      setActiveFilter(nextActive);
+    }
+  }, [currentQuery.search, currentQuery.active]);
+
+  useEffect(() => {
+    const nextQuery: QueryParams = {};
+    if (searchTerm.trim()) {
+      nextQuery.search = searchTerm.trim();
+    }
+    if (activeFilter === "true") {
+      nextQuery.active = true;
+    } else if (activeFilter === "false") {
+      nextQuery.active = false;
+    }
+    void setQuery(nextQuery);
+  }, [activeFilter, searchTerm, setQuery]);
+
+  const filterChips = useMemo<FilterChip[]>(() => {
+    const chips: FilterChip[] = [];
+    if (searchTerm.trim()) {
+      chips.push({
+        key: "search",
+        label: "Búsqueda",
+        value: searchTerm.trim(),
+      });
+    }
+    if (activeFilter === "true" || activeFilter === "false") {
+      chips.push({
+        key: "active",
+        label: "Estado",
+        value: activeFilter === "true" ? "Activo" : "Inactivo",
+      });
+    }
+    return chips;
+  }, [activeFilter, searchTerm]);
+
+  const handleRemoveFilter = (key: string) => {
+    if (key === "search") {
+      setSearchTerm("");
+    }
+    if (key === "active") {
+      setActiveFilter("all");
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setActiveFilter("all");
+    void resetQuery();
+  };
 
   async function handleServiceUpdate(serviceId: string, formData: FormData) {
     setServiceUpdatingId(serviceId);
@@ -139,6 +230,35 @@ export function ServicesManager({
       {/* Manage Services List */}
       <section className="ui-stack">
         <h3 className="ui-section-title">Gestionar servicios</h3>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full sm:max-w-xs">
+            <SearchBar
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar servicios..."
+              isLoading={isLoading}
+            />
+          </div>
+          <label className="ui-field w-full sm:w-48">
+            <span className="ui-field__label">Estado</span>
+            <select
+              value={activeFilter}
+              onChange={(event) =>
+                setActiveFilter(event.target.value as "all" | "true" | "false")
+              }
+              className="ui-input"
+            >
+              <option value="all">Todos</option>
+              <option value="true">Activos</option>
+              <option value="false">Inactivos</option>
+            </select>
+          </label>
+        </div>
+        <FilterChips
+          filters={filterChips}
+          onRemove={handleRemoveFilter}
+          onClearAll={filterChips.length > 1 ? handleClearFilters : undefined}
+        />
         {isLoading ? (
           <div className="grid gap-4">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -155,7 +275,9 @@ export function ServicesManager({
           </div>
         ) : services.length === 0 ? (
           <p className="ui-helper-text">
-            No hay servicios configurados todavía.
+            {filterChips.length > 0
+              ? "No se encontraron servicios para los filtros seleccionados."
+              : "No hay servicios configurados todavía."}
           </p>
         ) : (
           <div className="ui-stack">

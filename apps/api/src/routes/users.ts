@@ -9,6 +9,7 @@ import { hashPassword } from "../lib/bcrypt-helpers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
 import type { UpdateUserDto } from "../interfaces/user.interface.js";
 import { getUserRepository } from "../container.js";
+import { parseSearchableQuery } from "../lib/pagination.js";
 
 const router = new Hono();
 
@@ -34,24 +35,32 @@ const createUserSchema = z.object({
   role: roleSchema,
 });
 
-const querySchema = z.object({
+const userQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional().default(50),
   cursor: z.string().cuid().optional(),
+  role: roleSchema.optional(),
+  isActive: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
 });
 
 router.get("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
-  const url = new URL(c.req.url, "http://localhost");
-  const parsed = querySchema.safeParse(
-    Object.fromEntries(url.searchParams.entries()),
-  );
-  if (!parsed.success) {
-    return c.json({ error: parsed.error.flatten() }, 400);
+  const queryResult = parseSearchableQuery(c, userQuerySchema);
+  if (!queryResult.success) {
+    return queryResult.response;
   }
 
-  const { limit, cursor } = parsed.data;
+  const { limit, cursor, search, role, isActive } = queryResult.data;
 
   const repository = getUserRepository();
-  const result = await repository.findMany({ limit, cursor });
+  const result = await repository.findManyWithSearch({
+    limit,
+    cursor,
+    search,
+    role,
+    isActive,
+  });
   return c.json(result);
 });
 

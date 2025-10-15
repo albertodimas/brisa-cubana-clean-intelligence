@@ -15,6 +15,27 @@ export const paginationQuerySchema = z.object({
 
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
 
+const searchParamSchema = z
+  .string()
+  .optional()
+  .transform((value) => {
+    if (!value) {
+      return undefined;
+    }
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  });
+
+const searchableQueryBaseSchema = paginationQuerySchema.extend({
+  search: searchParamSchema,
+});
+
+export type SearchableQuery<
+  T extends z.ZodObject<any> | undefined = undefined,
+> = PaginationQuery & {
+  search?: string;
+} & (T extends z.ZodObject<any> ? z.infer<T> : Record<string, never>);
+
 /**
  * Pagination result structure
  */
@@ -53,6 +74,43 @@ export function parsePaginationQuery(
   }
 
   return { success: true, data: parsed.data };
+}
+
+/**
+ * Parse pagination + search query parameters from request
+ * @param c - Hono context
+ * @param filterSchema - Optional Zod schema for additional filters
+ * @returns Parsed searchable query or error response
+ */
+export function parseSearchableQuery<T extends z.ZodObject<any>>(
+  c: Context,
+  filterSchema?: T,
+):
+  | {
+      success: true;
+      data: SearchableQuery<T>;
+    }
+  | { success: false; response: Response } {
+  const url = new URL(c.req.url, "http://localhost");
+  const entries = Object.fromEntries(url.searchParams.entries());
+
+  const schema = filterSchema
+    ? searchableQueryBaseSchema.merge(filterSchema)
+    : searchableQueryBaseSchema;
+
+  const parsed = schema.safeParse(entries);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      response: c.json({ error: parsed.error.flatten() }, 400),
+    };
+  }
+
+  return {
+    success: true,
+    data: parsed.data as SearchableQuery<T>,
+  };
 }
 
 /**

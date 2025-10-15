@@ -141,4 +141,31 @@ export class ServiceRepository
       orderBy: { name: "asc" },
     });
   }
+
+  async findManyWithSearch(options: {
+    search?: string;
+    active?: boolean;
+    limit?: number;
+    cursor?: string;
+  }): Promise<PaginatedResult<Service>> {
+    const { search, active, limit = 50, cursor } = options;
+
+    const where: Prisma.ServiceWhereInput = {};
+
+    if (typeof active === "boolean") {
+      where.active = active;
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    return await this.findManyPaginated(limit, cursor, {
+      where,
+      orderBy: [{ name: "asc" }, { id: "asc" }],
+    });
+  }
 }

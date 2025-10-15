@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { PaginationInfo, Service } from "@/lib/api";
@@ -51,6 +51,10 @@ function renderManager(
 ) {
   const onToast = vi.fn();
   const onRefresh = vi.fn();
+  const setQuery = vi
+    .fn<(query: Record<string, unknown>) => Promise<void>>()
+    .mockResolvedValue();
+  const resetQuery = vi.fn<() => Promise<void>>().mockResolvedValue();
   const props: React.ComponentProps<typeof ServicesManager> = {
     services: [],
     createService: defaultCreate,
@@ -62,11 +66,14 @@ function renderManager(
     isLoadingMore: false,
     onLoadMore: vi.fn(),
     onRefresh,
+    currentQuery: {},
+    setQuery,
+    resetQuery,
     ...overrides,
   };
 
   const utils = render(<ServicesManager {...props} />);
-  return { ...props, onToast, onRefresh, utils };
+  return { ...props, onToast, onRefresh, setQuery, resetQuery, utils };
 }
 
 describe("ServicesManager", () => {
@@ -212,5 +219,30 @@ describe("ServicesManager", () => {
 
     expect(onToast).toHaveBeenCalledWith("No se pudo actualizar", "error");
     expect(onRefresh).not.toHaveBeenCalled();
+  });
+
+  it("updates query when search term changes", async () => {
+    const user = userEvent.setup();
+    const { setQuery } = renderManager();
+
+    const input = screen.getByPlaceholderText("Buscar servicios...");
+    await user.type(input, "limpieza");
+
+    await waitFor(
+      () => {
+        expect(setQuery).toHaveBeenCalledWith({ search: "limpieza" });
+      },
+      { timeout: 500 },
+    );
+  });
+
+  it("updates query when active filter changes", async () => {
+    const user = userEvent.setup();
+    const { setQuery } = renderManager();
+
+    const select = screen.getByLabelText("Estado");
+    await user.selectOptions(select, "true");
+
+    expect(setQuery).toHaveBeenCalledWith({ active: true });
   });
 });

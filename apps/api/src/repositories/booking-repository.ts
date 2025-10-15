@@ -44,6 +44,7 @@ export interface BookingFilters {
   customerId?: string;
   from?: Date;
   to?: Date;
+  search?: string;
 }
 
 /**
@@ -233,6 +234,26 @@ export class BookingRepository
         ...(filters.from ? { gte: filters.from } : {}),
         ...(filters.to ? { lte: filters.to } : {}),
       };
+    }
+
+    if (filters.search) {
+      const search = filters.search;
+      where.OR = [
+        { code: { contains: search, mode: "insensitive" } },
+        {
+          customer: {
+            OR: [
+              { email: { contains: search, mode: "insensitive" } },
+              { fullName: { contains: search, mode: "insensitive" } },
+            ],
+          },
+        },
+        {
+          property: {
+            label: { contains: search, mode: "insensitive" },
+          },
+        },
+      ];
     }
 
     return Object.keys(where).length > 0 ? where : undefined;

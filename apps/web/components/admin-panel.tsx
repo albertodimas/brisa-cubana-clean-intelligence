@@ -41,6 +41,7 @@ type BookingFilterState = {
   status: string;
   from: string;
   to: string;
+  search: string;
 };
 
 type AdminPanelProps = {
@@ -107,6 +108,9 @@ export function AdminPanel({
     isLoadingMore: isLoadingMoreServices,
     loadMore: loadMoreServices,
     refresh: refreshServices,
+    currentQuery: serviceQuery,
+    setQuery: setServiceQuery,
+    resetQuery: resetServiceQuery,
   } = usePaginatedResource<Service>({
     initial: services,
     endpoint: "/api/services",
@@ -120,6 +124,9 @@ export function AdminPanel({
     isLoadingMore: isLoadingMoreProperties,
     loadMore: loadMoreProperties,
     refresh: refreshProperties,
+    currentQuery: propertyQuery,
+    setQuery: setPropertyQuery,
+    resetQuery: resetPropertyQuery,
   } = usePaginatedResource<Property>({
     initial: properties,
     endpoint: "/api/properties",
@@ -132,6 +139,9 @@ export function AdminPanel({
     isLoading: isCustomersRefreshing,
     isLoadingMore: isLoadingMoreCustomers,
     loadMore: loadMoreCustomers,
+    currentQuery: customerQuery,
+    setQuery: setCustomerQuery,
+    resetQuery: resetCustomerQuery,
   } = usePaginatedResource<Customer>({
     initial: customers,
     endpoint: "/api/customers",
@@ -146,6 +156,7 @@ export function AdminPanel({
       status: filters.status !== "ALL" ? filters.status : "",
       from: filters.from || "",
       to: filters.to || "",
+      search: filters.search || "",
     }),
     [BOOKINGS_PAGE_SIZE],
   );
@@ -157,6 +168,7 @@ export function AdminPanel({
         ? initialBookingFilters.from.slice(0, 10)
         : "",
       to: initialBookingFilters.to ? initialBookingFilters.to.slice(0, 10) : "",
+      search: "",
     }),
     [initialBookingFilters],
   );
@@ -327,6 +339,9 @@ export function AdminPanel({
         isLoadingMore={isLoadingMoreServices}
         onLoadMore={loadMoreServices}
         onRefresh={refreshServices}
+        currentQuery={serviceQuery}
+        setQuery={setServiceQuery}
+        resetQuery={resetServiceQuery}
       />
 
       <BookingsManager
@@ -349,6 +364,9 @@ export function AdminPanel({
         isLoading={isCustomersRefreshing}
         isLoadingMore={isLoadingMoreCustomers}
         onLoadMore={loadMoreCustomers}
+        currentQuery={customerQuery}
+        setQuery={setCustomerQuery}
+        resetQuery={resetCustomerQuery}
       />
 
       <PropertiesManager
@@ -362,6 +380,9 @@ export function AdminPanel({
         isLoadingMore={isLoadingMoreProperties}
         onLoadMore={loadMoreProperties}
         onRefresh={refreshProperties}
+        currentQuery={propertyQuery}
+        setQuery={setPropertyQuery}
+        resetQuery={resetPropertyQuery}
       />
 
       {currentUser?.role === "ADMIN" ? (

@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "./ui/button";
+import { FilterChips, type FilterChip } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
+import { SearchBar } from "./ui/search-bar";
 import { Skeleton } from "./ui/skeleton";
 import type { Booking, PaginationInfo, Property, Service } from "@/lib/api";
 
@@ -9,6 +11,7 @@ type BookingFilterInput = {
   status: string;
   from: string;
   to: string;
+  search: string;
 };
 
 type BookingsManagerProps = {
@@ -41,53 +44,110 @@ export function BookingsManager({
   formatDateTime,
 }: BookingsManagerProps) {
   const hasBookings = bookings.length > 0;
+  const filterChips: FilterChip[] = [];
+
+  if (filters.search.trim()) {
+    filterChips.push({
+      key: "search",
+      label: "Búsqueda",
+      value: filters.search.trim(),
+    });
+  }
+  if (filters.status !== "ALL") {
+    filterChips.push({
+      key: "status",
+      label: "Estado",
+      value: filters.status,
+    });
+  }
+  if (filters.from) {
+    filterChips.push({ key: "from", label: "Desde", value: filters.from });
+  }
+  if (filters.to) {
+    filterChips.push({ key: "to", label: "Hasta", value: filters.to });
+  }
 
   return (
     <section className="ui-stack ui-stack--lg">
       <h3 className="ui-section-title">Reservas programadas</h3>
-      <div className="flex flex-wrap gap-4">
-        <label className="ui-field">
-          <span className="ui-field__label">Estado</span>
-          <select
-            data-testid="booking-status-filter"
-            value={filters.status}
-            onChange={async (event) => {
-              await onFiltersChange({ status: event.target.value });
+      <div className="flex flex-col gap-3">
+        <div className="w-full sm:max-w-xs">
+          <SearchBar
+            value={filters.search}
+            onChange={async (value) => {
+              await onFiltersChange({ search: value });
             }}
-            className="ui-input"
-          >
-            <option value="ALL">Todos</option>
-            <option value="PENDING">Pendiente</option>
-            <option value="CONFIRMED">Confirmada</option>
-            <option value="IN_PROGRESS">En curso</option>
-            <option value="COMPLETED">Completada</option>
-            <option value="CANCELLED">Cancelada</option>
-          </select>
-        </label>
-
-        <label className="ui-field">
-          <span className="ui-field__label">Desde</span>
-          <input
-            type="date"
-            value={filters.from}
-            onChange={async (event) => {
-              await onFiltersChange({ from: event.target.value });
-            }}
-            className="ui-input"
+            placeholder="Buscar por código, cliente o propiedad..."
+            isLoading={isLoading}
           />
-        </label>
+        </div>
+        <div className="flex flex-wrap gap-4">
+          <label className="ui-field">
+            <span className="ui-field__label">Estado</span>
+            <select
+              data-testid="booking-status-filter"
+              value={filters.status}
+              onChange={async (event) => {
+                await onFiltersChange({ status: event.target.value });
+              }}
+              className="ui-input"
+            >
+              <option value="ALL">Todos</option>
+              <option value="PENDING">Pendiente</option>
+              <option value="CONFIRMED">Confirmada</option>
+              <option value="IN_PROGRESS">En curso</option>
+              <option value="COMPLETED">Completada</option>
+              <option value="CANCELLED">Cancelada</option>
+            </select>
+          </label>
 
-        <label className="ui-field">
-          <span className="ui-field__label">Hasta</span>
-          <input
-            type="date"
-            value={filters.to}
-            onChange={async (event) => {
-              await onFiltersChange({ to: event.target.value });
-            }}
-            className="ui-input"
-          />
-        </label>
+          <label className="ui-field">
+            <span className="ui-field__label">Desde</span>
+            <input
+              type="date"
+              value={filters.from}
+              onChange={async (event) => {
+                await onFiltersChange({ from: event.target.value });
+              }}
+              className="ui-input"
+            />
+          </label>
+
+          <label className="ui-field">
+            <span className="ui-field__label">Hasta</span>
+            <input
+              type="date"
+              value={filters.to}
+              onChange={async (event) => {
+                await onFiltersChange({ to: event.target.value });
+              }}
+              className="ui-input"
+            />
+          </label>
+        </div>
+        <FilterChips
+          filters={filterChips}
+          onRemove={async (key) => {
+            const next: Partial<BookingFilterInput> = {};
+            if (key === "search") next.search = "";
+            if (key === "status") next.status = "ALL";
+            if (key === "from") next.from = "";
+            if (key === "to") next.to = "";
+            await onFiltersChange(next);
+          }}
+          onClearAll={
+            filterChips.length > 1
+              ? async () => {
+                  await onFiltersChange({
+                    search: "",
+                    status: "ALL",
+                    from: "",
+                    to: "",
+                  });
+                }
+              : undefined
+          }
+        />
       </div>
 
       {isLoading ? (
@@ -102,7 +162,9 @@ export function BookingsManager({
         </div>
       ) : !hasBookings ? (
         <p className="ui-helper-text">
-          No hay reservas que coincidan con los filtros seleccionados.
+          {filterChips.length > 0
+            ? "No hay reservas que coincidan con los filtros seleccionados."
+            : "No hay reservas disponibles."}
         </p>
       ) : (
         <div className="grid gap-4">

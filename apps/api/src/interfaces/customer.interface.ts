@@ -16,8 +16,15 @@ export interface CustomerPaginationParams {
   cursor?: string;
 }
 
+export interface CustomerSearchParams extends CustomerPaginationParams {
+  search?: string;
+}
+
 export interface ICustomerRepository {
   findMany(
     params?: CustomerPaginationParams,
+  ): Promise<{ data: CustomerResponse[]; pagination: CustomerPagination }>;
+  findManyWithSearch(
+    params: CustomerSearchParams,
   ): Promise<{ data: CustomerResponse[]; pagination: CustomerPagination }>;
 }

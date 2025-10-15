@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { authenticate, requireRoles } from "../middleware/auth.js";
-import { parsePaginationQuery } from "../lib/pagination.js";
+import { parseSearchableQuery } from "../lib/pagination.js";
 import { validateRequest } from "../lib/validation.js";
 import { serializeService } from "../lib/serializers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
@@ -15,19 +15,29 @@ const serviceSchema = z.object({
   active: z.boolean().default(true),
 });
 
+const serviceQuerySchema = z.object({
+  active: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
+});
+
 const router = new Hono();
 
 router.get("/", async (c) => {
-  const paginationResult = parsePaginationQuery(c);
-  if (!paginationResult.success) {
-    return paginationResult.response;
+  const queryResult = parseSearchableQuery(c, serviceQuerySchema);
+  if (!queryResult.success) {
+    return queryResult.response;
   }
 
-  const { limit, cursor } = paginationResult.data;
+  const { limit, cursor, search, active } = queryResult.data;
 
   const repository = getServiceRepository();
-  const result = await repository.findManyPaginated(limit, cursor, {
-    orderBy: [{ name: "asc" }, { id: "asc" }],
+  const result = await repository.findManyWithSearch({
+    search,
+    active,
+    limit,
+    cursor,
   });
 
   const normalized = result.data.map(serializeService);

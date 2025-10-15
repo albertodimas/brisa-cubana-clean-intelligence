@@ -23,14 +23,51 @@ const mockPrisma = {
         take,
         skip,
         cursor,
+        where,
       }: {
         take?: number;
         skip?: number;
         cursor?: { id: string };
+        where?: any;
       } = {}) => {
         let filtered = servicesFixture.filter(
           (service) => service.deletedAt === null,
         );
+
+        if (where) {
+          filtered = filtered.filter((service) => {
+            if (typeof where.active === "boolean") {
+              if (service.active !== where.active) {
+                return false;
+              }
+            }
+
+            if (Array.isArray(where.OR) && where.OR.length > 0) {
+              const matchesOr = where.OR.some((clause: any) => {
+                if (clause.name?.contains) {
+                  return (
+                    typeof service.name === "string" &&
+                    service.name
+                      .toLowerCase()
+                      .includes(clause.name.contains.toLowerCase())
+                  );
+                }
+                if (clause.description?.contains) {
+                  if (!service.description) return false;
+                  return service.description
+                    .toLowerCase()
+                    .includes(clause.description.contains.toLowerCase());
+                }
+                return false;
+              });
+              if (!matchesOr) {
+                return false;
+              }
+            }
+
+            return true;
+          });
+        }
 
         // Handle cursor-based pagination
         if (cursor) {
@@ -116,6 +153,49 @@ const mockPrisma = {
               return false;
             if (where.scheduledAt.lte && date > new Date(where.scheduledAt.lte))
               return false;
+          }
+          if (Array.isArray(where.OR) && where.OR.length > 0) {
+            const matchesSearch = where.OR.some((clause: any) => {
+              if (clause.code?.contains) {
+                return booking.code
+                  .toLowerCase()
+                  .includes(clause.code.contains.toLowerCase());
+              }
+              if (clause.customer?.OR) {
+                const customer =
+                  usersFixture.find((user) => user.id === booking.customerId) ??
+                  null;
+                if (!customer) return false;
+                return clause.customer.OR.some((customerClause: any) => {
+                  if (customerClause.email?.contains) {
+                    return customer.email
+                      .toLowerCase()
+                      .includes(customerClause.email.contains.toLowerCase());
+                  }
+                  if (customerClause.fullName?.contains) {
+                    if (!customer.fullName) return false;
+                    return customer.fullName
+                      .toLowerCase()
+                      .includes(customerClause.fullName.contains.toLowerCase());
+                  }
+                  return false;
+                });
+              }
+              if (clause.property?.label?.contains) {
+                const property =
+                  propertiesFixture.find(
+                    (property) => property.id === booking.propertyId,
+                  ) ?? null;
+                if (!property) return false;
+                return property.label
+                  .toLowerCase()
+                  .includes(clause.property.label.contains.toLowerCase());
+              }
+              return false;
+            });
+            if (!matchesSearch) {
+              return false;
+            }
           }
           return true;
         });
@@ -310,6 +390,56 @@ const mockPrisma = {
           filtered = filtered.filter((user) => user.role === where.role);
         }
 
+        if (typeof where?.isActive === "boolean") {
+          filtered = filtered.filter(
+            (user) => user.isActive === where.isActive,
+          );
+        }
+
+        if (Array.isArray(where?.OR) && where.OR.length > 0) {
+          filtered = filtered.filter((user) => {
+            const matches = where.OR.some((clause: any) => {
+              if (clause.email?.contains) {
+                return user.email
+                  .toLowerCase()
+                  .includes(clause.email.contains.toLowerCase());
+              }
+              if (clause.fullName?.contains) {
+                if (!user.fullName) return false;
+                return user.fullName
+                  .toLowerCase()
+                  .includes(clause.fullName.contains.toLowerCase());
+              }
+              return false;
+            });
+            return matches;
+          });
+        }
+
+        if (Array.isArray(where?.AND) && where.AND.length > 0) {
+          filtered = filtered.filter((user) => {
+            return where.AND.every((condition: any) => {
+              if (Array.isArray(condition.OR)) {
+                return condition.OR.some((clause: any) => {
+                  if (clause.email?.contains) {
+                    return user.email
+                      .toLowerCase()
+                      .includes(clause.email.contains.toLowerCase());
+                  }
+                  if (clause.fullName?.contains) {
+                    if (!user.fullName) return false;
+                    return user.fullName
+                      .toLowerCase()
+                      .includes(clause.fullName.contains.toLowerCase());
+                  }
+                  return false;
+                });
+              }
+              return true;
+            });
+          });
+        }
+
         if (cursor?.id) {
           const cursorIndex = filtered.findIndex(
             (user) => user.id === cursor.id,
@@ -396,15 +526,52 @@ const mockPrisma = {
         skip,
         cursor,
         include,
+        where,
       }: {
         take?: number;
         skip?: number;
         cursor?: { id: string };
         include?: any;
+        where?: any;
       } = {}) => {
         let filtered = propertiesFixture.filter(
           (property) => property.deletedAt === null,
         );
+
+        if (where) {
+          filtered = filtered.filter((property) => {
+            if (where.city && property.city !== where.city) {
+              return false;
+            }
+            if (where.type && property.type !== where.type) {
+              return false;
+            }
+            if (Array.isArray(where.OR) && where.OR.length > 0) {
+              const matchesOr = where.OR.some((clause: any) => {
+                if (clause.label?.contains) {
+                  return property.label
+                    .toLowerCase()
+                    .includes(clause.label.contains.toLowerCase());
+                }
+                if (clause.city?.contains) {
+                  return property.city
+                    .toLowerCase()
+                    .includes(clause.city.contains.toLowerCase());
+                }
+                if (clause.addressLine?.contains) {
+                  return property.addressLine
+                    .toLowerCase()
+                    .includes(clause.addressLine.contains.toLowerCase());
+                }
+                return false;
+              });
+              if (!matchesOr) {
+                return false;
+              }
+            }
+            return true;
+          });
+        }
 
         if (cursor) {
           const cursorIndex = filtered.findIndex((p) => p.id === cursor.id);
@@ -559,7 +726,7 @@ describe("app", () => {
         description: "Limpieza para mudanzas",
         basePrice: 350,
         durationMin: 240,
-        active: true,
+        active: false,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
@@ -593,6 +760,15 @@ describe("app", () => {
         isActive: true,
         deletedAt: null,
       },
+      {
+        id: makeCuid(104),
+        fullName: "Staff Operaciones",
+        email: "staff@test.com",
+        passwordHash: "$2a$10$hashed",
+        role: "STAFF",
+        isActive: false,
+        deletedAt: null,
+      },
     ];
     propertiesFixture = [
       {
@@ -600,6 +776,10 @@ describe("app", () => {
         label: "Brickell Loft",
         city: "Miami",
         ownerId: makeCuid(101),
+        addressLine: "120 SW 8th St",
+        state: "FL",
+        zipCode: "33130",
+        type: "RESIDENTIAL",
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
         deletedAt: null,
@@ -609,8 +789,25 @@ describe("app", () => {
         label: "Coral Gables House",
         city: "Miami",
         ownerId: makeCuid(101),
+        addressLine: "400 Sevilla Ave",
+        state: "FL",
+        zipCode: "33134",
+        type: "VACATION_RENTAL",
         createdAt: new Date("2024-02-01"),
         updatedAt: new Date("2024-02-01"),
+        deletedAt: null,
+      },
+      {
+        id: makeCuid(203),
+        label: "Downtown Office Suite",
+        city: "Orlando",
+        ownerId: makeCuid(101),
+        addressLine: "1 Orlando Center",
+        state: "FL",
+        zipCode: "32801",
+        type: "OFFICE",
+        createdAt: new Date("2024-03-01"),
+        updatedAt: new Date("2024-03-01"),
         deletedAt: null,
       },
     ];
@@ -668,12 +865,15 @@ describe("app", () => {
 
   it("delegates service listing to the service repository", async () => {
     const repository = getServiceRepository();
-    const spy = vi.spyOn(repository, "findManyPaginated");
+    const spy = vi.spyOn(repository, "findManyWithSearch");
 
     const res = await app.request("/api/services");
     expect(res.status).toBe(200);
-    expect(spy).toHaveBeenCalledWith(50, undefined, {
-      orderBy: [{ name: "asc" }, { id: "asc" }],
+    expect(spy).toHaveBeenCalledWith({
+      search: undefined,
+      active: undefined,
+      limit: 50,
+      cursor: undefined,
     });
 
     spy.mockRestore();
@@ -746,6 +946,33 @@ describe("app", () => {
     expect(json.pagination.limit).toBe(1);
   });
 
+  it("filters services by search term", async () => {
+    const res = await app.request("/api/services?search=deep");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data.length).toBe(1);
+    expect(json.data[0].name).toContain("Deep");
+  });
+
+  it("filters services by active flag", async () => {
+    const res = await app.request("/api/services?active=false");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data.length).toBe(1);
+    expect(json.data[0].active).toBe(false);
+  });
+
+  it("returns empty array when service search has no matches", async () => {
+    const res = await app.request("/api/services?search=nomatch");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data).toHaveLength(0);
+    expect(json.pagination.hasMore).toBe(false);
+  });
+
   it("navigates services pagination with cursor", async () => {
     const firstPage = await app.request("/api/services?limit=1");
     const firstJson = await firstPage.json();
@@ -787,6 +1014,17 @@ describe("app", () => {
 
     expect(json.data.length).toBeLessThanOrEqual(1);
     expect(json.pagination.limit).toBe(1);
+  });
+
+  it("filters properties by search and type", async () => {
+    const res = await app.request(
+      "/api/properties?search=miami&type=VACATION_RENTAL",
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+
+    expect(json.data).toHaveLength(1);
+    expect(json.data[0].label).toBe("Coral Gables House");
   });
 
   it("navigates properties pagination with cursor", async () => {
@@ -841,6 +1079,21 @@ describe("app", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data.length).toBeGreaterThan(0);
+  });
+
+  it("searches bookings by code", async () => {
+    const res = await app.request("/api/bookings?search=BRISA-DEMO");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data).toHaveLength(1);
+    expect(json.data[0].code).toBe("BRISA-DEMO");
+  });
+
+  it("returns empty bookings when search mismatches", async () => {
+    const res = await app.request("/api/bookings?search=NO_MATCH_123");
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data).toHaveLength(0);
   });
 
   it("creates a booking", async () => {
@@ -1079,6 +1332,17 @@ describe("app", () => {
     expect(json.data[0].email).toBeDefined();
   });
 
+  it("filters customers by search term", async () => {
+    const res = await app.request("/api/customers?search=cliente", {
+      headers: authorizedHeaders,
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data).toHaveLength(1);
+    expect(json.data[0].email).toBe("client@test.com");
+  });
+
   it("lists users for admin", async () => {
     const res = await app.request("/api/users", {
       headers: authorizedHeaders,
@@ -1091,6 +1355,24 @@ describe("app", () => {
       email: expect.any(String),
       role: expect.any(String),
       isActive: true,
+    });
+  });
+
+  it("filters users by search, role and active status", async () => {
+    const res = await app.request(
+      "/api/users?search=staff&role=STAFF&isActive=false",
+      {
+        headers: authorizedHeaders,
+      },
+    );
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.data).toHaveLength(1);
+    expect(json.data[0]).toMatchObject({
+      email: "staff@test.com",
+      role: "STAFF",
+      isActive: false,
     });
   });
 

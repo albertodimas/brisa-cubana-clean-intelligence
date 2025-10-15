@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Booking, PaginationInfo, Property, Service } from "@/lib/api";
@@ -9,6 +9,7 @@ type BookingFilterInput = {
   status: string;
   from: string;
   to: string;
+  search: string;
 };
 
 function getFormAction(
@@ -93,6 +94,7 @@ const filters: BookingFilterInput = {
   status: "ALL",
   from: "",
   to: "",
+  search: "",
 };
 
 describe("BookingsManager", () => {
@@ -195,6 +197,40 @@ describe("BookingsManager", () => {
     await user.click(button);
 
     expect(onLoadMore).toHaveBeenCalled();
+  });
+
+  it("updates search filter", async () => {
+    const user = userEvent.setup();
+    const onFiltersChange = vi.fn();
+
+    render(
+      <BookingsManager
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        bookings={bookings}
+        pageInfo={pageInfo}
+        isLoading={false}
+        isLoadingMore={false}
+        onLoadMore={vi.fn()}
+        onUpdate={vi.fn()}
+        updatingId={null}
+        services={services}
+        properties={properties}
+        formatDateTime={(value) => value}
+      />,
+    );
+
+    const searchInput = screen.getByPlaceholderText(
+      "Buscar por código, cliente o propiedad...",
+    );
+    await user.type(searchInput, "BRISA");
+
+    await waitFor(
+      () => {
+        expect(onFiltersChange).toHaveBeenCalledWith({ search: "BRISA" });
+      },
+      { timeout: 500 },
+    );
   });
 
   it("submits booking update form via action handler", async () => {

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { authenticate, requireRoles } from "../middleware/auth.js";
-import { parsePaginationQuery } from "../lib/pagination.js";
+import { parseSearchableQuery } from "../lib/pagination.js";
 import { validateRequest } from "../lib/validation.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
 import { getPropertyRepository } from "../container.js";
@@ -20,16 +20,28 @@ const propertySchema = z.object({
   notes: z.string().optional(),
 });
 
+const propertyQuerySchema = z.object({
+  city: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    }),
+  type: z.enum(["RESIDENTIAL", "VACATION_RENTAL", "OFFICE"]).optional(),
+});
+
 const router = new Hono();
 
 router.get("/", async (c) => {
-  const paginationResult = parsePaginationQuery(c);
-  if (!paginationResult.success) {
-    return paginationResult.response;
+  const queryResult = parseSearchableQuery(c, propertyQuerySchema);
+  if (!queryResult.success) {
+    return queryResult.response;
   }
 
   const repository = getPropertyRepository();
-  const result = await repository.findMany(paginationResult.data);
+  const result = await repository.findManyWithSearch(queryResult.data);
   return c.json(result);
 });
 

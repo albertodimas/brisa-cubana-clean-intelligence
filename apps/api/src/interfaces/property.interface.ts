@@ -39,6 +39,12 @@ export interface PropertyPaginationParams {
   cursor?: string;
 }
 
+export interface PropertySearchParams extends PropertyPaginationParams {
+  search?: string;
+  city?: string;
+  type?: CreatePropertyDto["type"];
+}
+
 export interface IPropertyRepository {
   findMany(
     pagination?: PropertyPaginationParams,
@@ -48,4 +54,7 @@ export interface IPropertyRepository {
   update(id: string, data: UpdatePropertyDto): Promise<PropertyResponse>;
   delete(id: string): Promise<void>;
   restore(id: string): Promise<PropertyResponse>;
+  findManyWithSearch(
+    params: PropertySearchParams,
+  ): Promise<{ data: PropertyResponse[]; pagination: PropertyPagination }>;
 }

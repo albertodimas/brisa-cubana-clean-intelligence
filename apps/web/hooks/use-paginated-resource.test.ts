@@ -51,6 +51,7 @@ describe("usePaginatedResource", () => {
       usePaginatedResource({
         initial: initialResult,
         endpoint,
+        initialQuery: { status: "ALL" },
       }),
     );
 
@@ -61,6 +62,7 @@ describe("usePaginatedResource", () => {
     });
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isLoadingMore).toBe(false);
+    expect(result.current.currentQuery).toEqual({ status: "ALL" });
   });
 
   it("refreshes data with optional query params", async () => {
@@ -94,6 +96,7 @@ describe("usePaginatedResource", () => {
     expect(result.current.items).toEqual([{ id: "c" }]);
     expect(result.current.pageInfo.nextCursor).toBe("cursor-2");
     expect(result.current.isLoading).toBe(false);
+    expect(result.current.currentQuery).toEqual({ status: "PENDING" });
   });
 
   it("updates current query via setQuery and appends on loadMore", async () => {
@@ -135,6 +138,7 @@ describe("usePaginatedResource", () => {
     );
     expect(result.current.items).toEqual([{ id: "d" }]);
     expect(result.current.pageInfo.hasMore).toBe(true);
+    expect(result.current.currentQuery).toEqual({ status: "CONFIRMED" });
 
     await act(async () => {
       await result.current.loadMore();
@@ -195,5 +199,68 @@ describe("usePaginatedResource", () => {
 
     expect(consoleErrorSpy).toHaveBeenCalled();
     expect(result.current.items).toEqual(initialResult.items);
+  });
+
+  it("resets query to initial values", async () => {
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockImplementation((input) => {
+        if (String(input).includes("status=CONFIRMED")) {
+          return mockFetchResponse([{ id: "d" }]);
+        }
+        return mockFetchResponse(initialResult.items, {
+          limit: initialPageInfo.limit,
+          cursor: initialPageInfo.cursor,
+          nextCursor: initialPageInfo.nextCursor,
+          hasMore: initialPageInfo.hasMore,
+        });
+      });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { result } = renderHook(() =>
+      usePaginatedResource({
+        initial: initialResult,
+        endpoint,
+        initialQuery: { status: "ALL" },
+      }),
+    );
+
+    await act(async () => {
+      await result.current.setQuery({ status: "CONFIRMED" });
+    });
+
+    await act(async () => {
+      await result.current.resetQuery();
+    });
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/resources?status=ALL",
+      expect.any(Object),
+    );
+    expect(result.current.currentQuery).toEqual({ status: "ALL" });
+  });
+
+  it("removes empty values when building queries", async () => {
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockImplementation(() => mockFetchResponse([{ id: "x" }]));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { result } = renderHook(() =>
+      usePaginatedResource({
+        initial: initialResult,
+        endpoint,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.setQuery({ search: "", role: "ADMIN" });
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/resources?role=ADMIN",
+      expect.any(Object),
+    );
+    expect(result.current.currentQuery).toEqual({ role: "ADMIN" });
   });
 });

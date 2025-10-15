@@ -5,6 +5,7 @@ import type {
   IUserRepository,
   PaginatedResponse,
   PaginationParams,
+  UserSearchParams,
   UpdateUserDto,
   UserResponse,
 } from "../interfaces/user.interface.js";
@@ -124,5 +125,54 @@ export class UserRepository implements IUserRepository {
       data: { deletedAt: null },
       select: defaultSelect,
     });
+  }
+
+  async findManyWithSearch({
+    search,
+    role,
+    isActive,
+    limit = 50,
+    cursor,
+  }: UserSearchParams): Promise<PaginatedResponse<UserResponse>> {
+    const take = limit + 1;
+
+    const where: Prisma.UserWhereInput = {};
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (typeof isActive === "boolean") {
+      where.isActive = isActive;
+    }
+
+    if (search) {
+      where.OR = [
+        { email: { contains: search, mode: "insensitive" } },
+        { fullName: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const users = await this.prisma.user.findMany({
+      where,
+      take,
+      ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      select: defaultSelect,
+    });
+
+    const hasMore = users.length > limit;
+    const data = hasMore ? users.slice(0, limit) : users;
+    const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
+
+    return {
+      data,
+      pagination: {
+        limit,
+        cursor: cursor ?? null,
+        nextCursor,
+        hasMore,
+      },
+    } satisfies PaginatedResponse<UserResponse>;
   }
 }

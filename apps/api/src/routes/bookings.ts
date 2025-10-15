@@ -5,6 +5,7 @@ import type { BookingStatus } from "@prisma/client";
 import { authenticate, requireRoles } from "../middleware/auth.js";
 import { serializeBooking } from "../lib/serializers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
+import { parseSearchableQuery } from "../lib/pagination.js";
 import {
   getBookingRepository,
   getPropertyRepository,
@@ -36,14 +37,13 @@ const bookingStatusValues = [
   "CANCELLED",
 ] as const;
 
-const querySchema = z.object({
+const bookingQuerySchema = z.object({
   from: z.coerce.date().optional(),
   to: z.coerce.date().optional(),
   status: z.enum(bookingStatusValues).optional(),
   propertyId: z.string().cuid().optional(),
   serviceId: z.string().cuid().optional(),
   customerId: z.string().cuid().optional(),
-  // Pagination
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
   cursor: z.string().cuid().optional(),
 });
@@ -62,16 +62,22 @@ const updateBookingSchema = z
   });
 
 router.get("/", async (c) => {
-  const url = new URL(c.req.url, "http://localhost");
-  const parsed = querySchema.safeParse(
-    Object.fromEntries(url.searchParams.entries()),
-  );
-  if (!parsed.success) {
-    return c.json({ error: parsed.error.flatten() }, 400);
+  const queryResult = parseSearchableQuery(c, bookingQuerySchema);
+  if (!queryResult.success) {
+    return queryResult.response;
   }
 
-  const { from, to, status, propertyId, serviceId, customerId, limit, cursor } =
-    parsed.data;
+  const {
+    search,
+    from,
+    to,
+    status,
+    propertyId,
+    serviceId,
+    customerId,
+    limit,
+    cursor,
+  } = queryResult.data;
 
   const filters: BookingFilters = {};
 
@@ -92,6 +98,9 @@ router.get("/", async (c) => {
   }
   if (customerId) {
     filters.customerId = customerId;
+  }
+  if (search) {
+    filters.search = search;
   }
 
   const repository = getBookingRepository();
