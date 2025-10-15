@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server";
 import { logger } from "@/lib/logger";
-import { auth } from "@/auth";
 
 function resolveApiBaseUrl(): string {
   const value = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL;
@@ -32,14 +31,6 @@ async function proxy(
   const url = buildTargetUrl(request, segments);
   const headers = new Headers(request.headers);
   headers.delete("host");
-
-  if (!headers.has("authorization")) {
-    const session = await auth();
-    const token = session?.accessToken;
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
-    }
-  }
 
   const init: RequestInit & { duplex?: "half" } = {
     method: request.method,

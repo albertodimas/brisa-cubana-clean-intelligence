@@ -1,14 +1,12 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
-const LHCI_HEADER = "x-lhci-bypass";
-
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/login", "/api/auth", "/lhci"];
+  const publicRoutes = ["/login", "/api/auth"];
 
   // Check if current route is public
   const isPublicRoute = publicRoutes.some((route) =>
@@ -41,6 +39,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public files (images, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|lhci|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

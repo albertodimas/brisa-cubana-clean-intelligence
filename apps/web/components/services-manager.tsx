@@ -87,15 +87,19 @@ export function ServicesManager({
       typeof currentQuery.search === "string"
         ? String(currentQuery.search)
         : "";
-    setSearchTerm((prev) => (prev === nextSearch ? prev : nextSearch));
+    if (nextSearch !== searchTerm) {
+      setSearchTerm(nextSearch);
+    }
     const nextActive =
       currentQuery.active === true
         ? "true"
         : currentQuery.active === false
           ? "false"
           : "all";
-    setActiveFilter((prev) => (prev === nextActive ? prev : nextActive));
-  }, [currentQuery]);
+    if (nextActive !== activeFilter) {
+      setActiveFilter(nextActive);
+    }
+  }, [currentQuery.search, currentQuery.active]);
 
   useEffect(() => {
     const nextQuery: QueryParams = {};

@@ -1698,37 +1698,6 @@ describe("app", () => {
     expect(res.status).toBe(401);
   });
 
-  it("streams notifications for the authenticated admin", async () => {
-    const res = await app.request("/api/notifications/stream", {
-      headers: authorizedHeaders,
-    });
-
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toBe("text/event-stream");
-
-    const reader = res.body?.getReader();
-    expect(reader).toBeDefined();
-    const decoder = new TextDecoder();
-    let combined = "";
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const chunk = await reader?.read();
-      if (!chunk || chunk.done) {
-        break;
-      }
-      combined += decoder.decode(chunk.value);
-      if (combined.includes("event: init")) {
-        break;
-      }
-    }
-    expect(combined).toContain("event: init");
-    await reader?.cancel();
-  });
-
-  it("rejects notification stream without authentication", async () => {
-    const res = await app.request("/api/notifications/stream");
-    expect(res.status).toBe(401);
-  });
-
   it("logs in a user and returns a token", async () => {
     const res = await app.request("/api/authentication/login", {
       method: "POST",

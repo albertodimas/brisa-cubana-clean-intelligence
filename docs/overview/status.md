@@ -331,7 +331,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 
 3. **Roadmap funcional:**
    - Sistema de estilos compartido (definir tras migración Tailwind v4)
-   - Notificaciones push para coordinadores (UI + canal en tiempo real · ver `docs/decisions/notifications-realtime-channel.md`)
+   - Notificaciones push para coordinadores (UI + canal en tiempo real)
 
 - UI de paginación en frontend (infinite scroll / load more)
 
