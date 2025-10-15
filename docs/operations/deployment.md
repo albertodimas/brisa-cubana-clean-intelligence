@@ -23,6 +23,8 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | Web                                         | `AUTH_SECRET`                                                       | All                | Debe coincidir con la API para sesiones válidas                 |
 | Web (Stripe)                                | `STRIPE_PUBLISHABLE_KEY`                                            | All                | Clave pública usada por Stripe.js                               |
 
+> **Estado 15-oct-2025:** Se cargaron claves de ejemplo `sk_test_brisa_demo_20251015`, `pk_test_brisa_demo_20251015` y `whsec_brisa_demo_20251015` en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
+
 ## 3. Despliegue
 
 1. Merge a `main` activa automáticamente los builds en Vercel para `Production`.

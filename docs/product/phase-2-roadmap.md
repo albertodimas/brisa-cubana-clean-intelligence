@@ -50,11 +50,12 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 - **Estado:** Implementado (`prisma/seed.operativo.ts`, `prisma/seed.demo.ts`) con scripts `pnpm --filter @brisa/api db:seed:operativo` y `pnpm --filter @brisa/api db:seed:demo`.
 - **Documentación:** `docs/operations/deployment.md` actualizada con la secuencia recomendada (producción solo operativo; staging/local operativo + demo).
 
-### 6.3 Configuración Stripe (modo test) 🔄
+### 6.3 Configuración Stripe (modo test) ✅
 
 - **Objetivo:** habilitar el checkout público con pagos simulados antes de integrar modo live.
 - **avance:**
   - [x] Variables de entorno (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`) documentadas en `docs/operations/security.md` y `.env.example`.
   - [x] Receptor de webhook `/api/payments/stripe/webhook` implementado y cubierto por pruebas de integración.
   - [x] Stripe CLI documentada (`pnpm stripe:listen` + `stripe trigger …`) para reproducir eventos en local/preview.
-  - [ ] Actualizar `docs/qa/regression-checklist.md` con casos de pago exitoso/fallido.
+  - [x] Actualizar `docs/qa/regression-checklist.md` con casos de pago exitoso/fallido.
+  - [ ] Sustituir claves demo `*_brisa_demo_20251015` por credenciales oficiales antes de pasar a modo live.

@@ -1,0 +1,78 @@
+# Inventario de Código y Herramientas
+
+**Última actualización:** 15 de octubre de 2025  
+**Responsables:** Plataforma · Producto · QA
+
+Este inventario resume los artefactos activos del monorepo para acelerar handoffs y auditorías.
+
+## 1. Aplicaciones
+
+| Ruta       | Stack clave                         | Descripción                                                                                    | Build                                      |
+| ---------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `apps/web` | Next.js 15.5.5, React 19, Auth.js 5 | Frontend operativo + futuras páginas públicas (landing, checkout, portal cliente).             | `pnpm turbo run build --filter=@brisa/web` |
+| `apps/api` | Hono 4.9.12, Prisma 6.17.1, Stripe  | API REST + webhooks (`/api/payments/stripe/webhook`), seeds operativos/demo, OpenAPI expuesto. | `pnpm --filter @brisa/api build`           |
+
+## 2. Librerías y utilidades compartidas
+
+- `apps/web/lib/*`: cliente HTTP, helpers de paginación, web vitals.
+- `apps/api/src/lib/*`: contenedor DI, validaciones Zod, helpers JWT/Bcrypt.
+- No existen paquetes en `packages/*` en esta versión; los módulos compartidos viven dentro de cada aplicación.
+
+## 3. Datos y migraciones
+
+- Prisma schema en `apps/api/prisma/schema.prisma`.
+- Seeds:
+  - `prisma/seed.operativo.ts`: usuarios internos (admin/coordinator) + contraseñas `Brisa123!`.
+  - `prisma/seed.demo.ts`: servicios, propiedades, reservas demo, cliente piloto.
+- Comandos relevantes (root):
+  - `pnpm db:push`, `pnpm db:seed`, `pnpm --filter @brisa/api db:seed:operativo`, `pnpm --filter @brisa/api db:seed:demo`.
+
+## 4. QA y pruebas
+
+- **Vitest Web:** `apps/web` (~60 tests) ejecutados con `pnpm --filter @brisa/web test`.
+- **Vitest API:** unit (`vitest.unit.config.ts`) + integración (`vitest.integration.config.ts`) en `apps/api/src/routes/**`.
+- **Playwright:** suites en `tests/e2e/*.spec.ts` (smoke, critical, full) con soporte en `tests/e2e/support`.
+- **Stripe tests:** `apps/api/src/routes/payments.integration.test.ts` usa `Stripe.webhooks.generateTestHeaderString`.
+- **LHCI:** nightly (`.lighthouserc.preview.json`) sobre despliegue Vercel.
+- **Checklist manual:** `docs/qa/regression-checklist.md` (actualizada con escenarios Stripe).
+
+## 5. Operaciones y despliegue
+
+- Pipelines GitHub Actions: `ci.yml`, `pr-checks.yml`, `nightly.yml`, `codeql.yml`, `post-deploy-seed.yml`.
+- Husky hooks:
+  - `pre-commit`: verifica secretos (`scripts/verify-secret-leaks.sh`), `verify:versions`, `lint-staged`.
+  - `pre-push`: lint, typecheck, test.
+- Deploy:
+  - Web → Vercel proyecto `brisa-cubana-clean-intelligence` (`apps/web` root).
+  - API → Vercel proyecto `brisa-cubana-clean-intelligence-api` (`apps/api`).
+  - Variables Stripe modo test (`*_brisa_demo_20251015`) cargadas en Dev/Preview/Prod (ver `docs/operations/deployment.md` §2).
+
+## 6. Observabilidad
+
+- Sentry configurado en web (`@sentry/nextjs`) y API (`@sentry/node`, `@sentry/profiling-node`).
+- Logs Pino + `pino-http`.
+- Web Vitals y Speed Insights integrados en `apps/web`.
+- Nightly Lighthouse (Performance objetivo ≥ 90).
+
+## 7. Documentación de referencia
+
+- `docs/overview/status.md`: estado del proyecto y health checks.
+- `docs/guides/quickstart.md`: setup local, seeds, Stripe CLI.
+- `docs/operations/deployment.md` y `docs/operations/security.md`: deploy y manejo de secrets.
+- `docs/product/phase-2-roadmap.md`: roadmap comercial.
+- `docs/product/rfc-public-components.md`: arquitectura pública Fase 2.
+
+## 8. Scripts y utilidades
+
+- `scripts/verify-versions.mjs`: mantiene coherencia de dependencias entre apps.
+- `scripts/verify-doc-structure.sh`: valida índice de documentación.
+- `pnpm stripe:listen`: wrapper CLI Stripe apuntando a webhook local.
+
+## 9. Herramientas externas
+
+- Stripe CLI (modo test) configurada.
+- GitHub CLI (`gh`) autenticada para `albertodimas`.
+- Vercel CLI 48.3.0 vinculada a ambos proyectos.
+- Base de datos Neon (producción) + Docker Compose local (`docker-compose.yml`).
+
+Mantener este inventario al día tras incorporar paquetes, servicios o herramientas nuevas para evitar deuda operacional.

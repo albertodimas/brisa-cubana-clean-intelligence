@@ -202,13 +202,38 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 
 ## 8. Pagos (Stripe)
 
-- [ ] `pnpm stripe:listen` se conecta correctamente y muestra el secret temporal.
-- [ ] `stripe trigger checkout.session.completed` llega al webhook y registra el evento en logs.
-- [ ] Eventos con firma inválida devuelven 400 y se registran en logs.
-- [ ] Sin variables Stripe configuradas, el endpoint responde 503 (expectativa en entornos sin pagos).
-- [ ] Foreign keys están definidas
-- [ ] Índices están aplicados
-- [ ] Constraints (UNIQUE, NOT NULL) funcionan
+### 8.1 Configuración CLI
+
+- [ ] `pnpm stripe:listen` inicia y muestra `Listening for events on` con endpoint `/api/payments/stripe/webhook`.
+- [ ] `stripe trigger checkout.session.completed` se reenvía y el webhook responde `200`.
+- [ ] `stripe trigger payment_intent.payment_failed` se reenvía y el webhook responde `200` registrando `type=payment_intent.payment_failed`.
+- [ ] Evento con firma alterada (`stripe trigger` + editar header) devuelve `400` y registra `signature_verification_failed`.
+
+### 8.2 Flujo checkout exitoso
+
+- [ ] Usuario completa selección de servicio y fecha sin errores.
+- [ ] Stripe Payment Element confirma pago en modo test y muestra pantalla de confirmación.
+- [ ] Evento `checkout.session.completed` persiste booking con estado `CONFIRMED`.
+- [ ] Logs de API registran `payment_intent.succeeded` y se genera `stripePaymentId`.
+
+### 8.3 Flujo checkout fallido
+
+- [ ] Stripe rechaza pago (`pm_card_chargeDeclined`) y UI muestra mensaje `Pago rechazado`.
+- [ ] El booking permanece en estado `PENDING` y se registra `lastPaymentError`.
+- [ ] Retry desde la UI reutiliza la misma Intent y concluye exitosamente tras usar tarjeta válida.
+
+### 8.4 Observabilidad y entorno
+
+- [ ] Variables `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (API) y `STRIPE_PUBLISHABLE_KEY` (web) están presentes en Development/Preview/Production (verificado vía `vercel env ls`).
+- [ ] Sentry captura breadcrumb `checkout.payment_submitted` y evento de error si falla la Intent.
+- [ ] LHCI en nightly mantiene Performance ≥ 90 en `/checkout`.
+- [ ] En entornos sin variables Stripe, el endpoint responde `503` con mensaje "stripe unavailable".
+
+### 8.5 Integridad de datos
+
+- [ ] Foreign keys y constraints (`payments`, `bookings`) están aplicados tras `pnpm prisma migrate deploy`.
+- [ ] Índices de búsqueda (`idx_booking_payment_intent`) verificados en base de staging.
+- [ ] Seeds demo crean Intent mock (`stripePaymentId="pi_demo"`) sin duplicados.
 
 ### 7.2 Seed
 
