@@ -10,6 +10,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Roadmap Fase 2 (`docs/product/phase-2-roadmap.md`) para landing comercial, checkout público y portal cliente.
 - Suite Playwright `tests/e2e/search-and-filters.spec.ts` con cobertura crítica para búsqueda, filtros combinados y mensajes sin resultados.
 - Seeds operativos (`prisma/seed.operativo.ts`) y demo (`prisma/seed.demo.ts`) con comandos `pnpm --filter @brisa/api db:seed:operativo` y `db:seed:demo` documentados en quickstart/despliegue.
+- Webhook `/api/payments/stripe/webhook` con verificación de firma y pruebas de integración sobre Stripe modo test.
 
 ### Changed
 

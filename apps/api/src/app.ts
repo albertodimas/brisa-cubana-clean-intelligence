@@ -13,6 +13,7 @@ import auth from "./routes/auth.js";
 import users from "./routes/users.js";
 import notifications from "./routes/notifications.js";
 import testUtils from "./routes/test-utils.js";
+import payments from "./routes/payments.js";
 
 // Initialize Dependency Injection Container
 initializeContainer();
@@ -103,6 +104,7 @@ app.route("/api/customers", customers);
 app.route("/api/bookings", bookings);
 app.route("/api/users", users);
 app.route("/api/notifications", notifications);
+app.route("/api/payments", payments);
 if (process.env.ENABLE_TEST_UTILS === "true") {
   app.route("/api/test-utils", testUtils);
 }

@@ -106,6 +106,9 @@ importers:
       pino-pretty:
         specifier: ^13.1.2
         version: 13.1.2
+      stripe:
+        specifier: ^14.21.0
+        version: 14.25.0
       zod:
         specifier: ^4.1.12
         version: 4.1.12
@@ -4544,6 +4547,10 @@ packages:
 
   strip-literal@3.1.0:
     resolution: {integrity: sha512-8r3mkIM/2+PpjHoOtiAW8Rg3jJLHaV7xPwG+YRGrv6FP0wwk/toTpATxWYOW0BKdWwl82VT2tFYi5DlROa0Mxg==}
+
+  stripe@14.25.0:
+    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
+    engines: {node: '>=12.*'}
 
   styled-jsx@5.1.6:
     resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
@@ -10034,6 +10041,11 @@ snapshots:
   strip-literal@3.1.0:
     dependencies:
       js-tokens: 9.0.1
+
+  stripe@14.25.0:
+    dependencies:
+      '@types/node': 24.7.2
+      qs: 6.13.0
 
   styled-jsx@5.1.6(@babel/core@7.28.4)(react@19.2.0):
     dependencies:

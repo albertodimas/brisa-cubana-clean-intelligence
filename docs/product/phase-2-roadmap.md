@@ -50,10 +50,11 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 - **Estado:** Implementado (`prisma/seed.operativo.ts`, `prisma/seed.demo.ts`) con scripts `pnpm --filter @brisa/api db:seed:operativo` y `pnpm --filter @brisa/api db:seed:demo`.
 - **Documentación:** `docs/operations/deployment.md` actualizada con la secuencia recomendada (producción solo operativo; staging/local operativo + demo).
 
-### 6.3 Configuración Stripe (modo test)
+### 6.3 Configuración Stripe (modo test) 🔄
 
 - **Objetivo:** habilitar el checkout público con pagos simulados antes de integrar modo live.
-- **Acciones:**
-  - Registrar cuentas y claves en Stripe Dashboard (modo test) y documentar variables (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`) en `docs/operations/security.md`.
-  - Implementar webhook receiver en API (`/api/payments/stripe/webhook`) validado con CLI de Stripe; añadir pruebas de integración.
-  - Actualizar checklist QA (`docs/qa/regression-checklist.md`) con escenarios de pago exitoso/fallido y validación de recibos.
+- **avance:**
+  - [x] Variables de entorno (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`) documentadas en `docs/operations/security.md` y `.env.example`.
+  - [x] Receptor de webhook `/api/payments/stripe/webhook` implementado y cubierto por pruebas de integración.
+  - [ ] Configurar Stripe CLI / dashboard para generar eventos en entornos Preview y completar escenarios QA.
+  - [ ] Actualizar `docs/qa/regression-checklist.md` con casos de pago exitoso/fallido.

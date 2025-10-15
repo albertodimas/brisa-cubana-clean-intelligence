@@ -96,6 +96,48 @@ paths:
                     $ref: '#/components/schemas/AuthContext'
         '401':
           description: No autenticado
+  /api/payments/stripe/webhook:
+    post:
+      tags: [Payments]
+      summary: Webhook de Stripe
+      description: Verifica la firma `stripe-signature` usando `STRIPE_WEBHOOK_SECRET` y procesa el evento.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Payload enviado por Stripe (estructura depende del evento).
+      responses:
+        '200':
+          description: Evento recibido y procesado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    example: true
+        '400':
+          description: Firma inválida o carga corrupta.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Firma inválida
+        '503':
+          description: Stripe no está configurado en el entorno actual.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
   /api/services:
     get:
       tags: [Services]

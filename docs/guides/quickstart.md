@@ -30,6 +30,10 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
 
    # El archivo .env.local ya contiene credenciales de desarrollo local seguras
    # Para más información sobre seguridad, ver docs/operations/security.md
+   # Si quieres probar el flujo de pagos, asigna claves modo test de Stripe:
+   # STRIPE_SECRET_KEY="sk_test_..."
+   # STRIPE_PUBLISHABLE_KEY="pk_test_..."
+   # STRIPE_WEBHOOK_SECRET="whsec_..."
    ```
 
    > El contenedor de PostgreSQL expone el puerto **5433** en tu máquina (`postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev`).

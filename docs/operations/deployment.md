@@ -17,9 +17,11 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | API (`brisa-cubana-clean-intelligence-api`) | `DATABASE_URL`, `DATABASE_URL_UNPOOLED`                             | All                | Puntero a Neon (producción)                                     |
 | API                                         | `JWT_SECRET`, `API_TOKEN`                                           | All                | Deben coincidir con seeds y Playwright                          |
 | API                                         | `ALLOWED_ORIGINS`, `LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS` | All                | Valores documentados en [`operations/security.md`](security.md) |
+| API/Stripe                                  | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`                        | All                | Modo test en Preview/Dev, modo live en Production               |
 | Web (`brisa-cubana-clean-intelligence`)     | `NEXT_PUBLIC_API_URL`                                               | All                | Debe apuntar al dominio de la API correspondiente               |
 | Web                                         | `INTERNAL_API_URL`                                                  | Production+Preview | URL interna para proxy                                          |
 | Web                                         | `AUTH_SECRET`                                                       | All                | Debe coincidir con la API para sesiones válidas                 |
+| Web (Stripe)                                | `STRIPE_PUBLISHABLE_KEY`                                            | All                | Clave pública usada por Stripe.js                               |
 
 ## 3. Despliegue
 
@@ -42,6 +44,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
    ```
    > Ejecutar desde una máquina segura con `DATABASE_URL` apuntando a producción.
 2. Después de cada schema change, corre los seeds en este orden:
+
    ```bash
    pnpm --filter @brisa/api db:seed:operativo
    pnpm --filter @brisa/api db:seed:demo
@@ -49,6 +52,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 
    - **Producción:** ejecuta únicamente `db:seed:operativo` (credenciales internas). Usa `db:seed:demo` solo en entornos de demo/preview.
    - **Staging/Local:** ejecuta ambos para contar con datos ficticios del landing y checkout.
+
 3. Registra la ejecución en [`operations/backup-log.md`](backup-log.md) con fecha, responsable y resultado.
 
 ## 5. Verificación post-deploy

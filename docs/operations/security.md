@@ -60,8 +60,9 @@ docker compose up -d
 
 ```bash
 cd apps/api
-pnpm db:push
-pnpm db:seed
+pnpm db:push --force-reset
+pnpm db:seed:operativo
+pnpm db:seed:demo
 ```
 
 ---
@@ -77,6 +78,13 @@ Las credenciales de producción están configuradas en:
 - `Production` - Credenciales reales
 - `Preview` - Credenciales de staging
 - `Development` - Credenciales de desarrollo
+
+**Variables críticas adicionales:**
+
+- `STRIPE_SECRET_KEY` (modo test en Preview/Development, live en Production).
+- `STRIPE_PUBLISHABLE_KEY` (se usa en la aplicación web para inicializar Stripe.js).
+- `STRIPE_WEBHOOK_SECRET` (clave de firma para `/api/payments/stripe/webhook`).
+- Documenta los valores en 1Password/Vault del equipo y rota si hay fuga.
 
 ---
 
@@ -143,5 +151,5 @@ Antes de cada commit:
 
 ---
 
-**Última actualización:** 14 de octubre de 2025
+**Última actualización:** 15 de octubre de 2025
 **Mantenido por:** Equipo Brisa Cubana
