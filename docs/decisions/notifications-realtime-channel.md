@@ -1,13 +1,13 @@
 # Plan de Canal en Tiempo Real para Notificaciones Operativas
 
 **Fecha:** 15 de octubre de 2025  
-**Estado:** APROBADO PARA PRÓXIMO SPRINT  
+**Estado:** IMPLEMENTADO (16 octubre 2025)  
 **Stakeholders:** Plataforma (API + Web), Operaciones, QA
 
 ## 1. Contexto
 
-- El panel operativo ya consume `/api/notifications`, permite marcar individuales y masivas, y muestra badge lateral mediante el nuevo componente `NotificationBell`.
-- El refresco depende de abrir el panel o recargar la página (`fetch` + acciones server). No existe canal push: coordinadores/admins no ven nuevas alertas si la vista queda inactiva.
+- El panel operativo consume `/api/notifications`, permite marcar individuales y masivas, y muestra badge lateral mediante `NotificationBell`.
+- Antes de esta decisión, el refresco dependía de abrir el panel o recargar la página (acciones server). Coordinadores/admins no veían nuevas alertas si la vista quedaba inactiva.
 - La API se ejecuta en Hono (Node 22) con autenticación vía `auth_token` o `Bearer` (NextAuth). Infraestructura actual corre sobre Vercel (frontend) y el API puede vivir en Vercel/Render.
 - Navegadores objetivo: escritorio (Chrome ≥ 123, Edge ≥ 123, Safari ≥ 17) en operación diaria; móviles son secundarios.
 
@@ -44,13 +44,14 @@ Seleccionar el canal de entrega en tiempo real para notificaciones internas (coo
 1. Endpoint `GET /api/notifications/stream`:
    - Verifica usuario autenticado.
    - Responde `Content-Type: text/event-stream`, `Cache-Control: no-cache`, `Connection: keep-alive`.
-   - Envía evento `init` con lista corta (≤20) y `lastEventId`.
-   - Suscribe a cambios (`NotificationRepository`) vía listeners (futuro hook en capa service). En MVP se usa `setInterval` interno (5 s) para chequear nuevos registros desde `lastEventId`.
-2. Eventos soportados:
-   - `notification:new` → payload con `id`, `message`, `type`, `createdAt`.
-   - `notification:update` → cuando `readAt` cambia (sincronizar badge en múltiples tabs).
-3. Rate limiting: usar el mismo limiter actual pero elevar ventana (SSE abre 1 conexión por usuario).
-4. Observabilidad: loggear eventos enviados + reconexiones.
+   - Envía evento `init` con lote inicial (≤20) y `lastEventId`.
+   - Suscribe a un hub en memoria (`apps/api/src/lib/notification-hub.ts`) que emite eventos cada vez que el repositorio crea o actualiza notificaciones.
+2. Eventos soportados en producción:
+   - `notification:new` → payload completo con `id`, `message`, `type`, `createdAt`.
+   - `notification:update` → `id` y nuevo `readAt` cuando cambia el estado.
+   - `notification:sync` → lote completo cuando se marca todo como leído (mantiene snapshot consistente).
+3. Observabilidad: se registran reconexiones y errores en logs estructurados.
+4. Consideración futura: reemplazar el hub in-memory por pub/sub externo (Redis) cuando la carga >10 eventos/s o se despliegue horizontalmente.
 
 ### 5.2 Front-end (Next.js)
 
@@ -61,9 +62,9 @@ Seleccionar el canal de entrega en tiempo real para notificaciones internas (coo
      - Actualiza estado local incrementando `unread`, mutando lista `items` (mantener paginado).
    - Cuando el panel está cerrado, seguir mostrando badge actualizado; cuando está abierto, aplicar diff sin rehacer fetch completo (solo si `hasMore` se requiere se usa REST).
 2. Fallback:
-   - Tras 3 errores consecutivos → fallback a polling usando `setInterval` con fetch REST cada 60 s hasta restablecer SSE.
+   - Tras 3 errores consecutivos → fallback a polling con `fetch /api/notifications` cada 60 s hasta restablecer SSE.
 3. Sincronización multiplataforma:
-   - Apoyarse en `lastEventId` / `EventSource` `Last-Event-ID` header para evitar duplicados.
+   - Se apoya en `lastEventId` y actualiza el snapshot local cuando llega `notification:sync`.
 
 ### 5.3 Seguridad y Compliance
 
@@ -72,14 +73,14 @@ Seleccionar el canal de entrega en tiempo real para notificaciones internas (coo
 - Limitar tamaño de payload (<4 KB por evento).
 - Añadir pruebas de desconexión (API corta conexión) y reconexión en cliente.
 
-## 6. Roadmap y Estimaciones
+## 6. Implementación
 
-- **Semana 1:** Implementar endpoint SSE + pruebas unitarias/integración (`app.integration.test.ts`).
-- **Semana 1:** Hook `useNotificationStream` con tests vitest (simular mensajes).
-- **Semana 1.5:** Actualizar `NotificationBell` para integrar stream + fallback.
-- **Semana 2:** Playwright: escenario reconexión y doble ventana sincronizada.
-- **Semana 2:** Observabilidad (logs + dashboard latencia), actualizar docs.
-- Hoja de ruta sujeta a disponibilidad tras Sprint Tailwind v4.
+- ✅ Endpoint SSE `GET /api/notifications/stream` con hub de eventos en memoria.
+- ✅ Repositorio notifica high-level events (`notification:new`, `notification:update`, `notification:bulk`).
+- ✅ Hook `useNotificationStream` con reconexión exponencial y fallback a polling.
+- ✅ Componente `NotificationBell` con panel lateral, badge reactivo y controles de lectura.
+- ✅ Tests: integración (`app.integration.test.ts`) + E2E críticos (`tests/e2e/notifications.spec.ts`).
+- ✅ Documentación actualizada (`docs/overview/status.md`).
 
 ## 7. Riesgos y Mitigaciones
 
@@ -98,4 +99,4 @@ Seleccionar el canal de entrega en tiempo real para notificaciones internas (coo
 
 ---
 
-**Próximos pasos:** calendarizar la implementación en el siguiente sprint técnico (Semana del 20 de octubre 2025) y crear issue de seguimiento (`notifications-sse-implementation`). Actualizar `docs/overview/status.md` al marcar inicio del trabajo.
+**Próximos pasos:** evaluar migración del hub a pub/sub (Redis) y añadir métricas de stream (entrega y reconexiones) en Sentry antes de escalar usuarios concurrentes.

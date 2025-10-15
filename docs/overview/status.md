@@ -309,13 +309,14 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 5. ✅ OpenAPI/Swagger: Documentación automática con Scalar UI en `/docs`
 6. ✅ Observabilidad: Sentry + Web Vitals + Speed Insights instrumentados para detectar regresiones de performance en tiempo real.citeturn2search1turn3search6turn3search7
 7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
-8. ✅ E2E Testing: 19 tests con estrategia piramidal (smoke/critical/full)
+8. ✅ E2E Testing: 25 tests con estrategia piramidal (smoke/critical/full)
 9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)
 10. ✅ Paginación cursor-based: `/api/bookings`, `/api/services`, `/api/properties`, `/api/users`, `/api/customers`
 11. ✅ Code Coverage: Configurado con V8 provider y thresholds automáticos (API: 85%, Web: 70%)
 12. ✅ Interfaces TypeScript: Tipos e interfaces para SOLID (auth, user, booking, service, property)
 13. ✅ Refactorización masiva: 450+ líneas de código duplicado eliminadas (6 bibliotecas compartidas, 60% reducción)
 14. ✅ API de notificaciones: Modelo Prisma, repositorio y endpoints GET/PATCH listos para UI de coordinadores.
+15. ✅ Notificaciones en tiempo real: SSE `GET /api/notifications/stream`, `NotificationBell` reactivo y fallback a polling.
 
 ### Pendiente 🔄
 
@@ -331,9 +332,8 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 
 3. **Roadmap funcional:**
    - Sistema de estilos compartido (definir tras migración Tailwind v4)
-   - Notificaciones push para coordinadores (UI + canal en tiempo real · ver `docs/decisions/notifications-realtime-channel.md`)
-
-- UI de paginación en frontend (infinite scroll / load more)
+   - Landing comercial + flujo de reserva pública (servicio → fecha → pago)
+   - Portal cliente con historial y facturación
 
 4. **Arquitectura (Sprint 2-3):**
    - Implementar dependency injection con interfaces creadas
@@ -343,6 +343,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 5. **DevOps:**
    - Postdeploy hook automático para seed inicial
    - Documentar proceso de deployment en `DEPLOYMENT.md`
+   - Staging environment dedicado para pruebas previas a producción
 
 ---
 
