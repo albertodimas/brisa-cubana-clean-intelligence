@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Política de divulgación responsable en `SECURITY.md` y `docs/README.md` con el enlace al índice.
 - Roadmap Fase 2 (`docs/product/phase-2-roadmap.md`) para landing comercial, checkout público y portal cliente.
+- Suite Playwright `tests/e2e/search-and-filters.spec.ts` con cobertura crítica para búsqueda, filtros combinados y mensajes sin resultados.
 
 ### Changed
 

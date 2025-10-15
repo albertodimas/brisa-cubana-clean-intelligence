@@ -122,7 +122,7 @@ test.describe.serial("Búsquedas y filtros", () => {
     await expect(bookingCards.first()).toContainText("BRISA-0001");
   });
 
-  test("muestra mensaje amigable cuando no hay coincidencias en servicios", async ({
+  test("muestra mensaje amigable cuando no hay coincidencias en servicios @critical", async ({
     page,
   }, testInfo) => {
     await loginAsAdmin(page, testInfo);

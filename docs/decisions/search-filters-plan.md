@@ -28,7 +28,7 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
 3. **QA & Documentación:**
    - Tests Vitest para la lógica de hooks y adaptadores. ✅ (completado 15/oct/2025)
 
-- Tests Playwright (`@critical`) para escenarios clave (búsqueda exitosa, sin resultados, limpieza de filtros). ⏳ pendiente
+- Tests Playwright (`@critical`) para escenarios clave (búsqueda exitosa, sin resultados, limpieza de filtros). ✅ completado (`tests/e2e/search-and-filters.spec.ts`)
 - Actualizar OpenAPI y docs de producto con ejemplos. ✅ (API y docs sincronizados 15/oct/2025)
 
 ## 4. Plan de Trabajo (Estimado 5-7 horas)
