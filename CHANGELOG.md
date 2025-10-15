@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) where applicable.
 
+## [Unreleased]
+
+### Added
+
+- Componente `SearchBar` con debounce interno y botón de limpieza reutilizado en servicios, propiedades, reservas y clientes (`apps/web/components/ui/search-bar.tsx`).
+- Componente `FilterChips` para visualizar y limpiar filtros activos en los paneles operativos.
+- Nuevas pruebas unitarias (SearchBar, FilterChips, managers y `usePaginatedResource`) elevan la suite web a 60 tests.
+
+### Changed
+
+- Endpoints `/api/services`, `/api/properties`, `/api/bookings`, `/api/customers` y `/api/users` soportan parámetros `search` y filtros combinables manteniendo paginación cursor-based.
+- `usePaginatedResource` expone `currentQuery`, `resetQuery` y normaliza queries para evitar resets innecesarios.
+- Documentación actualizada (`README`, `docs/overview/status.md`, `docs/product/pagination.md`, `docs/decisions/search-filters-plan.md`, `docs/reference/*`) para reflejar la Fase 2 de búsquedas y filtros.
+
+### Testing
+
+- `pnpm --filter @brisa/web test` (60 pruebas) ✅
+- `pnpm --filter @brisa/api test` (95 pruebas) ✅
+
 ## [0.3.0] - 2025-10-14
 
 ### Added
@@ -193,22 +212,3 @@ All notable changes to this project are documented here. The format follows [Kee
 ---
 
 For upcoming work and open items, see `docs/overview/status.md` section “Próximos pasos prioritarios”.
-
-# [0.2.9] - 2025-10-14
-
-### Added
-
-- Suite completa de tests E2E para gestión de usuarios (`tests/e2e/user-management.spec.ts`) con 5 casos críticos.
-- Plan de implementación de búsqueda y filtros documentado (`docs/decisions/search-filters-plan.md`, Fase 6).
-
-### Changed
-
-- Suite E2E expandida: 19 tests totales (2 smoke, ~8 critical, 19 full).
-- Optimizaciones E2E: token compartido de admin, IPs únicas, selectores refinados.
-- Documentación sincronizada con nueva Fase 6 (búsqueda/filtros) en roadmap.
-
-### Testing
-
-- +5 pruebas E2E en `user-management.spec.ts` (crear, actualizar rol, activar/desactivar, guards).
-- Optimización de suite crítica para evitar rate limiting y mejorar estabilidad.
-- Total: **129 tests unitarios/integración + 19 tests E2E = 148 tests totales**.

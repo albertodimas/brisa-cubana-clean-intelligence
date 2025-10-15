@@ -1,12 +1,14 @@
 # API Documentation - OpenAPI/Swagger
 
-**Última actualización:** 14 de octubre de 2025
+**Última actualización:** 15 de octubre de 2025
 
 ---
 
 ## Overview
 
 La API de Brisa Cubana Clean Intelligence está completamente documentada con **OpenAPI 3.1** specification. Toda la documentación interactiva está disponible a través de **Scalar API Reference**, una interfaz moderna y funcional para explorar y probar los endpoints.
+
+> **Actualización 15/oct/2025:** Los endpoints de servicios, propiedades, reservas, clientes y usuarios soportan parámetros `search` y filtros complementarios (`status`, `city`, `type`, `active`, etc.) con paginación cursor-based. Consulta la especificación o el handbook de producto para ejemplos concretos.
 
 ---
 

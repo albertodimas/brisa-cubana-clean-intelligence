@@ -1,12 +1,12 @@
 # Plan de Implementación: Búsquedas y Filtros en Listados Operativos
 
-**Fecha:** 14 de octubre de 2025  
-**Estado:** PLANIFICADO (Sprint objetivo: Q1 2026, posterior a Tailwind v4)  
+**Fecha:** 15 de octubre de 2025  
+**Estado:** EN PROGRESO — Fases 1 y 2 completadas (servicios, propiedades, reservas, clientes); Fase 3 (QA automatizada) y soporte completo de usuarios pendientes.  
 **Stakeholders:** Equipo Frontend, Equipo Producto, QA
 
 ## 1. Contexto
 
-Los listados de servicios, propiedades, reservas y usuarios ya utilizan paginación cursor-based y pueden manejar centenares de registros. Sin embargo, la UI actual sólo expone controles de paginación (“Load more”) y filtros básicos para reservas. La documentación de producto (`docs/product/user-management.md:470`) identifica la ausencia de búsqueda como un bloqueo para operaciones reales.
+Los listados de servicios, propiedades, reservas y usuarios ya utilizan paginación cursor-based y pueden manejar centenares de registros. Tras completar la Fase 2 (15/oct/2025), servicios, propiedades, reservas y clientes cuentan con búsquedas debounced, filtros específicos y chips visuales. La sección de usuarios en `AdminPanel` permanece sin búsqueda, lo que mantiene abierta la fase restante. La documentación de producto (`docs/product/user-management.md:470`) identificaba la ausencia de búsqueda como un bloqueo para operaciones reales y aún aplica para usuarios.
 
 ## 2. Objetivo
 
@@ -26,10 +26,9 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
    - Preservar compatibilidad con teclado y accesibilidad (labels claros, `aria-*`).
 
 3. **QA & Documentación:**
-   - Tests Vitest para la lógica de hooks y adaptadores.
-
-- Tests Playwright (`@critical`) para escenarios clave (búsqueda exitosa, sin resultados, limpieza de filtros).
-- Actualizar OpenAPI y docs de producto con ejemplos.
+   - Tests Vitest para la lógica de hooks y adaptadores. ✅ (completado 15/oct/2025)
+   - Tests Playwright (`@critical`) para escenarios clave (búsqueda exitosa, sin resultados, limpieza de filtros). ⏳ pendiente
+   - Actualizar OpenAPI y docs de producto con ejemplos. ✅ (API y docs sincronizados 15/oct/2025)
 
 ## 4. Plan de Trabajo (Estimado 5-7 horas)
 
@@ -40,14 +39,16 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
 - Añadir validaciones en `apps/api/src/routes/*` (`zod`) para nuevos parámetros.
 - Actualizar tests en `app.integration.test.ts` (1 por recurso).
 
-### Fase 2 – Hooks y Componentes (2 h)
+### Fase 2 – Hooks y Componentes (2 h) ✅ completada 15/oct/2025
 
 - Extender `usePaginatedResource` para aceptar `search` y filtros arbitrarios.
 - Crear componente `SearchBar` reutilizable (input + botón limpiar).
 - Inyectar controles en `ServicesManager`, `PropertiesManager`, `BookingsManager`, `CustomersManager`, `AdminPanel` (usuarios).
 - Añadir estados visuales (spinner, mensaje “sin resultados”).
 
-### Fase 3 – QA Automatizada (1.5 h)
+> Nota: `AdminPanel` usuarios se mantiene sin manager dedicado; la refactorización para paginación/búsqueda se moverá a Fase 6b.
+
+### Fase 3 – QA Automatizada (1.5 h) ⏳ en progreso
 
 - Vitest: unidad para hook (`use-paginated-resource.test.ts`) cubriendo cambios de query y sucesión de cursores.
 - Playwright: nuevo archivo `tests/e2e/search-and-filters.spec.ts` con escenarios:
@@ -56,7 +57,7 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
   3. Buscar reserva inexistente → mensaje “sin resultados”.
 - Etiquetar pruebas con `@critical` para suite principal.
 
-### Fase 4 – Documentación y Rollout (0.5-1 h)
+### Fase 4 – Documentación y Rollout (0.5-1 h) ✅ completada 15/oct/2025
 
 - OpenAPI: extender documentación de parámetros de búsqueda/filtros.
 - Docs: actualizar `docs/product/*` y `docs/overview/status.md`.
@@ -92,4 +93,4 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
 
 ---
 
-**Última revisión:** 14 de octubre de 2025. Actualizar si cambian prioridades o arquitecturas de datos.
+**Última revisión:** 15 de octubre de 2025. Actualizar si cambian prioridades o arquitecturas de datos.

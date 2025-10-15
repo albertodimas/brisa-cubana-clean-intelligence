@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 14 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 150 tests passing – 131 unit/integration + 19 E2E)
+**Última revisión:** 15 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 174 tests passing – 155 unit/integration + 19 E2E)
 
 ---
 
@@ -9,10 +9,10 @@
 - Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
 - Versionado actual: `@brisa/api` 0.3.0 · `@brisa/web` 0.3.0 (tag `v0.3.0`, 14-oct-2025).
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
-- Panel operativo funcional: creación/edición de servicios, propiedades y reservas; filtros y mensajes de feedback.
+- Panel operativo funcional: creación/edición de servicios, propiedades y reservas; búsqueda con debounce y chips de filtros activos; mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
-- Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo.
+- Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
 - Release etiquetado `v0.3.0` (14-oct-2025) completa Sprint 1 con paginación visible en la UI; Fase 5 (Tailwind v4) programada para Q1 2026 en el Issue #40 según ADR dedicado.
@@ -160,11 +160,11 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 87 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI)
+- **`apps/api`**: 95 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI y filtros/búsqueda)
   - Coverage thresholds: 85% lines, 65% functions, 50% branches
-- **`apps/web`**: 44 pruebas Vitest (hooks, server actions y componentes UI)
+- **`apps/web`**: 60 pruebas Vitest (hooks, server actions y componentes UI con SearchBar/FilterChips)
   - Coverage threshold: 70%
-- **Total**: 131 pruebas unitarias/integración passing (150 en total incluyendo 19 E2E)
+- **Total**: 155 pruebas unitarias/integración passing (174 en total incluyendo 19 E2E)
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
@@ -187,7 +187,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 - **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`.
 
-**Estado (14-oct-2025)**: ✅ Pipelines en `main` (CI, CodeQL, Post-Deploy Seed) completados; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` con fallos en CodeQL y PR Checks pendientes.
+**Estado (15-oct-2025)**: ✅ Pipelines en `main` (CI, CodeQL, Post-Deploy Seed) completados; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` con fallos en CodeQL y PR Checks pendientes.
 
 ### 7.4 Calidad de Código
 
@@ -331,8 +331,9 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 3. **Roadmap funcional:**
    - Sistema de estilos compartido (definir tras migración Tailwind v4)
    - Notificaciones push para coordinadores
-   - Búsqueda y filtros en listados (plan detallado en `docs/decisions/search-filters-plan.md`)
-   - UI de paginación en frontend (infinite scroll / load more)
+
+- Completar búsqueda en gestión de usuarios y suite E2E (ver `docs/decisions/search-filters-plan.md`)
+- UI de paginación en frontend (infinite scroll / load more)
 
 4. **Arquitectura (Sprint 2-3):**
    - Implementar dependency injection con interfaces creadas

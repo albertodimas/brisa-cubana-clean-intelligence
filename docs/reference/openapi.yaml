@@ -124,8 +124,19 @@ paths:
   /api/services:
     get:
       tags: [Services]
-      summary: Lista todos los servicios disponibles con paginación
+      summary: Lista servicios con búsqueda opcional y paginación
       parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Coincidencia parcial en nombre o descripción (case-insensitive)
+        - in: query
+          name: active
+          schema:
+            type: string
+            enum: ['true', 'false']
+          description: Filtra por estado activo/inactivo
         - in: query
           name: limit
           schema:
@@ -228,8 +239,24 @@ paths:
   /api/properties:
     get:
       tags: [Properties]
-      summary: Lista todas las propiedades registradas con paginación
+      summary: Lista propiedades con búsqueda opcional y paginación
       parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Coincidencia parcial en etiqueta, ciudad o dirección.
+        - in: query
+          name: city
+          schema:
+            type: string
+          description: Filtra por ciudad exacta.
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: ['RESIDENTIAL', 'VACATION_RENTAL', 'OFFICE']
+          description: Filtra por tipo de propiedad.
         - in: query
           name: limit
           schema:
@@ -333,12 +360,32 @@ paths:
     get:
       tags: [Customers]
       summary: Lista clientes (requiere rol administrativo)
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Coincidencia parcial en nombre o email.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Número de resultados por página (1-100)
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+          description: ID del último elemento de la página anterior (cursor-based pagination)
       security:
         - bearerAuth: []
         - cookieAuth: []
       responses:
         '200':
-          description: Colección de clientes
+          description: Colección paginada de clientes
           content:
             application/json:
               schema:
@@ -350,13 +397,44 @@ paths:
   /api/users:
     get:
       tags: [Users]
-      summary: Lista usuarios con sus roles
+      summary: Lista usuarios con filtros opcionales y paginación
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Coincidencia parcial en nombre o email.
+        - in: query
+          name: role
+          schema:
+            $ref: '#/components/schemas/UserRole'
+          description: Filtra por rol.
+        - in: query
+          name: isActive
+          schema:
+            type: string
+            enum: ['true', 'false']
+          description: Filtra por estado activo/inactivo.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Número de resultados por página (1-100)
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            pattern: '^c[0-9a-z]{24}$'
+          description: ID del último elemento de la página anterior (cursor-based pagination)
       security:
         - bearerAuth: []
         - cookieAuth: []
       responses:
         '200':
-          description: Colección de usuarios
+          description: Colección paginada de usuarios
           content:
             application/json:
               schema:
@@ -423,6 +501,11 @@ paths:
       tags: [Bookings]
       summary: Lista reservas con filtros opcionales y paginación
       parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Búsqueda parcial en código, cliente o propiedad asociada.
         - in: query
           name: from
           schema:
@@ -889,11 +972,31 @@ components:
           nullable: true
     CustomerListResponse:
       type: object
+      required: [data, pagination]
       properties:
         data:
           type: array
           items:
             $ref: '#/components/schemas/Customer'
+        pagination:
+          type: object
+          required: [limit, hasMore]
+          properties:
+            limit:
+              type: integer
+              description: Número de resultados solicitados por página
+              example: 50
+            cursor:
+              type: string
+              nullable: true
+              description: Cursor actual (ID desde donde se comenzó a paginar)
+            nextCursor:
+              type: string
+              nullable: true
+              description: Cursor para la siguiente página (ID del último elemento)
+            hasMore:
+              type: boolean
+              description: Indica si hay más resultados disponibles
     Booking:
       type: object
       required:
@@ -1040,11 +1143,31 @@ components:
           format: date-time
     UserListResponse:
       type: object
+      required: [data, pagination]
       properties:
         data:
           type: array
           items:
             $ref: '#/components/schemas/User'
+        pagination:
+          type: object
+          required: [limit, hasMore]
+          properties:
+            limit:
+              type: integer
+              description: Número de resultados solicitados por página
+              example: 50
+            cursor:
+              type: string
+              nullable: true
+              description: Cursor actual (ID desde donde se comenzó a paginar)
+            nextCursor:
+              type: string
+              nullable: true
+              description: Cursor para la siguiente página (ID del último elemento)
+            hasMore:
+              type: boolean
+              description: Indica si hay más resultados disponibles
     UserResponse:
       type: object
       properties:
