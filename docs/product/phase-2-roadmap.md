@@ -56,5 +56,5 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 - **avance:**
   - [x] Variables de entorno (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`) documentadas en `docs/operations/security.md` y `.env.example`.
   - [x] Receptor de webhook `/api/payments/stripe/webhook` implementado y cubierto por pruebas de integración.
-  - [ ] Configurar Stripe CLI / dashboard para generar eventos en entornos Preview y completar escenarios QA.
+  - [x] Stripe CLI documentada (`pnpm stripe:listen` + `stripe trigger …`) para reproducir eventos en local/preview.
   - [ ] Actualizar `docs/qa/regression-checklist.md` con casos de pago exitoso/fallido.

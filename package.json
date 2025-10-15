@@ -25,7 +25,8 @@
     "docs:verify": "pnpm verify:versions && bash scripts/verify-doc-structure.sh",
     "format": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
     "clean": "rm -rf node_modules .turbo",
-    "prepare": "husky"
+    "prepare": "husky",
+    "stripe:listen": "stripe listen --forward-to http://localhost:3001/api/payments/stripe/webhook"
   },
   "devDependencies": {
     "@cspell/dict-es-es": "^3.0.8",

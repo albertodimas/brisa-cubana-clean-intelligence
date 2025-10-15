@@ -1,6 +1,6 @@
 # Checklist de Regresiones
 
-**Última actualización:** 14 de octubre de 2025
+**Última actualización:** 15 de octubre de 2025
 
 Este documento define los escenarios críticos que deben verificarse antes de cada despliegue a producción para prevenir regresiones.
 
@@ -198,6 +198,14 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 
 - [ ] `prisma db push` ejecuta sin errores
 - [ ] Todas las tablas se crean correctamente
+- [ ] Seeds operativo + demo corren en el orden documentado
+
+## 8. Pagos (Stripe)
+
+- [ ] `pnpm stripe:listen` se conecta correctamente y muestra el secret temporal.
+- [ ] `stripe trigger checkout.session.completed` llega al webhook y registra el evento en logs.
+- [ ] Eventos con firma inválida devuelven 400 y se registran en logs.
+- [ ] Sin variables Stripe configuradas, el endpoint responde 503 (expectativa en entornos sin pagos).
 - [ ] Foreign keys están definidas
 - [ ] Índices están aplicados
 - [ ] Constraints (UNIQUE, NOT NULL) funcionan

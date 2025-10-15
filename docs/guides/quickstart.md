@@ -43,11 +43,15 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    docker compose up -d
    ```
 5. **Sincronizar y sembrar base de datos**
+
    ```bash
    pnpm --filter @brisa/api db:push --force-reset
    pnpm --filter @brisa/api db:seed:operativo
    pnpm --filter @brisa/api db:seed:demo
    ```
+
+   > Para escuchar webhooks de Stripe en desarrollo, ejecuta `pnpm stripe:listen` en otra terminal y usa `stripe trigger checkout.session.completed` para enviar eventos de prueba.
+
 6. **Ejecutar el stack**
 
    ```bash

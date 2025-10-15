@@ -55,6 +55,22 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 
 3. Registra la ejecución en [`operations/backup-log.md`](backup-log.md) con fecha, responsable y resultado.
 
+### Stripe CLI (modo test)
+
+Para validar los webhooks en local o staging:
+
+```bash
+pnpm stripe:listen
+```
+
+En otra terminal puedes disparar eventos de prueba, por ejemplo:
+
+```bash
+stripe trigger checkout.session.completed
+```
+
+Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook` y quedarán registrados en la consola.
+
 ## 5. Verificación post-deploy
 
 | Check           | Descripción                                                                                                 |
