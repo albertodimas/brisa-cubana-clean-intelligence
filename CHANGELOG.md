@@ -14,6 +14,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - README y `docs/overview/status.md` actualizados con el run CI `18542267689`, la estandarización en Node.js 22.13.0 y el alcance real del release `v0.3.0` (búsqueda/filtros).
 - `scripts/verify-doc-structure.sh` exige `SECURITY.md` y la nueva documentación de producto para mantener la verificación.
+- Workflow `nightly.yml` ahora ejecuta Lighthouse CI sobre la URL de Vercel, alineado con `.lighthouserc.preview.json` y los budgets documentados.
+- Eliminada la ruta `/api/authentication/verify` del OpenAPI para reflejar la implementación actual.
 
 ### Fixed
 

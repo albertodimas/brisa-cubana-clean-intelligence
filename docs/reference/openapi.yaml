@@ -96,31 +96,6 @@ paths:
                     $ref: '#/components/schemas/AuthContext'
         '401':
           description: No autenticado
-  /api/authentication/verify:
-    post:
-      tags: [Auth]
-      summary: Verifica si un token JWT es válido
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                token:
-                  type: string
-      responses:
-        '200':
-          description: Resultado de validación
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  valid:
-                    type: boolean
-        '400':
-          description: Payload inválido
   /api/services:
     get:
       tags: [Services]
