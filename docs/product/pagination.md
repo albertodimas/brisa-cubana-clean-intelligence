@@ -7,13 +7,13 @@ Desde la **Fase 2 (15/oct/2025)**, los listados de servicios, propiedades, reser
 
 ## Búsqueda y Filtros – Fase 2
 
-| Recurso     | Parámetros soportados                                                                        | UI Asociada                                              |
-| ----------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Servicios   | `search`, `active`, `limit`, `cursor`                                                        | SearchBar + select “Estado”; chips por texto/estado.     |
-| Propiedades | `search`, `city`, `type`, `limit`, `cursor`                                                  | SearchBar + selects “Filtrar por ciudad/tipo”.           |
-| Reservas    | `search`, `status`, `from`, `to`, `propertyId`, `serviceId`, `customerId`, `limit`, `cursor` | SearchBar + filtros existentes (estado/fechas).          |
-| Clientes    | `search`, `limit`, `cursor`                                                                  | SearchBar (nombre/email).                                |
-| Usuarios    | `search`, `role`, `isActive`, `limit`, `cursor`                                              | **Pendiente** (sección AdminPanel sin manager dedicado). |
+| Recurso     | Parámetros soportados                                                                        | UI Asociada                                                      |
+| ----------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Servicios   | `search`, `active`, `limit`, `cursor`                                                        | SearchBar + select “Estado”; chips por texto/estado.             |
+| Propiedades | `search`, `city`, `type`, `limit`, `cursor`                                                  | SearchBar + selects “Filtrar por ciudad/tipo”.                   |
+| Reservas    | `search`, `status`, `from`, `to`, `propertyId`, `serviceId`, `customerId`, `limit`, `cursor` | SearchBar + filtros existentes (estado/fechas).                  |
+| Clientes    | `search`, `limit`, `cursor`                                                                  | SearchBar (nombre/email).                                        |
+| Usuarios    | `search`, `role`, `isActive`, `limit`, `cursor`                                              | SearchBar + selects de rol/estado; chips y paginación integrada. |
 
 El componente `SearchBar` es reutilizable (forwardRef, clear button, estados `loading`/`disabled`) y el componente `FilterChips` muestra los filtros activos con opción “Limpiar todos”. Ambos componentes cuentan con pruebas unitarias dedicadas.
 
@@ -116,7 +116,7 @@ La paginación cursor-based es más eficiente que la paginación offset-based pa
 
 #### GET /api/users
 
-> Estado: parámetros disponibles en API (15/oct/2025); integración UI pendiente para sección de usuarios en `AdminPanel`.
+> Estado: parámetros disponibles en API e integrados en la UI (15/oct/2025).
 
 | Parámetro  | Tipo                           | Requerido | Default | Descripción                                                 |
 | ---------- | ------------------------------ | --------- | ------- | ----------------------------------------------------------- |

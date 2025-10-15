@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 15 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 174 tests passing – 155 unit/integration + 19 E2E)
+**Última revisión:** 15 de octubre de 2025 (CI/CD main en verde; CodeQL y PR Checks completados; 180 tests passing – 161 unit/integration + 19 E2E)
 
 ---
 
@@ -162,9 +162,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 - **`apps/api`**: 95 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI y filtros/búsqueda)
   - Coverage thresholds: 85% lines, 65% functions, 50% branches
-- **`apps/web`**: 60 pruebas Vitest (hooks, server actions y componentes UI con SearchBar/FilterChips)
+- **`apps/web`**: 66 pruebas Vitest (hooks, server actions y componentes UI con SearchBar/FilterChips/UsersManager)
   - Coverage threshold: 70%
-- **Total**: 155 pruebas unitarias/integración passing (174 en total incluyendo 19 E2E)
+- **Total**: 161 pruebas unitarias/integración passing (180 en total incluyendo 19 E2E)
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
@@ -332,7 +332,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
    - Sistema de estilos compartido (definir tras migración Tailwind v4)
    - Notificaciones push para coordinadores
 
-- Completar búsqueda en gestión de usuarios y suite E2E (ver `docs/decisions/search-filters-plan.md`)
+- Completar suite E2E para búsquedas y filtros (ver `docs/decisions/search-filters-plan.md`)
 - UI de paginación en frontend (infinite scroll / load more)
 
 4. **Arquitectura (Sprint 2-3):**

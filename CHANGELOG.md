@@ -15,6 +15,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Endpoints `/api/services`, `/api/properties`, `/api/bookings`, `/api/customers` y `/api/users` soportan parámetros `search` y filtros combinables manteniendo paginación cursor-based.
 - `usePaginatedResource` expone `currentQuery`, `resetQuery` y normaliza queries para evitar resets innecesarios.
 - Documentación actualizada (`README`, `docs/overview/status.md`, `docs/product/pagination.md`, `docs/decisions/search-filters-plan.md`, `docs/reference/*`) para reflejar la Fase 2 de búsquedas y filtros.
+- El panel de usuarios (`AdminPanel`) ahora integra `UsersManager` con búsqueda debounced, filtros por rol/estado y chips visuales.
 
 ### Testing
 

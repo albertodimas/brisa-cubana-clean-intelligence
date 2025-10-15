@@ -234,6 +234,13 @@ export async function toggleUserActiveAction(
 - Manejo de errores con mensajes descriptivos
 - Type-safe con TypeScript
 
+### Búsqueda y filtros (Fase 2 – 15/oct/2025)
+
+- Barra de búsqueda con debounce de 300 ms (nombre o email).
+- Selects dedicados para rol (`ADMIN`, `COORDINATOR`, `STAFF`, `CLIENT`) y estado (`Activos`, `Inactivos`).
+- Chips dinámicos para visualizar filtros activos con opción “Limpiar todos”.
+- Paginación cursor-based con botón “Cargar más” sincronizado con el backend (`/api/users`).
+
 ## Base de Datos
 
 ### Schema (Prisma)

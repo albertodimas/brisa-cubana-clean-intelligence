@@ -17,25 +17,16 @@ import { Card } from "./ui/card";
 import { Chip } from "./ui/chip";
 import { Skeleton } from "./ui/skeleton";
 import { useToast } from "./ui/toast";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
 import { BookingsManager } from "./bookings-manager";
 import { ServicesManager } from "./services-manager";
 import { PropertiesManager } from "./properties-manager";
 import { CustomersManager } from "./customers-manager";
+import { UsersManager } from "./users-manager";
 
 type ActionResult = {
   success?: string;
   error?: string;
 };
-
-const USER_ROLES = ["ADMIN", "COORDINATOR", "STAFF", "CLIENT"] as const;
 
 type BookingFilterState = {
   status: string;
@@ -71,7 +62,7 @@ type AdminPanelProps = {
     bookingId: string,
     formData: FormData,
   ) => Promise<ActionResult>;
-  users: User[];
+  users: PaginatedResult<User>;
   updateUser: (userId: string, formData: FormData) => Promise<ActionResult>;
   toggleUserActive: (userId: string, active: boolean) => Promise<ActionResult>;
   logout: () => Promise<ActionResult>;
@@ -176,7 +167,6 @@ export function AdminPanel({
   const [bookingUpdatingId, setBookingUpdatingId] = useState<string | null>(
     null,
   );
-  const [userUpdatingId, setUserUpdatingId] = useState<string | null>(null);
   const [bookingFilters, setBookingFilters] = useState<BookingFilterState>(
     initialBookingFormFilters,
   );
@@ -194,6 +184,22 @@ export function AdminPanel({
     initial: bookings,
     endpoint: "/api/bookings",
     initialQuery: buildBookingQuery(initialBookingFormFilters),
+  });
+
+  const {
+    items: userItems,
+    pageInfo: userPageInfo,
+    isLoading: isUsersRefreshing,
+    isLoadingMore: isLoadingMoreUsers,
+    loadMore: loadMoreUsers,
+    refresh: refreshUsers,
+    currentQuery: userQuery,
+    setQuery: setUserQuery,
+    resetQuery: resetUserQuery,
+  } = usePaginatedResource<User>({
+    initial: users,
+    endpoint: "/api/users",
+    initialQuery: { limit: users.pageInfo.limit },
   });
 
   const applyBookingFilters = useCallback(
@@ -278,17 +284,6 @@ export function AdminPanel({
     } else if (result.success) {
       showToast(result.success, "success");
       await setBookingQuery(buildBookingQuery(bookingFilters));
-    }
-  }
-
-  async function handleUserUpdate(userId: string, formData: FormData) {
-    setUserUpdatingId(userId);
-    const result = await updateUser(userId, formData);
-    setUserUpdatingId(null);
-    if (result.error) {
-      showToast(result.error, "error");
-    } else if (result.success) {
-      showToast(result.success, "success");
     }
   }
 
@@ -386,136 +381,21 @@ export function AdminPanel({
       />
 
       {currentUser?.role === "ADMIN" ? (
-        <Card
-          title="Gestión de usuarios"
-          description="Actualiza roles operativos y rota contraseñas de manera segura."
-        >
-          <div className="ui-stack">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableHeader>Usuario</TableHeader>
-                  <TableHeader>Nombre</TableHeader>
-                  <TableHeader>Rol</TableHeader>
-                  <TableHeader>Estado</TableHeader>
-                  <TableHeader>Última actualización</TableHeader>
-                  <TableHeader align="right">Acciones</TableHeader>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.fullName ?? "Sin nombre"}</TableCell>
-                    <TableCell>
-                      <Chip>{user.role}</Chip>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        className={
-                          user.isActive
-                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                            : "bg-red-500/20 text-red-300 border-red-500/30"
-                        }
-                      >
-                        {user.isActive ? "Activo" : "Inactivo"}
-                      </Chip>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.updatedAt).toLocaleString("es-US", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </TableCell>
-                    <TableCell align="right">
-                      <form
-                        action={async (formData) => {
-                          await handleUserUpdate(user.id, formData);
-                        }}
-                        className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 items-center"
-                      >
-                        <select
-                          name="userRole"
-                          defaultValue={user.role}
-                          className="ui-input"
-                          aria-label={`Rol de ${user.email}`}
-                        >
-                          {USER_ROLES.map((role) => (
-                            <option key={role} value={role}>
-                              {role}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          name="userFullName"
-                          type="text"
-                          defaultValue={user.fullName ?? ""}
-                          placeholder="Nombre completo"
-                          className="ui-input"
-                        />
-                        <input
-                          name="userPassword"
-                          type="password"
-                          placeholder="Nueva contraseña (opcional)"
-                          className="ui-input"
-                        />
-                        <label
-                          className={`flex items-center gap-2 rounded-lg border border-brisa-600/20 bg-brisa-800/40 px-3 py-2 ${
-                            user.id === currentUser?.id
-                              ? "opacity-50 cursor-not-allowed"
-                              : "cursor-pointer"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={user.isActive}
-                            onChange={async (e) => {
-                              if (user.id === currentUser?.id) {
-                                alert("No puedes desactivar tu propia cuenta");
-                                e.target.checked = user.isActive;
-                                return;
-                              }
-                              const result = await toggleUserActive(
-                                user.id,
-                                e.target.checked,
-                              );
-                              if (result.error) {
-                                showToast(
-                                  result.error ??
-                                    "No se pudo actualizar el estado",
-                                  "error",
-                                );
-                                e.target.checked = user.isActive;
-                              } else if (result.success) {
-                                showToast(
-                                  result.success ?? "Estado actualizado",
-                                  "success",
-                                );
-                              }
-                            }}
-                            disabled={user.id === currentUser?.id}
-                          />
-                          <span className="ui-field__label">Activo</span>
-                        </label>
-                        <Button
-                          type="submit"
-                          variant="ghost"
-                          size="sm"
-                          className="max-w-fit"
-                          isLoading={userUpdatingId === user.id}
-                        >
-                          {userUpdatingId === user.id
-                            ? "Guardando..."
-                            : "Actualizar"}
-                        </Button>
-                      </form>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
+        <UsersManager
+          users={userItems}
+          pageInfo={userPageInfo}
+          isLoading={isUsersRefreshing}
+          isLoadingMore={isLoadingMoreUsers}
+          onLoadMore={loadMoreUsers}
+          currentQuery={userQuery}
+          setQuery={setUserQuery}
+          resetQuery={resetUserQuery}
+          refresh={refreshUsers}
+          onUpdate={updateUser}
+          onToggleActive={toggleUserActive}
+          currentUserId={currentUser?.id ?? null}
+          onToast={showToast}
+        />
       ) : null}
 
       <form

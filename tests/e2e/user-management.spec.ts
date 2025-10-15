@@ -61,6 +61,26 @@ test.describe.serial("Gestión de usuarios", () => {
     });
   }
 
+  async function getUserByEmailViaApi(
+    page: Parameters<typeof test>[0]["page"],
+    email: string,
+  ) {
+    const token = await getAdminToken(page);
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+    const response = await page.request.get(
+      `${apiBase}/api/users?search=${encodeURIComponent(email)}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    const body = await response.json();
+    const users = (body?.data ?? []) as Array<{
+      email: string;
+      isActive: boolean;
+    }>;
+    return users.find((user) => user.email === email) ?? null;
+  }
+
   test("Admin can create new user @critical", async ({ page }, testInfo) => {
     await loginAsAdmin(page, testInfo);
 
@@ -107,12 +127,12 @@ test.describe.serial("Gestión de usuarios", () => {
     const roleSelect = row.getByRole("combobox").first();
     await roleSelect.selectOption("COORDINATOR");
     await row.getByRole("button", { name: /actualizar/i }).click();
-    await expect(row.getByText("COORDINATOR").first()).toBeVisible();
+    await expect(roleSelect).toHaveValue("COORDINATOR");
 
     // Revert to STAFF so subsequent tests operate on the original state.
     await roleSelect.selectOption("STAFF");
     await row.getByRole("button", { name: /actualizar/i }).click();
-    await expect(row.getByText("STAFF").first()).toBeVisible();
+    await expect(roleSelect).toHaveValue("STAFF");
   });
 
   test("Admin can activate and deactivate users @critical", async ({
@@ -125,27 +145,42 @@ test.describe.serial("Gestión de usuarios", () => {
       /[.*+?^${}()|[\]\\]/g,
       "\\$&",
     );
-    const row = page.getByRole("row", {
-      name: new RegExp(escapedEmail, "i"),
-    });
-    await expect(row).toBeVisible();
+    const rowLocator = () =>
+      page.getByRole("row", {
+        name: new RegExp(escapedEmail, "i"),
+      });
+    await expect(rowLocator()).toBeVisible();
 
-    const checkbox = row
-      .getByRole("checkbox", { name: "Activo", exact: true })
-      .first();
-    await expect(checkbox).toBeChecked();
+    const checkboxLocator = () =>
+      rowLocator()
+        .getByRole("checkbox", { name: "Activo", exact: true })
+        .first();
+    await expect(checkboxLocator()).toBeChecked();
 
-    await checkbox.click();
-    await expect(checkbox).not.toBeChecked();
-    await expect(
-      row.locator("td").nth(3).getByText("Inactivo", { exact: true }),
-    ).toBeVisible();
+    const waitForUserActive = async (expected: boolean) =>
+      await expect
+        .poll(
+          async () => {
+            const user = await getUserByEmailViaApi(page, createdUser!.email);
+            return user?.isActive;
+          },
+          { timeout: 10000 },
+        )
+        .toBe(expected);
 
-    await checkbox.click();
-    await expect(checkbox).toBeChecked();
-    await expect(
-      row.locator("td").nth(3).getByText("Activo", { exact: true }),
-    ).toBeVisible();
+    // Desactivar usuario
+    await checkboxLocator().click();
+    await waitForUserActive(false);
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(rowLocator().locator("td").nth(3)).toHaveText(/Inactivo/i);
+    await expect(checkboxLocator()).not.toBeChecked();
+
+    // Reactivar usuario
+    await checkboxLocator().click();
+    await waitForUserActive(true);
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(rowLocator().locator("td").nth(3)).toHaveText(/Activo/i);
+    await expect(checkboxLocator()).toBeChecked();
 
     await deleteUserViaApi(page, createdUser!.id);
     createdUser = null;

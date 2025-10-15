@@ -1,12 +1,12 @@
 # Plan de Implementación: Búsquedas y Filtros en Listados Operativos
 
 **Fecha:** 15 de octubre de 2025  
-**Estado:** EN PROGRESO — Fases 1 y 2 completadas (servicios, propiedades, reservas, clientes); Fase 3 (QA automatizada) y soporte completo de usuarios pendientes.  
+**Estado:** EN PROGRESO — Fases 1 y 2 completadas (servicios, propiedades, reservas, clientes y usuarios); Fase 3 (QA automatizada) pendiente.  
 **Stakeholders:** Equipo Frontend, Equipo Producto, QA
 
 ## 1. Contexto
 
-Los listados de servicios, propiedades, reservas y usuarios ya utilizan paginación cursor-based y pueden manejar centenares de registros. Tras completar la Fase 2 (15/oct/2025), servicios, propiedades, reservas y clientes cuentan con búsquedas debounced, filtros específicos y chips visuales. La sección de usuarios en `AdminPanel` permanece sin búsqueda, lo que mantiene abierta la fase restante. La documentación de producto (`docs/product/user-management.md:470`) identificaba la ausencia de búsqueda como un bloqueo para operaciones reales y aún aplica para usuarios.
+Los listados de servicios, propiedades, reservas y usuarios ya utilizan paginación cursor-based y pueden manejar centenares de registros. Tras completar la Fase 2 (15/oct/2025), servicios, propiedades, reservas, clientes y usuarios cuentan con búsquedas debounced, filtros específicos y chips visuales alineados con la API. La documentación de producto (`docs/product/user-management.md`) refleja ahora los flujos de búsqueda y rotación de estado por rol.
 
 ## 2. Objetivo
 
@@ -27,8 +27,9 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
 
 3. **QA & Documentación:**
    - Tests Vitest para la lógica de hooks y adaptadores. ✅ (completado 15/oct/2025)
-   - Tests Playwright (`@critical`) para escenarios clave (búsqueda exitosa, sin resultados, limpieza de filtros). ⏳ pendiente
-   - Actualizar OpenAPI y docs de producto con ejemplos. ✅ (API y docs sincronizados 15/oct/2025)
+
+- Tests Playwright (`@critical`) para escenarios clave (búsqueda exitosa, sin resultados, limpieza de filtros). ⏳ pendiente
+- Actualizar OpenAPI y docs de producto con ejemplos. ✅ (API y docs sincronizados 15/oct/2025)
 
 ## 4. Plan de Trabajo (Estimado 5-7 horas)
 
@@ -43,10 +44,8 @@ Habilitar búsqueda y filtros combinables (texto + filtros específicos) en las 
 
 - Extender `usePaginatedResource` para aceptar `search` y filtros arbitrarios.
 - Crear componente `SearchBar` reutilizable (input + botón limpiar).
-- Inyectar controles en `ServicesManager`, `PropertiesManager`, `BookingsManager`, `CustomersManager`, `AdminPanel` (usuarios).
+- Inyectar controles en `ServicesManager`, `PropertiesManager`, `BookingsManager`, `CustomersManager`, `UsersManager` (admin panel).
 - Añadir estados visuales (spinner, mensaje “sin resultados”).
-
-> Nota: `AdminPanel` usuarios se mantiene sin manager dedicado; la refactorización para paginación/búsqueda se moverá a Fase 6b.
 
 ### Fase 3 – QA Automatizada (1.5 h) ⏳ en progreso
 

@@ -207,7 +207,26 @@ export async function fetchCustomersPage(
   return toPaginatedResult(response);
 }
 
-export async function fetchUsers(): Promise<User[]> {
-  const response = await safeFetch<User[]>("/api/users");
-  return response?.data ?? [];
+type FetchUsersOptions = PaginationQuery & {
+  search?: string;
+  role?: string;
+  isActive?: boolean;
+};
+
+export async function fetchUsersPage(
+  options: FetchUsersOptions = {},
+): Promise<PaginatedResult<User>> {
+  const { limit, cursor, search, role, isActive } = options;
+  const query = buildQuery({
+    limit,
+    cursor,
+    search,
+    role,
+    isActive: typeof isActive === "boolean" ? String(isActive) : undefined,
+  });
+  const response = await safeFetch<User[]>(`/api/users${query}`);
+  if (!response) {
+    return { items: [], pageInfo: normalizePagination(undefined) };
+  }
+  return toPaginatedResult(response);
 }

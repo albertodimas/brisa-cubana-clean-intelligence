@@ -81,7 +81,15 @@ vi.mock("@/lib/api", () => ({
       hasMore: false,
     },
   }),
-  fetchUsers: vi.fn().mockResolvedValue([]),
+  fetchUsersPage: vi.fn().mockResolvedValue({
+    items: [],
+    pageInfo: {
+      limit: 50,
+      cursor: null,
+      nextCursor: null,
+      hasMore: false,
+    },
+  }),
 }));
 
 vi.mock("@/auth", () => ({
@@ -98,7 +106,7 @@ describe("HomePage", () => {
       fetchBookingsPage,
       fetchPropertiesPage,
       fetchCustomersPage,
-      fetchUsers,
+      fetchUsersPage,
     } = api;
     const { default: HomePage } = await import("./page");
     const component = await HomePage();
@@ -108,7 +116,7 @@ describe("HomePage", () => {
     const mockedBookings = vi.mocked(fetchBookingsPage);
     const mockedProperties = vi.mocked(fetchPropertiesPage);
     const mockedCustomers = vi.mocked(fetchCustomersPage);
-    const mockedUsers = vi.mocked(fetchUsers);
+    const mockedUsers = vi.mocked(fetchUsersPage);
 
     expect(mockedServices).toHaveBeenCalled();
     expect(mockedBookings).toHaveBeenCalled();

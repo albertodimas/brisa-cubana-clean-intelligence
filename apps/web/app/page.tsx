@@ -20,7 +20,9 @@ import {
   fetchBookingsPage,
   fetchPropertiesPage,
   fetchCustomersPage,
-  fetchUsers,
+  fetchUsersPage,
+  type PaginatedResult,
+  type User,
 } from "@/lib/api";
 import { auth } from "@/auth";
 
@@ -66,7 +68,14 @@ export default async function HomePage() {
       fetchCustomersPage({ limit: 50 }),
     ]);
 
-  const users = isAdmin ? await fetchUsers() : [];
+  const emptyUsersPage: PaginatedResult<User> = {
+    items: [],
+    pageInfo: { limit: 50, cursor: null, nextCursor: null, hasMore: false },
+  };
+
+  const usersPage = isAdmin
+    ? await fetchUsersPage({ limit: 50 })
+    : emptyUsersPage;
 
   const services = servicesPage.items;
   const bookings = bookingsPage.items;
@@ -328,7 +337,7 @@ export default async function HomePage() {
             updateBooking={updateBookingAction}
             updateUser={updateUserAction}
             toggleUserActive={toggleUserActiveAction}
-            users={users}
+            users={usersPage}
             logout={logoutAction}
           />
         </>
