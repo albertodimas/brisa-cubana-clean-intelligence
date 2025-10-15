@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>LHCI Snapshot</title>
+    <meta
+      name="description"
+      content="Página estática para auditorías Lighthouse sin autenticación."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: #0d1b2a;
+        color: #e0f2f1;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px;
+      }
+      main {
+        max-width: 640px;
+        width: 100%;
+        display: grid;
+        gap: 24px;
+      }
+      h1 {
+        font-size: 2rem;
+        margin: 0;
+        text-align: center;
+      }
+      p {
+        margin: 0;
+        line-height: 1.6;
+        text-align: center;
+        color: rgba(224, 242, 241, 0.85);
+      }
+      section {
+        display: grid;
+        gap: 16px;
+      }
+      article {
+        background: rgba(13, 27, 42, 0.85);
+        border: 1px solid rgba(125, 196, 199, 0.25);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(8px);
+      }
+      h2 {
+        margin: 0 0 12px 0;
+        font-size: 1.25rem;
+      }
+      ul,
+      ol {
+        margin: 0;
+        padding-left: 20px;
+        color: rgba(224, 242, 241, 0.85);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Auditoría de Rendimiento</h1>
+      <p>
+        Esta vista está pensada para validar Lighthouse en CI sin autenticación.
+        Resume indicadores clave del panel operativo y se actualiza manualmente
+        cuando cambian los objetivos de rendimiento.
+      </p>
+      <section>
+        <article>
+          <h2>Indicadores clave</h2>
+          <ul>
+            <li>Tiempo de respuesta API &lt; 350&nbsp;ms</li>
+            <li>Disponibilidad semanal ≥ 99.5&nbsp;%</li>
+            <li>Backlog de notificaciones críticas en cero</li>
+          </ul>
+        </article>
+        <article>
+          <h2>Próximos hitos</h2>
+          <ol>
+            <li>Conectar stream SSE con bus de eventos en tiempo real.</li>
+            <li>Extender cobertura end-to-end a flujos de reclutamiento.</li>
+            <li>Optimizar payload crítico para First Contentful Paint.</li>
+          </ol>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

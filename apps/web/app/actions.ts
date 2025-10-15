@@ -412,3 +412,37 @@ export async function createUserAction(
     return { error: "Error inesperado" };
   }
 }
+
+export async function markNotificationReadAction(
+  notificationId: string,
+): Promise<ActionResult> {
+  try {
+    return await authenticatedFetch(
+      `/api/notifications/${notificationId}/read`,
+      {
+        method: "PATCH",
+      },
+      "No se pudo actualizar la notificación",
+      "Notificación actualizada",
+    );
+  } catch (error) {
+    console.error("[actions] markNotificationRead", error);
+    return { error: "Error inesperado" };
+  }
+}
+
+export async function markAllNotificationsReadAction(): Promise<ActionResult> {
+  try {
+    return await authenticatedFetch(
+      "/api/notifications/read-all",
+      {
+        method: "PATCH",
+      },
+      "No se pudieron marcar las notificaciones",
+      "Notificaciones actualizadas",
+    );
+  } catch (error) {
+    console.error("[actions] markAllNotificationsRead", error);
+    return { error: "Error inesperado" };
+  }
+}

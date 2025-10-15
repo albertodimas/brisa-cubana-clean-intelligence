@@ -55,7 +55,11 @@ export async function loginWithCredentials(
       page.getByRole("button", { name: "Ingresar" }).click(),
     ]);
 
-    await page.waitForLoadState("networkidle");
+    try {
+      await page.waitForLoadState("networkidle", { timeout: 5_000 });
+    } catch {
+      await page.waitForLoadState("load");
+    }
 
     const panelHeading = page.getByRole("heading", {
       name: "Panel operativo",

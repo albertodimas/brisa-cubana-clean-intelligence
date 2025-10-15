@@ -77,20 +77,16 @@ export function UsersManager({
       typeof currentQuery.search === "string"
         ? String(currentQuery.search)
         : "";
-    if (nextSearch !== searchTerm) {
-      setSearchTerm(nextSearch);
-    }
-  }, [currentQuery.search]);
+    setSearchTerm((prev) => (prev === nextSearch ? prev : nextSearch));
+  }, [currentQuery]);
 
   useEffect(() => {
     const nextRole =
       typeof currentQuery.role === "string" && currentQuery.role.length > 0
         ? String(currentQuery.role)
         : "ALL";
-    if (nextRole !== roleFilter) {
-      setRoleFilter(nextRole);
-    }
-  }, [currentQuery.role]);
+    setRoleFilter((prev) => (prev === nextRole ? prev : nextRole));
+  }, [currentQuery]);
 
   useEffect(() => {
     const nextStatus: StatusFilter =
@@ -99,10 +95,8 @@ export function UsersManager({
           ? "ACTIVE"
           : "INACTIVE"
         : "ALL";
-    if (nextStatus !== statusFilter) {
-      setStatusFilter(nextStatus);
-    }
-  }, [currentQuery.isActive]);
+    setStatusFilter((prev) => (prev === nextStatus ? prev : nextStatus));
+  }, [currentQuery]);
 
   useEffect(() => {
     const query: QueryParams = {};

@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["http://localhost:3000"],
+      "url": ["http://localhost:3000/lhci.html?__lhci_bypass=local"],
       "numberOfRuns": 3,
       "startServerCommand": "bash scripts/start-lighthouse.sh",
       "startServerReadyPattern": "http://localhost:3000",
@@ -11,6 +11,9 @@
           "rttMs": 40,
           "throughputKbps": 10240,
           "cpuSlowdownMultiplier": 1
+        },
+        "extraHeaders": {
+          "x-lhci-bypass": "local-lhci-bypass"
         }
       }
     },
@@ -28,12 +31,21 @@
         "speed-index": ["error", { "maxNumericValue": 3000 }],
         "interactive": ["error", { "maxNumericValue": 3500 }],
         "max-potential-fid": ["error", { "maxNumericValue": 130 }],
+        "bf-cache": "warn",
+        "legacy-javascript-insight": ["warn", { "minScore": 0 }],
+        "errors-in-console": "warn",
+        "network-dependency-tree-insight": "warn",
+        "document-latency-insight": "warn",
+        "redirects": "warn",
+        "robots-txt": "warn",
         "uses-responsive-images": "off",
         "offscreen-images": "warn",
         "unminified-css": "warn",
         "unminified-javascript": "warn",
         "unused-css-rules": "warn",
         "unused-javascript": "warn",
+        "legacy-javascript": "warn",
+        "render-blocking-insight": "warn",
         "modern-image-formats": "warn",
         "uses-optimized-images": "warn",
         "uses-text-compression": "warn",

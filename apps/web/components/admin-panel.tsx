@@ -9,6 +9,7 @@ import type {
   Property,
   Service,
   User,
+  Notification,
   PaginatedResult,
 } from "@/lib/api";
 import { usePaginatedResource } from "@/hooks/use-paginated-resource";
@@ -17,6 +18,7 @@ import { Card } from "./ui/card";
 import { Chip } from "./ui/chip";
 import { Skeleton } from "./ui/skeleton";
 import { useToast } from "./ui/toast";
+import { NotificationBell } from "./notifications/notification-bell";
 import { BookingsManager } from "./bookings-manager";
 import { ServicesManager } from "./services-manager";
 import { PropertiesManager } from "./properties-manager";
@@ -63,6 +65,7 @@ type AdminPanelProps = {
     formData: FormData,
   ) => Promise<ActionResult>;
   users: PaginatedResult<User>;
+  notifications: PaginatedResult<Notification>;
   updateUser: (userId: string, formData: FormData) => Promise<ActionResult>;
   toggleUserActive: (userId: string, active: boolean) => Promise<ActionResult>;
   logout: () => Promise<ActionResult>;
@@ -84,6 +87,7 @@ export function AdminPanel({
   updateProperty,
   updateBooking,
   users,
+  notifications,
   updateUser,
   toggleUserActive,
   logout,
@@ -293,33 +297,61 @@ export function AdminPanel({
         title="Panel operativo"
         description="Gestiona servicios, propiedades, reservas y usuarios desde un mismo panel."
       >
-        <div className="ui-stack">
+        <div className="flex flex-col gap-4">
           {currentUser ? (
-            <Chip>
-              Sesión: {currentUser.email ?? "usuario sin correo"}
-              {currentUser.role ? ` · Rol ${currentUser.role}` : null}
-            </Chip>
-          ) : null}
-          <Button
-            type="button"
-            variant="ghost"
-            isLoading={isLoggingOut}
-            onClick={async () => {
-              setLoggingOut(true);
-              const result = await logout();
-              setLoggingOut(false);
-              if (result.error) {
-                showToast(result.error, "error");
-              } else if (result.success) {
-                showToast(result.success, "success");
-                router.replace("/login");
-                router.refresh();
-              }
-            }}
-            className="max-w-fit"
-          >
-            Cerrar sesión
-          </Button>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Chip>
+                Sesión: {currentUser.email ?? "usuario sin correo"}
+                {currentUser.role ? ` · Rol ${currentUser.role}` : null}
+              </Chip>
+              <div className="flex items-center gap-3">
+                <NotificationBell initialNotifications={notifications} />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  isLoading={isLoggingOut}
+                  onClick={async () => {
+                    setLoggingOut(true);
+                    const result = await logout();
+                    setLoggingOut(false);
+                    if (result.error) {
+                      showToast(result.error, "error");
+                    } else if (result.success) {
+                      showToast(result.success, "success");
+                      router.replace("/login");
+                      router.refresh();
+                    }
+                  }}
+                  className="max-w-fit"
+                >
+                  Cerrar sesión
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                isLoading={isLoggingOut}
+                onClick={async () => {
+                  setLoggingOut(true);
+                  const result = await logout();
+                  setLoggingOut(false);
+                  if (result.error) {
+                    showToast(result.error, "error");
+                  } else if (result.success) {
+                    showToast(result.success, "success");
+                    router.replace("/login");
+                    router.refresh();
+                  }
+                }}
+                className="max-w-fit"
+              >
+                Cerrar sesión
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 

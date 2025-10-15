@@ -132,7 +132,7 @@ async function main() {
         userId: coordinator.id,
         type: NotificationType.SERVICE_UPDATED,
         message: "El servicio Deep Clean Residencial cambió su precio base",
-        readAt: addHours(new Date(), -2),
+        readAt: null,
       },
     ],
     skipDuplicates: true,
