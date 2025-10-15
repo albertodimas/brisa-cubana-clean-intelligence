@@ -159,30 +159,6 @@ router.get("/stream", async (c) => {
     createdAt: notification.createdAt.toISOString(),
   });
 
-  const emitDiff = (notifications: NotificationResponse[]) => {
-    const nextSnapshot = buildSnapshot(notifications);
-
-    notifications.forEach((notification) => {
-      const prev = snapshot.get(notification.id);
-      const current = {
-        readAt: notification.readAt ? notification.readAt.toISOString() : null,
-        createdAt: notification.createdAt.toISOString(),
-      };
-      if (!prev) {
-        sendEvent("notification:new", toSerializable(notification));
-        return;
-      }
-      if (prev.readAt !== current.readAt) {
-        sendEvent("notification:update", {
-          id: notification.id,
-          readAt: current.readAt,
-        });
-      }
-    });
-
-    snapshot = nextSnapshot;
-  };
-
   const stream = new ReadableStream<Uint8Array>({
     start: async (streamController) => {
       controllerRef.current = streamController;
