@@ -19,6 +19,7 @@ fi
 
 # 2. Archivos obligatorios que deben existir
 required_files=(
+  "SECURITY.md"
   "docs/README.md"
   "docs/guides/quickstart.md"
   "docs/overview/status.md"
@@ -36,6 +37,7 @@ required_files=(
   "docs/qa/performance-budgets.md"
   "docs/product/user-management.md"
   "docs/product/pagination.md"
+  "docs/product/phase-2-roadmap.md"
   "docs/archive/2025-10-08-session-log.md"
 )
 

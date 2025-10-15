@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 15 de octubre de 2025 (CI main – run 18539604606 – falló en la suite Playwright `critical`; corrección alineada a Node.js 22.13.0 y re-ejecución pendiente; CodeQL y Post-Deploy Seed en verde; 180 tests locales passing – 161 unit/integration + 19 E2E)
+**Última revisión:** 15 de octubre de 2025 (CI main – run 18541947751 – ✅ Playwright `critical`; CodeQL y Post-Deploy Seed en verde; 180 tests locales passing – 161 unit/integration + 19 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
