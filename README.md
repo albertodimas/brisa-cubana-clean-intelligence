@@ -9,7 +9,7 @@ Actualizado al **15 de octubre de 2025** con **180 pruebas automatizadas** (161 
 - **API:** Hono 4.9.12 (`apps/api`) sobre Node.js 22, autenticación JWT, RBAC por middleware, rate limiting configurable y repositorios Prisma desacoplados.
 - **Persistencia:** Prisma ORM 6.17.1 sobre PostgreSQL 16 (Docker local) / PostgreSQL 17 (Neon en producción) con soft delete (`deletedAt`) en todos los modelos.
 - **Estilos:** Tailwind CSS 3.4.18 (migración a Tailwind v4 planificada para Q1 2026 en el Issue #40 siguiendo el ADR `docs/decisions/tailwind-v4-deferral.md`).
-- **Observabilidad:** Logging con Pino, métricas básicas en `/health`, captura de errores con Sentry y Web Vitals a través de Speed Insights + métricas personalizadas.citeturn2search1turn3search7
+- **Observabilidad:** Logging con Pino, métricas básicas en `/health`, captura de errores con Sentry y Web Vitals a través de Speed Insights + métricas personalizadas.citeturn2search1turn3search6turn3search7
 - **Tooling base:** pnpm 10.18, Turborepo 2.5.8, TypeScript 5.9, Vitest 3.2, Playwright 1.56, Husky + lint-staged, CI en GitHub Actions.
 
 ## Estado al 15 de octubre de 2025
@@ -85,7 +85,7 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
   - API: https://brisa-cubana-clean-intelligence-api.vercel.app
 - **Base de datos:** PostgreSQL Neon (17) con seed de usuarios, servicios, propiedades y reservas demo.
 - **Proxy interno:** La web reexpone `/api/*` hacia la API Hono vía `INTERNAL_API_URL`, evitando exponer secretos en el navegador.
-- **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API) y Web Vitals se envían a Sentry + Speed Insights para monitoreo continuo.citeturn2search1turn3search7
+- **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API) y Web Vitals se envían a Sentry + Speed Insights para monitoreo continuo.citeturn2search1turn3search6turn3search7
 
 ## Autenticación y RBAC
 
