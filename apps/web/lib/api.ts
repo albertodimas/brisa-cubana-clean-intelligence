@@ -59,6 +59,14 @@ export type User = {
   updatedAt: string;
 };
 
+export type Notification = {
+  id: string;
+  type: string;
+  message: string;
+  readAt: string | null;
+  createdAt: string;
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export type PaginationInfo = {
@@ -225,6 +233,28 @@ export async function fetchUsersPage(
     isActive: typeof isActive === "boolean" ? String(isActive) : undefined,
   });
   const response = await safeFetch<User[]>(`/api/users${query}`);
+  if (!response) {
+    return { items: [], pageInfo: normalizePagination(undefined) };
+  }
+  return toPaginatedResult(response);
+}
+
+type FetchNotificationsOptions = PaginationQuery & {
+  unreadOnly?: boolean;
+};
+
+export async function fetchNotificationsPage(
+  options: FetchNotificationsOptions = {},
+): Promise<PaginatedResult<Notification>> {
+  const { limit, cursor, unreadOnly } = options;
+  const query = buildQuery({
+    limit,
+    cursor,
+    unreadOnly: unreadOnly ? "true" : undefined,
+  });
+  const response = await safeFetch<Notification[]>(
+    `/api/notifications${query}`,
+  );
   if (!response) {
     return { items: [], pageInfo: normalizePagination(undefined) };
   }

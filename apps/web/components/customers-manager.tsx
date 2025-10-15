@@ -38,10 +38,8 @@ export function CustomersManager({
       typeof currentQuery.search === "string"
         ? String(currentQuery.search)
         : "";
-    if (nextSearch !== searchTerm) {
-      setSearchTerm(nextSearch);
-    }
-  }, [currentQuery.search]);
+    setSearchTerm((prev) => (prev === nextSearch ? prev : nextSearch));
+  }, [currentQuery]);
 
   useEffect(() => {
     const query: QueryParams = {};

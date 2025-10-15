@@ -5,6 +5,7 @@ import type {
   NotificationSearchParams,
 } from "../interfaces/notification.interface.js";
 import type { INotificationRepository } from "../interfaces/notification.interface.js";
+import { emitNotificationEvent } from "../lib/notification-hub.js";
 
 export class NotificationRepository implements INotificationRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -48,10 +49,15 @@ export class NotificationRepository implements INotificationRepository {
     notificationId: string,
     userId: string,
   ): Promise<NotificationResponse> {
-    return this.prisma.notification.update({
+    const updated = await this.prisma.notification.update({
       where: { id: notificationId, userId },
       data: { readAt: new Date() },
     });
+    emitNotificationEvent(userId, {
+      type: "notification:update",
+      notification: updated,
+    });
+    return updated;
   }
 
   async markAllAsRead(userId: string): Promise<number> {
@@ -59,6 +65,9 @@ export class NotificationRepository implements INotificationRepository {
       where: { userId, readAt: null },
       data: { readAt: new Date() },
     });
+    if (result.count > 0) {
+      emitNotificationEvent(userId, { type: "notification:bulk" });
+    }
     return result.count;
   }
 
@@ -67,8 +76,13 @@ export class NotificationRepository implements INotificationRepository {
     type: NotificationType;
     message: string;
   }): Promise<NotificationResponse> {
-    return this.prisma.notification.create({
+    const created = await this.prisma.notification.create({
       data: input,
     });
+    emitNotificationEvent(input.userId, {
+      type: "notification:new",
+      notification: created,
+    });
+    return created;
   }
 }

@@ -33,6 +33,12 @@ type PropertiesManagerProps = {
   resetQuery: () => Promise<void>;
 };
 
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  RESIDENTIAL: "Residencial",
+  VACATION_RENTAL: "Alquiler vacacional",
+  OFFICE: "Oficina",
+};
+
 export function PropertiesManager({
   properties,
   customers,
@@ -52,11 +58,6 @@ export function PropertiesManager({
     null,
   );
   const [isPropertyPending, startPropertyAction] = useTransition();
-  const PROPERTY_TYPE_LABELS: Record<string, string> = {
-    RESIDENTIAL: "Residencial",
-    VACATION_RENTAL: "Alquiler vacacional",
-    OFFICE: "Oficina",
-  };
   const [searchTerm, setSearchTerm] = useState<string>(
     typeof currentQuery.search === "string" ? String(currentQuery.search) : "",
   );
@@ -72,22 +73,16 @@ export function PropertiesManager({
       typeof currentQuery.search === "string"
         ? String(currentQuery.search)
         : "";
-    if (nextSearch !== searchTerm) {
-      setSearchTerm(nextSearch);
-    }
+    setSearchTerm((prev) => (prev === nextSearch ? prev : nextSearch));
 
     const nextCity =
       typeof currentQuery.city === "string" ? String(currentQuery.city) : "";
-    if (nextCity !== cityFilter) {
-      setCityFilter(nextCity);
-    }
+    setCityFilter((prev) => (prev === nextCity ? prev : nextCity));
 
     const nextType =
       typeof currentQuery.type === "string" ? String(currentQuery.type) : "";
-    if (nextType !== typeFilter) {
-      setTypeFilter(nextType);
-    }
-  }, [currentQuery.search, currentQuery.city, currentQuery.type]);
+    setTypeFilter((prev) => (prev === nextType ? prev : nextType));
+  }, [currentQuery]);
 
   useEffect(() => {
     const query: QueryParams = {};
@@ -150,7 +145,7 @@ export function PropertiesManager({
       });
     }
     return chips;
-  }, [PROPERTY_TYPE_LABELS, cityFilter, searchTerm, typeFilter]);
+  }, [cityFilter, searchTerm, typeFilter]);
 
   const handleRemoveFilter = (key: string) => {
     if (key === "search") {

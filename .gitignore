@@ -121,3 +121,5 @@ infra/kubernetes/**/*secret*.yaml
 
 # Sentry
 sentry-debug.log
+
+.lighthouseci/

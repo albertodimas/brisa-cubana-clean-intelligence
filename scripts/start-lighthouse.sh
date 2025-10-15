@@ -3,6 +3,15 @@ set -euo pipefail
 
 export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:3001}"
 export INTERNAL_API_URL="${INTERNAL_API_URL:-http://localhost:3001}"
+export DATABASE_URL="${DATABASE_URL:-postgresql://postgres:postgres@localhost:5433/brisa_cubana_e2e}"
+export DATABASE_URL_UNPOOLED="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
+export JWT_SECRET="${JWT_SECRET:-test-jwt-secret}"
+export AUTH_SECRET="${AUTH_SECRET:-test-auth-secret}"
+export ENABLE_TEST_UTILS="${ENABLE_TEST_UTILS:-false}"
+export LHCI_BYPASS_TOKEN="${LHCI_BYPASS_TOKEN:-local-lhci-bypass}"
+
+pnpm --filter @brisa/api build >/dev/null
+pnpm --filter @brisa/web build >/dev/null
 
 pnpm --filter @brisa/api start &
 API_PID=$!

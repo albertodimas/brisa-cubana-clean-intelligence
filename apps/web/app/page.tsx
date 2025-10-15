@@ -21,8 +21,10 @@ import {
   fetchPropertiesPage,
   fetchCustomersPage,
   fetchUsersPage,
+  fetchNotificationsPage,
   type PaginatedResult,
   type User,
+  type Notification,
 } from "@/lib/api";
 import { auth } from "@/auth";
 
@@ -73,9 +75,18 @@ export default async function HomePage() {
     pageInfo: { limit: 50, cursor: null, nextCursor: null, hasMore: false },
   };
 
+  const emptyNotificationsPage: PaginatedResult<Notification> = {
+    items: [],
+    pageInfo: { limit: 10, cursor: null, nextCursor: null, hasMore: false },
+  };
+
   const usersPage = isAdmin
     ? await fetchUsersPage({ limit: 50 })
     : emptyUsersPage;
+
+  const notificationsPage = isAuthenticated
+    ? await fetchNotificationsPage({ limit: 10 })
+    : emptyNotificationsPage;
 
   const services = servicesPage.items;
   const bookings = bookingsPage.items;
@@ -129,6 +140,7 @@ export default async function HomePage() {
           </Link>
           <Link
             href="/api/docs"
+            prefetch={false}
             className="text-brisa-600 hover:text-gray-700 dark:text-brisa-300 dark:hover:text-brisa-200 transition-colors"
           >
             Documentación API
@@ -338,6 +350,7 @@ export default async function HomePage() {
             updateUser={updateUserAction}
             toggleUserActive={toggleUserActiveAction}
             users={usersPage}
+            notifications={notificationsPage}
             logout={logoutAction}
           />
         </>
