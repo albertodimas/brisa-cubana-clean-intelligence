@@ -250,6 +250,26 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/portal/auth/logout": {
+      post: {
+        tags: ["Portal"],
+        summary: "Cerrar sesión en el portal cliente",
+        description:
+          "Invalida la sesión asociada al token de portal del cliente.",
+        security: [{ BearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Sesión cerrada",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/PortalLogoutResponse" },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
     "/api/portal/bookings": {
       get: {
         tags: ["Portal"],
@@ -1281,6 +1301,12 @@ export const openApiSpec = {
               hasMore: { type: "boolean", example: false },
             },
           },
+        },
+      },
+      PortalLogoutResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean", example: true },
         },
       },
       StripeIntentRequest: {

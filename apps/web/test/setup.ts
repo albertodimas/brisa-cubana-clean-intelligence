@@ -42,3 +42,12 @@ vi.mock("@/auth", () => ({
   GET: mockedHandlers.GET,
   POST: mockedHandlers.POST,
 }));
+
+vi.mock("@vercel/analytics", () => ({
+  track: vi.fn(),
+}));
+
+vi.mock("@sentry/nextjs", () => ({
+  addBreadcrumb: vi.fn(),
+  captureException: vi.fn(),
+}));

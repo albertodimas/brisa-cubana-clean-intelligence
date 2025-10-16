@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { recordPortalEvent } from "@/lib/portal-telemetry";
 
 type VerifyResponse = {
   data?: {
@@ -21,36 +22,6 @@ export default function PortalAccessVerifyPage() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [response, setResponse] = useState<VerifyResponse | null>(null);
-
-  const track = (event: string, detail: Record<string, unknown>) => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const anyWindow = window as typeof window & {
-      analytics?: {
-        track?: (name: string, data?: Record<string, unknown>) => void;
-      };
-      Sentry?: {
-        addBreadcrumb?: (breadcrumb: {
-          category: string;
-          message: string;
-          data?: Record<string, unknown>;
-          level?: string;
-        }) => void;
-      };
-    };
-
-    anyWindow.analytics?.track?.(event, detail);
-    anyWindow.Sentry?.addBreadcrumb?.({
-      category: "portal",
-      message: event,
-      data: detail,
-      level: "info",
-    });
-
-    console.info(`[portal] ${event}`, detail);
-  };
 
   useEffect(() => {
     if (!token) {
@@ -72,7 +43,7 @@ export default function PortalAccessVerifyPage() {
         if (!res.ok) {
           setStatus("error");
           setResponse(data);
-          track("portal.link.verify", {
+          recordPortalEvent("portal.link.verify", {
             tokenPresent: Boolean(token),
             status: "error",
             reason: data.error ?? `http-${res.status}`,
@@ -81,11 +52,11 @@ export default function PortalAccessVerifyPage() {
         }
         setStatus("success");
         setResponse(data);
-        track("portal.link.verify", {
+        recordPortalEvent("portal.link.verify", {
           tokenPresent: Boolean(token),
           status: "success",
-          customerId: data.data?.customerId,
-          email: data.data?.email,
+          customerId: data.data?.customerId ?? null,
+          email: data.data?.email ?? null,
         });
       } catch (error) {
         setStatus("error");
@@ -95,7 +66,7 @@ export default function PortalAccessVerifyPage() {
               ? error.message
               : "No pudimos validar el enlace.",
         });
-        track("portal.link.verify", {
+        recordPortalEvent("portal.link.verify", {
           tokenPresent: Boolean(token),
           status: "error",
           reason: error instanceof Error ? error.message : "exception",
@@ -106,6 +77,11 @@ export default function PortalAccessVerifyPage() {
     verify().catch(() => {
       setStatus("error");
       setResponse({ error: "No pudimos validar el enlace." });
+      recordPortalEvent("portal.link.verify", {
+        tokenPresent: Boolean(token),
+        status: "error",
+        reason: "network-failure",
+      });
     });
   }, [token]);
 

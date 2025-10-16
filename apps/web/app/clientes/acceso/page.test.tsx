@@ -1,15 +1,22 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
+
+vi.mock("@/lib/portal-telemetry", () => ({
+  recordPortalEvent: vi.fn(),
+}));
+
+import { recordPortalEvent } from "@/lib/portal-telemetry";
 import PortalAccessRequestPage from "./page";
+
+const recordPortalEventMock = vi.mocked(recordPortalEvent);
 
 describe("PortalAccessRequestPage", () => {
   const originalFetch = global.fetch;
-  let consoleInfoSpy: ReturnType<typeof vi.spyOn>;
 
   afterEach(() => {
     global.fetch = originalFetch;
-    consoleInfoSpy?.mockRestore();
+    recordPortalEventMock.mockReset();
   });
 
   it("muestra mensaje de éxito y reporta telemetría", async () => {
@@ -18,7 +25,6 @@ describe("PortalAccessRequestPage", () => {
       json: async () => ({ message: "Enlace enviado" }),
     } as Response);
     global.fetch = fetchMock as unknown as typeof fetch;
-    consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
 
     render(<PortalAccessRequestPage />);
 
@@ -36,8 +42,8 @@ describe("PortalAccessRequestPage", () => {
       "/api/portal/request",
       expect.objectContaining({ method: "POST" }),
     );
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      "[portal] portal.link.requested",
+    expect(recordPortalEventMock).toHaveBeenCalledWith(
+      "portal.link.requested",
       expect.objectContaining({ status: "success" }),
     );
   });
@@ -48,7 +54,6 @@ describe("PortalAccessRequestPage", () => {
       json: async () => ({ error: "Token inválido" }),
     } as Response);
     global.fetch = fetchMock as unknown as typeof fetch;
-    consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
 
     render(<PortalAccessRequestPage />);
 
@@ -62,8 +67,8 @@ describe("PortalAccessRequestPage", () => {
     expect(message).toHaveAttribute("role", "status");
     expect(message).toHaveAttribute("aria-live", "polite");
 
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      "[portal] portal.link.requested",
+    expect(recordPortalEventMock).toHaveBeenCalledWith(
+      "portal.link.requested",
       expect.objectContaining({ status: "error" }),
     );
   });

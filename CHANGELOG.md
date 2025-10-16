@@ -12,7 +12,9 @@ All notable changes to this project are documented here. The format follows [Kee
 - Portal cliente: landing y dashboard beta estilizados, componentes compartidos (`PortalStatCard`, `PortalBookingCard`, `PortalTimelineItem`, `PortalCallout`) y flujo de enlace mágico (`/api/portal/auth/request`, `/verify`).
 - Envío de enlaces mágicos vía SMTP configurable (`PORTAL_MAGIC_LINK_*`) con plantilla HTML y logs dedicados.
 - Endpoint `GET /api/portal/bookings` protegido por `portal_token` para exponer reservas y metadatos del cliente.
-- Frontend portal guarda la sesión en la cookie httpOnly `portal_token`, añade redirecciones seguras y telemetría (`portal.link.requested` / `portal.link.verify`).
+- Endpoint `POST /api/portal/auth/logout` para invalidar sesiones y limpiar cookies del portal cliente.
+- Frontend portal guarda la sesión en la cookie httpOnly `portal_token`, añade redirecciones seguras, botón de cierre de sesión y telemetría (`portal.link.requested`, `portal.link.verify`, `portal.logout`).
+- Dashboard del portal hidrata datos iniciales con SWR (`/api/portal/bookings`) y ofrece refresco manual con indicadores de estado.
 - Política de divulgación responsable en `SECURITY.md` y `docs/README.md` con el enlace al índice.
 - Roadmap Fase 2 (`docs/product/phase-2-roadmap.md`) para landing comercial, checkout público y portal cliente.
 - Suite Playwright `tests/e2e/search-and-filters.spec.ts` con cobertura crítica para búsqueda, filtros combinados y mensajes sin resultados.
@@ -27,7 +29,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Eliminada la ruta `/api/authentication/verify` del OpenAPI para reflejar la implementación actual.
 - Documentación actualizada (`docs/product/rfc-public-components.md`, `docs/operations/deployment.md`, `docs/operations/security.md`, `docs/overview/status.md`) con wireframes, rotación Stripe y seguimiento de checkout.
 - `docs/qa/regression-checklist.md` incorpora el flujo del portal (cookies, endpoint de reservas) para smoke tests manuales.
-- `POST /api/portal/auth/request` envía correo real cuando SMTP está configurado y deja de exponer `debugToken` en producción (`PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"`).
+- `docs/operations/security.md` documenta cookies `portal_token`/`portal_customer_id` y el endpoint de logout.
+- `POST /api/portal/auth/request` envía correo real cuando SMTP está configurado y deja de exponer el `debugToken` en producción (`PORTAL_MAGIC_LINK_EXPOSE_DEBUG=false`).
 
 ### Fixed
 

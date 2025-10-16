@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { recordPortalEvent } from "@/lib/portal-telemetry";
 
 export default function PortalAccessRequestPage() {
   const [email, setEmail] = useState("");
@@ -9,36 +10,6 @@ export default function PortalAccessRequestPage() {
   >("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [debugToken, setDebugToken] = useState<string | null>(null);
-
-  const track = (event: string, detail: Record<string, unknown>) => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const anyWindow = window as typeof window & {
-      analytics?: {
-        track?: (name: string, data?: Record<string, unknown>) => void;
-      };
-      Sentry?: {
-        addBreadcrumb?: (breadcrumb: {
-          category: string;
-          message: string;
-          data?: Record<string, unknown>;
-          level?: string;
-        }) => void;
-      };
-    };
-
-    anyWindow.analytics?.track?.(event, detail);
-    anyWindow.Sentry?.addBreadcrumb?.({
-      category: "portal",
-      message: event,
-      data: detail,
-      level: "info",
-    });
-
-    console.info(`[portal] ${event}`, detail);
-  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -69,7 +40,7 @@ export default function PortalAccessRequestPage() {
             ? data.error
             : "No pudimos generar el enlace. Intenta nuevamente.",
         );
-        track("portal.link.requested", {
+        recordPortalEvent("portal.link.requested", {
           email,
           status: "error",
           reason: typeof data.error === "string" ? data.error : "unknown-error",
@@ -85,10 +56,10 @@ export default function PortalAccessRequestPage() {
       if (data.debugToken) {
         setDebugToken(data.debugToken);
       }
-      track("portal.link.requested", {
+      recordPortalEvent("portal.link.requested", {
         email,
         status: "success",
-        expiresAt: data.expiresAt,
+        expiresAt: data.expiresAt ?? null,
       });
     } catch (error) {
       setStatus("error");
@@ -97,7 +68,7 @@ export default function PortalAccessRequestPage() {
           ? error.message
           : "Ocurrió un error inesperado. Intenta nuevamente.",
       );
-      track("portal.link.requested", {
+      recordPortalEvent("portal.link.requested", {
         email,
         status: "error",
         reason: error instanceof Error ? error.message : "exception",

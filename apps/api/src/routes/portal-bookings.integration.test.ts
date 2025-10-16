@@ -151,4 +151,27 @@ describe("Portal bookings routes", () => {
 
     expect(response.status).toBe(401);
   });
+
+  it("permite cerrar sesión con token portal válido", async () => {
+    const token = makeToken("client@portal.test");
+
+    const response = await app.request("/api/portal/auth/logout", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toEqual({ success: true });
+  });
+
+  it("retorna 401 al cerrar sesión sin token", async () => {
+    const response = await app.request("/api/portal/auth/logout", {
+      method: "POST",
+    });
+
+    expect(response.status).toBe(401);
+  });
 });

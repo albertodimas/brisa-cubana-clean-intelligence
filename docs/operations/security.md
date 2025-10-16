@@ -110,6 +110,7 @@ Las credenciales de producción están configuradas en:
   - `PORTAL_MAGIC_LINK_BASE_URL`
 - Define `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción para evitar que el API incluya el `debugToken` en la respuesta una vez que el envío por correo esté habilitado.
 - El frontend almacena el JWT en la cookie httpOnly `portal_token` (scope portal-client) y un identificador auxiliar no sensible en `portal_customer_id` para validar redirecciones. Ambos expiran conforme al `expiresAt` otorgado por el API y deben tratarse como credenciales de sesión.
+- El endpoint `POST /api/portal/auth/logout` invalida la sesión actual (requiere token de portal) y debe invocarse desde la UI al cerrar sesión para limpiar cookies.
 
 ---
 

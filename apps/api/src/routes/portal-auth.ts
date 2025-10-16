@@ -11,6 +11,7 @@ import {
   sendPortalMagicLinkEmail,
   shouldExposeDebugToken,
 } from "../services/magic-link-mailer.js";
+import { authenticatePortal } from "../middleware/auth.js";
 
 const router = new Hono();
 
@@ -141,6 +142,18 @@ router.post("/verify", async (c) => {
       expiresAt: sessionExpiresAt.toISOString(),
     },
   });
+});
+
+router.post("/logout", authenticatePortal, async (c) => {
+  const portalAuth = c.get("portalAuth");
+  logger.info(
+    {
+      email: portalAuth?.email,
+      type: "portal_logout",
+    },
+    "Portal logout solicitado",
+  );
+  return c.json({ success: true });
 });
 
 export default router;
