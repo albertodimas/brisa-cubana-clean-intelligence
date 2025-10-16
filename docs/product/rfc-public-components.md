@@ -111,6 +111,7 @@ Cada componente debe:
 - Botón de cierre de sesión en dashboard que invoca `/api/portal/auth/logout` y limpia cookies para regresar a `/clientes/acceso`.
 - Refresco automático del dashboard con SWR (`/api/portal/bookings`) para mantener las tarjetas sincronizadas y mostrar la caducidad de sesión (`session.expiresAt`) con un callout visible y contador regresivo.
 - Acciones rápidas “Reagendar” y “Cancelar” deben utilizar los endpoints protegidos `/api/portal/bookings/:id/reschedule` y `/cancel`, mostrar confirmaciones inline y registrar telemetría (`portal.booking.rescheduled`, `portal.booking.cancelled`).
+- Cada solicitud debe generar notificaciones en `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED` para usuarios activos de operaciones (roles ADMIN y COORDINATOR) incluyendo código de reserva, horario y nota del cliente.
 - Workflow inicial: `POST /api/portal/auth/request` → email registrado, TTL 15 min; `POST /api/portal/auth/verify` retorna `portalToken` (JWT 1h, scope `portal-client`).
 - Listado de próximas reservas con estado, propiedad, servicio, horarios y CTA `Ver detalle`.
 - Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).

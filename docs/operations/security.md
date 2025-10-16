@@ -117,6 +117,7 @@ Las credenciales de producción están configuradas en:
   1. Verificar en DevTools (Application → Storage → Cookies) que `portal_token` es HttpOnly/SameSite `Strict` en producción o `Lax` en local con HTTP.
   2. Confirmar que el atributo `Expires` coincide con el valor `expiresAt` devuelto por la API.
   3. Validar que tras `POST /api/portal/auth/logout` ambas cookies se eliminan en el browser y en la respuesta HTTP.
+- Las solicitudes de cancelación/reagendo desde el portal generan notificaciones `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED` dirigidas a usuarios activos con rol `ADMIN` o `COORDINATOR`, para que operaciones pueda reaccionar.
 
 ---
 

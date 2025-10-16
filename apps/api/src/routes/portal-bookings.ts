@@ -1,7 +1,11 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { BookingStatus } from "@prisma/client";
-import { getBookingRepository, getUserRepository } from "../container.js";
+import { BookingStatus, NotificationType } from "@prisma/client";
+import {
+  getBookingRepository,
+  getNotificationRepository,
+  getUserRepository,
+} from "../container.js";
 import { authenticatePortal, getPortalAuth } from "../middleware/auth.js";
 import { serializeBooking } from "../lib/serializers.js";
 import { logger } from "../lib/logger.js";
@@ -33,6 +37,37 @@ const rescheduleBookingSchema = z.object({
   scheduledAt: z.coerce.date(),
   notes: z.string().trim().min(3).max(500).optional(),
 });
+
+function formatDateForMessage(date: Date): string {
+  return date.toISOString().replace("T", " ").replace("Z", " UTC");
+}
+
+async function notifyOperationsAboutBooking(
+  userRepository: ReturnType<typeof getUserRepository>,
+  notificationRepository: ReturnType<typeof getNotificationRepository>,
+  notification: { type: NotificationType; message: string },
+) {
+  const operations = await userRepository.findActiveByRoles([
+    "ADMIN",
+    "COORDINATOR",
+  ]);
+
+  if (operations.length === 0) {
+    return;
+  }
+
+  const trimmedMessage = notification.message.slice(0, 240);
+
+  await Promise.all(
+    operations.map((operationsUser) =>
+      notificationRepository.createNotification({
+        userId: operationsUser.id,
+        type: notification.type,
+        message: trimmedMessage,
+      }),
+    ),
+  );
+}
 
 router.use("*", authenticatePortal);
 
@@ -114,6 +149,7 @@ router.post("/:id/cancel", async (c) => {
 
   const userRepository = getUserRepository();
   const bookingRepository = getBookingRepository();
+  const notificationRepository = getNotificationRepository();
 
   const user = await userRepository.findByEmail(portalAuth.email);
   if (!user || !user.isActive || user.role !== "CLIENT") {
@@ -153,6 +189,22 @@ router.post("/:id/cancel", async (c) => {
     "Portal booking cancellation processed",
   );
 
+  const customerLabel = user.fullName ?? user.email;
+  const scheduledAtLabel = formatDateForMessage(
+    new Date(updated?.scheduledAt ?? booking.scheduledAt),
+  );
+  const reasonSnippet = reason
+    ? ` Motivo: ${reason.trim().slice(0, 120)}.`
+    : "";
+  const serviceName = updated?.service?.name ?? booking.service?.name ?? "";
+  const message =
+    `Portal: ${booking.code} (${serviceName}) cancelada por ${customerLabel} (${scheduledAtLabel}).${reasonSnippet}`.trim();
+
+  await notifyOperationsAboutBooking(userRepository, notificationRepository, {
+    type: NotificationType.BOOKING_CANCELLED,
+    message,
+  });
+
   return c.json({
     data: serializeBooking(updated ?? booking),
   });
@@ -184,6 +236,7 @@ router.post("/:id/reschedule", async (c) => {
 
   const userRepository = getUserRepository();
   const bookingRepository = getBookingRepository();
+  const notificationRepository = getNotificationRepository();
 
   const user = await userRepository.findByEmail(portalAuth.email);
   if (!user || !user.isActive || user.role !== "CLIENT") {
@@ -227,6 +280,20 @@ router.post("/:id/reschedule", async (c) => {
     },
     "Portal booking reschedule processed",
   );
+
+  const customerLabel = user.fullName ?? user.email;
+  const scheduledAtLabel = formatDateForMessage(
+    new Date(updated?.scheduledAt ?? scheduledAt),
+  );
+  const serviceName = updated?.service?.name ?? booking.service?.name ?? "";
+  const notesSnippet = notes ? ` Nota: ${notes.trim().slice(0, 120)}.` : "";
+  const message =
+    `Portal: ${booking.code} (${serviceName}) reagendada por ${customerLabel} al ${scheduledAtLabel}.${notesSnippet}`.trim();
+
+  await notifyOperationsAboutBooking(userRepository, notificationRepository, {
+    type: NotificationType.BOOKING_RESCHEDULED,
+    message,
+  });
 
   return c.json({
     data: serializeBooking(updated ?? booking),

@@ -9,6 +9,7 @@ import {
 } from "vitest";
 import type { Hono } from "hono";
 import jwt from "jsonwebtoken";
+import { NotificationType } from "@prisma/client";
 
 let app: Hono;
 
@@ -20,6 +21,11 @@ const bookingRepositoryMock = {
 
 const userRepositoryMock = {
   findByEmail: vi.fn(),
+  findActiveByRoles: vi.fn(),
+};
+
+const notificationRepositoryMock = {
+  createNotification: vi.fn(),
 };
 
 const sampleBooking = {
@@ -58,6 +64,7 @@ const makeToken = (email: string) =>
 
 let getBookingRepositorySpy: ReturnType<typeof vi.spyOn>;
 let getUserRepositorySpy: ReturnType<typeof vi.spyOn>;
+let getNotificationRepositorySpy: ReturnType<typeof vi.spyOn>;
 
 describe("Portal bookings routes", () => {
   beforeAll(async () => {
@@ -74,6 +81,9 @@ describe("Portal bookings routes", () => {
     getUserRepositorySpy = vi
       .spyOn(containerModule, "getUserRepository")
       .mockReturnValue(userRepositoryMock as any);
+    getNotificationRepositorySpy = vi
+      .spyOn(containerModule, "getNotificationRepository")
+      .mockReturnValue(notificationRepositoryMock as any);
 
     app = (await import("../app.js")).default;
   });
@@ -81,6 +91,7 @@ describe("Portal bookings routes", () => {
   afterAll(() => {
     getBookingRepositorySpy.mockRestore();
     getUserRepositorySpy.mockRestore();
+    getNotificationRepositorySpy.mockRestore();
     delete process.env.JWT_SECRET;
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_URL_UNPOOLED;
@@ -91,6 +102,8 @@ describe("Portal bookings routes", () => {
     bookingRepositoryMock.findByIdWithRelations.mockReset();
     bookingRepositoryMock.update.mockReset();
     userRepositoryMock.findByEmail.mockReset();
+    userRepositoryMock.findActiveByRoles.mockReset();
+    notificationRepositoryMock.createNotification.mockReset();
 
     userRepositoryMock.findByEmail.mockResolvedValue({
       id: "user-1",
@@ -99,6 +112,17 @@ describe("Portal bookings routes", () => {
       isActive: true,
       role: "CLIENT",
     });
+    userRepositoryMock.findActiveByRoles.mockResolvedValue([]);
+    notificationRepositoryMock.createNotification.mockImplementation(
+      async (input) => ({
+        id: `notif-${Math.random().toString(36).slice(2, 8)}`,
+        userId: input.userId,
+        type: input.type,
+        message: input.message,
+        createdAt: new Date(),
+        readAt: null,
+      }),
+    );
 
     bookingRepositoryMock.findManyPaginated.mockResolvedValue({
       data: [sampleBooking],
@@ -184,6 +208,17 @@ describe("Portal bookings routes", () => {
   });
   it("cancela una reserva del cliente autenticado", async () => {
     const token = makeToken("client@portal.test");
+    userRepositoryMock.findActiveByRoles.mockResolvedValue([
+      {
+        id: "ops-1",
+        email: "ops@portal.test",
+        fullName: "Ops One",
+        role: "COORDINATOR",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
 
     const response = await app.request(
       "/api/portal/bookings/booking-1/cancel",
@@ -205,6 +240,12 @@ describe("Portal bookings routes", () => {
       "booking-1",
       expect.objectContaining({
         status: "CANCELLED",
+      }),
+    );
+    expect(notificationRepositoryMock.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "ops-1",
+        type: NotificationType.BOOKING_CANCELLED,
       }),
     );
   });
@@ -232,6 +273,17 @@ describe("Portal bookings routes", () => {
   it("permite reagendar una reserva futura del cliente", async () => {
     const token = makeToken("client@portal.test");
     const newDate = new Date(Date.now() + 86_400_000).toISOString();
+    userRepositoryMock.findActiveByRoles.mockResolvedValue([
+      {
+        id: "ops-1",
+        email: "ops@portal.test",
+        fullName: "Ops One",
+        role: "COORDINATOR",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
 
     const response = await app.request(
       "/api/portal/bookings/booking-1/reschedule",
@@ -253,6 +305,12 @@ describe("Portal bookings routes", () => {
       "booking-1",
       expect.objectContaining({
         scheduledAt: expect.any(Date),
+      }),
+    );
+    expect(notificationRepositoryMock.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "ops-1",
+        type: NotificationType.BOOKING_RESCHEDULED,
       }),
     );
   });

@@ -175,4 +175,20 @@ export class UserRepository implements IUserRepository {
       },
     } satisfies PaginatedResponse<UserResponse>;
   }
+
+  async findActiveByRoles(roles: UserRole[]): Promise<UserResponse[]> {
+    if (roles.length === 0) {
+      return [];
+    }
+
+    return await this.prisma.user.findMany({
+      where: {
+        role: { in: roles },
+        isActive: true,
+        deletedAt: null,
+      },
+      orderBy: [{ fullName: "asc" }, { email: "asc" }],
+      select: defaultSelect,
+    });
+  }
 }

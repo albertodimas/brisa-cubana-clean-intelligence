@@ -64,4 +64,5 @@ export interface IUserRepository {
   update(id: string, data: UpdateUserDto): Promise<UserResponse>;
   delete(id: string): Promise<void>;
   restore(id: string): Promise<UserResponse>;
+  findActiveByRoles(roles: UserRole[]): Promise<UserResponse[]>;
 }

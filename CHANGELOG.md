@@ -24,6 +24,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Backend del portal responde con `Set-Cookie` para `portal_token` (HttpOnly) y `portal_customer_id` tras verificar enlaces mágicos; utilidades compartidas para formatear/medir expiración (`apps/web/lib/portal-session.ts`) con pruebas unitarias.
 - Endpoints `POST /api/portal/bookings/:id/cancel` y `POST /api/portal/bookings/:id/reschedule` para autoservicio de clientes, con logs y validación de pertenencia.
 - Suite Playwright `tests/e2e/portal-client.spec.ts` que cubre solicitud de enlace, verificación, dashboard, reagendado, cancelación y logout.
+- Notificaciones operativas automáticas cuando un cliente cancela o reagenda desde el portal (tipo `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED`).
 
 ### Changed
 
