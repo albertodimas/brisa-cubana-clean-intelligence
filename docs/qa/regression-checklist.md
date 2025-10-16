@@ -288,6 +288,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] `POST /api/portal/auth/verify` entrega `portalToken` cuando el token es válido.
 - [ ] Token expirado o reutilizado devuelve 400.
 - [ ] Con SMTP configurado (`PORTAL_MAGIC_LINK_*`), el correo llega y el API no expone `debugToken` cuando `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"`.
+- [ ] `GET /api/portal/bookings` responde 200 con las reservas del cliente autenticado y respeta filtros (`status`, paginación).
 - [ ] Páginas `/clientes/acceso` y `/clientes/acceso/confirmar` muestran estados correctos (idle/loading/success/error).
 
 ## 9. Deployment

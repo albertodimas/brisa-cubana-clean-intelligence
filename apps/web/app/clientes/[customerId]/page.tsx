@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ArrowPathIcon, UserCircleIcon } from "@heroicons/react/24/outline";
-import { fetchCustomerBookings, type Booking } from "@/lib/api";
+import { fetchPortalBookings, type Booking } from "@/lib/api";
 import { PortalStatCard } from "@/components/portal/stat-card";
 import { PortalBookingCard } from "@/components/portal/booking-card";
 import { PortalTimelineItem } from "@/components/portal/timeline-item";
@@ -59,10 +60,31 @@ export default async function ClienteDashboardPage({
     notFound();
   }
 
-  const bookingsResult = await fetchCustomerBookings({
-    customerId,
-    limit: 50,
-  });
+  const cookieStore = await cookies();
+  const portalToken = cookieStore.get("portal_token")?.value ?? null;
+  const portalCustomerId = cookieStore.get("portal_customer_id")?.value ?? null;
+
+  if (!portalToken) {
+    redirect("/clientes/acceso");
+  }
+
+  if (portalCustomerId && portalCustomerId !== customerId) {
+    redirect(`/clientes/${portalCustomerId}`);
+  }
+
+  const portalData = await fetchPortalBookings({ limit: 50 });
+
+  if (!portalData) {
+    redirect("/clientes/acceso");
+  }
+
+  if (portalData.customer.id !== customerId) {
+    redirect(`/clientes/${portalData.customer.id}`);
+  }
+
+  const bookingsResult = portalData;
+  const displayName =
+    portalData.customer.fullName ?? portalData.customer.email ?? "cliente";
 
   const { upcoming, history } = splitBookings(bookingsResult.items);
   const totals = {
@@ -89,7 +111,7 @@ export default async function ClienteDashboardPage({
           </div>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              ¡Hola! Estas son tus reservas con Brisa Cubana
+              ¡Hola {displayName}! Estas son tus reservas con Brisa Cubana
             </h1>
             <p className="mt-3 max-w-2xl text-sm text-gray-600 dark:text-brisa-200 sm:text-base">
               Revisa detalles, estados y acciones disponibles. La versión beta

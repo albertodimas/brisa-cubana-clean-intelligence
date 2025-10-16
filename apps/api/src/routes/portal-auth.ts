@@ -104,12 +104,21 @@ router.post("/verify", async (c) => {
     return c.json({ error: "Token inválido o expirado" }, 400);
   }
 
-  await magicLinkRepository.consume(tokenRecord.id);
-
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
     return c.json({ error: "JWT_SECRET no configurado en el entorno" }, 500);
   }
+
+  const userRepository = getUserRepository();
+  const user = await userRepository.findByEmail(tokenRecord.email);
+  if (!user || !user.isActive || user.role !== "CLIENT") {
+    await magicLinkRepository.consume(tokenRecord.id);
+    return c.json({ error: "Cuenta no habilitada para acceso portal" }, 400);
+  }
+
+  await magicLinkRepository.consume(tokenRecord.id);
+
+  const sessionExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
   const portalToken = jwt.sign(
     {
@@ -128,6 +137,8 @@ router.post("/verify", async (c) => {
     data: {
       portalToken,
       email: tokenRecord.email,
+      customerId: user.id,
+      expiresAt: sessionExpiresAt.toISOString(),
     },
   });
 });

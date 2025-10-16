@@ -10,6 +10,36 @@ export default function PortalAccessRequestPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [debugToken, setDebugToken] = useState<string | null>(null);
 
+  const track = (event: string, detail: Record<string, unknown>) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const anyWindow = window as typeof window & {
+      analytics?: {
+        track?: (name: string, data?: Record<string, unknown>) => void;
+      };
+      Sentry?: {
+        addBreadcrumb?: (breadcrumb: {
+          category: string;
+          message: string;
+          data?: Record<string, unknown>;
+          level?: string;
+        }) => void;
+      };
+    };
+
+    anyWindow.analytics?.track?.(event, detail);
+    anyWindow.Sentry?.addBreadcrumb?.({
+      category: "portal",
+      message: event,
+      data: detail,
+      level: "info",
+    });
+
+    console.info(`[portal] ${event}`, detail);
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus("loading");
@@ -39,6 +69,11 @@ export default function PortalAccessRequestPage() {
             ? data.error
             : "No pudimos generar el enlace. Intenta nuevamente.",
         );
+        track("portal.link.requested", {
+          email,
+          status: "error",
+          reason: typeof data.error === "string" ? data.error : "unknown-error",
+        });
         return;
       }
 
@@ -50,6 +85,11 @@ export default function PortalAccessRequestPage() {
       if (data.debugToken) {
         setDebugToken(data.debugToken);
       }
+      track("portal.link.requested", {
+        email,
+        status: "success",
+        expiresAt: data.expiresAt,
+      });
     } catch (error) {
       setStatus("error");
       setMessage(
@@ -57,8 +97,15 @@ export default function PortalAccessRequestPage() {
           ? error.message
           : "Ocurrió un error inesperado. Intenta nuevamente.",
       );
+      track("portal.link.requested", {
+        email,
+        status: "error",
+        reason: error instanceof Error ? error.message : "exception",
+      });
     }
   };
+
+  const isLoading = status === "loading";
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-brisa-50 to-brisa-100 px-4 py-16 text-gray-900 dark:from-brisa-950 dark:via-brisa-900 dark:to-brisa-950 dark:text-white sm:px-6 md:px-10">
@@ -80,6 +127,7 @@ export default function PortalAccessRequestPage() {
 
         <form
           onSubmit={handleSubmit}
+          aria-busy={isLoading}
           className="rounded-3xl border border-white/70 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80"
         >
           <label className="grid gap-2 text-sm">
@@ -98,12 +146,11 @@ export default function PortalAccessRequestPage() {
 
           <button
             type="submit"
-            disabled={status === "loading"}
+            disabled={isLoading}
+            aria-disabled={isLoading}
             className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-sm font-semibold tracking-wide text-white shadow-lg shadow-brisa-300/40 transition-transform hover:-translate-y-0.5 hover:bg-brisa-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-brisa-400 dark:text-brisa-900 dark:shadow-brisa-900/30 dark:hover:bg-brisa-300"
           >
-            {status === "loading"
-              ? "Enviando enlace…"
-              : "Enviar enlace de acceso"}
+            {isLoading ? "Enviando enlace…" : "Enviar enlace de acceso"}
           </button>
 
           {message ? (
@@ -113,6 +160,9 @@ export default function PortalAccessRequestPage() {
                   ? "border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200"
                   : "border-brisa-200 bg-brisa-50 text-brisa-700 dark:border-brisa-600 dark:bg-brisa-900/50 dark:text-brisa-200"
               }`}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
             >
               {message}
             </p>

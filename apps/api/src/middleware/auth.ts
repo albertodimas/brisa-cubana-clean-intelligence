@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from "hono";
 import { getCookie } from "hono/cookie";
 import type { UserRole } from "@prisma/client";
-import { verifyAuthToken } from "../lib/jwt.js";
+import { verifyAuthToken, verifyPortalToken } from "../lib/jwt.js";
 
 const API_TOKEN = process.env.API_TOKEN ?? null;
 
@@ -12,9 +12,16 @@ type AuthInfo = {
   kind: "user" | "service";
 };
 
+type PortalAuthInfo = {
+  email: string;
+  scope: "portal-client";
+  expiresAt?: number | null;
+};
+
 declare module "hono" {
   interface ContextVariableMap {
     authUser?: AuthInfo;
+    portalAuth?: PortalAuthInfo;
   }
 }
 
@@ -62,6 +69,29 @@ export const authenticate: MiddlewareHandler = async (c, next) => {
   await next();
 };
 
+export const authenticatePortal: MiddlewareHandler = async (c, next) => {
+  const headerToken = extractBearerToken(c.req.header("authorization"));
+  const cookieToken = getCookie(c, "portal_token");
+  const token = headerToken ?? cookieToken ?? null;
+
+  if (!token) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const payload = verifyPortalToken(token);
+  if (!payload || payload.scope !== "portal-client") {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  c.set("portalAuth", {
+    email: payload.sub,
+    scope: payload.scope,
+    expiresAt: payload.exp ?? null,
+  });
+
+  await next();
+};
+
 export const requireRoles = (roles: UserRole[]): MiddlewareHandler => {
   return async (c, next) => {
     const authUser = c.get("authUser");
@@ -81,4 +111,10 @@ export function getAuthenticatedUser(
   c: Parameters<MiddlewareHandler>[0],
 ): AuthInfo | undefined {
   return c.get("authUser");
+}
+
+export function getPortalAuth(
+  c: Parameters<MiddlewareHandler>[0],
+): PortalAuthInfo | undefined {
+  return c.get("portalAuth");
 }

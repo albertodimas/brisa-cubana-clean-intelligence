@@ -191,10 +191,21 @@ describe("Portal auth routes", () => {
 
     expect(verifyResponse.status).toBe(200);
     const verifyBody = await jsonResponse<{
-      data?: { portalToken: string; email: string };
+      data?: {
+        portalToken: string;
+        email: string;
+        customerId: string;
+        expiresAt: string;
+      };
     }>(verifyResponse);
     expect(verifyBody.data?.portalToken).toBeDefined();
     expect(verifyBody.data?.email).toBe("client@portal.test");
+    expect(verifyBody.data?.customerId).toBe("user-1");
+    expect(verifyBody.data?.expiresAt).toMatch(/\d{4}-\d{2}-\d{2}T/);
+
+    expect(userRepositoryMock.findByEmail).toHaveBeenCalledWith(
+      "client@portal.test",
+    );
 
     // Reutilizar el token debe fallar (token consumido)
     const secondVerify = await app.request("/api/portal/auth/verify", {

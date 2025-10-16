@@ -218,6 +218,8 @@ export const openApiSpec = {
       post: {
         tags: ["Portal"],
         summary: "Validar enlace mágico y obtener token de sesión",
+        description:
+          "Valida el token recibido y emite un JWT de portal (cookie httpOnly) para acceder al dashboard.",
         requestBody: {
           required: true,
           content: {
@@ -245,6 +247,61 @@ export const openApiSpec = {
               },
             },
           },
+        },
+      },
+    },
+    "/api/portal/bookings": {
+      get: {
+        tags: ["Portal"],
+        summary: "Listar reservas visibles para el portal cliente",
+        description:
+          "Devuelve las reservas del cliente autenticado mediante el token de portal.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "status",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: [
+                "PENDING",
+                "CONFIRMED",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED",
+              ],
+            },
+            description: "Filtra por estado de reserva",
+          },
+          {
+            name: "limit",
+            in: "query",
+            schema: {
+              type: "integer",
+              minimum: 1,
+              maximum: 50,
+              default: 20,
+            },
+            description: "Límite de elementos por página",
+          },
+          {
+            name: "cursor",
+            in: "query",
+            schema: { type: "string" },
+            description: "Cursor de paginación",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Reservas encontradas",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/PortalBookingsList" },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
         },
       },
     },
@@ -1192,6 +1249,40 @@ export const openApiSpec = {
           },
         },
       },
+      PortalBookingsList: {
+        type: "object",
+        properties: {
+          data: {
+            type: "array",
+            items: { $ref: "#/components/schemas/Booking" },
+          },
+          customer: {
+            type: "object",
+            properties: {
+              id: { type: "string", example: "user_123" },
+              email: {
+                type: "string",
+                format: "email",
+                example: "client@portal.test",
+              },
+              fullName: {
+                type: "string",
+                nullable: true,
+                example: "Cliente Portal",
+              },
+            },
+          },
+          pagination: {
+            type: "object",
+            properties: {
+              limit: { type: "integer", example: 20 },
+              cursor: { type: "string", nullable: true, example: null },
+              nextCursor: { type: "string", nullable: true, example: null },
+              hasMore: { type: "boolean", example: false },
+            },
+          },
+        },
+      },
       StripeIntentRequest: {
         type: "object",
         required: ["serviceId", "customerEmail"],
@@ -1299,6 +1390,15 @@ export const openApiSpec = {
               email: {
                 type: "string",
                 format: "email",
+              },
+              customerId: {
+                type: "string",
+                description: "Identificador del cliente asociado al portal",
+              },
+              expiresAt: {
+                type: "string",
+                format: "date-time",
+                description: "Fecha de expiración del token de portal",
               },
             },
           },

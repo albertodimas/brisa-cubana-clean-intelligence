@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { cookies } from "next/headers";
 
 export type Service = {
   id: string;
@@ -86,10 +87,32 @@ export type PaginatedResult<T> = {
   pageInfo: PaginationInfo;
 };
 
+export type PortalBookingsResult = PaginatedResult<Booking> & {
+  customer: {
+    id: string;
+    email: string;
+    fullName: string | null;
+  };
+};
+
+async function getPortalTokenFromCookies(): Promise<string | null> {
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get("portal_token")?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function resolveAuthHeader(): Promise<string | null> {
   const session = await auth();
   const token = session?.accessToken;
-  return token ? `Bearer ${token}` : null;
+  if (token) {
+    return `Bearer ${token}`;
+  }
+
+  const portalToken = await getPortalTokenFromCookies();
+  return portalToken ? `Bearer ${portalToken}` : null;
 }
 
 type QueryValue = string | number | null | undefined;
@@ -203,6 +226,59 @@ export async function fetchCustomerBookings({
   limit?: number;
 }): Promise<PaginatedResult<Booking>> {
   return fetchBookingsPage({ customerId, status, limit });
+}
+
+export async function fetchPortalBookings({
+  status,
+  limit = 20,
+  cursor,
+}: {
+  status?: string;
+  limit?: number;
+  cursor?: string;
+} = {}): Promise<PortalBookingsResult | null> {
+  const query = buildQuery({ status, limit, cursor });
+  const authorization = await resolveAuthHeader();
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (authorization) {
+      headers.Authorization = authorization;
+    }
+
+    const res = await fetch(`${API_URL}/api/portal/bookings${query}`, {
+      headers,
+      cache: "no-store",
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      console.warn(
+        `[api] portal request failed for /api/portal/bookings${query} with ${res.status}`,
+      );
+      return null;
+    }
+
+    const json = (await res.json()) as {
+      data: Booking[];
+      customer: { id: string; email: string; fullName: string | null };
+      pagination?: PaginationInfo;
+    };
+
+    return {
+      items: json.data ?? [],
+      customer: json.customer,
+      pageInfo: normalizePagination(
+        json.pagination,
+        json.data ? json.data.length : 0,
+      ),
+    };
+  } catch (error) {
+    console.warn("[api] portal bookings request threw", error);
+    return null;
+  }
 }
 
 export async function fetchPropertiesPage(

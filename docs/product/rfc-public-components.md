@@ -105,6 +105,7 @@ Cada componente debe:
 
 - Auth pública basada en token mágico enviado vía correo (no implementado aún).
 - Auth pública basada en token mágico enviado vía correo (SMTP configurable via `PORTAL_MAGIC_LINK_*`).
+- Dashboard consume `/api/portal/bookings` usando el token httpOnly `portal_token` (scope `portal-client`) y restringe el acceso al ID asociado.
 - Workflow inicial: `POST /api/portal/auth/request` → email registrado, TTL 15 min; `POST /api/portal/auth/verify` retorna `portalToken` (JWT 1h, scope `portal-client`).
 - Listado de próximas reservas con estado, propiedad, servicio, horarios y CTA `Ver detalle`.
 - Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).

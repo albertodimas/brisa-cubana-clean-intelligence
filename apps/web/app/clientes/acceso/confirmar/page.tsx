@@ -1,23 +1,56 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type VerifyResponse = {
   data?: {
     portalToken: string;
     email: string;
+    customerId: string;
+    expiresAt: string;
   };
   error?: string;
 };
 
 export default function PortalAccessVerifyPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const token = searchParams.get("token") ?? "";
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [response, setResponse] = useState<VerifyResponse | null>(null);
+
+  const track = (event: string, detail: Record<string, unknown>) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const anyWindow = window as typeof window & {
+      analytics?: {
+        track?: (name: string, data?: Record<string, unknown>) => void;
+      };
+      Sentry?: {
+        addBreadcrumb?: (breadcrumb: {
+          category: string;
+          message: string;
+          data?: Record<string, unknown>;
+          level?: string;
+        }) => void;
+      };
+    };
+
+    anyWindow.analytics?.track?.(event, detail);
+    anyWindow.Sentry?.addBreadcrumb?.({
+      category: "portal",
+      message: event,
+      data: detail,
+      level: "info",
+    });
+
+    console.info(`[portal] ${event}`, detail);
+  };
 
   useEffect(() => {
     if (!token) {
@@ -39,10 +72,21 @@ export default function PortalAccessVerifyPage() {
         if (!res.ok) {
           setStatus("error");
           setResponse(data);
+          track("portal.link.verify", {
+            tokenPresent: Boolean(token),
+            status: "error",
+            reason: data.error ?? `http-${res.status}`,
+          });
           return;
         }
         setStatus("success");
         setResponse(data);
+        track("portal.link.verify", {
+          tokenPresent: Boolean(token),
+          status: "success",
+          customerId: data.data?.customerId,
+          email: data.data?.email,
+        });
       } catch (error) {
         setStatus("error");
         setResponse({
@@ -50,6 +94,11 @@ export default function PortalAccessVerifyPage() {
             error instanceof Error
               ? error.message
               : "No pudimos validar el enlace.",
+        });
+        track("portal.link.verify", {
+          tokenPresent: Boolean(token),
+          status: "error",
+          reason: error instanceof Error ? error.message : "exception",
         });
       }
     };
@@ -59,6 +108,18 @@ export default function PortalAccessVerifyPage() {
       setResponse({ error: "No pudimos validar el enlace." });
     });
   }, [token]);
+
+  useEffect(() => {
+    if (status !== "success" || !response?.data?.customerId) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      router.replace(`/clientes/${response.data?.customerId}`);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [response, router, status]);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-brisa-50 to-brisa-100 px-4 py-16 text-gray-900 dark:from-brisa-950 dark:via-brisa-900 dark:to-brisa-950 dark:text-white sm:px-6 md:px-10">
@@ -79,13 +140,23 @@ export default function PortalAccessVerifyPage() {
 
         <section className="rounded-3xl border border-white/70 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80">
           {status === "idle" && (
-            <p className="text-sm text-gray-600 dark:text-brisa-300">
+            <p
+              className="text-sm text-gray-600 dark:text-brisa-300"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               Proporciona el parámetro <code className="font-mono">token</code>{" "}
               en la URL para validar el acceso.
             </p>
           )}
           {status === "loading" && (
-            <p className="text-sm text-gray-600 dark:text-brisa-300">
+            <p
+              className="text-sm text-gray-600 dark:text-brisa-300"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               Validando enlace de acceso…
             </p>
           )}
@@ -94,6 +165,9 @@ export default function PortalAccessVerifyPage() {
               <p className="text-sm text-gray-700 dark:text-brisa-200">
                 ¡Listo! Tu enlace se validó correctamente. Este token es válido
                 por una hora.
+              </p>
+              <p className="text-xs text-gray-500 dark:text-brisa-400">
+                Estamos redirigiéndote al portal en unos segundos…
               </p>
               <div className="rounded-2xl border border-brisa-300/60 bg-brisa-50/70 p-4 text-xs text-brisa-700 dark:border-brisa-700/40 dark:bg-brisa-800/40 dark:text-brisa-200">
                 <p className="font-semibold">Portal token (beta)</p>
@@ -104,7 +178,11 @@ export default function PortalAccessVerifyPage() {
             </div>
           ) : null}
           {status === "error" && (
-            <p className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200">
+            <p
+              className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200"
+              role="alert"
+              aria-live="assertive"
+            >
               {response?.error ?? "El enlace no es válido o ya se utilizó."}
             </p>
           )}

@@ -27,6 +27,14 @@ export type AuthPayload = {
   role: UserRole;
 };
 
+export type PortalAuthPayload = {
+  sub: string;
+  scope: string;
+  exp?: number;
+  aud?: string | string[];
+  iss?: string;
+};
+
 export function signAuthToken(
   payload: AuthPayload,
   expiresIn: SignOptions["expiresIn"] = "1d",
@@ -68,6 +76,46 @@ export function verifyAuthToken(token: string): AuthPayload | null {
 
   try {
     return verifyFn(token, secret) as AuthPayload;
+  } catch {
+    return null;
+  }
+}
+
+export function verifyPortalToken(token: string): PortalAuthPayload | null {
+  const secret = resolveSecret();
+  if (!secret) {
+    return null;
+  }
+
+  const namespace = jwt as unknown as {
+    verify?: typeof jwt.verify;
+    default?: { verify?: typeof jwt.verify };
+  };
+  const verifyFn = namespace.verify ?? namespace.default?.verify;
+
+  if (!verifyFn) {
+    return null;
+  }
+
+  try {
+    const decoded = verifyFn(token, secret);
+    if (typeof decoded !== "object" || decoded === null) {
+      return null;
+    }
+
+    const payload = decoded as jwt.JwtPayload;
+
+    if (typeof payload.sub !== "string" || typeof payload.scope !== "string") {
+      return null;
+    }
+
+    return {
+      sub: payload.sub,
+      scope: payload.scope,
+      exp: payload.exp,
+      aud: payload.aud,
+      iss: payload.iss,
+    };
   } catch {
     return null;
   }
