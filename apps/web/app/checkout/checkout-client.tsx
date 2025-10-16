@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -154,6 +154,48 @@ export function CheckoutClient({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
+  const sentryModuleRef = useRef<typeof import("@sentry/nextjs") | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    import("@sentry/nextjs")
+      .then((mod) => {
+        if (!cancelled) {
+          sentryModuleRef.current = mod;
+        }
+      })
+      .catch(() => {
+        // Sentry opcional: ignorar en entornos donde no esté configurado
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const captureMessage = useCallback(
+    (
+      message: string,
+      level: "info" | "warning" | "error",
+      context?: Record<string, unknown>,
+    ) => {
+      const sentry = sentryModuleRef.current;
+      if (!sentry) return;
+      sentry.withScope((scope) => {
+        if (context) {
+          scope.setContext("checkout", context);
+        }
+        scope.setLevel(level);
+        sentry.captureMessage(message, level);
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!publishableKey) {
+      captureMessage("checkout.publishable_key.missing", "warning");
+    }
+  }, [captureMessage, publishableKey]);
 
   const stripePromise = useMemo(() => {
     if (!publishableKey) {
@@ -179,6 +221,15 @@ export function CheckoutClient({
     }
     setIsCreatingIntent(true);
     try {
+      sentryModuleRef.current?.addBreadcrumb({
+        category: "checkout",
+        message: "intent:create:start",
+        data: {
+          serviceId: selectedService.id,
+          email: details.email,
+          hasSchedule: Boolean(details.scheduledFor),
+        },
+      });
       const response = await fetch("/api/checkout/intent", {
         method: "POST",
         headers: {
@@ -204,12 +255,27 @@ export function CheckoutClient({
       const payload = (await response.json()) as { data: CheckoutIntent };
       setIntent(payload.data);
       setPhase("payment");
+      captureMessage("checkout.intent.created", "info", {
+        serviceId: selectedService.id,
+        paymentIntentId: payload.data.paymentIntentId,
+        amount: payload.data.amount,
+        currency: payload.data.currency,
+      });
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
           : "No pudimos crear la intención de pago.",
       );
+      sentryModuleRef.current?.captureException(error, {
+        contexts: {
+          checkout: {
+            stage: "intent:create",
+            serviceId: selectedService.id,
+            email: details.email,
+          },
+        },
+      });
     } finally {
       setIsCreatingIntent(false);
     }
@@ -428,8 +494,36 @@ export function CheckoutClient({
               onSuccess={(paymentIntentId) => {
                 setSuccessId(paymentIntentId);
                 setPhase("completed");
+                captureMessage("checkout.payment.confirmed", "info", {
+                  paymentIntentId,
+                  serviceId: selectedService?.id,
+                });
+                sentryModuleRef.current?.addBreadcrumb({
+                  category: "checkout",
+                  message: "payment_confirmed",
+                  data: {
+                    paymentIntentId,
+                    serviceId: selectedService?.id,
+                  },
+                  level: "info",
+                });
               }}
-              onFailure={(message) => setErrorMessage(message)}
+              onFailure={(message) => {
+                setErrorMessage(message);
+                captureMessage("checkout.payment.failed", "warning", {
+                  serviceId: selectedService?.id,
+                  error: message,
+                });
+                sentryModuleRef.current?.addBreadcrumb({
+                  category: "checkout",
+                  message: "payment_failed",
+                  data: {
+                    serviceId: selectedService?.id,
+                    error: message,
+                  },
+                  level: "warning",
+                });
+              }}
             />
           </Elements>
           {errorMessage ? (

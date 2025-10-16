@@ -93,6 +93,34 @@ Cada componente debe:
 3. Crear historias en backlog (landing, checkout, portal) referenciando este RFC.
 4. Revisar este RFC trimestralmente o cuando cambien tokens globales.
 
+## 8. Portal cliente
+
+### 8.1 Estado inicial
+
+- Ruta pública temporal: `/clientes` (Next.js) en modo informativo hasta desplegar funcionalidades completas.
+- Figma: `Portal Cliente – Iteración 1` contiene layouts dashboard, historial y solicitud de cambio (desktop/mobile).
+- Backlog Jira: `PORTAL-101` (dashboard), `PORTAL-102` (historial), `PORTAL-103` (formulario de cambio).
+
+### 8.2 Requerimientos MVP
+
+- Auth pública basada en token mágico enviado vía correo (no implementado aún).
+- Listado de próximas reservas con estado, propiedad, servicio, horarios y CTA `Ver detalle`.
+- Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).
+- Formulario “Solicitar cambio” con opciones (reagendar, cancelar, duda) y texto libre (máx. 500 caracteres).
+- Notificaciones en tiempo real usando el stream SSE existente (suscripción por `customerId`).
+
+### 8.3 Métricas y observabilidad
+
+- Evento Sentry `portal.viewed` con atributos `section`, `customerId` (hash), `bookingCount`.
+- Web Vitals etiquetados con `pageType: "portal"`.
+- Heatmap para portal (herramienta a definir) antes del GA.
+
+### 8.4 Checklist para go-live
+
+- [ ] Cubrir rutas `/clientes` y `/clientes/reservas/:id` con pruebas Playwright (@public).
+- [ ] Documentar flujo de recuperación de acceso (link mágico) y proceso manual de fallback.
+- [ ] Revisar accesibilidad (WCAG AA) usando axe DevTools + QA manual.
+
 ---
 
 Este documento evolucionará conforme avance la Fase 2. Añadir comentarios o propuestas mediante PRs etiquetados `area:product`.

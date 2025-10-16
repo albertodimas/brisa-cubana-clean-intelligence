@@ -45,6 +45,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 5. **Revocar claves antiguas**
    - En el dashboard de Stripe marca como "revoke" las claves anteriores para evitar uso accidental.
    - Actualiza la tabla de variables en este documento con fecha de rotación.
+6. Consulta el [runbook detallado](stripe-rotation-checklist.md) para checklist previo/post evento y comandos de validación.
 
 ## 3. Despliegue
 

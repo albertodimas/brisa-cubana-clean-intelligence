@@ -83,6 +83,12 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 - El hook `useNotificationStream` añade breadcrumbs (`notifications.stream`) y mensajes `notifications.stream.fallback`/`notifications.stream.event.error` en Sentry.
 - Usa estas métricas para configurar alertas cuando el estado cambie a `polling` o se acumulen reintentos consecutivos.
 
+### 1.6 Checkout público
+
+- El formulario multipaso en `/checkout` emite breadcrumbs Sentry `intent:create:start`, `payment_confirmed`, `payment_failed` y eventos `checkout.intent.created`, `checkout.payment.confirmed`, `checkout.payment.failed`.
+- Errores al crear intents se reportan con `captureException` (`stage: intent:create`). Configura alertas en Sentry para monitorear spikes.
+- Cuando falta `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, se registra `checkout.publishable_key.missing` (nivel warning) para detectar entornos mal configurados.
+
 ---
 
 ## 2. Monitoreo en Vercel

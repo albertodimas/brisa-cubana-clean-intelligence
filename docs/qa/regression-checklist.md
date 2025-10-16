@@ -228,6 +228,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 
 - [ ] Variables `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (API) y `STRIPE_PUBLISHABLE_KEY` (web) están presentes en Development/Preview/Production (verificado vía `vercel env ls`).
 - [ ] Sentry captura breadcrumb `checkout.payment_submitted` y evento de error si falla la Intent.
+- [ ] Sentry registra `checkout.intent.created`, `checkout.payment.confirmed`/`failed` y breadcrumbs (`intent:create:start`, `payment_confirmed`, `payment_failed`).
 - [ ] LHCI en nightly mantiene Performance ≥ 90 en `/checkout`.
 - [ ] En entornos sin variables Stripe, el endpoint responde `503` con mensaje "stripe unavailable".
 

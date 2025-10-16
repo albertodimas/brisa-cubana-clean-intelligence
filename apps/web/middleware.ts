@@ -8,7 +8,13 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/login", "/checkout", "/api/auth", "/lhci"];
+  const publicRoutes = [
+    "/login",
+    "/checkout",
+    "/clientes",
+    "/api/auth",
+    "/lhci",
+  ];
 
   // Check if current route is public
   const isPublicRoute = publicRoutes.some((route) =>
