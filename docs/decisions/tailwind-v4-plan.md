@@ -13,6 +13,14 @@
 - **Uso de `@apply`:** 1 archivo (`app/globals.css`) con 4 directivas
 - **Compatibilidad Node.js:** 22.13.0 (Active LTS actual). Ejecutaremos la migración cuando Node.js 24 alcance estatus LTS (28-oct-2025) y pase validaciones en CI/CD.
 
+### Novedades Tailwind 4.1 (octubre 2025)
+
+- Configuración 100% basada en CSS (`tailwind.config.css`) y tokens mediante `@theme`.
+- Reemplazo de `@tailwind base/components/utilities` por `@import "tailwindcss"` y uso de capas automáticas.
+- Modo JIT por defecto con tree-shaking mejorado; es obligatorio limpiar utilidades huérfanas antes del upgrade.
+- Se requiere `@tailwindcss/postcss` como plugin dedicado; la CLI incorpora verificación de navegadores (Safari ≥16.4, Chrome ≥111, Firefox ≥128).
+- Los generadores de colores aprovechan `color-mix()`; revisar contrastes en tema `brisa` y ajustar si el preprocesado produce tonos distintos.
+
 ## 2. Objetivo
 
 Migrar el front-end web de Tailwind v3.4.18 a v4.1.14 manteniendo paridad funcional y visual, habilitando la nueva configuración basada en CSS y evitando regresiones en la experiencia de usuario.
@@ -38,7 +46,7 @@ Migrar el front-end web de Tailwind v3.4.18 a v4.1.14 manteniendo paridad funcio
 
 1. Actualizar dependencias:
    - `tailwindcss` → `^4.1.14`
-   - Añadir `@tailwindcss/postcss`
+   - Añadir `@tailwindcss/postcss` (requerido desde Tailwind 4.1)
 2. Verificar compatibilidad con `autoprefixer` y `postcss`.
 3. Migrar `tailwind.config.ts` a CSS:
    - Representar el tema `brisa` con `@theme`.
@@ -132,6 +140,7 @@ Migrar el front-end web de Tailwind v3.4.18 a v4.1.14 manteniendo paridad funcio
 - [ ] `pnpm build`
 - [ ] `pnpm test` (42/42)
 - [ ] QA manual (modo claro/oscuro + capturas)
+- [ ] Verificar warnings del plugin `@tailwindcss/postcss` y compatibilidad de navegadores objetivo
 
 ### Deploy & QA
 
@@ -200,6 +209,8 @@ git push origin v0.3.0
 - **Semana 1 (13–17 enero 2026):** Kick-off del sprint “Q1 2026 Tailwind v4” (milestone asignado). Ejecutar Fases 5.1–5.3, incluyendo la corrida inicial de `npx @tailwindcss/upgrade` y validación de dependencias.
 - **Semana 2 (20–24 enero 2026):** QA visual, Vercel Preview y Playwright completo (Fases 5.4–5.6), preparación del PR y monitoreo post-merge.
 - **Responsables propuestos:** Equipo Frontend (coordinar programación y cambios), Equipo QA (validaciones manuales y E2E) y stakeholders de producto para aprobación final.
+
+> **Recordatorio 2025-10:** revisar la [guía oficial de migración Tailwind 4.1](https://tailwindcss.com/docs/upgrade-guide) y registrar hallazgos en el Issue #40 antes del 15-dic-2025 para reducir incertidumbre.
 
 ---
 

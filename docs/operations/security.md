@@ -86,6 +86,14 @@ Las credenciales de producción están configuradas en:
 - `STRIPE_WEBHOOK_SECRET` (clave de firma para `/api/payments/stripe/webhook`).
 - Documenta los valores en 1Password/Vault del equipo y rota si hay fuga.
 
+### Procedimiento de rotación seguro
+
+1. Genera nuevas llaves live en Stripe y regístralas en el vault con fecha y responsable.
+2. Actualiza variables en Vercel (`development`, `preview`, `production`) usando `vercel env add`.
+3. Actualiza secretos de GitHub Actions (`gh secret set STRIPE_*`) para `post-deploy-seed.yml`.
+4. Ejecuta `stripe trigger checkout.session.completed` y valida recepción en logs (`payments: PaymentIntent de Stripe creado`).
+5. Revoca inmediatamente las claves previas en Stripe y documenta el cambio en `docs/operations/deployment.md` §2.1.
+
 ---
 
 ## 🧪 Testing

@@ -35,6 +35,16 @@ Establecer la arquitectura de UI/UX para las experiencias públicas, definiendo 
 - Checkout: barra de progreso colapsa a tabs en `sm`; resumen se ancla a bottom sheet en mobile.
 - Portal: sidebar persistente en `lg`; navegación tipo sheet en `md`; tarjetas apiladas en `sm`.
 
+### 3.4 Referencias de diseño y accesibilidad
+
+- Wireframes de alta fidelidad en Figma:
+  - `Landing – Fase 2` (📁 Figma → Brisa · Público) con variantes desktop/mobile, anotaciones WCAG 2.2 y tokens `brisa`.
+  - `Checkout – PaymentElement` resaltando estados `idle/loading/success/error`, mensajes inline y confirmación accesible.
+  - `Portal Cliente – Dashboard` con vistas responsive y jerarquía de tarjetas, timeline y CTA de soporte.
+- Benchmark UI: colección “Hospitality & Home Services” (Baymard Premium) referenciada como comparativo para jerarquía y copy.
+- Checklist heurístico (Nielsen) y WCAG AA documentados en la misma página de Figma; enlaza a resultados de revisión manual en `docs/qa/regression-checklist.md` §8.
+- Para stakeholders, añadir capturas estáticas (PNG) en `docs/assets/public-components/` y vincularlas aquí cuando estén disponibles.
+
 ## 4. Componentes compartidos
 
 - **Landing:** `HeroBanner`, `FeatureList`, `PricingTier`, `TestimonialsCarousel`, `FAQAccordion`, `MetricsStrip`.

@@ -85,6 +85,7 @@ pnpm build       # Compila Next.js y API
 
 1. Accede a <http://localhost:3000/login> y autentícate con un usuario `ADMIN` o `COORDINATOR`.
 2. El panel operativo permitirá crear servicios, propiedades y reservas usando las APIs reales.
+3. Para validar pagos de prueba, visita <http://localhost:3000/checkout> con las claves modo test de Stripe y usa tarjetas demo (`4242 4242 4242 4242`) antes de activar modo live.
 
 ## Problemas comunes
 

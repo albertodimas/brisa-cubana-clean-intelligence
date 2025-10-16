@@ -76,6 +76,13 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 - `res.headers['set-cookie']`
 - Cualquier campo llamado `password`, `passwordHash`, `token`, `secret`
 
+### 1.5 Telemetría del stream SSE
+
+- `/api/notifications/stream` registra cada conexión con `logger.info` (usuario, `heartbeatInterval`, `streamLimit`, `Last-Event-ID`).
+- Heartbeat (`event: ping`) cada 25 s configurable mediante `NOTIFICATION_STREAM_HEARTBEAT_MS`.
+- El hook `useNotificationStream` añade breadcrumbs (`notifications.stream`) y mensajes `notifications.stream.fallback`/`notifications.stream.event.error` en Sentry.
+- Usa estas métricas para configurar alertas cuando el estado cambie a `polling` o se acumulen reintentos consecutivos.
+
 ---
 
 ## 2. Monitoreo en Vercel

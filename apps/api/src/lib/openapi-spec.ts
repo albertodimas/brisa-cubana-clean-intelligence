@@ -19,6 +19,88 @@ export const openApiSpec = {
       name: "Brisa Cubana Support",
       email: "admin@brisacubanaclean.com",
     },
+    "/api/payments/stripe/intent": {
+      post: {
+        tags: ["Payments"],
+        summary: "Crear PaymentIntent de Stripe para checkout público",
+        description:
+          "Recibe un client_secret listo para usar con Stripe Payment Element. Valida que el servicio esté activo y adjunta metadatos para el webhook.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/StripeIntentRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "PaymentIntent creado correctamente",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/StripeIntentResponse" },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "404": { $ref: "#/components/responses/NotFound" },
+          "503": {
+            description: "Stripe no está configurado en el entorno",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: { error: { type: "string" } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/payments/stripe/webhook": {
+      post: {
+        tags: ["Payments"],
+        summary: "Webhook de Stripe para eventos críticos",
+        description:
+          "Procesa eventos de Checkout y PaymentIntent. Verifica la firma con STRIPE_WEBHOOK_SECRET.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { type: "object" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Evento recibido",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    received: { type: "boolean", example: true },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "503": {
+            description: "Stripe no está configurado en el entorno",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: { error: { type: "string" } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   servers: [
     {
@@ -43,6 +125,10 @@ export const openApiSpec = {
     {
       name: "Notifications",
       description: "Alertas operativas para usuarios autenticados",
+    },
+    {
+      name: "Payments",
+      description: "Integraciones con Stripe (webhooks e intents)",
     },
     { name: "Health", description: "Health checks y monitoreo" },
   ],
@@ -1035,6 +1121,58 @@ export const openApiSpec = {
                 example: "clnotif789",
               },
               hasMore: { type: "boolean", example: true },
+            },
+          },
+        },
+      },
+      StripeIntentRequest: {
+        type: "object",
+        required: ["serviceId", "customerEmail"],
+        properties: {
+          serviceId: {
+            type: "string",
+            example: "srv_123",
+            description: "Identificador del servicio activo a reservar",
+          },
+          scheduledFor: {
+            type: "string",
+            format: "date-time",
+            nullable: true,
+            description: "Fecha propuesta por el cliente",
+            example: "2025-10-20T14:00:00.000Z",
+          },
+          customerEmail: {
+            type: "string",
+            format: "email",
+            example: "cliente@correo.com",
+          },
+          customerFullName: {
+            type: "string",
+            nullable: true,
+            example: "Laura Pérez",
+          },
+          notes: {
+            type: "string",
+            nullable: true,
+            maxLength: 500,
+            example: "Favor de traer productos hipoalergénicos.",
+          },
+        },
+      },
+      StripeIntentResponse: {
+        type: "object",
+        properties: {
+          data: {
+            type: "object",
+            required: ["clientSecret", "paymentIntentId", "amount", "currency"],
+            properties: {
+              clientSecret: {
+                type: "string",
+                example: "pi_123_secret_456",
+              },
+              paymentIntentId: { type: "string", example: "pi_123" },
+              amount: { type: "integer", example: 14500 },
+              currency: { type: "string", example: "usd" },
             },
           },
         },

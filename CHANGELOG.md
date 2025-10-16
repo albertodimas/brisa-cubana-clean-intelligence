@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Checkout público (`/checkout`) con formulario multipaso, integración Stripe Payment Element y fallback de configuración.
+- Endpoint `POST /api/payments/stripe/intent` para generar PaymentIntent con metadatos de servicio y cliente.
+- Ruta Next `/api/checkout/intent` como proxy seguro hacia la API y test E2E `checkout.spec.ts`.
 - Política de divulgación responsable en `SECURITY.md` y `docs/README.md` con el enlace al índice.
 - Roadmap Fase 2 (`docs/product/phase-2-roadmap.md`) para landing comercial, checkout público y portal cliente.
 - Suite Playwright `tests/e2e/search-and-filters.spec.ts` con cobertura crítica para búsqueda, filtros combinados y mensajes sin resultados.
@@ -18,6 +21,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `scripts/verify-doc-structure.sh` exige `SECURITY.md` y la nueva documentación de producto para mantener la verificación.
 - Workflow `nightly.yml` ahora ejecuta Lighthouse CI sobre la URL de Vercel, alineado con `.lighthouserc.preview.json` y los budgets documentados.
 - Eliminada la ruta `/api/authentication/verify` del OpenAPI para reflejar la implementación actual.
+- Documentación actualizada (`docs/product/rfc-public-components.md`, `docs/operations/deployment.md`, `docs/operations/security.md`, `docs/overview/status.md`) con wireframes, rotación Stripe y seguimiento de checkout.
 
 ### Fixed
 

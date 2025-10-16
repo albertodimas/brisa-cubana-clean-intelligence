@@ -25,6 +25,27 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 
 > **Estado 15-oct-2025:** Se cargaron claves de ejemplo `sk_test_brisa_demo_20251015`, `pk_test_brisa_demo_20251015` y `whsec_brisa_demo_20251015` en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
 
+### 2.1 Rotación de claves Stripe (modo live)
+
+1. **Preparar nuevas llaves**
+   - Genera claves live (`Publishable`, `Secret`, `Webhook signing secret`) en el dashboard de Stripe.
+   - Documenta los valores en el vault del equipo (1Password) con fecha de generación.
+2. **Actualizar secretos (ventana de mantenimiento corta)**
+   - `vercel env add STRIPE_SECRET_KEY production`
+   - `vercel env add STRIPE_PUBLISHABLE_KEY production`
+   - `vercel env add STRIPE_WEBHOOK_SECRET production`
+   - Repite el proceso para `preview` y `development` si corresponde.
+3. **Reconfigurar GitHub Actions post-deploy**
+   - `gh secret set STRIPE_SECRET_KEY --env production`
+   - `gh secret set STRIPE_WEBHOOK_SECRET --env production`
+4. **Validar**
+   - Ejecuta `stripe trigger checkout.session.completed` y `payment_intent.payment_failed` apuntando al endpoint `/api/payments/stripe/webhook`.
+   - Verifica en `/checkout` que la clave pública live esté activa (inspecciona `window.Stripe`).
+   - Revisa logs en Vercel y Sentry para confirmar recepción de eventos.
+5. **Revocar claves antiguas**
+   - En el dashboard de Stripe marca como "revoke" las claves anteriores para evitar uso accidental.
+   - Actualiza la tabla de variables en este documento con fecha de rotación.
+
 ## 3. Despliegue
 
 1. Merge a `main` activa automáticamente los builds en Vercel para `Production`.

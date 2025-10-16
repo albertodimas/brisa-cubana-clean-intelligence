@@ -45,6 +45,25 @@ export function useNotificationStream({
   const refreshDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const isUnmountedRef = useRef(false);
+  const sentryModuleRef = useRef<typeof import("@sentry/nextjs") | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!sentryModuleRef.current) {
+      import("@sentry/nextjs")
+        .then((mod) => {
+          if (!cancelled) {
+            sentryModuleRef.current = mod;
+          }
+        })
+        .catch(() => {
+          // Evitar fallos en entornos que deshabilitan Sentry
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const scheduleEventCallback = useCallback(
     (eventName: StreamEventName, payload: unknown) => {
@@ -97,6 +116,10 @@ export function useNotificationStream({
         return;
       }
       setConnectionState("polling");
+      sentryModuleRef.current?.captureMessage(
+        "notifications.stream.fallback",
+        "info",
+      );
       fallbackTimerRef.current = setInterval(() => {
         if (isUnmountedRef.current) {
           return;
@@ -175,6 +198,10 @@ export function useNotificationStream({
           return;
         }
         reconnectAttemptsRef.current += 1;
+        sentryModuleRef.current?.captureMessage(
+          "notifications.stream.error",
+          "warning",
+        );
         const attempts = reconnectAttemptsRef.current;
         if (attempts >= maxRetriesBeforeFallback) {
           startFallback();
@@ -213,6 +240,29 @@ export function useNotificationStream({
     reconnectBaseDelayMs,
     scheduleEventCallback,
   ]);
+
+  useEffect(() => {
+    if (!sentryModuleRef.current) {
+      return;
+    }
+    sentryModuleRef.current.addBreadcrumb({
+      category: "notifications.stream",
+      message: `connection_state:${connectionState}`,
+      level: connectionState === "polling" ? "warning" : "info",
+    });
+  }, [connectionState]);
+
+  useEffect(() => {
+    if (!sentryModuleRef.current || !lastEvent) {
+      return;
+    }
+    if (lastEvent === "error") {
+      sentryModuleRef.current.captureMessage(
+        "notifications.stream.event.error",
+        "warning",
+      );
+    }
+  }, [lastEvent]);
 
   return {
     connectionState,

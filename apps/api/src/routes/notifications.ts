@@ -5,6 +5,7 @@ import { getNotificationRepository } from "../container.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
 import type { NotificationResponse } from "../interfaces/notification.interface.js";
 import { subscribeToNotifications } from "../lib/notification-hub.js";
+import { logger } from "../lib/logger.js";
 
 const notificationQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional().default(25),
@@ -108,6 +109,8 @@ router.get("/stream", async (c) => {
     "X-Accel-Buffering": "no",
   } as Record<string, string>;
 
+  headers["Last-Event-ID"] = String(lastEventId);
+
   const controllerRef = {
     current: null as ReadableStreamDefaultController<Uint8Array> | null,
   };
@@ -175,8 +178,20 @@ router.get("/stream", async (c) => {
         sendEvent("init", {
           notifications: result.data.map(toSerializable),
         });
+        logger.info(
+          {
+            userId: authUser.id,
+            streamLimit,
+            heartbeatInterval,
+            lastEventId,
+          },
+          "Stream SSE de notificaciones inicializado",
+        );
       } catch (error) {
-        console.error("[notifications] init stream error", error);
+        logger.error(
+          { err: error, userId: authUser.id },
+          "Error inicializando stream de notificaciones",
+        );
         sendEvent("error", {
           message: "Unable to initialize notification stream",
         });
@@ -225,7 +240,10 @@ router.get("/stream", async (c) => {
               break;
           }
         } catch (error) {
-          console.error("[notifications] stream event error", error);
+          logger.error(
+            { err: error, userId: authUser.id },
+            "Error procesando evento SSE de notificaciones",
+          );
         }
       });
 
@@ -239,6 +257,10 @@ router.get("/stream", async (c) => {
             unsubscribe();
             unsubscribe = null;
           }
+          logger.info(
+            { userId: authUser.id, lastEventId },
+            "Stream SSE de notificaciones abortado por el cliente",
+          );
         }
         abortSignal.removeEventListener("abort", onAbort);
       };
@@ -254,6 +276,10 @@ router.get("/stream", async (c) => {
         unsubscribe();
         unsubscribe = null;
       }
+      logger.info(
+        { userId: authUser.id, lastEventId },
+        "Stream SSE de notificaciones cancelado",
+      );
     },
   });
 

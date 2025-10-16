@@ -126,6 +126,25 @@ Metric Alert:
 
 **Severidad**: 🟡 Media
 
+#### 7. Notificaciones SSE en modo fallback
+
+**Cuándo**: El hook `useNotificationStream` entra en estado `polling` (fallback) o se registran más de 3 reconexiones consecutivas.
+
+**Configuración**:
+
+```yaml
+Metric Alert:
+  When: event.count()
+  Dataset: transactions
+  Query: message:"notifications.stream.fallback"
+  For: 5 minutes
+  Then:
+    - Slack: #brisa-alerts
+    - Email: ops@brisacubanaclean.com
+```
+
+**Severidad**: 🟡 Media (verificar que Vercel o SSE no estén bloqueados por proxies)
+
 ## Slack Integration
 
 ### Setup

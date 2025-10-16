@@ -72,6 +72,7 @@
   - "usuario CLIENT no debe poder crear servicios"
   - "permite cerrar sesión correctamente"
   - "sesión persiste después de recargar página"
+- `checkout.spec.ts`: "carga el checkout público y muestra flujo listo para pago"
 
 **Ejecución:**
 

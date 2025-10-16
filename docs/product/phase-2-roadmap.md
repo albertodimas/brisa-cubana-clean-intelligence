@@ -58,4 +58,5 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
   - [x] Receptor de webhook `/api/payments/stripe/webhook` implementado y cubierto por pruebas de integración.
   - [x] Stripe CLI documentada (`pnpm stripe:listen` + `stripe trigger …`) para reproducir eventos en local/preview.
   - [x] Actualizar `docs/qa/regression-checklist.md` con casos de pago exitoso/fallido.
+  - [x] Checkout público (`/checkout`) con Payment Element, endpoint `POST /api/payments/stripe/intent` y Playwright `checkout.spec.ts`.
   - [ ] Sustituir claves demo `*_brisa_demo_20251015` por credenciales oficiales antes de pasar a modo live.

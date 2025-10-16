@@ -215,12 +215,14 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Stripe Payment Element confirma pago en modo test y muestra pantalla de confirmación.
 - [ ] Evento `checkout.session.completed` persiste booking con estado `CONFIRMED`.
 - [ ] Logs de API registran `payment_intent.succeeded` y se genera `stripePaymentId`.
+- [ ] UI `/checkout` muestra resumen del servicio, genera PaymentIntent via `/api/checkout/intent` y avanza a la fase de pago.
 
 ### 8.3 Flujo checkout fallido
 
 - [ ] Stripe rechaza pago (`pm_card_chargeDeclined`) y UI muestra mensaje `Pago rechazado`.
 - [ ] El booking permanece en estado `PENDING` y se registra `lastPaymentError`.
 - [ ] Retry desde la UI reutiliza la misma Intent y concluye exitosamente tras usar tarjeta válida.
+- [ ] Modalidad fallback (Stripe no configurado) muestra instrucción “Configura Stripe…” y bloquea avance.
 
 ### 8.4 Observabilidad y entorno
 

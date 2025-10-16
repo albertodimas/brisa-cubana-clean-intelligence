@@ -21,6 +21,7 @@ Actualizado al **15 de octubre de 2025** con **180 pruebas automatizadas** (161 
 | Tests         | 🟢     | 161 pruebas unitarias/integración + 19 E2E (smoke/critical/full); `pnpm test`, `pnpm test:e2e:*`.                                                  |
 | Documentación | 🟢     | README, `docs/guides/quickstart.md`, `docs/overview/status.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados.                            |
 | Deploy        | 🟢     | Web (Next.js) y API (Hono) corriendo en Vercel, conectados a PostgreSQL Neon; pipelines CI/CD verdes.                                              |
+| Checkout test | 🟡     | Flujo `/checkout` habilitado con Stripe Payment Element (modo test) y endpoint `POST /api/payments/stripe/intent`; rota claves antes de modo live. |
 
 ## Requisitos
 
