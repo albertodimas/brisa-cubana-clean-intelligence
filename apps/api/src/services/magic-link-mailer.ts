@@ -64,6 +64,10 @@ export function buildPortalMagicLinkUrl(token: string): string {
 }
 
 export function shouldExposeDebugToken(): boolean {
+  if (process.env.ENABLE_TEST_UTILS === "true") {
+    return true;
+  }
+
   if (process.env.PORTAL_MAGIC_LINK_EXPOSE_DEBUG === "false") {
     return false;
   }
