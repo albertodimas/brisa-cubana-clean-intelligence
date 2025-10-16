@@ -1,16 +1,24 @@
 import type { Booking } from "@/lib/api";
+import type { ReactNode } from "react";
 
 type PortalBookingCardProps = {
   booking: Booking;
   scheduledLabel: string;
+  actions?: ReactNode;
 };
 
 export function PortalBookingCard({
   booking,
   scheduledLabel,
+  actions,
 }: PortalBookingCardProps) {
   return (
-    <li className="rounded-2xl border border-white/70 bg-white/90 p-5 shadow-lg transition-transform hover:-translate-y-1 hover:shadow-xl dark:border-brisa-700/50 dark:bg-brisa-900/70">
+    <li
+      className="rounded-2xl border border-white/70 bg-white/90 p-5 shadow-lg transition-transform hover:-translate-y-1 hover:shadow-xl dark:border-brisa-700/50 dark:bg-brisa-900/70"
+      data-portal-booking-id={booking.id}
+      data-portal-booking-code={booking.code}
+      data-portal-booking-status={booking.status.toLowerCase()}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-300">
@@ -50,6 +58,9 @@ export function PortalBookingCard({
           <dd>${booking.totalAmount.toFixed(2)}</dd>
         </div>
       </dl>
+      {actions ? (
+        <div className="mt-4 flex flex-wrap gap-2">{actions}</div>
+      ) : null}
     </li>
   );
 }

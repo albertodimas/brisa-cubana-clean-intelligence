@@ -101,6 +101,7 @@ Las credenciales de producción están configuradas en:
 - Los tokens generados por `/api/portal/auth/request` se almacenan con hash SHA-256 y caducan en 15 minutos (configurable vía `MAGIC_LINK_TTL_MINUTES`).
 - El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite un JWT (`portalToken`) con scope `portal-client` válido por 1 hora.
 - La API adjunta automáticamente las cookies `portal_token` (HttpOnly) y `portal_customer_id` tras una verificación exitosa; la UI ya no debe intentar generarlas manualmente.
+- Endpoints de autoservicio `POST /api/portal/bookings/:id/cancel|reschedule` validan pertenencia del cliente, registran logs (`Portal booking cancellation/reschedule processed`) y limitan estados permitidos.
 - Configura el canal SMTP (`PORTAL_MAGIC_LINK_*`) para enviar correos reales desde producción. Los valores recomendados:
   - `PORTAL_MAGIC_LINK_FROM`
   - `PORTAL_MAGIC_LINK_SMTP_HOST`

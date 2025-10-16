@@ -50,6 +50,8 @@ Establecer la arquitectura de UI/UX para las experiencias públicas, definiendo 
 - **Landing:** `HeroBanner`, `FeatureList`, `PricingTier`, `TestimonialsCarousel`, `FAQAccordion`, `MetricsStrip`.
 - **Checkout:** `CheckoutStepper`, `ServiceOptionCard`, `SchedulePicker`, `ContactForm`, `PaymentSummaryCard`, `LegalNotice`.
 - **Portal:** `PortalStatCard`, `PortalReservationCard`, `PortalBookingCard`, `PortalTimelineItem`, `PortalCallout`, `InvoiceList`, `SupportCTA`, `ProfileForm`.
+  - `PortalBookingCard` añade acciones primarias (reagendar/cancelar) con estados deshabilitados y feedback inline.
+  - Skeletons dedicados para próximas reservas e historial durante refrescos de SWR.
 
 Cada componente debe:
 
@@ -108,6 +110,7 @@ Cada componente debe:
 - Dashboard consume `/api/portal/bookings` usando el token httpOnly `portal_token` (scope `portal-client`) y restringe el acceso al ID asociado.
 - Botón de cierre de sesión en dashboard que invoca `/api/portal/auth/logout` y limpia cookies para regresar a `/clientes/acceso`.
 - Refresco automático del dashboard con SWR (`/api/portal/bookings`) para mantener las tarjetas sincronizadas y mostrar la caducidad de sesión (`session.expiresAt`) con un callout visible y contador regresivo.
+- Acciones rápidas “Reagendar” y “Cancelar” deben utilizar los endpoints protegidos `/api/portal/bookings/:id/reschedule` y `/cancel`, mostrar confirmaciones inline y registrar telemetría (`portal.booking.rescheduled`, `portal.booking.cancelled`).
 - Workflow inicial: `POST /api/portal/auth/request` → email registrado, TTL 15 min; `POST /api/portal/auth/verify` retorna `portalToken` (JWT 1h, scope `portal-client`).
 - Listado de próximas reservas con estado, propiedad, servicio, horarios y CTA `Ver detalle`.
 - Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).

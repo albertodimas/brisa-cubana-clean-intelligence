@@ -292,6 +292,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] `POST /api/portal/auth/logout` invalida la sesión y limpia cookies (`portal_token`, `portal_customer_id`).
 - [ ] Tras verificar un enlace, la respuesta HTTP incluye `Set-Cookie` para `portal_token` (HttpOnly) y `portal_customer_id` con caducidad alineada a `expiresAt`.
 - [ ] El dashboard muestra callout con el tiempo restante de sesión y CTA para solicitar un nuevo enlace; al expirar, el mensaje cambia a “Tu sesión ya expiró”.
+- [ ] Botones “Reagendar” y “Cancelar” envían solicitudes válidas (`/reschedule`, `/cancel`), muestran mensajes de confirmación y actualizan la lista de reservas sin recargar la página.
 - [ ] Páginas `/clientes/acceso` y `/clientes/acceso/confirmar` muestran estados correctos (idle/loading/success/error).
 
 ## 9. Deployment

@@ -22,6 +22,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Webhook `/api/payments/stripe/webhook` con verificación de firma y pruebas de integración sobre Stripe modo test.
 - Portal cliente expone callout de expiración de sesión con contador visible y CTA para renovar acceso; la API entrega `session.expiresAt` en `/api/portal/bookings`.
 - Backend del portal responde con `Set-Cookie` para `portal_token` (HttpOnly) y `portal_customer_id` tras verificar enlaces mágicos; utilidades compartidas para formatear/medir expiración (`apps/web/lib/portal-session.ts`) con pruebas unitarias.
+- Endpoints `POST /api/portal/bookings/:id/cancel` y `POST /api/portal/bookings/:id/reschedule` para autoservicio de clientes, con logs y validación de pertenencia.
+- Suite Playwright `tests/e2e/portal-client.spec.ts` que cubre solicitud de enlace, verificación, dashboard, reagendado, cancelación y logout.
 
 ### Changed
 
@@ -34,6 +36,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/operations/security.md` documenta cookies `portal_token`/`portal_customer_id` y el endpoint de logout.
 - `POST /api/portal/auth/request` envía correo real cuando SMTP está configurado y deja de exponer el `debugToken` en producción (`PORTAL_MAGIC_LINK_EXPOSE_DEBUG=false`).
 - `docs/operations/security.md`, `docs/product/rfc-public-components.md`, `docs/overview/status.md` y `docs/qa/regression-checklist.md` actualizados con validaciones de expiración de sesión y nuevos escenarios QA.
+- Portal dashboard incorpora skeletons, CTA enriquecidos y acciones inline con mensajes accesibles para reagendar/cancelar reservas.
 
 ### Fixed
 

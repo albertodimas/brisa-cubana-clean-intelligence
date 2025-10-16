@@ -4,6 +4,7 @@ import type { BookingStatus } from "@prisma/client";
 import { getBookingRepository, getUserRepository } from "../container.js";
 import { authenticatePortal, getPortalAuth } from "../middleware/auth.js";
 import { serializeBooking } from "../lib/serializers.js";
+import { logger } from "../lib/logger.js";
 
 const router = new Hono();
 
@@ -19,6 +20,18 @@ const portalBookingsQuerySchema = z.object({
   status: z.enum(bookingStatusValues).optional(),
   limit: z.coerce.number().int().min(1).max(50).optional().default(20),
   cursor: z.string().cuid().optional(),
+});
+
+const cancelBookingSchema = z
+  .object({
+    reason: z.string().trim().min(3).max(500).optional(),
+  })
+  .optional()
+  .transform((value) => value ?? {});
+
+const rescheduleBookingSchema = z.object({
+  scheduledAt: z.coerce.date(),
+  notes: z.string().trim().min(3).max(500).optional(),
 });
 
 router.use("*", authenticatePortal);
@@ -79,6 +92,144 @@ router.get("/", async (c) => {
       nextCursor: result.nextCursor ?? null,
       hasMore: result.hasMore,
     },
+  });
+});
+
+router.post("/:id/cancel", async (c) => {
+  const portalAuth = getPortalAuth(c);
+  if (!portalAuth) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const [parsedBody, id] = await Promise.all([
+    cancelBookingSchema.safeParseAsync(await c.req.json().catch(() => ({}))),
+    Promise.resolve(c.req.param("id")),
+  ]);
+
+  if (!parsedBody.success) {
+    return c.json({ error: parsedBody.error.flatten() }, 400);
+  }
+
+  const { reason } = parsedBody.data;
+
+  const userRepository = getUserRepository();
+  const bookingRepository = getBookingRepository();
+
+  const user = await userRepository.findByEmail(portalAuth.email);
+  if (!user || !user.isActive || user.role !== "CLIENT") {
+    return c.json({ error: "Cuenta no habilitada para portal" }, 403);
+  }
+
+  const booking = await bookingRepository.findByIdWithRelations(id);
+  if (!booking || booking.customerId !== user.id) {
+    return c.json({ error: "Reserva no encontrada" }, 404);
+  }
+
+  if (booking.status === "CANCELLED" || booking.status === "COMPLETED") {
+    return c.json(
+      { error: "Esta reserva ya no puede cancelarse desde el portal" },
+      409,
+    );
+  }
+
+  const reasonNote = reason
+    ? `Cancelación portal: ${reason}`
+    : "Cancelación solicitada desde el portal cliente.";
+  const updatedNotes = [booking.notes, reasonNote].filter(Boolean).join("\n\n");
+
+  await bookingRepository.update(booking.id, {
+    status: "CANCELLED",
+    notes: updatedNotes.slice(0, 500),
+  });
+
+  const updated = await bookingRepository.findByIdWithRelations(booking.id);
+
+  logger.info(
+    {
+      bookingId: booking.id,
+      customerId: user.id,
+      portalEmail: portalAuth.email,
+    },
+    "Portal booking cancellation processed",
+  );
+
+  return c.json({
+    data: serializeBooking(updated ?? booking),
+  });
+});
+
+router.post("/:id/reschedule", async (c) => {
+  const portalAuth = getPortalAuth(c);
+  if (!portalAuth) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const id = c.req.param("id");
+  const parsed = await rescheduleBookingSchema.safeParseAsync(
+    await c.req.json().catch(() => null),
+  );
+
+  if (!parsed.success) {
+    return c.json({ error: parsed.error.flatten() }, 400);
+  }
+
+  const { scheduledAt, notes } = parsed.data;
+
+  if (scheduledAt.getTime() < Date.now()) {
+    return c.json(
+      { error: "La nueva fecha debe ser posterior al momento actual." },
+      400,
+    );
+  }
+
+  const userRepository = getUserRepository();
+  const bookingRepository = getBookingRepository();
+
+  const user = await userRepository.findByEmail(portalAuth.email);
+  if (!user || !user.isActive || user.role !== "CLIENT") {
+    return c.json({ error: "Cuenta no habilitada para portal" }, 403);
+  }
+
+  const booking = await bookingRepository.findByIdWithRelations(id);
+  if (!booking || booking.customerId !== user.id) {
+    return c.json({ error: "Reserva no encontrada" }, 404);
+  }
+
+  if (booking.status === "CANCELLED" || booking.status === "COMPLETED") {
+    return c.json(
+      { error: "Esta reserva ya no puede reagendarse desde el portal" },
+      409,
+    );
+  }
+
+  const noteSegments = [booking.notes];
+
+  if (notes) {
+    noteSegments.push(`Reagendado en portal: ${notes}`);
+  } else {
+    noteSegments.push("Reagendado desde el portal cliente.");
+  }
+
+  await bookingRepository.update(booking.id, {
+    scheduledAt,
+    status: booking.status === "PENDING" ? booking.status : "PENDING",
+    notes: noteSegments.filter(Boolean).join("\n\n").slice(0, 500),
+  });
+
+  const updated = await bookingRepository.findByIdWithRelations(booking.id);
+
+  logger.info(
+    {
+      bookingId: booking.id,
+      customerId: user.id,
+      portalEmail: portalAuth.email,
+      scheduledAt: scheduledAt.toISOString(),
+    },
+    "Portal booking reschedule processed",
+  );
+
+  return c.json({
+    data: serializeBooking(updated ?? booking),
   });
 });
 

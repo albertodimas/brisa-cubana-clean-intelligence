@@ -14,6 +14,8 @@ let app: Hono;
 
 const bookingRepositoryMock = {
   findManyPaginated: vi.fn(),
+  findByIdWithRelations: vi.fn(),
+  update: vi.fn(),
 };
 
 const userRepositoryMock = {
@@ -86,6 +88,8 @@ describe("Portal bookings routes", () => {
 
   beforeEach(() => {
     bookingRepositoryMock.findManyPaginated.mockReset();
+    bookingRepositoryMock.findByIdWithRelations.mockReset();
+    bookingRepositoryMock.update.mockReset();
     userRepositoryMock.findByEmail.mockReset();
 
     userRepositoryMock.findByEmail.mockResolvedValue({
@@ -101,6 +105,10 @@ describe("Portal bookings routes", () => {
       nextCursor: null,
       hasMore: false,
     });
+    bookingRepositoryMock.findByIdWithRelations.mockResolvedValue(
+      sampleBooking,
+    );
+    bookingRepositoryMock.update.mockResolvedValue(sampleBooking);
   });
 
   it("retorna reservas filtradas por el portal token", async () => {
@@ -173,5 +181,79 @@ describe("Portal bookings routes", () => {
     });
 
     expect(response.status).toBe(401);
+  });
+  it("cancela una reserva del cliente autenticado", async () => {
+    const token = makeToken("client@portal.test");
+
+    const response = await app.request(
+      "/api/portal/bookings/booking-1/cancel",
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ reason: "Necesito reagendar" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(bookingRepositoryMock.findByIdWithRelations).toHaveBeenCalledWith(
+      "booking-1",
+    );
+    expect(bookingRepositoryMock.update).toHaveBeenCalledWith(
+      "booking-1",
+      expect.objectContaining({
+        status: "CANCELLED",
+      }),
+    );
+  });
+
+  it("rechaza cancelaciones para reservas que no pertenecen al cliente", async () => {
+    bookingRepositoryMock.findByIdWithRelations.mockResolvedValueOnce({
+      ...sampleBooking,
+      customerId: "other-user",
+    });
+
+    const token = makeToken("client@portal.test");
+    const response = await app.request(
+      "/api/portal/bookings/booking-1/cancel",
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it("permite reagendar una reserva futura del cliente", async () => {
+    const token = makeToken("client@portal.test");
+    const newDate = new Date(Date.now() + 86_400_000).toISOString();
+
+    const response = await app.request(
+      "/api/portal/bookings/booking-1/reschedule",
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          scheduledAt: newDate,
+          notes: "Prefiero martes",
+        }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(bookingRepositoryMock.update).toHaveBeenCalledWith(
+      "booking-1",
+      expect.objectContaining({
+        scheduledAt: expect.any(Date),
+      }),
+    );
   });
 });

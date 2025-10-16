@@ -20,6 +20,11 @@ import {
   getPortalSessionRemaining,
   parsePortalSessionExpiresAt,
 } from "@/lib/portal-session";
+import {
+  cancelPortalBooking,
+  reschedulePortalBooking,
+} from "@/lib/portal-actions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, {
@@ -65,10 +70,56 @@ type Props = {
   initialData: PortalBookingsResult;
 };
 
+type PortalActionState =
+  | {
+      type: "cancel";
+      booking: Booking;
+      reason: string;
+    }
+  | {
+      type: "reschedule";
+      booking: Booking;
+      scheduledAt: string;
+      notes: string;
+    }
+  | null;
+
+function toDatetimeLocalValue(date: Date): string {
+  const pad = (value: number) => value.toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function PortalBookingsSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <ul className="grid gap-4">
+      {Array.from({ length: count }).map((_, index) => (
+        <li
+          key={index}
+          className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-lg dark:border-brisa-700/40 dark:bg-brisa-900/60"
+        >
+          <Skeleton className="h-6 w-48 mb-4" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-2/3 mb-2" />
+          <Skeleton className="h-4 w-1/3" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function PortalDashboardClient({ initialData }: Props) {
   const router = useRouter();
   const [isLoggingOut, startLogout] = useTransition();
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [actionState, setActionState] = useState<PortalActionState>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [isActionPending, startActionTransition] = useTransition();
 
   const { data, isValidating, mutate, error } = useSWR<PortalBookingsResult>(
     "/api/portal/bookings?limit=50",
@@ -145,6 +196,84 @@ export function PortalDashboardClient({ initialData }: Props) {
     }
   };
 
+  const openCancelModal = (booking: Booking) => {
+    setActionError(null);
+    setActionSuccess(null);
+    setActionState({
+      type: "cancel",
+      booking,
+      reason: "",
+    });
+  };
+
+  const openRescheduleModal = (booking: Booking) => {
+    setActionError(null);
+    setActionSuccess(null);
+    const currentDate = new Date(booking.scheduledAt);
+    setActionState({
+      type: "reschedule",
+      booking,
+      scheduledAt: toDatetimeLocalValue(currentDate),
+      notes: "",
+    });
+  };
+
+  const closeActionModal = () => {
+    setActionState(null);
+  };
+
+  const handleSubmitAction = () => {
+    if (!actionState) {
+      return;
+    }
+    startActionTransition(async () => {
+      try {
+        if (actionState.type === "cancel") {
+          await cancelPortalBooking({
+            bookingId: actionState.booking.id,
+            reason: actionState.reason?.trim()
+              ? actionState.reason.trim()
+              : undefined,
+          });
+          recordPortalEvent("portal.booking.cancelled", {
+            bookingId: actionState.booking.id,
+            customerId: customer.id,
+          });
+          setActionSuccess(
+            "Tu solicitud de cancelación fue registrada. Nuestro equipo confirmará el cambio por correo.",
+          );
+        } else {
+          await reschedulePortalBooking({
+            bookingId: actionState.booking.id,
+            scheduledAt: new Date(actionState.scheduledAt).toISOString(),
+            notes: actionState.notes?.trim()
+              ? actionState.notes.trim()
+              : undefined,
+          });
+          recordPortalEvent("portal.booking.rescheduled", {
+            bookingId: actionState.booking.id,
+            customerId: customer.id,
+          });
+          setActionSuccess(
+            "Tu solicitud de reagendado fue enviada. Recibirás confirmación una vez que operaciones la procese.",
+          );
+        }
+        await mutate();
+        closeActionModal();
+        setActionError(null);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Acción no disponible.";
+        setActionError(message);
+        recordPortalEvent("portal.booking.action.error", {
+          bookingId: actionState.booking.id,
+          type: actionState.type,
+          message,
+        });
+      }
+    });
+  };
+
   const handleLogout = () => {
     startLogout(async () => {
       setLogoutError(null);
@@ -180,6 +309,11 @@ export function PortalDashboardClient({ initialData }: Props) {
   };
 
   const displayName = customer.fullName ?? customer.email ?? "cliente";
+  const isActionsDisabled = isActionPending || isLoggingOut || isSessionExpired;
+  const minRescheduleValue = toDatetimeLocalValue(
+    new Date(Date.now() + 30 * 60 * 1000),
+  );
+  const showRefreshingSkeleton = isValidating && bookings.length === 0;
 
   return (
     <div className="relative mx-auto grid max-w-5xl gap-12">
@@ -250,6 +384,44 @@ export function PortalDashboardClient({ initialData }: Props) {
         </div>
       </header>
 
+      {actionSuccess ? (
+        <PortalCallout
+          title="Solicitud enviada"
+          description={<p>{actionSuccess}</p>}
+          icon={<ArrowPathIcon className="h-10 w-10 rotate-45" />}
+          action={
+            <button
+              type="button"
+              onClick={() => setActionSuccess(null)}
+              className="rounded-full border border-brisa-500/60 px-4 py-2 text-sm font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+            >
+              Ocultar mensaje
+            </button>
+          }
+        />
+      ) : null}
+
+      {actionError ? (
+        <PortalCallout
+          title="No pudimos completar tu solicitud"
+          description={<p>{actionError}</p>}
+          icon={
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-red-400/70 text-sm font-semibold text-red-500 dark:border-red-500/60 dark:text-red-200">
+              !
+            </span>
+          }
+          action={
+            <button
+              type="button"
+              onClick={() => setActionError(null)}
+              className="rounded-full border border-red-400/60 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/60 dark:text-red-200 dark:hover:bg-red-900/40"
+            >
+              Entendido
+            </button>
+          }
+        />
+      ) : null}
+
       <section className="space-y-5 rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/80">
         <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -270,19 +442,60 @@ export function PortalDashboardClient({ initialData }: Props) {
         </header>
 
         {upcoming.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-brisa-300/60 bg-brisa-50/70 p-4 text-sm text-gray-700 dark:border-brisa-700/40 dark:bg-brisa-800/40 dark:text-brisa-100">
-            No encontramos reservas próximas. Si necesitas agendar una limpieza,
-            utiliza el checkout público o contacta a operaciones.
-          </p>
+          showRefreshingSkeleton ? (
+            <PortalBookingsSkeleton />
+          ) : (
+            <div className="space-y-3 rounded-xl border border-dashed border-brisa-300/60 bg-brisa-50/70 p-5 text-sm text-gray-700 dark:border-brisa-700/40 dark:bg-brisa-800/40 dark:text-brisa-100">
+              <p>No encontramos reservas próximas en tu cuenta.</p>
+              <p>
+                Si necesitas agendar un servicio urgente, escribe a{" "}
+                <a
+                  className="font-semibold underline underline-offset-4"
+                  href="mailto:soporte@brisacubanaclean.com"
+                >
+                  soporte@brisacubanaclean.com
+                </a>{" "}
+                o utiliza el checkout público.
+              </p>
+            </div>
+          )
         ) : (
           <ul className="grid gap-4">
-            {upcoming.map((booking) => (
-              <PortalBookingCard
-                key={booking.id}
-                booking={booking}
-                scheduledLabel={formatMeta(booking.scheduledAt)}
-              />
-            ))}
+            {upcoming.map((booking) => {
+              const isImmutable =
+                booking.status === "IN_PROGRESS" ||
+                booking.status === "COMPLETED" ||
+                booking.status === "CANCELLED";
+              return (
+                <PortalBookingCard
+                  key={booking.id}
+                  booking={booking}
+                  scheduledLabel={formatMeta(booking.scheduledAt)}
+                  actions={
+                    isImmutable ? null : (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isActionsDisabled}
+                          onClick={() => openRescheduleModal(booking)}
+                          className="inline-flex items-center rounded-full border border-brisa-500/60 px-4 py-2 text-xs font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 disabled:opacity-60 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+                        >
+                          Reagendar
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isActionsDisabled}
+                          onClick={() => openCancelModal(booking)}
+                          className="inline-flex items-center rounded-full border border-red-400/60 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/60 dark:text-red-200 dark:hover:bg-red-900/30"
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    )
+                  }
+                />
+              );
+            })}
           </ul>
         )}
       </section>
@@ -297,9 +510,14 @@ export function PortalDashboardClient({ initialData }: Props) {
           </p>
         </header>
         {history.length === 0 ? (
-          <p className="text-sm text-gray-600 dark:text-brisa-300">
-            Aún no hay historial disponible.
-          </p>
+          showRefreshingSkeleton ? (
+            <PortalBookingsSkeleton count={2} />
+          ) : (
+            <p className="text-sm text-gray-600 dark:text-brisa-300">
+              Aún no hay historial disponible. Aquí verás tus servicios
+              completados y podrás descargar comprobantes en futuras versiones.
+            </p>
+          )
         ) : (
           <ol className="space-y-4 border-l border-dashed border-brisa-300/60 pl-5 dark:border-brisa-700/50">
             {history.map((booking) => (
@@ -376,6 +594,140 @@ export function PortalDashboardClient({ initialData }: Props) {
           No pudimos actualizar tus reservas automáticamente. Intenta
           manualmente más tarde.
         </p>
+      ) : null}
+
+      {actionState ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-lg rounded-3xl border border-white/70 bg-white/95 p-6 shadow-2xl backdrop-blur-md dark:border-brisa-700/60 dark:bg-brisa-900/90">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {actionState.type === "cancel"
+                    ? "Cancelar reserva"
+                    : "Reagendar reserva"}
+                </h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300">
+                  {actionState.type === "cancel"
+                    ? "Confirma que deseas cancelar esta reserva. Nuestro equipo revisará la solicitud."
+                    : "Selecciona una nueva fecha y comparte detalles para que nuestro equipo valide la disponibilidad."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeActionModal}
+                className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-500 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/60"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-sm">
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {actionState.booking.service.name} ·{" "}
+                  {actionState.booking.property.label}
+                </p>
+                <p className="text-gray-600 dark:text-brisa-300">
+                  Programado originalmente para{" "}
+                  {formatMeta(actionState.booking.scheduledAt)}
+                </p>
+              </div>
+
+              {actionState.type === "cancel" ? (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="portal-cancel-reason"
+                    className="text-xs uppercase text-gray-500 dark:text-brisa-400"
+                  >
+                    Motivo (opcional)
+                  </label>
+                  <textarea
+                    id="portal-cancel-reason"
+                    maxLength={500}
+                    rows={4}
+                    value={actionState.reason}
+                    onChange={(event) =>
+                      setActionState((current) =>
+                        current && current.type === "cancel"
+                          ? { ...current, reason: event.target.value }
+                          : current,
+                      )
+                    }
+                    className="w-full rounded-2xl border border-brisa-200/60 bg-white/80 p-3 text-sm text-gray-900 shadow-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-200 dark:border-brisa-700/50 dark:bg-brisa-900/60 dark:text-brisa-100"
+                    placeholder="Cuéntanos brevemente el motivo para agilizar la atención (máx. 500 caracteres)."
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="portal-reschedule-date"
+                      className="text-xs uppercase text-gray-500 dark:text-brisa-400"
+                    >
+                      Nueva fecha
+                    </label>
+                    <input
+                      id="portal-reschedule-date"
+                      type="datetime-local"
+                      min={minRescheduleValue}
+                      value={actionState.scheduledAt}
+                      onChange={(event) =>
+                        setActionState((current) =>
+                          current && current.type === "reschedule"
+                            ? { ...current, scheduledAt: event.target.value }
+                            : current,
+                        )
+                      }
+                      className="w-full rounded-2xl border border-brisa-200/60 bg-white/80 p-3 text-sm text-gray-900 shadow-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-200 dark:border-brisa-700/50 dark:bg-brisa-900/60 dark:text-brisa-100"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="portal-reschedule-notes"
+                      className="text-xs uppercase text-gray-500 dark:text-brisa-400"
+                    >
+                      Comentarios para operaciones (opcional)
+                    </label>
+                    <textarea
+                      id="portal-reschedule-notes"
+                      maxLength={500}
+                      rows={4}
+                      value={actionState.notes}
+                      onChange={(event) =>
+                        setActionState((current) =>
+                          current && current.type === "reschedule"
+                            ? { ...current, notes: event.target.value }
+                            : current,
+                        )
+                      }
+                      className="w-full rounded-2xl border border-brisa-200/60 bg-white/80 p-3 text-sm text-gray-900 shadow-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-200 dark:border-brisa-700/50 dark:bg-brisa-900/60 dark:text-brisa-100"
+                      placeholder="Comparte rango horario preferido, acceso al edificio, etc. (máx. 500 caracteres)."
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeActionModal}
+                className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isActionPending}
+                onClick={handleSubmitAction}
+                className="inline-flex items-center gap-2 rounded-full border border-brisa-500/60 bg-brisa-600 px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-brisa-700 disabled:opacity-60 dark:border-brisa-400/60 dark:bg-brisa-500 dark:hover:bg-brisa-400"
+              >
+                {isActionPending ? "Enviando…" : "Enviar solicitud"}
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

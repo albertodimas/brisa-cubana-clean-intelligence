@@ -1,8 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { recordPortalEvent } from "@/lib/portal-telemetry";
+import {
+  formatPortalSessionRemaining,
+  getPortalSessionRemaining,
+  parsePortalSessionExpiresAt,
+} from "@/lib/portal-session";
 
 type VerifyResponse = {
   data?: {
@@ -22,6 +27,7 @@ export default function PortalAccessVerifyPage() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [response, setResponse] = useState<VerifyResponse | null>(null);
+  const [countdown, setCountdown] = useState<string>("–");
 
   useEffect(() => {
     if (!token) {
@@ -90,12 +96,35 @@ export default function PortalAccessVerifyPage() {
       return;
     }
 
-    const timeout = setTimeout(() => {
+    const expiresAt = parsePortalSessionExpiresAt(response.data.expiresAt);
+    let countdownInterval: number | null = null;
+
+    if (expiresAt) {
+      const updateCountdown = () => {
+        const remaining = getPortalSessionRemaining(expiresAt);
+        setCountdown(formatPortalSessionRemaining(remaining));
+      };
+
+      updateCountdown();
+      countdownInterval = window.setInterval(updateCountdown, 1000);
+    }
+
+    const timeout = window.setTimeout(() => {
       router.replace(`/clientes/${response.data?.customerId}`);
     }, 1500);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      if (countdownInterval) {
+        window.clearInterval(countdownInterval);
+      }
+    };
   }, [response, router, status]);
+
+  const expiresAtLabel = useMemo(() => {
+    const parsed = parsePortalSessionExpiresAt(response?.data?.expiresAt);
+    return parsed ? parsed.toLocaleString() : null;
+  }, [response?.data?.expiresAt]);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-brisa-50 to-brisa-100 px-4 py-16 text-gray-900 dark:from-brisa-950 dark:via-brisa-900 dark:to-brisa-950 dark:text-white sm:px-6 md:px-10">
@@ -139,9 +168,17 @@ export default function PortalAccessVerifyPage() {
           {status === "success" && response?.data ? (
             <div className="space-y-4">
               <p className="text-sm text-gray-700 dark:text-brisa-200">
-                ¡Listo! Tu enlace se validó correctamente. Este token es válido
-                por una hora.
+                ¡Listo! Tu enlace se validó correctamente. Tu sesión vencerá en{" "}
+                <span className="font-semibold text-brisa-600 dark:text-brisa-100">
+                  {countdown}
+                </span>
+                .
               </p>
+              {expiresAtLabel ? (
+                <p className="text-xs text-gray-500 dark:text-brisa-400">
+                  Expira el {expiresAtLabel}.
+                </p>
+              ) : null}
               <p className="text-xs text-gray-500 dark:text-brisa-400">
                 Estamos redirigiéndote al portal en unos segundos…
               </p>
