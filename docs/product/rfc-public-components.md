@@ -49,7 +49,7 @@ Establecer la arquitectura de UI/UX para las experiencias públicas, definiendo 
 
 - **Landing:** `HeroBanner`, `FeatureList`, `PricingTier`, `TestimonialsCarousel`, `FAQAccordion`, `MetricsStrip`.
 - **Checkout:** `CheckoutStepper`, `ServiceOptionCard`, `SchedulePicker`, `ContactForm`, `PaymentSummaryCard`, `LegalNotice`.
-- **Portal:** `PortalReservationCard`, `PortalEmptyState`, `InvoiceList`, `SupportCTA`, `ProfileForm`.
+- **Portal:** `PortalStatCard`, `PortalReservationCard`, `PortalBookingCard`, `PortalTimelineItem`, `PortalCallout`, `InvoiceList`, `SupportCTA`, `ProfileForm`.
 
 Cada componente debe:
 
@@ -97,7 +97,7 @@ Cada componente debe:
 
 ### 8.1 Estado inicial
 
-- Ruta pública temporal: `/clientes` (Next.js) en modo informativo hasta desplegar funcionalidades completas.
+- Ruta pública temporal: `/clientes` (Next.js) con hero marketing, CTA doble (demo + contacto) y tarjetas de valor; todavía read-only mientras se habilitan funcionalidades completas.
 - Figma: `Portal Cliente – Iteración 1` contiene layouts dashboard, historial y solicitud de cambio (desktop/mobile).
 - Backlog Jira: `PORTAL-101` (dashboard), `PORTAL-102` (historial), `PORTAL-103` (formulario de cambio).
 
