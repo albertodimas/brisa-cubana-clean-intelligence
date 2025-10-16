@@ -126,3 +126,15 @@ model Notification {
   @@index([userId, readAt])
   @@index([createdAt])
 }
+
+model MagicLinkToken {
+  id         String   @id @default(cuid())
+  email      String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([email, expiresAt])
+  @@index([consumedAt])
+}

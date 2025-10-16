@@ -96,6 +96,22 @@ Las credenciales de producción están configuradas en:
 
 ---
 
+## ✉️ Enlaces mágicos (portal cliente)
+
+- Los tokens generados por `/api/portal/auth/request` se almacenan con hash SHA-256 y caducan en 15 minutos (configurable vía `MAGIC_LINK_TTL_MINUTES`).
+- El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite un JWT (`portalToken`) con scope `portal-client` válido por 1 hora.
+- Configura el canal SMTP (`PORTAL_MAGIC_LINK_*`) para enviar correos reales desde producción. Los valores recomendados:
+  - `PORTAL_MAGIC_LINK_FROM`
+  - `PORTAL_MAGIC_LINK_SMTP_HOST`
+  - `PORTAL_MAGIC_LINK_SMTP_PORT`
+  - `PORTAL_MAGIC_LINK_SMTP_USER`
+  - `PORTAL_MAGIC_LINK_SMTP_PASSWORD`
+  - `PORTAL_MAGIC_LINK_SMTP_SECURE`
+  - `PORTAL_MAGIC_LINK_BASE_URL`
+- Define `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción para evitar que el API incluya el `debugToken` en la respuesta una vez que el envío por correo esté habilitado.
+
+---
+
 ## 🧪 Testing
 
 ### Tests Unitarios

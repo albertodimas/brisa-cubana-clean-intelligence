@@ -19,6 +19,90 @@ export const openApiSpec = {
       name: "Brisa Cubana Support",
       email: "admin@brisacubanaclean.com",
     },
+  },
+  servers: [
+    {
+      url: "https://brisa-cubana-clean-intelligence-api.vercel.app",
+      description: "Production",
+    },
+    {
+      url: "http://localhost:3001",
+      description: "Development",
+    },
+  ],
+  tags: [
+    {
+      name: "Authentication",
+      description: "Autenticación y gestión de sesión",
+    },
+    { name: "Users", description: "Gestión de usuarios (ADMIN only)" },
+    { name: "Services", description: "Catálogo de servicios de limpieza" },
+    { name: "Properties", description: "Gestión de propiedades" },
+    { name: "Bookings", description: "Reservas de servicios" },
+    { name: "Customers", description: "Clientes del sistema" },
+    {
+      name: "Notifications",
+      description: "Alertas operativas para usuarios autenticados",
+    },
+    {
+      name: "Payments",
+      description: "Integraciones con Stripe (webhooks e intents)",
+    },
+    {
+      name: "Portal",
+      description: "Flujos de acceso del portal cliente",
+    },
+    { name: "Health", description: "Health checks y monitoreo" },
+  ],
+  paths: {
+    "/api": {
+      get: {
+        tags: ["Health"],
+        summary: "API root endpoint",
+        responses: {
+          "200": {
+            description: "API information",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    service: { type: "string" },
+                    status: { type: "string" },
+                    version: { type: "string" },
+                    timestamp: { type: "string", format: "date-time" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/health": {
+      get: {
+        tags: ["Health"],
+        summary: "Health check endpoint",
+        responses: {
+          "200": {
+            description: "System is healthy",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HealthCheck" },
+              },
+            },
+          },
+          "500": {
+            description: "System is unhealthy",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HealthCheckFailed" },
+              },
+            },
+          },
+        },
+      },
+    },
     "/api/payments/stripe/intent": {
       post: {
         tags: ["Payments"],
@@ -101,80 +185,63 @@ export const openApiSpec = {
         },
       },
     },
-  },
-  servers: [
-    {
-      url: "https://brisa-cubana-clean-intelligence-api.vercel.app",
-      description: "Production",
-    },
-    {
-      url: "http://localhost:3001",
-      description: "Development",
-    },
-  ],
-  tags: [
-    {
-      name: "Authentication",
-      description: "Autenticación y gestión de sesión",
-    },
-    { name: "Users", description: "Gestión de usuarios (ADMIN only)" },
-    { name: "Services", description: "Catálogo de servicios de limpieza" },
-    { name: "Properties", description: "Gestión de propiedades" },
-    { name: "Bookings", description: "Reservas de servicios" },
-    { name: "Customers", description: "Clientes del sistema" },
-    {
-      name: "Notifications",
-      description: "Alertas operativas para usuarios autenticados",
-    },
-    {
-      name: "Payments",
-      description: "Integraciones con Stripe (webhooks e intents)",
-    },
-    { name: "Health", description: "Health checks y monitoreo" },
-  ],
-  paths: {
-    "/api": {
-      get: {
-        tags: ["Health"],
-        summary: "API root endpoint",
+    "/api/portal/auth/request": {
+      post: {
+        tags: ["Portal"],
+        summary: "Solicitar enlace mágico para portal cliente",
+        description:
+          "Genera un enlace de acceso temporal para clientes registrados. En entornos QA puede devolver el token en la respuesta; en producción el enlace se entrega exclusivamente por correo.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/MagicLinkRequest" },
+            },
+          },
+        },
         responses: {
           "200": {
-            description: "API information",
+            description: "Solicitud aceptada",
             content: {
               "application/json": {
                 schema: {
-                  type: "object",
-                  properties: {
-                    service: { type: "string" },
-                    status: { type: "string" },
-                    version: { type: "string" },
-                    timestamp: { type: "string", format: "date-time" },
-                  },
+                  $ref: "#/components/schemas/MagicLinkRequestResponse",
                 },
               },
             },
           },
+          "400": { $ref: "#/components/responses/ValidationError" },
         },
       },
     },
-    "/api/health": {
-      get: {
-        tags: ["Health"],
-        summary: "Health check endpoint",
+    "/api/portal/auth/verify": {
+      post: {
+        tags: ["Portal"],
+        summary: "Validar enlace mágico y obtener token de sesión",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/MagicLinkVerifyRequest" },
+            },
+          },
+        },
         responses: {
           "200": {
-            description: "System is healthy",
+            description: "Token válido",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/HealthCheck" },
+                schema: {
+                  $ref: "#/components/schemas/MagicLinkVerifyResponse",
+                },
               },
             },
           },
-          "500": {
-            description: "System is unhealthy",
+          "400": {
+            description: "Token inválido o expirado",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/HealthCheckFailed" },
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
               },
             },
           },
@@ -1173,6 +1240,66 @@ export const openApiSpec = {
               paymentIntentId: { type: "string", example: "pi_123" },
               amount: { type: "integer", example: 14500 },
               currency: { type: "string", example: "usd" },
+            },
+          },
+        },
+      },
+      MagicLinkRequest: {
+        type: "object",
+        required: ["email"],
+        properties: {
+          email: {
+            type: "string",
+            format: "email",
+            example: "client@brisacubanaclean.com",
+          },
+        },
+      },
+      MagicLinkRequestResponse: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            example: "Enlace de acceso enviado.",
+          },
+          expiresAt: {
+            type: "string",
+            format: "date-time",
+            example: "2025-10-16T15:00:00.000Z",
+          },
+          debugToken: {
+            type: "string",
+            nullable: true,
+            description:
+              "Incluido solo en QA cuando PORTAL_MAGIC_LINK_EXPOSE_DEBUG=true",
+            example: "9c3e5b8d...",
+          },
+        },
+      },
+      MagicLinkVerifyRequest: {
+        type: "object",
+        required: ["token"],
+        properties: {
+          token: {
+            type: "string",
+            example: "9c3e5b8d...",
+          },
+        },
+      },
+      MagicLinkVerifyResponse: {
+        type: "object",
+        properties: {
+          data: {
+            type: "object",
+            properties: {
+              portalToken: {
+                type: "string",
+                description: "JWT válido por 1 hora con scope portal-client",
+              },
+              email: {
+                type: "string",
+                format: "email",
+              },
             },
           },
         },

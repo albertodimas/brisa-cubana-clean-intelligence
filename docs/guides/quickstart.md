@@ -34,6 +34,15 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    # STRIPE_SECRET_KEY="sk_test_..."
    # STRIPE_PUBLISHABLE_KEY="pk_test_..."
    # STRIPE_WEBHOOK_SECRET="whsec_..."
+   # MAGIC_LINK_TTL_MINUTES="15"  # Tiempo de vida de enlaces mágicos para el portal cliente
+   # PORTAL_MAGIC_LINK_FROM="Brisa Cubana <no-reply@brisacubanaclean.com>"
+   # PORTAL_MAGIC_LINK_SMTP_HOST="smtp.mailtrap.io"
+   # PORTAL_MAGIC_LINK_SMTP_PORT="587"
+   # PORTAL_MAGIC_LINK_SMTP_USER="smtp-user"
+   # PORTAL_MAGIC_LINK_SMTP_PASSWORD="smtp-password"
+   # PORTAL_MAGIC_LINK_BASE_URL="http://localhost:3000"
+   # PORTAL_MAGIC_LINK_CONFIRMATION_PATH="/clientes/acceso/confirmar"
+   # PORTAL_MAGIC_LINK_EXPOSE_DEBUG="true" # Usa "false" en producción para ocultar el token
    ```
 
    > El contenedor de PostgreSQL expone el puerto **5433** en tu máquina (`postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev`).
@@ -85,7 +94,8 @@ pnpm build       # Compila Next.js y API
 
 1. Accede a <http://localhost:3000/login> y autentícate con un usuario `ADMIN` o `COORDINATOR`.
 2. El panel operativo permitirá crear servicios, propiedades y reservas usando las APIs reales.
-3. Para validar pagos de prueba, visita <http://localhost:3000/checkout> con las claves modo test de Stripe y usa tarjetas demo (`4242 4242 4242 4242`) antes de activar modo live.
+3. Para el portal cliente, visita <http://localhost:3000/clientes/acceso>, solicita un enlace mágico con `client@brisacubanaclean.com` y usa el token de debug que se muestra (solo en beta) para confirmar el acceso en <http://localhost:3000/clientes/acceso/confirmar?token=...>.
+4. Para validar pagos de prueba, visita <http://localhost:3000/checkout> con las claves modo test de Stripe y usa tarjetas demo (`4242 4242 4242 4242`) antes de activar modo live.
 
 ## Problemas comunes
 

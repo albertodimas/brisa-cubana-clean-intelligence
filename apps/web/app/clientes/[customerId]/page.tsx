@@ -9,13 +9,18 @@ import { PortalBookingCard } from "@/components/portal/booking-card";
 import { PortalTimelineItem } from "@/components/portal/timeline-item";
 import { PortalCallout } from "@/components/portal/callout";
 
-type PageProps = {
-  params: { customerId: string };
+type PageParams = {
+  customerId: string;
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
+  const { customerId } = await params;
   return {
-    title: `Portal Cliente – ${params.customerId}`,
+    title: `Portal Cliente – ${customerId}`,
     description:
       "Consulta tus próximas reservas, historial y solicitudes con Brisa Cubana Clean Intelligence.",
   };
@@ -44,8 +49,12 @@ function formatDate(dateIso: string) {
   }
 }
 
-export default async function ClienteDashboardPage({ params }: PageProps) {
-  const { customerId } = params;
+export default async function ClienteDashboardPage({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
+  const { customerId } = await params;
   if (!customerId) {
     notFound();
   }

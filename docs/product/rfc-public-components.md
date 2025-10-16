@@ -104,6 +104,8 @@ Cada componente debe:
 ### 8.2 Requerimientos MVP
 
 - Auth pública basada en token mágico enviado vía correo (no implementado aún).
+- Auth pública basada en token mágico enviado vía correo (SMTP configurable via `PORTAL_MAGIC_LINK_*`).
+- Workflow inicial: `POST /api/portal/auth/request` → email registrado, TTL 15 min; `POST /api/portal/auth/verify` retorna `portalToken` (JWT 1h, scope `portal-client`).
 - Listado de próximas reservas con estado, propiedad, servicio, horarios y CTA `Ver detalle`.
 - Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).
 - Formulario “Solicitar cambio” con opciones (reagendar, cancelar, duda) y texto libre (máx. 500 caracteres).
@@ -114,6 +116,7 @@ Cada componente debe:
 - Evento Sentry `portal.viewed` con atributos `section`, `customerId` (hash), `bookingCount`.
 - Web Vitals etiquetados con `pageType: "portal"`.
 - Heatmap para portal (herramienta a definir) antes del GA.
+- Logs API `Magic link solicitado para cliente` sirven como auditoría de solicitudes; en beta se expone `debugToken` para QA manual.
 
 ### 8.4 Checklist para go-live
 

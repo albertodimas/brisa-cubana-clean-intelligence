@@ -88,6 +88,8 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 - El formulario multipaso en `/checkout` emite breadcrumbs Sentry `intent:create:start`, `payment_confirmed`, `payment_failed` y eventos `checkout.intent.created`, `checkout.payment.confirmed`, `checkout.payment.failed`.
 - Errores al crear intents se reportan con `captureException` (`stage: intent:create`). Configura alertas en Sentry para monitorear spikes.
 - Cuando falta `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, se registra `checkout.publishable_key.missing` (nivel warning) para detectar entornos mal configurados.
+- Los endpoints de enlace mágico (`/api/portal/auth/request`/`verify`) registran eventos en logs (`Magic link solicitado para cliente`) y pueden instrumentarse con eventos Sentry adicionales cuando se integre el frontend.
+- El mailer SMTP (`sendPortalMagicLinkEmail`) registra `Magic link email dispatched` cuando el correo se entrega y `Magic link email failed` cuando el proveedor rechaza el envío.
 
 ---
 

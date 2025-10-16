@@ -62,11 +62,11 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 
 ## 4. Seed y migraciones
 
-1. Migraciones Prisma se aplican automáticamente vía `prisma generate` + `tsc`. Si cambiaste el schema, sincroniza producción:
+1. Migraciones Prisma se aplican automáticamente vía `prisma generate` + `tsc`. Si cambiaste el schema, sincroniza producción ejecutando las migraciones generadas:
    ```bash
-   pnpm --filter @brisa/api db:push
+   pnpm --filter @brisa/api db:deploy
    ```
-   > Ejecutar desde una máquina segura con `DATABASE_URL` apuntando a producción.
+   > Ejecuta el comando desde una máquina segura con `DATABASE_URL` apuntando a producción. Evita `db:push` en entornos productivos.
 2. Después de cada schema change, corre los seeds en este orden:
 
    ```bash

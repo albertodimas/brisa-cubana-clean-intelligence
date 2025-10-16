@@ -280,6 +280,16 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 
 ---
 
+### 8.5 Portal cliente (beta)
+
+- [ ] `/clientes` muestra hero, CTA dual y tarjetas de valor actualizadas.
+- [ ] `/clientes/[customerId]` renderiza métricas, tarjetas de reservas y timeline para `client@brisacubanaclean.com`.
+- [ ] `POST /api/portal/auth/request` devuelve 200 y `debugToken` con un correo válido registrado.
+- [ ] `POST /api/portal/auth/verify` entrega `portalToken` cuando el token es válido.
+- [ ] Token expirado o reutilizado devuelve 400.
+- [ ] Con SMTP configurado (`PORTAL_MAGIC_LINK_*`), el correo llega y el API no expone `debugToken` cuando `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"`.
+- [ ] Páginas `/clientes/acceso` y `/clientes/acceso/confirmar` muestran estados correctos (idle/loading/success/error).
+
 ## 9. Deployment
 
 ### 9.1 Build
