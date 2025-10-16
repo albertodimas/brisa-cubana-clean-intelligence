@@ -20,6 +20,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Suite Playwright `tests/e2e/search-and-filters.spec.ts` con cobertura crítica para búsqueda, filtros combinados y mensajes sin resultados.
 - Seeds operativos (`prisma/seed.operativo.ts`) y demo (`prisma/seed.demo.ts`) con comandos `pnpm --filter @brisa/api db:seed:operativo` y `db:seed:demo` documentados en quickstart/despliegue.
 - Webhook `/api/payments/stripe/webhook` con verificación de firma y pruebas de integración sobre Stripe modo test.
+- Portal cliente expone callout de expiración de sesión con contador visible y CTA para renovar acceso; la API entrega `session.expiresAt` en `/api/portal/bookings`.
+- Backend del portal responde con `Set-Cookie` para `portal_token` (HttpOnly) y `portal_customer_id` tras verificar enlaces mágicos; utilidades compartidas para formatear/medir expiración (`apps/web/lib/portal-session.ts`) con pruebas unitarias.
 
 ### Changed
 
@@ -31,6 +33,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/qa/regression-checklist.md` incorpora el flujo del portal (cookies, endpoint de reservas) para smoke tests manuales.
 - `docs/operations/security.md` documenta cookies `portal_token`/`portal_customer_id` y el endpoint de logout.
 - `POST /api/portal/auth/request` envía correo real cuando SMTP está configurado y deja de exponer el `debugToken` en producción (`PORTAL_MAGIC_LINK_EXPOSE_DEBUG=false`).
+- `docs/operations/security.md`, `docs/product/rfc-public-components.md`, `docs/overview/status.md` y `docs/qa/regression-checklist.md` actualizados con validaciones de expiración de sesión y nuevos escenarios QA.
 
 ### Fixed
 

@@ -100,6 +100,7 @@ Las credenciales de producción están configuradas en:
 
 - Los tokens generados por `/api/portal/auth/request` se almacenan con hash SHA-256 y caducan en 15 minutos (configurable vía `MAGIC_LINK_TTL_MINUTES`).
 - El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite un JWT (`portalToken`) con scope `portal-client` válido por 1 hora.
+- La API adjunta automáticamente las cookies `portal_token` (HttpOnly) y `portal_customer_id` tras una verificación exitosa; la UI ya no debe intentar generarlas manualmente.
 - Configura el canal SMTP (`PORTAL_MAGIC_LINK_*`) para enviar correos reales desde producción. Los valores recomendados:
   - `PORTAL_MAGIC_LINK_FROM`
   - `PORTAL_MAGIC_LINK_SMTP_HOST`
@@ -109,8 +110,12 @@ Las credenciales de producción están configuradas en:
   - `PORTAL_MAGIC_LINK_SMTP_SECURE`
   - `PORTAL_MAGIC_LINK_BASE_URL`
 - Define `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción para evitar que el API incluya el `debugToken` en la respuesta una vez que el envío por correo esté habilitado.
-- El frontend almacena el JWT en la cookie httpOnly `portal_token` (scope portal-client) y un identificador auxiliar no sensible en `portal_customer_id` para validar redirecciones. Ambos expiran conforme al `expiresAt` otorgado por el API y deben tratarse como credenciales de sesión.
+- El frontend confía en las cookies emitidas por la API (`portal_token` HttpOnly + `portal_customer_id` pública). Ambas expiran conforme al `expiresAt` otorgado por el backend y deben tratarse como credenciales de sesión.
 - El endpoint `POST /api/portal/auth/logout` invalida la sesión actual (requiere token de portal) y debe invocarse desde la UI al cerrar sesión para limpiar cookies.
+- Checklist manual tras cualquier cambio:
+  1. Verificar en DevTools (Application → Storage → Cookies) que `portal_token` es HttpOnly/SameSite `Strict` en producción o `Lax` en local con HTTP.
+  2. Confirmar que el atributo `Expires` coincide con el valor `expiresAt` devuelto por la API.
+  3. Validar que tras `POST /api/portal/auth/logout` ambas cookies se eliminan en el browser y en la respuesta HTTP.
 
 ---
 

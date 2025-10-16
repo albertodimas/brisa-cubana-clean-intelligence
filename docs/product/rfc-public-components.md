@@ -107,7 +107,7 @@ Cada componente debe:
 - Auth pública basada en token mágico enviado vía correo (SMTP configurable via `PORTAL_MAGIC_LINK_*`).
 - Dashboard consume `/api/portal/bookings` usando el token httpOnly `portal_token` (scope `portal-client`) y restringe el acceso al ID asociado.
 - Botón de cierre de sesión en dashboard que invoca `/api/portal/auth/logout` y limpia cookies para regresar a `/clientes/acceso`.
-- Refresco automático del dashboard con SWR (`/api/portal/bookings`) para mantener las tarjetas sincronizadas.
+- Refresco automático del dashboard con SWR (`/api/portal/bookings`) para mantener las tarjetas sincronizadas y mostrar la caducidad de sesión (`session.expiresAt`) con un callout visible y contador regresivo.
 - Workflow inicial: `POST /api/portal/auth/request` → email registrado, TTL 15 min; `POST /api/portal/auth/verify` retorna `portalToken` (JWT 1h, scope `portal-client`).
 - Listado de próximas reservas con estado, propiedad, servicio, horarios y CTA `Ver detalle`.
 - Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).

@@ -22,8 +22,22 @@ export async function POST() {
     status: upstreamResponse.status,
   });
 
-  response.cookies.delete("portal_token");
-  response.cookies.delete("portal_customer_id");
+  const candidate = upstreamResponse.headers as unknown as {
+    getSetCookie?: () => string[];
+  };
+  const setCookieHeaders =
+    typeof candidate.getSetCookie === "function"
+      ? (candidate.getSetCookie() ?? [])
+      : [];
+
+  if (setCookieHeaders.length > 0) {
+    setCookieHeaders.forEach((cookie) => {
+      response.headers.append("set-cookie", cookie);
+    });
+  } else {
+    response.cookies.delete("portal_token");
+    response.cookies.delete("portal_customer_id");
+  }
 
   if (upstreamResponse.ok) {
     response.cookies.set({

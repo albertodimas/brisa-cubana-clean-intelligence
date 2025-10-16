@@ -290,6 +290,8 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Con SMTP configurado (`PORTAL_MAGIC_LINK_*`), el correo llega y el API no expone `debugToken` cuando `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"`.
 - [ ] `GET /api/portal/bookings` responde 200 con las reservas del cliente autenticado y respeta filtros (`status`, paginación).
 - [ ] `POST /api/portal/auth/logout` invalida la sesión y limpia cookies (`portal_token`, `portal_customer_id`).
+- [ ] Tras verificar un enlace, la respuesta HTTP incluye `Set-Cookie` para `portal_token` (HttpOnly) y `portal_customer_id` con caducidad alineada a `expiresAt`.
+- [ ] El dashboard muestra callout con el tiempo restante de sesión y CTA para solicitar un nuevo enlace; al expirar, el mensaje cambia a “Tu sesión ya expiró”.
 - [ ] Páginas `/clientes/acceso` y `/clientes/acceso/confirmar` muestran estados correctos (idle/loading/success/error).
 
 ## 9. Deployment

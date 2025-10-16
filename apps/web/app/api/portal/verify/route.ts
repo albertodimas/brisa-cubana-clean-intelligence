@@ -23,7 +23,19 @@ export async function POST(request: Request) {
     status: upstreamResponse.status,
   });
 
-  if (
+  const candidate = upstreamResponse.headers as unknown as {
+    getSetCookie?: () => string[];
+  };
+  const setCookieHeaders =
+    typeof candidate.getSetCookie === "function"
+      ? (candidate.getSetCookie() ?? [])
+      : [];
+
+  if (setCookieHeaders.length > 0) {
+    setCookieHeaders.forEach((cookie) => {
+      nextResponse.headers.append("set-cookie", cookie);
+    });
+  } else if (
     upstreamResponse.ok &&
     data &&
     typeof data === "object" &&

@@ -58,6 +58,10 @@ router.get("/", async (c) => {
   );
 
   const serialized = result.data.map((booking) => serializeBooking(booking));
+  const sessionExpiresAtIso =
+    typeof portalAuth.expiresAt === "number"
+      ? new Date(portalAuth.expiresAt * 1000).toISOString()
+      : null;
 
   return c.json({
     data: serialized,
@@ -65,6 +69,9 @@ router.get("/", async (c) => {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
+    },
+    session: {
+      expiresAt: sessionExpiresAtIso,
     },
     pagination: {
       limit,

@@ -7,6 +7,7 @@ import honoRateLimiter from "hono-rate-limiter";
 import { signAuthToken } from "../lib/jwt.js";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
 import { getUserRepository } from "../container.js";
+import { resolveCookiePolicy } from "../lib/cookies.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -47,20 +48,6 @@ const loginRateLimiter = rateLimiter({
       429,
     ),
 });
-
-type SameSitePolicy = "lax" | "strict";
-
-function resolveCookiePolicy(c: Context): {
-  secure: boolean;
-  sameSite: SameSitePolicy;
-} {
-  if (process.env.NODE_ENV === "production") {
-    return { secure: true, sameSite: "strict" };
-  }
-  const forwardedProto = c.req.header("x-forwarded-proto");
-  const secure = forwardedProto === "https" || c.req.url.startsWith("https");
-  return { secure, sameSite: secure ? "strict" : "lax" };
-}
 
 router.use("/login", loginRateLimiter);
 

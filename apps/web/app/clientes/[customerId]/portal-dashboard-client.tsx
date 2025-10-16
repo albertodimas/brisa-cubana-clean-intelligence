@@ -1,8 +1,8 @@
 "use client";
 
-import useSWR from "swr";
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import useSWR from "swr";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Booking, PortalBookingsResult } from "@/lib/api";
 import { PortalStatCard } from "@/components/portal/stat-card";
@@ -12,8 +12,14 @@ import { PortalCallout } from "@/components/portal/callout";
 import {
   ArrowPathIcon,
   ArrowRightOnRectangleIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import { recordPortalEvent } from "@/lib/portal-telemetry";
+import {
+  formatPortalSessionRemaining,
+  getPortalSessionRemaining,
+  parsePortalSessionExpiresAt,
+} from "@/lib/portal-session";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, {
@@ -75,6 +81,43 @@ export function PortalDashboardClient({ initialData }: Props) {
   );
 
   const customer = data?.customer ?? initialData.customer;
+  const sessionExpiresAtIso =
+    data?.session?.expiresAt ?? initialData.session?.expiresAt ?? null;
+  const sessionExpiresAt = useMemo(
+    () => parsePortalSessionExpiresAt(sessionExpiresAtIso),
+    [sessionExpiresAtIso],
+  );
+  const [sessionRemainingMs, setSessionRemainingMs] = useState(() =>
+    getPortalSessionRemaining(sessionExpiresAt),
+  );
+  useEffect(() => {
+    setSessionRemainingMs(getPortalSessionRemaining(sessionExpiresAt));
+    if (!sessionExpiresAt) {
+      return;
+    }
+    const interval = window.setInterval(() => {
+      const remaining = getPortalSessionRemaining(sessionExpiresAt);
+      setSessionRemainingMs(remaining);
+      if (remaining <= 0) {
+        window.clearInterval(interval);
+      }
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [sessionExpiresAt]);
+  const sessionCountdown = formatPortalSessionRemaining(sessionRemainingMs);
+  const hasKnownSession = Boolean(sessionExpiresAt);
+  const isSessionExpired = hasKnownSession && sessionRemainingMs <= 0;
+  const sessionExpiringSoon =
+    hasKnownSession &&
+    sessionRemainingMs > 0 &&
+    sessionRemainingMs <= 5 * 60 * 1000;
+  const sessionStatusTitle = !hasKnownSession
+    ? "No pudimos validar la expiración de tu sesión"
+    : isSessionExpired
+      ? "Tu sesión de portal expiró"
+      : sessionExpiringSoon
+        ? "Tu sesión vence pronto"
+        : "Tu sesión de portal está activa";
   const bookings = data?.items ?? initialData.items;
   const { upcoming, history } = useMemo(
     () => splitBookings(bookings),
@@ -270,6 +313,43 @@ export function PortalDashboardClient({ initialData }: Props) {
           </ol>
         )}
       </section>
+
+      <PortalCallout
+        title={sessionStatusTitle}
+        description={
+          hasKnownSession ? (
+            <p>
+              {isSessionExpired ? (
+                <>
+                  Tu sesión ya expiró. Solicita un nuevo enlace para continuar
+                  usando el portal y actualizar esta vista.
+                </>
+              ) : (
+                <>
+                  Tu sesión vence en{" "}
+                  <span className="font-semibold">{sessionCountdown}</span>.
+                  Solicita un nuevo enlace si necesitas más tiempo o refresca
+                  esta vista después de renovarlo.
+                </>
+              )}
+            </p>
+          ) : (
+            <p>
+              No pudimos determinar la expiración de tu sesión. Si pierdes el
+              acceso, vuelve a solicitar un enlace desde la página de acceso.
+            </p>
+          )
+        }
+        icon={<ClockIcon className="h-10 w-10" />}
+        action={
+          <Link
+            className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+            href="/clientes/acceso"
+          >
+            Solicitar nuevo enlace →
+          </Link>
+        }
+      />
 
       <PortalCallout
         title="¿Necesitas ajustar algo?"

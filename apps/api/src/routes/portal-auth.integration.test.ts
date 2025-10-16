@@ -36,6 +36,19 @@ function jsonResponse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+function extractCookies(headers: Headers): string[] {
+  const candidate = headers as unknown as {
+    getSetCookie?: () => string[];
+  };
+
+  if (typeof candidate.getSetCookie === "function") {
+    return candidate.getSetCookie() ?? [];
+  }
+
+  const cookie = headers.get("set-cookie");
+  return cookie ? [cookie] : [];
+}
+
 describe("Portal auth routes", () => {
   let app: Hono;
   const magicLinkTokens: MagicLinkRecord[] = [];
@@ -190,6 +203,13 @@ describe("Portal auth routes", () => {
     });
 
     expect(verifyResponse.status).toBe(200);
+    const cookies = extractCookies(verifyResponse.headers);
+    expect(cookies.some((value) => value.startsWith("portal_token="))).toBe(
+      true,
+    );
+    expect(
+      cookies.some((value) => value.startsWith("portal_customer_id=")),
+    ).toBe(true);
     const verifyBody = await jsonResponse<{
       data?: {
         portalToken: string;

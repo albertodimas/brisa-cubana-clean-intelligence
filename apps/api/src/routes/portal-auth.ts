@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
 import { randomBytes, createHash } from "node:crypto";
 import jwt from "jsonwebtoken";
@@ -12,6 +13,7 @@ import {
   shouldExposeDebugToken,
 } from "../services/magic-link-mailer.js";
 import { authenticatePortal } from "../middleware/auth.js";
+import { resolveCookiePolicy } from "../lib/cookies.js";
 
 const router = new Hono();
 
@@ -119,7 +121,8 @@ router.post("/verify", async (c) => {
 
   await magicLinkRepository.consume(tokenRecord.id);
 
-  const sessionExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  const sessionTtlSeconds = 60 * 60;
+  const sessionExpiresAt = new Date(Date.now() + sessionTtlSeconds * 1000);
 
   const portalToken = jwt.sign(
     {
@@ -134,6 +137,26 @@ router.post("/verify", async (c) => {
     },
   );
 
+  const { secure, sameSite } = resolveCookiePolicy(c);
+
+  setCookie(c, "portal_token", portalToken, {
+    httpOnly: true,
+    secure,
+    sameSite,
+    path: "/",
+    maxAge: sessionTtlSeconds,
+    expires: sessionExpiresAt,
+  });
+
+  setCookie(c, "portal_customer_id", user.id, {
+    httpOnly: false,
+    secure,
+    sameSite,
+    path: "/",
+    maxAge: sessionTtlSeconds,
+    expires: sessionExpiresAt,
+  });
+
   return c.json({
     data: {
       portalToken,
@@ -146,6 +169,11 @@ router.post("/verify", async (c) => {
 
 router.post("/logout", authenticatePortal, async (c) => {
   const portalAuth = c.get("portalAuth");
+  const { secure, sameSite } = resolveCookiePolicy(c);
+
+  deleteCookie(c, "portal_token", { path: "/", secure, sameSite });
+  deleteCookie(c, "portal_customer_id", { path: "/", secure, sameSite });
+
   logger.info(
     {
       email: portalAuth?.email,

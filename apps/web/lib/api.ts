@@ -93,6 +93,9 @@ export type PortalBookingsResult = PaginatedResult<Booking> & {
     email: string;
     fullName: string | null;
   };
+  session?: {
+    expiresAt: string | null;
+  };
 };
 
 async function getPortalTokenFromCookies(): Promise<string | null> {
@@ -265,11 +268,15 @@ export async function fetchPortalBookings({
       data: Booking[];
       customer: { id: string; email: string; fullName: string | null };
       pagination?: PaginationInfo;
+      session?: { expiresAt: string | null };
     };
 
     return {
       items: json.data ?? [],
       customer: json.customer,
+      session: {
+        expiresAt: json.session?.expiresAt ?? null,
+      },
       pageInfo: normalizePagination(
         json.pagination,
         json.data ? json.data.length : 0,
