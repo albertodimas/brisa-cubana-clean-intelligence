@@ -49,13 +49,34 @@ test.describe("@critical portal cliente – flujo completo", () => {
     ).toBeVisible();
     await expect(page.getByText("Tu sesión vence")).toBeVisible();
 
-    // Reagendar la primera reserva disponible
+    const dashboardUrl = new URL(page.url());
+    const detailCustomerIdPattern =
+      dashboardUrl.pathname.split("/").pop() ?? "[a-z0-9]+";
+
     const targetBookingCard = page.locator(
       '[data-portal-booking-code="BRISA-0002"]',
     );
     await expect(targetBookingCard).toBeVisible();
 
-    await targetBookingCard.getByRole("button", { name: "Reagendar" }).click();
+    await targetBookingCard.getByRole("link", { name: "Ver detalle" }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/clientes/${detailCustomerIdPattern}/reservas/BRISA-0002`),
+    );
+    await expect(
+      page.getByRole("heading", { name: /Reserva BRISA-0002/i }),
+    ).toBeVisible();
+    await expect(page.getByText("¿Necesitas ayuda?")).toBeVisible();
+    await page.getByRole("link", { name: "Volver al dashboard" }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/clientes/${detailCustomerIdPattern}$`),
+    );
+
+    const refreshedCard = page.locator(
+      '[data-portal-booking-code="BRISA-0002"]',
+    );
+    await expect(refreshedCard).toBeVisible();
+
+    await refreshedCard.getByRole("button", { name: "Reagendar" }).click();
 
     const newDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
     const newDateValue = toDatetimeLocal(newDate);
@@ -69,7 +90,7 @@ test.describe("@critical portal cliente – flujo completo", () => {
     ).toBeVisible();
 
     // Cancelar la misma reserva (la lista se refresca después del mutate)
-    await targetBookingCard.getByRole("button", { name: "Cancelar" }).click();
+    await refreshedCard.getByRole("button", { name: "Cancelar" }).click();
     await page
       .getByLabel("Motivo (opcional)")
       .fill("Cancelación desde pruebas automáticas");

@@ -18,7 +18,7 @@
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
 - Stripe modo test configurado en Vercel (Development/Preview/Production) con claves temporales `*_brisa_demo_20251015`; programar rotación al habilitar modo live.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
-- Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; funcionalidades de autoservicio adicionales siguen planificadas (ver RFC §8).
+- Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Funcionalidades de autoservicio adicionales siguen planificadas (ver RFC §8).
 - Release etiquetado `v0.3.0` (14-oct-2025) completa las mejoras de búsqueda y filtros en el panel operativo; la Fase 2 comercial (landing, checkout, portal cliente) está documentada en `product/phase-2-roadmap.md`. La migración Tailwind v4 (Fase 5) sigue programada para Q1 2026 (Issue #40).
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.

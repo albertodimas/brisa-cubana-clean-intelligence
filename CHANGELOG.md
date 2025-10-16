@@ -25,6 +25,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Endpoints `POST /api/portal/bookings/:id/cancel` y `POST /api/portal/bookings/:id/reschedule` para autoservicio de clientes, con logs y validación de pertenencia.
 - Suite Playwright `tests/e2e/portal-client.spec.ts` que cubre solicitud de enlace, verificación, dashboard, reagendado, cancelación y logout.
 - Notificaciones operativas automáticas cuando un cliente cancela o reagenda desde el portal (tipo `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED`).
+- Página `/clientes/[customerId]/reservas/[bookingId]` para detalle de reserva con timeline, acciones y CTA de soporte.
 
 ### Changed
 

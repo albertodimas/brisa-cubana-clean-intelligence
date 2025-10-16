@@ -4,6 +4,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 import type { Booking, PortalBookingsResult } from "@/lib/api";
 import { PortalStatCard } from "@/components/portal/stat-card";
 import { PortalBookingCard } from "@/components/portal/booking-card";
@@ -490,6 +491,14 @@ export function PortalDashboardClient({ initialData }: Props) {
                         >
                           Cancelar
                         </button>
+                        <Link
+                          href={
+                            `/clientes/${customer.id}/reservas/${booking.id}` as Route
+                          }
+                          className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/60"
+                        >
+                          Ver detalle
+                        </Link>
                       </>
                     )
                   }

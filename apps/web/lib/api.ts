@@ -98,6 +98,15 @@ export type PortalBookingsResult = PaginatedResult<Booking> & {
   };
 };
 
+export type PortalBookingDetail = {
+  booking: Booking;
+  customer: {
+    id: string;
+    email: string;
+    fullName: string | null;
+  };
+};
+
 async function getPortalTokenFromCookies(): Promise<string | null> {
   try {
     const cookieStore = await cookies();
@@ -297,6 +306,48 @@ export async function fetchPropertiesPage(
     return { items: [], pageInfo: normalizePagination(undefined) };
   }
   return toPaginatedResult(response);
+}
+
+export async function fetchPortalBookingDetail(
+  bookingId: string,
+): Promise<PortalBookingDetail | null> {
+  const authorization = await resolveAuthHeader();
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (authorization) {
+      headers.Authorization = authorization;
+    }
+
+    const res = await fetch(`${API_URL}/api/portal/bookings/${bookingId}`, {
+      headers,
+      cache: "no-store",
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const json = (await res.json()) as {
+      data?: Booking;
+      customer?: { id: string; email: string; fullName: string | null };
+    };
+
+    if (!json.data || !json.customer) {
+      return null;
+    }
+
+    return {
+      booking: json.data,
+      customer: json.customer,
+    };
+  } catch (error) {
+    console.warn("[api] portal booking detail request threw", error);
+    return null;
+  }
 }
 
 export async function fetchCustomersPage(

@@ -117,6 +117,7 @@ Cada componente debe:
 - Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).
 - Formulario “Solicitar cambio” con opciones (reagendar, cancelar, duda) y texto libre (máx. 500 caracteres).
 - Notificaciones en tiempo real usando el stream SSE existente (suscripción por `customerId`).
+- Pantalla de detalle `/clientes/[customerId]/reservas/[bookingId]` que reutiliza timeline, muestra notas y ofrece CTA de soporte.
 
 ### 8.3 Métricas y observabilidad
 
