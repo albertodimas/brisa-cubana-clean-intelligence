@@ -193,6 +193,18 @@ export async function fetchBookingsPage(
   return toPaginatedResult(response);
 }
 
+export async function fetchCustomerBookings({
+  customerId,
+  status,
+  limit = 20,
+}: {
+  customerId: string;
+  status?: string;
+  limit?: number;
+}): Promise<PaginatedResult<Booking>> {
+  return fetchBookingsPage({ customerId, status, limit });
+}
+
 export async function fetchPropertiesPage(
   params: PaginationQuery = {},
 ): Promise<PaginatedResult<Property>> {
