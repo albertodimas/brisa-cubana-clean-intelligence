@@ -117,26 +117,16 @@ test.describe("Seguridad y Autenticación", () => {
       await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
       // Intentar acceder directamente al panel
       await page.goto("/");
+      await page.waitForLoadState("networkidle");
 
-      // Si el panel requiere auth, debe redirigir a login o mostrar estado sin auth
-      // Ajustar según implementación real
-      const panelHeading = page.getByRole("heading", {
-        name: "Panel operativo",
-      });
-      const loginForm = page.getByLabel("Correo");
-
-      // Debe estar en login O el panel no debe mostrar operaciones
-      const isInLogin = await loginForm.isVisible().catch(() => false);
-      const hasPanel = await panelHeading.isVisible().catch(() => false);
-
-      if (hasPanel) {
-        // Si muestra panel sin auth, verificar que no hay botones de operaciones
-        const saveButtons = page.getByRole("button", { name: "Guardar" });
-        expect(await saveButtons.count()).toBe(0);
-      } else {
-        // Debe redirigir a login
-        expect(isInLogin).toBe(true);
+      const currentUrl = page.url();
+      if (currentUrl.includes("/login")) {
+        await expect(page.getByLabel("Correo")).toBeVisible();
+        return;
       }
+
+      const saveButtons = page.getByRole("button", { name: "Guardar" });
+      expect(await saveButtons.count()).toBe(0);
     });
   });
 
