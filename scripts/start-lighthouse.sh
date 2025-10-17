@@ -9,6 +9,7 @@ export JWT_SECRET="${JWT_SECRET:-test-jwt-secret}"
 export AUTH_SECRET="${AUTH_SECRET:-test-auth-secret}"
 export ENABLE_TEST_UTILS="${ENABLE_TEST_UTILS:-false}"
 export LHCI_BYPASS_TOKEN="${LHCI_BYPASS_TOKEN:-local-lhci-bypass}"
+export ENABLE_HSTS="${ENABLE_HSTS:-false}"
 
 pnpm --filter @brisa/api build >/dev/null
 pnpm --filter @brisa/web build >/dev/null
