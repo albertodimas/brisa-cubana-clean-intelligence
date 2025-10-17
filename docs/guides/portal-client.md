@@ -105,13 +105,14 @@ Checklist previo a habilitar cambios en producción:
 
 ## 7. Resolución de incidencias comunes
 
-| Síntoma                                   | Causa probable                                                    | Mitigación                                                                             |
-| ----------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| El enlace mágico muestra "Token inválido" | Token expirado o consumido                                        | Generar nuevo enlace; verificar hora del servidor y `MAGIC_LINK_TTL_MINUTES`.          |
-| El dashboard no carga reservas            | Seed incompleto o token sin scope `portal-client`                 | Ejecutar `pnpm --filter @brisa/api db:seed:demo` o revisar firma JWT (`scope`, `aud`). |
-| Acciones de cancelación/reschedule fallan | Reserva ya en estado `IN_PROGRESS/COMPLETED` o falta notificación | Validar estado, revisar logs API (`Portal booking ...`).                               |
-| Logout no elimina cookies                 | Proxy sin limpiar `Set-Cookie`                                    | Revisar `app/api/[...route]/route.ts` y asegurar `set-cookie` se propaga.              |
-| No llegan correos en producción           | SMTP bloqueado o campos faltantes                                 | Revisar credenciales en Vercel, confirmar `PORTAL_MAGIC_LINK_FROM`.                    |
+| Síntoma                                   | Causa probable                                                    | Mitigación                                                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| El enlace mágico muestra "Token inválido" | Token expirado o consumido                                        | Generar nuevo enlace; verificar hora del servidor y `MAGIC_LINK_TTL_MINUTES`.                        |
+| El dashboard no carga reservas            | Seed incompleto o token sin scope `portal-client`                 | Ejecutar `pnpm --filter @brisa/api db:seed:demo` o revisar firma JWT (`scope`, `aud`).               |
+| Acciones de cancelación/reschedule fallan | Reserva ya en estado `IN_PROGRESS/COMPLETED` o falta notificación | Validar estado, revisar logs API (`Portal booking ...`).                                             |
+| Logout no elimina cookies                 | Proxy sin limpiar `Set-Cookie`                                    | Revisar `app/api/[...route]/route.ts` y asegurar `set-cookie` se propaga.                            |
+| No llegan correos en producción           | SMTP bloqueado o campos faltantes                                 | Revisar credenciales en Vercel, confirmar `PORTAL_MAGIC_LINK_FROM`.                                  |
+| API responde 503 al solicitar enlace      | SMTP no configurado (`PORTAL_MAGIC_LINK_*` incompletas)           | Completar variables en Vercel; sin SMTP la API rechaza la solicitud para evitar falsas expectativas. |
 
 ---
 
