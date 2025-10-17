@@ -80,6 +80,19 @@ router.post("/request", async (c) => {
     "Magic link solicitado para cliente",
   );
 
+  if (!delivery.delivered) {
+    const status = delivery.reason === "not-configured" ? 503 : 500;
+    return c.json(
+      {
+        error:
+          delivery.reason === "not-configured"
+            ? "No está configurado el correo de enlaces mágicos. Contacta al equipo de operaciones."
+            : "No pudimos enviar el enlace mágico. Intenta más tarde.",
+      },
+      status,
+    );
+  }
+
   const responsePayload: Record<string, unknown> = {
     message: "Enlace de acceso enviado.",
     expiresAt: expiresAt.toISOString(),

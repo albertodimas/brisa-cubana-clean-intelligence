@@ -355,6 +355,36 @@ Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite 
 | Latencia API `/api/portal/bookings` P95                               | Vercel Analytics             | < 500 ms.                                             |
 | Tasa de correos fallidos                                              | Logs API                     | 0 fallos; alerta inmediata ante ≥1.                   |
 
+### 5.6 Procedimiento para habilitar alertas (ejecutar una vez)
+
+1. **Conectar Slack a Sentry**
+   - Sentry → _Settings → Integrations → Slack → Add Workspace_.
+   - Autoriza el workspace `brisa-cubana` y selecciona:
+     - `#brisa-critical` (errores críticos / tasa de error).
+     - `#brisa-alerts` (issues nuevos y regresiones).
+     - `#brisa-performance` (latencia / rendimiento).
+2. **Crear reglas de issues**
+   - _When a new issue is created_ → Slack `#brisa-alerts`, email `ops@brisacubanaclean.com`.
+   - _When issue state changes to regressed_ → Slack `#brisa-alerts`.
+3. **Crear alertas métricas**
+   - Error rate > 5 % (dataset Transactions, env Production) → Slack `#brisa-critical`, email `oncall@brisacubanaclean.com`.
+   - Latencia P95 > 2000 ms (`transaction.op = http.server`) → Slack `#brisa-performance`.
+   - `message:"notifications.stream.fallback"` ≥ 3 eventos / 5 min → Slack `#brisa-alerts`.
+4. **Validación**
+   - Ejecutar `pnpm exec sentry-cli send-event` (web/API) y confirmar notificación en Slack.
+   - Adjuntar captura o enlace a la regla en `docs/operations/alerts.md`.
+5. **Actualizar tabla 5.7** con la fecha y responsable que completó cada integración.
+
+### 5.7 Registro de implementación (completar al habilitar)
+
+| Fecha       | Responsable | Integración                                  | Evidencia |
+| ----------- | ----------- | -------------------------------------------- | --------- |
+| _Pendiente_ | _Asignar_   | Slack ↔ Sentry (issues nuevos)              |           |
+| _Pendiente_ | _Asignar_   | Error rate > 5 %                             |           |
+| _Pendiente_ | _Asignar_   | Latencia P95 > 2 s                           |           |
+| _Pendiente_ | _Asignar_   | Fallback SSE `notifications.stream.fallback` |           |
+| _Pendiente_ | _Asignar_   | KPIs de negocio en Grafana/Loki              |           |
+
 ## 6. Health Checks
 
 ### 6.1 Endpoint de Health

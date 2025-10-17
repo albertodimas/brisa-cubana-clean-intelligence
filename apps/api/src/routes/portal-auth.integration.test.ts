@@ -237,6 +237,23 @@ describe("Portal auth routes", () => {
     expect(secondVerify.status).toBe(400);
   });
 
+  it("retorna 503 cuando el correo no está configurado", async () => {
+    sendPortalMagicLinkEmailMock.mockResolvedValueOnce({
+      delivered: false,
+      reason: "not-configured",
+    });
+
+    const response = await app.request("/api/portal/auth/request", {
+      method: "POST",
+      body: JSON.stringify({ email: "client@portal.test" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(response.status).toBe(503);
+    const body = await jsonResponse<{ error?: string }>(response);
+    expect(body.error).toMatch(/correo de enlaces mágicos/i);
+  });
+
   it("rechaza token expirado", async () => {
     const expiredHash = createHash("sha256")
       .update("expired-token")
