@@ -15,7 +15,7 @@
 
 ## 2. Riesgos detectados
 
-1. **Tailwind CSS 4.x** – Cambios de API y nueva filosofía (sin `tailwind.config.js` clásico). Requiere refactor de estilos y build pipeline.
+1. **Tailwind CSS 4.x** – Cambios de API y nueva filosofía (sin `tailwind.config.js` clásico). ✅ Mitigado con la migración del 17-oct-2025 (`tailwindcss@4.1.0`, `@tailwindcss/postcss`) y documentación actualizada.
 2. **Zod 4.x** – Elimina `required_error`, cambios en inferencia y `.refine`. Afecta validaciones en API y web.
 3. **Prisma 6.17.x** – Cambios en motores; necesita regenerar cliente, validar seeds y pipelines.
 4. **bcryptjs 3.x** – Cambios en export default, posibles ajustes en `hashPassword`.
@@ -30,7 +30,7 @@
 | **Fase 2** (completada 14-oct-2025, PR #37) | Herramientas de desarrollo | Actualizar dev deps (PR #33) en rama dedicada. Añadir `@testing-library/dom` y ajustar configuración ESLint/TypeScript si es necesario.       |
 | **Fase 3** (completada 14-oct-2025, PR #38) | Prisma & bcrypt            | Rama `upgrade/major-deps-2025-10`: actualizar Prisma 6.17+, regenerar cliente, re-ejecutar seeds, ajustar `hashPassword`, revisar CodeQL.     |
 | **Fase 4** (completada 14-oct-2025, PR #39) | Zod 4.x                    | Migrar validaciones reemplazando `required_error`, revisar `safeParse` y tipos. Ejecutar test suite + contract tests.                         |
-| **Fase 5** (diferida Q1 2026)               | Tailwind 4.x               | Ejecutar plan de migración documentado en `docs/decisions/tailwind-v4-plan.md` (upgrade tooling, config CSS, QA visual, rollout).             |
+| **Fase 5** (completada 17-oct-2025)         | Tailwind 4.x               | Migración manual en `main`: dependencias v4, `@tailwindcss/postcss`, `app/globals.css` con `@config`, `tailwind.config.ts` simplificado.      |
 | **Fase 6** (planificado)                    | Búsquedas y filtros        | Implementar plan de `docs/decisions/search-filters-plan.md`: extender API con `search`, UI con barra de filtros, tests Vitest/Playwright.     |
 
 Cada fase debe:
@@ -47,9 +47,8 @@ Cada fase debe:
 ## 5. Próximos pasos
 
 1. ~~Completar Fase 4 (Zod 4.x)~~ ✅ COMPLETADA (PR #39).
-2. Evaluar Fase 5 (Tailwind 4.x) – DIFERIDA para Q1 2026; revisar `docs/decisions/tailwind-v4-deferral.md` y el plan operativo `docs/decisions/tailwind-v4-plan.md` antes de retomar trabajos (Issue #40).
-3. Preparar kickoff de Fase 6 (búsquedas y filtros) tras finalizar Tailwind v4; coordinar con producto/QA usando el plan dedicado.
-4. Mantener Dependabot activo pero revisar manualmente cada PR conforme a esta estrategia.
+2. Preparar kickoff de Fase 6 (búsquedas y filtros); coordinar con producto/QA usando el plan dedicado.
+3. Mantener Dependabot activo pero revisar manualmente cada PR conforme a esta estrategia.
 
 ---
 

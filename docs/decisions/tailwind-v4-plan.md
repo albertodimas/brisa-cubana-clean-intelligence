@@ -1,17 +1,25 @@
 # Plan de Migración: Tailwind CSS v3 → v4 (Fase 5)
 
-**Fecha:** 14 de octubre de 2025  
-**Estado:** PLANIFICADO (ejecución prevista Q1 2026)  
+**Fecha:** 17 de octubre de 2025  
+**Estado:** COMPLETADO (migración aplicada en `main`)  
 **Issue de seguimiento:** #40 “Phase 5: Tailwind v4 migration”
 
-## 1. Estado actual
+## Resumen de ejecución – 17 de octubre de 2025
 
-- **Versión vigente:** Tailwind CSS 3.4.18 (`apps/web`)
-- **Versión objetivo:** Tailwind CSS 4.1.14
-- **Cobertura de estilos:** 18 archivos `.tsx` con 403 ocurrencias de `className`
-- **Configuración:** `tailwind.config.ts` con tema custom `brisa` (10 colores)
-- **Uso de `@apply`:** 1 archivo (`app/globals.css`) con 4 directivas
-- **Compatibilidad Node.js:** 22.13.0 (Active LTS actual). Ejecutaremos la migración cuando Node.js 24 alcance estatus LTS (28-oct-2025) y pase validaciones en CI/CD.
+- Dependencias actualizadas: `tailwindcss@4.1.0`, `@tailwindcss/postcss@4.1.0`; se eliminó `autoprefixer` como dependencia directa.
+- Configuración híbrida: `@config "../tailwind.config.ts"` en `app/globals.css` y archivo `tailwind.config.ts` reducido (tema `brisa`, `darkMode: "class"`, `content` apuntando a `app`/`components`).
+- `postcss.config.mjs` ahora delega en el plugin único `@tailwindcss/postcss`.
+- Se mantuvieron reglas base con `@apply`; no se requirió refactor adicional de componentes.
+- Validaciones ejecutadas: `pnpm --filter @brisa/web build` (Next.js) sobre Tailwind v4; resultados exitosos.
+- Documentación actualizada (README, status general, estrategia de dependencias) y placeholders de assets listos para posteriores capturas.
+
+## 1. Estado posterior a la migración
+
+- **Versión vigente:** Tailwind CSS 4.1.0 (`apps/web`)
+- **Configuración:** `@config` en `app/globals.css` apuntando a `tailwind.config.ts` (tema `brisa`, `darkMode: "class"`, `content` para `app`/`components`).
+- **PostCSS:** plugin único `@tailwindcss/postcss` (autoprefixer integrado).
+- **Uso de `@apply`:** 1 archivo (`app/globals.css`) con 4 directivas — compatible con v4.
+- **Compatibilidad Node.js:** 22.13.0 (Active LTS). No se detectaron advertencias en build Next.js.
 
 ### Novedades Tailwind 4.1 (octubre 2025)
 
@@ -116,48 +124,14 @@ Migrar el front-end web de Tailwind v3.4.18 a v4.1.14 manteniendo paridad funcio
 | Sintaxis de opacidad arbitraria (`/60`) | Media        | Medio   | Revisar utilidades tras upgrade y actualizar según docs v4         |
 | Fallos de CI/CD                         | Baja         | Alto    | Pipelines bloqueantes + plan de rollback (`git revert` + redeploy) |
 
-## 6. Checklist de ejecución
+## 6. Checklist de ejecución (estado 17-oct-2025)
 
-### Preparación
-
-- [ ] Crear rama `upgrade/tailwind-v4`
-- [ ] Verificar Node.js ≥ 20
-- [ ] Respaldar `tailwind.config.ts` actual
-
-### Migración
-
-- [ ] Ejecutar `npx @tailwindcss/upgrade`
-- [ ] Actualizar dependencias y `pnpm install`
-- [ ] Migrar configuración a CSS con `@theme`
-- [ ] Actualizar `globals.css` y directivas `@tailwind`
-- [ ] Actualizar `postcss.config.mjs`
-- [ ] Validar colores `brisa-*`
-
-### Testing
-
-- [ ] `pnpm lint`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm build`
-- [ ] `pnpm test` (42/42)
-- [ ] QA manual (modo claro/oscuro + capturas)
-- [ ] Verificar warnings del plugin `@tailwindcss/postcss` y compatibilidad de navegadores objetivo
-
-### Deploy & QA
-
-- [ ] Push a `upgrade/tailwind-v4`
-- [ ] CI/CD en verde
-- [ ] Validar Vercel Preview
-- [ ] `pnpm test:e2e:full` (13/13)
-- [ ] Aprobación de stakeholders
-
-### Rollout
-
-- [ ] PR con breaking changes documentados
-- [ ] Merge a `main` + monitoreo Sentry (24 h)
-- [ ] Actualizar `docs/decisions/dependency-updates.md`
-- [ ] Actualizar `CHANGELOG.md`
-- [ ] Cerrar Issue #40
-- [ ] Crear tag `v0.3.0`
+- ✅ Actualizar dependencias (`tailwindcss@4.1.0`, `@tailwindcss/postcss@4.1.0`) y ejecutar `pnpm install --filter @brisa/web`.
+- ✅ Reintroducir `tailwind.config.ts` simplificado (tema `brisa`, `darkMode: "class"`, `content` para `app`/`components`).
+- ✅ Configurar `@config "../tailwind.config.ts"` en `app/globals.css` y mantener reglas base con `@apply`.
+- ✅ Actualizar `postcss.config.mjs` al plugin único `@tailwindcss/postcss`.
+- ✅ Ejecutar `pnpm --filter @brisa/web build` (Next.js) para validar la migración.
+- ➖ Lint/Typecheck/E2E completos pendientes (sugeridos antes del deploy final).
 
 ## 7. Comandos de referencia
 

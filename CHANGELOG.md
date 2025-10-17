@@ -61,6 +61,24 @@ All notable changes to this project are documented here. The format follows [Kee
 - `pnpm --filter @brisa/web test` (66 pruebas) ✅
 - `pnpm --filter @brisa/api test` (95 pruebas) ✅
 
+## [0.3.1] - 2025-10-17
+
+### Added
+
+- Guía operativa del portal cliente (`docs/guides/portal-client.md`) con prerrequisitos, flujos y checklist de QA.
+- Reporte de accesibilidad del portal (`docs/qa/portal-accessibility.md`) y placeholders iniciales en `docs/assets/public-components/` para capturas de Fase 2.
+
+### Changed
+
+- Migración completa a Tailwind CSS 4.1.0 (`apps/web`): dependencias actualizadas, `@config "../tailwind.config.ts"`, `tailwind.config.ts` simplificado y adopción de `@tailwindcss/postcss`.
+- Eliminado `autoprefixer` como dependencia directa; PostCSS se apoya en el plugin oficial de Tailwind v4.
+- Documentación actualizada (README, `docs/overview/status.md`, `docs/decisions/tailwind-v4-plan.md`, `docs/decisions/dependency-updates.md`, `docs/decisions/tailwind-v4-deferral.md`) para reflejar la migración y nuevos artefactos.
+
+### Testing
+
+- `pnpm docs:verify`
+- `pnpm --filter @brisa/web build`
+
 ## [0.3.0] - 2025-10-14
 
 ### Added

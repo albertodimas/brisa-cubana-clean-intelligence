@@ -8,7 +8,7 @@ Actualizado al **17 de octubre de 2025** con **188 pruebas automatizadas** (161 
 - **Frontend:** Next.js 15.5.5 + React 19.2.0 (`apps/web`) con Auth.js (NextAuth v5), server actions y proxy interno `/api/*` hacia la API Hono (`INTERNAL_API_URL`).
 - **API:** Hono 4.9.12 (`apps/api`) sobre Node.js 22, autenticación JWT, RBAC por middleware, rate limiting configurable y repositorios Prisma desacoplados.
 - **Persistencia:** Prisma ORM 6.17.1 sobre PostgreSQL 16 (Docker local) / PostgreSQL 17 (Neon en producción) con soft delete (`deletedAt`) en todos los modelos.
-- **Estilos:** Tailwind CSS 3.4.18 (migración a Tailwind v4 planificada para Q1 2026 en el Issue #40 siguiendo el ADR `docs/decisions/tailwind-v4-deferral.md`).
+- **Estilos:** Tailwind CSS 4.1.0 (configuración híbrida `@config` + `tailwind.config.ts`, migrada el 17-oct-2025 según `docs/decisions/tailwind-v4-plan.md`).
 - **Observabilidad:** Logging con Pino, métricas básicas en `/health`, captura de errores con Sentry y Web Vitals a través de Speed Insights + métricas personalizadas.
 - **Tooling base:** pnpm 10.18, Turborepo 2.5.8, TypeScript 5.9, Vitest 3.2, Playwright 1.56, Husky + lint-staged, CI en GitHub Actions.
 
@@ -108,5 +108,5 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
 
 ## Desarrollo activo
 
-El proyecto continúa en desarrollo controlado. Siguiente hito: **Fase 5 – migración a Tailwind v4 (Issue #40, Q1 2026)** con investigación previa documentada en el ADR correspondiente.  
+El proyecto continúa en desarrollo controlado. Próximos hitos: consolidar componentes públicos (Fase 2) y desplegar alertas de observabilidad avanzadas (Slack + métricas de negocio).  
 Se aceptan contribuciones que mantengan la regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI.** Usa `pnpm docs:verify` antes de abrir un PR y mantén Playwright/Vitest verdes.

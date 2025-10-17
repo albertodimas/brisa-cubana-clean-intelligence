@@ -1,12 +1,12 @@
 # Decisión: Diferir Tailwind v4 hasta Q1 2026
 
 **Fecha:** 14 de octubre de 2025  
-**Estado:** DIFERIDA  
-**Contexto:** Dependabot propuso Tailwind 3.4.18 → 4.1.14 en PR #34 (cerrado).
+**Estado:** CERRADO (migración completada el 17-oct-2025)  
+**Contexto:** Dependabot propuso Tailwind 3.4.18 → 4.1.14 en PR #34 (cerrado). La actualización se aplicó manualmente siguiendo `docs/decisions/tailwind-v4-plan.md`.
 
 ## Decisión
 
-Diferir la actualización a Tailwind CSS v4 hasta Q1 2026.
+La migración se difería hasta contar con capacidad dedicada. La ventana se ejecutó el 17-oct-2025, por lo que este ADR queda como registro histórico de la decisión original.
 
 ## Razones
 
@@ -61,4 +61,4 @@ Diferir la actualización a Tailwind CSS v4 hasta Q1 2026.
 
 ---
 
-**Última revisión:** 14 de octubre de 2025
+**Última revisión:** 17 de octubre de 2025

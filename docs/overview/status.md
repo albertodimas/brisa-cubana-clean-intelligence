@@ -19,7 +19,7 @@
 - Stripe modo test configurado en Vercel (Development/Preview/Production) con claves temporales `*_brisa_demo_20251015`; programar rotación al habilitar modo live.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
 - Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Accesibilidad validada (WCAG 2.2 AA) con fixes `aria-live` y `aria-hidden` implementados (commit `ce37e09`, 17-oct-2025). Funcionalidades de autoservicio adicionales (PDF exports, SSE push) siguen planificadas para Fase 2.1/2.2 (ver [RFC §8](../product/rfc-public-components.md#8-portal-cliente)) y se documentan en la guía operativa [docs/guides/portal-client.md](../guides/portal-client.md).
-- Release etiquetado `v0.3.0` (14-oct-2025) completa las mejoras de búsqueda y filtros en el panel operativo; la Fase 2 comercial (landing, checkout, portal cliente) está documentada en `product/phase-2-roadmap.md`. La migración Tailwind v4 (Fase 5) sigue programada para Q1 2026 (Issue #40).
+- Release etiquetado `v0.3.0` (14-oct-2025) completa las mejoras de búsqueda y filtros en el panel operativo; la Fase 2 comercial (landing, checkout, portal cliente) está documentada en `product/phase-2-roadmap.md`. El 17-oct-2025 se ejecutó la migración a Tailwind CSS 4.1.0 (Issue #40) adoptando `@tailwindcss/postcss` y configuración híbrida.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
@@ -326,27 +326,22 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 
 ### Pendiente 🔄
 
-1. **Fase 5 – Tailwind v4 (Issue #40, Q1 2026):**
-   - Ejecutar las Fases 5.1–5.6 detalladas en `docs/decisions/tailwind-v4-plan.md`.
-   - Validar hitos de la checklist de `docs/decisions/tailwind-v4-deferral.md` antes del merge.
-   - Ejecutar QA visual en previews de Vercel y validar con stakeholders.
-
-2. **Observabilidad avanzada:**
+1. **Observabilidad avanzada:**
    - Configurar alertas Sentry en Slack/Email (procedimiento documentado en `docs/operations/observability.md` §5, falta ejecución en entornos).
    - Dashboard de métricas de negocio (Grafana)
    - Expandir reportes automatizados con dashboards (Nightly Lighthouse ya en ejecución)
 
-3. **Roadmap funcional:**
+2. **Roadmap funcional:**
    - Sistema de estilos compartido (definir tras migración Tailwind v4)
    - Landing comercial + flujo de reserva pública (servicio → fecha → pago)
    - Portal cliente con historial y facturación
 
-4. **Arquitectura (Sprint 2-3):**
+3. **Arquitectura (Sprint 2-3):**
    - Implementar dependency injection con interfaces creadas
    - Separar tests de integración de tests unitarios
    - Repositorios concretos implementando interfaces
 
-5. **DevOps:**
+4. **DevOps:**
    - Postdeploy hook automático para seed inicial
    - Documentar proceso de deployment en `DEPLOYMENT.md`
    - Staging environment dedicado para pruebas previas a producción
