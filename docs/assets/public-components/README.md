@@ -3,6 +3,10 @@
 **Última actualización:** 17 de octubre de 2025
 **Propósito:** Capturas de referencia visual para layouts de landing, checkout y portal cliente documentados en [RFC](../../product/rfc-public-components.md).
 
+**🎨 Integración Figma:** ✅ Configurada con exportación CLI automatizada
+**Guía completa:** [docs/guides/figma-integration.md](../guides/figma-integration.md)
+**Comando:** `pnpm figma:export`
+
 ---
 
 ## 📋 Archivos Actuales
@@ -17,81 +21,72 @@
 
 ---
 
-## 🎨 Procedimiento de Exportación desde Figma
+## 🎨 Exportación Automatizada desde Figma
 
-### Requisitos previos
+### Método Recomendado: CLI (Automatizado)
 
-- Acceso al proyecto Figma "Brisa · Público"
-- Permisos de exportación de frames
-- Navegador actualizado (Chrome/Firefox)
+**Guía completa:** [docs/guides/figma-integration.md](../guides/figma-integration.md)
 
-### Pasos para exportar
+#### Setup inicial (una vez)
+
+1. **Configura credenciales** en `.env.local`:
+
+   ```bash
+   FIGMA_ACCESS_TOKEN="figd_your_token_here"
+   FIGMA_FILE_KEY="K9Xu2wZ3mT4vLp8qR1nY5e"
+   ```
+
+2. **Organiza diseños en Figma** con nombres específicos:
+   - Frame: "Hero Background Image"
+   - Frame: "CTA Illustration"
+   - Frame: "Features Icon Set"
+
+#### Exportar assets (cada vez que cambien diseños)
+
+```bash
+pnpm figma:export
+```
+
+**Resultado:**
+
+- ✅ Descarga automática de PNG 2x (retina)
+- ✅ Optimización con pngquant
+- ✅ Guardado en `docs/assets/public-components/`
+
+#### Personalizar exports
+
+Edita `scripts/figma/export-assets.ts`:
+
+```typescript
+const ASSET_NODES = {
+  "landing-hero": "Landing Hero Section", // ← Personaliza nombres
+  "checkout-step1": "Checkout Step 1",
+};
+```
+
+---
+
+### Método Alternativo: Exportación Manual
+
+Si prefieres no usar CLI, sigue el procedimiento manual:
 
 #### 1. Preparación en Figma
 
-1. Abrir el archivo de diseño en Figma
-2. Navegar a la página correspondiente
-3. Seleccionar el frame completo a exportar (clic en el panel izquierdo o sobre el frame en el canvas)
+1. Abrir archivo de diseño
+2. Seleccionar frame a exportar
+3. Panel derecho → "Export" → PNG, 2x, Export
 
-#### 2. Configurar parámetros de exportación
-
-**Para desktop (1440px):**
-
-```
-Panel derecho → "Export" → "+ Add export settings"
-- Format: PNG
-- Size: 2x (retina)
-- Suffix: -desktop (opcional, renombrar después)
-Click "Export [nombre-frame]"
-```
-
-**Para mobile (768px o 375px):**
-
-```
-Seleccionar frame mobile correspondiente
-- Format: PNG
-- Size: 2x
-- Suffix: -mobile
-```
-
-#### 3. Optimización de imágenes
-
-Después de exportar, optimizar tamaño de archivo:
+#### 2. Optimización local
 
 ```bash
-# Opción A: pngquant (reducción con pérdida aceptable)
 pngquant --quality=80-95 --ext .png --force landing-desktop.png
-
-# Opción B: optipng (sin pérdida)
-optipng -o5 landing-desktop.png
 ```
 
-**Objetivo:** < 500KB por imagen desktop, < 200KB por imagen mobile.
-
-#### 4. Reemplazar placeholders
+#### 3. Copiar al repositorio
 
 ```bash
-# Desde raíz del repositorio
-cd docs/assets/public-components/
-
-# Copiar archivos exportados
-cp ~/Downloads/Landing-2x.png landing-desktop.png
-cp ~/Downloads/Checkout-2x.png checkout-flow.png
-cp ~/Downloads/Portal-2x.png portal-dashboard.png
-
-# Verificar
-file *.png && du -h *.png
+cp ~/Downloads/Landing-2x.png docs/assets/public-components/landing-desktop.png
 ```
-
-#### 5. Actualizar tabla de seguimiento
-
-Editar este README y actualizar la tabla de §1:
-
-```markdown
-| `landing-desktop.png` | 1440×2800 | ✅ Actual | Hero + servicios + CTA | 2025-10-17 |
-```
-
-Cambiar estado: ⏸️ Placeholder → ✅ Actual
 
 ---
 
