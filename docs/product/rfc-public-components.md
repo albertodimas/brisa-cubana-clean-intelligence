@@ -115,9 +115,9 @@ Cada componente debe:
 - Dashboard consume `/api/portal/bookings` con SWR y muestra expiración de sesión (`session.expiresAt`). ✅
 - Acciones rápidas “Reagendar” y “Cancelar” usan endpoints dedicados, registran telemetría (`portal.booking.rescheduled`, `portal.booking.cancelled`) y generan notificaciones para roles `ADMIN`/`COORDINATOR`. ✅
 - Pantalla de detalle `/clientes/[customerId]/reservas/[bookingId]` con timeline y CTA de soporte. ✅
-- Exportación PDF (`/api/bookings/:id/receipt`). 🔄 Definir alcance y UX antes del GA.
-- Notificaciones en tiempo real vía SSE (`/api/notifications/stream`). 🔄 Suscripción portal pendiente.
-- Formulario “Solicitar cambio” extendido (motivos adicionales, adjuntos). 🔄 Posterior al GA.
+- Exportación PDF (`/api/bookings/:id/receipt`). ⏸️ Fase 2.1 – Definir alcance y UX antes del GA.
+- Notificaciones en tiempo real vía SSE (`/api/notifications/stream`). ⏸️ Fase 2.1 – Suscripción portal cliente pendiente (API ya implementada).
+- Formulario "Solicitar cambio" extendido (motivos adicionales, adjuntos). ⏸️ Fase 2.2 – Posterior al GA (mejora iterativa).
 
 ### 8.3 Métricas y observabilidad
 
@@ -129,8 +129,8 @@ Cada componente debe:
 ### 8.4 Checklist para go-live
 
 - [x] Cubrir rutas `/clientes` y `/clientes/reservas/:id` con pruebas Playwright (@critical).
-- [x] Documentar flujo de recuperación de acceso (link mágico) y proceso manual de fallback (`docs/guides/portal-client.md`).
-- [ ] Revisar accesibilidad (WCAG AA) usando axe DevTools + QA manual.
+- [x] Documentar flujo de recuperación de acceso (link mágico) y proceso manual de fallback ([docs/guides/portal-client.md](../guides/portal-client.md)).
+- [x] Revisar accesibilidad (WCAG AA) usando axe DevTools + QA manual ([docs/qa/portal-accessibility.md](../qa/portal-accessibility.md), fixes commit `ce37e09`).
 
 ## 9. Documentos relacionados
 
