@@ -6,12 +6,12 @@
 
 ## 1. Infraestructura recomendada
 
-| Recurso                                                                                               | Descripción                                      | Observaciones                                                          |
-| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------- |
-| Vercel Project (`brisa-cubana-clean-intelligence-staging`, id `prj_B073TvwDxTCrAqrhB3lSdLrnQCgm`)     | Next.js + proxy `/api/*`                         | Clonar configuración del proyecto principal, habilitar rama `staging`. |
-| Vercel Project (`brisa-cubana-clean-intelligence-api-staging`, id `prj_lPoMbFIpj9aXsb7HpYjgN83yx4so`) | API Hono                                         | Compartir esquema Prisma con base dedicada.                            |
-| Base de datos                                                                                         | Neon branch `staging` (`br-sweet-pine-adbdrcsp`) | Clonar producción y rotar secretos. Compute `ep-rapid-king-adr7fiux`.  |
-| Stripe                                                                                                | Cuenta/conexión “modo test”                      | Claves independientes de producción.                                   |
+| Recurso                                                                                               | Descripción                                 | Observaciones                                                          |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------- |
+| Vercel Project (`brisa-cubana-clean-intelligence-staging`, id `prj_B073TvwDxTCrAqrhB3lSdLrnQCgm`)     | Next.js + proxy `/api/*`                    | Clonar configuración del proyecto principal, habilitar rama `staging`. |
+| Vercel Project (`brisa-cubana-clean-intelligence-api-staging`, id `prj_lPoMbFIpj9aXsb7HpYjgN83yx4so`) | API Hono                                    | Compartir esquema Prisma con base dedicada.                            |
+| Base de datos                                                                                         | Neon branch `staging` o Postgres gestionado | Clonar producción y rotar secretos.                                    |
+| Stripe                                                                                                | Cuenta/conexión “modo test”                 | Claves independientes de producción.                                   |
 
 ## 2. Variables de entorno
 
