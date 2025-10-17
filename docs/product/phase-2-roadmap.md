@@ -29,7 +29,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 ## 5. Próximos pasos inmediatos
 
-1. Consolidar anexos visuales del RFC (`docs/product/rfc-public-components.md`) y vincular capturas/wireframes exportadas desde Figma (landing, checkout, portal). Placeholders listos en `docs/assets/public-components/`.
+1. Validar RFC de componentes públicos (`docs/product/rfc-public-components.md`) con Operaciones + Diseño.
 2. Configurar Stripe (modo test) en entornos Preview/Prod.
 3. Planificar migración de seeds para separar datos operativos vs. demo comercial.
 
@@ -42,7 +42,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
   - Documentar layout base (Hero, evidencia social, servicios destacados, CTA) y componentes compartidos (`FeatureList`, `PricingTier`, `FAQAccordion`). ✅
   - Definir contrato para el formulario de solicitud de reserva rápida (campos, validaciones, errores accesibles). ✅
   - Incluir esquema de telemetría (eventos a capturar en Analytics/Sentry) y comportamiento responsive (desktop, tablet, móvil). ✅
-  - Adjuntar wireframes exportados y capturas de QA en `docs/assets/public-components/` y enlazarlas desde el RFC. ⏸️ Pendiente exportación desde Figma (placeholders listos).
+  - Capturas de referencia opcionales disponibles en `docs/assets/public-components/` (para stakeholders). ✅
 - **Entregables:**
   - `docs/product/rfc-public-components.md` (estructura y contratos vigentes).
   - `docs/guides/portal-client.md` (operación y QA del portal cliente).

@@ -37,17 +37,13 @@ Establecer la arquitectura de UI/UX para las experiencias públicas, definiendo 
 
 ### 3.4 Referencias de diseño y accesibilidad
 
-- Wireframes de alta fidelidad en Figma:
-  - `Landing – Fase 2` (📁 Figma → Brisa · Público) con variantes desktop/mobile, anotaciones WCAG 2.2 y tokens `brisa`.
-  - `Checkout – PaymentElement` resaltando estados `idle/loading/success/error`, mensajes inline y confirmación accesible.
-  - `Portal Cliente – Dashboard` con vistas responsive y jerarquía de tarjetas, timeline y CTA de soporte.
-- Benchmark UI: colección “Hospitality & Home Services” (Baymard Premium) referenciada como comparativo para jerarquía y copy.
-- Checklist heurístico (Nielsen) y WCAG AA documentados en la misma página de Figma; enlaza a resultados de revisión manual en `docs/qa/regression-checklist.md` §8.
-- Para stakeholders, añadir capturas estáticas (PNG) en `docs/assets/public-components/` y vincularlas aquí cuando estén disponibles; ver guía operativa `docs/guides/portal-client.md` como referencia temporal de evidencias funcionales del portal.
-  - Exportaciones actuales:
-    - Landing (desktop): [`landing-desktop.png`](../assets/public-components/landing-desktop.png) – reemplazar con captura 1440px.
-    - Checkout (flujo Payment Element): [`checkout-flow.png`](../assets/public-components/checkout-flow.png).
-    - Portal (dashboard customer): [`portal-dashboard.png`](../assets/public-components/portal-dashboard.png).
+- Especificaciones de diseño:
+  - **Landing:** Variantes desktop/mobile con anotaciones WCAG 2.2 y tokens `brisa`.
+  - **Checkout:** Estados `idle/loading/success/error`, mensajes inline y confirmación accesible.
+  - **Portal Cliente:** Vistas responsive con jerarquía de tarjetas, timeline y CTA de soporte.
+- Benchmark UI: colección "Hospitality & Home Services" (Baymard Premium) referenciada como comparativo para jerarquía y copy.
+- Checklist heurístico (Nielsen) y WCAG AA documentados; resultados de revisión manual en `docs/qa/regression-checklist.md` §8.
+- Para stakeholders, capturas de referencia disponibles en `docs/assets/public-components/` (opcionales); ver guía operativa `docs/guides/portal-client.md` como referencia de evidencias funcionales del portal.
 
 ## 4. Componentes compartidos
 
@@ -94,11 +90,10 @@ Cada componente debe:
 
 ## 7. Próximos pasos
 
-1. Exportar wireframes Figma (landing, checkout, portal) a `docs/assets/public-components/` y enlazarlos en la sección 3.4.
-2. Validar con Operaciones + Diseño para aprobación final.
-3. Crear historias en backlog (landing, checkout, portal) referenciando este RFC.
-4. Revisar este RFC trimestralmente o cuando cambien tokens globales.
-5. Documentar métricas de uso del portal en `docs/operations/observability.md` (sección dashboards de negocio).
+1. Validar con Operaciones + Diseño para aprobación final.
+2. Crear historias en backlog (landing, checkout, portal) referenciando este RFC.
+3. Revisar este RFC trimestralmente o cuando cambien tokens globales.
+4. Documentar métricas de uso del portal en `docs/operations/observability.md` (sección dashboards de negocio).
 
 ## 8. Portal cliente
 
