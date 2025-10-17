@@ -45,7 +45,8 @@
     "lint-staged": "^16.2.4",
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "tsx": "^4.19.1"
   },
   "pnpm": {
     "overrides": {
