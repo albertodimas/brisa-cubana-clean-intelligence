@@ -1,6 +1,6 @@
 import type { APIRequestContext } from "@playwright/test";
 import { adminEmail } from "./auth";
-import { getAdminAccessToken } from "./services";
+import { getAdminAccessToken, getUserAccessToken } from "./services";
 
 const apiBaseUrl = process.env.E2E_API_URL || "http://localhost:3001";
 
@@ -45,8 +45,15 @@ export async function createNotificationFixture(
 
 export async function markAllNotificationsReadFixture(
   request: APIRequestContext,
+  options: { email?: string; password?: string } = {},
 ) {
-  const accessToken = await getAdminAccessToken(request);
+  const accessToken = options.email
+    ? await getUserAccessToken(
+        request,
+        options.email,
+        options.password ?? "Brisa123!",
+      )
+    : await getAdminAccessToken(request);
   const response = await request.patch(
     `${apiBaseUrl}/api/notifications/read-all`,
     {

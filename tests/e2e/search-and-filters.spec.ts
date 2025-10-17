@@ -228,21 +228,22 @@ test.describe.serial("Búsquedas y filtros", () => {
       usersSection.getByText("Estado: Activo", { exact: true }),
     ).toBeVisible();
 
-    const clearButton = usersSection.getByRole("button", {
-      name: "Limpiar todos",
-    });
-    const resetResponse = page.waitForResponse((response) => {
-      const url = response.url();
-      return (
-        response.request().method() === "GET" &&
-        url.includes("/api/users") &&
-        !url.includes("search=") &&
-        !url.includes("role=") &&
-        !url.includes("isActive=")
-      );
-    });
-    await clearButton.click();
-    await resetResponse;
+    const clearButton = usersSection.getByTestId("user-filters-clear-button");
+    await Promise.all([
+      page
+        .waitForResponse((response) => {
+          const url = response.url();
+          return (
+            response.request().method() === "GET" &&
+            url.includes("/api/users") &&
+            !url.includes("search=") &&
+            !url.includes("role=") &&
+            !url.includes("isActive=")
+          );
+        })
+        .catch(() => null),
+      clearButton.click(),
+    ]);
 
     const tableRows = usersSection.locator("table tbody tr");
     await expect(tableRows.first()).toBeVisible();

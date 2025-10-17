@@ -4,14 +4,19 @@
 
 ### Métricas
 
-- **Total de tests:** 13
-- **Duración total:** ~8 segundos
-- **Archivos:** 3 (auth.spec.ts, operations.spec.ts, security.spec.ts)
-- **Ejecución:** Paralela con workers ilimitados en local, 2 workers en CI
-- **Distribución:**
-  - auth.spec.ts: 1 test (login básico)
-  - operations.spec.ts: 2 tests (crear servicio, filtrar reservas)
-  - security.spec.ts: 10 tests (validaciones, rate limiting, permisos, sesión)
+- **Total de tests:** 27
+- **Duración total (full suite):** ~95 segundos (incluye boot de servidores)
+- **Archivos:** 8 (`auth`, `checkout`, `notifications`, `operations`, `portal-client`, `search-and-filters`, `security`, `user-management`)
+- **Ejecución:** Paralela (workers ilimitados en local; 2 workers en CI para smoke, 2 críticos, 2 full)
+- **Distribución actual (17-oct-2025):**
+  - `auth.spec.ts`: 1 test (login operativo)
+  - `checkout.spec.ts`: 1 test (flujo Payment Element)
+  - `notifications.spec.ts`: 1 test (panel de notificaciones con SSE)
+  - `operations.spec.ts`: 4 tests (CRUD servicios + paginación reservas)
+  - `portal-client.spec.ts`: 1 test (flujo portal cliente end-to-end)
+  - `search-and-filters.spec.ts`: 5 tests (búsquedas combinadas en panel operativo)
+  - `security.spec.ts`: 9 tests (negativos login, rate limiting, sesión)
+  - `user-management.spec.ts`: 5 tests (alta, actualización y activación de usuarios)
 
 ### Problemática Identificada
 
@@ -48,7 +53,7 @@
 - **Timeout:** 30 segundos
 - **Workers:** 2 (para máxima velocidad)
 
-**Objetivo de tiempo:** < 3 segundos
+**Objetivo de tiempo:** < 30 segundos (incluye arranque de Next.js + API)
 
 ---
 
@@ -83,11 +88,11 @@
 - **Timeout:** 60 segundos
 - **Workers:** 4
 
-**Objetivo de tiempo:** < 6 segundos
+**Objetivo de tiempo:** < 60 segundos (boot + 17 pruebas)
 
 ---
 
-#### 3. **Full Suite** (~8-10s)
+#### 3. **Full Suite** (~90-100s)
 
 **Propósito:** Validación exhaustiva de todos los escenarios
 
@@ -101,7 +106,7 @@
 
 **Tests incluidos:**
 
-- **Todos los 13 tests actuales**
+- 27 tests (smoke + critical + escenarios extendidos de seguridad, filtros, usuarios y portal)
 
 **Ejecución:**
 
@@ -113,7 +118,7 @@
 - **Timeout:** 120 segundos
 - **Workers:** 6-8 (máximo paralelismo)
 
-**Objetivo de tiempo:** < 10 segundos
+**Objetivo de tiempo:** < 110 segundos (máximo tolerable con servers en caliente)
 
 ---
 
@@ -124,18 +129,19 @@
 Utilizaremos el sistema de tags de Playwright para categorizar tests:
 
 ```typescript
-// Smoke test
-test("permite iniciar sesión @smoke", async ({ page }) => {
+test("permite iniciar sesión y acceder al panel operativo @smoke @critical", async ({
+  page,
+}) => {
   // ...
 });
 
-// Critical test
-test("permite cerrar sesión @critical", async ({ page }) => {
+test("combina búsqueda y estado en reservas mostrando los filtros activos @critical", async ({
+  page,
+}) => {
   // ...
 });
 
-// Full suite (sin tag especial, se ejecuta por defecto)
-test("rechaza email inválido", async ({ page }) => {
+test("pagina reservas correctamente", async ({ request }) => {
   // ...
 });
 ```
@@ -187,7 +193,7 @@ export default defineConfig({
 
 ### Rate Limiting en Tests Paralelos
 
-**Problema:** Al ejecutar la suite `critical` con 7 workers paralelos, los tests fallaban con error "No se pudo iniciar sesión".
+**Problema (sep-2025):** Al ejecutar la suite `critical` con 7 workers paralelos, los tests fallaban con error "No se pudo iniciar sesión".
 
 **Causa raíz:**
 
@@ -204,20 +210,32 @@ Aumentar el rate limit en entorno de test en `playwright.config.ts`:
   command: "pnpm --filter @brisa/api dev",
   env: {
     NODE_ENV: "test",
-    LOGIN_RATE_LIMIT: "20", // Increased for parallel E2E tests
+    LOGIN_RATE_LIMIT: "20",
     LOGIN_RATE_LIMIT_WINDOW_MS: "60000",
   },
 }
 ```
 
-**Resultado:**
+**Resultado (actualizado 17-oct-2025):**
 
-- ✅ Critical suite: 7/7 tests passing (7.8s)
-- ✅ Full suite: 13/13 tests passing
-- ✅ Smoke suite: 2/2 tests passing (7.1s)
+- ✅ Critical suite: 17 tests en 8 archivos (≈60s)
+- ✅ Full suite: 27 tests en 8 archivos (≈95s)
+- ✅ Smoke suite: 2 tests (≈25s)
 
 **Mejora futura (opcional):**
 Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, permitiendo usar el rate limiting real por IP.
+
+### Estabilidad del panel de notificaciones (oct-2025)
+
+**Problema:** La nightly `full` fallaba de forma intermitente porque el panel de notificaciones refrescaba la lista antes de que el backend confirmara el `PATCH /api/notifications/:id/read`, dejando ítems “fantasma” en la UI.
+
+**Solución (commit 17-oct-2025):**
+
+- Bloquear la UI mientras se procesa `markNotificationReadAction` (`pendingNotificationId`).
+- Evitar que el usuario aplique filtros o “Marcar todas” hasta que la operación actual termine.
+- Ignorar respuestas de paginación obsoletas en `usePaginatedResource` mediante un token por petición.
+
+**Resultado:** Nightly Playwright `full` en verde; suite crítica estable con SSE + filtros simultáneos.
 
 ---
 

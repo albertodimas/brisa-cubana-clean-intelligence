@@ -209,6 +209,9 @@ export function UsersManager({
               }
             : undefined
         }
+        clearAllTestId={
+          filters.length > 0 ? "user-filters-clear-button" : undefined
+        }
       />
 
       {isLoading ? (

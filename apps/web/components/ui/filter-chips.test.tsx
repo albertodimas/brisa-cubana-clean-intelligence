@@ -51,10 +51,11 @@ describe("FilterChips", () => {
         filters={filters}
         onRemove={vi.fn()}
         onClearAll={onClearAll}
+        clearAllTestId="filters-clear-button"
       />,
     );
 
-    const clearButton = screen.getByRole("button", { name: /Limpiar todos/i });
+    const clearButton = screen.getByTestId("filters-clear-button");
     await user.click(clearButton);
 
     expect(onClearAll).toHaveBeenCalled();

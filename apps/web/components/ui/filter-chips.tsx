@@ -14,12 +14,14 @@ export type FilterChipsProps = {
   onRemove: (key: string) => void;
   onClearAll?: () => void;
   className?: string;
+  clearAllTestId?: string;
 };
 
 export function FilterChips({
   filters,
   onRemove,
   onClearAll,
+  clearAllTestId,
   className = "",
 }: FilterChipsProps) {
   if (filters.length === 0) {
@@ -55,6 +57,7 @@ export function FilterChips({
           size="sm"
           className="px-2 py-1 text-xs text-brisa-300 hover:text-brisa-100"
           onClick={onClearAll}
+          data-testid={clearAllTestId}
         >
           Limpiar todos
         </Button>

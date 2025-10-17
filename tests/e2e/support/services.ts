@@ -37,6 +37,13 @@ type ServicePayload = {
   durationMin?: number;
 };
 
+type UserPayload = {
+  email?: string;
+  fullName?: string;
+  password?: string;
+  role?: "ADMIN" | "COORDINATOR" | "STAFF" | "CLIENT";
+};
+
 export async function createServiceFixture(
   request: APIRequestContext,
   accessToken: string,
@@ -65,6 +72,95 @@ export async function createServiceFixture(
   }
 
   return (await response.json()) as { data: { id: string; name: string } };
+}
+
+export async function createUserFixture(
+  request: APIRequestContext,
+  overrides: UserPayload = {},
+) {
+  const accessToken = await getAdminAccessToken(request);
+  const email =
+    overrides.email ??
+    `qa-user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@brisacubanaclean.com`;
+  const password = overrides.password ?? "Brisa123!";
+  const fullName = overrides.fullName ?? "QA Notifications";
+  const role = overrides.role ?? "ADMIN";
+
+  const response = await request.post(`${apiBaseUrl}/api/users`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    data: {
+      email,
+      fullName,
+      password,
+      role,
+    },
+  });
+
+  if (!response.ok()) {
+    throw new Error(
+      `No se pudo crear el usuario de prueba: ${response.status()} ${response.statusText()}`,
+    );
+  }
+
+  const json = (await response.json()) as {
+    data: { id: string; email: string; fullName: string; role: string };
+  };
+
+  return {
+    id: json.data.id,
+    email,
+    password,
+  };
+}
+
+export async function deleteUserFixture(
+  request: APIRequestContext,
+  userId: string,
+) {
+  const accessToken = await getAdminAccessToken(request);
+  const response = await request.delete(`${apiBaseUrl}/api/users/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok()) {
+    throw new Error(
+      `No se pudo eliminar el usuario de prueba: ${response.status()} ${response.statusText()}`,
+    );
+  }
+}
+
+export async function getUserAccessToken(
+  request: APIRequestContext,
+  email: string,
+  password: string,
+) {
+  const response = await request.post(
+    `${apiBaseUrl}/api/authentication/login`,
+    {
+      data: {
+        email,
+        password,
+      },
+    },
+  );
+
+  if (!response.ok()) {
+    throw new Error(
+      `No se pudo autenticar al usuario ${email}: ${response.status()} ${response.statusText()}`,
+    );
+  }
+
+  const json = (await response.json()) as { token?: string };
+  if (!json.token) {
+    throw new Error("Respuesta de autenticación sin token de acceso");
+  }
+
+  return json.token;
 }
 
 async function fetchCollection<T>(

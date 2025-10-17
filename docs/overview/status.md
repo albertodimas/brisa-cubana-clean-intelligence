@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 15 de octubre de 2025 (CI main – run 18542267689 – ✅ Playwright `critical`; CodeQL y Post-Deploy Seed en verde; 180 tests locales passing – 161 unit/integration + 19 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 17 de octubre de 2025 (CI main – run 18586147254 – ✅ Playwright `critical`; CodeQL 18586147253; Post-Deploy Seed 18586310079; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -168,18 +168,20 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
   - Coverage thresholds: 85% lines, 65% functions, 50% branches
 - **`apps/web`**: 66 pruebas Vitest (hooks, server actions y componentes UI con SearchBar/FilterChips/UsersManager)
   - Coverage threshold: 70%
-- **Total**: 161 pruebas unitarias/integración passing (180 en total incluyendo 19 E2E)
+- **Total**: 161 pruebas unitarias/integración passing (188 en total incluyendo 27 E2E)
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
 
 | Suite    | Tests | Duración | Comando                  |
 | -------- | ----- | -------- | ------------------------ |
-| Smoke    | 2     | ~7s      | `pnpm test:e2e:smoke`    |
-| Critical | 10    | ~9s      | `pnpm test:e2e:critical` |
-| Full     | 19    | ~11s     | `pnpm test:e2e:full`     |
+| Smoke    | 2     | ~25s     | `pnpm test:e2e:smoke`    |
+| Critical | 17    | ~60s     | `pnpm test:e2e:critical` |
+| Full     | 27    | ~95s     | `pnpm test:e2e:full`     |
 
 **Documentación:** [`qa/e2e-strategy.md`](../qa/e2e-strategy.md)
+
+**Estado 17-oct-2025:** La suite `full` volvió a ser estable tras bloquear acciones concurrentes en el panel de notificaciones y descartar respuestas obsoletas en `usePaginatedResource`. La nightly 18581096720 se reintentará una vez mergeado el fix.
 
 ### 7.3 CI/CD Workflows
 
@@ -191,7 +193,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 - **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`.
 
-**Estado (15-oct-2025)**: ✅ Pipelines en `main` (CI, CodeQL, Post-Deploy Seed) completados; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` con fallos en CodeQL y PR Checks pendientes.
+**Estado (17-oct-2025)**: ✅ Pipelines en `main` (CI 18586147254, CodeQL 18586147253, Post-Deploy Seed 18586310079) completados; ❌ Nightly 18581096720 falló por carrera en notificaciones (`@critical`), mitigada en commit 17-oct-2025 – reejecutar tras desplegar este fix; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` con fallos en CodeQL y PR Checks pendientes.
 
 ### 7.4 Calidad de Código
 

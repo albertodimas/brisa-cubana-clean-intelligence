@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import type { PaginatedResult, PaginationInfo } from "@/lib/api";
 
 type QueryValue = string | number | boolean | null | undefined;
@@ -84,6 +84,7 @@ export function usePaginatedResource<T>({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const requestTokenRef = useRef(0);
 
   const fetchPage = useCallback(
     async ({
@@ -95,6 +96,8 @@ export function usePaginatedResource<T>({
       cursor?: string | null;
       append?: boolean;
     }) => {
+      const requestToken = requestTokenRef.current + 1;
+      requestTokenRef.current = requestToken;
       const normalizedQuery = normalizeQuery(query ?? {});
       const qs = buildQueryString(normalizedQuery, cursor ?? undefined);
       try {
@@ -116,6 +119,10 @@ export function usePaginatedResource<T>({
           ...parsedPagination,
           limit: parsedPagination.limit || json.data.length,
         };
+
+        if (requestToken !== requestTokenRef.current) {
+          return;
+        }
 
         setItems((prev) => (append ? [...prev, ...json.data] : json.data));
         setPageInfo(pagination);

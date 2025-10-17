@@ -43,17 +43,18 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Fixed
 
 - Dependabot alert `GHSA-52f5-9888-hmc6` resuelta fijando `tmp@0.2.5` vía override pnpm.
-
 - Componente `SearchBar` con debounce interno y botón de limpieza reutilizado en servicios, propiedades, reservas y clientes (`apps/web/components/ui/search-bar.tsx`).
 - Componente `FilterChips` para visualizar y limpiar filtros activos en los paneles operativos.
 - Nuevas pruebas unitarias (SearchBar, FilterChips, managers y `usePaginatedResource`) elevan la suite web a 60 tests.
+- Panel de notificaciones bloquea acciones mientras procesa lectura, evita filtros concurrentes y descarta respuestas obsoletas (`notification-bell.tsx`, `usePaginatedResource`), estabilizando la nightly Playwright `full`.
 
-### Changed
+### Updated
 
 - Endpoints `/api/services`, `/api/properties`, `/api/bookings`, `/api/customers` y `/api/users` soportan parámetros `search` y filtros combinables manteniendo paginación cursor-based.
 - `usePaginatedResource` expone `currentQuery`, `resetQuery` y normaliza queries para evitar resets innecesarios.
 - Documentación actualizada (`README`, `docs/overview/status.md`, `docs/product/pagination.md`, `docs/decisions/search-filters-plan.md`, `docs/reference/*`) para reflejar la Fase 2 de búsquedas y filtros.
 - El panel de usuarios (`AdminPanel`) ahora integra `UsersManager` con búsqueda debounced, filtros por rol/estado y chips visuales.
+- `docs/overview/status.md` y `docs/qa/e2e-strategy.md` reflejan 27 pruebas Playwright (smoke/critical/full), el fallo nightly 18581096720 y la mitigación del panel de notificaciones (17-oct-2025).
 
 ### Testing
 

@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import type { TestInfo } from "@playwright/test";
 import { ipForTest, loginAsAdmin } from "./support/auth";
+import { createBookingFixture, getAdminAccessToken } from "./support/services";
 
 test.describe.serial("Operaciones", () => {
   test("permite crear un nuevo servicio @smoke @critical", async ({
@@ -20,11 +21,19 @@ test.describe.serial("Operaciones", () => {
     await serviceForm.getByRole("button", { name: "Guardar" }).click();
 
     // Toast notification appears outside the form
-    await expect(page.getByText("Servicio creado")).toBeVisible();
+    await expect(
+      page.getByText("Servicio creado", { exact: true }).first(),
+    ).toBeVisible();
     await expect(page.getByText(uniqueName).first()).toBeVisible();
   });
 
-  test("filtra reservas por estado @critical", async ({ page }, testInfo) => {
+  test("filtra reservas por estado @critical", async ({
+    page,
+    request,
+  }, testInfo) => {
+    const adminToken = await getAdminAccessToken(request);
+    await createBookingFixture(request, adminToken, { status: "CONFIRMED" });
+
     await loginAsAdmin(page, testInfo);
 
     const statusSelect = page.getByTestId("booking-status-filter");

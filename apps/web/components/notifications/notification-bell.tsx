@@ -38,6 +38,9 @@ export function NotificationBell({
 }: NotificationBellProps) {
   const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const [pendingNotificationId, setPendingNotificationId] = useState<
+    string | null
+  >(null);
   const [viewUnreadOnly, setViewUnreadOnly] = useState(false);
   const [isMarkingAll, startMarkAll] = useTransition();
   const {
@@ -110,14 +113,21 @@ export function NotificationBell({
 
   const handleMarkAsRead = useCallback(
     async (notificationId: string): Promise<ActionResult> => {
-      const result = await markNotificationReadAction(notificationId);
-      if (result.error) {
-        showToast(result.error, "error");
-      } else if (result.success) {
-        showToast(result.success, "success");
-        await refresh(currentQuery);
+      setPendingNotificationId(notificationId);
+      try {
+        const result = await markNotificationReadAction(notificationId);
+        if (result.error) {
+          showToast(result.error, "error");
+        } else if (result.success) {
+          showToast(result.success, "success");
+          await refresh(currentQuery);
+        }
+        return result;
+      } finally {
+        setPendingNotificationId((current) =>
+          current === notificationId ? null : current,
+        );
       }
-      return result;
     },
     [currentQuery, refresh, showToast],
   );
@@ -209,6 +219,11 @@ export function NotificationBell({
                     size="sm"
                     onClick={() => void handleToggleFilter()}
                     className="text-xs"
+                    disabled={
+                      isLoading ||
+                      isLoadingMore ||
+                      pendingNotificationId !== null
+                    }
                   >
                     {viewUnreadOnly ? "Ver todas" : "Sólo sin leer"}
                   </Button>
@@ -216,7 +231,12 @@ export function NotificationBell({
                     type="button"
                     size="sm"
                     variant="ghost"
-                    disabled={isMarkingAll || unreadCount === 0}
+                    disabled={
+                      isMarkingAll ||
+                      unreadCount === 0 ||
+                      isLoading ||
+                      pendingNotificationId !== null
+                    }
                     onClick={handleMarkAllAsRead}
                     className="text-xs"
                   >
@@ -283,6 +303,14 @@ export function NotificationBell({
                               void handleMarkAsRead(notification.id)
                             }
                             data-testid="notification-mark-read"
+                            disabled={
+                              pendingNotificationId === notification.id ||
+                              isLoading ||
+                              isLoadingMore
+                            }
+                            aria-busy={
+                              pendingNotificationId === notification.id
+                            }
                           >
                             Marcar
                           </Button>
