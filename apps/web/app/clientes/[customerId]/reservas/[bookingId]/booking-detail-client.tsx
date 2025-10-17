@@ -17,11 +17,7 @@ import {
 } from "@/lib/portal-session";
 import { recordPortalEvent } from "@/lib/portal-telemetry";
 import { Skeleton } from "@/components/ui/skeleton";
-
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
+import { toPortalDatetimeLocalValue } from "@/lib/portal-utils";
 
 type PortalBookingDetailClientProps = PortalBookingDetail & {
   sessionExpiresAt?: string | null;
@@ -40,6 +36,7 @@ export function PortalBookingDetailClient({
   const router = useRouter();
   const [actionState, setActionState] = useState<ActionState>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [sessionRemainingMs, setSessionRemainingMs] = useState(() =>
     getPortalSessionRemaining(
@@ -59,29 +56,39 @@ export function PortalBookingDetailClient({
   }, [sessionExpiresAt]);
 
   const sessionCountdown = formatPortalSessionRemaining(sessionRemainingMs);
+  const hasKnownSession = Boolean(sessionExpiresAt);
   const isSessionExpired = sessionRemainingMs <= 0;
+  const sessionStatusLabel = !hasKnownSession
+    ? "Sesión sin tiempo disponible"
+    : isSessionExpired
+      ? "Tu sesión de portal expiró"
+      : `Sesión vence en ${sessionCountdown}`;
 
   const minRescheduleValue = useMemo(
-    () => toDatetimeLocalValue(new Date(Date.now() + 30 * 60 * 1000)),
+    () => toPortalDatetimeLocalValue(new Date(Date.now() + 30 * 60 * 1000)),
     [],
   );
 
   const openCancel = () => {
     setActionError(null);
+    setActionSuccess(null);
     setActionState({ type: "cancel", booking, reason: "" });
   };
 
   const openReschedule = () => {
     setActionError(null);
+    setActionSuccess(null);
     setActionState({
       type: "reschedule",
       booking,
-      scheduledAt: toDatetimeLocalValue(new Date(booking.scheduledAt)),
+      scheduledAt: toPortalDatetimeLocalValue(new Date(booking.scheduledAt)),
       notes: "",
     });
   };
 
-  const closeModal = () => setActionState(null);
+  const closeModal = () => {
+    setActionState(null);
+  };
 
   const handleSubmit = () => {
     if (!actionState) return;
@@ -96,6 +103,9 @@ export function PortalBookingDetailClient({
             bookingId: booking.id,
             customerId: customer.id,
           });
+          setActionSuccess(
+            "Tu solicitud de cancelación fue registrada. Nuestro equipo confirmará el cambio por correo.",
+          );
         } else {
           await reschedulePortalBooking({
             bookingId: actionState.booking.id,
@@ -106,8 +116,12 @@ export function PortalBookingDetailClient({
             bookingId: booking.id,
             customerId: customer.id,
           });
+          setActionSuccess(
+            "Tu solicitud de reagendado fue enviada. Recibirás confirmación una vez que operaciones la procese.",
+          );
         }
         closeModal();
+        setActionError(null);
         router.refresh();
       } catch (error) {
         const message =
@@ -146,6 +160,22 @@ export function PortalBookingDetailClient({
 
   return (
     <div className="space-y-8">
+      {actionSuccess ? (
+        <PortalCallout
+          title="Solicitud enviada"
+          description={<p>{actionSuccess}</p>}
+          action={
+            <button
+              type="button"
+              onClick={() => setActionSuccess(null)}
+              className="rounded-full border border-brisa-500/60 px-4 py-2 text-sm font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+            >
+              Ocultar mensaje
+            </button>
+          }
+        />
+      ) : null}
+
       <section className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl dark:border-brisa-700/50 dark:bg-brisa-900/80">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -167,7 +197,7 @@ export function PortalBookingDetailClient({
                 {booking.status}
               </span>
             </span>
-            <span>Sesión vence en {sessionCountdown}</span>
+            <span>{sessionStatusLabel}</span>
           </div>
         </header>
 
@@ -266,6 +296,27 @@ export function PortalBookingDetailClient({
           </Link>
         }
       />
+
+      {!hasKnownSession ? (
+        <PortalCallout
+          title="No pudimos validar tu sesión"
+          description={
+            <p>
+              Si pierdes el acceso, solicita un nuevo enlace mágico desde la
+              página principal del portal para continuar gestionando tus
+              reservas.
+            </p>
+          }
+          action={
+            <Link
+              href="/clientes/acceso"
+              className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+            >
+              Solicitar nuevo enlace →
+            </Link>
+          }
+        />
+      ) : null}
 
       {actionError ? (
         <PortalCallout

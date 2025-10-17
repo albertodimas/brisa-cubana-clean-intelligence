@@ -130,6 +130,63 @@ router.get("/", async (c) => {
   });
 });
 
+router.get("/:id", async (c) => {
+  const portalAuth = getPortalAuth(c);
+  if (!portalAuth) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const id = c.req.param("id");
+
+  const userRepository = getUserRepository();
+  const bookingRepository = getBookingRepository();
+
+  const user = await userRepository.findByEmail(portalAuth.email);
+  if (!user || !user.isActive || user.role !== "CLIENT") {
+    return c.json({ error: "Cuenta no habilitada para portal" }, 403);
+  }
+
+  const booking = await bookingRepository.findByIdWithRelations(id);
+  if (!booking || booking.customerId !== user.id) {
+    logger.warn(
+      {
+        bookingId: id,
+        portalEmail: portalAuth.email,
+        customerId: user.id,
+        foundBookingCustomerId: booking?.customerId ?? null,
+      },
+      "Portal booking detail not accessible",
+    );
+    return c.json({ error: "Reserva no encontrada" }, 404);
+  }
+
+  logger.info(
+    {
+      bookingId: booking.id,
+      customerId: user.id,
+      portalEmail: portalAuth.email,
+    },
+    "Portal booking detail fetched",
+  );
+
+  const sessionExpiresAtIso =
+    typeof portalAuth.expiresAt === "number"
+      ? new Date(portalAuth.expiresAt * 1000).toISOString()
+      : null;
+
+  return c.json({
+    data: serializeBooking(booking),
+    customer: {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+    },
+    session: {
+      expiresAt: sessionExpiresAtIso,
+    },
+  });
+});
+
 router.post("/:id/cancel", async (c) => {
   const portalAuth = getPortalAuth(c);
   if (!portalAuth) {

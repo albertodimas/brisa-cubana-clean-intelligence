@@ -26,6 +26,7 @@ import {
   reschedulePortalBooking,
 } from "@/lib/portal-actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toPortalDatetimeLocalValue } from "@/lib/portal-utils";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, {
@@ -84,16 +85,6 @@ type PortalActionState =
       notes: string;
     }
   | null;
-
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0");
-  const year = date.getFullYear();
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
 
 function PortalBookingsSkeleton({ count = 3 }: { count?: number }) {
   return (
@@ -214,7 +205,7 @@ export function PortalDashboardClient({ initialData }: Props) {
     setActionState({
       type: "reschedule",
       booking,
-      scheduledAt: toDatetimeLocalValue(currentDate),
+      scheduledAt: toPortalDatetimeLocalValue(currentDate),
       notes: "",
     });
   };
@@ -311,7 +302,7 @@ export function PortalDashboardClient({ initialData }: Props) {
 
   const displayName = customer.fullName ?? customer.email ?? "cliente";
   const isActionsDisabled = isActionPending || isLoggingOut || isSessionExpired;
-  const minRescheduleValue = toDatetimeLocalValue(
+  const minRescheduleValue = toPortalDatetimeLocalValue(
     new Date(Date.now() + 30 * 60 * 1000),
   );
   const showRefreshingSkeleton = isValidating && bookings.length === 0;

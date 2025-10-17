@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { fetchPortalBookingDetail, fetchPortalBookings } from "@/lib/api";
+import { fetchPortalBookingDetail } from "@/lib/api";
 import { PortalBookingDetailClient } from "./booking-detail-client";
 
 type PageParams = {
@@ -45,8 +45,7 @@ export default async function PortalBookingDetailPage({
     redirect(`/clientes/${detail.customer.id}`);
   }
 
-  const sessionExpiresAt = (await fetchPortalBookings({ limit: 1 }))?.session
-    ?.expiresAt;
+  const sessionExpiresAt = detail.session?.expiresAt ?? null;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-brisa-50 to-brisa-100 px-4 py-16 text-gray-900 dark:from-brisa-950 dark:via-brisa-900 dark:to-brisa-950 dark:text-white sm:px-6 md:px-10">

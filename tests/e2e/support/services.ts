@@ -66,3 +66,120 @@ export async function createServiceFixture(
 
   return (await response.json()) as { data: { id: string; name: string } };
 }
+
+async function fetchCollection<T>(
+  request: APIRequestContext,
+  accessToken: string,
+  path: string,
+): Promise<T[]> {
+  const response = await request.get(`${apiBaseUrl}${path}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok()) {
+    throw new Error(
+      `No se pudo obtener datos desde ${path}: ${response.status()} ${response.statusText()}`,
+    );
+  }
+
+  const json = (await response.json()) as { data?: T[] };
+  return json.data ?? [];
+}
+
+type BookingFixtureOptions = {
+  status?: "PENDING" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+};
+
+export async function createBookingFixture(
+  request: APIRequestContext,
+  accessToken: string,
+  options: BookingFixtureOptions = {},
+) {
+  const [customers, properties, services] = await Promise.all([
+    fetchCollection<{ id: string }>(
+      request,
+      accessToken,
+      "/api/customers?limit=1",
+    ),
+    fetchCollection<{ id: string }>(
+      request,
+      accessToken,
+      "/api/properties?limit=1",
+    ),
+    fetchCollection<{ id: string; durationMin: number }>(
+      request,
+      accessToken,
+      "/api/services?limit=1",
+    ),
+  ]);
+
+  const customerId = customers[0]?.id;
+  const propertyId = properties[0]?.id;
+  const service = services[0];
+
+  if (!customerId || !propertyId || !service?.id) {
+    throw new Error(
+      "No se encontraron datos suficientes para crear una reserva de prueba",
+    );
+  }
+
+  const scheduledAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+
+  const response = await request.post(`${apiBaseUrl}/api/bookings`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    data: {
+      customerId,
+      propertyId,
+      serviceId: service.id,
+      scheduledAt,
+      durationMin: service.durationMin ?? 120,
+    },
+  });
+
+  if (!response.ok()) {
+    throw new Error(
+      `No se pudo crear la reserva de prueba: ${response.status()} ${response.statusText()}`,
+    );
+  }
+
+  const bookingResponse = (await response.json()) as {
+    data: { id: string; code: string; status: string };
+  };
+
+  const booking = bookingResponse.data;
+
+  if (options.status && options.status !== booking.status) {
+    const patchResponse = await request.patch(
+      `${apiBaseUrl}/api/bookings/${booking.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        data: {
+          status: options.status,
+        },
+      },
+    );
+
+    if (!patchResponse.ok()) {
+      throw new Error(
+        `No se pudo actualizar la reserva de prueba: ${patchResponse.status()} ${patchResponse.statusText()}`,
+      );
+    }
+
+    const patched = (await patchResponse.json()) as {
+      data: { id: string; code: string; status: string };
+    };
+
+    return patched.data;
+  }
+
+  return booking;
+}

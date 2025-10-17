@@ -169,6 +169,46 @@ describe("Portal bookings routes", () => {
     expect(json.pagination?.hasMore).toBe(false);
   });
 
+  it("retorna el detalle de una reserva perteneciente al cliente", async () => {
+    const token = makeToken("client@portal.test");
+
+    const response = await app.request("/api/portal/bookings/booking-1", {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+
+    expect(response.status).toBe(200);
+    const json = (await response.json()) as {
+      data: { id: string; code: string };
+      customer: { id: string; email: string };
+      session?: { expiresAt: string | null };
+    };
+
+    expect(bookingRepositoryMock.findByIdWithRelations).toHaveBeenCalledWith(
+      "booking-1",
+    );
+    expect(json.data.id).toBe("booking-1");
+    expect(json.customer.id).toBe("user-1");
+    expect(json.session?.expiresAt).toBeTruthy();
+  });
+
+  it("responde 404 cuando la reserva no pertenece al cliente autenticado", async () => {
+    const token = makeToken("client@portal.test");
+    bookingRepositoryMock.findByIdWithRelations.mockResolvedValueOnce({
+      ...sampleBooking,
+      customerId: "another-user",
+    });
+
+    const response = await app.request("/api/portal/bookings/booking-1", {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+
+    expect(response.status).toBe(404);
+  });
+
   it("rechaza tokens sin scope portal", async () => {
     const token = jwt.sign(
       { sub: "client@portal.test", scope: "unknown" },

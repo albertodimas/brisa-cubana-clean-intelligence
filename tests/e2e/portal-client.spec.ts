@@ -12,6 +12,10 @@ function toDatetimeLocal(date: Date): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test.describe("@critical portal cliente – flujo completo", () => {
   test("@critical valida enlace mágico, navega dashboard y ejecuta acciones", async ({
     page,
@@ -50,29 +54,55 @@ test.describe("@critical portal cliente – flujo completo", () => {
     await expect(page.getByText("Tu sesión vence")).toBeVisible();
 
     const dashboardUrl = new URL(page.url());
-    const detailCustomerIdPattern =
-      dashboardUrl.pathname.split("/").pop() ?? "[a-z0-9]+";
+    const customerIdMatch = dashboardUrl.pathname.match(/\/clientes\/([^/]+)/i);
+    const currentCustomerId = customerIdMatch?.[1] ?? "[a-z0-9]+";
 
-    const targetBookingCard = page.locator(
-      '[data-portal-booking-code="BRISA-0002"]',
-    );
+    const targetBookingCard = page.locator("[data-portal-booking-id]").first();
     await expect(targetBookingCard).toBeVisible();
+    const targetBookingCode =
+      (await targetBookingCard.getAttribute("data-portal-booking-code")) ?? "";
+    expect(targetBookingCode).toBeTruthy();
+    const targetBookingId =
+      (await targetBookingCard.getAttribute("data-portal-booking-id")) ?? "";
+    expect(targetBookingId).toBeTruthy();
+    const targetBookingTitleRaw =
+      (
+        (await targetBookingCard.getByRole("heading").textContent()) ?? ""
+      ).trim() ?? "";
+    expect(targetBookingTitleRaw).toBeTruthy();
+    const [serviceName, propertyLabel] = targetBookingTitleRaw
+      .split("·")
+      .map((value) => value.trim());
+    const expectedDetailHeading =
+      serviceName && propertyLabel
+        ? `${serviceName} en ${propertyLabel}`
+        : targetBookingTitleRaw;
 
-    await targetBookingCard.getByRole("link", { name: "Ver detalle" }).click();
-    await expect(page).toHaveURL(
-      new RegExp(`/clientes/${detailCustomerIdPattern}/reservas/BRISA-0002`),
-    );
+    await Promise.all([
+      page.waitForURL(
+        new RegExp(
+          `/clientes/${currentCustomerId}/reservas/${targetBookingId}`,
+        ),
+        { waitUntil: "commit" },
+      ),
+      targetBookingCard.getByRole("link", { name: "Ver detalle" }).click(),
+    ]);
     await expect(
-      page.getByRole("heading", { name: /Reserva BRISA-0002/i }),
+      page.getByRole("heading", {
+        name: new RegExp(escapeRegExp(expectedDetailHeading), "i"),
+      }),
     ).toBeVisible();
+    await expect(page.locator("main")).toContainText(targetBookingCode);
     await expect(page.getByText("¿Necesitas ayuda?")).toBeVisible();
-    await page.getByRole("link", { name: "Volver al dashboard" }).click();
-    await expect(page).toHaveURL(
-      new RegExp(`/clientes/${detailCustomerIdPattern}$`),
-    );
+    await Promise.all([
+      page.waitForURL(new RegExp(`/clientes/${currentCustomerId}$`), {
+        waitUntil: "commit",
+      }),
+      page.getByRole("link", { name: "Volver al dashboard" }).click(),
+    ]);
 
     const refreshedCard = page.locator(
-      '[data-portal-booking-code="BRISA-0002"]',
+      `[data-portal-booking-id="${targetBookingId}"]`,
     );
     await expect(refreshedCard).toBeVisible();
 

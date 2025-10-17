@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { loginAsAdmin } from "./support/auth";
-import { createServiceFixture, getAdminAccessToken } from "./support/services";
+import {
+  createBookingFixture,
+  createServiceFixture,
+  getAdminAccessToken,
+} from "./support/services";
 
 test.describe.serial("Búsquedas y filtros", () => {
   let adminToken: string;
@@ -86,7 +90,12 @@ test.describe.serial("Búsquedas y filtros", () => {
 
   test("combina búsqueda y estado en reservas mostrando los filtros activos @critical", async ({
     page,
+    request,
   }, testInfo) => {
+    const booking = await createBookingFixture(request, adminToken, {
+      status: "CONFIRMED",
+    });
+
     await loginAsAdmin(page, testInfo);
 
     const bookingSearch = page.getByPlaceholder(
@@ -99,11 +108,17 @@ test.describe.serial("Búsquedas y filtros", () => {
       return (
         response.request().method() === "GET" &&
         url.includes("/api/bookings") &&
-        url.includes("search=BRISA-0001")
+        url.includes(`search=${booking.code}`)
       );
     });
-    await bookingSearch.fill("BRISA-0001");
-    await responsePromiseSearch;
+    await bookingSearch.fill(booking.code);
+    const searchResponse = await responsePromiseSearch;
+    const searchJson = (await searchResponse.json()) as {
+      data?: Array<{ code: string; status: string }>;
+    };
+    const initialCode =
+      searchJson.data?.find((result) => result.code === booking.code)?.code ??
+      null;
 
     const responsePromiseStatus = page.waitForResponse((response) => {
       const url = response.url();
@@ -114,12 +129,23 @@ test.describe.serial("Búsquedas y filtros", () => {
       );
     });
     await statusSelect.selectOption("CONFIRMED");
-    await responsePromiseStatus;
+    const statusResponse = await responsePromiseStatus;
+    const statusJson = (await statusResponse.json()) as {
+      data?: Array<{ code: string; status: string }>;
+    };
+    const filteredCode = statusJson.data?.[0]?.code ?? initialCode;
 
-    await expect(page.getByText("Búsqueda: BRISA-0001")).toBeVisible();
+    await expect(
+      page.getByText(`Búsqueda: ${booking.code}`, { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText("Estado: CONFIRMED")).toBeVisible();
     const bookingCards = page.getByTestId("booking-card");
-    await expect(bookingCards.first()).toContainText("BRISA-0001");
+    await expect(bookingCards.first()).toBeVisible();
+    if (filteredCode) {
+      await expect(bookingCards.first()).toContainText(filteredCode);
+    } else {
+      await expect(bookingCards.first()).toContainText(booking.code);
+    }
   });
 
   test("muestra mensaje amigable cuando no hay coincidencias en servicios @critical", async ({

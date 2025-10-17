@@ -105,6 +105,9 @@ export type PortalBookingDetail = {
     email: string;
     fullName: string | null;
   };
+  session?: {
+    expiresAt: string | null;
+  };
 };
 
 async function getPortalTokenFromCookies(): Promise<string | null> {
@@ -334,6 +337,7 @@ export async function fetchPortalBookingDetail(
     const json = (await res.json()) as {
       data?: Booking;
       customer?: { id: string; email: string; fullName: string | null };
+      session?: { expiresAt?: string | null };
     };
 
     if (!json.data || !json.customer) {
@@ -343,6 +347,9 @@ export async function fetchPortalBookingDetail(
     return {
       booking: json.data,
       customer: json.customer,
+      session: {
+        expiresAt: json.session?.expiresAt ?? null,
+      },
     };
   } catch (error) {
     console.warn("[api] portal booking detail request threw", error);
