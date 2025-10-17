@@ -1,6 +1,6 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 14 de octubre de 2025
+**Última actualización:** 17 de octubre de 2025
 **Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN)
 
 ---
@@ -285,9 +285,30 @@ Sigue el wizard para configurar:
 
 ---
 
-## 5. Métricas de Negocio
+## 5. Alertas y métricas de negocio
 
-### 5.1 Custom Metrics con Pino
+### 5.1 Integración Sentry ↔ Slack
+
+1. En Sentry, navegar a **Settings → Integrations → Slack → Add Workspace**.
+2. Autorizar el workspace `brisa-cubana` y seleccionar los canales:
+   - `#alerts-prod` para errores críticos (`severity:error`).
+   - `#alerts-performance` para degradaciones de performance.
+3. Crear reglas en **Project Settings → Alerts → Issue Alerts**:
+   - **Portal booking action error:** condición `event.title contains "portal.booking.action.error"` con umbral ≥ 3 eventos en 15 min → Slack `#alerts-prod`.
+   - **Checkout intent failures:** condición `event.title contains "checkout.intent.create"` o `payment_failed` → Slack `#alerts-prod`.
+4. Agregar notificación secundaria por correo al on-call (`operaciones@brisacubanaclean.com`) para redundancia.
+5. Documentar en 1Password la URL del webhook y el responsable de rotación.
+
+### 5.2 Alertas específicas por flujo
+
+| Flujo          | Evento / métrica                             | Umbral recomendado     | Acción                                                    |
+| -------------- | -------------------------------------------- | ---------------------- | --------------------------------------------------------- |
+| Portal cliente | `portal.session.expired` (Sentry breadcrumb) | ≥ 10 eventos en 10 min | Revisar expiración anticipada de cookies, validar clocks. |
+| Portal cliente | `Magic link email failed` (log API)          | ≥ 1 evento             | Verificar credenciales SMTP.                              |
+| Checkout       | `checkout.payment.failed` (Sentry)           | ≥ 5 eventos en 15 min  | Revisar estado de Stripe, verificar claves y webhooks.    |
+| API            | Latencia P95 (`vercel analytics`)            | > 2 s durante 5 min    | Escalar a ingeniería para investigar queries/prisma.      |
+
+### 5.3 Métricas personalizadas con Pino
 
 ```typescript
 import { logBusinessEvent } from "./lib/logger.js";
@@ -308,20 +329,31 @@ logBusinessEvent("user_login", {
   email: user.email,
 });
 
-// Ejemplo: Login fallido
-logBusinessEvent("login_failed", {
-  email: "user@example.com",
-  reason: "invalid_credentials",
+// Ejemplo: Acción portal
+logBusinessEvent("portal_action", {
+  bookingId: booking.id,
+  action: "reschedule",
+  customerId: booking.customerId,
 });
 ```
 
-### 5.2 Dashboard de Métricas
+Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite generar dashboards de negocio sin duplicar lógica.
 
-**Herramientas recomendadas:**
+### 5.4 Dashboards recomendados
 
-- **Grafana Cloud** (free tier): Visualización de logs estructurados
-- **Vercel Analytics** (incluido): Web Vitals y performance
-- **Neon Monitoring** (incluido): Database metrics
+- **Grafana Cloud (Loki + Prometheus):** Ingestar logs de Pino y visualizar `booking_created`, `portal_action`, `checkout.payment.confirmed`.
+- **Vercel Analytics:** Web Vitals por tipo de página (`pageType`), distribución de Core Web Vitals y tasa de errores.
+- **Neon Monitoring:** Queries lentas, conexiones activas y uso de almacenamiento.
+
+### 5.5 KPIs mínimos a monitorear
+
+| Métrica                                                               | Fuente                       | Objetivo                                              |
+| --------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------- |
+| Conversiones checkout (`checkout.payment.confirmed`)                  | Logs Pino / Sentry           | ≥ 95% éxito transacciones modo test.                  |
+| Cancelaciones portal (`portal.booking.cancelled`)                     | Logs Pino                    | Correlacionar con notificaciones `BOOKING_CANCELLED`. |
+| Tiempo medio de confirmación (creación booking → confirmación portal) | Logs Pino + Vercel Analytics | < 2 minutos en horario laboral.                       |
+| Latencia API `/api/portal/bookings` P95                               | Vercel Analytics             | < 500 ms.                                             |
+| Tasa de correos fallidos                                              | Logs API                     | 0 fallos; alerta inmediata ante ≥1.                   |
 
 ## 6. Health Checks
 

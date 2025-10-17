@@ -1,6 +1,6 @@
 # Roadmap Fase 2 – Experiencia Comercial y Clientes
 
-**Última actualización:** 15 de octubre de 2025  
+**Última actualización:** 17 de octubre de 2025  
 **Responsables:** Producto · Plataforma · Operaciones
 
 ## 1. Objetivo general
@@ -29,7 +29,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 ## 5. Próximos pasos inmediatos
 
-1. Definir estructura de componentes públicos en un RFC corto (link pendiente).
+1. Consolidar anexos visuales del RFC (`docs/product/rfc-public-components.md`) y vincular capturas/wireframes exportadas desde Figma (landing, checkout, portal). Placeholders listos en `docs/assets/public-components/`.
 2. Configurar Stripe (modo test) en entornos Preview/Prod.
 3. Planificar migración de seeds para separar datos operativos vs. demo comercial.
 
@@ -39,10 +39,13 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 - **Objetivo:** consolidar la arquitectura de páginas públicas reutilizando tokens UI existentes sin duplicar estilos.
 - **Acciones:**
-  - Documentar layout base (Hero, evidencia social, servicios destacados, CTA) y componentes compartidos (`FeatureList`, `PricingTier`, `FAQAccordion`).
-  - Definir contrato para el formulario de solicitud de reserva rápida (campos, validaciones, errores accesibles).
-  - Incluir esquema de telemetría (eventos a capturar en Analytics/Sentry) y comportamiento responsive (desktop, tablet, móvil).
-- **Entregable:** markdown en `docs/product/rfc-public-components.md` con wireframes de referencia y checklist de accesibilidad WCAG AA.
+  - Documentar layout base (Hero, evidencia social, servicios destacados, CTA) y componentes compartidos (`FeatureList`, `PricingTier`, `FAQAccordion`). ✅
+  - Definir contrato para el formulario de solicitud de reserva rápida (campos, validaciones, errores accesibles). ✅
+  - Incluir esquema de telemetría (eventos a capturar en Analytics/Sentry) y comportamiento responsive (desktop, tablet, móvil). ✅
+  - Adjuntar wireframes exportados y capturas de QA en `docs/assets/public-components/` y enlazarlas desde el RFC. 🔄
+- **Entregables:**
+  - `docs/product/rfc-public-components.md` (estructura y contratos vigentes).
+  - `docs/guides/portal-client.md` (operación y QA del portal cliente).
 
 ### 6.2 Plan de migración de seeds (operativos vs. demo) ✅
 

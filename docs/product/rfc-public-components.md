@@ -2,7 +2,7 @@
 
 **Estado:** Propuesto  
 **Responsables:** Producto · Diseño · Frontend  
-**Última actualización:** 15 de octubre de 2025
+**Última actualización:** 17 de octubre de 2025
 
 ## 1. Contexto
 
@@ -43,7 +43,11 @@ Establecer la arquitectura de UI/UX para las experiencias públicas, definiendo 
   - `Portal Cliente – Dashboard` con vistas responsive y jerarquía de tarjetas, timeline y CTA de soporte.
 - Benchmark UI: colección “Hospitality & Home Services” (Baymard Premium) referenciada como comparativo para jerarquía y copy.
 - Checklist heurístico (Nielsen) y WCAG AA documentados en la misma página de Figma; enlaza a resultados de revisión manual en `docs/qa/regression-checklist.md` §8.
-- Para stakeholders, añadir capturas estáticas (PNG) en `docs/assets/public-components/` y vincularlas aquí cuando estén disponibles.
+- Para stakeholders, añadir capturas estáticas (PNG) en `docs/assets/public-components/` y vincularlas aquí cuando estén disponibles; ver guía operativa `docs/guides/portal-client.md` como referencia temporal de evidencias funcionales del portal.
+  - Exportaciones actuales:
+    - Landing (desktop): [`landing-desktop.png`](../assets/public-components/landing-desktop.png) – reemplazar con captura 1440px.
+    - Checkout (flujo Payment Element): [`checkout-flow.png`](../assets/public-components/checkout-flow.png).
+    - Portal (dashboard customer): [`portal-dashboard.png`](../assets/public-components/portal-dashboard.png).
 
 ## 4. Componentes compartidos
 
@@ -90,34 +94,30 @@ Cada componente debe:
 
 ## 7. Próximos pasos
 
-1. Diseñar wireframes de alta fidelidad (Figma) y anexar enlace.
+1. Exportar wireframes Figma (landing, checkout, portal) a `docs/assets/public-components/` y enlazarlos en la sección 3.4.
 2. Validar con Operaciones + Diseño para aprobación final.
 3. Crear historias en backlog (landing, checkout, portal) referenciando este RFC.
 4. Revisar este RFC trimestralmente o cuando cambien tokens globales.
+5. Documentar métricas de uso del portal en `docs/operations/observability.md` (sección dashboards de negocio).
 
 ## 8. Portal cliente
 
-### 8.1 Estado inicial
+### 8.1 Estado actual (Beta)
 
-- Ruta pública temporal: `/clientes` (Next.js) con hero marketing, CTA doble (demo + contacto) y tarjetas de valor; todavía read-only mientras se habilitan funcionalidades completas.
-- Figma: `Portal Cliente – Iteración 1` contiene layouts dashboard, historial y solicitud de cambio (desktop/mobile).
-- Backlog Jira: `PORTAL-101` (dashboard), `PORTAL-102` (historial), `PORTAL-103` (formulario de cambio).
+- Portal accesible en `/clientes` con formulario de acceso por enlace mágico y dashboard funcional.
+- Acciones implementadas: reagendar, cancelar, ver detalle y cerrar sesión (ver `docs/guides/portal-client.md` para operación).
+- Seeds demo exponen reservas de prueba (`prisma/seed.demo.ts`) para `client@brisacubanaclean.com`.
+- Tests Playwright críticos automatizan el flujo end-to-end (`tests/e2e/portal-client.spec.ts`).
 
 ### 8.2 Requerimientos MVP
 
-- Auth pública basada en token mágico enviado vía correo (no implementado aún).
-- Auth pública basada en token mágico enviado vía correo (SMTP configurable via `PORTAL_MAGIC_LINK_*`).
-- Dashboard consume `/api/portal/bookings` usando el token httpOnly `portal_token` (scope `portal-client`) y restringe el acceso al ID asociado.
-- Botón de cierre de sesión en dashboard que invoca `/api/portal/auth/logout` y limpia cookies para regresar a `/clientes/acceso`.
-- Refresco automático del dashboard con SWR (`/api/portal/bookings`) para mantener las tarjetas sincronizadas y mostrar la caducidad de sesión (`session.expiresAt`) con un callout visible y contador regresivo.
-- Acciones rápidas “Reagendar” y “Cancelar” deben utilizar los endpoints protegidos `/api/portal/bookings/:id/reschedule` y `/cancel`, mostrar confirmaciones inline y registrar telemetría (`portal.booking.rescheduled`, `portal.booking.cancelled`).
-- Cada solicitud debe generar notificaciones en `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED` para usuarios activos de operaciones (roles ADMIN y COORDINATOR) incluyendo código de reserva, horario y nota del cliente.
-- Workflow inicial: `POST /api/portal/auth/request` → email registrado, TTL 15 min; `POST /api/portal/auth/verify` retorna `portalToken` (JWT 1h, scope `portal-client`).
-- Listado de próximas reservas con estado, propiedad, servicio, horarios y CTA `Ver detalle`.
-- Historial paginado con exportación PDF (`/api/bookings/:id/receipt`).
-- Formulario “Solicitar cambio” con opciones (reagendar, cancelar, duda) y texto libre (máx. 500 caracteres).
-- Notificaciones en tiempo real usando el stream SSE existente (suscripción por `customerId`).
-- Pantalla de detalle `/clientes/[customerId]/reservas/[bookingId]` que reutiliza timeline, muestra notas y ofrece CTA de soporte.
+- Autenticación vía enlace mágico con token `portal-client` (cookies HttpOnly + `portal_customer_id`). ✅
+- Dashboard consume `/api/portal/bookings` con SWR y muestra expiración de sesión (`session.expiresAt`). ✅
+- Acciones rápidas “Reagendar” y “Cancelar” usan endpoints dedicados, registran telemetría (`portal.booking.rescheduled`, `portal.booking.cancelled`) y generan notificaciones para roles `ADMIN`/`COORDINATOR`. ✅
+- Pantalla de detalle `/clientes/[customerId]/reservas/[bookingId]` con timeline y CTA de soporte. ✅
+- Exportación PDF (`/api/bookings/:id/receipt`). 🔄 Definir alcance y UX antes del GA.
+- Notificaciones en tiempo real vía SSE (`/api/notifications/stream`). 🔄 Suscripción portal pendiente.
+- Formulario “Solicitar cambio” extendido (motivos adicionales, adjuntos). 🔄 Posterior al GA.
 
 ### 8.3 Métricas y observabilidad
 
@@ -128,9 +128,15 @@ Cada componente debe:
 
 ### 8.4 Checklist para go-live
 
-- [ ] Cubrir rutas `/clientes` y `/clientes/reservas/:id` con pruebas Playwright (@public).
-- [ ] Documentar flujo de recuperación de acceso (link mágico) y proceso manual de fallback.
+- [x] Cubrir rutas `/clientes` y `/clientes/reservas/:id` con pruebas Playwright (@critical).
+- [x] Documentar flujo de recuperación de acceso (link mágico) y proceso manual de fallback (`docs/guides/portal-client.md`).
 - [ ] Revisar accesibilidad (WCAG AA) usando axe DevTools + QA manual.
+
+## 9. Documentos relacionados
+
+- `docs/guides/portal-client.md` – Guía operativa del portal (autenticación, QA y troubleshooting).
+- `docs/product/phase-2-roadmap.md` – Roadmap general Fase 2 (hitos, evidencias, próximos pasos).
+- `docs/qa/regression-checklist.md` – Casos manuales para validar experiencias públicas.
 
 ---
 

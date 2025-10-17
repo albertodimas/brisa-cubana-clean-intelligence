@@ -18,7 +18,7 @@
 - Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
 - Stripe modo test configurado en Vercel (Development/Preview/Production) con claves temporales `*_brisa_demo_20251015`; programar rotación al habilitar modo live.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
-- Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Funcionalidades de autoservicio adicionales siguen planificadas (ver RFC §8).
+- Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Funcionalidades de autoservicio adicionales siguen planificadas (ver RFC §8) y se documentan en la guía operativa `docs/guides/portal-client.md`.
 - Release etiquetado `v0.3.0` (14-oct-2025) completa las mejoras de búsqueda y filtros en el panel operativo; la Fase 2 comercial (landing, checkout, portal cliente) está documentada en `product/phase-2-roadmap.md`. La migración Tailwind v4 (Fase 5) sigue programada para Q1 2026 (Issue #40).
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
@@ -282,7 +282,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 - `loggingMiddleware`: Loguea todas las requests automáticamente
 - Incluye: method, path, status, durationMs, userId (si auth)
 
-**Documentación:** Ver [`operations/observability.md`](../operations/observability.md)
+**Documentación:** Ver [`operations/observability.md`](../operations/observability.md) (sección 5 para alertas Sentry/Slack y métricas de negocio)
 
 ### 9.4 Tests de Seguridad
 
@@ -332,7 +332,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
    - Ejecutar QA visual en previews de Vercel y validar con stakeholders.
 
 2. **Observabilidad avanzada:**
-   - Configurar alertas Sentry en Slack/Email
+   - Configurar alertas Sentry en Slack/Email (procedimiento documentado en `docs/operations/observability.md` §5, falta ejecución en entornos).
    - Dashboard de métricas de negocio (Grafana)
    - Expandir reportes automatizados con dashboards (Nightly Lighthouse ya en ejecución)
 

@@ -1,7 +1,7 @@
 # Brisa Cubana Clean Intelligence
 
 Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
-Actualizado al **15 de octubre de 2025** con **180 pruebas automatizadas** (161 unit/integration + 19 E2E) pasando en CI; release etiquetado como **v0.3.0** tras completar la fase de búsqueda/filtros en el panel operativo. La expansión comercial (landing, checkout, portal cliente) está planificada en `docs/product/phase-2-roadmap.md`.
+Actualizado al **17 de octubre de 2025** con **188 pruebas automatizadas** (161 unit/integration + 27 E2E) pasando en CI; release etiquetado como **v0.3.0** tras completar la fase de búsqueda/filtros en el panel operativo. La expansión comercial (landing, checkout, portal cliente) está planificada en `docs/product/phase-2-roadmap.md`.
 
 ## Stack actualizado
 
@@ -9,16 +9,16 @@ Actualizado al **15 de octubre de 2025** con **180 pruebas automatizadas** (161 
 - **API:** Hono 4.9.12 (`apps/api`) sobre Node.js 22, autenticación JWT, RBAC por middleware, rate limiting configurable y repositorios Prisma desacoplados.
 - **Persistencia:** Prisma ORM 6.17.1 sobre PostgreSQL 16 (Docker local) / PostgreSQL 17 (Neon en producción) con soft delete (`deletedAt`) en todos los modelos.
 - **Estilos:** Tailwind CSS 3.4.18 (migración a Tailwind v4 planificada para Q1 2026 en el Issue #40 siguiendo el ADR `docs/decisions/tailwind-v4-deferral.md`).
-- **Observabilidad:** Logging con Pino, métricas básicas en `/health`, captura de errores con Sentry y Web Vitals a través de Speed Insights + métricas personalizadas.citeturn2search1turn3search6turn3search7
+- **Observabilidad:** Logging con Pino, métricas básicas en `/health`, captura de errores con Sentry y Web Vitals a través de Speed Insights + métricas personalizadas.
 - **Tooling base:** pnpm 10.18, Turborepo 2.5.8, TypeScript 5.9, Vitest 3.2, Playwright 1.56, Husky + lint-staged, CI en GitHub Actions.
 
-## Estado al 15 de octubre de 2025
+## Estado al 17 de octubre de 2025
 
 | Área          | Estado | Detalle                                                                                                                                            |
 | ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Frontend web  | 🟢     | Panel operativo con búsqueda debounced, chips de filtros activos, gestión de usuarios (roles), formularios server action y proxy interno `/api/*`. |
 | API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes, usuarios) con repositorios, búsqueda paginada, soft delete y rate limiting en login.    |
-| Tests         | 🟢     | 161 pruebas unitarias/integración + 19 E2E (smoke/critical/full); `pnpm test`, `pnpm test:e2e:*`.                                                  |
+| Tests         | 🟢     | 161 pruebas unitarias/integración + 27 E2E (smoke/critical/full); `pnpm test`, `pnpm test:e2e:*`.                                                  |
 | Documentación | 🟢     | README, `docs/guides/quickstart.md`, `docs/overview/status.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados.                            |
 | Deploy        | 🟢     | Web (Next.js) y API (Hono) corriendo en Vercel, conectados a PostgreSQL Neon; pipelines CI/CD verdes.                                              |
 | Checkout test | 🟡     | Flujo `/checkout` habilitado con Stripe Payment Element (modo test) y endpoint `POST /api/payments/stripe/intent`; rota claves antes de modo live. |
@@ -86,7 +86,7 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
   - API: https://brisa-cubana-clean-intelligence-api.vercel.app
 - **Base de datos:** PostgreSQL Neon (17) con seed de usuarios, servicios, propiedades y reservas demo.
 - **Proxy interno:** La web reexpone `/api/*` hacia la API Hono vía `INTERNAL_API_URL`, evitando exponer secretos en el navegador.
-- **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API) y Web Vitals se envían a Sentry + Speed Insights para monitoreo continuo.citeturn2search1turn3search6turn3search7
+- **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API) y Web Vitals se envían a Sentry + Speed Insights para monitoreo continuo.
 
 ## Autenticación y RBAC
 
@@ -102,6 +102,7 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
 - Índice maestro: `docs/README.md` (estructura por dominios y reglas de mantenimiento).
 - Estado y métricas: `docs/overview/status.md`.
 - Quickstart de desarrollo local: `docs/guides/quickstart.md`.
+- Operación del portal cliente: `docs/guides/portal-client.md`.
 - Referencia API: `docs/reference/api-reference.md` + `docs/reference/openapi.yaml`.
 - Decisiones técnicas: `docs/decisions/dependency-updates.md`, `docs/decisions/tailwind-v4-deferral.md` y `docs/decisions/tailwind-v4-plan.md` (Issue #40).
 

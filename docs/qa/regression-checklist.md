@@ -296,6 +296,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Cada solicitud genera una notificación en el panel de operaciones (roles ADMIN/COORDINATOR) con el tipo correcto (`BOOKING_CANCELLED` o `BOOKING_RESCHEDULED`).
 - [ ] La página `/clientes/[customerId]/reservas/[bookingId]` muestra detalle, timeline y CTA de soporte; las acciones desde allí replican el comportamiento del dashboard.
 - [ ] Páginas `/clientes/acceso` y `/clientes/acceso/confirmar` muestran estados correctos (idle/loading/success/error).
+- [ ] Consultar [`qa/portal-accessibility.md`](portal-accessibility.md) y cerrar hallazgos abiertos (aria-live, aria-hidden) antes de GA.
 
 ## 9. Deployment
 
