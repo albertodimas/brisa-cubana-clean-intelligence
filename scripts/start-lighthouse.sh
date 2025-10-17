@@ -20,6 +20,14 @@ API_PID=$!
 pnpm --filter @brisa/web start &
 WEB_PID=$!
 
+for attempt in {1..60}; do
+  if curl -sf "http://localhost:3000/lhci.html?__lhci_bypass=local" >/dev/null 2>&1; then
+    echo "http://localhost:3000 ready"
+    break
+  fi
+  sleep 1
+done
+
 cleanup() {
   kill "$API_PID" "$WEB_PID" >/dev/null 2>&1 || true
 }

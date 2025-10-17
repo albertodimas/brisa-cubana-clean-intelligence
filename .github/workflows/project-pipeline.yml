@@ -177,6 +177,7 @@ jobs:
         if: ${{ inputs.run-build }}
         shell: bash
         env:
+          ENABLE_HSTS: ${{ inputs.run-lighthouse && 'false' || '' }}
           NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
         run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
 
