@@ -318,10 +318,30 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 ### 9.3 CI/CD
 
 - [ ] GitHub Actions CI pasa (lint, typecheck, test, e2e, build)
-- [ ] Tests unitarios pasan (18/18 en `apps/api`)
-- [ ] Tests E2E pasan (3/3 en `tests/e2e`)
+- [ ] Tests unitarios pasan (161 tests en total: API + Web)
+- [ ] Tests E2E críticos pasan (12 tests @critical)
 - [ ] Pre-commit hooks se ejecutan correctamente
 - [ ] Verificación de secretos pasa
+
+### 9.4 Validación Post-Deploy
+
+**Script automatizado:** `bash scripts/qa/validate-accessibility.sh [production|preview]`
+
+- [ ] Portal landing (`/clientes`) responde 200
+- [ ] Portal auth (`/clientes/acceso`) responde 200
+- [ ] HTML incluye `aria-live="polite"` (fix commit `ce37e09`)
+- [ ] HTML incluye `aria-hidden="true"` en íconos decorativos
+- [ ] Headings jerárquicos (h1/h2) presentes
+- [ ] Landmarks semánticos (nav, main, section) correctos
+- [ ] Atributo `lang="es"` presente en HTML
+- [ ] Viewport meta configurado correctamente
+
+**Validación manual post-deploy:**
+
+- [ ] Ejecutar axe DevTools en `/clientes` (espera 0 issues críticos/serios)
+- [ ] Ejecutar Lighthouse en `/clientes` (espera score A11y 100/100, vs 97/100 pre-fix)
+- [ ] Probar navegación con NVDA para confirmar `aria-live` funciona
+- [ ] Actualizar [docs/qa/portal-accessibility.md](portal-accessibility.md) con resultados y fecha
 
 ---
 
