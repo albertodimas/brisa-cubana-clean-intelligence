@@ -39,18 +39,18 @@ jobs:
           jwt-secret: ${{ secrets.JWT_SECRET }}
           auth-secret: ${{ secrets.AUTH_SECRET }}
 
-      - name: Push Prisma schema
+      - name: Apply Prisma migrations
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
           DATABASE_URL_UNPOOLED: ${{ secrets.PRODUCTION_DATABASE_URL_UNPOOLED }}
         run: |
           export DATABASE_URL_UNPOOLED="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
-          pnpm --filter @brisa/api db:push
+          pnpm --filter @brisa/api db:deploy
 
-      - name: Seed production data
+      - name: Seed production data (operativo)
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
           DATABASE_URL_UNPOOLED: ${{ secrets.PRODUCTION_DATABASE_URL_UNPOOLED }}
         run: |
           export DATABASE_URL_UNPOOLED="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
-          pnpm --filter @brisa/api db:seed
+          pnpm --filter @brisa/api db:seed:operativo

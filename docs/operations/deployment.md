@@ -69,13 +69,13 @@ Revisar y, si aplica, actualizar los valores en Vercel:
    > Ejecuta el comando desde una máquina segura con `DATABASE_URL` apuntando a producción. Evita `db:push` en entornos productivos.
 2. Después de cada schema change, corre los seeds en este orden:
 
-   ```bash
-   pnpm --filter @brisa/api db:seed:operativo
-   pnpm --filter @brisa/api db:seed:demo
-   ```
+```bash
+pnpm --filter @brisa/api db:seed:operativo
+pnpm --filter @brisa/api db:seed:demo
+```
 
-   - **Producción:** ejecuta únicamente `db:seed:operativo` (credenciales internas). Usa `db:seed:demo` solo en entornos de demo/preview.
-   - **Staging/Local:** ejecuta ambos para contar con datos ficticios del landing y checkout.
+- **Producción:** ejecuta únicamente `db:seed:operativo` (credenciales internas). Usa `db:seed:demo` solo en entornos de demo/preview.
+- **Staging/Local:** ejecuta ambos para contar con datos ficticios del landing y checkout.
 
 3. Registra la ejecución en [`operations/backup-log.md`](backup-log.md) con fecha, responsable y resultado.
 
@@ -108,7 +108,7 @@ Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook`
 ## 6. Rollback
 
 1. Selecciona el deployment previo en Vercel y marca **Promote to Production**.
-2. Ejecuta `pnpm --filter @brisa/api db:push` con el commit anterior si hubo cambios de schema.
+2. Ejecuta `pnpm --filter @brisa/api db:deploy` con el commit anterior si hubo cambios de schema.
 3. Actualiza [`overview/status.md`](../overview/status.md) y `CHANGELOG.md` con el incidente.
 
 ## 7. Contactos
@@ -122,7 +122,7 @@ Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook`
 ## 8. Automatización post-deploy
 
 - El workflow `post-deploy-seed.yml` se ejecuta automáticamente cuando `CI (Main Branch)` finaliza en verde sobre `main`.
-- Ejecuta `pnpm --filter @brisa/api db:push` seguido de `pnpm --filter @brisa/api db:seed` contra la base de datos de producción.
+- Ejecuta `pnpm --filter @brisa/api db:deploy` seguido de `pnpm --filter @brisa/api db:seed:operativo` contra la base de datos de producción.
 - Requiere configurar los secretos en GitHub:
   - `PRODUCTION_DATABASE_URL`
   - `PRODUCTION_DATABASE_URL_UNPOOLED` (opcional, usa el valor anterior si no está definido)
