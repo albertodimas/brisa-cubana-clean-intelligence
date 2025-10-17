@@ -14,7 +14,10 @@ export function PortalCallout({
   icon,
 }: PortalCalloutProps) {
   return (
-    <section className="rounded-3xl border border-white/70 bg-white/90 p-8 text-sm text-gray-700 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80 dark:text-brisa-200">
+    <section
+      className="rounded-3xl border border-white/70 bg-white/90 p-8 text-sm text-gray-700 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80 dark:text-brisa-200"
+      aria-live="polite"
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-start gap-3">
           {icon ? (

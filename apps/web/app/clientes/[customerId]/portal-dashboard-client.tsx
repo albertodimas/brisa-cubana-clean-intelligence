@@ -337,6 +337,7 @@ export function PortalDashboardClient({ initialData }: Props) {
             >
               <ArrowPathIcon
                 className={`h-4 w-4 ${isValidating ? "animate-spin" : ""}`}
+                aria-hidden="true"
               />
               Actualizar
             </button>
