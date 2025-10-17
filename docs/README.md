@@ -1,6 +1,6 @@
 # Brisa Cubana Clean Intelligence – Manual de Documentación
 
-**Última revisión:** 17 de octubre de 2025  
+**Última revisión:** 15 de octubre de 2025  
 Todas las guías descritas aquí reflejan funcionalidades existentes y probadas en `main`.  
 Ejecuta `pnpm docs:verify` para validar la estructura antes de abrir un PR.
 
