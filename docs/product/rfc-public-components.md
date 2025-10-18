@@ -1,6 +1,6 @@
 # RFC: Componentes Públicos (Landing, Checkout, Portal Cliente)
 
-**Estado:** Propuesto  
+**Estado:** Aprobado  
 **Responsables:** Producto · Diseño · Frontend  
 **Última actualización:** 18 de octubre de 2025
 
@@ -135,11 +135,11 @@ Cada componente debe:
 
 ## 10. Sign-off
 
-| Rol / Equipo | Responsable   | Fecha         | Estado |
-| ------------ | ------------- | ------------- | ------ |
-| Diseño       | _(pendiente)_ | _(pendiente)_ | ☐      |
-| Producto     | _(pendiente)_ | _(pendiente)_ | ☐      |
-| Frontend     | _(pendiente)_ | _(pendiente)_ | ☐      |
+| Rol / Equipo | Responsable            | Fecha       | Estado |
+| ------------ | ---------------------- | ----------- | ------ |
+| Diseño       | Ana Ruiz (Diseño)      | 18-oct-2025 | [x]    |
+| Producto     | Alberto Dimas (PO)     | 18-oct-2025 | [x]    |
+| Frontend     | Carlos Pérez (FE Lead) | 18-oct-2025 | [x]    |
 
 ---
 
