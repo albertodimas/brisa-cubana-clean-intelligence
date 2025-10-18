@@ -111,6 +111,7 @@ Las credenciales de producción están configuradas en:
   - `PORTAL_MAGIC_LINK_SMTP_SECURE`
   - `PORTAL_MAGIC_LINK_BASE_URL`
 - Define `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción para evitar que el API incluya el `debugToken` en la respuesta una vez que el envío por correo esté habilitado.
+- Asegura que `ENABLE_TEST_UTILS="false"` en producción y preview; este flag activa bypasses de seguridad (omisión de correo y exposición de tokens) pensados solo para entornos locales/CI.
 - El frontend confía en las cookies emitidas por la API (`portal_token` HttpOnly + `portal_customer_id` pública). Ambas expiran conforme al `expiresAt` otorgado por el backend y deben tratarse como credenciales de sesión.
 - El endpoint `POST /api/portal/auth/logout` invalida la sesión actual (requiere token de portal) y debe invocarse desde la UI al cerrar sesión para limpiar cookies.
 - Checklist manual tras cualquier cambio:

@@ -288,6 +288,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] `POST /api/portal/auth/verify` entrega `portalToken` cuando el token es válido.
 - [ ] Token expirado o reutilizado devuelve 400.
 - [ ] Con SMTP configurado (`PORTAL_MAGIC_LINK_*`), el correo llega y el API no expone `debugToken` cuando `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"`.
+- [ ] En entornos Preview/Production `ENABLE_TEST_UTILS` permanece en `false` y la API no muestra mensajes “Magic link email skipped - test utils mode”.
 - [ ] `GET /api/portal/bookings` responde 200 con las reservas del cliente autenticado y respeta filtros (`status`, paginación).
 - [ ] `POST /api/portal/auth/logout` invalida la sesión y limpia cookies (`portal_token`, `portal_customer_id`).
 - [ ] Tras verificar un enlace, la respuesta HTTP incluye `Set-Cookie` para `portal_token` (HttpOnly) y `portal_customer_id` con caducidad alineada a `expiresAt`.

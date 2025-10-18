@@ -1,6 +1,6 @@
 # Roadmap Fase 2 – Experiencia Comercial y Clientes
 
-**Última actualización:** 17 de octubre de 2025  
+**Última actualización:** 18 de octubre de 2025  
 **Responsables:** Producto · Plataforma · Operaciones
 
 ## 1. Objetivo general
@@ -29,9 +29,9 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 ## 5. Próximos pasos inmediatos
 
-1. Validar RFC de componentes públicos (`docs/product/rfc-public-components.md`) con Operaciones + Diseño.
-2. Configurar Stripe (modo test) en entornos Preview/Prod.
-3. Planificar migración de seeds para separar datos operativos vs. demo comercial.
+1. Validar RFC de componentes públicos (`docs/product/rfc-public-components.md`) con Operaciones + Diseño (pendiente de sign-off final).
+2. Sustituir las claves Stripe demo (`*_brisa_demo_20251015`) por credenciales oficiales cuando se apruebe el go-live y documentar la rotación en `operations/deployment.md`.
+3. Configurar proveedor SMTP definitivo para el portal cliente (Mailtrap → proveedor productivo) y ejecutar pruebas de correo end-to-end en Preview antes de promover a producción.
 
 ## 6. Artefactos en elaboración
 

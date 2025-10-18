@@ -70,6 +70,14 @@ Revisar y, si aplica, actualizar los valores en Vercel:
    pnpm --filter @brisa/api db:deploy
    ```
    > Ejecuta el comando desde una máquina segura con `DATABASE_URL` apuntando a producción. Evita `db:push` en entornos productivos.
+   >
+   > **Nueva herramienta:** el workflow `post-deploy-seed.yml` llama a `scripts/prisma-deploy-or-baseline.sh`, que reintenta `db:deploy` marcando las migraciones existentes como aplicadas cuando Prisma detecta el error `P3005` (base ya inicializada). Usa el script manualmente en incidentes similares:
+   >
+   > ```bash
+   > ./scripts/prisma-deploy-or-baseline.sh
+   > ```
+   >
+   > Revisa la salida para confirmar si se ejecutó el fallback y documenta el resultado en `operations/backup-log.md`.
 2. Después de cada schema change, corre los seeds en este orden:
 
 ```bash
@@ -131,3 +139,4 @@ Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook`
   - `PRODUCTION_DATABASE_URL_UNPOOLED` (opcional, usa el valor anterior si no está definido)
   - `API_TOKEN`, `JWT_SECRET`, `AUTH_SECRET` para mantener coherencia con los seeds.
 - Los resultados quedan registrados en la pestaña **Actions**. Ante un fallo, revisar la salida y ejecutar manualmente el procedimiento descrito en este documento.
+- La Nightly (`nightly.yml`) invoca la pipeline con `enable-test-utils: "false"` para validar el portal cliente con envío real de correos; replica este valor en despliegues manuales cuando quieras simular producción a partir de CI.

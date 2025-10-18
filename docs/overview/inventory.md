@@ -38,7 +38,7 @@ Este inventario resume los artefactos activos del monorepo para acelerar handoff
 
 ## 5. Operaciones y despliegue
 
-- Pipelines GitHub Actions: `ci.yml`, `pr-checks.yml`, `nightly.yml`, `codeql.yml`, `post-deploy-seed.yml`.
+- Pipelines GitHub Actions: `ci.yml`, `pr-checks.yml`, `nightly.yml`, `codeql.yml`, `post-deploy-seed.yml` (Nightly invoca `enable-test-utils: "false"` para endurecer el portal cliente en CI).
 - Husky hooks:
   - `pre-commit`: verifica secretos (`scripts/verify-secret-leaks.sh`), `verify:versions`, `lint-staged`.
   - `pre-push`: lint, typecheck, test.
@@ -66,6 +66,7 @@ Este inventario resume los artefactos activos del monorepo para acelerar handoff
 
 - `scripts/verify-versions.mjs`: mantiene coherencia de dependencias entre apps.
 - `scripts/verify-doc-structure.sh`: valida índice de documentación.
+- `scripts/prisma-deploy-or-baseline.sh`: encapsula `pnpm --filter @brisa/api db:deploy` con fallback `P3005` para automatizar baselines en producción.
 - `pnpm stripe:listen`: wrapper CLI Stripe apuntando a webhook local.
 
 ## 9. Herramientas externas

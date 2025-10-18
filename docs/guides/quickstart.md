@@ -43,6 +43,7 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    # PORTAL_MAGIC_LINK_BASE_URL="http://localhost:3000"
    # PORTAL_MAGIC_LINK_CONFIRMATION_PATH="/clientes/acceso/confirmar"
    # PORTAL_MAGIC_LINK_EXPOSE_DEBUG="true" # Usa "false" en producción para ocultar el token
+   # ENABLE_TEST_UTILS="true" # Solo en local/CI; en Preview/Producción debe ser "false"
    ```
 
    > El contenedor de PostgreSQL expone el puerto **5433** en tu máquina (`postgresql://postgres:postgres@localhost:5433/brisa_cubana_dev`).

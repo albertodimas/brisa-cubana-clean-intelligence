@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 17 de octubre de 2025 (CI main – run 18586147254 – ✅ Playwright `critical`; CodeQL 18586147253; Post-Deploy Seed 18586310079; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 18 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -191,9 +191,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Nightly** (`nightly.yml`): suite `full` diaria 02:00 UTC con retención de reportes de 14 días.
 - **CodeQL** (`codeql.yml`): escaneo estático para JavaScript/TypeScript en push, PR y weekly schedule.
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
-- **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`.
+- **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`; utiliza `scripts/prisma-deploy-or-baseline.sh` para resolver automáticamente escenarios con P3005 cuando la base ya contiene datos.
 
-**Estado (17-oct-2025)**: ✅ Pipelines en `main` (CI 18586147254, CodeQL 18586147253, Post-Deploy Seed 18586310079) completados; ❌ Nightly 18581096720 falló por carrera en notificaciones (`@critical`), mitigada en commit 17-oct-2025 – reejecutar tras desplegar este fix; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` con fallos en CodeQL y PR Checks pendientes.
+**Estado (18-oct-2025)**: ✅ Pipelines en `main` (CI 18603217844, CodeQL 18603217867, Post-Deploy Seed 18612902776) completados; ✅ Nightly 18612838707 validó suite `full` con `ENABLE_TEST_UTILS="false"` y correo SMTP simulado; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` mantiene fallos en CodeQL y PR Checks pendientes.
 
 ### 7.4 Calidad de Código
 

@@ -90,6 +90,7 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 - Cuando falta `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, se registra `checkout.publishable_key.missing` (nivel warning) para detectar entornos mal configurados.
 - Los endpoints de enlace mágico (`/api/portal/auth/request`/`verify`) registran eventos en logs (`Magic link solicitado para cliente`) y pueden instrumentarse con eventos Sentry adicionales cuando se integre el frontend.
 - El mailer SMTP (`sendPortalMagicLinkEmail`) registra `Magic link email dispatched` cuando el correo se entrega y `Magic link email failed` cuando el proveedor rechaza el envío.
+- Configura una alerta de Sentry con disparo cuando se acumulen ≥3 eventos `checkout.payment.failed` o `portal.booking.action.error` en 15 minutos y redirígela al canal `#alerts-operaciones`. Documenta el enlace del monitor en 1Password y mantenlo actualizado.
 
 ---
 

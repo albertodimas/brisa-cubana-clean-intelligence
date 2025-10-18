@@ -17,11 +17,11 @@ Esta guía describe cómo habilitar, verificar y operar el portal de autoservici
 
 ## 2. Prerrequisitos por entorno
 
-| Entorno    | Requerimientos                                                                                        | Notas                                                          |
-| ---------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Local      | `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="true"` en `.env.local` para obtener `debugToken` sin SMTP.           | Permite QA rápido sin correo.                                  |
-| Preview    | SMTP real o sandbox (Mailtrap/Resend) y `PORTAL_MAGIC_LINK_BASE_URL` apuntando al dominio de preview. | Mantén `EXPOSE_DEBUG="false"` para simular experiencia real.   |
-| Producción | SMTP productivo (credenciales en Vercel + 1Password) y `EXPOSE_DEBUG="false"`.                        | Revisar `docs/operations/security.md` para rotación de claves. |
+| Entorno    | Requerimientos                                                                                                                     | Notas                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Local      | `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="true"` en `.env.local` para obtener `debugToken` sin SMTP.                                        | Permite QA rápido sin correo.                                                                       |
+| Preview    | SMTP real o sandbox (Mailtrap/Resend), `PORTAL_MAGIC_LINK_BASE_URL` apuntando al dominio de preview y `ENABLE_TEST_UTILS="false"`. | Mantén `EXPOSE_DEBUG="false"` para simular experiencia real y validar correos de extremo a extremo. |
+| Producción | SMTP productivo (credenciales en Vercel + 1Password), `EXPOSE_DEBUG="false"` y `ENABLE_TEST_UTILS="false"`.                        | Revisar `docs/operations/security.md` para rotación de claves y checklist de correo.                |
 
 Variables mínimas:
 
