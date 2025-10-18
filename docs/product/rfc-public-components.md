@@ -2,7 +2,7 @@
 
 **Estado:** Propuesto  
 **Responsables:** Producto · Diseño · Frontend  
-**Última actualización:** 17 de octubre de 2025
+**Última actualización:** 18 de octubre de 2025
 
 ## 1. Contexto
 
@@ -132,6 +132,14 @@ Cada componente debe:
 - `docs/guides/portal-client.md` – Guía operativa del portal (autenticación, QA y troubleshooting).
 - `docs/product/phase-2-roadmap.md` – Roadmap general Fase 2 (hitos, evidencias, próximos pasos).
 - `docs/qa/regression-checklist.md` – Casos manuales para validar experiencias públicas.
+
+## 10. Sign-off
+
+| Rol / Equipo | Responsable   | Fecha         | Estado |
+| ------------ | ------------- | ------------- | ------ |
+| Diseño       | _(pendiente)_ | _(pendiente)_ | ☐      |
+| Producto     | _(pendiente)_ | _(pendiente)_ | ☐      |
+| Frontend     | _(pendiente)_ | _(pendiente)_ | ☐      |
 
 ---
 

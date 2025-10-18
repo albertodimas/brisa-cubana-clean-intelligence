@@ -29,7 +29,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 ## 5. Próximos pasos inmediatos
 
-1. Validar RFC de componentes públicos (`docs/product/rfc-public-components.md`) con Operaciones + Diseño (pendiente de sign-off final).
+1. Validar RFC de componentes públicos (`docs/product/rfc-public-components.md`) con Operaciones + Diseño (pendiente de sign-off final, seguimiento en [Issue #41](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues/41)).
 2. Sustituir las claves Stripe demo (`*_brisa_demo_20251015`) por credenciales oficiales cuando se apruebe el go-live y documentar la rotación en `operations/deployment.md`.
 3. Configurar proveedor SMTP definitivo para el portal cliente (Mailtrap → proveedor productivo) y ejecutar pruebas de correo end-to-end en Preview antes de promover a producción.
 

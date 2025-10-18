@@ -102,7 +102,7 @@ Las credenciales de producción están configuradas en:
 - El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite un JWT (`portalToken`) con scope `portal-client` válido por 1 hora.
 - La API adjunta automáticamente las cookies `portal_token` (HttpOnly) y `portal_customer_id` tras una verificación exitosa; la UI ya no debe intentar generarlas manualmente.
 - Endpoints de autoservicio `POST /api/portal/bookings/:id/cancel|reschedule` validan pertenencia del cliente, registran logs (`Portal booking cancellation/reschedule processed`) y limitan estados permitidos.
-- Configura el canal SMTP (`PORTAL_MAGIC_LINK_*`) para enviar correos reales desde producción. Los valores recomendados:
+- Configura el canal SMTP (`PORTAL_MAGIC_LINK_*`) para enviar correos reales desde producción. Actualmente se usa SendGrid (`smtp.sendgrid.net`, puerto 465 con `secure=true` y usuario `apikey`). Ajusta estos parámetros si cambias de proveedor.
   - `PORTAL_MAGIC_LINK_FROM`
   - `PORTAL_MAGIC_LINK_SMTP_HOST`
   - `PORTAL_MAGIC_LINK_SMTP_PORT`
