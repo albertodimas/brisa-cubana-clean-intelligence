@@ -1,6 +1,6 @@
 # Guía Operativa: Portal Cliente
 
-**Última actualización:** 17 de octubre de 2025  
+**Última actualización:** 18 de octubre de 2025  
 **Responsables:** Producto · Operaciones · QA
 
 Esta guía describe cómo habilitar, verificar y operar el portal de autoservicio para clientes hospedado en `/clientes`. Cubre los flujos actuales (beta) basados en enlaces mágicos, las acciones disponibles para los clientes y los criterios de observabilidad/QA.
