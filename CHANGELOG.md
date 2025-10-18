@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+_No changes yet._
+
+## [0.4.0] - 2025-10-18
+
 ### Added
 
 - Checkout público (`/checkout`) con formulario multipaso, integración Stripe Payment Element y fallback de configuración.
