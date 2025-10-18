@@ -79,6 +79,10 @@ on:
         required: false
         type: string
         default: "http://localhost:3001"
+      enable-test-utils:
+        required: false
+        type: string
+        default: "true"
       portal-magic-link-from:
         required: false
         type: string
@@ -150,6 +154,7 @@ jobs:
           database-url: ${{ inputs.database-url }}
           database-url-unpooled: ${{ inputs.database-url-unpooled }}
           next-public-api-url: ${{ inputs.next-public-api-url }}
+          enable-test-utils: ${{ inputs.enable-test-utils }}
           api-token: ${{ secrets.api-token }}
           jwt-secret: ${{ secrets.jwt-secret }}
           auth-secret: ${{ secrets.auth-secret }}

@@ -57,6 +57,10 @@ inputs:
     description: Public API URL consumed by the web app.
     required: false
     default: "http://localhost:3001"
+  enable-test-utils:
+    description: Toggle to enable internal testing utilities with relaxed safeguards.
+    required: false
+    default: "true"
   portal-magic-link-from:
     description: From header used when sending portal magic link emails.
     required: false
@@ -125,6 +129,7 @@ runs:
         login_rate_limit_window_ms="${{ inputs.login-rate-limit-window-ms }}"
         e2e_admin_email="${{ inputs.e2e-admin-email }}"
         e2e_admin_password="${{ inputs.e2e-admin-password }}"
+        enable_test_utils="${{ inputs.enable-test-utils }}"
         portal_magic_link_from="${{ inputs.portal-magic-link-from }}"
         portal_magic_link_base_url="${{ inputs.portal-magic-link-base-url }}"
         portal_magic_link_confirmation_path="${{ inputs.portal-magic-link-confirmation-path }}"
@@ -145,6 +150,7 @@ runs:
         if [ -z "$login_rate_limit_window_ms" ]; then login_rate_limit_window_ms="60000"; fi
         if [ -z "$e2e_admin_email" ]; then e2e_admin_email="admin@brisacubanaclean.com"; fi
         if [ -z "$e2e_admin_password" ]; then e2e_admin_password="Brisa123!"; fi
+        if [ -z "$enable_test_utils" ]; then enable_test_utils="true"; fi
         if [ -z "$portal_magic_link_base_url" ]; then portal_magic_link_base_url="http://localhost:3000"; fi
         if [ -z "$portal_magic_link_confirmation_path" ]; then portal_magic_link_confirmation_path="/clientes/acceso/confirmar"; fi
         if [ -z "$portal_magic_link_expose_debug" ]; then portal_magic_link_expose_debug="true"; fi
@@ -160,6 +166,7 @@ runs:
           echo "LOGIN_RATE_LIMIT_WINDOW_MS=$login_rate_limit_window_ms"
           echo "E2E_ADMIN_EMAIL=$e2e_admin_email"
           echo "E2E_ADMIN_PASSWORD=$e2e_admin_password"
+          echo "ENABLE_TEST_UTILS=$enable_test_utils"
           echo "PORTAL_MAGIC_LINK_BASE_URL=$portal_magic_link_base_url"
           echo "PORTAL_MAGIC_LINK_CONFIRMATION_PATH=$portal_magic_link_confirmation_path"
           echo "PORTAL_MAGIC_LINK_EXPOSE_DEBUG=$portal_magic_link_expose_debug"

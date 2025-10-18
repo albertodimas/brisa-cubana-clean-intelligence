@@ -44,8 +44,7 @@ jobs:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
           DATABASE_URL_UNPOOLED: ${{ secrets.PRODUCTION_DATABASE_URL_UNPOOLED }}
         run: |
-          export DATABASE_URL_UNPOOLED="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
-          pnpm --filter @brisa/api db:deploy
+          ./scripts/prisma-deploy-or-baseline.sh
 
       - name: Seed production data (operativo)
         env:
