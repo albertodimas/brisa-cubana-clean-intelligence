@@ -79,12 +79,40 @@ on:
         required: false
         type: string
         default: "http://localhost:3001"
+      portal-magic-link-from:
+        required: false
+        type: string
+        default: ""
+      portal-magic-link-base-url:
+        required: false
+        type: string
+        default: ""
+      portal-magic-link-confirmation-path:
+        required: false
+        type: string
+        default: ""
+      portal-magic-link-expose-debug:
+        required: false
+        type: string
+        default: "true"
     secrets:
       api-token:
         required: false
       jwt-secret:
         required: false
       auth-secret:
+        required: false
+      portal-magic-link-from:
+        required: false
+      portal-magic-link-smtp-host:
+        required: false
+      portal-magic-link-smtp-port:
+        required: false
+      portal-magic-link-smtp-user:
+        required: false
+      portal-magic-link-smtp-password:
+        required: false
+      portal-magic-link-smtp-secure:
         required: false
 
 concurrency:
@@ -125,6 +153,15 @@ jobs:
           api-token: ${{ secrets.api-token }}
           jwt-secret: ${{ secrets.jwt-secret }}
           auth-secret: ${{ secrets.auth-secret }}
+          portal-magic-link-from: ${{ secrets.portal-magic-link-from }}
+          portal-magic-link-base-url: ${{ inputs.portal-magic-link-base-url }}
+          portal-magic-link-confirmation-path: ${{ inputs.portal-magic-link-confirmation-path }}
+          portal-magic-link-smtp-host: ${{ secrets.portal-magic-link-smtp-host }}
+          portal-magic-link-smtp-port: ${{ secrets.portal-magic-link-smtp-port }}
+          portal-magic-link-smtp-user: ${{ secrets.portal-magic-link-smtp-user }}
+          portal-magic-link-smtp-password: ${{ secrets.portal-magic-link-smtp-password }}
+          portal-magic-link-smtp-secure: ${{ secrets.portal-magic-link-smtp-secure }}
+          portal-magic-link-expose-debug: ${{ inputs.portal-magic-link-expose-debug }}
 
       - name: Initialize database schema
         if: ${{ inputs.run-database-prep }}

@@ -78,6 +78,17 @@ export function shouldExposeDebugToken(): boolean {
 export async function sendPortalMagicLinkEmail(
   payload: MagicLinkEmailPayload,
 ): Promise<MagicLinkEmailResult> {
+  if (process.env.ENABLE_TEST_UTILS === "true") {
+    logger.warn(
+      {
+        email: payload.email,
+      },
+      "Magic link email skipped - test utils mode",
+    );
+
+    return { delivered: true, messageId: "test-utils-bypass" };
+  }
+
   const mailTransporter = getTransporter();
   const from = process.env.PORTAL_MAGIC_LINK_FROM;
   const expiresIso = payload.expiresAt.toISOString();

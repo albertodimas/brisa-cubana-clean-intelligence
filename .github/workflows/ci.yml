@@ -20,3 +20,9 @@ jobs:
       api-token: ${{ secrets.API_TOKEN }}
       jwt-secret: ${{ secrets.JWT_SECRET }}
       auth-secret: ${{ secrets.AUTH_SECRET }}
+      portal-magic-link-from: ${{ secrets.PORTAL_MAGIC_LINK_FROM }}
+      portal-magic-link-smtp-host: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_HOST }}
+      portal-magic-link-smtp-port: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_PORT }}
+      portal-magic-link-smtp-user: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_USER }}
+      portal-magic-link-smtp-password: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_PASSWORD }}
+      portal-magic-link-smtp-secure: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_SECURE }}
