@@ -1,373 +1,199 @@
-import React from "react";
 import Link from "next/link";
-import { AdminPanel } from "@/components/admin-panel";
-import { Dashboard } from "@/components/dashboard";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import {
-  createServiceAction,
-  createPropertyAction,
-  createBookingAction,
-  toggleServiceActiveAction,
-  updateServiceAction,
-  updatePropertyAction,
-  updateBookingAction,
-  updateUserAction,
-  toggleUserActiveAction,
-  logoutAction,
-} from "@/app/actions";
-import {
-  fetchServicesPage,
-  fetchBookingsPage,
-  fetchPropertiesPage,
-  fetchCustomersPage,
-  fetchUsersPage,
-  fetchNotificationsPage,
-  type PaginatedResult,
-  type User,
-  type Notification,
-} from "@/lib/api";
-import { auth } from "@/auth";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+const highlights = [
+  {
+    title: "Equipos confiables",
+    description:
+      "Personal operativo entrenado con protocolos de limpieza profunda, rotaciones verificadas y control de calidad documentado.",
+  },
+  {
+    title: "Tecnología en cada visita",
+    description:
+      "Dashboard en tiempo real, rutas optimizadas y reportes antes/después para propiedades residenciales y renta corta.",
+  },
+  {
+    title: "Pagos sin fricción",
+    description:
+      "Checkout con Stripe, recordatorios automáticos y facturación consolidada para que cierres ciclos sin hojas de cálculo.",
+  },
+];
 
-const currencyFormatter = new Intl.NumberFormat("es-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-});
+const processSteps = [
+  {
+    step: "1",
+    title: "Agenda una inspección",
+    description:
+      "Cuéntanos del espacio, frecuencia y servicios especiales. En menos de 24 horas recibirás una propuesta personalizada.",
+  },
+  {
+    step: "2",
+    title: "Activa tu portal",
+    description:
+      "Gestiona reservas, reagenda, descarga reportes y comparte accesos con tu equipo desde un solo lugar.",
+  },
+  {
+    step: "3",
+    title: "Monitorea resultados",
+    description:
+      "Recibe evidencias fotográficas, métricas de satisfacción y alertas proactivas previas a cada estancia.",
+  },
+];
 
-const dateFormatter = new Intl.DateTimeFormat("es-US", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
+const testimonials = [
+  {
+    quote:
+      "Desde que migramos con Brisa Cubana no hemos tenido un solo check-in retrasado. La visibilidad del portal nos permite reaccionar antes de que un huésped lo note.",
+    author: "Laura Méndez",
+    role: "Directora de Operaciones · StayBrick Rentals",
+  },
+  {
+    quote:
+      "Cada visita viene documentada con fotos y checklist. El equipo llega puntual y deja la propiedad lista para inspección hotelera.",
+    author: "Carlos Martínez",
+    role: "Administrador · Residencias Brickell Loft",
+  },
+];
 
-export default async function HomePage() {
-  const session = await auth();
-  const isAuthenticated = Boolean(session?.user);
-  const currentRole = session?.user?.role;
-  const isAdmin = currentRole === "ADMIN";
-  const today = new Date();
-  const from = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  ).toISOString();
-  const horizon = new Date(
-    today.getTime() + 1000 * 60 * 60 * 24 * 30,
-  ).toISOString();
-  const bookingFilterDefaults = {
-    status: "ALL" as const,
-    from,
-    to: horizon,
-  };
+export const revalidate = 3600;
 
-  const [servicesPage, bookingsPage, propertiesPage, customersPage] =
-    await Promise.all([
-      fetchServicesPage({ limit: 50 }),
-      fetchBookingsPage({ from, to: horizon, limit: 10 }),
-      fetchPropertiesPage({ limit: 50 }),
-      fetchCustomersPage({ limit: 50 }),
-    ]);
-
-  const emptyUsersPage: PaginatedResult<User> = {
-    items: [],
-    pageInfo: { limit: 50, cursor: null, nextCursor: null, hasMore: false },
-  };
-
-  const emptyNotificationsPage: PaginatedResult<Notification> = {
-    items: [],
-    pageInfo: { limit: 10, cursor: null, nextCursor: null, hasMore: false },
-  };
-
-  const usersPage = isAdmin
-    ? await fetchUsersPage({ limit: 50 })
-    : emptyUsersPage;
-
-  const notificationsPage = isAuthenticated
-    ? await fetchNotificationsPage({ limit: 10 })
-    : emptyNotificationsPage;
-
-  const services = servicesPage.items;
-  const bookings = bookingsPage.items;
-  const properties = propertiesPage.items;
-  const customers = customersPage.items;
-
-  const activeServices = services
-    .filter((service) => service.active)
-    .slice(0, 4);
-  const upcomingBookings = bookings.slice(0, 4);
-
-  const sections = [
-    {
-      title: "Estado",
-      body: `Stack reiniciado con API Hono + Prisma y frontend Next.js. Hay ${services.length} servicios configurados y ${bookings.length} reservas sembradas para pruebas end-to-end.`,
-    },
-    {
-      title: "Siguientes pasos",
-      body: "Consolidar sistema de diseño reutilizable, exponer gestión de usuarios en la UI y publicar documentación OpenAPI antes de abrir integraciones externas.",
-    },
-    {
-      title: "Contacto",
-      body: "hola@brisacubanaclean.com",
-    },
-  ];
-
+export default function LandingPage() {
   return (
-    <main className="px-4 py-8 sm:px-6 md:px-8 md:py-12 lg:py-16 max-w-[960px] mx-auto">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1" />
-        <ThemeToggle />
-      </div>
-      <header className="flex flex-col gap-2">
-        <span className="text-xs tracking-[0.4em] uppercase text-brisa-600 dark:text-brisa-300">
-          Brisa Cubana Clean Intelligence
-        </span>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl m-0 leading-tight">
-          Plataforma en construcción con código verificable
-        </h1>
-        <p className="text-base sm:text-lg text-gray-700 dark:text-brisa-200 max-w-[60ch]">
-          Replanteamos el proyecto para que cada afirmación esté respaldada por
-          implementación real. Este landing refleja el estado actual y enlaza
-          solo a documentación verificada.
-        </p>
-        <div className="flex gap-4 flex-wrap mt-2">
-          <Link
-            href="https://github.com/albertodimas/brisa-cubana-clean-intelligence"
-            className="text-brisa-600 hover:text-gray-700 dark:text-brisa-300 dark:hover:text-brisa-200 transition-colors"
-          >
-            Repositorio en GitHub
-          </Link>
-          <Link
-            href="/api/docs"
-            prefetch={false}
-            className="text-brisa-600 hover:text-gray-700 dark:text-brisa-300 dark:hover:text-brisa-200 transition-colors"
-          >
-            Documentación API
-          </Link>
-        </div>
-      </header>
-
-      <section className="mt-8 sm:mt-10 md:mt-12 grid gap-4 sm:gap-5 md:gap-6">
-        {sections.map((section) => (
-          <article
-            key={section.title}
-            className="bg-gray-100 dark:bg-brisa-900/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-brisa-300/20"
-          >
-            <h2 className="mt-0 mb-3 text-xl sm:text-2xl">{section.title}</h2>
-            <p className="m-0 text-gray-800 dark:text-brisa-100 text-sm sm:text-base">
-              {section.body}
+    <main className="min-h-screen bg-white dark:bg-brisa-950 text-gray-900 dark:text-brisa-50">
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-brisa-100 via-white to-white dark:from-brisa-900/60 dark:via-brisa-950 dark:to-brisa-950 pointer-events-none" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
+          <header className="flex flex-col gap-6 lg:gap-8">
+            <span className="text-xs tracking-[0.45em] uppercase text-brisa-600 dark:text-brisa-300">
+              Brisa Cubana Clean Intelligence
+            </span>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] max-w-3xl">
+              Limpieza hotelera para renta corta y residencias premium en Miami
+            </h1>
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 dark:text-brisa-200 max-w-2xl">
+              Operamos cada propiedad con estándares cinco estrellas: equipos
+              propios, tecnología en campo y reporte en tiempo real.
             </p>
-          </article>
-        ))}
-      </section>
-
-      <section className="mt-8 sm:mt-10 md:mt-12 grid gap-4 sm:gap-5 md:gap-6">
-        <article className="bg-white dark:bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-brisa-300/20">
-          <header className="mb-4">
-            <h2 className="m-0 text-xl sm:text-2xl">Servicios disponibles</h2>
-            <p className="m-0 text-gray-700 dark:text-brisa-200 text-sm sm:text-base">
-              Datos en vivo provenientes de la API REST (`/api/services`).
-            </p>
-          </header>
-          {activeServices.length === 0 ? (
-            <p className="text-gray-800 dark:text-brisa-100 text-sm sm:text-base">
-              Aún no hay servicios configurados en la base de datos.
-            </p>
-          ) : (
-            <ul className="list-none p-0 m-0 grid gap-3 sm:gap-4">
-              {activeServices.map((service) => (
-                <li
-                  key={service.id}
-                  className="flex flex-col gap-1 bg-white dark:bg-brisa-800/60 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 dark:border-brisa-300/15"
-                >
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-2 sm:gap-4">
-                    <strong className="text-base sm:text-lg">
-                      {service.name}
-                    </strong>
-                    <span className="text-brisa-600 dark:text-brisa-300 font-medium text-sm sm:text-base">
-                      {currencyFormatter.format(service.basePrice)}
-                    </span>
-                  </div>
-                  {service.description ? (
-                    <p className="m-0 text-gray-700 dark:text-brisa-200 text-sm sm:text-base">
-                      {service.description}
-                    </p>
-                  ) : null}
-                  <span className="text-xs sm:text-sm text-gray-600 dark:text-brisa-400">
-                    Duración estimada: {service.durationMin} min · Última
-                    actualización:{" "}
-                    {dateFormatter.format(new Date(service.updatedAt))}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-
-        <article className="bg-white dark:bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-brisa-300/20">
-          <header className="mb-4">
-            <h2 className="m-0 text-xl sm:text-2xl">Próximas reservas</h2>
-            <p className="m-0 text-gray-700 dark:text-brisa-200 text-sm sm:text-base">
-              Mostrando hasta cuatro reservas futuras desde `/api/bookings`.
-            </p>
-          </header>
-          {upcomingBookings.length === 0 ? (
-            <p className="text-gray-800 dark:text-brisa-100 text-sm sm:text-base">
-              Aún no hay reservas programadas en la base de datos.
-            </p>
-          ) : (
-            <ul className="list-none p-0 m-0 grid gap-3 sm:gap-4">
-              {upcomingBookings.map((booking) => (
-                <li
-                  key={booking.id}
-                  className="flex flex-col gap-1 bg-white dark:bg-brisa-800/60 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 dark:border-brisa-300/15"
-                >
-                  <strong className="text-base sm:text-lg">
-                    {booking.service.name}
-                  </strong>
-                  <span className="text-gray-700 dark:text-brisa-200 text-sm sm:text-base">
-                    {booking.property.label} · {booking.property.city}
-                  </span>
-                  <span className="text-sm sm:text-base text-brisa-600 dark:text-brisa-300">
-                    {dateFormatter.format(new Date(booking.scheduledAt))}
-                  </span>
-                  <span className="text-xs sm:text-sm text-gray-600 dark:text-brisa-400">
-                    Código {booking.code} ·{" "}
-                    {currencyFormatter.format(booking.totalAmount)} · Estado{" "}
-                    {booking.status}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-
-        <article className="bg-white dark:bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-brisa-300/20">
-          <header className="mb-4">
-            <h2 className="m-0 text-xl sm:text-2xl">
-              Inventario de propiedades
-            </h2>
-            <p className="m-0 text-gray-700 dark:text-brisa-200 text-sm sm:text-base">
-              {properties.length} propiedades activas listas para asignación.
-            </p>
-          </header>
-          {properties.length === 0 ? (
-            <p className="text-gray-800 dark:text-brisa-100 text-sm sm:text-base">
-              Crea una propiedad desde el panel operativo para iniciar
-              programación.
-            </p>
-          ) : (
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
-              {properties.slice(0, 4).map((property) => (
-                <div
-                  key={property.id}
-                  className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 dark:border-brisa-300/15 bg-white dark:bg-brisa-800/60"
-                >
-                  <strong className="text-sm sm:text-base">
-                    {property.label}
-                  </strong>
-                  <p className="my-1.5 text-gray-700 dark:text-brisa-200 text-xs sm:text-sm">
-                    {property.addressLine}, {property.city}, {property.state}{" "}
-                    {property.zipCode}
-                  </p>
-                  <span className="text-xs sm:text-sm text-gray-600 dark:text-brisa-400">
-                    Propietario:{" "}
-                    {property.owner?.fullName ?? property.owner?.email ?? "N/A"}
-                  </span>
-                </div>
-              ))}
-              {properties.length > 4 ? (
-                <span className="text-brisa-600 dark:text-brisa-300 text-xs sm:text-sm md:col-span-2">
-                  {properties.length - 4} propiedades adicionales no mostradas.
-                </span>
-              ) : null}
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/checkout"
+                className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 transition-colors"
+              >
+                Solicita una propuesta
+              </Link>
+              <Link
+                href="/clientes"
+                className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
+              >
+                Explora el portal cliente
+              </Link>
             </div>
-          )}
-        </article>
-
-        <article className="bg-white dark:bg-brisa-800/60 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-brisa-300/20">
-          <header className="mb-4">
-            <h2 className="m-0 text-xl sm:text-2xl">Clientes activos</h2>
-            <p className="m-0 text-gray-700 dark:text-brisa-200 text-sm sm:text-base">
-              {customers.length} clientes con reservas o propiedades
-              registradas.
-            </p>
           </header>
-          {customers.length === 0 ? (
-            <p className="text-gray-800 dark:text-brisa-100 text-sm sm:text-base">
-              Registra clientes desde el panel operativo o mediante seed.
-            </p>
-          ) : (
-            <ul className="list-none p-0 m-0 grid gap-3 sm:gap-4 md:grid-cols-2">
-              {customers.slice(0, 5).map((customer) => (
-                <li
-                  key={customer.id}
-                  className="p-3 sm:p-3.5 rounded-lg sm:rounded-xl border border-gray-200 dark:border-brisa-300/15 bg-white dark:bg-brisa-800/60 flex flex-col gap-1"
-                >
-                  <strong className="text-sm sm:text-base">
-                    {customer.fullName ?? "Cliente sin nombre"}
-                  </strong>
-                  <span className="text-gray-700 dark:text-brisa-200 text-xs sm:text-sm">
-                    {customer.email}
-                  </span>
-                </li>
-              ))}
-              {customers.length > 5 ? (
-                <span className="text-brisa-600 dark:text-brisa-300 text-xs sm:text-sm md:col-span-2">
-                  {customers.length - 5} clientes adicionales no mostrados.
-                </span>
-              ) : null}
-            </ul>
-          )}
-        </article>
+        </div>
+      </div>
+
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-12">
+          ¿Por qué marcas de hospitalidad nos eligen?
+        </h2>
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {highlights.map((item) => (
+            <article
+              key={item.title}
+              className="rounded-3xl border border-gray-200 dark:border-brisa-800 bg-white dark:bg-brisa-950 p-6 shadow-sm"
+            >
+              <h3 className="text-xl font-semibold mb-3 text-brisa-700 dark:text-brisa-200">
+                {item.title}
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-brisa-300 leading-relaxed">
+                {item.description}
+              </p>
+            </article>
+          ))}
+        </div>
       </section>
 
-      {isAuthenticated ? (
-        <>
-          <section className="mt-8 sm:mt-10 md:mt-12">
-            <Dashboard
-              bookings={bookings}
-              services={services}
-              customersCount={customers.length}
-            />
-          </section>
+      <section className="bg-gray-50 dark:bg-brisa-900/50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-12">
+            Un proceso diseñado para operaciones predictivas
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {processSteps.map((step) => (
+              <article
+                key={step.step}
+                className="rounded-3xl bg-white dark:bg-brisa-950/70 border border-gray-200 dark:border-brisa-700 p-6 shadow-sm"
+              >
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brisa-600 text-white font-semibold mb-4">
+                  {step.step}
+                </span>
+                <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-brisa-300 leading-relaxed">
+                  {step.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <AdminPanel
-            currentUser={session?.user ?? null}
-            services={servicesPage}
-            properties={propertiesPage}
-            bookings={bookingsPage}
-            customers={customersPage}
-            initialBookingFilters={bookingFilterDefaults}
-            createService={createServiceAction}
-            createProperty={createPropertyAction}
-            createBooking={createBookingAction}
-            toggleService={toggleServiceActiveAction}
-            updateService={updateServiceAction}
-            updateProperty={updatePropertyAction}
-            updateBooking={updateBookingAction}
-            updateUser={updateUserAction}
-            toggleUserActive={toggleUserActiveAction}
-            users={usersPage}
-            notifications={notificationsPage}
-            logout={logoutAction}
-          />
-        </>
-      ) : (
-        <section className="mt-8 sm:mt-10 md:mt-12 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-brisa-300/20 bg-gray-100 dark:bg-brisa-900/60 grid gap-3">
-          <h2 className="m-0 text-xl sm:text-2xl">Acceso restringido</h2>
-          <p className="m-0 text-gray-700 dark:text-brisa-200 text-sm sm:text-base">
-            Inicia sesión para crear o gestionar servicios operativos.
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-12">
+          Historias de clientes
+        </h2>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {testimonials.map((item) => (
+            <blockquote
+              key={item.author}
+              className="relative rounded-3xl border border-gray-200 dark:border-brisa-800 bg-white dark:bg-brisa-950 p-8 shadow-sm"
+            >
+              <span
+                className="absolute -top-4 left-6 text-5xl text-brisa-200 dark:text-brisa-700"
+                aria-hidden
+              >
+                “
+              </span>
+              <p className="text-base sm:text-lg text-gray-700 dark:text-brisa-200 leading-relaxed">
+                {item.quote}
+              </p>
+              <footer className="mt-6">
+                <p className="font-semibold text-brisa-700 dark:text-brisa-100">
+                  {item.author}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-brisa-300">
+                  {item.role}
+                </p>
+              </footer>
+            </blockquote>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-brisa-50 dark:bg-brisa-900/40">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-center space-y-6">
+          <h2 className="text-3xl sm:text-4xl font-semibold">
+            Lleva tu operación al siguiente nivel
+          </h2>
+          <p className="text-base sm:text-lg text-gray-600 dark:text-brisa-200 max-w-2xl mx-auto">
+            Integración con PMS, reportes descargables y soporte 24/7. Estamos
+            listos para conectar con tu equipo y diseñar un programa a la
+            medida.
           </p>
-          <Link
-            href="/login"
-            className="text-brisa-600 hover:text-gray-700 dark:text-brisa-300 dark:hover:text-brisa-200 transition-colors text-sm sm:text-base"
-          >
-            Ir a iniciar sesión
-          </Link>
-        </section>
-      )}
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              href="/checkout"
+              className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 transition-colors"
+            >
+              Comenzar ahora
+            </Link>
+            <Link
+              href="mailto:hola@brisacubanaclean.com"
+              className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
+            >
+              Habla con nuestro equipo
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

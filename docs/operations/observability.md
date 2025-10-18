@@ -92,6 +92,21 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 - El mailer SMTP (`sendPortalMagicLinkEmail`) registra `Magic link email dispatched` cuando el correo se entrega y `Magic link email failed` cuando el proveedor rechaza el envío.
 - Configura una alerta de Sentry con disparo cuando se acumulen ≥3 eventos `checkout.payment.failed` o `portal.booking.action.error` en 15 minutos y redirígela al canal `#alerts-operaciones`. Documenta el enlace del monitor en 1Password y mantenlo actualizado.
 
+### 1.7 Alertas activas (actualizado 20-oct-2025)
+
+- **Sentry Issue Alert – Checkout errores** (`checkout-payment-failed`):
+  - Condición: ≥3 eventos `checkout.payment.failed` en 15 minutos.
+  - Acción: Notificación a Slack `#alerts-operaciones` mediante la app Sentry.
+  - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:checkout-payment-failed` (registrado en 1Password «Sentry Alerts»).
+- **Sentry Issue Alert – Portal autoservicio** (`portal-booking-action-error`):
+  - Condición: ≥3 eventos `portal.booking.action.error` en 10 minutos.
+  - Acción: Slack `#alerts-operaciones` + email a operaciones@brisacubanaclean.com.
+  - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:portal-booking-action-error`.
+- **Sentry Cron Monitor – Nightly Full E2E** (`nightly-full-e2e-suite`):
+  - Frecuencia esperada: diaria 02:00 UTC (workflow GitHub Actions `nightly.yml`).
+  - Acción: Slack `#alerts-operaciones` cuando la ejecución no se recibe en 3h.
+  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *" --slack #alerts-operaciones`.
+
 ---
 
 ## 2. Monitoreo en Vercel

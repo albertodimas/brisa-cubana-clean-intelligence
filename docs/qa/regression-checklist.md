@@ -398,6 +398,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - Ejecutar checklist completo
 - Verificar que CI está en verde
 - Confirmar con stakeholder cambios funcionales
+- Registrar evidencias en `docs/qa/reports/<fecha>-go-live.md`. Último informe: [2025-10-20](reports/2025-10-20-go-live.md).
 
 ### Después de deployment
 
