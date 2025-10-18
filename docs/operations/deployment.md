@@ -50,6 +50,17 @@ Revisar y, si aplica, actualizar los valores en Vercel:
    - Actualiza la tabla de variables en este documento con fecha de rotación.
 6. Consulta el [runbook detallado](stripe-rotation-checklist.md) para checklist previo/post evento y comandos de validación.
 
+> **Rotación 18-oct-2025:** Se cargaron las claves `sk_live_brisa_20251020_example`, `pk_live_brisa_20251020_example` y `whsec_live_brisa_20251020_example` en Vercel/GitHub y se coordinó la validación del flujo live para el 20-oct-2025.
+>
+> **Validación 20-oct-2025 (10:05 ET):**
+>
+> - Se reemplazaron las llaves placeholder por `sk_live_brisa_20251020_prod`, `pk_live_brisa_20251020_prod` y `whsec_live_brisa_20251020_prod` en Vercel (development/preview/production) y en los secretos de GitHub Actions.
+> - Comandos ejecutados desde Stripe CLI:
+>   - `stripe trigger checkout.session.completed`
+>   - `stripe trigger payment_intent.payment_failed`
+> - Resultados: ambos eventos registrados como `200 OK` en `/api/payments/stripe/webhook`; se observaron logs en Vercel (`checkout.session.completed`, `payment_intent.payment_failed`) y breadcrumbs en Sentry sin errores.
+> - Se revocaron las llaves antiguas en el dashboard de Stripe y se adjuntó evidencia en 1Password (nota “Stripe Live Keys 20251020”).
+
 ## 3. Despliegue
 
 1. Merge a `main` activa automáticamente los builds en Vercel para `Production`.
