@@ -219,13 +219,26 @@ export function AdminPanel({
   );
 
   if (isLoading) {
+    const sessionEmail = currentUser?.email ?? "cargando...";
+    const sessionRole = currentUser?.role ? ` · Rol ${currentUser.role}` : "";
+
     return (
-      <section className="ui-stack ui-stack--lg mt-12">
+      <section className="ui-stack ui-stack--lg mt-12" data-testid="panel-root">
         <Card
           title="Panel operativo"
           description="Gestiona servicios, propiedades, reservas y usuarios desde un mismo panel."
         >
           <div className="ui-stack">
+            <div
+              className="flex flex-wrap items-center justify-between gap-3"
+              data-testid="panel-session"
+            >
+              <Chip>
+                Sesión: {sessionEmail}
+                {sessionRole}
+              </Chip>
+              <Skeleton className="h-10 w-28" />
+            </div>
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-10 w-40" />
           </div>
@@ -292,14 +305,17 @@ export function AdminPanel({
   }
 
   return (
-    <section className="ui-stack ui-stack--lg mt-12">
+    <section className="ui-stack ui-stack--lg mt-12" data-testid="panel-root">
       <Card
         title="Panel operativo"
         description="Gestiona servicios, propiedades, reservas y usuarios desde un mismo panel."
       >
         <div className="flex flex-col gap-4">
           {currentUser ? (
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div
+              className="flex flex-wrap items-center justify-between gap-3"
+              data-testid="panel-session"
+            >
               <Chip>
                 Sesión: {currentUser.email ?? "usuario sin correo"}
                 {currentUser.role ? ` · Rol ${currentUser.role}` : null}
@@ -329,7 +345,7 @@ export function AdminPanel({
               </div>
             </div>
           ) : (
-            <div className="flex justify-end">
+            <div className="flex justify-end" data-testid="panel-session">
               <Button
                 type="button"
                 variant="ghost"

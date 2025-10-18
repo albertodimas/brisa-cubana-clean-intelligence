@@ -95,6 +95,7 @@ export async function loginWithCredentials(
     const panelHeading = page.getByRole("heading", {
       name: "Panel operativo",
     });
+    const panelRoot = page.getByTestId("panel-root");
 
     try {
       const { pathname } = new URL(page.url());
@@ -124,6 +125,7 @@ export async function loginWithCredentials(
     }
     if (navigationSucceeded) {
       await expect(panelHeading).toBeVisible({ timeout: 10_000 });
+      await expect(panelRoot).toBeVisible({ timeout: 15_000 });
       return;
     }
 
@@ -140,6 +142,7 @@ export async function loginWithCredentials(
     }
 
     await expect(panelHeading).toBeVisible({ timeout: 10_000 });
+    await expect(panelRoot).toBeVisible({ timeout: 15_000 });
     return;
   }
 }

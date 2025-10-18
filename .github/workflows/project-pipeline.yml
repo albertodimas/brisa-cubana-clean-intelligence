@@ -51,6 +51,22 @@ on:
         required: false
         type: string
         default: "none"
+      e2e-admin-email:
+        required: false
+        type: string
+        default: ""
+      e2e-admin-password:
+        required: false
+        type: string
+        default: ""
+      e2e-coordinator-email:
+        required: false
+        type: string
+        default: ""
+      e2e-coordinator-password:
+        required: false
+        type: string
+        default: ""
       upload-playwright-report:
         required: false
         type: boolean
@@ -158,6 +174,10 @@ jobs:
           api-token: ${{ secrets.api-token }}
           jwt-secret: ${{ secrets.jwt-secret }}
           auth-secret: ${{ secrets.auth-secret }}
+          e2e-admin-email: ${{ inputs.e2e-admin-email }}
+          e2e-admin-password: ${{ inputs.e2e-admin-password }}
+          e2e-coordinator-email: ${{ inputs.e2e-coordinator-email }}
+          e2e-coordinator-password: ${{ inputs.e2e-coordinator-password }}
           portal-magic-link-from: ${{ secrets.portal-magic-link-from }}
           portal-magic-link-base-url: ${{ inputs.portal-magic-link-base-url }}
           portal-magic-link-confirmation-path: ${{ inputs.portal-magic-link-confirmation-path }}

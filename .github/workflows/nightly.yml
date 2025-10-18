@@ -17,6 +17,10 @@ jobs:
       playwright-retention-days: 14
       run-lighthouse: false
       enable-test-utils: "false"
+      e2e-admin-email: ${{ secrets.E2E_ADMIN_EMAIL }}
+      e2e-admin-password: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      e2e-coordinator-email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
+      e2e-coordinator-password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
     secrets:
       api-token: ${{ secrets.API_TOKEN }}
       jwt-secret: ${{ secrets.JWT_SECRET }}

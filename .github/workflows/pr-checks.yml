@@ -15,6 +15,10 @@ jobs:
       run-e2e-suite: smoke
       playwright-report-name: playwright-report-smoke
       upload-playwright-only-on-failure: true
+      e2e-admin-email: ${{ secrets.E2E_ADMIN_EMAIL }}
+      e2e-admin-password: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      e2e-coordinator-email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
+      e2e-coordinator-password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
     secrets:
       api-token: ${{ secrets.API_TOKEN }}
       jwt-secret: ${{ secrets.JWT_SECRET }}

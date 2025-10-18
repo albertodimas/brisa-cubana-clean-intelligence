@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Session } from "next-auth";
 import { AdminPanel } from "@/components/admin-panel";
 import { Dashboard } from "@/components/dashboard";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -26,6 +28,7 @@ import {
   type Service,
   type Booking,
   type Customer,
+  type Property,
   type User,
   type Notification,
 } from "@/lib/api";
@@ -34,13 +37,156 @@ import { auth } from "@/auth";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+type PanelUser = NonNullable<Session["user"]>;
+
+type BookingWindow = {
+  from: string;
+  to: string;
+};
+
+const EMPTY_PAGE_INFO = {
+  cursor: null,
+  nextCursor: null,
+  hasMore: false,
+} as const;
+
+function makeEmptyPage<T>(limit = 0): PaginatedResult<T> {
+  return {
+    items: [],
+    pageInfo: { limit, ...EMPTY_PAGE_INFO },
+  };
+}
+
+type PanelContentProps = {
+  user: PanelUser;
+  bookingWindow: BookingWindow;
+};
+
+async function PanelContent({ user, bookingWindow }: PanelContentProps) {
+  const { from, to } = bookingWindow;
+  const bookingFilterDefaults = {
+    status: "ALL" as const,
+    from,
+    to,
+  };
+
+  const [servicesPage, bookingsPage, propertiesPage, customersPage] =
+    await Promise.all([
+      fetchServicesPage({ limit: 50 }),
+      fetchBookingsPage({ from, to, limit: 10 }),
+      fetchPropertiesPage({ limit: 50 }),
+      fetchCustomersPage({ limit: 50 }),
+    ]);
+
+  const emptyUsersPage: PaginatedResult<User> = makeEmptyPage<User>(50);
+  const emptyNotificationsPage: PaginatedResult<Notification> =
+    makeEmptyPage<Notification>(10);
+
+  const usersPage =
+    user.role === "ADMIN"
+      ? await fetchUsersPage({ limit: 50 })
+      : emptyUsersPage;
+
+  const notificationsPage = await fetchNotificationsPage({ limit: 10 }).catch(
+    () => emptyNotificationsPage,
+  );
+
+  return (
+    <>
+      <section>
+        <Dashboard
+          bookings={bookingsPage.items}
+          services={servicesPage.items}
+          customersCount={customersPage.items.length}
+        />
+      </section>
+
+      <section className="bg-white dark:bg-brisa-900/60 border border-gray-200 dark:border-brisa-800 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-sm">
+        <AdminPanel
+          currentUser={user}
+          services={servicesPage}
+          properties={propertiesPage}
+          bookings={bookingsPage}
+          customers={customersPage}
+          users={usersPage}
+          notifications={notificationsPage}
+          initialBookingFilters={bookingFilterDefaults}
+          createService={createServiceAction}
+          createProperty={createPropertyAction}
+          createBooking={createBookingAction}
+          toggleService={toggleServiceActiveAction}
+          updateService={updateServiceAction}
+          updateProperty={updatePropertyAction}
+          updateBooking={updateBookingAction}
+          updateUser={updateUserAction}
+          toggleUserActive={toggleUserActiveAction}
+          logout={logoutAction}
+        />
+      </section>
+    </>
+  );
+}
+
+function PanelContentFallback({ user, bookingWindow }: PanelContentProps) {
+  const { from, to } = bookingWindow;
+  const bookingFilterDefaults = {
+    status: "ALL" as const,
+    from,
+    to,
+  };
+
+  const emptyServices = makeEmptyPage<Service>(50);
+  const emptyProperties = makeEmptyPage<Property>(50);
+  const emptyBookings = makeEmptyPage<Booking>(10);
+  const emptyCustomers = makeEmptyPage<Customer>(50);
+  const emptyUsers = makeEmptyPage<User>(50);
+  const emptyNotifications = makeEmptyPage<Notification>(10);
+
+  return (
+    <>
+      <section>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="rounded-2xl border border-gray-200 dark:border-brisa-800 bg-white/70 dark:bg-brisa-900/60 h-32 animate-pulse"
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-white dark:bg-brisa-900/60 border border-gray-200 dark:border-brisa-800 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-sm">
+        <AdminPanel
+          currentUser={user}
+          services={emptyServices}
+          properties={emptyProperties}
+          bookings={emptyBookings}
+          customers={emptyCustomers}
+          users={emptyUsers}
+          notifications={emptyNotifications}
+          initialBookingFilters={bookingFilterDefaults}
+          createService={createServiceAction}
+          createProperty={createPropertyAction}
+          createBooking={createBookingAction}
+          toggleService={toggleServiceActiveAction}
+          updateService={updateServiceAction}
+          updateProperty={updatePropertyAction}
+          updateBooking={updateBookingAction}
+          updateUser={updateUserAction}
+          toggleUserActive={toggleUserActiveAction}
+          logout={logoutAction}
+          isLoading
+        />
+      </section>
+    </>
+  );
+}
+
 export default async function PanelPage() {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
   }
-
-  const isAdmin = session.user.role === "ADMIN";
 
   const today = new Date();
   const from = new Date(
@@ -52,41 +198,7 @@ export default async function PanelPage() {
     today.getTime() + 1000 * 60 * 60 * 24 * 30,
   ).toISOString();
 
-  const bookingFilterDefaults = {
-    status: "ALL" as const,
-    from,
-    to: horizon,
-  };
-
-  const [servicesPage, bookingsPage, propertiesPage, customersPage] =
-    await Promise.all([
-      fetchServicesPage({ limit: 50 }),
-      fetchBookingsPage({ from, to: horizon, limit: 10 }),
-      fetchPropertiesPage({ limit: 50 }),
-      fetchCustomersPage({ limit: 50 }),
-    ]);
-
-  const emptyUsersPage: PaginatedResult<User> = {
-    items: [],
-    pageInfo: { limit: 50, cursor: null, nextCursor: null, hasMore: false },
-  };
-
-  const emptyNotificationsPage: PaginatedResult<Notification> = {
-    items: [],
-    pageInfo: { limit: 10, cursor: null, nextCursor: null, hasMore: false },
-  };
-
-  const usersPage = isAdmin
-    ? await fetchUsersPage({ limit: 50 })
-    : emptyUsersPage;
-
-  const notificationsPage = await fetchNotificationsPage({ limit: 10 }).catch(
-    () => emptyNotificationsPage,
-  );
-
-  const services: Service[] = servicesPage.items;
-  const bookings: Booking[] = bookingsPage.items;
-  const customers: Customer[] = customersPage.items;
+  const bookingWindow = { from, to: horizon };
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-brisa-950 text-gray-900 dark:text-brisa-50">
@@ -121,36 +233,16 @@ export default async function PanelPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-10">
-        <section>
-          <Dashboard
-            bookings={bookings}
-            services={services}
-            customersCount={customers.length}
-          />
-        </section>
-
-        <section className="bg-white dark:bg-brisa-900/60 border border-gray-200 dark:border-brisa-800 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-sm">
-          <AdminPanel
-            currentUser={session.user}
-            services={servicesPage}
-            properties={propertiesPage}
-            bookings={bookingsPage}
-            customers={customersPage}
-            users={usersPage}
-            notifications={notificationsPage}
-            initialBookingFilters={bookingFilterDefaults}
-            createService={createServiceAction}
-            createProperty={createPropertyAction}
-            createBooking={createBookingAction}
-            toggleService={toggleServiceActiveAction}
-            updateService={updateServiceAction}
-            updateProperty={updatePropertyAction}
-            updateBooking={updateBookingAction}
-            updateUser={updateUserAction}
-            toggleUserActive={toggleUserActiveAction}
-            logout={logoutAction}
-          />
-        </section>
+        <Suspense
+          fallback={
+            <PanelContentFallback
+              user={session.user}
+              bookingWindow={bookingWindow}
+            />
+          }
+        >
+          <PanelContent user={session.user} bookingWindow={bookingWindow} />
+        </Suspense>
       </div>
     </main>
   );

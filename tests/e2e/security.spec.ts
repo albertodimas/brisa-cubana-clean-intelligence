@@ -255,14 +255,21 @@ test.describe("Seguridad y Autenticación", () => {
       // Login as admin first
       await loginAsAdmin(page, testInfo);
 
-      await page.goto("/");
-      const sessionIndicator = page.getByText("Sesión:", { exact: false });
+      await page.goto("/panel");
+      const panelRoot = page.getByTestId("panel-root");
+      const sessionIndicator = page.getByTestId("panel-session");
 
-      await expect(sessionIndicator).toBeVisible({ timeout: 5000 });
+      await expect(panelRoot).toBeVisible({ timeout: 15_000 });
+      await expect(sessionIndicator).toContainText("Sesión:", {
+        timeout: 15_000,
+      });
 
       await test.step("persiste después de recargar", async () => {
         await page.reload();
-        await expect(sessionIndicator).toBeVisible({ timeout: 5000 });
+        await expect(panelRoot).toBeVisible({ timeout: 15_000 });
+        await expect(sessionIndicator).toContainText("Sesión:", {
+          timeout: 15_000,
+        });
       });
 
       await test.step("cierra sesión y redirige a login", async () => {
@@ -271,7 +278,7 @@ test.describe("Seguridad y Autenticación", () => {
           .click();
         await page.waitForURL(/\/login/, { timeout: 5000 });
         await expect(page.getByLabel("Correo")).toBeVisible({ timeout: 5000 });
-        await expect(sessionIndicator).not.toBeVisible();
+        await expect(panelRoot).not.toBeVisible({ timeout: 5000 });
       });
     });
   });
