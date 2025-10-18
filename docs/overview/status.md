@@ -15,12 +15,12 @@
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
 - Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
-- Deploy web operativo en Vercel (Next.js 15.5.5) sincronizado con la API.
-- Stripe modo test configurado en Vercel (Development/Preview/Production) con claves temporales `*_brisa_demo_20251015`; programar rotación al habilitar modo live.
+- Sitio público `/` sirve la landing comercial (hero + CTA checkout/portal) ahora con secciones "Planes y precios", testimonios, FAQ interactiva y formulario de captura que persiste en `/api/leads`; todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
+- Stripe live configurado (claves `sk_live_brisa_20251020_prod`, `pk_live_brisa_20251020_prod`, `whsec_live_brisa_20251020_prod`) con validaciones ejecutadas vía Stripe CLI el 20-oct-2025; documentación en `docs/operations/deployment.md`.
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
 - Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Accesibilidad validada (WCAG 2.2 AA) con fixes `aria-live` y `aria-hidden` implementados (commit `ce37e09`, 17-oct-2025). Funcionalidades de autoservicio adicionales (PDF exports, SSE push) siguen planificadas para Fase 2.1/2.2 (ver [RFC §8](../product/rfc-public-components.md#8-portal-cliente)) y se documentan en la guía operativa [docs/guides/portal-client.md](../guides/portal-client.md).
-- Release etiquetado `v0.3.0` (14-oct-2025) completa las mejoras de búsqueda y filtros en el panel operativo; la Fase 2 comercial (landing, checkout, portal cliente) está documentada en `product/phase-2-roadmap.md`. El 17-oct-2025 se ejecutó la migración a Tailwind CSS 4.1.0 (Issue #40) adoptando `@tailwindcss/postcss` y configuración híbrida.
+- Release etiquetado `v0.4.0` (20-oct-2025) incorpora landing comercial, portal público navegable y rotación Stripe live; el roadmap Fase 2 continúa en `product/phase-2-roadmap.md`. El 17-oct-2025 se ejecutó la migración a Tailwind CSS 4.1.0 (Issue #40) adoptando `@tailwindcss/postcss` y configuración híbrida.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
@@ -33,7 +33,7 @@
   - Autenticación con Auth.js (NextAuth v5) y session strategy `jwt`.
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
-  - Diseño declarativo en `app/page.tsx` + componente `AdminPanel`.
+  - Diseño declarativo en `app/page.tsx` (landing) y `app/panel/page.tsx` (panel operativo autenticado).
   - **Shared utilities**:
     - `lib/types.ts`: Tipos TypeScript compartidos (PaginatedResult, User, Service, etc.)
     - `lib/api-client.ts`: Cliente HTTP reutilizable con manejo de errores

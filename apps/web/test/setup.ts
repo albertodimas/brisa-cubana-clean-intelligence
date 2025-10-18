@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import { createElement, type MouseEvent, type ReactNode } from "react";
 import { vi } from "vitest";
 
 const mockedAuth = vi.fn().mockResolvedValue(null);
@@ -50,4 +51,34 @@ vi.mock("@vercel/analytics", () => ({
 vi.mock("@sentry/nextjs", () => ({
   addBreadcrumb: vi.fn(),
   captureException: vi.fn(),
+}));
+
+vi.mock("next/link", () => ({
+  __esModule: true,
+  default: ({
+    children,
+    onClick,
+    href,
+    ...rest
+  }: {
+    children: ReactNode;
+    onClick?: (event: MouseEvent) => void;
+    href?: string;
+  } & Record<string, any>) =>
+    createElement(
+      "a",
+      {
+        href: typeof href === "string" ? href : "#",
+        onClick: (event: MouseEvent) => {
+          if (typeof onClick === "function") {
+            onClick(event);
+          }
+          if (!event.defaultPrevented) {
+            event.preventDefault();
+          }
+        },
+        ...rest,
+      },
+      children,
+    ),
 }));

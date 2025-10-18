@@ -23,10 +23,19 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | Web                                         | `INTERNAL_API_URL`                                                                                                                                          | Production+Preview  | URL interna para proxy                                                    |
 | Web                                         | `AUTH_SECRET`                                                                                                                                               | All                 | Debe coincidir con la API para sesiones válidas                           |
 | Web (Stripe)                                | `STRIPE_PUBLISHABLE_KEY`                                                                                                                                    | All                 | Clave pública usada por Stripe.js                                         |
+| Web (Leads opcional)                        | `LEAD_WEBHOOK_URL`                                                                                                                                          | Production+Preview  | Endpoint HTTPS (Slack/CRM) que recibirá payloads del formulario público   |
 
 > **Estado 15-oct-2025:** Se cargaron claves de ejemplo `sk_test_brisa_demo_20251015`, `pk_test_brisa_demo_20251015` y `whsec_brisa_demo_20251015` en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
 
 > **Portal cliente:** Configura SMTP con proveedor confiable. En producción establece `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` y elimina `ENABLE_TEST_UTILS` para evitar tokens de depuración.
+
+> **Captura de leads:** Si no configuras `LEAD_WEBHOOK_URL` el formulario en `/` seguirá funcionando pero solo registrará un log server-side. Para integraciones con Slack o CRM usa un webhook HTTPS (por ejemplo, Slack Incoming Webhook) y verifica la entrega con el comando (o ejecuta `scripts/test-lead-webhook.sh` tras exportar la variable):
+>
+> ```bash
+> curl -X POST "$LEAD_WEBHOOK_URL" \
+>   -H "Content-Type: application/json" \
+>   -d '{"event":"landing_lead.test","payload":{"name":"qa","email":"qa@example.com","propertyCount":"1-5 unidades"}}'
+> ```
 
 ### 2.1 Rotación de claves Stripe (modo live)
 

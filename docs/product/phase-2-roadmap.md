@@ -9,11 +9,11 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 ## 2. Alcance funcional
 
-| Entregable        | Descripción                                                                       | Dependencias                                             | Evidencias requeridas                                        |
-| ----------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
-| Landing comercial | Página pública con propuesta de valor, listado de servicios y CTA a checkout.     | Nuevos componentes UI, métricas Web Vitals.              | Playwright smoke pública, Lighthouse ≥ 90 Performance.       |
-| Checkout público  | Selección de servicio, fecha y datos de contacto; integración Stripe (modo test). | API booking pública con validaciones, integración pagos. | Tests e2e `checkout.spec.ts`, webhook tests en API.          |
-| Portal cliente    | Autogestión: ver reservas, actualizar datos, solicitar cambios.                   | Autenticación cliente, endpoints `/api/clients/*`.       | Playwright crítico `portal-client.spec.ts`, casos QA manual. |
+| Entregable        | Descripción                                                                               | Dependencias                                             | Evidencias requeridas                                        |
+| ----------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+| Landing comercial | Página pública con propuesta de valor, listado de servicios y CTA a checkout (✅ v0.4.0). | Nuevos componentes UI, métricas Web Vitals.              | Playwright smoke pública, Lighthouse ≥ 90 Performance.       |
+| Checkout público  | Selección de servicio, fecha y datos de contacto; integración Stripe (modo test).         | API booking pública con validaciones, integración pagos. | Tests e2e `checkout.spec.ts`, webhook tests en API.          |
+| Portal cliente    | Autogestión: ver reservas, actualizar datos, solicitar cambios.                           | Autenticación cliente, endpoints `/api/clients/*`.       | Playwright crítico `portal-client.spec.ts`, casos QA manual. |
 
 ## 3. Hitos
 
@@ -29,9 +29,9 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 ## 5. Próximos pasos inmediatos
 
-1. Validar RFC de componentes públicos (`docs/product/rfc-public-components.md`) con Operaciones + Diseño (pendiente de sign-off final, seguimiento en [Issue #41](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues/41)).
-2. Sustituir las claves Stripe demo (`*_brisa_demo_20251015`) por credenciales oficiales cuando se apruebe el go-live y documentar la rotación en `operations/deployment.md` (seguimiento en [Issue #42](https://github.com/albertodimas/brisa-cubana-clean-intelligence/issues/42)).
-3. Configurar proveedor SMTP definitivo para el portal cliente (Mailtrap → proveedor productivo) y ejecutar pruebas de correo end-to-end en Preview antes de promover a producción.
+1. Analítica base lista (18-oct-2025): CTA y checkout disparan `cta_request_proposal`, `cta_portal_demo`, `checkout_started`, `checkout_completed` vía `@vercel/analytics` + Sentry. Pendiente: seleccionar plataforma definitiva (PostHog/GA4/Segment), normalizar naming/UTM y publicar dashboard.
+2. Contenido comercial iterado el 18-oct-2025: landing incorpora secciones "Planes y precios", FAQ ampliada y formulario de captura que envía a `/api/leads` (webhook opcional `LEAD_WEBHOOK_URL`). Pendiente: cerrar copy definitivo con marketing y añadir assets/hero photography para la release pública.
+3. Definir proceso post-lanzamiento: monitoreo diario de alertas Sentry/Slack, revisión de logs Stripe live y QA regresivo semanal (ver `docs/qa/reports/2025-10-20-go-live.md`).
 
 ## 6. Artefactos en elaboración
 
@@ -44,7 +44,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
   - Incluir esquema de telemetría (eventos a capturar en Analytics/Sentry) y comportamiento responsive (desktop, tablet, móvil). ✅
   - Capturas de referencia opcionales disponibles en `docs/assets/public-components/` (para stakeholders). ✅
 - **Entregables:**
-  - `docs/product/rfc-public-components.md` (estructura y contratos vigentes).
+  - `docs/product/rfc-public-components.md` (estructura y contratos vigentes) – **Aprobado 18-oct-2025**.
   - `docs/guides/portal-client.md` (operación y QA del portal cliente).
 
 ### 6.2 Plan de migración de seeds (operativos vs. demo) ✅
@@ -62,4 +62,4 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
   - [x] Stripe CLI documentada (`pnpm stripe:listen` + `stripe trigger …`) para reproducir eventos en local/preview.
   - [x] Actualizar `docs/qa/regression-checklist.md` con casos de pago exitoso/fallido.
   - [x] Checkout público (`/checkout`) con Payment Element, endpoint `POST /api/payments/stripe/intent` y Playwright `checkout.spec.ts`.
-  - [ ] Sustituir claves demo `*_brisa_demo_20251015` por credenciales oficiales antes de pasar a modo live.
+  - [x] Sustituir claves demo `*_brisa_demo_20251015` por credenciales oficiales (`sk_live_brisa_20251020_prod`, etc.) y documentar la rotación en `docs/operations/deployment.md` (20-oct-2025).

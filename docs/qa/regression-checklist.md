@@ -159,10 +159,11 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 
 ### 6.1 Landing Page
 
-- [ ] Página principal (`/`) muestra estado del proyecto
-- [ ] Muestra reportes en vivo (servicios, reservas, propiedades, clientes)
-- [ ] Botón "Ingresar" redirige a `/login`
-- [ ] Muestra sesión activa si usuario está logueado
+- [ ] Página principal (`/`) muestra hero con copy actualizado y CTA dobles (“Solicita una propuesta”, “Explora el portal cliente”)
+- [ ] Secciones “Por qué nos eligen”, “Proceso”, “Historias de clientes” y “Planes y precios” cargan sin errores
+- [ ] FAQ interactiva abre/cierra acordeones correctamente
+- [ ] Formulario “¿Listo para recibir tu propuesta?” valida campos obligatorios y muestra feedback (éxito/error)
+- [ ] CTA hero no mostrados para usuarios autenticados mantienen sesión activa (chip en panel tras login)
 
 ### 6.2 Panel Operativo
 
@@ -189,6 +190,13 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Cookies HttpOnly se preservan
 - [ ] Query strings se preservan
 - [ ] Headers sensibles (`content-length`, `content-encoding`) se limpian
+
+### 6.5 Landing – Analítica y Captura de Leads
+
+- [ ] `LEAD_WEBHOOK_URL` configurado en entorno (revisar Vercel/GitHub Secrets)
+- [ ] Enviar formulario público (`/`, sección contacto) produce 200 y dispara evento en destino (Slack/CRM) con payload esperado (puedes validar manualmente con `scripts/test-lead-webhook.sh` apuntando a la URL de webhook)
+- [ ] CTA hero y pricing generan eventos `cta_request_proposal` y `cta_portal_demo` visibles en la plataforma de analítica (Vercel/PostHog/GA4)
+- [ ] Checkout público registra eventos `checkout_started` y `checkout_completed` (ver logs Sentry o analítica) al completar pago de prueba
 
 ---
 

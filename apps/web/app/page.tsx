@@ -1,4 +1,10 @@
-import Link from "next/link";
+import { FAQSection } from "@/components/landing/faq-section";
+import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
+import {
+  PricingTiers,
+  type PricingTier,
+} from "@/components/landing/pricing-tiers";
+import { MarketingLink } from "@/components/landing/marketing-link";
 
 const highlights = [
   {
@@ -54,6 +60,80 @@ const testimonials = [
   },
 ];
 
+const pricingTiers: PricingTier[] = [
+  {
+    id: "starter",
+    name: "Starter",
+    headline: "Hasta 5 unidades activas",
+    price: "$499",
+    priceSuffix: "mensuales",
+    description: "Propiedades residenciales o primeras reseñas en Airbnb.",
+    features: [
+      "2 turnos semanales por propiedad",
+      "Kit de bienvenida y reposición básica incluida",
+      "Portal cliente + reportes fotográficos en 6 horas",
+      "Soporte operativo en horario laboral (9-18h)",
+    ],
+  },
+  {
+    id: "growth",
+    name: "Growth",
+    headline: "6 a 20 unidades mixtas",
+    price: "$1,290",
+    priceSuffix: "mensuales",
+    description: "Renta corta con rotación constante y multiple housekeeping.",
+    features: [
+      "Turnos diarios e inspección post check-out",
+      "Limpieza profunda mensual y lavandería centralizada",
+      "Playbooks personalizados por tipo de estancia",
+      "Respuesta 24/7 ante incidentes y escalamiento por Slack",
+    ],
+    highlighted: true,
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    headline: "Portafolios 21+ unidades / usos mixtos",
+    price: "A medida",
+    priceSuffix: "según SLAs",
+    description: "Operación hotelera, multifamily o inventario distribuido.",
+    features: [
+      "Equipo fijo por cuadrilla y reemplazos garantizados",
+      "Integraciones con PMS (Guesty, Hostaway, ResNexus)",
+      "SLA personalizados con monitoreo en tiempo real",
+      "Gestión de amenities, reposiciones y control de inventario",
+    ],
+  },
+];
+
+const faqItems = [
+  {
+    question: "¿Cuál es el tiempo de respuesta para una nueva solicitud?",
+    answer:
+      "Después de recibir el formulario agendamos diagnóstico en menos de 24 horas hábiles. Si ya tienes una fecha límite podemos coordinar un onboarding express en 48 horas siempre que recibamos accesos y credenciales a tiempo.",
+  },
+  {
+    question: "¿Qué necesito para activar el portal cliente?",
+    answer:
+      "Solo el correo del responsable operativo y la configuración inicial de tus propiedades. Importamos datos desde CSV, planillas o tu PMS. Una vez dentro puedes crear usuarios ilimitados sin costo adicional.",
+  },
+  {
+    question: "¿Incluyen insumos y lavandería?",
+    answer:
+      "Sí. Cada plan contempla reposición de básicos (amenities, bolsas, toallas) según inventario. Para prendas personalizadas gestionamos logística con tu proveedor o con nuestro partner certificado.",
+  },
+  {
+    question: "¿Cómo manejan la calidad y los reportes?",
+    answer:
+      "Cada turno genera checklist digital, fotos antes/después y métricas de duración. Supervisores revisan y levantan alertas en el portal. También enviamos un resumen semanal automatizado a tu equipo.",
+  },
+  {
+    question: "¿Puedo combinar limpieza con mantenimiento ligero?",
+    answer:
+      "Claro. Tenemos cuadrillas especializadas para retoques de pintura, reparación de mobiliario ligero y reposición de electrodomésticos menores. Inclúyelo en tu onboarding y lo agregamos como add-on recurrente.",
+  },
+];
+
 export const revalidate = 3600;
 
 export default function LandingPage() {
@@ -74,18 +154,22 @@ export default function LandingPage() {
               propios, tecnología en campo y reporte en tiempo real.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
+              <MarketingLink
                 href="/checkout"
+                eventName="cta_request_proposal"
+                metadata={{ placement: "hero" }}
                 className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 transition-colors"
               >
                 Solicita una propuesta
-              </Link>
-              <Link
+              </MarketingLink>
+              <MarketingLink
                 href="/clientes"
+                eventName="cta_portal_demo"
+                metadata={{ placement: "hero" }}
                 className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
               >
                 Explora el portal cliente
-              </Link>
+              </MarketingLink>
             </div>
           </header>
         </div>
@@ -168,32 +252,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-brisa-50 dark:bg-brisa-900/40">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-semibold">
-            Lleva tu operación al siguiente nivel
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-brisa-200 max-w-2xl mx-auto">
-            Integración con PMS, reportes descargables y soporte 24/7. Estamos
-            listos para conectar con tu equipo y diseñar un programa a la
-            medida.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/checkout"
-              className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 transition-colors"
-            >
-              Comenzar ahora
-            </Link>
-            <Link
-              href="mailto:hola@brisacubanaclean.com"
-              className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
-            >
-              Habla con nuestro equipo
-            </Link>
-          </div>
-        </div>
-      </section>
+      <PricingTiers
+        tiers={pricingTiers}
+        renderCTA={(tier) => (
+          <MarketingLink
+            href="/checkout"
+            eventName="cta_request_proposal"
+            metadata={{ placement: "pricing", tierId: tier.id }}
+            className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-4 py-2 text-sm font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
+          >
+            Solicitar onboarding
+          </MarketingLink>
+        )}
+      />
+
+      <FAQSection items={faqItems} />
+
+      <LeadCaptureForm />
     </main>
   );
 }

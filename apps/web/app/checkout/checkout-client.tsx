@@ -9,6 +9,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import type { Service } from "@/lib/api";
+import { recordCheckoutEvent } from "@/lib/marketing-telemetry";
 
 type CheckoutClientProps = {
   services: Array<
@@ -261,12 +262,23 @@ export function CheckoutClient({
         amount: payload.data.amount,
         currency: payload.data.currency,
       });
+      recordCheckoutEvent("checkout_started", {
+        serviceId: selectedService.id,
+        paymentIntentId: payload.data.paymentIntentId,
+        amount: payload.data.amount,
+        currency: payload.data.currency,
+      });
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
           : "No pudimos crear la intención de pago.",
       );
+      recordCheckoutEvent("checkout_failed", {
+        stage: "intent",
+        serviceId: selectedService?.id,
+        error: error instanceof Error ? error.message : "unknown_intent_error",
+      });
       sentryModuleRef.current?.captureException(error, {
         contexts: {
           checkout: {
@@ -507,6 +519,10 @@ export function CheckoutClient({
                   },
                   level: "info",
                 });
+                recordCheckoutEvent("checkout_completed", {
+                  paymentIntentId,
+                  serviceId: selectedService?.id,
+                });
               }}
               onFailure={(message) => {
                 setErrorMessage(message);
@@ -522,6 +538,11 @@ export function CheckoutClient({
                     error: message,
                   },
                   level: "warning",
+                });
+                recordCheckoutEvent("checkout_failed", {
+                  stage: "payment",
+                  serviceId: selectedService?.id,
+                  error: message,
                 });
               }}
             />
