@@ -52,7 +52,9 @@ export async function loginWithCredentials(
           await page.waitForURL(
             (url) => {
               const { pathname } = new URL(url);
-              return pathname === "/" || pathname === "";
+              return (
+                pathname === "/panel" || pathname === "/" || pathname === ""
+              );
             },
             { timeout: 15_000, waitUntil: "domcontentloaded" },
           );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 import type { loginAction } from "@/app/actions";
 
 type LoginAction = typeof loginAction;
@@ -39,7 +40,7 @@ export function LoginForm({ action }: Props) {
   async function handleSubmit(formData: FormData) {
     const result = await action(formData);
     if (result?.success) {
-      router.replace("/");
+      router.replace("/panel" as Route);
       router.refresh();
       return;
     }

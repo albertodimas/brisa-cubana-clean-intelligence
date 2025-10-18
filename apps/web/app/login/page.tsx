@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Route } from "next";
 import { loginAction } from "@/app/actions";
 import { LoginForm } from "@/components/login-form";
 import { auth } from "@/auth";
@@ -11,7 +12,7 @@ export const metadata = {
 export default async function LoginPage() {
   const session = await auth();
   if (session?.user) {
-    redirect("/");
+    redirect("/panel" as Route);
   }
 
   return (

@@ -25,6 +25,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
       redirect: false,
     });
     revalidatePath("/");
+    revalidatePath("/panel");
     return { success: "Sesión iniciada" };
   } catch (error) {
     console.error("[actions] login", error);
@@ -53,6 +54,7 @@ export async function logoutAction(): Promise<ActionResult> {
   try {
     await signOut({ redirect: false });
     revalidatePath("/");
+    revalidatePath("/panel");
     return { success: "Sesión cerrada" };
   } catch (error) {
     console.error("[actions] logout", error);
