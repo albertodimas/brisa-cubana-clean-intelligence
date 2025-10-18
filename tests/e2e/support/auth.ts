@@ -95,6 +95,18 @@ export async function loginWithCredentials(
     const panelHeading = page.getByRole("heading", {
       name: "Panel operativo",
     });
+
+    try {
+      const { pathname } = new URL(page.url());
+      if (pathname !== "/panel") {
+        await page.goto("/panel", {
+          waitUntil: "domcontentloaded",
+        });
+        navigationSucceeded = true;
+      }
+    } catch {
+      // ignore URL parsing errors and fall back to existing visibility checks
+    }
     const stillOnLogin = (() => {
       try {
         return new URL(page.url()).pathname === "/login";
