@@ -171,28 +171,28 @@ vercel logs --output=logs.txt
 - Breadcrumbs/Sentry: `checkout.intent.created`, `portal.link.requested`, `portal.link.verify`, `portal.logout`.
 - Información consolidada en `apps/web/lib/marketing-telemetry.ts`.
 
-### 4.2 Plataforma de producto (pendiente elegir)
+### 4.2 Plataforma seleccionada: PostHog Cloud (US)
 
-| Opción                | Pros                                                                     | Contras                                                              | Próximo paso                                         |
-| --------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------- |
-| **PostHog Cloud**     | Open-source, funnels, recordings, hosting US/EU, integración sencilla JS | Coste basado en eventos, requiere plan pago para retención > 15 días | Solicitar trial, validar cumplimiento GDPR con legal |
-| **GA4**               | Gratis, equipo ya familiar con Google                                    | UI compleja, muestreo elevado, exige banner cookies estricto         | Preparar plan de consentimiento y mapeo eventos      |
-| **Segment + destino** | Flexibilidad para múltiples destinos (Mixpanel, Amplitude)               | Coste + complejidad inicial, requiere gobernanza de esquema          | Estimar volumen mensual (MTE) y presupuesto          |
+- Detalle de la decisión en `docs/product/analytics-decision.md`.
+- Variables nuevas:
+  - `NEXT_PUBLIC_POSTHOG_KEY`
+  - `NEXT_PUBLIC_POSTHOG_HOST` (opcional, default `https://us.posthog.com`)
 
 ### 4.3 Checklist de implementación
 
-1. **Decisión de plataforma** (Producto/Marketing, antes del 25-oct-2025).
-2. **Normalización de nombres**: definir convención (`namespace.event`, atributos obligatorios `source`, `campaign`, `serviceId`, `customerType`).
-3. **Enriquecimiento con UTMs**: persistir `utm_*` en `marketing-telemetry`, propagar a checkout/portal.
-4. **Data Warehouse (opcional)**: preparar export a BigQuery/ClickHouse cuando se supere el umbral de 100k eventos/mes.
-5. **Dashboard compartido**:
-   - KPI iniciales: conversiones `cta → lead`, `lead → checkout`, `checkout → pago`, ratio uso portal (`portal.link.verify` vs `portal.booking.action`).
-   - Responsable: Producto. Ubicar enlace en este documento (sección 4.4) una vez creado.
-6. **QA**: añadir casos en `docs/qa/regression-checklist.md` para verificar emisión de eventos en smoke tests.
+1. **Integrar SDK PostHog** en `apps/web` (lazy load) con fallback si la key no está definida.
+2. **Normalización de eventos** (`namespace.event`, props `source`, `campaign`, `serviceId`, `customerType`).
+3. **Persistir UTMs** en el telemetry helper y propagar a checkout/portal.
+4. **Dashboard compartido**:
+   - KPI iniciales: `cta → lead`, `lead → checkout`, `checkout → pago`, ratio uso portal.
+   - Responsable: Producto. Añadir enlace en sección 4.4 al publicarlo.
+5. **Alertas PostHog** para spikes de `checkout_payment_failed` → Slack `#producto`.
+6. **QA**: actualizar `docs/qa/regression-checklist.md` para comprobar presencia de `window.posthog` cuando la key esté configurada.
+7. **Export warehouse (opcional)** cuando se superen 100k eventos/mes.
 
 ### 4.4 Enlaces (actualizar cuando estén listos)
 
-- Dashboard principal: _(pendiente)_.
+- Dashboard PostHog: _(pendiente)_.
 - Diccionario de eventos: `docs/product/analytics-events.md` _(crear)_.
 
 > **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.

@@ -37,9 +37,9 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
    - [ ] Entregar hoja de contenidos (Google Doc) y cargar assets en `docs/assets/public-components/`.
    - [ ] Actualizar landing con assets definitivos y anotar cambios en CHANGELOG.
 
-5. **Integración analítica (nuevo)**:
-   - [ ] Seleccionar plataforma (PostHog/GA4/Segment) junto a Producto (ver `docs/operations/observability.md#4-analítica-comercial-plan-fase-2`).
-   - [ ] Implementar SDK y enviar eventos normalizados (`cta`, `checkout`, `portal`).
+5. **Integración analítica**:
+   - [x] Seleccionar plataforma → **PostHog Cloud** (ver `docs/product/analytics-decision.md`).
+   - [ ] Implementar SDK `posthog-js` y enviar eventos normalizados (`cta`, `checkout`, `portal`).
    - [ ] Publicar dashboard accesible para stakeholders y enlazarlo en este roadmap.
 
 ## 6. Artefactos en elaboración
