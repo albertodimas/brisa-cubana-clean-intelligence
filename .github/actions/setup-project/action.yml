@@ -105,6 +105,10 @@ inputs:
     description: Toggle to expose debug tokens in portal magic link responses.
     required: false
     default: "true"
+  log-drain-verification-code:
+    description: Verification code returned in x-vercel-verify for log drain validation.
+    required: false
+    default: "local-log-drain-verification-code"
 runs:
   using: "composite"
   steps:
@@ -149,6 +153,7 @@ runs:
         portal_magic_link_smtp_password="${{ inputs.portal-magic-link-smtp-password }}"
         portal_magic_link_smtp_secure="${{ inputs.portal-magic-link-smtp-secure }}"
         portal_magic_link_expose_debug="${{ inputs.portal-magic-link-expose-debug }}"
+        log_drain_verification_code="${{ inputs.log-drain-verification-code }}"
 
         if [ -z "$api_token" ]; then api_token="test-api-token"; fi
         if [ -z "$jwt_secret" ]; then jwt_secret="test-jwt-secret-for-ci-only"; fi
@@ -166,6 +171,7 @@ runs:
         if [ -z "$portal_magic_link_base_url" ]; then portal_magic_link_base_url="http://localhost:3000"; fi
         if [ -z "$portal_magic_link_confirmation_path" ]; then portal_magic_link_confirmation_path="/clientes/acceso/confirmar"; fi
         if [ -z "$portal_magic_link_expose_debug" ]; then portal_magic_link_expose_debug="true"; fi
+        if [ -z "$log_drain_verification_code" ]; then log_drain_verification_code="local-log-drain-verification-code"; fi
 
         {
           echo "API_TOKEN=$api_token"
@@ -184,6 +190,7 @@ runs:
           echo "PORTAL_MAGIC_LINK_BASE_URL=$portal_magic_link_base_url"
           echo "PORTAL_MAGIC_LINK_CONFIRMATION_PATH=$portal_magic_link_confirmation_path"
           echo "PORTAL_MAGIC_LINK_EXPOSE_DEBUG=$portal_magic_link_expose_debug"
+          echo "LOG_DRAIN_VERIFICATION_CODE=$log_drain_verification_code"
         } >> "$GITHUB_ENV"
 
         if [ -n "$portal_magic_link_from" ]; then
