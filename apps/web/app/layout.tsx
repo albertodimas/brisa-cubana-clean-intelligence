@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WebVitalsReporter } from "@/components/analytics/web-vitals-reporter";
+import { PostHogAnalytics } from "@/components/analytics/posthog-analytics";
 
 const SITE_DESCRIPTION =
   "Sistema de gestión profesional para servicios de limpieza premium en Miami. Deep cleaning, turnover para Airbnb y propiedades vacacionales.";
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ToastProvider>{children}</ToastProvider>
           <WebVitalsReporter />
         </ThemeProvider>
+        <PostHogAnalytics />
         {enableSpeedInsights ? <SpeedInsights /> : null}
       </body>
     </html>

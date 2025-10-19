@@ -2,9 +2,12 @@
 
 import { track } from "@vercel/analytics";
 import * as Sentry from "@sentry/nextjs";
+import posthog from "posthog-js";
 
 type AllowedPropertyValue = string | number | boolean | null;
 type EventData = Record<string, AllowedPropertyValue | undefined>;
+
+const HAS_POSTHOG_KEY = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
 function sanitizeData(
   data?: EventData,
@@ -23,6 +26,8 @@ function recordAnalyticsEvent(
   data?: EventData,
 ) {
   const payload = sanitizeData(data);
+  const posthogProperties = payload ? { ...payload, category } : { category };
+
   try {
     if (payload) {
       track(event, payload);
@@ -31,6 +36,14 @@ function recordAnalyticsEvent(
     }
   } catch {
     // analytics optional
+  }
+
+  if (HAS_POSTHOG_KEY) {
+    try {
+      posthog.capture(event, posthogProperties);
+    } catch {
+      // posthog optional
+    }
   }
 
   try {
