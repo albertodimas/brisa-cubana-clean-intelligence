@@ -3,6 +3,10 @@ import { expect, test } from "@playwright/test";
 test("@smoke @critical inicializa PostHog cuando la key está configurada", async ({
   page,
 }) => {
+  page.on("console", (message) => {
+    console.log(`[console:${message.type()}] ${message.text()}`);
+  });
+
   await page.goto("/");
 
   await page.waitForFunction(() =>

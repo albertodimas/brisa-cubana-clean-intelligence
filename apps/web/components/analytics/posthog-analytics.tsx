@@ -16,7 +16,7 @@ export function PostHogAnalytics() {
   const search = searchParams?.toString();
 
   useEffect(() => {
-    if (!POSTHOG_KEY || typeof window === "undefined") {
+    if (!POSTHOG_KEY) {
       return;
     }
 

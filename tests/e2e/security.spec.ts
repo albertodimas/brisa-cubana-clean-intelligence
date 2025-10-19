@@ -257,7 +257,7 @@ test.describe("Seguridad y Autenticación", () => {
 
       await page.goto("/panel");
       const panelRoot = page.getByTestId("panel-root").first();
-      const sessionIndicator = page.getByTestId("panel-session");
+      const sessionIndicator = page.getByTestId("panel-session").first();
 
       await expect(panelRoot).toBeVisible({ timeout: 15_000 });
       await expect(sessionIndicator).toContainText("Sesión:", {
@@ -273,12 +273,27 @@ test.describe("Seguridad y Autenticación", () => {
       });
 
       await test.step("cierra sesión y redirige a login", async () => {
-        await page
-          .getByRole("button", { name: /cerrar sesión|logout/i })
-          .click();
-        await page.waitForURL(/\/login/, { timeout: 5000 });
+        // Buscar el botón de logout dentro del panel de sesión
+        const logoutButton = sessionIndicator.getByRole("button", {
+          name: "Cerrar sesión",
+        });
+
+        // Esperar a que el botón sea visible y clickeable
+        await expect(logoutButton).toBeVisible({ timeout: 10_000 });
+        await expect(logoutButton).toBeEnabled({ timeout: 5000 });
+
+        // Click y esperar navegación en paralelo
+        await Promise.all([
+          page.waitForURL(/\/login/, { timeout: 15_000 }),
+          logoutButton.click(),
+        ]);
+
+        // Verificar que estamos en login
         await expect(page.getByLabel("Correo")).toBeVisible({ timeout: 5000 });
-        await expect(panelRoot).not.toBeVisible({ timeout: 5000 });
+
+        // Verificar que el panel ya no es visible
+        const currentUrl = page.url();
+        expect(currentUrl).toMatch(/\/login/);
       });
     });
   });

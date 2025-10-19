@@ -12,16 +12,14 @@ test.describe("Checkout público", () => {
       }),
     ).toBeVisible();
 
-    // Validar que al menos uno de los estados (falta configurar Stripe o formulario)
-    // esté presente para garantizar retroalimentación al usuario.
-    const fallbackMessage = page.getByText(
-      /Configura Stripe para habilitar el checkout público/i,
-    );
-    const fallbackVisible = await fallbackMessage
-      .isVisible()
-      .catch(() => false);
+    const fallbackHeading = page.getByRole("heading", {
+      name: /Configura Stripe para habilitar el checkout público/i,
+    });
+    const fallbackVisible = (await fallbackHeading.count()) > 0;
 
-    if (!fallbackVisible) {
+    if (fallbackVisible) {
+      await expect(fallbackHeading.first()).toBeVisible();
+    } else {
       await expect(
         page.getByText(/Selecciona servicio y comparte tus datos/i),
       ).toBeVisible();

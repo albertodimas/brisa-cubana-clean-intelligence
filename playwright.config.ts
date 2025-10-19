@@ -56,6 +56,7 @@ export default defineConfig({
             LOGIN_RATE_LIMIT: loginRateLimit,
             LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
             ENABLE_TEST_UTILS: "true",
+            PORT: process.env.API_PORT ?? "3001",
           },
           timeout: 120_000,
         },
@@ -73,6 +74,7 @@ export default defineConfig({
               process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "phc_test_e2e",
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
+            PORT: process.env.WEB_PORT ?? "3000",
           },
           timeout: 120_000,
         },
@@ -81,36 +83,39 @@ export default defineConfig({
         // Local dev: Setup DB and use dev servers
         {
           command:
-            "pnpm db:push --force-reset && pnpm db:seed && pnpm --filter @brisa/api dev",
+            "pnpm db:push --force-reset && pnpm db:seed && pnpm --filter @brisa/api build && pnpm --filter @brisa/api start",
           url: `${baseApiUrl}/health`,
           reuseExistingServer: true,
           stdout: "pipe",
           stderr: "pipe",
           env: {
-            NODE_ENV: "test",
+            NODE_ENV: "production",
             DATABASE_URL: databaseUrl,
             DATABASE_URL_UNPOOLED: databaseUrl,
             JWT_SECRET: jwtSecret,
             LOGIN_RATE_LIMIT: loginRateLimit,
             LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
             ENABLE_TEST_UTILS: "true",
+            PORT: process.env.API_PORT ?? "3001",
           },
           timeout: 120_000,
         },
         {
-          command: "pnpm --filter @brisa/web dev",
+          command:
+            "pnpm --filter @brisa/web build && pnpm --filter @brisa/web start",
           url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
           reuseExistingServer: true,
           stdout: "pipe",
           stderr: "pipe",
           env: {
-            NODE_ENV: "test",
+            NODE_ENV: "production",
             AUTH_SECRET: authSecret,
             NEXT_PUBLIC_API_URL: baseApiUrl,
             NEXT_PUBLIC_POSTHOG_KEY:
               process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "phc_test_e2e",
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
+            PORT: process.env.WEB_PORT ?? "3000",
           },
           timeout: 120_000,
         },

@@ -225,6 +225,30 @@ Aumentar el rate limit en entorno de test en `playwright.config.ts`:
 **Mejora futura (opcional):**
 Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, permitiendo usar el rate limiting real por IP.
 
+### Playwright con builds de producción (oct-2025)
+
+**Contexto:** en GitHub Actions los comandos `pnpm --filter @brisa/api dev` y `pnpm --filter @brisa/web dev` se veían afectados por ports aleatorios (cuando 3000/3001 estaban ocupados) y por watchers que quedaban colgados tras los tests. El resultado era una suite `critical` inestable y pipelines que terminaban en timeout.
+
+**Ajustes aplicados:**
+
+- Antes de lanzar Playwright se ejecuta:
+
+  ```bash
+  pnpm db:push --force-reset && pnpm db:seed \
+    && pnpm --filter @brisa/api build && pnpm --filter @brisa/api start
+  ```
+
+  y de forma análoga para la web (`pnpm --filter @brisa/web build && pnpm --filter @brisa/web start`).
+
+- Se respetan los nuevos puertos configurables mediante `API_PORT` y `WEB_PORT` (por defecto 3001/3000).
+- `PLAYWRIGHT_BASE_URL` debe apuntar al host/puerto real (habitualmente `http://localhost:3000`).
+
+**Resultado (19-oct-2025):**
+
+- 🚀 Arranque determinista de los servidores en CI (sin fallback a 3002/3100).
+- ✅ Suites críticas estables tanto en local como en Actions.
+- 📄 Procedimiento documentado en `docs/operations/runbook-daily-monitoring.md` (sección Analytics) y reforzado con los scripts `pnpm posthog:test-event` / `pnpm sentry:test-event`.
+
 ### Estabilidad del panel de notificaciones (oct-2025)
 
 **Problema:** La nightly `full` fallaba de forma intermitente porque el panel de notificaciones refrescaba la lista antes de que el backend confirmara el `PATCH /api/notifications/:id/read`, dejando ítems “fantasma” en la UI.
