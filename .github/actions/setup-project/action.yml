@@ -105,6 +105,14 @@ inputs:
     description: Toggle to expose debug tokens in portal magic link responses.
     required: false
     default: "true"
+  next-public-posthog-key:
+    description: Public PostHog API key used by web analytics.
+    required: false
+    default: ""
+  next-public-posthog-host:
+    description: PostHog ingestion host URL.
+    required: false
+    default: "https://us.posthog.com"
   log_drain_verification_code:
     description: Verification code returned in x-vercel-verify for log drain validation.
     required: false
@@ -154,6 +162,8 @@ runs:
         portal_magic_link_smtp_secure="${{ inputs.portal-magic-link-smtp-secure }}"
         portal_magic_link_expose_debug="${{ inputs.portal-magic-link-expose-debug }}"
         log_drain_verification_code="${{ inputs.log_drain_verification_code }}"
+        next_public_posthog_key="${{ inputs.next-public-posthog-key }}"
+        next_public_posthog_host="${{ inputs.next-public-posthog-host }}"
 
         if [ -z "$api_token" ]; then api_token="test-api-token"; fi
         if [ -z "$jwt_secret" ]; then jwt_secret="test-jwt-secret-for-ci-only"; fi
@@ -215,6 +225,14 @@ runs:
 
         if [ -n "$portal_magic_link_smtp_secure" ]; then
           echo "PORTAL_MAGIC_LINK_SMTP_SECURE=$portal_magic_link_smtp_secure" >> "$GITHUB_ENV"
+        fi
+
+        if [ -n "$next_public_posthog_key" ]; then
+          echo "NEXT_PUBLIC_POSTHOG_KEY=$next_public_posthog_key" >> "$GITHUB_ENV"
+        fi
+
+        if [ -n "$next_public_posthog_host" ]; then
+          echo "NEXT_PUBLIC_POSTHOG_HOST=$next_public_posthog_host" >> "$GITHUB_ENV"
         fi
 
     - name: Generate Prisma client
