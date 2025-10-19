@@ -1,13 +1,13 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 18 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 19 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
 ## 1. Resumen ejecutivo
 
 - Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
-- Versionado actual: `@brisa/api` 0.3.0 · `@brisa/web` 0.3.0 (tag `v0.3.0`, 14-oct-2025).
+- Versionado actual: `@brisa/api` 0.4.1 · `@brisa/web` 0.4.1 (tag `v0.4.1`, 19-oct-2025).
 - Entorno estándar: Node.js 22.13.0 (Active LTS). Evaluaremos Node.js 24 cuando entre a ciclo LTS el 28-oct-2025 y tras validar CI/CD completo.
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; búsqueda con debounce y chips de filtros activos; mensajes de feedback.
@@ -20,7 +20,7 @@
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
 - Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Accesibilidad validada (WCAG 2.2 AA) con fixes `aria-live` y `aria-hidden` implementados (commit `ce37e09`, 17-oct-2025). Funcionalidades de autoservicio adicionales (PDF exports, SSE push) siguen planificadas para Fase 2.1/2.2 (ver [RFC §8](../product/rfc-public-components.md#8-portal-cliente)) y se documentan en la guía operativa [docs/guides/portal-client.md](../guides/portal-client.md).
-- Release etiquetado `v0.4.0` (20-oct-2025) incorpora landing comercial, portal público navegable y rotación Stripe live; el roadmap Fase 2 continúa en `product/phase-2-roadmap.md`. El 17-oct-2025 se ejecutó la migración a Tailwind CSS 4.1.0 (Issue #40) adoptando `@tailwindcss/postcss` y configuración híbrida.
+- Release etiquetado `v0.4.1` (19-oct-2025) consolida landing comercial, formulario de leads con webhook documentado, telemetría de marketing y la reubicación del panel operativo en `/panel`; el roadmap Fase 2 continúa en `product/phase-2-roadmap.md`. El 17-oct-2025 se ejecutó la migración a Tailwind CSS 4.1.0 (Issue #40) adoptando `@tailwindcss/postcss` y configuración híbrida.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 

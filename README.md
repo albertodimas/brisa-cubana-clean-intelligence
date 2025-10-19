@@ -1,7 +1,7 @@
 # Brisa Cubana Clean Intelligence
 
 Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
-Actualizado al **17 de octubre de 2025** con **188 pruebas automatizadas** (161 unit/integration + 27 E2E) pasando en CI; release etiquetado como **v0.3.0** tras completar la fase de búsqueda/filtros en el panel operativo. La expansión comercial (landing, checkout, portal cliente) está planificada en `docs/product/phase-2-roadmap.md`.
+Actualizado al **19 de octubre de 2025** con **188 pruebas automatizadas** (161 unit/integration + 27 E2E) pasando en CI; release etiquetado como **v0.4.1** tras lanzar la landing comercial con telemetría, el formulario de leads, el panel operativo en `/panel` y cobertura documental actualizada.
 
 ## Stack actualizado
 
@@ -12,16 +12,16 @@ Actualizado al **17 de octubre de 2025** con **188 pruebas automatizadas** (161 
 - **Observabilidad:** Logging con Pino, métricas básicas en `/health`, captura de errores con Sentry y Web Vitals a través de Speed Insights + métricas personalizadas.
 - **Tooling base:** pnpm 10.18, Turborepo 2.5.8, TypeScript 5.9, Vitest 3.2, Playwright 1.56, Husky + lint-staged, CI en GitHub Actions.
 
-## Estado al 17 de octubre de 2025
+## Estado al 19 de octubre de 2025
 
-| Área          | Estado | Detalle                                                                                                                                            |
-| ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Frontend web  | 🟢     | Panel operativo con búsqueda debounced, chips de filtros activos, gestión de usuarios (roles), formularios server action y proxy interno `/api/*`. |
-| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes, usuarios) con repositorios, búsqueda paginada, soft delete y rate limiting en login.    |
-| Tests         | 🟢     | 161 pruebas unitarias/integración + 27 E2E (smoke/critical/full); `pnpm test`, `pnpm test:e2e:*`.                                                  |
-| Documentación | 🟢     | README, `docs/guides/quickstart.md`, `docs/overview/status.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados.                            |
-| Deploy        | 🟢     | Web (Next.js) y API (Hono) corriendo en Vercel, conectados a PostgreSQL Neon; pipelines CI/CD verdes.                                              |
-| Checkout test | 🟡     | Flujo `/checkout` habilitado con Stripe Payment Element (modo test) y endpoint `POST /api/payments/stripe/intent`; rota claves antes de modo live. |
+| Área          | Estado | Detalle                                                                                                                                                                                             |
+| ------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend web  | 🟢     | Panel operativo en `/panel` con estados de carga resilientes, búsqueda debounced, chips de filtros activos, landing comercial relanzada (hero, precios, FAQ, testimonios) y proxy interno `/api/*`. |
+| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes, usuarios) con repositorios, búsqueda paginada, soft delete, rate limiting en login y webhook de leads documentado.                       |
+| Tests         | 🟢     | 161 pruebas unitarias/integración + 27 E2E (smoke/critical/full); `pnpm test`, `pnpm test:e2e:*`.                                                                                                   |
+| Documentación | 🟢     | README, `docs/guides/quickstart.md`, `docs/overview/status.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados con la serie 0.4.x.                                                          |
+| Deploy        | 🟢     | Web (Next.js) y API (Hono) corriendo en Vercel, conectados a PostgreSQL Neon; pipelines CI/CD verdes.                                                                                               |
+| Checkout test | 🟡     | Flujo `/checkout` habilitado con Stripe Payment Element (modo test) y endpoint `POST /api/payments/stripe/intent`; rota claves antes de modo live.                                                  |
 
 ## Requisitos
 

@@ -12,7 +12,7 @@ export const openApiSpec = {
   openapi: "3.1.0",
   info: {
     title: "Brisa Cubana Clean Intelligence API",
-    version: "0.3.0",
+    version: "0.4.1",
     description:
       "API para gestión de servicios de limpieza, reservas, propiedades y usuarios",
     contact: {
