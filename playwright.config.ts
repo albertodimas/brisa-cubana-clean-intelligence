@@ -10,6 +10,8 @@ const databaseUrl =
 const heartbeatSeconds = Number(process.env.E2E_HEARTBEAT_SECONDS ?? "15");
 const loginRateLimit = process.env.E2E_LOGIN_RATE_LIMIT ?? "20"; // Increased for parallel E2E tests
 const loginRateLimitWindow = "60000";
+const posthogKey =
+  (process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "").trim() || "phc_test_e2e";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -70,8 +72,7 @@ export default defineConfig({
             NODE_ENV: "production",
             AUTH_SECRET: authSecret,
             NEXT_PUBLIC_API_URL: baseApiUrl,
-            NEXT_PUBLIC_POSTHOG_KEY:
-              process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "phc_test_e2e",
+            NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
             PORT: process.env.WEB_PORT ?? "3000",
@@ -111,8 +112,7 @@ export default defineConfig({
             NODE_ENV: "production",
             AUTH_SECRET: authSecret,
             NEXT_PUBLIC_API_URL: baseApiUrl,
-            NEXT_PUBLIC_POSTHOG_KEY:
-              process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "phc_test_e2e",
+            NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
             PORT: process.env.WEB_PORT ?? "3000",
