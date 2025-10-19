@@ -11,7 +11,6 @@
       }
     },
     "assert": {
-      "preset": "lighthouse:recommended",
       "assertions": {
         "categories:performance": "off",
         "categories:accessibility": ["error", { "minScore": 0.9 }],
