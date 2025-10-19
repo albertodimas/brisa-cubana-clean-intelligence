@@ -15,3 +15,4 @@ const respond = (request: NextRequest) => {
 
 export const GET = respond;
 export const POST = respond;
+export const HEAD = respond;
