@@ -190,9 +190,9 @@ vercel logs --output=logs.txt
 6. **QA**: actualizar `docs/qa/regression-checklist.md` para comprobar presencia de `window.posthog` cuando la key esté configurada.
 7. **Export warehouse (opcional)** cuando se superen 100k eventos/mes.
 
-### 4.4 Enlaces (actualizar cuando estén listos)
+### 4.4 Enlaces
 
-- Dashboard PostHog: _(pendiente)_.
+- Dashboard PostHog: https://us.posthog.com/project/brisa-cubana/dashboards/funnel-fase2
 - Diccionario de eventos: `docs/product/analytics-events.md`.
 
 > **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.

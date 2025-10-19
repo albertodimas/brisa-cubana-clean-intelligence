@@ -32,9 +32,9 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 1. Analítica base lista (18-oct-2025): CTA y checkout disparan `cta_request_proposal`, `cta_portal_demo`, `checkout_started`, `checkout_completed` vía `@vercel/analytics` + Sentry. Pendiente: seleccionar plataforma definitiva (PostHog/GA4/Segment), normalizar naming/UTM y publicar dashboard.
 2. Contenido comercial iterado el 18-oct-2025: landing incorpora secciones "Planes y precios", FAQ ampliada y formulario de captura que envía a `/api/leads` (webhook opcional `LEAD_WEBHOOK_URL`). Pendiente: cerrar copy definitivo con marketing y añadir assets/hero photography para la release pública.
 3. Definir proceso post-lanzamiento: monitoreo diario de alertas Sentry/Slack, revisión de logs Stripe live y QA regresivo semanal (ver `docs/qa/reports/2025-10-20-go-live.md`).
-4. **Coordinación marketing (nuevo)**:
-   - [ ] Reunión con Marketing (deadline 23-oct-2025) para aprobar copy final y assets (hero, testimonios, pricing badges).
-   - [ ] Entregar hoja de contenidos (Google Doc) y cargar assets en `docs/assets/public-components/`.
+4. **Coordinación marketing**:
+   - [x] Reunión con Marketing (19-oct-2025) – copy definitivo en `docs/marketing/landing-copy-2025-10-19.md`.
+   - [x] Assets en `docs/assets/public-components/` (hero, iconografía, testimonios).
    - [ ] Actualizar landing con assets definitivos y anotar cambios en CHANGELOG.
 
 5. **Integración analítica**:

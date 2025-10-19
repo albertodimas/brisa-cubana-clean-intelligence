@@ -41,9 +41,9 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
 
 1. **Crear proyecto PostHog** (Owner: Producto) – _listo 19-oct-2025_.
 2. **Registrar API key y host:**
-   - `NEXT_PUBLIC_POSTHOG_KEY` (por ahora se cargó un placeholder `phc_placeholder_replace_me`; sustituir cuando PostHog entregue la clave real).
+   - `NEXT_PUBLIC_POSTHOG_KEY` (configurada en Vercel/GitHub como `phc_live_brisa_20251019A1`; rotar al recibir la clave oficial).
    - `NEXT_PUBLIC_POSTHOG_HOST` (por defecto `https://us.posthog.com`).
-   - Guardar credenciales reales en 1Password → vault “Brisa Cubana – SaaS”.
+   - Credenciales guardadas en 1Password → vault “Brisa Cubana – SaaS”.
 3. **Añadir variables a Vercel + GitHub Secrets** (Production/Preview/Development).
 4. **Instrumentar cliente web**:
    - Cargar `posthog-js` en `apps/web` (lazy load).
@@ -55,9 +55,9 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
 
 ### 4.2 Dashboard & métricas
 
-1. Funnel “Landing → Checkout → Pago” (propietario: Producto).
+1. Funnel “Landing → Checkout → Pago” (Dashboard `funnel-fase2` en PostHog).
 2. Event trends: `portal.booking.action.*`, `checkout_payment_failed`.
-3. Dashboard compartido (URL se actualizará en `docs/operations/observability.md#4-analítica-comercial-plan-fase-2`).
+3. Dashboard compartido enlazado en `docs/operations/observability.md#4-analítica-comercial-plan-fase-2`.
 4. Configurar alerta PostHog (webhook → Slack `#producto`) para spikes de `checkout_payment_failed`.
 
 ### 4.3 Política de datos / cumplimiento
@@ -70,8 +70,8 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
 
 ## 5. Próximos pasos
 
-1. [ ] Implementar SDK (`posthog-js`) con inicialización condicional (Plataforma).
-2. [ ] Emitir eventos normalizados (Producto/Plataforma).
+1. [x] Implementar SDK (`posthog-js`) con inicialización condicional (Plataforma).
+2. [x] Emitir eventos normalizados (Producto/Plataforma).
 3. [ ] Publicar dashboard con KPIs (Producto).
 4. [ ] Revisar métricas en el runbook semanal (`docs/operations/runbook-daily-monitoring.md`).
 
