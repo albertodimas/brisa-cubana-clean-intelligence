@@ -4,6 +4,12 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Rama o tag a validar (por defecto main)"
+        required: false
+        default: "main"
 
 jobs:
   smoke-tests:
@@ -15,6 +21,7 @@ jobs:
       run-e2e-suite: smoke
       playwright-report-name: playwright-report-smoke
       upload-playwright-only-on-failure: true
+      checkout-ref: ${{ inputs.ref }}
     secrets:
       api-token: ${{ secrets.API_TOKEN }}
       jwt-secret: ${{ secrets.JWT_SECRET }}

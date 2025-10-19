@@ -159,6 +159,44 @@ vercel logs --output=logs.txt
 
 **Acceso:** Neon Console → Project → Monitoring
 
+---
+
+## 4. Analítica Comercial (Plan Fase 2)
+
+### 4.1 Estado actual
+
+- Eventos enviados con `@vercel/analytics`:
+  - `cta_request_proposal`, `cta_portal_demo` (landing).
+  - `checkout_started`, `checkout_completed`, `checkout_payment_failed`.
+- Breadcrumbs/Sentry: `checkout.intent.created`, `portal.link.requested`, `portal.link.verify`, `portal.logout`.
+- Información consolidada en `apps/web/lib/marketing-telemetry.ts`.
+
+### 4.2 Plataforma de producto (pendiente elegir)
+
+| Opción                | Pros                                                                     | Contras                                                              | Próximo paso                                         |
+| --------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------- |
+| **PostHog Cloud**     | Open-source, funnels, recordings, hosting US/EU, integración sencilla JS | Coste basado en eventos, requiere plan pago para retención > 15 días | Solicitar trial, validar cumplimiento GDPR con legal |
+| **GA4**               | Gratis, equipo ya familiar con Google                                    | UI compleja, muestreo elevado, exige banner cookies estricto         | Preparar plan de consentimiento y mapeo eventos      |
+| **Segment + destino** | Flexibilidad para múltiples destinos (Mixpanel, Amplitude)               | Coste + complejidad inicial, requiere gobernanza de esquema          | Estimar volumen mensual (MTE) y presupuesto          |
+
+### 4.3 Checklist de implementación
+
+1. **Decisión de plataforma** (Producto/Marketing, antes del 25-oct-2025).
+2. **Normalización de nombres**: definir convención (`namespace.event`, atributos obligatorios `source`, `campaign`, `serviceId`, `customerType`).
+3. **Enriquecimiento con UTMs**: persistir `utm_*` en `marketing-telemetry`, propagar a checkout/portal.
+4. **Data Warehouse (opcional)**: preparar export a BigQuery/ClickHouse cuando se supere el umbral de 100k eventos/mes.
+5. **Dashboard compartido**:
+   - KPI iniciales: conversiones `cta → lead`, `lead → checkout`, `checkout → pago`, ratio uso portal (`portal.link.verify` vs `portal.booking.action`).
+   - Responsable: Producto. Ubicar enlace en este documento (sección 4.4) una vez creado.
+6. **QA**: añadir casos en `docs/qa/regression-checklist.md` para verificar emisión de eventos en smoke tests.
+
+### 4.4 Enlaces (actualizar cuando estén listos)
+
+- Dashboard principal: _(pendiente)_.
+- Diccionario de eventos: `docs/product/analytics-events.md` _(crear)_.
+
+> **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.
+
 **Métricas clave:**
 
 - Active connections

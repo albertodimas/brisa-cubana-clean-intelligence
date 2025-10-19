@@ -35,6 +35,10 @@ on:
         required: false
         type: boolean
         default: false
+      checkout-ref:
+        required: false
+        type: string
+        default: ""
       run-docs-verify:
         required: false
         type: boolean
@@ -153,6 +157,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.checkout-ref || github.ref }}
 
       - name: Setup project
         uses: ./.github/actions/setup-project
