@@ -69,7 +69,40 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 >   - `stripe trigger checkout.session.completed`
 >   - `stripe trigger payment_intent.payment_failed`
 > - Resultados: ambos eventos registrados como `200 OK` en `/api/payments/stripe/webhook`; se observaron logs en Vercel (`checkout.session.completed`, `payment_intent.payment_failed`) y breadcrumbs en Sentry sin errores.
-> - Se revocaron las llaves antiguas en el dashboard de Stripe y se adjuntó evidencia en 1Password (nota “Stripe Live Keys 20251020”).
+
+- Se revocaron las llaves antiguas en el dashboard de Stripe y se adjuntó evidencia en 1Password (nota “Stripe Live Keys 20251020”).
+
+### 2.2 Log drains en Vercel
+
+1. **Definir código de verificación.** Configura `LOG_DRAIN_VERIFICATION_CODE` en Development, Preview y Production del proyecto web en Vercel. Replica el valor como secreto en GitHub Actions.
+2. **Verificar endpoint.** Comprueba que `/api/logdrain` responde el header correcto: `curl -I https://brisa-cubana-clean-intelligence.vercel.app/api/logdrain | grep -i x-vercel-verify`.
+3. **Crear el drain.** Ejecuta:
+   ```bash
+   export VERCEL_TOKEN="tu_token"
+   curl -X POST "https://api.vercel.com/v2/log-drains?teamId=team_GI7iQ5ivPN36nVRB1Y9IJ9UW" \
+     -H "Authorization: Bearer $VERCEL_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "name": "brisa-prod-logdrain",
+       "url": "https://brisa-cubana-clean-intelligence.vercel.app/api/logdrain",
+       "secret": "rotar-este-secreto",
+       "deliveryFormat": "json",
+       "projectIds": ["prj_n11x8GsVN5qDw0eOFAcQiOfpc0Zg"],
+       "sources": ["edge", "lambda", "build", "static"],
+       "environments": ["production"]
+     }'
+   ```
+4. **Consumir registros.** Configura el colector externo para validar `x-vercel-signature` con el `secret`. Al rotar la clave, actualiza primero Vercel/GitHub antes de recrear el drain.
+
+### 2.3 Secretos usados en CI/CD
+
+| Secreto                                                                                      | Uso                                                                   |
+| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `API_TOKEN`, `JWT_SECRET`, `AUTH_SECRET`                                                     | Seeds y autenticación en suites Playwright.                           |
+| `LOG_DRAIN_VERIFICATION_CODE`                                                                | Verificación del endpoint `/api/logdrain` en CI y creación de drains. |
+| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_COORDINATOR_EMAIL`, `E2E_COORDINATOR_PASSWORD` | Credenciales sembradas para smoke/critical.                           |
+| `PORTAL_MAGIC_LINK_*`                                                                        | Flujos de enlaces mágicos (Nightly).                                  |
+| `PRODUCTION_DATABASE_URL`, `PRODUCTION_DATABASE_URL_UNPOOLED`                                | Workflow `Post-Deploy Seed`.                                          |
 
 ## 3. Despliegue
 
