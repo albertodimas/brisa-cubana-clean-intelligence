@@ -321,7 +321,15 @@ Sigue el wizard para configurar:
 - `sentry.server.config.ts`
 - `sentry.edge.config.ts`
 
-### 4.4 Alertas Sentry
+### 4.4 Reportes CSP en Sentry
+
+- Los encabezados `Report-To` y `Reporting-Endpoints` del proyecto web envían violaciones CSP a `POST /api/security/csp-report`, que reenvía el payload a Sentry con el mensaje `CSP Violation` y la etiqueta `source:csp-report`.
+- Crea un **Saved Search** en Sentry con la consulta `source:csp-report level:warning` y compártelo con el equipo de operaciones.
+- Configura un **Issue Alert** (3 eventos en 10 minutos) hacia `#alerts-operaciones`. Este alertado indica que la política está bloqueando recursos inesperados o se requiere whitelisting controlado.
+- Mantén la política en modo `Report-Only` hasta que no existan falsos positivos durante ≥ 7 días consecutivos; después, cambia el encabezado a `Content-Security-Policy` en `apps/web/vercel.json` y actualiza la documentación.
+- Cada excepción aprobada (nuevo dominio externo) debe anotarse en `docs/operations/security.md` y en la descripción del alert correspondiente.
+
+### 4.5 Alertas Sentry
 
 **Configurar en Sentry Dashboard:**
 
