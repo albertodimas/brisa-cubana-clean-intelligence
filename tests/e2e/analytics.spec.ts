@@ -18,7 +18,8 @@ test("@smoke @critical inicializa PostHog cuando la key está configurada", asyn
         }
       ).__brisaPostHogReady ||
         typeof (window as unknown as { posthog?: { capture?: unknown } })
-          .posthog?.capture === "function",
+          .posthog?.capture === "function" ||
+        document.documentElement.dataset.brisaPosthog === "ready",
     ),
   );
 

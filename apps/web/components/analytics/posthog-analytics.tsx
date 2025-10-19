@@ -35,6 +35,9 @@ export function PostHogAnalytics() {
 
       globalScope.__brisaPostHogClient = posthog;
       globalScope.__brisaPostHogReady = true;
+      if (typeof document !== "undefined") {
+        document.documentElement.dataset.brisaPosthog = "ready";
+      }
       isPostHogInitialized = true;
     }
   }, []);
