@@ -9,16 +9,31 @@ on:
 jobs:
   full-e2e:
     uses: ./.github/workflows/project-pipeline.yml
-    secrets: inherit
     with:
       job-name: Nightly full e2e
       run-database-prep: true
       run-e2e-suite: full
-      next-public-api-url: "http://localhost:3001"
       playwright-report-name: playwright-report-full
       playwright-retention-days: 14
       run-lighthouse: false
       enable-test-utils: false
+      next-public-posthog-key: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+      next-public-posthog-host: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+    secrets:
+      api-token: ${{ secrets.API_TOKEN }}
+      jwt-secret: ${{ secrets.JWT_SECRET }}
+      auth-secret: ${{ secrets.AUTH_SECRET }}
+      portal-magic-link-from: ${{ secrets.PORTAL_MAGIC_LINK_FROM }}
+      portal-magic-link-smtp-host: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_HOST }}
+      portal-magic-link-smtp-port: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_PORT }}
+      portal-magic-link-smtp-user: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_USER }}
+      portal-magic-link-smtp-password: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_PASSWORD }}
+      portal-magic-link-smtp-secure: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_SECURE }}
+      log_drain_verification_code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
+      e2e_admin_email: ${{ secrets.E2E_ADMIN_EMAIL }}
+      e2e_admin_password: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      e2e_coordinator_email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
+      e2e_coordinator_password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
 
   lighthouse:
     name: Nightly Lighthouse budgets
@@ -37,33 +52,6 @@ jobs:
           run-prisma-generate: false
 
       - name: Run Lighthouse CI against Vercel production
-        id: lhci
-        continue-on-error: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: pnpm exec lhci autorun --config=.lighthouserc.preview.json
-
-      - name: Evaluate Lighthouse failure streak
-        if: steps.lhci.outcome == 'failure'
-        id: evaluate-streak
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          LIGHTHOUSE_WORKFLOW_FILE: nightly.yml
-          LIGHTHOUSE_JOB_NAME: Nightly Lighthouse budgets
-        run: |
-          STREAK=$(python3 scripts/check_lighthouse_streak.py)
-          echo "streak=$STREAK" >> "$GITHUB_OUTPUT"
-          {
-            echo "### Lighthouse budgets failing"
-            echo
-            echo "- Consecutive failures: $STREAK"
-            echo "- Workflow: nightly.yml"
-          } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$STREAK" -ge 3 ]; then
-            echo "Lighthouse budgets have failed $STREAK consecutive runs" >&2
-            exit 1
-          fi
-
-      - name: Mark Lighthouse job failure
-        if: steps.lhci.outcome == 'failure'
-        run: exit 1
