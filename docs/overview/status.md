@@ -151,8 +151,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Vercel web**: build `pnpm turbo run build --filter=@brisa/web`.
 - **Vercel API**: build `pnpm build` (Prisma + TypeScript).
 - **URLs producción**:
-  - Web: https://brisa-cubana-clean-intelligence.vercel.app
-  - API: https://brisa-cubana-clean-intelligence-api.vercel.app
+  - Web: https://brisacubanacleanintelligence.com
+  - API: https://api.brisacubanacleanintelligence.com
+  - Alternativas (fallback): https://brisa-cubana-clean-intelligence.vercel.app · https://brisa-cubana-clean-intelligence-api.vercel.app
 - **Logs**:
   - `/favicon.ico` 404 → resueltos tras subir assets a `public/`.
   - `prisma:error … Closed` → ocurrieron antes del fix JWT/bcrypt; no presentes en despliegues vigentes.
