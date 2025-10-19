@@ -5,13 +5,9 @@ on:
     # Runs at 2:00 AM UTC every day
     - cron: "0 2 * * *"
   workflow_dispatch: # Allow manual triggers
-  push:
-    branches:
-      - '**'
 
 jobs:
   full-e2e:
-    if: ${{ github.event_name != 'push' }}
     uses: ./.github/workflows/project-pipeline.yml
     with:
       job-name: Nightly full e2e
@@ -42,7 +38,6 @@ jobs:
   lighthouse:
     name: Nightly Lighthouse budgets
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'push' }}
     needs: full-e2e
     steps:
       - name: Checkout repository
@@ -60,10 +55,3 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: pnpm exec lhci autorun --config=.lighthouserc.preview.json
-
-  noop-on-push:
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip nightly workflow for push events
-        run: echo "Nightly workflow runs on schedule or manual dispatch."
