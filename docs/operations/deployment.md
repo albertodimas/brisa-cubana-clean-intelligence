@@ -37,6 +37,13 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | `www.brisacubanacleanintelligence.com` | Web      | Redirect 301 → dominio raíz         |
 | `api.brisacubanacleanintelligence.com` | API      | Backend Hono + Prisma               |
 
+**Procedimiento recomendado**
+
+1. Desde el proyecto **web**, elimina cualquier alias previo a `api.brisacubanacleanintelligence.com` para evitar conflictos. Puedes hacerlo desde _Settings → Domains_ o ejecutando `vercel alias rm api.brisacubanacleanintelligence.com`.citeturn0search0
+2. En el proyecto **API**, añade el dominio `api.brisacubanacleanintelligence.com` (Settings → Domains o `vercel domains add api.brisacubanacleanintelligence.com`) y, una vez disponible el deployment productivo deseado, asígnalo con `vercel alias set <deployment-url> api.brisacubanacleanintelligence.com`.citeturn0search3
+3. Si administras el DNS fuera de Vercel, crea/actualiza el registro CNAME del subdominio para que apunte a `cname.vercel-dns.com`. Si usas Vercel DNS, no se requieren cambios adicionales.citeturn0search11
+4. Verifica que la respuesta `GET https://api.brisacubanacleanintelligence.com/health` devuelva `200` antes de actualizar configuraciones (por ejemplo, `NEXT_PUBLIC_API_URL`) en web, GitHub y workflows.
+
 ### Certificados SSL
 
 Vercel genera y renueva automáticamente certificados SSL/TLS (Let's Encrypt). No se requiere acción manual.
