@@ -6,6 +6,30 @@ All notable changes to this project are documented here. The format follows [Kee
 
 _No changes yet._
 
+## [0.4.1] - 2025-10-18
+
+### Added
+
+- Landing hero relanzado con copy comercial, secciones de FAQ y planes (`apps/web/components/landing`) enlazado con telemetría dedicada.
+- Formulario de captura de leads con webhook documentado, script CLI (`scripts/test-lead-webhook.sh`) y eventos de marketing centralizados.
+- Panel operativo accesible vía `/panel` con layout dedicado, fallback de carga y credenciales sembradas para el CI.
+
+### Changed
+
+- `apps/web/app/page.tsx` y `checkout-client.tsx` envían cobertura analítica adicional para compras y enlaces de marketing.
+- `apps/web/components/admin-panel.tsx` y `panel/page.tsx` reorganizados para hidratar datos de manera progresiva y ofrecer estados de error más claros.
+- Workflows de CI/CD reciben seeds operativos por ambiente para mantener pruebas E2E consistentes.
+
+### Testing
+
+- Helper Playwright asegura que los flujos de login redirigen correctamente al panel (`tests/e2e/support/auth.ts`).
+- Suite landing (`apps/web/app/page.test.tsx`) actualizada con asserts para la nueva experiencia de marketing y enlaces de seguimiento.
+
+### Docs
+
+- `docs/operations/deployment.md` registra la rotación Stripe en vivo y la guía para probar el webhook de leads.
+- `docs/operations/observability.md`, `docs/overview/status.md` y reportes QA documentan la cobertura de analítica y el lanzamiento comercial.
+
 ## [0.4.0] - 2025-10-18
 
 ### Added
