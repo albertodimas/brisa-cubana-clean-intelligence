@@ -256,7 +256,7 @@ test.describe("Seguridad y Autenticación", () => {
       await loginAsAdmin(page, testInfo);
 
       await page.goto("/panel");
-      const panelRoot = page.getByTestId("panel-root");
+      const panelRoot = page.getByTestId("panel-root").first();
       const sessionIndicator = page.getByTestId("panel-session");
 
       await expect(panelRoot).toBeVisible({ timeout: 15_000 });

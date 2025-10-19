@@ -95,7 +95,7 @@ export async function loginWithCredentials(
     const panelHeading = page.getByRole("heading", {
       name: "Panel operativo",
     });
-    const panelRoot = page.getByTestId("panel-root");
+    const panelRoot = page.getByTestId("panel-root").first();
 
     try {
       const { pathname } = new URL(page.url());
