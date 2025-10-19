@@ -115,7 +115,7 @@ on:
         required: false
         type: string
         default: "true"
-      log-drain-verification-code:
+      log_drain_verification_code:
         required: false
         type: string
         default: "local-log-drain-verification-code"
@@ -191,7 +191,7 @@ jobs:
           portal-magic-link-smtp-password: ${{ secrets.portal-magic-link-smtp-password }}
           portal-magic-link-smtp-secure: ${{ secrets.portal-magic-link-smtp-secure }}
           portal-magic-link-expose-debug: ${{ inputs.portal-magic-link-expose-debug }}
-          log-drain-verification-code: ${{ inputs.log-drain-verification-code }}
+          log_drain_verification_code: ${{ inputs.log_drain_verification_code }}
 
       - name: Initialize database schema
         if: ${{ inputs.run-database-prep }}

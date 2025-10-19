@@ -105,7 +105,7 @@ inputs:
     description: Toggle to expose debug tokens in portal magic link responses.
     required: false
     default: "true"
-  log-drain-verification-code:
+  log_drain_verification_code:
     description: Verification code returned in x-vercel-verify for log drain validation.
     required: false
     default: "local-log-drain-verification-code"
@@ -153,7 +153,7 @@ runs:
         portal_magic_link_smtp_password="${{ inputs.portal-magic-link-smtp-password }}"
         portal_magic_link_smtp_secure="${{ inputs.portal-magic-link-smtp-secure }}"
         portal_magic_link_expose_debug="${{ inputs.portal-magic-link-expose-debug }}"
-        log_drain_verification_code="${{ inputs.log-drain-verification-code }}"
+        log_drain_verification_code="${{ inputs.log_drain_verification_code }}"
 
         if [ -z "$api_token" ]; then api_token="test-api-token"; fi
         if [ -z "$jwt_secret" ]; then jwt_secret="test-jwt-secret-for-ci-only"; fi

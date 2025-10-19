@@ -15,7 +15,7 @@ jobs:
       run-e2e-suite: smoke
       playwright-report-name: playwright-report-smoke
       upload-playwright-only-on-failure: true
-      log-drain-verification-code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
+      log_drain_verification_code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
       e2e-admin-email: ${{ secrets.E2E_ADMIN_EMAIL }}
       e2e-admin-password: ${{ secrets.E2E_ADMIN_PASSWORD }}
       e2e-coordinator-email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
