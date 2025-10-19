@@ -7,9 +7,13 @@ on:
         description: "Rama o tag a validar (por defecto main)"
         required: false
         default: "main"
+  push:
+    branches:
+      - '**'
 
 jobs:
   smoke-tests-manual:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     uses: ./.github/workflows/project-pipeline.yml
     with:
       job-name: PR smoke tests (manual)
@@ -36,3 +40,10 @@ jobs:
       e2e_admin_password: ${{ secrets.E2E_ADMIN_PASSWORD }}
       e2e_coordinator_email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
       e2e_coordinator_password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
+
+  noop-on-push:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip manual smoke on push
+        run: echo "Manual smoke workflow only runs via dispatch."

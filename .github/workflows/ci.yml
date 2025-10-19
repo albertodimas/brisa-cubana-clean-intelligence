@@ -3,10 +3,11 @@ name: CI (Main Branch)
 on:
   push:
     branches:
-      - main
+      - '**'
 
 jobs:
   quality:
+    if: ${{ github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/project-pipeline.yml
     with:
       job-name: Main branch safety checks
@@ -33,3 +34,10 @@ jobs:
       e2e_admin_password: ${{ secrets.E2E_ADMIN_PASSWORD }}
       e2e_coordinator_email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
       e2e_coordinator_password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
+
+  noop-non-main:
+    if: ${{ github.ref != 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip CI for non-main push
+        run: echo "CI (Main Branch) workflow only runs on main."

@@ -4,9 +4,13 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - '**'
 
 jobs:
   smoke-tests:
+    if: ${{ github.event_name != 'push' }}
     uses: ./.github/workflows/project-pipeline.yml
     with:
       job-name: PR smoke tests
@@ -27,3 +31,15 @@ jobs:
       portal-magic-link-smtp-user: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_USER }}
       portal-magic-link-smtp-password: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_PASSWORD }}
       portal-magic-link-smtp-secure: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_SECURE }}
+      log_drain_verification_code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
+      e2e_admin_email: ${{ secrets.E2E_ADMIN_EMAIL }}
+      e2e_admin_password: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      e2e_coordinator_email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
+      e2e_coordinator_password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
+
+  noop-on-push:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip PR Checks for direct push
+        run: echo "PR Checks workflow runs only on pull_request events."
