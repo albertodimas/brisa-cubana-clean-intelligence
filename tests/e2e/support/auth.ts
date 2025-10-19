@@ -1,4 +1,5 @@
 import { expect, type Page, type TestInfo } from "@playwright/test";
+import { createHash } from "node:crypto";
 
 export const adminEmail =
   process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanaclean.com";
@@ -11,11 +12,9 @@ export const ADMIN_STORAGE_STATE_PATH =
   process.env.E2E_ADMIN_STATE_PATH ?? "tests/e2e/.auth/admin.json";
 
 export function ipForTest(testInfo: TestInfo): string {
-  let hash = 0;
-  for (const char of testInfo.title) {
-    hash = (hash * 31 + char.charCodeAt(0)) % 200;
-  }
-  const octet = 50 + (hash % 150);
+  // Derive a deterministic but non-guessable octet from the test title to avoid Math.random().
+  const digest = createHash("sha256").update(testInfo.title).digest();
+  const octet = 50 + (digest[0] % 150);
   return `198.51.101.${octet}`;
 }
 

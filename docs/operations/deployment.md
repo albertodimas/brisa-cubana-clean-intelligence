@@ -50,7 +50,7 @@ Los dominios utilizan los nameservers administrados por Vercel:
 
 La propagación global suele completarse en <1 hora (máximo 48 h).
 
-> **Estado 15-oct-2025:** Se cargaron claves de ejemplo `sk_test_brisa_demo_20251015`, `pk_test_brisa_demo_20251015` y `whsec_brisa_demo_20251015` en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
+> **Estado 15-oct-2025:** Se cargaron claves de ejemplo (`stripe_test_secret_demo_20251015`, `stripe_test_publishable_demo_20251015`, `stripe_test_webhook_demo_20251015`) en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
 
 > **Portal cliente:** Configura SMTP con proveedor confiable. En producción establece `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` y elimina `ENABLE_TEST_UTILS` para evitar tokens de depuración.
 
@@ -84,17 +84,18 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
    - Actualiza la tabla de variables en este documento con fecha de rotación.
 6. Consulta el [runbook detallado](stripe-rotation-checklist.md) para checklist previo/post evento y comandos de validación.
 
-> **Rotación 18-oct-2025:** Se cargaron las claves `sk_live_brisa_20251020_example`, `pk_live_brisa_20251020_example` y `whsec_live_brisa_20251020_example` en Vercel/GitHub y se coordinó la validación del flujo live para el 20-oct-2025.
+> **Rotación 18-oct-2025:** Se cargaron las credenciales live etiquetadas como `stripe/live/2025-10-20/example` en Vercel y GitHub, y se coordinó la validación del flujo live para el 20-oct-2025.
 >
 > **Validación 20-oct-2025 (10:05 ET):**
 >
-> - Se reemplazaron las llaves placeholder por `sk_live_brisa_20251020_prod`, `pk_live_brisa_20251020_prod` y `whsec_live_brisa_20251020_prod` en Vercel (development/preview/production) y en los secretos de GitHub Actions.
+> - Se reemplazaron las llaves placeholder por las credenciales live almacenadas en 1Password (entrada “Stripe Live Keys · 2025-10-20”) en Vercel (development/preview/production) y en los secretos de GitHub Actions.
 > - Comandos ejecutados desde Stripe CLI:
 >   - `stripe trigger checkout.session.completed`
 >   - `stripe trigger payment_intent.payment_failed`
 > - Resultados: ambos eventos registrados como `200 OK` en `/api/payments/stripe/webhook`; se observaron logs en Vercel (`checkout.session.completed`, `payment_intent.payment_failed`) y breadcrumbs en Sentry sin errores.
 
-- Se revocaron las llaves antiguas en el dashboard de Stripe y se adjuntó evidencia en 1Password (nota “Stripe Live Keys 20251020”).
+- Se revocaron las llaves antiguas en el dashboard de Stripe y se adjuntó evidencia en 1Password (nota “Stripe Live Keys · 2025-10-20”).
+- **Rotación 19-oct-2025 (22:40 UTC):** Se regeneró la firma live del webhook desde Stripe CLI y se actualizó el secreto `STRIPE_WEBHOOK_SECRET` en GitHub Actions con el nuevo valor. Falta replicar la actualización en Vercel y revocar la firma previa en el dashboard de Stripe.
 
 ### 2.2 Log drains en Vercel
 
