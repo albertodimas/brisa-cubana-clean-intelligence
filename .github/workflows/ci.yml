@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Rama o tag a validar (por defecto main)"
+        required: false
+        default: "main"
 
 jobs:
   quality:
@@ -16,6 +22,7 @@ jobs:
       playwright-report-name: playwright-report-critical
       playwright-retention-days: 7
       upload-playwright-only-on-failure: true
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
       next-public-posthog-key: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
       next-public-posthog-host: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
     secrets:
