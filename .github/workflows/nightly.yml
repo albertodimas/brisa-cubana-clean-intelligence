@@ -16,12 +16,7 @@ jobs:
       playwright-report-name: playwright-report-full
       playwright-retention-days: 14
       run-lighthouse: false
-      enable-test-utils: "false"
-      log_drain_verification_code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
-      e2e-admin-email: ${{ secrets.E2E_ADMIN_EMAIL }}
-      e2e-admin-password: ${{ secrets.E2E_ADMIN_PASSWORD }}
-      e2e-coordinator-email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
-      e2e-coordinator-password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
+      enable-test-utils: false
     secrets:
       api-token: ${{ secrets.API_TOKEN }}
       jwt-secret: ${{ secrets.JWT_SECRET }}
@@ -32,6 +27,11 @@ jobs:
       portal-magic-link-smtp-user: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_USER }}
       portal-magic-link-smtp-password: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_PASSWORD }}
       portal-magic-link-smtp-secure: ${{ secrets.PORTAL_MAGIC_LINK_SMTP_SECURE }}
+      log_drain_verification_code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
+      e2e_admin_email: ${{ secrets.E2E_ADMIN_EMAIL }}
+      e2e_admin_password: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      e2e_coordinator_email: ${{ secrets.E2E_COORDINATOR_EMAIL }}
+      e2e_coordinator_password: ${{ secrets.E2E_COORDINATOR_PASSWORD }}
 
   lighthouse:
     name: Nightly Lighthouse budgets

@@ -51,22 +51,6 @@ on:
         required: false
         type: string
         default: "none"
-      e2e-admin-email:
-        required: false
-        type: string
-        default: ""
-      e2e-admin-password:
-        required: false
-        type: string
-        default: ""
-      e2e-coordinator-email:
-        required: false
-        type: string
-        default: ""
-      e2e-coordinator-password:
-        required: false
-        type: string
-        default: ""
       upload-playwright-report:
         required: false
         type: boolean
@@ -97,8 +81,8 @@ on:
         default: "http://localhost:3001"
       enable-test-utils:
         required: false
-        type: string
-        default: "true"
+        type: boolean
+        default: true
       portal-magic-link-from:
         required: false
         type: string
@@ -115,10 +99,6 @@ on:
         required: false
         type: string
         default: "true"
-      log_drain_verification_code:
-        required: false
-        type: string
-        default: "local-log-drain-verification-code"
     secrets:
       api-token:
         required: false
@@ -137,6 +117,16 @@ on:
       portal-magic-link-smtp-password:
         required: false
       portal-magic-link-smtp-secure:
+        required: false
+      e2e_admin_email:
+        required: false
+      e2e_admin_password:
+        required: false
+      e2e_coordinator_email:
+        required: false
+      e2e_coordinator_password:
+        required: false
+      log_drain_verification_code:
         required: false
 
 concurrency:
@@ -178,10 +168,10 @@ jobs:
           api-token: ${{ secrets.api-token }}
           jwt-secret: ${{ secrets.jwt-secret }}
           auth-secret: ${{ secrets.auth-secret }}
-          e2e-admin-email: ${{ inputs.e2e-admin-email }}
-          e2e-admin-password: ${{ inputs.e2e-admin-password }}
-          e2e-coordinator-email: ${{ inputs.e2e-coordinator-email }}
-          e2e-coordinator-password: ${{ inputs.e2e-coordinator-password }}
+          e2e-admin-email: ${{ secrets.e2e_admin_email }}
+          e2e-admin-password: ${{ secrets.e2e_admin_password }}
+          e2e-coordinator-email: ${{ secrets.e2e_coordinator_email }}
+          e2e-coordinator-password: ${{ secrets.e2e_coordinator_password }}
           portal-magic-link-from: ${{ secrets.portal-magic-link-from }}
           portal-magic-link-base-url: ${{ inputs.portal-magic-link-base-url }}
           portal-magic-link-confirmation-path: ${{ inputs.portal-magic-link-confirmation-path }}
@@ -191,7 +181,7 @@ jobs:
           portal-magic-link-smtp-password: ${{ secrets.portal-magic-link-smtp-password }}
           portal-magic-link-smtp-secure: ${{ secrets.portal-magic-link-smtp-secure }}
           portal-magic-link-expose-debug: ${{ inputs.portal-magic-link-expose-debug }}
-          log_drain_verification_code: ${{ inputs.log_drain_verification_code }}
+          log_drain_verification_code: ${{ secrets.log_drain_verification_code }}
 
       - name: Initialize database schema
         if: ${{ inputs.run-database-prep }}
