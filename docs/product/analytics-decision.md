@@ -41,9 +41,9 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
 
 1. **Crear proyecto PostHog** (Owner: Producto) – _listo 19-oct-2025_.
 2. **Registrar API key y host:**
-   - `NEXT_PUBLIC_POSTHOG_KEY`
-   - `NEXT_PUBLIC_POSTHOG_HOST` (por defecto `https://us.posthog.com`)
-   - Guardar en 1Password → vault “Brisa Cubana – SaaS”.
+   - `NEXT_PUBLIC_POSTHOG_KEY` (por ahora se cargó un placeholder `phc_placeholder_replace_me`; sustituir cuando PostHog entregue la clave real).
+   - `NEXT_PUBLIC_POSTHOG_HOST` (por defecto `https://us.posthog.com`).
+   - Guardar credenciales reales en 1Password → vault “Brisa Cubana – SaaS”.
 3. **Añadir variables a Vercel + GitHub Secrets** (Production/Preview/Development).
 4. **Instrumentar cliente web**:
    - Cargar `posthog-js` en `apps/web` (lazy load).

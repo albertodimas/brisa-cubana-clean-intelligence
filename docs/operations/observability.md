@@ -193,7 +193,7 @@ vercel logs --output=logs.txt
 ### 4.4 Enlaces (actualizar cuando estén listos)
 
 - Dashboard PostHog: _(pendiente)_.
-- Diccionario de eventos: `docs/product/analytics-events.md` _(crear)_.
+- Diccionario de eventos: `docs/product/analytics-events.md`.
 
 > **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.
 
