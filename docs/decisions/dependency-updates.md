@@ -52,7 +52,15 @@ Cada fase debe:
 
 ---
 
-## 6. Verificación de release 0.2.8
+## 6. Compatibilidad React 19 / Next 15
+
+- **Stripe**: `@stripe/react-stripe-js@2.9.0` declara peer dependency `react@^16 || ^17 || ^18`. Con React 19 el instalador de npm falla (`ERESOLVE`). Mientras Stripe publica una versión compatible, mantén la instalación via `pnpm` (respeta peers) y evita reinstalar con npm/yarn sin `--legacy-peer-deps`. Seguimiento: [stripe/react-stripe-js#540](https://github.com/stripe/react-stripe-js/issues/540).
+- **UI Libraries**: revisa compatibilidad oficial antes de añadir librerías (`shadcn/ui`, Radix, etc.). Documenta excepciones en esta ADR y usa `pnpm.overrides` cuando necesites alinear versiones.
+- **Auth0 SDK**: el soporte estable para React 19/Next 15 se encuentra en la rama beta del SDK (oct-2025). Al integrarlo, planifica smoke tests en App Router y valida middlewares en funciones Edge.
+
+Actualiza esta sección cuando cada proveedor libere builds oficiales compatibles.
+
+## 7. Verificación de release 0.2.8
 
 - Etiqueta `v0.2.8` publicada el 14-oct-2025 con CRUD 100 % RESTful (soft delete en servicios, propiedades, reservas y usuarios) y validación `isActive` en login.
 - Despliegues Vercel (`vercel[bot]`) y pipelines (`CI`, `CodeQL`) ejecutándose en verde sobre el commit `5254ef4`.

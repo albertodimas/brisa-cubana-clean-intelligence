@@ -27,6 +27,29 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | Web (Log drains)                            | `LOG_DRAIN_VERIFICATION_CODE`                                                                                                                               | All                 | Código devuelto en `x-vercel-verify` para validar el endpoint `/api/logdrain`. |
 | Web (Analítica)                             | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`                                                                                                       | All                 | API key y host para PostHog (`https://us.posthog.com` por defecto).            |
 
+## 3. Configuración de Dominios Personalizados
+
+### Dominios de producción
+
+| Dominio                                | Proyecto | Propósito                           |
+| -------------------------------------- | -------- | ----------------------------------- |
+| `brisacubanacleanintelligence.com`     | Web      | Landing + Checkout + Portal + Panel |
+| `www.brisacubanacleanintelligence.com` | Web      | Redirect 301 → dominio raíz         |
+| `api.brisacubanacleanintelligence.com` | API      | Backend Hono + Prisma               |
+
+### Certificados SSL
+
+Vercel genera y renueva automáticamente certificados SSL/TLS (Let's Encrypt). No se requiere acción manual.
+
+### Verificación DNS
+
+Los dominios utilizan los nameservers administrados por Vercel:
+
+- `ns1.vercel-dns.com`
+- `ns2.vercel-dns.com`
+
+La propagación global suele completarse en <1 hora (máximo 48 h).
+
 > **Estado 15-oct-2025:** Se cargaron claves de ejemplo `sk_test_brisa_demo_20251015`, `pk_test_brisa_demo_20251015` y `whsec_brisa_demo_20251015` en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
 
 > **Portal cliente:** Configura SMTP con proveedor confiable. En producción establece `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` y elimina `ENABLE_TEST_UTILS` para evitar tokens de depuración.
@@ -105,7 +128,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | `PORTAL_MAGIC_LINK_*`                                                                        | Flujos de enlaces mágicos (Nightly).                                  |
 | `PRODUCTION_DATABASE_URL`, `PRODUCTION_DATABASE_URL_UNPOOLED`                                | Workflow `Post-Deploy Seed`.                                          |
 
-## 3. Despliegue
+## 4. Despliegue
 
 1. Merge a `main` activa automáticamente los builds en Vercel para `Production`.
 2. Confirma que los pipelines (`CI (Main Branch)`, `CodeQL`) estén en verde antes de aprobar el despliegue.
@@ -118,7 +141,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
    ```
    Usa el scope del equipo configurado (requiere `vercel login`).
 
-## 4. Seed y migraciones
+## 5. Seed y migraciones
 
 1. Migraciones Prisma se aplican automáticamente vía `prisma generate` + `tsc`. Si cambiaste el schema, sincroniza producción ejecutando las migraciones generadas:
    ```bash
@@ -161,17 +184,17 @@ stripe trigger checkout.session.completed
 
 Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook` y quedarán registrados en la consola.
 
-## 5. Verificación post-deploy
+## 6. Verificación post-deploy
 
-| Check           | Descripción                                                                                                 |
-| --------------- | ----------------------------------------------------------------------------------------------------------- |
-| Health API      | `GET https://brisa-cubana-clean-intelligence-api.vercel.app/health` devuelve `200` con estado `ok`.         |
-| Admin login     | Autenticación en https://brisa-cubana-clean-intelligence.vercel.app/login con `admin@brisacubanaclean.com`. |
-| Panel operativo | CRUD de servicios/propiedades/reservas visible solo para roles autorizados.                                 |
-| Observabilidad  | Sentry recibe eventos de prueba (`pnpm exec sentry-cli send-event`).                                        |
-| Rate limiting   | 6 intentos de login fallidos devuelven `429` en menos de 60 segundos (opcional).                            |
+| Check           | Descripción                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------- |
+| Health API      | `GET https://api.brisacubanacleanintelligence.com/health` devuelve `200` con estado `ok`.         |
+| Admin login     | Autenticación en https://brisacubanacleanintelligence.com/login con `admin@brisacubanaclean.com`. |
+| Panel operativo | CRUD de servicios/propiedades/reservas visible solo para roles autorizados.                       |
+| Observabilidad  | Sentry recibe eventos de prueba (`pnpm exec sentry-cli send-event`).                              |
+| Rate limiting   | 6 intentos de login fallidos devuelven `429` en menos de 60 segundos (opcional).                  |
 
-## 6. Rollback
+## 7. Rollback
 
 1. Selecciona el deployment previo en Vercel y marca **Promote to Production**.
 2. Ejecuta `pnpm --filter @brisa/api db:deploy` con el commit anterior si hubo cambios de schema.

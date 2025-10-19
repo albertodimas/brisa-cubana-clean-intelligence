@@ -151,8 +151,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Vercel web**: build `pnpm turbo run build --filter=@brisa/web`.
 - **Vercel API**: build `pnpm build` (Prisma + TypeScript).
 - **URLs producción**:
-  - Web: https://brisa-cubana-clean-intelligence.vercel.app
-  - API: https://brisa-cubana-clean-intelligence-api.vercel.app
+  - Web: https://brisacubanacleanintelligence.com
+  - API: https://api.brisacubanacleanintelligence.com
+  - Alternativas (fallback): https://brisa-cubana-clean-intelligence.vercel.app · https://brisa-cubana-clean-intelligence-api.vercel.app
 - **Logs**:
   - `/favicon.ico` 404 → resueltos tras subir assets a `public/`.
   - `prisma:error … Closed` → ocurrieron antes del fix JWT/bcrypt; no presentes en despliegues vigentes.
@@ -194,7 +195,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 - **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`; utiliza `scripts/prisma-deploy-or-baseline.sh` para resolver automáticamente escenarios con P3005 cuando la base ya contiene datos.
 
-**Estado (18-oct-2025)**: ✅ Pipelines en `main` (CI 18603217844, CodeQL 18603217867, Post-Deploy Seed 18612902776) completados; ✅ Nightly 18612838707 validó suite `full` con `ENABLE_TEST_UTILS="false"` y correo SMTP simulado; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` mantiene fallos en CodeQL y PR Checks pendientes.
+**Estado (19-oct-2025)**: ✅ `PR Checks` 18632102829 (`workflow_dispatch`) verde tras propagar `NEXT_PUBLIC_POSTHOG_*` a la acción reutilizable; ✅ Pipelines en `main` (CI 18603217844, CodeQL 18603217867, Post-Deploy Seed 18612902776) completados el 18-oct; ✅ Nightly 18612838707 validó suite `full` con `ENABLE_TEST_UTILS="false"` y correo SMTP simulado; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` mantiene fallos en CodeQL y PR Checks pendientes.
 
 ### 7.4 Calidad de Código
 
@@ -324,6 +325,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 13. ✅ Refactorización masiva: 450+ líneas de código duplicado eliminadas (6 bibliotecas compartidas, 60% reducción)
 14. ✅ API de notificaciones: Modelo Prisma, repositorio y endpoints GET/PATCH listos para UI de coordinadores.
 15. ✅ Notificaciones en tiempo real: SSE `GET /api/notifications/stream`, `NotificationBell` reactivo y fallback a polling.
+16. ✅ Telemetría PostHog: secretos `NEXT_PUBLIC_POSTHOG_*` propagados en CI/CD y cliente resiliente validado por `analytics.spec.ts`.
 
 ### Pendiente 🔄
 

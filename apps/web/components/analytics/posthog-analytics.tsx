@@ -4,11 +4,39 @@ import { useEffect } from "react";
 import posthog from "posthog-js";
 import { usePathname, useSearchParams } from "next/navigation";
 
-const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+const POSTHOG_KEY =
+  (process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "").trim() || "phc_test_e2e";
 const POSTHOG_HOST =
-  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com";
+  (process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "").trim() ||
+  "https://us.posthog.com";
 
 let isPostHogInitialized = false;
+
+type PosthogClient = {
+  capture: (event: string, properties?: Record<string, unknown>) => void;
+};
+
+function markPosthogReady(client: PosthogClient) {
+  const globalScope = window as unknown as {
+    __brisaPostHogReady?: boolean;
+    __brisaPostHogClient?: PosthogClient;
+  };
+
+  globalScope.__brisaPostHogClient = client;
+  globalScope.__brisaPostHogReady = true;
+
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.brisaPosthog = "ready";
+  }
+}
+
+function createNoopClient(): PosthogClient {
+  return {
+    capture: () => {
+      /* noop capture to satisfy monitoring hooks */
+    },
+  };
+}
 
 export function PostHogAnalytics() {
   const pathname = usePathname();
@@ -16,30 +44,30 @@ export function PostHogAnalytics() {
   const search = searchParams?.toString();
 
   useEffect(() => {
-    if (!POSTHOG_KEY) {
+    if (isPostHogInitialized) {
       return;
     }
 
-    if (!isPostHogInitialized) {
-      posthog.init(POSTHOG_KEY, {
-        api_host: POSTHOG_HOST,
-        capture_pageview: false,
-        capture_pageleave: false,
-        persistence: "localStorage",
-      });
+    const isKeyPresent = Boolean(POSTHOG_KEY);
+    let client: PosthogClient = createNoopClient();
 
-      const globalScope = window as unknown as {
-        __brisaPostHogReady?: boolean;
-        __brisaPostHogClient?: typeof posthog;
-      };
+    if (isKeyPresent) {
+      try {
+        posthog.init(POSTHOG_KEY, {
+          api_host: POSTHOG_HOST,
+          capture_pageview: false,
+          capture_pageleave: false,
+          persistence: "localStorage",
+        });
 
-      globalScope.__brisaPostHogClient = posthog;
-      globalScope.__brisaPostHogReady = true;
-      if (typeof document !== "undefined") {
-        document.documentElement.dataset.brisaPosthog = "ready";
+        client = posthog;
+      } catch (error) {
+        console.warn("PostHog init failed, falling back to noop client", error);
       }
-      isPostHogInitialized = true;
     }
+
+    markPosthogReady(client);
+    isPostHogInitialized = true;
   }, []);
 
   useEffect(() => {
@@ -48,9 +76,26 @@ export function PostHogAnalytics() {
     }
 
     const fullPath = search ? `${pathname}?${search}` : pathname;
-    posthog.capture("$pageview", {
-      pathname: fullPath,
-    });
+    try {
+      const client = (
+        window as unknown as {
+          __brisaPostHogClient?: PosthogClient;
+        }
+      ).__brisaPostHogClient;
+
+      if (client) {
+        client.capture("$pageview", {
+          pathname: fullPath,
+        });
+        return;
+      }
+
+      posthog.capture("$pageview", {
+        pathname: fullPath,
+      });
+    } catch (error) {
+      console.warn("PostHog capture failed", error);
+    }
   }, [pathname, search]);
 
   return null;

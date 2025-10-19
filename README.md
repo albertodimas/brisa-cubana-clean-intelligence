@@ -82,8 +82,8 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
 ## Infraestructura y despliegue
 
 - **Producción Vercel:**
-  - Web: https://brisa-cubana-clean-intelligence.vercel.app
-  - API: https://brisa-cubana-clean-intelligence-api.vercel.app
+- Web: https://brisacubanacleanintelligence.com
+- API: https://api.brisacubanacleanintelligence.com
 - **Base de datos:** PostgreSQL Neon (17) con seed de usuarios, servicios, propiedades y reservas demo.
 - **Proxy interno:** La web reexpone `/api/*` hacia la API Hono vía `INTERNAL_API_URL`, evitando exponer secretos en el navegador.
 - **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API) y Web Vitals se envían a Sentry + Speed Insights para monitoreo continuo.

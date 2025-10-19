@@ -103,6 +103,14 @@ on:
         required: false
         type: string
         default: "true"
+      next-public-posthog-key:
+        required: false
+        type: string
+        default: ""
+      next-public-posthog-host:
+        required: false
+        type: string
+        default: "https://us.posthog.com"
     secrets:
       api-token:
         required: false
@@ -187,6 +195,8 @@ jobs:
           portal-magic-link-smtp-password: ${{ secrets.portal-magic-link-smtp-password }}
           portal-magic-link-smtp-secure: ${{ secrets.portal-magic-link-smtp-secure }}
           portal-magic-link-expose-debug: ${{ inputs.portal-magic-link-expose-debug }}
+          next-public-posthog-key: ${{ inputs.next-public-posthog-key }}
+          next-public-posthog-host: ${{ inputs.next-public-posthog-host }}
           log_drain_verification_code: ${{ secrets.log_drain_verification_code }}
 
       - name: Initialize database schema
