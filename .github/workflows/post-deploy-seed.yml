@@ -38,6 +38,7 @@ jobs:
           api-token: ${{ secrets.API_TOKEN }}
           jwt-secret: ${{ secrets.JWT_SECRET }}
           auth-secret: ${{ secrets.AUTH_SECRET }}
+          log-drain-verification-code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
 
       - name: Apply Prisma migrations
         env:
