@@ -96,6 +96,12 @@ Las credenciales de producción están configuradas en:
 
 ---
 
+## 🛡️ Content Security Policy (CSP)
+
+- La web sirve un encabezado `Content-Security-Policy-Report-Only` desde `apps/web/vercel.json`. Esto nos permite detectar recursos externos no declarados antes de bloquearlos.
+- Política actual: `default-src 'self'; script-src 'self' https://js.stripe.com https://cdn.posthog.com https://www.googletagmanager.com https://www.gstatic.com https://js.sentry-cdn.com; connect-src 'self' https://api.brisacubanacleanintelligence.com https://*.posthog.com https://o*.ingest.sentry.io https://js.stripe.com https://api.stripe.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; frame-src https://js.stripe.com https://hooks.stripe.com; base-uri 'self'; form-action 'self' https://api.brisacubanacleanintelligence.com; frame-ancestors 'none'`.
+- Si un nuevo proveedor externo es necesario, agrégalo explícitamente en la directiva pertinente y documenta el motivo aquí. Tras estabilizar los reportes, migraremos la política a modo bloqueante (`Content-Security-Policy`).
+
 ## ✉️ Enlaces mágicos (portal cliente)
 
 - Los tokens generados por `/api/portal/auth/request` se almacenan con hash SHA-256 y caducan en 15 minutos (configurable vía `MAGIC_LINK_TTL_MINUTES`).
@@ -185,5 +191,5 @@ Antes de cada commit:
 
 ---
 
-**Última actualización:** 15 de octubre de 2025
+**Última actualización:** 19 de octubre de 2025
 **Mantenido por:** Equipo Brisa Cubana
