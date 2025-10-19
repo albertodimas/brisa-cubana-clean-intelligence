@@ -16,12 +16,14 @@ All notable changes to this project are documented here. The format follows [Kee
 - Configuración Playwright propaga `NEXT_PUBLIC_POSTHOG_KEY`/`HOST` por defecto en entornos de prueba.
 - Suite Playwright crítica ahora usa builds de producción (`pnpm build && pnpm start`) para API y web, con puertos configurables (`API_PORT`, `WEB_PORT`) y `PLAYWRIGHT_BASE_URL` definido.
 - Test de seguridad `gestiona sesión (persistencia y logout)` refactorizado con selectores específicos, timeouts explícitos y sincronización `Promise.all`, eliminando cuelgues en CI (`tests/e2e/security.spec.ts`).
+- Workflows (`project-pipeline.yml`, `ci.yml`, `pr-checks.yml`, `nightly.yml`) reenvían `NEXT_PUBLIC_POSTHOG_*` a la acción compuesta para estabilizar la verificación `analytics.spec.ts` en CI.
 
 ### Docs
 
 - `docs/product/phase-2-roadmap.md` y `docs/product/analytics-decision.md` actualizados con el estado de la integración PostHog y el plan de rotación de claves.
 - `docs/operations/observability.md`, `docs/operations/runbook-daily-monitoring.md` y `docs/operations/alerts.md` ahora incluyen los nuevos scripts y pasos de verificación para alertas PostHog/Sentry.
 - `docs/qa/e2e-strategy.md` documenta el uso de builds de producción y las variables `API_PORT`/`WEB_PORT`/`PLAYWRIGHT_BASE_URL` para entornos locales y CI.
+- `docs/overview/status.md` registra la verificación del 19-oct-2025 y la resiliencia del cliente PostHog.
 
 ## [0.4.1] - 2025-10-18
 
