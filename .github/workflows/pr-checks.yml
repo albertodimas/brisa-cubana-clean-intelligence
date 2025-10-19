@@ -53,7 +53,6 @@ jobs:
       run-e2e-suite: smoke
       playwright-report-name: playwright-report-smoke
       upload-playwright-only-on-failure: true
-      checkout-ref: ${{ github.event.inputs.ref }}
       next-public-posthog-key: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
       next-public-posthog-host: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
     secrets:
