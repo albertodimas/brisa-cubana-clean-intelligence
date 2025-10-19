@@ -4,7 +4,21 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
-_No changes yet._
+### Added
+
+- Hero comercial con imagen aprobada por marketing y sección portal actualizada con assets finales (`apps/web/app/page.tsx`, `public/images/landing/*`).
+- Prueba Playwright `analytics.spec.ts` que verifica la inicialización de PostHog desde la landing pública.
+- Scripts de verificación `pnpm posthog:test-event` y `pnpm sentry:test-event` para validar ingestión y alertas desde la CLI.
+
+### Changed
+
+- Middleware público ahora permite acceder a `/` sin autenticación para exponer la landing en producción (`apps/web/middleware.ts`).
+- Configuración Playwright propaga `NEXT_PUBLIC_POSTHOG_KEY`/`HOST` por defecto en entornos de prueba.
+
+### Docs
+
+- `docs/product/phase-2-roadmap.md` y `docs/product/analytics-decision.md` actualizados con el estado de la integración PostHog y el plan de rotación de claves.
+- `docs/operations/observability.md`, `docs/operations/runbook-daily-monitoring.md` y `docs/operations/alerts.md` ahora incluyen los nuevos scripts y pasos de verificación para alertas PostHog/Sentry.
 
 ## [0.4.1] - 2025-10-18
 

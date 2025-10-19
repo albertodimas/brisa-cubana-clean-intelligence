@@ -27,6 +27,14 @@ export function PostHogAnalytics() {
         capture_pageleave: false,
         persistence: "localStorage",
       });
+
+      const globalScope = window as unknown as {
+        __brisaPostHogReady?: boolean;
+        __brisaPostHogClient?: typeof posthog;
+      };
+
+      globalScope.__brisaPostHogClient = posthog;
+      globalScope.__brisaPostHogReady = true;
       isPostHogInitialized = true;
     }
   }, []);

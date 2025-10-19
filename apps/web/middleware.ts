@@ -9,6 +9,7 @@ export default auth((req) => {
 
   // Public routes that don't require authentication
   const publicRoutes = [
+    "/",
     "/login",
     "/checkout",
     "/clientes",
@@ -16,10 +17,14 @@ export default auth((req) => {
     "/lhci",
   ];
 
-  // Check if current route is public
-  const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
+  // Allow marketing/landing routes without sesión
+  const isPublicRoute = publicRoutes.some((route) => {
+    if (route === "/") {
+      return pathname === "/";
+    }
+
+    return pathname === route || pathname.startsWith(`${route}/`);
+  });
 
   // Redirect to login if not authenticated and trying to access protected route
   if (!isLoggedIn && !isPublicRoute) {

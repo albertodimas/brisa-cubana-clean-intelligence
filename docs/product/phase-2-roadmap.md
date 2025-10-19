@@ -35,11 +35,12 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 4. **Coordinación marketing**:
    - [x] Reunión con Marketing (19-oct-2025) – copy definitivo en `docs/marketing/landing-copy-2025-10-19.md`.
    - [x] Assets en `docs/assets/public-components/` (hero, iconografía, testimonios).
-   - [ ] Actualizar landing con assets definitivos y anotar cambios en CHANGELOG.
+   - [x] Actualizar landing con assets definitivos y anotar cambios en CHANGELOG (`apps/web/app/page.tsx`, `public/images/landing/*`).
 
 5. **Integración analítica**:
    - [x] Seleccionar plataforma → **PostHog Cloud** (ver `docs/product/analytics-decision.md`).
-   - [ ] Implementar SDK `posthog-js` y enviar eventos normalizados (`cta`, `checkout`, `portal`).
+   - [x] Implementar SDK `posthog-js`, exponer `window.__brisaPostHogClient` y validar carga vía Playwright (`tests/e2e/analytics.spec.ts`).
+   - [x] Añadir script `pnpm posthog:test-event` para validar manualmente dashboards/alertas.
    - [ ] Publicar dashboard accesible para stakeholders y enlazarlo en este roadmap.
 
 ## 6. Artefactos en elaboración

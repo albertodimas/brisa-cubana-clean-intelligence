@@ -425,7 +425,7 @@ Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite 
    - Latencia P95 > 2000 ms (`transaction.op = http.server`) → Slack `#brisa-performance`.
    - `message:"notifications.stream.fallback"` ≥ 3 eventos / 5 min → Slack `#brisa-alerts`.
 4. **Validación**
-   - Ejecutar `pnpm exec sentry-cli send-event` (web/API) y confirmar notificación en Slack.
+   - Ejecutar `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación Slack"` y confirmar notificación en Slack.
    - Adjuntar captura o enlace a la regla en `docs/operations/alerts.md`.
 5. **Actualizar tabla 5.7** con la fecha y responsable que completó cada integración.
 
@@ -438,6 +438,14 @@ Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite 
 | _Pendiente_ | _Asignar_   | Latencia P95 > 2 s                           |           |
 | _Pendiente_ | _Asignar_   | Fallback SSE `notifications.stream.fallback` |           |
 | _Pendiente_ | _Asignar_   | KPIs de negocio en Grafana/Loki              |           |
+
+### 5.8 Alertas PostHog (pendiente)
+
+1. Crear alerta de funnel `checkout_payment_failed` en PostHog → enviar a webhook Slack `#producto` (configurar en _Project → Alerts_).
+2. Duplicar la alerta para `portal.booking.action.error` con umbral ≥ 3 eventos en 15 minutos.
+3. Guardar los enlaces a las alertas en 1Password (`Brisa Cubana – SaaS`) y documentarlos en la tabla 5.7.
+4. Verificar recepción disparando eventos desde staging (`pnpm exec stripe trigger payment_intent.payment_failed` o acciones en el portal).
+   - También puedes usar `POSTHOG_API_KEY=... pnpm posthog:test-event checkout_payment_failed` para validar desde la CLI.
 
 ## 6. Health Checks
 

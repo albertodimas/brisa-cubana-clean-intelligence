@@ -7,8 +7,10 @@ describe("LandingPage", () => {
     const { default: LandingPage } = await import("./page");
     const markup = renderToStaticMarkup(<LandingPage />);
 
-    expect(markup).toContain("Limpieza hotelera para renta corta");
-    expect(markup).toContain("Solicita una propuesta");
+    expect(markup).toContain(
+      "Limpieza profesional para propiedades premium en Miami.",
+    );
+    expect(markup).toContain("Solicitar cotización");
     expect(markup).toContain("Explora el portal cliente");
   });
 
@@ -16,9 +18,13 @@ describe("LandingPage", () => {
     const { default: LandingPage } = await import("./page");
     const markup = renderToStaticMarkup(<LandingPage />);
 
-    expect(markup).toContain("Equipos confiables");
-    expect(markup).toContain("Pagos sin fricción");
-    expect(markup).toContain("Agenda una inspección");
+    expect(markup).toContain("Portal cliente y operaciones conectadas");
+    expect(markup).toContain(
+      "Alertas automáticas al detectar cambios de agenda o incidencias.",
+    );
+    expect(markup).toContain(
+      "Vista del portal cliente de Brisa Cubana mostrando reservas y acciones disponibles.",
+    );
   });
 
   it("presenta pricing, FAQ y formulario de contacto", async () => {

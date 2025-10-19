@@ -8,6 +8,8 @@ Este documento describe la configuración de alertas para monitoreo proactivo de
 
 ### Configuración de Alertas de Errores
 
+**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar que Slack/Email reciben la notificación.
+
 #### 1. New Issue Alert (Errores Nuevos)
 
 **Cuándo**: Un error nunca antes visto aparece en producción

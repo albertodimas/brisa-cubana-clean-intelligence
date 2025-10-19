@@ -50,8 +50,9 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
    - Adaptar `marketing-telemetry.ts` para enviar eventos a PostHog además de `@vercel/analytics`.
    - Adjuntar `distinct_id` (correo o hash) cuando haya sesión portal cliente.
 5. **Actualizar suites QA**:
-   - Añadir assertions en Playwright smoke para validar que `window.posthog` está definido cuando se configura la key.
+   - Añadir assertions en Playwright smoke para validar que `window.__brisaPostHogClient.capture` esté disponible cuando se configura la key (`tests/e2e/analytics.spec.ts`).
    - Documentar en `docs/qa/regression-checklist.md`.
+   - Ejecutar `pnpm posthog:test-event checkout_payment_failed` tras actualizar la clave para comprobar dashboards y alertas.
 
 ### 4.2 Dashboard & métricas
 
@@ -65,6 +66,15 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
 - Añadir PostHog a la política de privacidad (Marketing).
 - Revisar si se requiere banner de consentimiento (US vs. EU). Por ahora: ocultar recordings en ambientes no productivos.
 - Activar IP anonymization en proyecto PostHog.
+
+### 4.4 Rotación de clave PostHog (pendiente)
+
+1. Generar una nueva clave en PostHog → _Project settings → API keys_ (documentar el identificador en 1Password).
+2. Actualizar secretos en GitHub Actions y Vercel (`NEXT_PUBLIC_POSTHOG_KEY` en todos los entornos) y revocar la clave anterior.
+3. Refrescar la variable local (`.env.local`) sólo si se requiere depuración, eliminando valores previos.
+4. Ejecutar `pnpm exec playwright test tests/e2e/analytics.spec.ts --project=smoke` para validar la inicialización con la nueva clave.
+5. Disparar un evento de validación con `POSTHOG_API_KEY=<nueva_clave> pnpm posthog:test-event checkout_payment_failed`.
+6. Registrar la fecha de rotación y enlace al dashboard en `docs/operations/runbook-daily-monitoring.md`.
 
 ---
 

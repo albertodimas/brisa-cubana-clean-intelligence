@@ -31,8 +31,10 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
    - GitHub Actions → confirmar que `CI (Main Branch)`, `Nightly Full E2E Suite` y `Post-Deploy Seed` corrieron la última noche.
    - Si `PR Checks` requiere ejecución manual (smoke), dispara `Workflow dispatch` desde Actions → PR Checks → `Run workflow` (usa la rama a validar).
 
-5. **Analytics (temporal)**
+5. **Analytics (PostHog + Vercel)**
    - Revisar reporte provisional de `@vercel/analytics`: CTA → lead, lead → checkout, portal link verifications.
+   - Revisar dashboard PostHog `https://us.posthog.com/project/brisa-cubana/dashboards/funnel-fase2` (eventos `checkout_payment_failed`, `portal.booking.action.*`).
+   - Si no hay eventos recientes, ejecutar `POSTHOG_API_KEY=<clave_actual> pnpm posthog:test-event checkout_payment_failed` para validar la ingesta y las alertas.
    - Documentar variaciones relevantes en el canal `#producto`.
 
 ---

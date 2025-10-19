@@ -69,6 +69,10 @@ export default defineConfig({
             NODE_ENV: "production",
             AUTH_SECRET: authSecret,
             NEXT_PUBLIC_API_URL: baseApiUrl,
+            NEXT_PUBLIC_POSTHOG_KEY:
+              process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "phc_test_e2e",
+            NEXT_PUBLIC_POSTHOG_HOST:
+              process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
           },
           timeout: 120_000,
         },
@@ -103,6 +107,10 @@ export default defineConfig({
             NODE_ENV: "test",
             AUTH_SECRET: authSecret,
             NEXT_PUBLIC_API_URL: baseApiUrl,
+            NEXT_PUBLIC_POSTHOG_KEY:
+              process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "phc_test_e2e",
+            NEXT_PUBLIC_POSTHOG_HOST:
+              process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
           },
           timeout: 120_000,
         },
