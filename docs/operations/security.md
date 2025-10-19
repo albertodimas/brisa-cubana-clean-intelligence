@@ -100,6 +100,7 @@ Las credenciales de producción están configuradas en:
 
 - La web sirve un encabezado `Content-Security-Policy-Report-Only` desde `apps/web/vercel.json`. Esto nos permite detectar recursos externos no declarados antes de bloquearlos.
 - Política actual: `default-src 'self'; script-src 'self' https://js.stripe.com https://cdn.posthog.com https://www.googletagmanager.com https://www.gstatic.com https://js.sentry-cdn.com; connect-src 'self' https://api.brisacubanacleanintelligence.com https://*.posthog.com https://o*.ingest.sentry.io https://js.stripe.com https://api.stripe.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; frame-src https://js.stripe.com https://hooks.stripe.com; base-uri 'self'; form-action 'self' https://api.brisacubanacleanintelligence.com; frame-ancestors 'none'`.
+- Los reportes se envían a `https://brisacubanacleanintelligence.com/api/security/csp-report` mediante los encabezados `Report-To` y `Reporting-Endpoints`. La ruta (`apps/web/app/api/security/csp-report/route.ts`) normaliza el payload, anota el `user-agent` y lo envía a Sentry como mensaje `warning` (`CSP Violation`).
 - Si un nuevo proveedor externo es necesario, agrégalo explícitamente en la directiva pertinente y documenta el motivo aquí. Tras estabilizar los reportes, migraremos la política a modo bloqueante (`Content-Security-Policy`).
 
 ## ✉️ Enlaces mágicos (portal cliente)
