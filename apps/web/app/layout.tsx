@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import "./globals.css";
 import "../styles/theme.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -67,7 +68,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ToastProvider>{children}</ToastProvider>
           <WebVitalsReporter />
         </ThemeProvider>
-        <PostHogAnalytics />
+        <Suspense fallback={null}>
+          <PostHogAnalytics />
+        </Suspense>
         {enableSpeedInsights ? <SpeedInsights /> : null}
       </body>
     </html>
