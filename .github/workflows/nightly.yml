@@ -14,6 +14,7 @@ jobs:
       job-name: Nightly full e2e
       run-database-prep: true
       run-e2e-suite: full
+      next-public-api-url: "http://localhost:3001"
       playwright-report-name: playwright-report-full
       playwright-retention-days: 14
       run-lighthouse: false
