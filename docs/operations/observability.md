@@ -1,9 +1,9 @@
 # Observabilidad y Monitoreo
 
 **Última actualización:** 20 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ⚠️ Slack pendiente (webhook sin configurar) (alertas siguen por email) · ✅ Health check público `/healthz` con token opcional
+**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ✅ Slack webhook configurado y probado · ✅ Health check público `/healthz` con token opcional
 
-> Nota: Hasta configurar `SLACK_WEBHOOK_URL` en Vercel/GitHub, cualquier paso que redirija alertas a Slack permanece pendiente.
+> Nota: `SLACK_WEBHOOK_URL` configurado en Vercel (20-oct-2025). Falta conectar alertas Sentry/PostHog al webhook (requiere configuración manual en dashboards).
 
 ---
 
@@ -98,16 +98,16 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 
 - **Sentry Issue Alert – Checkout errores** (`checkout-payment-failed`):
   - Condición: ≥3 eventos `checkout.payment.failed` en 15 minutos.
-  - Acción actual: email vía `notify_event` (Slack pendiente (webhook sin configurar) hasta configurar `SLACK_WEBHOOK_URL`).
+  - Acción actual: email vía `notify_event` (webhook Slack configurado en Vercel, pendiente de conectar en Sentry dashboard).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:checkout-payment-failed` (registrado en 1Password «Sentry Alerts»).
 - **Sentry Issue Alert – Portal autoservicio** (`portal-booking-action-error`):
   - Condición: ≥3 eventos `portal.booking.action.error` en 10 minutos.
-  - Acción actual: email a operaciones@brisacubanaclean.com (añadir Slack cuando esté disponible).
+  - Acción actual: email a operaciones@brisacubanaclean.com (webhook Slack disponible, pendiente de configurar en alerta).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:portal-booking-action-error`.
 - **Sentry Cron Monitor – Nightly Full E2E** (`nightly-full-e2e-suite`):
   - Frecuencia esperada: diaria 02:00 UTC (workflow GitHub Actions `nightly.yml`).
-  - Acción actual: email por ausencia del run; editar monitor para Slack cuando se disponga del webhook.
-  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *"` (añadir `--slack #alerts-operaciones` tras integrar Slack).
+  - Acción actual: email por ausencia del run (webhook Slack disponible para configurar).
+  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *"` (webhook disponible en `SLACK_WEBHOOK_URL`).
 
 ---
 
