@@ -33,11 +33,7 @@ jobs:
         uses: ./.github/actions/setup-project
         with:
           install-playwright: false
-          run-prisma-generate: true
-
-      - name: Build workspace
-        shell: bash
-        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+          run-prisma-generate: false
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
