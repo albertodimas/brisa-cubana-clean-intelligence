@@ -46,9 +46,10 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
    - Credenciales guardadas en 1Password → vault “Brisa Cubana – SaaS”.
 3. **Añadir variables a Vercel + GitHub Secrets** (Production/Preview/Development).
 4. **Instrumentar cliente web**:
-   - Cargar `posthog-js` en `apps/web` (lazy load).
+   - Cargar `posthog-js-lite` en `apps/web` (lazy load).
    - Adaptar `marketing-telemetry.ts` para enviar eventos a PostHog además de `@vercel/analytics`.
    - Adjuntar `distinct_id` (correo o hash) cuando haya sesión portal cliente.
+   - Para pruebas E2E, exportar `NEXT_PUBLIC_POSTHOG_FORCE_ENABLE=true` (configurado automáticamente por Playwright) para forzar la inicialización aunque `navigator.webdriver` sea `true`.
 5. **Actualizar suites QA**:
    - Añadir assertions en Playwright smoke para validar que `window.__brisaPostHogClient.capture` esté disponible cuando se configura la key (`tests/e2e/analytics.spec.ts`).
    - Documentar en `docs/qa/regression-checklist.md`.
@@ -80,7 +81,7 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
 
 ## 5. Próximos pasos
 
-1. [x] Implementar SDK (`posthog-js`) con inicialización condicional (Plataforma).
+1. [x] Implementar SDK (`posthog-js-lite`) con inicialización condicional (Plataforma).
 2. [x] Emitir eventos normalizados (Producto/Plataforma).
 3. [ ] Publicar dashboard con KPIs (Producto).
 4. [ ] Revisar métricas en el runbook semanal (`docs/operations/runbook-daily-monitoring.md`).

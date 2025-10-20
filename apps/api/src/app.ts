@@ -78,13 +78,37 @@ const healthHandler = async (c: Context) => {
   }
 };
 
+const publicHealthHandler = async (c: Context) => {
+  const expectedToken = process.env.HEALTH_CHECK_TOKEN;
+  const headerToken = c.req.header("authorization");
+  const bearerToken = headerToken?.startsWith("Bearer ")
+    ? headerToken.slice("Bearer ".length).trim()
+    : undefined;
+  const queryToken = c.req.query("token");
+  const providedToken = bearerToken ?? queryToken ?? "";
+
+  if (expectedToken && providedToken !== expectedToken) {
+    return c.json(
+      {
+        status: "unauthorized",
+        error: "Missing or invalid health check token",
+      },
+      401,
+    );
+  }
+
+  return healthHandler(c);
+};
+
 // Routes for standalone deployment (without /api prefix)
 app.get("/", rootHandler);
 app.get("/health", healthHandler);
+app.get("/healthz", publicHealthHandler);
 
 // Routes for monorepo deployment (with /api prefix)
 app.get("/api", rootHandler);
 app.get("/api/health", healthHandler);
+app.get("/api/healthz", publicHealthHandler);
 
 // OpenAPI Specification JSON endpoint
 app.get("/api/openapi.json", (c) => c.json(openApiSpec));

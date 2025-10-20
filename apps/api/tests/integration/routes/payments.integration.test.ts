@@ -1,7 +1,7 @@
 import { describe, beforeAll, afterAll, it, expect, vi } from "vitest";
 import Stripe from "stripe";
 import type { Hono } from "hono";
-import type { ServiceRepository } from "../repositories/service-repository.js";
+import type { ServiceRepository } from "../../../src/repositories/service-repository.js";
 
 const TEST_SECRET_KEY = "sk_test_12345";
 const TEST_WEBHOOK_SECRET = "whsec_testsecret";
@@ -21,8 +21,8 @@ describe("Stripe webhook", () => {
     process.env.DATABASE_URL_UNPOOLED =
       "postgresql://test:test@localhost:5432/test";
     vi.resetModules();
-    app = (await import("../app.js")).default;
-    const paymentsModule = await import("../routes/payments.js");
+    app = (await import("../../../src/app.js")).default;
+    const paymentsModule = await import("../../../src/routes/payments.js");
     stripeClientInstance = paymentsModule.__testing.stripeClient;
   });
 
@@ -96,7 +96,7 @@ describe("Stripe webhook", () => {
       .spyOn(stripeClientInstance.paymentIntents, "create")
       .mockImplementation(paymentIntentCreateMock as any);
 
-    const containerModule = await import("../container.js");
+    const containerModule = await import("../../../src/container.js");
     const repositoryMock: Partial<ServiceRepository> = {
       findById: vi.fn().mockResolvedValue({
         id: "srv_test",

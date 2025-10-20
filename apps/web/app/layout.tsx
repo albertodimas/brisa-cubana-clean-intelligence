@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import "./globals.css";
 import "../styles/theme.css";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WebVitalsReporter } from "@/components/analytics/web-vitals-reporter";
 import { PostHogAnalytics } from "@/components/analytics/posthog-analytics";
+import { SpeedInsightsClient } from "@/components/analytics/speed-insights-client";
 
 const SITE_DESCRIPTION =
   "Sistema de gestión profesional para servicios de limpieza premium en Miami. Deep cleaning, turnover para Airbnb y propiedades vacacionales.";
@@ -71,7 +71,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Suspense fallback={null}>
           <PostHogAnalytics />
         </Suspense>
-        {enableSpeedInsights ? <SpeedInsights /> : null}
+        <Suspense fallback={null}>
+          <SpeedInsightsClient enabled={enableSpeedInsights} />
+        </Suspense>
       </body>
     </html>
   );

@@ -9,9 +9,9 @@ import {
 } from "vitest";
 import type { Hono } from "hono";
 import { createHash } from "node:crypto";
-import { sendPortalMagicLinkEmail } from "../services/magic-link-mailer.js";
+import { sendPortalMagicLinkEmail } from "../../../src/services/magic-link-mailer.js";
 
-vi.mock("../services/magic-link-mailer.js", () => {
+vi.mock("../../../src/services/magic-link-mailer.js", () => {
   const sendPortalMagicLinkEmail = vi.fn(async () => ({
     delivered: true,
     messageId: "test-message",
@@ -123,7 +123,7 @@ describe("Portal auth routes", () => {
       "postgresql://test:test@localhost:5432/test";
 
     vi.resetModules();
-    const containerModule = await import("../container.js");
+    const containerModule = await import("../../../src/container.js");
     getUserRepositorySpy = vi
       .spyOn(containerModule, "getUserRepository")
       .mockReturnValue(userRepositoryMock as any);
@@ -131,7 +131,7 @@ describe("Portal auth routes", () => {
       .spyOn(containerModule, "getMagicLinkTokenRepository")
       .mockReturnValue(magicLinkRepositoryMock as any);
 
-    app = (await import("../app.js")).default;
+    app = (await import("../../../src/app.js")).default;
   });
 
   afterAll(() => {

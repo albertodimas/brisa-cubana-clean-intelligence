@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 19 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 20 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -13,10 +13,11 @@
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; búsqueda con debounce y chips de filtros activos; mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
+- Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
-- Sitio público `/` sirve la landing comercial (hero + CTA checkout/portal) ahora con secciones "Planes y precios", testimonios, FAQ interactiva y formulario de captura que persiste en `/api/leads`; todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
-- Stripe live configurado (claves `sk_live_brisa_20251020_prod`, `pk_live_brisa_20251020_prod`, `whsec_live_brisa_20251020_prod`) con validaciones ejecutadas vía Stripe CLI el 20-oct-2025; documentación en `docs/operations/deployment.md`.
+- Build local (`vercel build --prod`) sin errores; los despliegues en Vercel están fallando en fase de publicación con "An unexpected error happened..." (investigación en curso con soporte). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN) listas en Development/Preview/Production; `SLACK_WEBHOOK_URL` sigue pendiente de alta.
+- Sitio público `/` sirve la landing comercial (hero + CTA checkout/portal) con métricas KPI, bloques de diferenciadores, proceso operativo, testimonios y FAQ. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
+- Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
 - Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Accesibilidad validada (WCAG 2.2 AA) con fixes `aria-live` y `aria-hidden` implementados (commit `ce37e09`, 17-oct-2025). Funcionalidades de autoservicio adicionales (PDF exports, SSE push) siguen planificadas para Fase 2.1/2.2 (ver [RFC §8](../product/rfc-public-components.md#8-portal-cliente)) y se documentan en la guía operativa [docs/guides/portal-client.md](../guides/portal-client.md).
@@ -201,7 +202,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 - **TypeScript**: `pnpm typecheck` ✅
 - **Lint**: `pnpm lint` ✅
-- **Deuda técnica**: 0 TODOs/FIXME
+- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: crear webhook Slack, publicar dashboard PostHog y resolver despliegues internos de Vercel.
 
 ---
 
@@ -315,7 +316,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 3. ✅ Cobertura fortalecida: Tests de seguridad con escenarios negativos
 4. ✅ Logging estructurado: Pino integrado con redacción automática
 5. ✅ OpenAPI/Swagger: Documentación automática con Scalar UI en `/docs`
-6. ✅ Observabilidad: Sentry + Web Vitals + Speed Insights instrumentados para detectar regresiones de performance en tiempo real.citeturn2search1turn3search6turn3search7
+6. ✅ Observabilidad: Sentry + Web Vitals + Speed Insights instrumentados para detectar regresiones de performance en tiempo real.
 7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
 8. ✅ E2E Testing: 25 tests con estrategia piramidal (smoke/critical/full)
 9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)

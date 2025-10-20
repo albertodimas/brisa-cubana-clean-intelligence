@@ -2,12 +2,55 @@
 
 import { track } from "@vercel/analytics";
 import * as Sentry from "@sentry/nextjs";
-import posthog from "posthog-js";
+type PosthogClient = {
+  capture: (event: string, properties?: Record<string, unknown>) => void;
+};
 
 type AllowedPropertyValue = string | number | boolean | null;
 type EventData = Record<string, AllowedPropertyValue | undefined>;
 
 const HAS_POSTHOG_KEY = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
+const globalScope =
+  typeof window !== "undefined"
+    ? (window as unknown as {
+        __brisaPostHogClient?: PosthogClient;
+        __brisaPostHogPromise?: Promise<PosthogClient>;
+      })
+    : undefined;
+
+function captureWithPosthog(
+  event: string,
+  properties?: Record<string, unknown>,
+) {
+  if (!HAS_POSTHOG_KEY || !globalScope) {
+    return;
+  }
+
+  const attemptCapture = (client: PosthogClient | undefined) => {
+    if (!client) {
+      return;
+    }
+
+    try {
+      client.capture(event, properties);
+    } catch {
+      // posthog optional
+    }
+  };
+
+  if (globalScope.__brisaPostHogClient) {
+    attemptCapture(globalScope.__brisaPostHogClient);
+    return;
+  }
+
+  globalScope.__brisaPostHogPromise
+    ?.then((client) => {
+      attemptCapture(client);
+    })
+    .catch(() => {
+      // posthog optional
+    });
+}
 
 function sanitizeData(
   data?: EventData,
@@ -38,13 +81,7 @@ function recordAnalyticsEvent(
     // analytics optional
   }
 
-  if (HAS_POSTHOG_KEY) {
-    try {
-      posthog.capture(event, posthogProperties);
-    } catch {
-      // posthog optional
-    }
-  }
+  captureWithPosthog(event, posthogProperties);
 
   try {
     Sentry.addBreadcrumb({

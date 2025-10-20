@@ -30,9 +30,11 @@ Este inventario resume los artefactos activos del monorepo para acelerar handoff
 ## 4. QA y pruebas
 
 - **Vitest Web:** `apps/web` (~60 tests) ejecutados con `pnpm --filter @brisa/web test`.
-- **Vitest API:** unit (`vitest.unit.config.ts`) + integración (`vitest.integration.config.ts`) en `apps/api/src/routes/**`.
+- **Vitest API:** unit (`vitest.unit.config.ts`) + integración (`vitest.integration.config.ts`)
+  - Comandos: `pnpm --filter @brisa/api test:unit`, `pnpm --filter @brisa/api test:integration`
+  - Ubicación integration: `apps/api/tests/integration/**`
 - **Playwright:** suites en `tests/e2e/*.spec.ts` (smoke, critical, full) con soporte en `tests/e2e/support`.
-- **Stripe tests:** `apps/api/src/routes/payments.integration.test.ts` usa `Stripe.webhooks.generateTestHeaderString`.
+- **Stripe tests:** `apps/api/tests/integration/routes/payments.integration.test.ts` usa `Stripe.webhooks.generateTestHeaderString`.
 - **LHCI:** nightly (`.lighthouserc.preview.json`) sobre despliegue Vercel.
 - **Checklist manual:** `docs/qa/regression-checklist.md` (actualizada con escenarios Stripe).
 

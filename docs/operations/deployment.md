@@ -20,6 +20,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | API/Stripe                                  | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`                                                                                                                | All                 | Modo test en Preview/Dev, modo live en Production                              |
 | API (Portal cliente)                        | `PORTAL_MAGIC_LINK_FROM`, `PORTAL_MAGIC_LINK_SMTP_*`, `PORTAL_MAGIC_LINK_BASE_URL`, `PORTAL_MAGIC_LINK_CONFIRMATION_PATH`, `PORTAL_MAGIC_LINK_EXPOSE_DEBUG` | Production, Preview | SMTP obligatorio; `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción.      |
 | Web (`brisa-cubana-clean-intelligence`)     | `NEXT_PUBLIC_API_URL`                                                                                                                                       | All                 | Debe apuntar al dominio de la API correspondiente                              |
+| API                                         | `HEALTH_CHECK_TOKEN`                                                                                                                                        | All                 | Token opcional para /healthz (usar en monitores externos).                     |
 | Web                                         | `INTERNAL_API_URL`                                                                                                                                          | Production+Preview  | URL interna para proxy                                                         |
 | Web                                         | `AUTH_SECRET`                                                                                                                                               | All                 | Debe coincidir con la API para sesiones válidas                                |
 | Web (Stripe)                                | `STRIPE_PUBLISHABLE_KEY`                                                                                                                                    | All                 | Clave pública usada por Stripe.js                                              |
@@ -31,11 +32,20 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 
 ### Dominios de producción
 
+> ℹ️ **Salud de la API**: `/healthz` y `/api/healthz` se reescriben desde el proyecto web hacia la API. Si usas un dominio personalizado diferente o deshabilitas las rewrites, asegúrate de mantener una regla equivalente en Vercel para evitar redirecciones a `/login`.
+
 | Dominio                                | Proyecto | Propósito                           |
 | -------------------------------------- | -------- | ----------------------------------- |
 | `brisacubanacleanintelligence.com`     | Web      | Landing + Checkout + Portal + Panel |
 | `www.brisacubanacleanintelligence.com` | Web      | Redirect 301 → dominio raíz         |
 | `api.brisacubanacleanintelligence.com` | API      | Backend Hono + Prisma               |
+
+**Procedimiento recomendado**
+
+1. Desde el proyecto **web**, elimina cualquier alias previo a `api.brisacubanacleanintelligence.com` para evitar conflictos. Puedes hacerlo desde _Settings → Domains_ o ejecutando `vercel alias rm api.brisacubanacleanintelligence.com`.
+2. En el proyecto **API**, añade el dominio `api.brisacubanacleanintelligence.com` (Settings → Domains o `vercel domains add api.brisacubanacleanintelligence.com`) y, una vez disponible el deployment productivo deseado, asígnalo con `vercel alias set <deployment-url> api.brisacubanacleanintelligence.com`.
+3. Si administras el DNS fuera de Vercel, crea/actualiza el registro CNAME del subdominio para que apunte a `cname.vercel-dns.com`. Si usas Vercel DNS, no se requieren cambios adicionales.
+4. Verifica que la respuesta `GET https://api.brisacubanacleanintelligence.com/health` devuelva `200` antes de actualizar configuraciones (por ejemplo, `NEXT_PUBLIC_API_URL`) en web, GitHub y workflows.
 
 ### Certificados SSL
 
@@ -50,7 +60,7 @@ Los dominios utilizan los nameservers administrados por Vercel:
 
 La propagación global suele completarse en <1 hora (máximo 48 h).
 
-> **Estado 15-oct-2025:** Se cargaron claves de ejemplo `sk_test_brisa_demo_20251015`, `pk_test_brisa_demo_20251015` y `whsec_brisa_demo_20251015` en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
+> **Estado 15-oct-2025:** Se cargaron claves de ejemplo (`stripe_test_secret_demo_20251015`, `stripe_test_publishable_demo_20251015`, `stripe_test_webhook_demo_20251015`) en los entornos Development/Preview/Production del proyecto API. Reemplazar por las credenciales oficiales del equipo antes de activar modo live.
 
 > **Portal cliente:** Configura SMTP con proveedor confiable. En producción establece `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` y elimina `ENABLE_TEST_UTILS` para evitar tokens de depuración.
 
@@ -84,17 +94,18 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
    - Actualiza la tabla de variables en este documento con fecha de rotación.
 6. Consulta el [runbook detallado](stripe-rotation-checklist.md) para checklist previo/post evento y comandos de validación.
 
-> **Rotación 18-oct-2025:** Se cargaron las claves `sk_live_brisa_20251020_example`, `pk_live_brisa_20251020_example` y `whsec_live_brisa_20251020_example` en Vercel/GitHub y se coordinó la validación del flujo live para el 20-oct-2025.
+> **Rotación 18-oct-2025:** Se cargaron las credenciales live etiquetadas como `stripe/live/2025-10-20/example` en Vercel y GitHub, y se coordinó la validación del flujo live para el 20-oct-2025.
 >
 > **Validación 20-oct-2025 (10:05 ET):**
 >
-> - Se reemplazaron las llaves placeholder por `sk_live_brisa_20251020_prod`, `pk_live_brisa_20251020_prod` y `whsec_live_brisa_20251020_prod` en Vercel (development/preview/production) y en los secretos de GitHub Actions.
+> - Se reemplazaron las llaves placeholder por las credenciales live almacenadas en 1Password (entrada “Stripe Live Keys · 2025-10-20”) en Vercel (development/preview/production) y en los secretos de GitHub Actions.
 > - Comandos ejecutados desde Stripe CLI:
 >   - `stripe trigger checkout.session.completed`
 >   - `stripe trigger payment_intent.payment_failed`
 > - Resultados: ambos eventos registrados como `200 OK` en `/api/payments/stripe/webhook`; se observaron logs en Vercel (`checkout.session.completed`, `payment_intent.payment_failed`) y breadcrumbs en Sentry sin errores.
 
-- Se revocaron las llaves antiguas en el dashboard de Stripe y se adjuntó evidencia en 1Password (nota “Stripe Live Keys 20251020”).
+- Se revocaron las llaves antiguas en el dashboard de Stripe y se adjuntó evidencia en 1Password (nota “Stripe Live Keys · 2025-10-20”).
+- **Rotación 19-oct-2025 (22:40 UTC):** Se regeneró la firma live del webhook desde Stripe CLI y se actualizó el secreto `STRIPE_WEBHOOK_SECRET` en GitHub Actions con el nuevo valor. Falta replicar la actualización en Vercel y revocar la firma previa en el dashboard de Stripe.
 
 ### 2.2 Log drains en Vercel
 
@@ -186,13 +197,15 @@ Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook`
 
 ## 6. Verificación post-deploy
 
-| Check           | Descripción                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------- |
-| Health API      | `GET https://api.brisacubanacleanintelligence.com/health` devuelve `200` con estado `ok`.         |
-| Admin login     | Autenticación en https://brisacubanacleanintelligence.com/login con `admin@brisacubanaclean.com`. |
-| Panel operativo | CRUD de servicios/propiedades/reservas visible solo para roles autorizados.                       |
-| Observabilidad  | Sentry recibe eventos de prueba (`pnpm exec sentry-cli send-event`).                              |
-| Rate limiting   | 6 intentos de login fallidos devuelven `429` en menos de 60 segundos (opcional).                  |
+| Check           | Descripción                                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Health API      | `GET https://api.brisacubanacleanintelligence.com/health` devuelve `200` con estado `ok`.                                                                                                         |
+| Admin login     | Autenticación en https://brisacubanacleanintelligence.com/login con `admin@brisacubanaclean.com`.                                                                                                 |
+| Lighthouse CI   | Ejecuta `pnpm exec lhci autorun --config=.lighthouserc.preview.json`; ignora solo las advertencias conocidas (`legacy-javascript`, `render-blocking-insight`, `network-dependency-tree-insight`). |
+| Robots/Sitemap  | `curl -I https://brisacubanacleanintelligence.com/robots.txt` y `.../sitemap.xml` → deben responder `200` sin redirecciones a `/login`.                                                           |
+| Panel operativo | CRUD de servicios/propiedades/reservas visible solo para roles autorizados.                                                                                                                       |
+| Observabilidad  | Sentry recibe eventos de prueba (`pnpm exec sentry-cli send-event`).                                                                                                                              |
+| Rate limiting   | 6 intentos de login fallidos devuelven `429` en menos de 60 segundos (opcional).                                                                                                                  |
 
 ## 7. Rollback
 

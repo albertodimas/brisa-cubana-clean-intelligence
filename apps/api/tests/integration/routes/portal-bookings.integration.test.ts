@@ -74,7 +74,7 @@ describe("Portal bookings routes", () => {
       "postgresql://test:test@localhost:5432/test";
 
     vi.resetModules();
-    const containerModule = await import("../container.js");
+    const containerModule = await import("../../../src/container.js");
     getBookingRepositorySpy = vi
       .spyOn(containerModule, "getBookingRepository")
       .mockReturnValue(bookingRepositoryMock as any);
@@ -85,7 +85,7 @@ describe("Portal bookings routes", () => {
       .spyOn(containerModule, "getNotificationRepository")
       .mockReturnValue(notificationRepositoryMock as any);
 
-    app = (await import("../app.js")).default;
+    app = (await import("../../../src/app.js")).default;
   });
 
   afterAll(() => {

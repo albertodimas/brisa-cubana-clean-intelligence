@@ -39,7 +39,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 5. **Integración analítica**:
    - [x] Seleccionar plataforma → **PostHog Cloud** (ver `docs/product/analytics-decision.md`).
-   - [x] Implementar SDK `posthog-js`, exponer `window.__brisaPostHogClient` y validar carga vía Playwright (`tests/e2e/analytics.spec.ts`).
+   - [x] Implementar SDK `posthog-js-lite`, exponer `window.__brisaPostHogClient` y validar carga vía Playwright (`tests/e2e/analytics.spec.ts`).
    - [x] Añadir script `pnpm posthog:test-event` para validar manualmente dashboards/alertas.
    - [ ] Publicar dashboard accesible para stakeholders y enlazarlo en este roadmap.
 

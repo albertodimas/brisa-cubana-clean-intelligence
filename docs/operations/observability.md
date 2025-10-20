@@ -1,7 +1,9 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 17 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN)
+**Última actualización:** 20 de octubre de 2025
+**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ✅ Slack webhook configurado y probado · ✅ Health check público `/healthz` con token opcional
+
+> Nota: `SLACK_WEBHOOK_URL` configurado en Vercel (20-oct-2025). Falta conectar alertas Sentry/PostHog al webhook (requiere configuración manual en dashboards).
 
 ---
 
@@ -96,16 +98,16 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 
 - **Sentry Issue Alert – Checkout errores** (`checkout-payment-failed`):
   - Condición: ≥3 eventos `checkout.payment.failed` en 15 minutos.
-  - Acción: Notificación a Slack `#alerts-operaciones` mediante la app Sentry.
+  - Acción actual: email vía `notify_event` (webhook Slack configurado en Vercel, pendiente de conectar en Sentry dashboard).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:checkout-payment-failed` (registrado en 1Password «Sentry Alerts»).
 - **Sentry Issue Alert – Portal autoservicio** (`portal-booking-action-error`):
   - Condición: ≥3 eventos `portal.booking.action.error` en 10 minutos.
-  - Acción: Slack `#alerts-operaciones` + email a operaciones@brisacubanaclean.com.
+  - Acción actual: email a operaciones@brisacubanaclean.com (webhook Slack disponible, pendiente de configurar en alerta).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:portal-booking-action-error`.
 - **Sentry Cron Monitor – Nightly Full E2E** (`nightly-full-e2e-suite`):
   - Frecuencia esperada: diaria 02:00 UTC (workflow GitHub Actions `nightly.yml`).
-  - Acción: Slack `#alerts-operaciones` cuando la ejecución no se recibe en 3h.
-  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *" --slack #alerts-operaciones`.
+  - Acción actual: email por ausencia del run (webhook Slack disponible para configurar).
+  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *"` (webhook disponible en `SLACK_WEBHOOK_URL`).
 
 ---
 
@@ -149,7 +151,12 @@ vercel logs --output=logs.txt
 - Uso de bandwidth
 - Edge requests vs serverless
 
-**Dashboard:** Vercel → Project → Analytics
+**Health checks supervisados**
+
+- Endpoint público: `https://api.brisacubanacleanintelligence.com/healthz` (o `/api/healthz`). Si la personalización de dominio redirige a `/login`, usar el dominio del proyecto (`https://brisa-cubana-clean-intelligence-api.vercel.app/healthz`) o ajustar las rewrites en Vercel para saltar NextAuth.
+- Seguridad opcional: si se define `HEALTH_CHECK_TOKEN`, enviar `Authorization: Bearer <token>` o `?token=<token>`.
+- Monitoreo sugerido: configurar Vercel, UptimeRobot o BetterStack para solicitar el endpoint cada 1-5 minutos y alertar en caso de `status != pass` o código HTTP ≥ 500.
+- El handler valida conectividad a PostgreSQL (`SELECT 1`) y expone uptime y entorno.
 
 ---
 
@@ -180,13 +187,13 @@ vercel logs --output=logs.txt
 
 ### 4.3 Checklist de implementación
 
-1. **Integrar SDK PostHog** en `apps/web` (lazy load) con fallback si la key no está definida.
+1. **Integrar SDK PostHog** en `apps/web` (lazy load) con fallback si la key no está definida (`posthog-js-lite`).
 2. **Normalización de eventos** (`namespace.event`, props `source`, `campaign`, `serviceId`, `customerType`).
 3. **Persistir UTMs** en el telemetry helper y propagar a checkout/portal.
 4. **Dashboard compartido**:
    - KPI iniciales: `cta → lead`, `lead → checkout`, `checkout → pago`, ratio uso portal.
    - Responsable: Producto. Añadir enlace en sección 4.4 al publicarlo.
-5. **Alertas PostHog** para spikes de `checkout_payment_failed` → Slack `#producto`.
+5. **Alertas PostHog** para spikes de `checkout_payment_failed` → Slack `#producto` (ver rutina abajo).
 6. **QA**: actualizar `docs/qa/regression-checklist.md` para comprobar presencia de `window.posthog` cuando la key esté configurada.
 7. **Export warehouse (opcional)** cuando se superen 100k eventos/mes.
 
@@ -194,6 +201,18 @@ vercel logs --output=logs.txt
 
 - Dashboard PostHog: https://us.posthog.com/project/brisa-cubana/dashboards/funnel-fase2
 - Diccionario de eventos: `docs/product/analytics-events.md`.
+- Reportes Lighthouse: `pnpm exec lhci autorun --config=.lighthouserc.preview.json` (URL `/?lhci=1` desactiva analytics y Speed Insights durante las corridas).
+- Allowlist de advertencias Lighthouse: tras cada ejecución se corre `scripts/verify-lhci-warnings.sh`; falla si aparecen nuevas advertencias distintas a `legacy-javascript`, `render-blocking-insight` o `network-dependency-tree-insight`.
+
+### 4.5 Alertas PostHog
+
+1. En PostHog → **Project settings → Webhooks**, crea un webhook HTTP para Slack (`https://hooks.slack.com/...`) con nombre `slack-product`.
+2. En **Automations → New automation**:
+   - Trigger: `Event is recorded` → `checkout_payment_failed`.
+   - Condition: `count` superior a 3 eventos en 5 minutos.
+   - Action: `Send webhook` → `slack-product` (payload sugerido en `docs/product/analytics-events.md`).
+3. Documenta la URL del webhook en 1Password (`Brisa Cubana – SaaS / Slack Hooks`).
+4. Añade chequeo semanal en `docs/operations/runbook-daily-monitoring.md` para validar que se reciben notificaciones (usar script `pnpm posthog:test-event checkout_payment_failed`).
 
 > **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.
 

@@ -1,11 +1,12 @@
-import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-const LHCI_HEADER = "x-lhci-bypass";
+const AUTH_SECRET = process.env.AUTH_SECRET;
 
-export default auth((req) => {
+export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+  const token = await getToken({ req, secret: AUTH_SECRET });
+  const isLoggedIn = !!token;
 
   // Public routes that don't require authentication
   const publicRoutes = [
@@ -15,6 +16,8 @@ export default auth((req) => {
     "/clientes",
     "/api/auth",
     "/lhci",
+    "/robots.txt",
+    "/sitemap.xml",
   ];
 
   // Allow marketing/landing routes without sesión
@@ -39,7 +42,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
@@ -50,8 +53,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - robots.txt / sitemap.xml (SEO endpoints)
      * - public files (images, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|lhci|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|lhci|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html|txt|xml)$).*)",
   ],
 };

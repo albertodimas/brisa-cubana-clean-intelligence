@@ -1,4 +1,12 @@
 import Image from "next/image";
+import {
+  ShieldCheckIcon,
+  SparklesIcon,
+  CloudArrowUpIcon,
+  ArrowPathIcon,
+  ChatBubbleLeftRightIcon,
+  ClipboardDocumentCheckIcon,
+} from "@heroicons/react/24/outline";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
 import {
@@ -18,6 +26,73 @@ const testimonials = [
       "La inspección final y el reporte fotográfico nos dieron tranquilidad total.",
     author: "Carlos",
     role: "Propietario · Key Biscayne",
+  },
+];
+
+const kpiHighlights = [
+  {
+    label: "Turnovers gestionados",
+    value: "+12K",
+    description: "Historias de check-in impecables para anfitriones premium.",
+  },
+  {
+    label: "Satisfacción del huésped",
+    value: "97%",
+    description:
+      "Encuestas post estancia en propiedades operadas por Brisa Cubana.",
+  },
+  {
+    label: "Alertas resueltas",
+    value: "< 15 min",
+    description: "Tiempo promedio de respuesta ante incidencias reportadas.",
+  },
+  {
+    label: "Cobertura",
+    value: "24/7",
+    description:
+      "Cuadrillas activas en Miami, Brickell, Key Biscayne y Surfside.",
+  },
+];
+
+const differentiators = [
+  {
+    title: "Protocolos cinco estrellas",
+    description:
+      "Checklist digital, reposición certificada y evidencia fotográfica en menos de seis horas.",
+    icon: SparklesIcon,
+  },
+  {
+    title: "Seguridad y compliance",
+    description:
+      "Supervisión operativa, inventario controlado y pólizas de responsabilidad civil actualizadas.",
+    icon: ShieldCheckIcon,
+  },
+  {
+    title: "Integraciones PMS",
+    description:
+      "Sincronizamos agenda con Guesty, Hostaway, ResNexus y reportamos incidencias en tiempo real.",
+    icon: CloudArrowUpIcon,
+  },
+];
+
+const processSteps = [
+  {
+    title: "Diagnóstico express",
+    description:
+      "Levantamos checklist, inventario y frecuencia ideal en una sesión remota de 30 minutos.",
+    icon: ClipboardDocumentCheckIcon,
+  },
+  {
+    title: "Operación continua",
+    description:
+      "Cuadrillas asignadas, reposición centralizada y inspección final con reporte fotográfico.",
+    icon: ArrowPathIcon,
+  },
+  {
+    title: "Visibilidad total",
+    description:
+      "Dashboard y alertas automatizadas, soporte humano 24/7 y mejoras trimestrales con tu equipo.",
+    icon: ChatBubbleLeftRightIcon,
   },
 ];
 
@@ -140,6 +215,26 @@ export default function LandingPage() {
         </div>
       </div>
 
+      <section className="relative -mt-12 sm:-mt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 rounded-3xl border border-white/70 bg-white/90 p-6 shadow-xl backdrop-blur dark:border-brisa-800/60 dark:bg-brisa-950/80 dark:shadow-brisa-900/50">
+            {kpiHighlights.map((item) => (
+              <div key={item.label} className="flex flex-col gap-1">
+                <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                  {item.label}
+                </span>
+                <span className="text-3xl font-semibold text-brisa-700 dark:text-white">
+                  {item.value}
+                </span>
+                <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="bg-gray-50 dark:bg-brisa-900/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-center">
@@ -192,6 +287,60 @@ export default function LandingPage() {
                 sizes="(max-width: 768px) 100vw, 380px"
                 className="object-cover"
               />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid gap-8 lg:grid-cols-3">
+          {differentiators.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
+            >
+              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brisa-100 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
+                <item.icon className="h-6 w-6" aria-hidden />
+              </div>
+              <h3 className="text-xl font-semibold text-brisa-700 dark:text-white">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-brisa-200">
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-gradient-to-br from-brisa-600 via-brisa-500 to-brisa-400 text-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="space-y-8">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl sm:text-4xl font-semibold">
+                Cómo trabajamos
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-white/90 leading-relaxed">
+                Operamos como un equipo extendido de housekeeping premium. Cada
+                fase tiene responsables, SLA y documentación en el portal, listo
+                para auditar.
+              </p>
+            </div>
+            <div className="grid gap-6 lg:grid-cols-3">
+              {processSteps.map((step) => (
+                <div
+                  key={step.title}
+                  className="rounded-3xl border border-white/30 bg-white/10 p-6 backdrop-blur transition hover:bg-white/15"
+                >
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-white">
+                    <step.icon className="h-6 w-6" aria-hidden />
+                  </div>
+                  <h3 className="text-xl font-semibold">{step.title}</h3>
+                  <p className="mt-3 text-sm sm:text-base text-white/80 leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -1,27 +1,52 @@
-import * as Sentry from "@sentry/nextjs";
+const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN ?? process.env.SENTRY_DSN;
+const enabled =
+  typeof window !== "undefined" &&
+  Boolean(dsn) &&
+  process.env.NODE_ENV !== "test";
+const environment =
+  process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
+  process.env.SENTRY_ENVIRONMENT ??
+  process.env.NODE_ENV ??
+  "development";
 
-const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const tracesSampleRate = Number(
+  process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE ??
+    process.env.SENTRY_TRACES_SAMPLE_RATE ??
+    (process.env.NODE_ENV === "production" ? "0.1" : "1.0"),
+);
 
-Sentry.init({
-  dsn,
-  enabled: Boolean(dsn),
+async function bootstrapSentry() {
+  const Sentry = await import("@sentry/nextjs");
+  Sentry.init({
+    dsn: dsn || undefined,
+    enabled: true,
+    environment,
+    tracesSampleRate: Number.isNaN(tracesSampleRate) ? 0 : tracesSampleRate,
+    profilesSampleRate: 0,
+    debug: process.env.NODE_ENV === "development",
+  });
+}
 
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+if (enabled) {
+  const load = () => {
+    bootstrapSentry().catch((error) => {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[Sentry] failed to initialize", error);
+      }
+    });
+  };
 
-  // Session Replay
-  replaysSessionSampleRate: 0.1, // 10% of sessions
-  replaysOnErrorSampleRate: 1.0, // 100% of error sessions
+  const idle = (
+    window as typeof window & {
+      requestIdleCallback?: (cb: IdleRequestCallback) => number;
+    }
+  ).requestIdleCallback;
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
+  if (typeof idle === "function") {
+    idle(() => load());
+  } else {
+    setTimeout(load, 0);
+  }
+}
 
-  integrations: [
-    Sentry.replayIntegration({
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
-
-  environment: process.env.NODE_ENV,
-});
+export {};

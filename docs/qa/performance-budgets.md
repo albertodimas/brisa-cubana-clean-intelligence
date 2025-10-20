@@ -8,9 +8,10 @@ Mantener una experiencia de usuario rápida y fluida estableciendo límites cuan
 
 ## Monitoreo activo
 
-- **Web Vitals en producción**: el componente `WebVitalsReporter` envía CLS, FCP, LCP, FID/INP y TTFB a Sentry como métricas agregadas (`web_vital.*`) para detectar regresiones en tiempo real.citeturn2search1turn3search6
-- **Vercel Speed Insights**: la aplicación Next.js renderiza `<SpeedInsights />`, habilitando la captura automática de métricas en el dashboard de Vercel.citeturn3search7
-- **Nightly Lighthouse CI**: el workflow `nightly.yml` ejecuta `lhci autorun` contra la URL de producción de Vercel usando `.lighthouserc.preview.json`; si el score de Performance cae por debajo de 90 o se violan límites, la ejecución falla y el pipeline nightly queda en rojo.
+- **Web Vitals en producción**: el componente `WebVitalsReporter` envía CLS, FCP, LCP, FID/INP y TTFB a Sentry como métricas agregadas (`web_vital.*`) para detectar regresiones en tiempo real.
+- **Vercel Speed Insights**: la aplicación Next.js renderiza `<SpeedInsights />`, habilitando la captura automática de métricas en el dashboard de Vercel.
+- **Nightly Lighthouse CI**: el workflow `nightly.yml` ejecuta `lhci autorun` contra la URL de producción de Vercel usando `.lighthouserc.preview.json`; los umbrales críticos se evalúan por métrica (FCP, LCP, TBT, TTI, etc.) para fallar si exceden los límites definidos, mientras que el score agregado de Performance se monitorea solo como referencia. Durante estas corridas (URL `/?lhci=1`), deshabilitamos automáticamente PostHog y Speed Insights para evitar falsos positivos por scripts externos bloqueados o con caché corta.
+- La alerta `legacy-javascript` queda supeditada al chunk compartido `/_next/static/chunks/885-*.js` generado por el runtime de Next.js; se monitorea como advertencia (no rompe CI) y se documentan los hallazgos en este archivo cuando cambien los targets de navegador o el runtime de Next.js.
 
 ## Core Web Vitals
 

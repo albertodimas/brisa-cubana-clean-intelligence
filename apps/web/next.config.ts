@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
 
 const enableHsts = process.env.ENABLE_HSTS !== "false";
 
@@ -59,11 +61,51 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/_next/static/:path*",
+        headers: [
+          ...securityHeaders,
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/:path*",
         headers: securityHeaders,
       },
     ];
   },
+  async rewrites() {
+    const apiBase =
+      process.env.INTERNAL_API_URL ??
+      "https://api.brisacubanacleanintelligence.com";
+    const normalizedApiBase = apiBase.endsWith("/")
+      ? apiBase.slice(0, -1)
+      : apiBase;
+
+    return [
+      {
+        source: "/healthz",
+        destination: `${normalizedApiBase}/healthz`,
+      },
+      {
+        source: "/api/healthz",
+        destination: `${normalizedApiBase}/healthz`,
+      },
+    ];
+  },
 };
 
-export default nextConfig;
+const sentryWebpackPluginOptions = {
+  silent: true,
+  hideSourceMaps: true,
+};
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default withBundleAnalyzer(
+  withSentryConfig(nextConfig, sentryWebpackPluginOptions),
+);
