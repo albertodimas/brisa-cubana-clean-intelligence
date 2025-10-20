@@ -252,7 +252,7 @@ jobs:
         env:
           ENABLE_HSTS: ${{ inputs.run-lighthouse && 'false' || '' }}
           NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
-        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web ${{ inputs.run-e2e-suite != 'none' && '--force' || '' }}
 
       - name: Lighthouse CI
         if: ${{ inputs.run-lighthouse }}
