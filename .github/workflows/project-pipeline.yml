@@ -273,6 +273,7 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           CI: true
+          PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: "si"
         run: |
           case "${{ inputs.run-e2e-suite }}" in
             smoke) pnpm test:e2e:smoke ;;

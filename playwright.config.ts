@@ -98,6 +98,8 @@ export default defineConfig({
             LOGIN_RATE_LIMIT: loginRateLimit,
             LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
             ENABLE_TEST_UTILS: "true",
+            PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION:
+              process.env.PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION ?? "si",
             PORT: process.env.API_PORT ?? "3001",
           },
           timeout: 120_000,
