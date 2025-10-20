@@ -1,7 +1,9 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 17 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN)
+**Última actualización:** 20 de octubre de 2025
+**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ⚠️ Slack pendiente (alertas siguen por email)
+
+> Nota: Hasta configurar `SLACK_WEBHOOK_URL` en Vercel/GitHub, cualquier paso que redirija alertas a Slack permanece pendiente.
 
 ---
 
@@ -96,16 +98,16 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 
 - **Sentry Issue Alert – Checkout errores** (`checkout-payment-failed`):
   - Condición: ≥3 eventos `checkout.payment.failed` en 15 minutos.
-  - Acción: Notificación a Slack `#alerts-operaciones` mediante la app Sentry.
+  - Acción actual: email vía `notify_event` (Slack pendiente hasta configurar `SLACK_WEBHOOK_URL`).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:checkout-payment-failed` (registrado en 1Password «Sentry Alerts»).
 - **Sentry Issue Alert – Portal autoservicio** (`portal-booking-action-error`):
   - Condición: ≥3 eventos `portal.booking.action.error` en 10 minutos.
-  - Acción: Slack `#alerts-operaciones` + email a operaciones@brisacubanaclean.com.
+  - Acción actual: email a operaciones@brisacubanaclean.com (añadir Slack cuando esté disponible).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:portal-booking-action-error`.
 - **Sentry Cron Monitor – Nightly Full E2E** (`nightly-full-e2e-suite`):
   - Frecuencia esperada: diaria 02:00 UTC (workflow GitHub Actions `nightly.yml`).
-  - Acción: Slack `#alerts-operaciones` cuando la ejecución no se recibe en 3h.
-  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *" --slack #alerts-operaciones`.
+  - Acción actual: email por ausencia del run; editar monitor para Slack cuando se disponga del webhook.
+  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *"` (añadir `--slack #alerts-operaciones` tras integrar Slack).
 
 ---
 

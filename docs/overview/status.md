@@ -14,7 +14,7 @@
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Build en Vercel sin advertencias; variables de entorno configuradas en Development/Preview/Production.
+- Build en Vercel sin advertencias; variables de entorno (Sentry/PostHog/Stripe) configuradas en Development/Preview/Production; `SLACK_WEBHOOK_URL` pendiente de alta.
 - Sitio público `/` sirve la landing comercial (hero + CTA checkout/portal) ahora con secciones "Planes y precios", testimonios, FAQ interactiva y formulario de captura que persiste en `/api/leads`; todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
 - Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
