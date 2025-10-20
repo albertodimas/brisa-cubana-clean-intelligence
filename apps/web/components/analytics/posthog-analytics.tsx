@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import type { PostHog as PosthogLite } from "posthog-js-lite";
 
 const POSTHOG_KEY =
@@ -73,8 +73,6 @@ function createNoopClient(): PosthogClient {
 
 export function PostHogAnalytics() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const search = searchParams?.toString();
 
   useEffect(() => {
     if (isPostHogInitialized || shouldSkipAnalytics()) {
@@ -119,7 +117,13 @@ export function PostHogAnalytics() {
       return;
     }
 
+    // Capture search params at runtime to avoid Suspense issues
+    const search =
+      typeof window !== "undefined"
+        ? window.location.search.replace(/^\?/, "")
+        : "";
     const fullPath = search ? `${pathname}?${search}` : pathname;
+
     posthogClientPromise
       ?.then((client) => {
         client.capture("$pageview", {
@@ -129,7 +133,7 @@ export function PostHogAnalytics() {
       .catch((error) => {
         console.warn("PostHog capture failed", error);
       });
-  }, [pathname, search]);
+  }, [pathname]);
 
   return null;
 }
