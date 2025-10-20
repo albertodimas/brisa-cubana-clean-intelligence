@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import bundleAnalyzer from "@next/bundle-analyzer";
 
+// Force rebuild to invalidate Turbo cache after env var configuration fix
 const enableHsts = process.env.ENABLE_HSTS !== "false";
 
 const securityHeaders = [
