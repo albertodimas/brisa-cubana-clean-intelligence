@@ -87,11 +87,33 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
 - **Base de datos:** PostgreSQL Neon (17) con seed de usuarios, servicios, propiedades y reservas demo.
 - **Proxy interno:** La web reexpone `/api/*` hacia la API Hono vía `INTERNAL_API_URL`, evitando exponer secretos en el navegador.
 - **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API) y Web Vitals se envían a Sentry + Speed Insights para monitoreo continuo.
+- **Dominios:** consulta `docs/operations/domain-map.md` para alias activos, subdominios reservados y checklist DNS/env vars.
+- **Sync de variables:** pasos detallados en `docs/operations/env-sync.md` para alinear Vercel y GitHub Actions con los dominios oficiales.
+
+## Contacto oficial
+
+- Dirección: 511 SW 4th Ave, Miami, FL 33130
+- Teléfono: +1 (786) 436-7132
+- Emails:
+  - `admin@brisacubanacleanintelligence.com`
+  - `operaciones@brisacubanacleanintelligence.com`
+  - `soporte@brisacubanacleanintelligence.com`
+  - `ventas@brisacubanacleanintelligence.com`
+  - `facturacion@brisacubanacleanintelligence.com`
+  - `seguridad@brisacubanacleanintelligence.com`
+  - `devops@brisacubanacleanintelligence.com`
+  - `no-reply@brisacubanacleanintelligence.com` (automatizado)
+- Redes sociales:
+  - Instagram: https://instagram.com/BrisaCleanIntelligence
+  - Facebook: https://facebook.com/BrisaCleanIntelligence
+  - LinkedIn: https://www.linkedin.com/company/brisa-clean-intelligence
+  - TikTok: https://www.tiktok.com/@brisacleanintelligence
+  - YouTube: https://www.youtube.com/@BrisaCleanIntelligence
 
 ## Autenticación y RBAC
 
 - Login API (`POST /api/authentication/login`) con rate limiting configurable (`LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`).
-- Credenciales sembradas: `admin@brisacubanaclean.com / Brisa123!`, `ops@brisacubanaclean.com / Brisa123!`, `client@brisacubanaclean.com / Brisa123!`.
+- Credenciales sembradas: `admin@brisacubanacleanintelligence.com / Brisa123!`, `operaciones@brisacubanacleanintelligence.com / Brisa123!`, `cliente@brisacubanacleanintelligence.com / Brisa123!`.
 - Cookies HttpOnly gestionadas por Auth.js; el panel muestra la sesión activa y permite cerrar sesión con seguridad.
 - Endpoints protegidos (`/api/services`, `/api/properties`, `/api/bookings`, `/api/users`, `/api/customers`) exigen roles `ADMIN` o `COORDINATOR`.
 - `API_TOKEN` reservado para integraciones servidor-servidor (la UI no depende de él).
@@ -103,6 +125,7 @@ pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera ve
 - Estado y métricas: `docs/overview/status.md`.
 - Quickstart de desarrollo local: `docs/guides/quickstart.md`.
 - Operación del portal cliente: `docs/guides/portal-client.md`.
+- Brand voice & social media: `docs/marketing/brand-voice.md`.
 - Referencia API: `docs/reference/api-reference.md` + `docs/reference/openapi.yaml`.
 - Decisiones técnicas: `docs/decisions/dependency-updates.md`, `docs/decisions/tailwind-v4-deferral.md` y `docs/decisions/tailwind-v4-plan.md` (Issue #40).
 

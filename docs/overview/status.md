@@ -64,10 +64,10 @@
     - `Booking`: reservas con estado (`PENDING`, `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
   - Soft delete habilitado en todos los modelos (`deletedAt` + índice) usando `softDeleteExtension`.
   - Semilla genera:
-    - Usuarios demo: Admin, Coordinador, Cliente (`Brisa123!`).
-    - Servicios “Deep Clean Residencial”, “Turnover Vacation Rental”.
-    - Propiedad “Brickell Loft”.
-    - Reservas BRISA-0001, BRISA-0002.
+    - Usuarios demo: Laura Domínguez (ADMIN), Andrés Cabrera (COORDINATOR), Sofía Márquez (CLIENT) – password `Brisa123!`.
+    - Servicios “Turnover Premium Airbnb”, “Deep Clean Brickell Collection”, “Post-Construcción Boutique”, “Amenity Refresh Express”.
+    - Propiedades “Skyline Loft Brickell”, “Azure Villa Key Biscayne”.
+    - Reservas BRISA-0001, BRISA-0002, BRISA-0003 y notificaciones operativas asociadas.
 
 ---
 
@@ -139,9 +139,9 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 > **Credenciales demo:**
 >
-> - Admin: `admin@brisacubanaclean.com` / `Brisa123!`
-> - Coordinador: `ops@brisacubanaclean.com` / `Brisa123!`
-> - Cliente: `client@brisacubanaclean.com` / `Brisa123!`
+> - Admin: `admin@brisacubanacleanintelligence.com` / `Brisa123!`
+> - Coordinador: `operaciones@brisacubanacleanintelligence.com` / `Brisa123!`
+> - Cliente: `cliente@brisacubanacleanintelligence.com` / `Brisa123!`
 
 ---
 

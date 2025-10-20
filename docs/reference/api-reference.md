@@ -66,7 +66,7 @@ info:
   description: API para gestión de servicios de limpieza, reservas, propiedades y usuarios
   contact:
     name: Brisa Cubana Support
-    email: admin@brisacubanaclean.com
+    email: admin@brisacubanacleanintelligence.com
 ```
 
 ### 2. Servidores
@@ -176,7 +176,7 @@ security:
 curl -X POST https://brisa-cubana-clean-intelligence-api.vercel.app/api/authentication/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@brisacubanaclean.com",
+    "email": "admin@brisacubanacleanintelligence.com",
     "password": "Brisa123!"
   }'
 ```
@@ -188,7 +188,7 @@ curl -X POST https://brisa-cubana-clean-intelligence-api.vercel.app/api/authenti
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": "clxyz123456789",
-    "email": "admin@brisacubanaclean.com",
+    "email": "admin@brisacubanacleanintelligence.com",
     "fullName": "Admin User",
     "role": "ADMIN",
     "isActive": true

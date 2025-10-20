@@ -71,11 +71,16 @@ export default defineConfig({
           env: {
             NODE_ENV: "production",
             AUTH_SECRET: authSecret,
+            AUTH_COOKIE_SECURE: "false",
             NEXT_PUBLIC_API_URL: baseApiUrl,
+            NEXT_PUBLIC_BASE_URL:
+              process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
             NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
+            NEXTAUTH_URL:
+              process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             PORT: process.env.WEB_PORT ?? "3000",
           },
           timeout: 120_000,
@@ -114,11 +119,16 @@ export default defineConfig({
           env: {
             NODE_ENV: "production",
             AUTH_SECRET: authSecret,
+            AUTH_COOKIE_SECURE: "false",
             NEXT_PUBLIC_API_URL: baseApiUrl,
+            NEXT_PUBLIC_BASE_URL:
+              process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
             NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
+            NEXTAUTH_URL:
+              process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             PORT: process.env.WEB_PORT ?? "3000",
           },
           timeout: 120_000,

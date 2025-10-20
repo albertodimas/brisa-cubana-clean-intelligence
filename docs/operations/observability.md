@@ -102,7 +102,7 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:checkout-payment-failed` (registrado en 1Password «Sentry Alerts»).
 - **Sentry Issue Alert – Portal autoservicio** (`portal-booking-action-error`):
   - Condición: ≥3 eventos `portal.booking.action.error` en 10 minutos.
-  - Acción actual: email a operaciones@brisacubanaclean.com (webhook Slack disponible, pendiente de configurar en alerta).
+  - Acción actual: email a operaciones@brisacubanacleanintelligence.com (webhook Slack disponible, pendiente de configurar en alerta).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:portal-booking-action-error`.
 - **Sentry Cron Monitor – Nightly Full E2E** (`nightly-full-e2e-suite`):
   - Frecuencia esperada: diaria 02:00 UTC (workflow GitHub Actions `nightly.yml`).
@@ -377,7 +377,7 @@ Sigue el wizard para configurar:
 3. Crear reglas en **Project Settings → Alerts → Issue Alerts**:
    - **Portal booking action error:** condición `event.title contains "portal.booking.action.error"` con umbral ≥ 3 eventos en 15 min → Slack `#alerts-prod`.
    - **Checkout intent failures:** condición `event.title contains "checkout.intent.create"` o `payment_failed` → Slack `#alerts-prod`.
-4. Agregar notificación secundaria por correo al on-call (`operaciones@brisacubanaclean.com`) para redundancia.
+4. Agregar notificación secundaria por correo al on-call (`operaciones@brisacubanacleanintelligence.com`) para redundancia.
 5. Documentar en 1Password la URL del webhook y el responsable de rotación.
 
 ### 5.2 Alertas específicas por flujo
@@ -445,10 +445,10 @@ Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite 
      - `#brisa-alerts` (issues nuevos y regresiones).
      - `#brisa-performance` (latencia / rendimiento).
 2. **Crear reglas de issues**
-   - _When a new issue is created_ → Slack `#brisa-alerts`, email `ops@brisacubanaclean.com`.
+   - _When a new issue is created_ → Slack `#brisa-alerts`, email `operaciones@brisacubanacleanintelligence.com`.
    - _When issue state changes to regressed_ → Slack `#brisa-alerts`.
 3. **Crear alertas métricas**
-   - Error rate > 5 % (dataset Transactions, env Production) → Slack `#brisa-critical`, email `oncall@brisacubanaclean.com`.
+   - Error rate > 5 % (dataset Transactions, env Production) → Slack `#brisa-critical`, email `oncall@brisacubanacleanintelligence.com`.
    - Latencia P95 > 2000 ms (`transaction.op = http.server`) → Slack `#brisa-performance`.
    - `message:"notifications.stream.fallback"` ≥ 3 eventos / 5 min → Slack `#brisa-alerts`.
 4. **Validación**
@@ -478,7 +478,7 @@ Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite 
 
 ### 6.1 Endpoint de Health
 
-**URL:** `https://api.brisacubanaclean.com/api/health`
+**URL:** `https://api.brisacubanacleanintelligence.com/api/health`
 
 **Response exitoso:**
 
@@ -518,7 +518,7 @@ Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite 
 **Configuración UptimeRobot:**
 
 1. Monitor type: HTTP(s)
-2. URL: `https://api.brisacubanaclean.com/api/health`
+2. URL: `https://api.brisacubanacleanintelligence.com/api/health`
 3. Monitoring interval: 5 minutes
 4. Keyword: `"status":"pass"`
 5. Alert contacts: Email, Slack
@@ -545,7 +545,7 @@ vercel logs --since=30m
 vercel ls
 
 # 3. Verificar Neon status
-curl https://api.brisacubanaclean.com/api/health
+curl https://api.brisacubanacleanintelligence.com/api/health
 
 # 4. Verificar conexiones activas en Neon
 # Neon Console → Monitoring → Active connections

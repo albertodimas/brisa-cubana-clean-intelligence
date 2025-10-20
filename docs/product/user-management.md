@@ -404,7 +404,7 @@ apps/web/components/ui/
 Pasos:
 1. Admin → Panel de usuarios → Crear usuario
 2. Llenar formulario:
-   - Email: ops-nuevo@brisacubanaclean.com
+   - Email: operaciones-nuevo@brisacubanacleanintelligence.com
    - Nombre: María Rodríguez
    - Password: (temporal, cambiar en primer login)
    - Rol: COORDINATOR

@@ -1,0 +1,6 @@
+metric,value,formula
+Total Leads (all platforms),,=SUM(Results!F:F)
+Average Response Time (min),,=AVERAGEIF(Results!H:H,">0")
+IG Conversion Rate (leads/clicks),,=IFERROR(SUMIFS(Results!F:F,Results!C:C,"Instagram")/SUMIFS(Results!E:E,Results!C:C,"Instagram"),0)
+LinkedIn Conversion Rate (leads/clicks),,=IFERROR(SUMIFS(Results!F:F,Results!C:C,"LinkedIn")/SUMIFS(Results!E:E,Results!C:C,"LinkedIn"),0)
+Top Campaign (by leads),,=INDEX(SORT(QUERY(Results!J:J&"☃"&Results!F:F,"select Col1,sum(Col2) where Col1 is not null group by Col1",0),2,FALSE),1)

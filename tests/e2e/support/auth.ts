@@ -2,10 +2,11 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 import { createHash } from "node:crypto";
 
 export const adminEmail =
-  process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanaclean.com";
+  process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanacleanintelligence.com";
 export const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? "Brisa123!";
 export const coordinatorEmail =
-  process.env.E2E_COORDINATOR_EMAIL ?? "ops@brisacubanaclean.com";
+  process.env.E2E_COORDINATOR_EMAIL ??
+  "operaciones@brisacubanacleanintelligence.com";
 export const coordinatorPassword =
   process.env.E2E_COORDINATOR_PASSWORD ?? "Brisa123!";
 export const ADMIN_STORAGE_STATE_PATH =

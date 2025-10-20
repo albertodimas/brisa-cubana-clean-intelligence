@@ -39,6 +39,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | `brisacubanacleanintelligence.com`     | Web      | Landing + Checkout + Portal + Panel |
 | `www.brisacubanacleanintelligence.com` | Web      | Redirect 301 → dominio raíz         |
 | `api.brisacubanacleanintelligence.com` | API      | Backend Hono + Prisma               |
+| _Subdominios futuros_                  | —        | Ver [domain-map.md](domain-map.md)  |
 
 **Procedimiento recomendado**
 
@@ -46,6 +47,9 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 2. En el proyecto **API**, añade el dominio `api.brisacubanacleanintelligence.com` (Settings → Domains o `vercel domains add api.brisacubanacleanintelligence.com`) y, una vez disponible el deployment productivo deseado, asígnalo con `vercel alias set <deployment-url> api.brisacubanacleanintelligence.com`.
 3. Si administras el DNS fuera de Vercel, crea/actualiza el registro CNAME del subdominio para que apunte a `cname.vercel-dns.com`. Si usas Vercel DNS, no se requieren cambios adicionales.
 4. Verifica que la respuesta `GET https://api.brisacubanacleanintelligence.com/health` devuelva `200` antes de actualizar configuraciones (por ejemplo, `NEXT_PUBLIC_API_URL`) en web, GitHub y workflows.
+5. Revisa la guía [domain-map.md](domain-map.md) para asegurarte de que los subdominios reservados/quedados por configurar se mantengan sincronizados con DNS y Vercel.
+
+> **Env vars obligatorias:** tras aplicar un alias nuevo, confirma en Vercel → Settings → Environment Variables que `NEXT_PUBLIC_BASE_URL`, `NEXTAUTH_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL`, `INTERNAL_API_URL` y `PORTAL_MAGIC_LINK_BASE_URL` apuntan al dominio final. Replica los cambios en GitHub Actions si usas secretos espejo.
 
 ### Certificados SSL
 
@@ -200,7 +204,7 @@ Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook`
 | Check           | Descripción                                                                                                                                                                                       |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Health API      | `GET https://api.brisacubanacleanintelligence.com/health` devuelve `200` con estado `ok`.                                                                                                         |
-| Admin login     | Autenticación en https://brisacubanacleanintelligence.com/login con `admin@brisacubanaclean.com`.                                                                                                 |
+| Admin login     | Autenticación en https://brisacubanacleanintelligence.com/login con `admin@brisacubanacleanintelligence.com`.                                                                                     |
 | Lighthouse CI   | Ejecuta `pnpm exec lhci autorun --config=.lighthouserc.preview.json`; ignora solo las advertencias conocidas (`legacy-javascript`, `render-blocking-insight`, `network-dependency-tree-insight`). |
 | Robots/Sitemap  | `curl -I https://brisacubanacleanintelligence.com/robots.txt` y `.../sitemap.xml` → deben responder `200` sin redirecciones a `/login`.                                                           |
 | Panel operativo | CRUD de servicios/propiedades/reservas visible solo para roles autorizados.                                                                                                                       |
@@ -215,9 +219,9 @@ Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook`
 
 ## 7. Contactos
 
-- Product Owner: `product@brisacubanaclean.com`
-- DevOps Lead: `devops@brisacubanaclean.com`
-- Seguridad: `security@brisacubanaclean.com`
+- Product Owner: `product@brisacubanacleanintelligence.com`
+- DevOps Lead: `devops@brisacubanacleanintelligence.com`
+- Seguridad: `security@brisacubanacleanintelligence.com`
 
 > Mantén este documento sincronizado con cada cambio en pipelines o credenciales. Si un paso cambia, actualiza la tabla correspondiente y documenta el ajuste en el changelog.
 

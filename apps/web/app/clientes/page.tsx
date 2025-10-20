@@ -48,7 +48,7 @@ export default function PortalClientePage() {
               Solicitar un servicio demo
             </Link>
             <Link
-              href="mailto:operaciones@brisacubanaclean.com"
+              href="mailto:operaciones@brisacubanacleanintelligence.com"
               prefetch={false}
               className="inline-flex items-center justify-center rounded-full border border-brisa-500/50 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/50 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
             >

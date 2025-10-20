@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const CUSTOMER_EMAIL = "client@brisacubanaclean.com";
+const CUSTOMER_EMAIL = "cliente@brisacubanacleanintelligence.com";
 
 function toDatetimeLocal(date: Date): string {
   const pad = (value: number) => value.toString().padStart(2, "0");

@@ -58,7 +58,7 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
 
 1. Notifica en Slack `#alerts-operaciones` (menciona `@oncall-platform`).
 2. Abre issue en GitHub `incident/<YYYY-MM-DD>-<slug>` con plantilla (ver `docs/operations/incident-template.md`).
-3. Detén campañas pagadas si el checkout live permanece caído más de 15 minutos (Marketing contacto: marketing@brisacubanaclean.com).
+3. Detén campañas pagadas si el checkout live permanece caído más de 15 minutos (Marketing contacto: ventas@brisacubanacleanintelligence.com).
 4. Documenta mitigaciones y RCA dentro de 24h.
 
 ---

@@ -3,15 +3,25 @@ import type { NextRequest } from "next/server";
 import Credentials from "next-auth/providers/credentials";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const normalizedNextAuthUrl =
+  process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? "";
 const isProduction = process.env.NODE_ENV === "production";
-const sessionCookieName = isProduction
+const shouldUseSecureCookies =
+  process.env.AUTH_COOKIE_SECURE === "true" ||
+  (process.env.AUTH_COOKIE_SECURE !== "false" &&
+    isProduction &&
+    (process.env.VERCEL === "1" ||
+      normalizedNextAuthUrl.startsWith("https://")));
+const sessionCookieName = shouldUseSecureCookies
   ? "__Secure-authjs.session-token"
   : "authjs.session-token";
-const sessionCookieSameSite: "lax" | "strict" = isProduction ? "strict" : "lax";
+const sessionCookieSameSite: "lax" | "strict" = shouldUseSecureCookies
+  ? "strict"
+  : "lax";
 const sessionCookieOptions = {
   httpOnly: true,
   sameSite: sessionCookieSameSite,
-  secure: isProduction,
+  secure: shouldUseSecureCookies,
   path: "/",
 };
 

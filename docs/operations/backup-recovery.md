@@ -396,7 +396,7 @@ echo "✅ Verificación completada"
 
 2. **Canales:**
    - Slack: #incidents-prod
-   - Email: ops@brisacubanaclean.com
+   - Email: operaciones@brisacubanacleanintelligence.com
 
 3. **Soporte Neon:**
    - Email: support@neon.tech

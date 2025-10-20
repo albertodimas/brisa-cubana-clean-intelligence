@@ -6,6 +6,7 @@ import {
   ArrowPathIcon,
   ChatBubbleLeftRightIcon,
   ClipboardDocumentCheckIcon,
+  ArrowUpRightIcon,
 } from "@heroicons/react/24/outline";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
@@ -17,15 +18,22 @@ import { MarketingLink } from "@/components/landing/marketing-link";
 
 const testimonials = [
   {
-    quote: "Brisa Cubana nos salvó la agenda de check-ins en alta temporada.",
+    quote:
+      "Con Brisa Cubana dejamos de bloquear noches entre huéspedes. 0 sorpresas, 100 % check-ins felices.",
     author: "Ana",
     role: "Superhost · Brickell",
   },
   {
     quote:
-      "La inspección final y el reporte fotográfico nos dieron tranquilidad total.",
+      "La auditoría RFID y los reportes en el portal me ahorran visitas improvisadas. El equipo opera como si fuera propio.",
     author: "Carlos",
     role: "Propietario · Key Biscayne",
+  },
+  {
+    quote:
+      "Escalar de 5 a 40 unidades sin aumentar staff interno fue posible gracias a su logística 24/7 y Amenity Refresh Express.",
+    author: "Valeria",
+    role: "Property Manager · Coconut Grove",
   },
 ];
 
@@ -99,49 +107,84 @@ const processSteps = [
 const pricingTiers: PricingTier[] = [
   {
     id: "turnover",
-    name: "Turnover Vacation Rental",
-    headline: "Desde $139 por salida",
-    price: "$139+",
+    name: "Turnover Premium Airbnb",
+    headline: "Desde $209 por salida",
+    price: "$209+",
     priceSuffix: "por salida",
     description:
-      "Para anfitriones con turnovers constantes que necesitan checklist Airbnb y reposición de amenities.",
+      "Para anfitriones con turnovers frecuentes que exigen restocking completo, lavandería express y evidencia fotográfica en <4 h.",
     features: [
-      "Reposición completa de amenities y textiles",
-      "Checklist Airbnb Pro con evidencias fotográficas",
-      "Reporte posterior en portal cliente en menos de 6 horas",
-      "Supervisión en sitio durante alta ocupación",
+      "Reposición completa de amenities, textiles y welcome kit",
+      "Checklist Airbnb Pro con auditoría RFID de inventario",
+      "Reporte en portal cliente en menos de 4 horas",
+      "Supervisión on-site durante ventanas críticas",
     ],
   },
   {
     id: "deep-clean",
-    name: "Deep Clean Residencial",
-    headline: "Desde $189",
-    price: "$189+",
+    name: "Deep Clean Brickell Collection",
+    headline: "Desde $289",
+    price: "$289+",
     priceSuffix: "por servicio",
     description:
-      "Limpieza profunda para residencias y segundas propiedades con mantenimiento esporádico.",
+      "Ideal para residencias y segundas propiedades que requieren detailing premium, tratamiento antivaho y cuidado de superficies.",
     features: [
-      "Enfoque especial en cocina, baños y zonas de alto contacto",
-      "Equipos con insumos hipoalergénicos certificados EPA",
+      "Detallado premium de cocina, baños y textiles de lujo",
+      "Insumos hipoalergénicos certificados EPA",
       "Control de humedad y mantenimiento preventivo ligero",
       "Checklist digital con seguimiento de incidencias",
     ],
     highlighted: true,
   },
   {
-    id: "premium",
-    name: "Mantenimiento Premium",
-    headline: "Cotización personalizada",
-    price: "Bajo demanda",
-    priceSuffix: "según SLA",
+    id: "post-construction",
+    name: "Post-Construcción Boutique",
+    headline: "Desde $349",
+    price: "$349+",
+    priceSuffix: "por servicio",
     description:
-      "Portafolios de lujo y edificios con estándares cinco estrellas y servicios combinados.",
+      "Para entregas de penthouses y villas boutique tras obra o remodelación, con acabado de hotel cinco estrellas.",
     features: [
-      "Cuadrillas fijas con reemplazos garantizados 24/7",
-      "Integración con PMS (Guesty, Hostaway, ResNexus)",
-      "Mantenimiento preventivo y gestión de inventario premium",
-      "Alertas automáticas y reportes ejecutivos en portal",
+      "Pulido de superficies y eliminación de polvo de obra",
+      "Staging final con inspección fotográfica ejecutiva",
+      "Equipo especializado con certificaciones OSHA",
+      "Opcional: Amenity Refresh Express para back-to-back stays",
     ],
+  },
+];
+
+const socialLinks = [
+  {
+    name: "Instagram",
+    handle: "@BrisaCleanIntelligence",
+    href: "https://instagram.com/BrisaCleanIntelligence",
+    description:
+      "Historias y reels del equipo en acción, antes/después y backstage.",
+  },
+  {
+    name: "Facebook",
+    handle: "Brisa Clean Intelligence",
+    href: "https://facebook.com/BrisaCleanIntelligence",
+    description: "Casos completos, reseñas de clientes y anuncios dirigidos.",
+  },
+  {
+    name: "LinkedIn",
+    handle: "Brisa Clean Intelligence",
+    href: "https://www.linkedin.com/company/brisa-clean-intelligence",
+    description: "Insights operativos, alianzas B2B y noticias corporativas.",
+  },
+  {
+    name: "TikTok",
+    handle: "@BrisaCleanIntelligence",
+    href: "https://www.tiktok.com/@brisacleanintelligence",
+    description: "Timelapses, tips rápidos y retos de limpieza premium.",
+  },
+  {
+    name: "YouTube",
+    handle: "@BrisaCleanIntelligence",
+    href: "https://www.youtube.com/@BrisaCleanIntelligence",
+    description:
+      "Recorridos completos, testimonios extendidos y guías para hosts.",
   },
 ];
 
@@ -391,6 +434,45 @@ export default function LandingPage() {
           </MarketingLink>
         )}
       />
+
+      <section className="py-16 sm:py-20 bg-brisa-50 dark:bg-brisa-950/60">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-6">
+            Conecta con la operación en vivo
+          </h2>
+          <p className="max-w-3xl mx-auto text-center text-base sm:text-lg text-gray-600 dark:text-brisa-200">
+            Sigue nuestras cuadrillas, casos de éxito y tips diarios en redes.
+            Compartimos procesos, métricas y aprendizajes para anfitriones y
+            property managers premium.
+          </p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+            {socialLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-start justify-between rounded-3xl border border-brisa-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-brisa-300 hover:shadow-lg dark:border-brisa-900 dark:bg-brisa-950/80 dark:hover:border-brisa-700"
+              >
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-wide text-brisa-500 dark:text-brisa-300">
+                    {link.name}
+                  </p>
+                  <p className="mt-1 text-xl font-semibold text-gray-900 dark:text-brisa-50">
+                    {link.handle}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300 leading-relaxed">
+                    {link.description}
+                  </p>
+                </div>
+                <span className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brisa-200 text-brisa-600 transition group-hover:border-brisa-400 group-hover:text-brisa-500 dark:border-brisa-700 dark:text-brisa-200">
+                  <ArrowUpRightIcon className="h-5 w-5" aria-hidden />
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <FAQSection items={faqItems} />
 

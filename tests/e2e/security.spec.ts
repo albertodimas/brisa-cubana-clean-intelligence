@@ -1,11 +1,6 @@
 import { test, expect, request as playwrightRequest } from "@playwright/test";
 import type { TestInfo } from "@playwright/test";
-import {
-  adminEmail,
-  adminPassword,
-  ADMIN_STORAGE_STATE_PATH,
-  loginAsAdmin,
-} from "./support/auth";
+import { adminEmail, adminPassword, loginAsAdmin } from "./support/auth";
 
 function ipForTestNamespace(testInfo: TestInfo, namespace = 102): string {
   let hash = 0;
@@ -140,7 +135,7 @@ test.describe("Seguridad y Autenticación", () => {
       // Por ahora lo marcamos como ejemplo de test futuro
 
       // Login con usuario CLIENT (si tenemos credenciales)
-      const clientEmail = "client@brisacubanaclean.com";
+      const clientEmail = "cliente@brisacubanacleanintelligence.com";
       const clientPassword = adminPassword; // Mismo password en seed
 
       await page.goto("/login");

@@ -61,7 +61,7 @@ export function LoginForm({ action }: Props) {
           name="email"
           type="email"
           required
-          placeholder="admin@brisacubanaclean.com"
+          placeholder="admin@brisacubanacleanintelligence.com"
           style={inputStyle}
         />
       </div>

@@ -1,0 +1,98 @@
+# Sincronización de Variables de Entorno (Vercel & GitHub Actions)
+
+Este procedimiento asegura que los proyectos de Vercel y los workflows de GitHub usen los dominios y credenciales oficiales definidos en `docs/operations/domain-map.md`.
+
+## 1. Variables obligatorias
+
+| Variable                             | Proyecto(s)                             | Entornos             | Valor producción                               |
+| ------------------------------------ | --------------------------------------- | -------------------- | ---------------------------------------------- |
+| `NEXT_PUBLIC_BASE_URL`               | `brisa-cubana-clean-intelligence` (web) | dev / preview / prod | `https://brisacubanacleanintelligence.com`     |
+| `NEXTAUTH_URL`                       | Web                                     | dev / preview / prod | `https://brisacubanacleanintelligence.com`     |
+| `NEXT_PUBLIC_SITE_URL`               | Web                                     | dev / preview / prod | `https://brisacubanacleanintelligence.com`     |
+| `NEXT_PUBLIC_API_URL`                | Web                                     | dev / preview / prod | `https://api.brisacubanacleanintelligence.com` |
+| `INTERNAL_API_URL`                   | Web                                     | dev / preview / prod | `https://api.brisacubanacleanintelligence.com` |
+| `PORTAL_MAGIC_LINK_BASE_URL`         | API                                     | dev / preview / prod | `https://brisacubanacleanintelligence.com`     |
+| `SLACK_WEBHOOK_URL`                  | Web / API                               | dev / preview / prod | URL del webhook (Slack Alerts)                 |
+| `LEAD_WEBHOOK_URL`                   | Web                                     | dev / preview / prod | Endpoint CRM/automation                        |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Web                                     | dev / preview / prod | Clave Stripe live                              |
+| `STRIPE_SECRET_KEY`                  | API                                     | dev / preview / prod | Clave Stripe live                              |
+| `STRIPE_WEBHOOK_SECRET`              | API                                     | dev / preview / prod | Firma webhook Stripe                           |
+
+> ⚠️ Mantén los valores reales en 1Password. No commit de credenciales.
+
+## 2. Carga en Vercel (CLI)
+
+Ejecuta desde la raíz del repo (requiere login con `vercel login`):
+
+```bash
+# Selecciona proyecto web
+vercel link --project brisa-cubana-clean-intelligence
+
+# Set de variables (repite para cada entorno)
+for env in production preview development; do
+  vercel env add NEXT_PUBLIC_BASE_URL $env <<<"https://brisacubanacleanintelligence.com"
+  vercel env add NEXTAUTH_URL $env <<<"https://brisacubanacleanintelligence.com"
+  vercel env add NEXT_PUBLIC_SITE_URL $env <<<"https://brisacubanacleanintelligence.com"
+  vercel env add NEXT_PUBLIC_API_URL $env <<<"https://api.brisacubanacleanintelligence.com"
+  vercel env add INTERNAL_API_URL $env <<<"https://api.brisacubanacleanintelligence.com"
+done
+
+# Variables sensibles (introduce manualmente cada valor real)
+for env in production preview development; do
+  vercel env add SLACK_WEBHOOK_URL $env
+  vercel env add LEAD_WEBHOOK_URL $env
+  vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY $env
+done
+```
+
+Para el proyecto API:
+
+```bash
+vercel link --project brisa-cubana-clean-intelligence-api
+
+for env in production preview development; do
+  vercel env add PORTAL_MAGIC_LINK_BASE_URL $env <<<"https://brisacubanacleanintelligence.com"
+  vercel env add STRIPE_SECRET_KEY $env
+  vercel env add STRIPE_WEBHOOK_SECRET $env
+  vercel env add SLACK_WEBHOOK_URL $env
+done
+```
+
+> Los comandos con `<<<` rellenan valores constantes. Para secretos, deja que el CLI solicite la entrada (quedará oculta).
+
+### Verificación
+
+```bash
+vercel env ls --project brisa-cubana-clean-intelligence
+vercel env ls --project brisa-cubana-clean-intelligence-api
+```
+
+Confirma que cada clave aparece en los tres entornos.
+
+## 3. Sincronización con GitHub Actions
+
+Si los workflows consumen las mismas credenciales:
+
+```bash
+# Secrets por ambiente (production / preview / development)
+gh secret set NEXT_PUBLIC_API_URL --env production --body "https://api.brisacubanacleanintelligence.com"
+gh secret set NEXT_PUBLIC_BASE_URL --env production --body "https://brisacubanacleanintelligence.com"
+gh secret set PORTAL_MAGIC_LINK_BASE_URL --env production --body "https://brisacubanacleanintelligence.com"
+
+# Secretos sensibles (introduce valor cuando lo solicite)
+gh secret set STRIPE_SECRET_KEY --env production
+gh secret set STRIPE_WEBHOOK_SECRET --env production
+gh secret set SLACK_WEBHOOK_URL --env production
+```
+
+Repite para `preview` y `development` según necesidad. Asegura consistencia con Vercel.
+
+## 4. Checklist de validación
+
+- [ ] `curl -I https://brisacubanacleanintelligence.com` devuelve HSTS y responde 200.
+- [ ] `curl -I https://api.brisacubanacleanintelligence.com/health` devuelve 200.
+- [ ] `vercel env ls` muestra valores correctos para web y api.
+- [ ] Workflows en GitHub pasan con las variables sincronizadas.
+- [ ] Actualiza `docs/operations/domain-map.md` si hubiera cambios en dominios o integraciones.
+
+Guarda este documento como referencia antes de cada rotación de claves o alta de nuevos subdominios.

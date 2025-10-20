@@ -25,7 +25,7 @@ Este documento describe la configuración de alertas para monitoreo proactivo de
    - **Environment**: Production
    - **Then**: Send notification to:
      - Slack: #brisa-alerts
-     - Email: ops@brisacubanaclean.com
+     - Email: operaciones@brisacubanacleanintelligence.com
 
 **Severidad**: 🔴 Alta (responder en <15 minutos)
 
@@ -43,7 +43,7 @@ Condition:
   - Interval: 5 minutes
 Then:
   - Slack: #brisa-critical
-  - Email: admin@brisacubanaclean.com
+  - Email: admin@brisacubanacleanintelligence.com
   - PagerDuty: (opcional)
 ```
 
@@ -62,7 +62,7 @@ Condition:
   - Environment: production
 Then:
   - Slack: #brisa-alerts
-  - Email: dev-team@brisacubanaclean.com
+  - Email: devops@brisacubanacleanintelligence.com
 ```
 
 **Severidad**: 🟡 Media (revisar en <1 hora)
@@ -85,7 +85,7 @@ Metric Alert:
   For: 5 minutes
   Then:
     - Slack: #brisa-performance
-    - Email: ops@brisacubanaclean.com
+    - Email: operaciones@brisacubanacleanintelligence.com
 ```
 
 **Severidad**: 🟡 Media
@@ -105,7 +105,7 @@ Metric Alert:
   For: 5 minutes
   Then:
     - Slack: #brisa-critical
-    - Email: admin@brisacubanaclean.com
+    - Email: admin@brisacubanacleanintelligence.com
 ```
 
 **Severidad**: 🔴 Crítica
@@ -144,7 +144,7 @@ Metric Alert:
   For: 5 minutes
   Then:
     - Slack: #brisa-alerts
-    - Email: ops@brisacubanaclean.com
+    - Email: operaciones@brisacubanacleanintelligence.com
 ```
 
 **Severidad**: 🟡 Media (verificar que Vercel o SSE no estén bloqueados por proxies)
@@ -200,13 +200,13 @@ Link: https://sentry.io/...
 
 ### Destinatarios por Tipo de Alerta
 
-| Alerta           | Destinatarios                                        |
-| ---------------- | ---------------------------------------------------- |
-| Errores Críticos | admin@brisacubanaclean.com, ops@brisacubanaclean.com |
-| Nuevos Errores   | ops@brisacubanaclean.com                             |
-| Performance      | ops@brisacubanaclean.com                             |
-| Regresiones      | dev-team@brisacubanaclean.com                        |
-| Deploy Success   | ops@brisacubanaclean.com                             |
+| Alerta           | Destinatarios                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| Errores Críticos | admin@brisacubanacleanintelligence.com, operaciones@brisacubanacleanintelligence.com |
+| Nuevos Errores   | operaciones@brisacubanacleanintelligence.com                                         |
+| Performance      | operaciones@brisacubanacleanintelligence.com                                         |
+| Regresiones      | devops@brisacubanacleanintelligence.com                                              |
+| Deploy Success   | operaciones@brisacubanacleanintelligence.com                                         |
 
 ### Digest Diario
 

@@ -22,7 +22,8 @@ const DEFAULT_CONFIRMATION_PATH =
 const DEFAULT_PORTAL_BASE_URL =
   process.env.PORTAL_MAGIC_LINK_BASE_URL ??
   process.env.NEXT_PUBLIC_PORTAL_URL ??
-  "https://brisa-cubana-clean-intelligence.vercel.app";
+  process.env.NEXT_PUBLIC_BASE_URL ??
+  "https://brisacubanacleanintelligence.com";
 
 let transporter: Transporter | null = null;
 

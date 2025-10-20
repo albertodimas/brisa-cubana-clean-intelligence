@@ -110,7 +110,7 @@ export default function PortalAccessRequestPage() {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="cliente@brisacubanaclean.com"
+              placeholder="cliente@brisacubanacleanintelligence.com"
               className="rounded-full border border-gray-300 px-4 py-3 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
             />
           </label>

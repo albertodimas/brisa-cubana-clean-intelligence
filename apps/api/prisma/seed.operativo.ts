@@ -8,22 +8,22 @@ const PASSWORD_HASH =
 async function seedOperativo() {
   await Promise.all([
     prisma.user.upsert({
-      where: { email: "admin@brisacubanaclean.com" },
+      where: { email: "admin@brisacubanacleanintelligence.com" },
       update: {},
       create: {
-        email: "admin@brisacubanaclean.com",
-        fullName: "Admin Brisa",
+        email: "admin@brisacubanacleanintelligence.com",
+        fullName: "Laura Domínguez",
         role: UserRole.ADMIN,
         isActive: true,
         passwordHash: PASSWORD_HASH,
       },
     }),
     prisma.user.upsert({
-      where: { email: "ops@brisacubanaclean.com" },
+      where: { email: "operaciones@brisacubanacleanintelligence.com" },
       update: {},
       create: {
-        email: "ops@brisacubanaclean.com",
-        fullName: "Coordinadora Operaciones",
+        email: "operaciones@brisacubanacleanintelligence.com",
+        fullName: "Andrés Cabrera",
         role: UserRole.COORDINATOR,
         isActive: true,
         passwordHash: PASSWORD_HASH,

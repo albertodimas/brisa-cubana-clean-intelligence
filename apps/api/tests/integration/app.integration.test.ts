@@ -751,11 +751,15 @@ const mockPrisma = {
 
 const mockVerify = vi.fn((token: string) =>
   token === "jwt-admin"
-    ? { sub: makeCuid(102), email: "admin@brisacubanaclean.com", role: "ADMIN" }
+    ? {
+        sub: makeCuid(102),
+        email: "admin@brisacubanacleanintelligence.com",
+        role: "ADMIN",
+      }
     : token === "jwt-coordinator"
       ? {
           sub: makeCuid(103),
-          email: "ops@brisacubanaclean.com",
+          email: "operaciones@brisacubanacleanintelligence.com",
           role: "COORDINATOR",
         }
       : null,
@@ -800,10 +804,11 @@ describe("app", () => {
     servicesFixture = [
       {
         id: makeCuid(1),
-        name: "Deep Clean Residencial",
-        description: "Limpieza profunda",
-        basePrice: 220,
-        durationMin: 180,
+        name: "Turnover Premium Airbnb",
+        description:
+          "Cambio integral entre huéspedes con restocking completo y reporte fotográfico en menos de 4 horas.",
+        basePrice: 209,
+        durationMin: 160,
         active: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -811,11 +816,36 @@ describe("app", () => {
       },
       {
         id: makeCuid(2),
-        name: "Move-In/Move-Out",
-        description: "Limpieza para mudanzas",
-        basePrice: 350,
+        name: "Deep Clean Brickell Collection",
+        description:
+          "Limpieza profunda con detailing premium y tratamiento antivaho.",
+        basePrice: 289,
+        durationMin: 210,
+        active: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      },
+      {
+        id: makeCuid(3),
+        name: "Post-Construcción Boutique",
+        description:
+          "Limpieza fina post obra con pulido de superficies y staging final.",
+        basePrice: 349,
         durationMin: 240,
         active: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      },
+      {
+        id: makeCuid(4),
+        name: "Amenity Refresh Express",
+        description:
+          "Reposición rápida entre estancias back-to-back y checklist de decoración.",
+        basePrice: 129,
+        durationMin: 90,
+        active: true,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
@@ -824,7 +854,7 @@ describe("app", () => {
     usersFixture = [
       {
         id: makeCuid(101),
-        fullName: "Cliente Piloto",
+        fullName: "Sofía Márquez",
         email: "client@test.com",
         passwordHash: "$2a$10$hashed",
         role: "CLIENT",
@@ -833,8 +863,8 @@ describe("app", () => {
       },
       {
         id: makeCuid(102),
-        fullName: "Admin Brisa",
-        email: "admin@brisacubanaclean.com",
+        fullName: "Laura Domínguez",
+        email: "admin@brisacubanacleanintelligence.com",
         passwordHash: "$2a$10$hashed",
         role: "ADMIN",
         isActive: true,
@@ -842,8 +872,8 @@ describe("app", () => {
       },
       {
         id: makeCuid(103),
-        fullName: "Coordinador",
-        email: "ops@brisacubanaclean.com",
+        fullName: "Andrés Cabrera",
+        email: "operaciones@brisacubanacleanintelligence.com",
         passwordHash: "$2a$10$hashed",
         role: "COORDINATOR",
         isActive: true,
@@ -851,7 +881,7 @@ describe("app", () => {
       },
       {
         id: makeCuid(104),
-        fullName: "Staff Operaciones",
+        fullName: "Equipo Operaciones",
         email: "staff@test.com",
         passwordHash: "$2a$10$hashed",
         role: "STAFF",
@@ -862,25 +892,25 @@ describe("app", () => {
     propertiesFixture = [
       {
         id: makeCuid(201),
-        label: "Brickell Loft",
+        label: "Skyline Loft Brickell",
         city: "Miami",
-        ownerId: makeCuid(101),
+        ownerId: usersFixture[0].id,
         addressLine: "120 SW 8th St",
         state: "FL",
         zipCode: "33130",
-        type: "RESIDENTIAL",
+        type: "VACATION_RENTAL",
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
         deletedAt: null,
       },
       {
         id: makeCuid(202),
-        label: "Coral Gables House",
-        city: "Miami",
-        ownerId: makeCuid(101),
-        addressLine: "400 Sevilla Ave",
+        label: "Azure Villa Key Biscayne",
+        city: "Key Biscayne",
+        ownerId: usersFixture[0].id,
+        addressLine: "745 Harbor Dr",
         state: "FL",
-        zipCode: "33134",
+        zipCode: "33149",
         type: "VACATION_RENTAL",
         createdAt: new Date("2024-02-01"),
         updatedAt: new Date("2024-02-01"),
@@ -890,7 +920,7 @@ describe("app", () => {
         id: makeCuid(203),
         label: "Downtown Office Suite",
         city: "Orlando",
-        ownerId: makeCuid(101),
+        ownerId: usersFixture[0].id,
         addressLine: "1 Orlando Center",
         state: "FL",
         zipCode: "32801",
@@ -903,15 +933,32 @@ describe("app", () => {
     bookingsFixture = [
       {
         id: "booking_fixture_1",
-        code: "BRISA-DEMO",
-        scheduledAt: new Date("2024-10-01T10:00:00Z"),
-        durationMin: 120,
-        notes: null,
+        code: "BRISA-0001",
+        scheduledAt: new Date("2025-10-21T13:30:00Z"),
+        durationMin: 160,
+        notes:
+          "Stock de amenities ‘Signature Citrus’. Revisar sensor de humedad en master bedroom.",
         status: "CONFIRMED",
-        totalAmount: 220,
+        totalAmount: 209,
         customerId: usersFixture[0].id,
         propertyId: propertiesFixture[0].id,
         serviceId: servicesFixture[0].id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      },
+      {
+        id: "booking_fixture_2",
+        code: "BRISA-0003",
+        scheduledAt: new Date("2025-10-22T18:00:00Z"),
+        durationMin: 90,
+        notes:
+          "Back-to-back stay. Reponer welcome kit y staging del patio exterior.",
+        status: "CONFIRMED",
+        totalAmount: 129,
+        customerId: usersFixture[0].id,
+        propertyId: propertiesFixture[1].id,
+        serviceId: servicesFixture[3].id,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
@@ -922,7 +969,8 @@ describe("app", () => {
         id: makeCuid(900),
         userId: usersFixture[1].id,
         type: "BOOKING_CREATED",
-        message: "Nueva reserva confirmada para Brickell Loft",
+        message:
+          "Se agendó BRISA-0003 – Amenity Refresh Express en Azure Villa Key Biscayne.",
         readAt: null,
         createdAt: new Date("2025-10-15T09:00:00Z"),
       },
@@ -930,15 +978,17 @@ describe("app", () => {
         id: makeCuid(901),
         userId: usersFixture[1].id,
         type: "SERVICE_UPDATED",
-        message: "El servicio Deep Clean Residencial fue actualizado",
+        message:
+          "El servicio Turnover Premium Airbnb ahora incluye auditoría de inventario con RFID.",
         readAt: new Date("2025-10-14T15:00:00Z"),
         createdAt: new Date("2025-10-14T12:00:00Z"),
       },
       {
         id: makeCuid(902),
         userId: usersFixture[2].id,
-        type: "BOOKING_CANCELLED",
-        message: "Reserva BRISA-DEMO cancelada por el cliente",
+        type: "BOOKING_RESCHEDULED",
+        message:
+          "Alerta: cliente reporta humedad en baño de visitas (Skyline Loft Brickell) – coordinar inspección preventiva.",
         readAt: null,
         createdAt: new Date("2025-10-13T08:00:00Z"),
       },
@@ -1133,13 +1183,13 @@ describe("app", () => {
 
   it("filters properties by search and type", async () => {
     const res = await app.request(
-      "/api/properties?search=miami&type=VACATION_RENTAL",
+      "/api/properties?search=biscayne&type=VACATION_RENTAL",
     );
     expect(res.status).toBe(200);
     const json = await res.json();
 
     expect(json.data).toHaveLength(1);
-    expect(json.data[0].label).toBe("Coral Gables House");
+    expect(json.data[0].label).toBe("Azure Villa Key Biscayne");
   });
 
   it("navigates properties pagination with cursor", async () => {
@@ -1186,8 +1236,8 @@ describe("app", () => {
   });
 
   it("filters bookings by date range", async () => {
-    const from = new Date("2024-09-30T00:00:00Z").toISOString();
-    const to = new Date("2024-10-02T23:59:59Z").toISOString();
+    const from = new Date("2025-10-20T00:00:00Z").toISOString();
+    const to = new Date("2025-10-23T23:59:59Z").toISOString();
     const res = await app.request(
       `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
     );
@@ -1197,11 +1247,11 @@ describe("app", () => {
   });
 
   it("searches bookings by code", async () => {
-    const res = await app.request("/api/bookings?search=BRISA-DEMO");
+    const res = await app.request("/api/bookings?search=BRISA-0001");
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data).toHaveLength(1);
-    expect(json.data[0].code).toBe("BRISA-DEMO");
+    expect(json.data[0].code).toBe("BRISA-0001");
   });
 
   it("returns empty bookings when search mismatches", async () => {
@@ -1448,7 +1498,7 @@ describe("app", () => {
   });
 
   it("filters customers by search term", async () => {
-    const res = await app.request("/api/customers?search=cliente", {
+    const res = await app.request("/api/customers?search=client", {
       headers: authorizedHeaders,
     });
 
@@ -1733,14 +1783,14 @@ describe("app", () => {
     const res = await app.request("/api/authentication/login", {
       method: "POST",
       body: JSON.stringify({
-        email: "admin@brisacubanaclean.com",
+        email: "admin@brisacubanacleanintelligence.com",
         password: "Brisa123!",
       }),
     });
 
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.data.email).toBe("admin@brisacubanaclean.com");
+    expect(json.data.email).toBe("admin@brisacubanacleanintelligence.com");
     expect(json.token).toBe("jwt-admin");
     expect(mockSign).toHaveBeenCalled();
   });
@@ -1773,7 +1823,7 @@ describe("app", () => {
       const res = await app.request("/api/authentication/login", {
         method: "POST",
         body: JSON.stringify({
-          email: "unknown@brisacubanaclean.com",
+          email: "unknown@brisacubanacleanintelligence.com",
           password: "WrongPass!",
         }),
       });
@@ -1783,7 +1833,7 @@ describe("app", () => {
     const blocked = await app.request("/api/authentication/login", {
       method: "POST",
       body: JSON.stringify({
-        email: "unknown@brisacubanaclean.com",
+        email: "unknown@brisacubanacleanintelligence.com",
         password: "WrongPass!",
       }),
     });
@@ -1801,7 +1851,7 @@ describe("app", () => {
     const res = await app.request("/api/authentication/login", {
       method: "POST",
       body: JSON.stringify({
-        email: "admin@brisacubanaclean.com",
+        email: "admin@brisacubanacleanintelligence.com",
         password: "WrongPwd!",
       }),
     });
@@ -1881,7 +1931,7 @@ describe("app", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "admin@brisacubanaclean.com",
+          email: "admin@brisacubanacleanintelligence.com",
           password: "Brisa123!",
         }),
       });

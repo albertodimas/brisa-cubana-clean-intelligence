@@ -81,7 +81,7 @@ export async function createUserFixture(
   const accessToken = await getAdminAccessToken(request);
   const email =
     overrides.email ??
-    `qa-user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@brisacubanaclean.com`;
+    `qa-user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@brisacubanacleanintelligence.com`;
   const password = overrides.password ?? "Brisa123!";
   const fullName = overrides.fullName ?? "QA Notifications";
   const role = overrides.role ?? "ADMIN";

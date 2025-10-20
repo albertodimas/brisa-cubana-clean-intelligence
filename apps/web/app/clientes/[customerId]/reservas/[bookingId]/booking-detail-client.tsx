@@ -156,7 +156,7 @@ export function PortalBookingDetailClient({
     return items;
   }, [booking]);
 
-  const supportEmail = "soporte@brisacubanaclean.com";
+  const supportEmail = "soporte@brisacubanacleanintelligence.com";
 
   return (
     <div className="space-y-8">

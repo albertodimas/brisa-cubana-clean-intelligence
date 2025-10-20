@@ -101,7 +101,7 @@ Cada componente debe:
 
 - Portal accesible en `/clientes` con formulario de acceso por enlace mágico y dashboard funcional.
 - Acciones implementadas: reagendar, cancelar, ver detalle y cerrar sesión (ver `docs/guides/portal-client.md` para operación).
-- Seeds demo exponen reservas de prueba (`prisma/seed.demo.ts`) para `client@brisacubanaclean.com`.
+- Seeds demo exponen reservas de prueba (`prisma/seed.demo.ts`) para `cliente@brisacubanacleanintelligence.com`.
 - Tests Playwright críticos automatizan el flujo end-to-end (`tests/e2e/portal-client.spec.ts`).
 
 ### 8.2 Requerimientos MVP

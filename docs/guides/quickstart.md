@@ -35,7 +35,7 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    # STRIPE_PUBLISHABLE_KEY="pk_test_..."
    # STRIPE_WEBHOOK_SECRET="whsec_..."
    # MAGIC_LINK_TTL_MINUTES="15"  # Tiempo de vida de enlaces mágicos para el portal cliente
-   # PORTAL_MAGIC_LINK_FROM="Brisa Cubana <no-reply@brisacubanaclean.com>"
+   # PORTAL_MAGIC_LINK_FROM="Brisa Cubana <no-reply@brisacubanacleanintelligence.com>"
    # PORTAL_MAGIC_LINK_SMTP_HOST="smtp.mailtrap.io"
    # PORTAL_MAGIC_LINK_SMTP_PORT="587"
    # PORTAL_MAGIC_LINK_SMTP_USER="smtp-user"
@@ -73,11 +73,11 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
 
 ## Credenciales sembradas
 
-| Rol          | Usuario                       | Contraseña  |
-| ------------ | ----------------------------- | ----------- |
-| Admin        | `admin@brisacubanaclean.com`  | `Brisa123!` |
-| Coordinador  | `ops@brisacubanaclean.com`    | `Brisa123!` |
-| Cliente demo | `client@brisacubanaclean.com` | `Brisa123!` |
+| Rol          | Usuario                                        | Contraseña  |
+| ------------ | ---------------------------------------------- | ----------- |
+| Admin        | `admin@brisacubanacleanintelligence.com`       | `Brisa123!` |
+| Coordinador  | `operaciones@brisacubanacleanintelligence.com` | `Brisa123!` |
+| Cliente demo | `cliente@brisacubanacleanintelligence.com`     | `Brisa123!` |
 
 ## Scripts de calidad
 
@@ -95,7 +95,7 @@ pnpm build       # Compila Next.js y API
 
 1. Accede a <http://localhost:3000/login> y autentícate con un usuario `ADMIN` o `COORDINATOR`.
 2. El panel operativo permitirá crear servicios, propiedades y reservas usando las APIs reales.
-3. Para el portal cliente, visita <http://localhost:3000/clientes/acceso>, solicita un enlace mágico con `client@brisacubanaclean.com` y usa el token de debug que se muestra (solo en beta) para confirmar el acceso en <http://localhost:3000/clientes/acceso/confirmar?token=...>.
+3. Para el portal cliente, visita <http://localhost:3000/clientes/acceso>, solicita un enlace mágico con `cliente@brisacubanacleanintelligence.com` y usa el token de debug que se muestra (solo en beta) para confirmar el acceso en <http://localhost:3000/clientes/acceso/confirmar?token=...>.
 4. Para validar pagos de prueba, visita <http://localhost:3000/checkout> con las claves modo test de Stripe y usa tarjetas demo (`4242 4242 4242 4242`) antes de activar modo live.
 
 ## Problemas comunes

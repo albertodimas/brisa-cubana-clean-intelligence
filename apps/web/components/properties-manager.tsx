@@ -201,7 +201,7 @@ export function PropertiesManager({
           <input
             name="propertyLabel"
             required
-            placeholder="Ej. Brickell Loft"
+            placeholder="Ej. Skyline Loft Brickell"
             className="ui-input"
           />
         </label>

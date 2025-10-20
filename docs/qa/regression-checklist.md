@@ -250,9 +250,9 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 
 - [ ] `pnpm db:seed` crea usuarios demo
 - [ ] Usuarios demo tienen passwords hasheados con bcrypt
-- [ ] Se crean servicios demo (Deep Clean, Turnover)
-- [ ] Se crea propiedad demo (Brickell Loft)
-- [ ] Se crean reservas demo (BRISA-0001, BRISA-0002)
+- [ ] Se crean servicios demo (Turnover Premium, Deep Clean Brickell, Post-Construcción, Amenity Refresh)
+- [ ] Se crean propiedades demo (Skyline Loft Brickell, Azure Villa Key Biscayne)
+- [ ] Se crean reservas demo (BRISA-0001, BRISA-0002, BRISA-0003)
 - [ ] Seed es idempotente (no falla si datos existen)
 
 ---
@@ -291,7 +291,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 ### 8.5 Portal cliente (beta)
 
 - [ ] `/clientes` muestra hero, CTA dual y tarjetas de valor actualizadas.
-- [ ] `/clientes/[customerId]` renderiza métricas, tarjetas de reservas y timeline para `client@brisacubanaclean.com`.
+- [ ] `/clientes/[customerId]` renderiza métricas, tarjetas de reservas y timeline para `cliente@brisacubanacleanintelligence.com`.
 - [ ] `POST /api/portal/auth/request` devuelve 200 y `debugToken` con un correo válido registrado.
 - [ ] `POST /api/portal/auth/verify` entrega `portalToken` cuando el token es válido.
 - [ ] Token expirado o reutilizado devuelve 400.

@@ -42,7 +42,7 @@ export const authenticate: MiddlewareHandler = async (c, next) => {
   if (token && API_TOKEN && token === API_TOKEN) {
     c.set("authUser", {
       id: "service-account",
-      email: "service@brisacubanaclean.com",
+      email: "no-reply@brisacubanacleanintelligence.com",
       role: "ADMIN",
       kind: "service",
     });

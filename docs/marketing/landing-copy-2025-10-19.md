@@ -9,9 +9,9 @@
 
 ## Sección Planes y precios
 
-1. **Turnover Vacation Rental** – Desde $139 por salida. Incluye reposición de amenities, checklist Airbnb pro y reporte fotográfico.
-2. **Deep Clean Residencial** – Desde $189. Limpieza profunda de cocina, baños y zonas de alto contacto.
-3. **Mantenimiento Premium** – Quote bajo demanda (edificios + propiedades de lujo).
+1. **Turnover Premium Airbnb** – Desde $209 por salida. Restocking completo, lavandería express y reporte fotográfico en <4 horas.
+2. **Deep Clean Brickell Collection** – Desde $289. Detailing premium, tratamiento antivaho y control de inventario.
+3. **Post-Construcción Boutique** – Desde $349. Limpieza fina tras remodelación con pulido de superficies y staging final.
 
 ## Testimonios
 

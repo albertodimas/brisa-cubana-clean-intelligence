@@ -17,7 +17,7 @@ export const openApiSpec = {
       "API para gestión de servicios de limpieza, reservas, propiedades y usuarios",
     contact: {
       name: "Brisa Cubana Support",
-      email: "admin@brisacubanaclean.com",
+      email: "admin@brisacubanacleanintelligence.com",
     },
   },
   servers: [
@@ -1169,7 +1169,7 @@ export const openApiSpec = {
           email: {
             type: "string",
             format: "email",
-            example: "admin@brisacubanaclean.com",
+            example: "admin@brisacubanacleanintelligence.com",
           },
           password: {
             type: "string",
@@ -1232,7 +1232,8 @@ export const openApiSpec = {
           },
           message: {
             type: "string",
-            example: "Se creó una nueva reserva para Brickell Loft",
+            example:
+              "Se agendó BRISA-0003 – Amenity Refresh Express en Azure Villa Key Biscayne.",
           },
           readAt: {
             type: "string",
@@ -1368,7 +1369,7 @@ export const openApiSpec = {
           email: {
             type: "string",
             format: "email",
-            example: "client@brisacubanaclean.com",
+            example: "cliente@brisacubanacleanintelligence.com",
           },
         },
       },

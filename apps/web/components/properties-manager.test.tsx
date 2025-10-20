@@ -38,7 +38,7 @@ const pageInfo: PaginationInfo = {
 
 const baseProperty: Property = {
   id: "prop-1",
-  label: "Brickell Loft",
+  label: "Skyline Loft Brickell",
   addressLine: "123 Main St",
   city: "Miami",
   state: "FL",

@@ -42,7 +42,7 @@ const sampleBooking = {
   },
   property: {
     id: "prop-1",
-    label: "Brickell Loft",
+    label: "Skyline Loft Brickell",
     city: "Miami",
   },
   customerId: "user-1",

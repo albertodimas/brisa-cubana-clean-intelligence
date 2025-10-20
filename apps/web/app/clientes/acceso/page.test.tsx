@@ -29,7 +29,7 @@ describe("PortalAccessRequestPage", () => {
     render(<PortalAccessRequestPage />);
 
     const emailField = screen.getByPlaceholderText(
-      "cliente@brisacubanaclean.com",
+      "cliente@brisacubanacleanintelligence.com",
     );
     await userEvent.type(emailField, "client@portal.test");
     await userEvent.click(screen.getByRole("button", { name: /enviar/i }));
@@ -58,7 +58,7 @@ describe("PortalAccessRequestPage", () => {
     render(<PortalAccessRequestPage />);
 
     const emailField = screen.getByPlaceholderText(
-      "cliente@brisacubanaclean.com",
+      "cliente@brisacubanacleanintelligence.com",
     );
     await userEvent.type(emailField, "client@portal.test");
     await userEvent.click(screen.getByRole("button", { name: /enviar/i }));

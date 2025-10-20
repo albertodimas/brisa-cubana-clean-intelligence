@@ -444,9 +444,9 @@ export function PortalDashboardClient({ initialData }: Props) {
                 Si necesitas agendar un servicio urgente, escribe a{" "}
                 <a
                   className="font-semibold underline underline-offset-4"
-                  href="mailto:soporte@brisacubanaclean.com"
+                  href="mailto:soporte@brisacubanacleanintelligence.com"
                 >
-                  soporte@brisacubanaclean.com
+                  soporte@brisacubanacleanintelligence.com
                 </a>{" "}
                 o utiliza el checkout público.
               </p>
@@ -583,7 +583,7 @@ export function PortalDashboardClient({ initialData }: Props) {
         action={
           <Link
             className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-            href="mailto:soporte@brisacubanaclean.com"
+            href="mailto:soporte@brisacubanacleanintelligence.com"
           >
             Escribir a soporte →
           </Link>

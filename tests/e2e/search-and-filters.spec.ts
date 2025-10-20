@@ -83,7 +83,7 @@ test.describe.serial("Búsquedas y filtros", () => {
       .count();
     expect(coordinatorRows).toBe(totalRows);
     await expect(
-      rows.first().getByText("ops@brisacubanaclean.com"),
+      rows.first().getByText("operaciones@brisacubanacleanintelligence.com"),
     ).toBeVisible();
     await expect(page.getByText("Rol: COORDINATOR")).toBeVisible();
   });

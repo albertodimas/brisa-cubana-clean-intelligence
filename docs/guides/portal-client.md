@@ -26,7 +26,7 @@ Esta guía describe cómo habilitar, verificar y operar el portal de autoservici
 Variables mínimas:
 
 ```dotenv
-PORTAL_MAGIC_LINK_FROM="Brisa Cubana <no-reply@brisacubanaclean.com>"
+PORTAL_MAGIC_LINK_FROM="Brisa Cubana <no-reply@brisacubanacleanintelligence.com>"
 PORTAL_MAGIC_LINK_SMTP_HOST="smtp.mailtrap.io"
 PORTAL_MAGIC_LINK_SMTP_PORT="587"
 PORTAL_MAGIC_LINK_SMTP_USER="smtp-user"
@@ -48,7 +48,7 @@ PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"
 5. La API devuelve cookies de sesión (`portal_token`, `portal_customer_id`) y vencimiento `expiresAt`.
 6. El frontend redirige a `/clientes/[customerId]` mostrando dashboard con reservas.
 
-> QA local: usa `client@brisacubanaclean.com`, captura `debugToken` del response y navega a `/clientes/acceso/confirmar?token=...`.
+> QA local: usa `cliente@brisacubanacleanintelligence.com`, captura `debugToken` del response y navega a `/clientes/acceso/confirmar?token=...`.
 
 ---
 
@@ -90,7 +90,7 @@ PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"
 ## 6. QA y evidencias
 
 - **CTest automatizado:** `tests/e2e/portal-client.spec.ts` (suite @critical). Ejecutar con `pnpm test:e2e:critical`.
-- **Seeds dependientes:** `prisma/seed.demo.ts` crea reservas demo para el cliente `client@brisacubanaclean.com`.
+- **Seeds dependientes:** `prisma/seed.demo.ts` crea reservas demo para el cliente `cliente@brisacubanacleanintelligence.com`.
 - **Manual QA:** agregar resultados y capturas en `docs/qa/regression-checklist.md` sección 8 (Portal cliente).
 
 Checklist previo a habilitar cambios en producción:

@@ -2,7 +2,7 @@
 
 ## Reportar vulnerabilidades
 
-- **Correo primario:** seguridad@brisacubanaclean.com
+- **Correo primario:** seguridad@brisacubanacleanintelligence.com
 - **Alternativa:** abrir un reporte privado en GitHub Security Advisories (Security → Report a vulnerability).
 - **Clave PGP (opcional):** solicitar fingerprint en el correo primario para intercambio cifrado.
 
