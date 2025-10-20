@@ -81,6 +81,14 @@ https://62f6df73f4e95ea1748c4718abeefdb1@o4509669004541952.ingest.us.sentry.io/4
    - Variable de Slack Webhook
    - Comentarios con valores de producción
 
+### 5. Alertas de Sentry configuradas (email)
+
+- Se crearon reglas básicas en ambos proyectos para:
+  - **Spike de errores** (10/min para Web, 20/min para API)
+  - **Nuevo issue** (Web y API)
+- Acciones actuales: notificación por correo usando el canal legacy (`notify_event`).
+- Una vez disponible el webhook de Slack se recomienda añadir la acción adicional vía Sentry UI.
+
 ---
 
 ## ⏳ Acciones Pendientes (REQUIERE EQUIPO)

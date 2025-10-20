@@ -13,6 +13,7 @@
   - `brisa-cubana-api` (Node.js/Hono)
 - ✅ **DSN configurados**
 - ✅ **Auth tokens generados**
+- ✅ **Reglas de alerta por correo** (spike de errores y nuevos issues en ambos proyectos)
 - ✅ **Documentación completa** en `docs/operations/observability-setup.md`
 
 ---
@@ -21,7 +22,7 @@
 
 ### 1️⃣ Crear Webhook de Slack (5 minutos)
 
-**Objetivo:** Recibir alertas de errores en Slack
+**Objetivo:** Recibir alertas de errores críticos en Slack (además de correo)
 
 **Pasos:**
 

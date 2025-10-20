@@ -8,28 +8,29 @@
 "title": "Observabilidad y performance",
 "tasks": [
 "Monitorear advertencia `legacy-javascript` (ver docs/tech-debt/legacy-chunk-885.md); probar upgrade de Next.js cuando haya release que elimine el chunk 885.",
-"Instrumentar alertas PostHog (dashboard funnel-fase2 + webhook Slack) según docs/product/analytics-decision.md (pendiente login en CLI)."
+"Completar integración Slack (Incoming Webhook) y conectar alertas de Sentry/PostHog.",
+"Publicar dashboard PostHog con KPIs y enlazarlo en docs/product/analytics-decision.md."
 ]
 },
 {
 "title": "CI/CD y seguridad",
 "tasks": [
 "Crear alerta en GitHub Actions/Nightly para fallos recurrentes de Lighthouse budgets.",
-"\u00bfAutomatizar validaci\u00f3n de robots.txt & sitemap en CI (curl) para evitar regresiones."
+"Automatizar validación de robots.txt & sitemap en CI (curl) para evitar regresiones (en progreso con scripts/verify-lhci-warnings.sh)."
 ]
 },
 {
 "title": "Experiencia de usuario",
 "tasks": [
-"Optimizar chunk 885 (revisar bundling de Next runtime, tree-shake libs) o abrir issue para actualizaci\u00f3n a runtime moderno.",
-"Cross-check flujos Portal/Checkout con QA manual guiado (docs/qa/regression-checklist.md) tras la migraci\u00f3n analytics."
+"Optimizar chunk 885 (revisar bundling de Next runtime, tree-shake libs) o abrir issue para actualización a runtime moderno.",
+"Cross-check flujos Portal/Checkout con QA manual guiado (docs/qa/regression-checklist.md) tras la migración analytics."
 ]
 },
 {
-"title": "Documentaci\u00f3n",
+"title": "Documentación",
 "tasks": [
-"Actualizar docs/operations/observability.md con el flujo de bypass `/?lhci=1` y nueva ruta `robots.ts`.",
-"Agregar resumen del nuevo pipeline Lighthouse en CHANGELOG.md (pr\u00f3ximo release)."
+"Registrar playbook de incidentes (quién, qué y cómo escalar) en docs/operations/observability-setup.md / docs/operations/alerts.md.",
+"Mantener TEAM_HANDOFF.md y OBSERVABILITY_QUICKSTART.md actualizados tras enlazar Slack y dashboard."
 ]
 }
 ]
