@@ -68,9 +68,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ToastProvider>{children}</ToastProvider>
           <WebVitalsReporter />
         </ThemeProvider>
-        <Suspense fallback={null}>
-          <PostHogAnalytics />
-        </Suspense>
+        <PostHogAnalytics />
         <Suspense fallback={null}>
           <SpeedInsightsClient enabled={enableSpeedInsights} />
         </Suspense>
