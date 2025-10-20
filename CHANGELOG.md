@@ -28,6 +28,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - `docs/product/phase-2-roadmap.md` y `docs/product/analytics-decision.md` actualizados con el estado de la integración PostHog y el plan de rotación de claves.
 - `docs/operations/observability.md`, `docs/operations/runbook-daily-monitoring.md` y `docs/operations/alerts.md` ahora incluyen los nuevos scripts y pasos de verificación para alertas PostHog/Sentry.
+- `TEAM_HANDOFF.md`, `OBSERVABILITY_QUICKSTART.md` y `docs/operations/observability-setup.md` documentan la creación de reglas Sentry (correo) y próximos pasos para Slack.
 - `docs/qa/e2e-strategy.md` documenta el uso de builds de producción y las variables `API_PORT`/`WEB_PORT`/`PLAYWRIGHT_BASE_URL` para entornos locales y CI.
 - `docs/overview/status.md` registra la verificación del 19-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.

@@ -64,32 +64,22 @@ SENTRY_ENVIRONMENT=production
 
 ### Configuración de Alertas en Sentry
 
-#### **1. Alertas de Error Rate (Tasa de Errores)**
+#### Estado actual (20-oct-2025)
 
-**Para Web:**
+Se crearon reglas básicas que envían correo mediante la acción legacy `notify_event`:
 
-1. Ve a https://sentry.io/organizations/brisacubana/alerts/brisa-cubana-web/
-2. Click en **"Create Alert"**
-3. Selecciona **"Issues"**
-4. Configura:
-   - **Metric:** `Number of events`
-   - **Threshold:** `> 10 events in 1 minute`
-   - **Action:** `Send notification to #alerts channel` (requiere integración Slack)
+| Proyecto | Regla              | Condición                     |
+| -------- | ------------------ | ----------------------------- |
+| Web      | `Web errors spike` | Más de 10 eventos en 1 minuto |
+| Web      | `Web new issue`    | Se crea un nuevo issue        |
+| API      | `API errors spike` | Más de 20 eventos en 1 minuto |
+| API      | `API new issue`    | Se crea un nuevo issue        |
 
-**Para API:**
+#### Próximos pasos
 
-1. Ve a https://sentry.io/organizations/brisacubana/alerts/brisa-cubana-api/
-2. Repite configuración anterior
-
-#### **2. Alertas de Nuevos Issues**
-
-Configurar para recibir notificación cuando aparezca un error nuevo:
-
-1. En cada proyecto → **Settings** → **Alerts**
-2. Click **"Create Alert"**
-3. Selecciona **"Issue Alerts"**
-4. Condición: `A new issue is created`
-5. Acción: `Send a notification to #alerts` (requiere Slack)
+- **Integrar Slack:** Cuando el webhook esté disponible, edita cada regla en Sentry UI y agrega la acción “Send a notification to Slack” (canal `#alerts`).
+- **Ajustar umbrales:** Revisa periódicamente los thresholds según tráfico real.
+- **Dueños de issues:** Considera habilitar la acción “Send a notification to Issue Owners” una vez definido el modelo de ownership.
 
 ---
 
