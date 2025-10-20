@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 
-const AUTH_SECRET = process.env.AUTH_SECRET;
-
-export default async function middleware(req: NextRequest) {
+export default auth(async (req) => {
   const { pathname } = req.nextUrl;
-  const token = await getToken({ req, secret: AUTH_SECRET });
-  const isLoggedIn = !!token;
+  const isLoggedIn = Boolean(req.auth);
 
   // Public routes that don't require authentication
   const publicRoutes = [
@@ -31,18 +28,18 @@ export default async function middleware(req: NextRequest) {
 
   // Redirect to login if not authenticated and trying to access protected route
   if (!isLoggedIn && !isPublicRoute) {
-    const loginUrl = new URL("/login", req.url);
+    const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // Redirect to home if logged in and trying to access login page
   if (isLoggedIn && pathname === "/login") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
