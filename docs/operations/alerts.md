@@ -8,7 +8,7 @@ Este documento describe la configuración de alertas para monitoreo proactivo de
 
 ### Configuración de Alertas de Errores
 
-**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar que Slack/Email reciben la notificación.
+**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar las notificaciones (actualmente correo por `notify_event`; añadir Slack cuando el webhook esté activo).
 
 #### 1. New Issue Alert (Errores Nuevos)
 
@@ -164,12 +164,15 @@ Metric Alert:
    - `#brisa-performance` - Alertas de performance
    - `#brisa-deployments` - Notificaciones de deploy
 
-3. **Configurar en Sentry**:
-   ```
-   Settings → Integrations → Slack
-   → Add to Slack → Authorize
-   → Configure channels per alert rule
-   ```
+3. **Configurar en Sentry** _(pendiente hasta tener el webhook)_:
+
+```
+Settings → Integrations → Slack
+→ Add to Slack → Authorize
+→ Configure channels per alert rule (usar #brisa-alerts / #brisa-critical)
+```
+
+4. **Probar webhook**: `SLACK_WEBHOOK_URL=<url> scripts/test-slack-webhook.sh "🧪 Webhook listo"`
 
 ### Formato de Mensajes
 

@@ -126,6 +126,7 @@ PostHog puede enviar alertas a Slack cuando se detectan anomalías o se cumplen 
 2. Click **"Add Webhook"**
 3. Ingresa Slack Webhook URL (ver sección Slack)
 4. Configura eventos a enviar
+5. Valida con `SLACK_WEBHOOK_URL=<url> scripts/test-slack-webhook.sh "🧪 Observabilidad configurada"`
 
 ---
 
