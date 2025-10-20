@@ -1,21 +1,12 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-const normalizedNextAuthUrl =
-  process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? "";
-const isProduction = process.env.NODE_ENV === "production";
-const shouldUseSecureCookies =
-  process.env.AUTH_COOKIE_SECURE === "true" ||
-  (process.env.AUTH_COOKIE_SECURE !== "false" &&
-    isProduction &&
-    (process.env.VERCEL === "1" ||
-      normalizedNextAuthUrl.startsWith("https://")));
-const sessionCookieName = shouldUseSecureCookies
-  ? "__Secure-authjs.session-token"
-  : "authjs.session-token";
+const AUTH_SECRET = process.env.AUTH_SECRET;
 
-export default function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const isLoggedIn = Boolean(request.cookies.get(sessionCookieName)?.value);
+export default async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  const token = await getToken({ req, secret: AUTH_SECRET });
+  const isLoggedIn = !!token;
 
   // Public routes that don't require authentication
   const publicRoutes = [
@@ -40,14 +31,14 @@ export default function middleware(request: NextRequest) {
 
   // Redirect to login if not authenticated and trying to access protected route
   if (!isLoggedIn && !isPublicRoute) {
-    const loginUrl = new URL("/login", request.url);
+    const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // Redirect to home if logged in and trying to access login page
   if (isLoggedIn && pathname === "/login") {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
