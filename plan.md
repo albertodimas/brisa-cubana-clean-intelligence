@@ -8,8 +8,8 @@
 "title": "Observabilidad y performance",
 "tasks": [
 "Monitorear advertencia `legacy-javascript` (ver docs/tech-debt/legacy-chunk-885.md); probar upgrade de Next.js cuando haya release que elimine el chunk 885.",
-"Completar integración Slack (Incoming Webhook) y conectar alertas de Sentry/PostHog.",
-"Publicar dashboard PostHog con KPIs y enlazarlo en docs/product/analytics-decision.md."
+"[Completado 20-oct-2025] Webhook Slack configurado y probado. Pendiente: conectar alertas en dashboards Sentry/PostHog (requiere UI).",
+"Publicar dashboard PostHog con KPIs y enlazarlo en docs/product/analytics-decision.md (requiere acceso a PostHog UI)."
 ]
 },
 {
