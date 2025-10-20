@@ -15,7 +15,7 @@
 {
 "title": "CI/CD y seguridad",
 "tasks": [
-"Crear alerta en GitHub Actions/Nightly para fallos recurrentes de Lighthouse budgets.",
+"[Completado 20-oct-2025] Crear alerta en GitHub Actions/Nightly para fallos recurrentes de Lighthouse budgets.",
 "Automatizar validación de robots.txt & sitemap en CI (curl) para evitar regresiones (en progreso con scripts/verify-lhci-warnings.sh)."
 ]
 },
