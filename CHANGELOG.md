@@ -21,6 +21,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Suite Playwright crítica ahora usa builds de producción (`pnpm build && pnpm start`) para API y web, con puertos configurables (`API_PORT`, `WEB_PORT`) y `PLAYWRIGHT_BASE_URL` definido.
 - Test de seguridad `gestiona sesión (persistencia y logout)` refactorizado con selectores específicos, timeouts explícitos y sincronización `Promise.all`, eliminando cuelgues en CI (`tests/e2e/security.spec.ts`).
 - Workflows (`project-pipeline.yml`, `ci.yml`, `pr-checks.yml`, `nightly.yml`) reenvían `NEXT_PUBLIC_POSTHOG_*` a la acción compuesta para estabilizar la verificación `analytics.spec.ts` en CI.
+- `apps/web` integra `@sentry/nextjs` (`sentry.*.config.ts` y `withSentryConfig`) con tasas de muestreo configurables desde entorno.
 - Cliente analítico migra a `posthog-js-lite`, deshabilitando carga en entornos Lighthouse y exponiendo `window.__brisaPostHogPromise` compartido (`apps/web/components/analytics/posthog-analytics.tsx`, `apps/web/lib/marketing-telemetry.ts`).
 - Middleware permite acceso público a `robots.txt`/`sitemap.xml` y el pipeline principal levanta `next start` para validarlos tras el build.
 
@@ -28,7 +29,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - `docs/product/phase-2-roadmap.md` y `docs/product/analytics-decision.md` actualizados con el estado de la integración PostHog y el plan de rotación de claves.
 - `docs/operations/observability.md`, `docs/operations/runbook-daily-monitoring.md` y `docs/operations/alerts.md` ahora incluyen los nuevos scripts y pasos de verificación para alertas PostHog/Sentry.
-- `TEAM_HANDOFF.md`, `OBSERVABILITY_QUICKSTART.md` y `docs/operations/observability-setup.md` documentan la creación de reglas Sentry (correo) y próximos pasos para Slack.
+- `docs/operations/observability-setup.md` documenta la creación de reglas Sentry (correo) y próximos pasos para Slack.
 - `docs/qa/e2e-strategy.md` documenta el uso de builds de producción y las variables `API_PORT`/`WEB_PORT`/`PLAYWRIGHT_BASE_URL` para entornos locales y CI.
 - `docs/overview/status.md` registra la verificación del 19-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.

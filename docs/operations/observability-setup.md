@@ -47,7 +47,17 @@ NEXT_PUBLIC_SENTRY_DSN=https://61251c0e4f5553d7febc1d31ab8a9da6@o450966900454195
 SENTRY_ORG=brisacubana
 SENTRY_PROJECT=brisa-cubana-web
 SENTRY_AUTH_TOKEN=<SENTRY_AUTH_TOKEN>
+SENTRY_TRACES_SAMPLE_RATE=0.1
+SENTRY_PROFILES_SAMPLE_RATE=0.1
+NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=0.1
+NEXT_PUBLIC_SENTRY_PROFILES_SAMPLE_RATE=0
 ```
+
+Archivos relevantes (`apps/web`):
+
+- `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`: inicializan Sentry de forma condicional según el DSN.
+- `sentry.config.ts`: referencia `org`, `project` y utiliza el token de entorno cuando se ejecuta la CLI (source maps, releases).
+- `next.config.ts`: envuelto con `withSentryConfig` para generar artefactos compatibles con Sentry y ocultar source maps del build público.
 
 #### **Para apps/api (Hono + Node.js)**
 
