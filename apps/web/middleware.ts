@@ -1,11 +1,12 @@
-import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-const LHCI_HEADER = "x-lhci-bypass";
+const AUTH_SECRET = process.env.AUTH_SECRET;
 
-export default auth((req) => {
+export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+  const token = await getToken({ req, secret: AUTH_SECRET });
+  const isLoggedIn = !!token;
 
   // Public routes that don't require authentication
   const publicRoutes = [
@@ -41,7 +42,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
