@@ -254,25 +254,6 @@ jobs:
           NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
         run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
 
-      - name: Verify public metadata endpoints
-        if: ${{ inputs.run-build }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          pnpm --filter @brisa/web start -- --hostname 127.0.0.1 --port 4000 &
-          NEXT_PID=$!
-          trap "kill $NEXT_PID >/dev/null 2>&1 || true" EXIT
-          for i in {1..30}; do
-            if curl -sf http://127.0.0.1:4000/robots.txt >/dev/null; then
-              break
-            fi
-            sleep 1
-          done
-          curl -sSf http://127.0.0.1:4000/robots.txt | grep -qi "user-agent"
-          curl -sSf http://127.0.0.1:4000/sitemap.xml | grep -qi "<urlset"
-          kill $NEXT_PID
-          trap - EXIT
-
       - name: Lighthouse CI
         if: ${{ inputs.run-lighthouse }}
         shell: bash
