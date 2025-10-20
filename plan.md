@@ -7,8 +7,8 @@
 {
 "title": "Observabilidad y performance",
 "tasks": [
-"Sanear advertencias Lighthouse (legacy-js chunk 885, render-blocking) documentando o creando issue de seguimiento con Next.js.",
-"Instrumentar alertas PostHog (dashboard funnel-fase2 + webhook Slack) según docs/product/analytics-decision.md."
+"Monitorear advertencia `legacy-javascript` (ver docs/tech-debt/legacy-chunk-885.md); probar upgrade de Next.js cuando haya release que elimine el chunk 885.",
+"Instrumentar alertas PostHog (dashboard funnel-fase2 + webhook Slack) según docs/product/analytics-decision.md (pendiente login en CLI)."
 ]
 },
 {
