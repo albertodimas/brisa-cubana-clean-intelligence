@@ -30,7 +30,6 @@ required_files=(
   "docs/operations/deployment.md"
   "docs/operations/backup-log.md"
   "docs/operations/observability.md"
-  "docs/operations/observability-setup.md"
   "docs/operations/alerts.md"
   "docs/operations/incident-runbook.md"
   "docs/operations/sentry.md"
