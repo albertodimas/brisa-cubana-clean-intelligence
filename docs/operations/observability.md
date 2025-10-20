@@ -1,7 +1,7 @@
 # Observabilidad y Monitoreo
 
 **Última actualización:** 20 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ⚠️ Slack pendiente (alertas siguen por email)
+**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ⚠️ Slack pendiente (alertas siguen por email) · ✅ Health check público `/healthz` con token opcional
 
 > Nota: Hasta configurar `SLACK_WEBHOOK_URL` en Vercel/GitHub, cualquier paso que redirija alertas a Slack permanece pendiente.
 
@@ -151,7 +151,12 @@ vercel logs --output=logs.txt
 - Uso de bandwidth
 - Edge requests vs serverless
 
-**Dashboard:** Vercel → Project → Analytics
+**Health checks supervisados**
+
+- Endpoint público: `https://api.brisacubanacleanintelligence.com/healthz` (o `/api/healthz`). Si la personalización de dominio redirige a `/login`, usar el dominio del proyecto (`https://brisa-cubana-clean-intelligence-api.vercel.app/healthz`) o ajustar las rewrites en Vercel para saltar NextAuth.
+- Seguridad opcional: si se define `HEALTH_CHECK_TOKEN`, enviar `Authorization: Bearer <token>` o `?token=<token>`.
+- Monitoreo sugerido: configurar Vercel, UptimeRobot o BetterStack para solicitar el endpoint cada 1-5 minutos y alertar en caso de `status != pass` o código HTTP ≥ 500.
+- El handler valida conectividad a PostgreSQL (`SELECT 1`) y expone uptime y entorno.
 
 ---
 
