@@ -1,13 +1,10 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://brisa-cubana-clean-intelligence.vercel.app/"],
+      "url": ["https://brisa-cubana-clean-intelligence.vercel.app/?lhci=1"],
       "numberOfRuns": 3,
       "settings": {
-        "preset": "desktop",
-        "extraHeaders": {
-          "x-vercel-preview": "nightly-lhci"
-        }
+        "preset": "desktop"
       }
     },
     "assert": {

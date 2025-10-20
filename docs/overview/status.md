@@ -315,7 +315,7 @@ import { logger, authLogger, dbLogger } from "./lib/logger.js";
 3. ✅ Cobertura fortalecida: Tests de seguridad con escenarios negativos
 4. ✅ Logging estructurado: Pino integrado con redacción automática
 5. ✅ OpenAPI/Swagger: Documentación automática con Scalar UI en `/docs`
-6. ✅ Observabilidad: Sentry + Web Vitals + Speed Insights instrumentados para detectar regresiones de performance en tiempo real.citeturn2search1turn3search6turn3search7
+6. ✅ Observabilidad: Sentry + Web Vitals + Speed Insights instrumentados para detectar regresiones de performance en tiempo real.
 7. ✅ UI de gestión de usuarios: Panel completo para ADMIN (roles, contraseñas, activación)
 8. ✅ E2E Testing: 25 tests con estrategia piramidal (smoke/critical/full)
 9. ✅ CI/CD optimizado: Workflows en GitHub Actions (PR checks, CI main, Nightly)

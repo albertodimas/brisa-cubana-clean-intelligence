@@ -15,6 +15,8 @@ export default auth((req) => {
     "/clientes",
     "/api/auth",
     "/lhci",
+    "/robots.txt",
+    "/sitemap.xml",
   ];
 
   // Allow marketing/landing routes without sesión
@@ -50,8 +52,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - robots.txt / sitemap.xml (SEO endpoints)
      * - public files (images, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|lhci|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|lhci|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html|txt|xml)$).*)",
   ],
 };
