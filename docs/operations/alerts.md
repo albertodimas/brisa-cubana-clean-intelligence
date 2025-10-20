@@ -4,11 +4,13 @@
 
 Este documento describe la configuración de alertas para monitoreo proactivo de errores, performance y disponibilidad del sistema.
 
+> **Estado 20-oct-2025:** Las reglas de Sentry envían correo; la notificación a Slack quedará operativa en cuanto se configure `SLACK_WEBHOOK_URL` en Vercel/GitHub.
+
 ## Sentry Alerts
 
 ### Configuración de Alertas de Errores
 
-**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar las notificaciones (actualmente correo por `notify_event`; añadir Slack cuando el webhook esté activo).
+**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar las notificaciones. Hasta configurar Slack, la confirmación llegará por email (`notify_event`).
 
 #### 1. New Issue Alert (Errores Nuevos)
 
@@ -172,7 +174,7 @@ Settings → Integrations → Slack
 → Configure channels per alert rule (usar #brisa-alerts / #brisa-critical)
 ```
 
-4. **Probar webhook**: `SLACK_WEBHOOK_URL=<url> scripts/test-slack-webhook.sh "🧪 Webhook listo"`
+4. **Probar webhook**: `SLACK_WEBHOOK_URL=<url> scripts/test-slack-webhook.sh "🧪 Webhook listo"` (pendiente de crear webhook)
 
 ### Formato de Mensajes
 
@@ -186,6 +188,13 @@ Link: https://sentry.io/...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 @channel - Requires immediate attention
 ```
+
+## GitHub Actions Monitoring
+
+- **Nightly Lighthouse budgets:** el job `Nightly Lighthouse budgets` en `nightly.yml` usa `scripts/check_lighthouse_streak.py` para contar fallos consecutivos.
+  - Si el run actual falla, se calcula el streak revisando los últimos 20 runs completados.
+  - El step añade un resumen al `GITHUB_STEP_SUMMARY` y, cuando el streak alcanza ≥3, falla el job para visibilizar la regresión.
+  - Propietario sugerido: Plataforma (revisar dashboards Lighthouse y abrir incidencia si se supera el umbral).
 
 ## Email Notifications
 

@@ -36,6 +36,33 @@ jobs:
           run-prisma-generate: false
 
       - name: Run Lighthouse CI against Vercel production
+        id: lhci
+        continue-on-error: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: pnpm exec lhci autorun --config=.lighthouserc.preview.json
+
+      - name: Evaluate Lighthouse failure streak
+        if: steps.lhci.outcome == 'failure'
+        id: evaluate-streak
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LIGHTHOUSE_WORKFLOW_FILE: nightly.yml
+          LIGHTHOUSE_JOB_NAME: Nightly Lighthouse budgets
+        run: |
+          STREAK=$(python3 scripts/check_lighthouse_streak.py)
+          echo "streak=$STREAK" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Lighthouse budgets failing"
+            echo
+            echo "- Consecutive failures: $STREAK"
+            echo "- Workflow: nightly.yml"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$STREAK" -ge 3 ]; then
+            echo "Lighthouse budgets have failed $STREAK consecutive runs" >&2
+            exit 1
+          fi
+
+      - name: Mark Lighthouse job failure
+        if: steps.lhci.outcome == 'failure'
+        run: exit 1
