@@ -1,7 +1,7 @@
 # Observabilidad y Monitoreo
 
 **Última actualización:** 20 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ⚠️ Slack pendiente (alertas siguen por email) · ✅ Health check público `/healthz` con token opcional
+**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ⚠️ Slack pendiente (webhook sin configurar) (alertas siguen por email) · ✅ Health check público `/healthz` con token opcional
 
 > Nota: Hasta configurar `SLACK_WEBHOOK_URL` en Vercel/GitHub, cualquier paso que redirija alertas a Slack permanece pendiente.
 
@@ -98,7 +98,7 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
 
 - **Sentry Issue Alert – Checkout errores** (`checkout-payment-failed`):
   - Condición: ≥3 eventos `checkout.payment.failed` en 15 minutos.
-  - Acción actual: email vía `notify_event` (Slack pendiente hasta configurar `SLACK_WEBHOOK_URL`).
+  - Acción actual: email vía `notify_event` (Slack pendiente (webhook sin configurar) hasta configurar `SLACK_WEBHOOK_URL`).
   - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:checkout-payment-failed` (registrado en 1Password «Sentry Alerts»).
 - **Sentry Issue Alert – Portal autoservicio** (`portal-booking-action-error`):
   - Condición: ≥3 eventos `portal.booking.action.error` en 10 minutos.

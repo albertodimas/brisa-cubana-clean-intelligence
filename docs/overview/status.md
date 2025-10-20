@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 19 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 20 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -13,9 +13,10 @@
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; búsqueda con debounce y chips de filtros activos; mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
+- Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Build en Vercel sin advertencias; variables de entorno (Sentry/PostHog/Stripe) configuradas en Development/Preview/Production; `SLACK_WEBHOOK_URL` pendiente de alta.
-- Sitio público `/` sirve la landing comercial (hero + CTA checkout/portal) ahora con secciones "Planes y precios", testimonios, FAQ interactiva y formulario de captura que persiste en `/api/leads`; todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
+- Build local (`vercel build --prod`) sin errores; los despliegues en Vercel están fallando en fase de publicación con "An unexpected error happened..." (investigación en curso con soporte). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN) listas en Development/Preview/Production; `SLACK_WEBHOOK_URL` sigue pendiente de alta.
+- Sitio público `/` sirve la landing comercial (hero + CTA checkout/portal) con métricas KPI, bloques de diferenciadores, proceso operativo, testimonios y FAQ. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
 - Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
@@ -201,7 +202,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 - **TypeScript**: `pnpm typecheck` ✅
 - **Lint**: `pnpm lint` ✅
-- **Deuda técnica**: 0 TODOs/FIXME
+- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: crear webhook Slack, publicar dashboard PostHog y resolver despliegues internos de Vercel.
 
 ---
 

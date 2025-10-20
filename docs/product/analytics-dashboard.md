@@ -60,6 +60,6 @@ Este documento describe la estructura y métricas propuestas para el dashboard e
 
 ## Pendientes
 
-- Obtener URL pública/privada del dashboard y documentarla.
+- Obtener URL pública/privada del dashboard y documentarla. (Pendiente: dashboard aún no publicado en PostHog).
 - Configurar automatización de reportes (ej. weekly digest en Slack).
 - Validar series/propiedades con el DWH cuando esté disponible.

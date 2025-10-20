@@ -1,7 +1,7 @@
 # Observabilidad y Monitoreo - Configuración Completa
 
 **Última actualización:** 20 de octubre, 2025
-**Estado:** ✅ Proyectos Sentry creados | ⏳ Integración Slack pendiente
+**Estado:** ✅ Proyectos Sentry creados | ⏳ Integración Slack pendiente (webhook sin configurar)
 
 ---
 
