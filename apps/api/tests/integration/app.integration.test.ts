@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import OpenAPIResponseValidator from "openapi-response-validator";
-import { openApiSpec } from "./lib/openapi-spec.js";
+import { openApiSpec } from "../../src/lib/openapi-spec.js";
 
 process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
 process.env.API_TOKEN = "test-service-token";
@@ -766,11 +766,11 @@ const mockSign = vi.fn(() => "jwt-admin");
 const mockCompare = vi.fn().mockResolvedValue(true);
 const mockHash = vi.fn().mockResolvedValue("hashed-password");
 
-vi.mock("./lib/prisma", () => ({
+vi.mock("../../src/lib/prisma", () => ({
   prisma: mockPrisma,
 }));
 
-vi.mock("./lib/jwt", () => ({
+vi.mock("../../src/lib/jwt", () => ({
   signAuthToken: mockSign,
   verifyAuthToken: mockVerify,
 }));
@@ -781,9 +781,9 @@ vi.mock("bcryptjs", () => ({
   hash: mockHash,
 }));
 
-const app = (await import("./app")).default;
+const app = (await import("../../src/app")).default;
 const { getServiceRepository, getBookingRepository } = await import(
-  "./container.js"
+  "../../src/container.js"
 );
 
 const authorizedHeaders = {

@@ -417,3 +417,5 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 ---
 
 **Nota:** Este checklist es un documento vivo. Añadir nuevos items conforme se descubran regresiones o se añadan funcionalidades.
+
+- [ ] Ejecutar `pnpm --filter @brisa/api test:integration` (requiere que la base local esté disponible).
