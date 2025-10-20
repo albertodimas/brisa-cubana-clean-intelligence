@@ -195,6 +195,7 @@ vercel logs --output=logs.txt
 - Dashboard PostHog: https://us.posthog.com/project/brisa-cubana/dashboards/funnel-fase2
 - Diccionario de eventos: `docs/product/analytics-events.md`.
 - Reportes Lighthouse: `pnpm exec lhci autorun --config=.lighthouserc.preview.json` (URL `/?lhci=1` desactiva analytics y Speed Insights durante las corridas).
+- Allowlist de advertencias Lighthouse: tras cada ejecución se corre `scripts/verify-lhci-warnings.sh`; falla si aparecen nuevas advertencias distintas a `legacy-javascript`, `render-blocking-insight` o `network-dependency-tree-insight`.
 
 ### 4.5 Alertas PostHog
 

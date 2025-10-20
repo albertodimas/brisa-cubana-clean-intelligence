@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Wrapper `SpeedInsightsClient` que omite la carga de Speed Insights en corridas Lighthouse (`apps/web/components/analytics/speed-insights-client.tsx`).
 - Archivo `.browserslistrc` para forzar targets modernos en la app web.
 - Verificación automatizada de `robots.txt`/`sitemap.xml` en el workflow compuesto (`.github/workflows/project-pipeline.yml`).
+- Script `scripts/verify-lhci-warnings.sh` para controlar el allowlist de advertencias Lighthouse dentro de CI.
 
 ### Changed
 

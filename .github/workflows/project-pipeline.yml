@@ -281,6 +281,11 @@ jobs:
           INTERNAL_API_URL: ${{ inputs.next-public-api-url }}
         run: pnpm exec lhci autorun
 
+      - name: Enforce Lighthouse warnings allowlist
+        if: ${{ inputs.run-lighthouse }}
+        shell: bash
+        run: bash scripts/verify-lhci-warnings.sh
+
       - name: Run Playwright suite
         if: ${{ inputs.run-e2e-suite != 'none' }}
         shell: bash
