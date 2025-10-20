@@ -180,13 +180,13 @@ vercel logs --output=logs.txt
 
 ### 4.3 Checklist de implementación
 
-1. **Integrar SDK PostHog** en `apps/web` (lazy load) con fallback si la key no está definida.
+1. **Integrar SDK PostHog** en `apps/web` (lazy load) con fallback si la key no está definida (`posthog-js-lite`).
 2. **Normalización de eventos** (`namespace.event`, props `source`, `campaign`, `serviceId`, `customerType`).
 3. **Persistir UTMs** en el telemetry helper y propagar a checkout/portal.
 4. **Dashboard compartido**:
    - KPI iniciales: `cta → lead`, `lead → checkout`, `checkout → pago`, ratio uso portal.
    - Responsable: Producto. Añadir enlace en sección 4.4 al publicarlo.
-5. **Alertas PostHog** para spikes de `checkout_payment_failed` → Slack `#producto`.
+5. **Alertas PostHog** para spikes de `checkout_payment_failed` → Slack `#producto` (ver rutina abajo).
 6. **QA**: actualizar `docs/qa/regression-checklist.md` para comprobar presencia de `window.posthog` cuando la key esté configurada.
 7. **Export warehouse (opcional)** cuando se superen 100k eventos/mes.
 
@@ -194,6 +194,17 @@ vercel logs --output=logs.txt
 
 - Dashboard PostHog: https://us.posthog.com/project/brisa-cubana/dashboards/funnel-fase2
 - Diccionario de eventos: `docs/product/analytics-events.md`.
+- Reportes Lighthouse: `pnpm exec lhci autorun --config=.lighthouserc.preview.json` (URL `/?lhci=1` desactiva analytics y Speed Insights durante las corridas).
+
+### 4.5 Alertas PostHog
+
+1. En PostHog → **Project settings → Webhooks**, crea un webhook HTTP para Slack (`https://hooks.slack.com/...`) con nombre `slack-product`.
+2. En **Automations → New automation**:
+   - Trigger: `Event is recorded` → `checkout_payment_failed`.
+   - Condition: `count` superior a 3 eventos en 5 minutos.
+   - Action: `Send webhook` → `slack-product` (payload sugerido en `docs/product/analytics-events.md`).
+3. Documenta la URL del webhook en 1Password (`Brisa Cubana – SaaS / Slack Hooks`).
+4. Añade chequeo semanal en `docs/operations/runbook-daily-monitoring.md` para validar que se reciben notificaciones (usar script `pnpm posthog:test-event checkout_payment_failed`).
 
 > **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.
 

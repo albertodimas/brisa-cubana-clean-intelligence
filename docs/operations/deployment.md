@@ -194,13 +194,15 @@ Los eventos se reenviarán a `http://localhost:3001/api/payments/stripe/webhook`
 
 ## 6. Verificación post-deploy
 
-| Check           | Descripción                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------- |
-| Health API      | `GET https://api.brisacubanacleanintelligence.com/health` devuelve `200` con estado `ok`.         |
-| Admin login     | Autenticación en https://brisacubanacleanintelligence.com/login con `admin@brisacubanaclean.com`. |
-| Panel operativo | CRUD de servicios/propiedades/reservas visible solo para roles autorizados.                       |
-| Observabilidad  | Sentry recibe eventos de prueba (`pnpm exec sentry-cli send-event`).                              |
-| Rate limiting   | 6 intentos de login fallidos devuelven `429` en menos de 60 segundos (opcional).                  |
+| Check           | Descripción                                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Health API      | `GET https://api.brisacubanacleanintelligence.com/health` devuelve `200` con estado `ok`.                                                                                                         |
+| Admin login     | Autenticación en https://brisacubanacleanintelligence.com/login con `admin@brisacubanaclean.com`.                                                                                                 |
+| Lighthouse CI   | Ejecuta `pnpm exec lhci autorun --config=.lighthouserc.preview.json`; ignora solo las advertencias conocidas (`legacy-javascript`, `render-blocking-insight`, `network-dependency-tree-insight`). |
+| Robots/Sitemap  | `curl -I https://brisacubanacleanintelligence.com/robots.txt` y `.../sitemap.xml` → deben responder `200` sin redirecciones a `/login`.                                                           |
+| Panel operativo | CRUD de servicios/propiedades/reservas visible solo para roles autorizados.                                                                                                                       |
+| Observabilidad  | Sentry recibe eventos de prueba (`pnpm exec sentry-cli send-event`).                                                                                                                              |
+| Rate limiting   | 6 intentos de login fallidos devuelven `429` en menos de 60 segundos (opcional).                                                                                                                  |
 
 ## 7. Rollback
 
