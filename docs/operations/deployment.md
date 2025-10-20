@@ -20,6 +20,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | API/Stripe                                  | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`                                                                                                                | All                 | Modo test en Preview/Dev, modo live en Production                              |
 | API (Portal cliente)                        | `PORTAL_MAGIC_LINK_FROM`, `PORTAL_MAGIC_LINK_SMTP_*`, `PORTAL_MAGIC_LINK_BASE_URL`, `PORTAL_MAGIC_LINK_CONFIRMATION_PATH`, `PORTAL_MAGIC_LINK_EXPOSE_DEBUG` | Production, Preview | SMTP obligatorio; `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción.      |
 | Web (`brisa-cubana-clean-intelligence`)     | `NEXT_PUBLIC_API_URL`                                                                                                                                       | All                 | Debe apuntar al dominio de la API correspondiente                              |
+| API                                         | `HEALTH_CHECK_TOKEN`                                                                                                                                        | All                 | Token opcional para /healthz (usar en monitores externos).                     |
 | Web                                         | `INTERNAL_API_URL`                                                                                                                                          | Production+Preview  | URL interna para proxy                                                         |
 | Web                                         | `AUTH_SECRET`                                                                                                                                               | All                 | Debe coincidir con la API para sesiones válidas                                |
 | Web (Stripe)                                | `STRIPE_PUBLISHABLE_KEY`                                                                                                                                    | All                 | Clave pública usada por Stripe.js                                              |
@@ -30,6 +31,8 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 ## 3. Configuración de Dominios Personalizados
 
 ### Dominios de producción
+
+> ℹ️ **Salud de la API**: `/healthz` y `/api/healthz` se reescriben desde el proyecto web hacia la API. Si usas un dominio personalizado diferente o deshabilitas las rewrites, asegúrate de mantener una regla equivalente en Vercel para evitar redirecciones a `/login`.
 
 | Dominio                                | Proyecto | Propósito                           |
 | -------------------------------------- | -------- | ----------------------------------- |

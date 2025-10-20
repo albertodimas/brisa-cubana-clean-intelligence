@@ -76,6 +76,25 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    const apiBase =
+      process.env.INTERNAL_API_URL ??
+      "https://api.brisacubanacleanintelligence.com";
+    const normalizedApiBase = apiBase.endsWith("/")
+      ? apiBase.slice(0, -1)
+      : apiBase;
+
+    return [
+      {
+        source: "/healthz",
+        destination: `${normalizedApiBase}/healthz`,
+      },
+      {
+        source: "/api/healthz",
+        destination: `${normalizedApiBase}/healthz`,
+      },
+    ];
+  },
 };
 
 const sentryWebpackPluginOptions = {
