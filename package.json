@@ -21,6 +21,7 @@
     "db:push": "pnpm --filter @brisa/api db:push",
     "db:migrate": "pnpm --filter @brisa/api db:migrate",
     "db:seed": "pnpm --filter @brisa/api db:seed",
+    "analyze:web": "pnpm --filter @brisa/web analyze",
     "verify:versions": "node scripts/verify-versions.mjs",
     "docs:verify": "pnpm verify:versions && bash scripts/verify-doc-structure.sh",
     "format": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",

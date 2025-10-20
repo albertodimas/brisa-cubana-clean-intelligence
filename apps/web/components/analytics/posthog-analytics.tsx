@@ -9,11 +9,17 @@ const POSTHOG_KEY =
 const POSTHOG_HOST =
   (process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "").trim() ||
   "https://us.posthog.com";
+const POSTHOG_FORCE_ENABLE =
+  (process.env.NEXT_PUBLIC_POSTHOG_FORCE_ENABLE ?? "").toLowerCase() === "true";
 
 let isPostHogInitialized = false;
 let posthogClientPromise: Promise<PosthogClient> | undefined;
 
 function shouldSkipAnalytics() {
+  if (POSTHOG_FORCE_ENABLE) {
+    return false;
+  }
+
   if (typeof navigator === "undefined") {
     return false;
   }

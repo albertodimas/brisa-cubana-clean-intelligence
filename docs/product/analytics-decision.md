@@ -49,6 +49,7 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
    - Cargar `posthog-js-lite` en `apps/web` (lazy load).
    - Adaptar `marketing-telemetry.ts` para enviar eventos a PostHog además de `@vercel/analytics`.
    - Adjuntar `distinct_id` (correo o hash) cuando haya sesión portal cliente.
+   - Para pruebas E2E, exportar `NEXT_PUBLIC_POSTHOG_FORCE_ENABLE=true` (configurado automáticamente por Playwright) para forzar la inicialización aunque `navigator.webdriver` sea `true`.
 5. **Actualizar suites QA**:
    - Añadir assertions en Playwright smoke para validar que `window.__brisaPostHogClient.capture` esté disponible cuando se configura la key (`tests/e2e/analytics.spec.ts`).
    - Documentar en `docs/qa/regression-checklist.md`.

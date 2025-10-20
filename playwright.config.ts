@@ -75,6 +75,7 @@ export default defineConfig({
             NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
+            NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
             PORT: process.env.WEB_PORT ?? "3000",
           },
           timeout: 120_000,
@@ -115,6 +116,7 @@ export default defineConfig({
             NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
               process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
+            NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
             PORT: process.env.WEB_PORT ?? "3000",
           },
           timeout: 120_000,

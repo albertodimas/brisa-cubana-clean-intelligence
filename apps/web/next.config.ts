@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
 
 const enableHsts = process.env.ENABLE_HSTS !== "false";
 
@@ -82,4 +83,10 @@ const sentryWebpackPluginOptions = {
   hideSourceMaps: true,
 };
 
-export default withSentryConfig(nextConfig, sentryWebpackPluginOptions);
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default withBundleAnalyzer(
+  withSentryConfig(nextConfig, sentryWebpackPluginOptions),
+);

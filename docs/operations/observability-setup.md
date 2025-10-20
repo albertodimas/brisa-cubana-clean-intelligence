@@ -107,6 +107,8 @@ Se crearon reglas básicas que envían correo mediante la acción legacy `notify
 ```bash
 NEXT_PUBLIC_POSTHOG_KEY=phc_TU_API_KEY_AQUI
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+# Opcional (solo ambientes de prueba / E2E)
+NEXT_PUBLIC_POSTHOG_FORCE_ENABLE=""
 ```
 
 ### Configuración de Webhooks (requiere Slack)

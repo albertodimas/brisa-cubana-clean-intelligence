@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "node ./scripts/build.js",
+    "analyze": "ANALYZE=true node ./scripts/build.js",
     "start": "next start",
     "lint": "eslint app components --ext .ts,.tsx",
     "typecheck": "tsc --project tsconfig.json --noEmit",
@@ -30,6 +31,7 @@
     "swr": "^2.3.6"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "15.5.5",
     "@tailwindcss/postcss": "^4.1.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.4.1",
