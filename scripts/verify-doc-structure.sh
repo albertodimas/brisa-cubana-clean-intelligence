@@ -30,7 +30,9 @@ required_files=(
   "docs/operations/deployment.md"
   "docs/operations/backup-log.md"
   "docs/operations/observability.md"
+  "docs/operations/observability-setup.md"
   "docs/operations/alerts.md"
+  "docs/operations/incident-runbook.md"
   "docs/operations/sentry.md"
   "docs/qa/e2e-strategy.md"
   "docs/qa/regression-checklist.md"
@@ -39,6 +41,7 @@ required_files=(
   "docs/product/pagination.md"
   "docs/product/phase-2-roadmap.md"
   "docs/product/rfc-public-components.md"
+  "docs/product/analytics-dashboard.md"
   "docs/archive/2025-10-08-session-log.md"
 )
 

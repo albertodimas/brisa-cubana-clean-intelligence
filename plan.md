@@ -29,8 +29,8 @@
 {
 "title": "Documentación",
 "tasks": [
-"Registrar playbook de incidentes (quién, qué y cómo escalar) en docs/operations/observability-setup.md / docs/operations/alerts.md.",
-"Mantener TEAM_HANDOFF.md y OBSERVABILITY_QUICKSTART.md actualizados tras enlazar Slack y dashboard."
+"Actualizar docs/operations/incident-runbook.md con responsables definitivos (guardias) cuando se asignen.",
+"Documentar la URL del dashboard PostHog y mantener docs/product/analytics-dashboard.md al día tras su publicación."
 ]
 }
 ]

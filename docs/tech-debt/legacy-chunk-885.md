@@ -23,10 +23,11 @@ Las auditorías Lighthouse sobre `https://brisa-cubana-clean-intelligence.vercel
 ## Plan de acción
 
 1. **Monitorear releases de Next.js**: revisar changelog ≥ 15.5.x en busca de mejoras relacionadas con polyfills y `legacy-javascript`.
-2. **Probar en rama feature**:
+2. **Probar en rama feature (trimestral o ante release relevante)**:
    - Actualizar a la versión estable más reciente (`pnpm up next@latest react@latest react-dom@latest`).
-   - Ejecutar `pnpm --filter @brisa/web build && pnpm exec lhci collect ...` para validar si el chunk desaparece o reduce.
-3. **Fallback**: en caso de persistir, abrir issue en `vercel/next.js` compartiendo la evidencia.
+   - Ejecutar `pnpm --filter @brisa/web build && pnpm exec lhci collect --url=http://127.0.0.1:4123/?lhci=1 ...` para validar si el chunk desaparece o reduce.
+3. **Fallback**: en caso de persistir, abrir issue en `vercel/next.js` compartiendo la evidencia y el reporte Lighthouse.
+4. **Tracking**: anotar resultados en este archivo (fecha, versión probada, conclusiones).
 
 ## Notas
 
