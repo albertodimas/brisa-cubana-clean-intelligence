@@ -1,6 +1,6 @@
 # Incident Report · Vercel Deployment Failures (temporary_failure)
 
-**Estado:** Abierto (última actualización 21-oct-2025 01:15 EDT)  
+**Estado:** Resuelto (cierre 21-oct-2025 01:30 UTC)  
 **Severidad sugerida:** SEV1 (degradación de despliegues, producción sirviendo build antigua)
 
 ## Resumen ejecutivo
@@ -39,13 +39,23 @@
 - **Equipo interno:** No es posible promover nuevos commits; rotaciones/actualizaciones quedan bloqueadas.
 - **Observabilidad:** No se observan fallos en salud ni monitorización externa (solo bloqueo de build).
 
-## Acciones recomendadas
+## Acciones realizadas
 
-1. Abrir ticket con soporte de Vercel, adjuntando la tabla de evidencia y los logs JSON (`curl https://api.vercel.com/v13/deployments/<id>…`).
-2. Solicitar confirmación explícita de que el incidente general no cubrió todos los proyectos y pedir runbook temporal.
-3. Evitar redeploy manual hasta recibir confirmación; monitorizar estado cada 30 min.
-4. Tras resolución, redeploy manual (`vercel deploy --prod`) y validar endpoints (`curl` a dominios web y API).
-5. Documentar cierre en `CHANGELOG.md` y `docs/operations/deployment.md`, actualizando también `docs/overview/status.md`.
+1. Ajuste en CI (`f14d575`, 21-oct 01:04 UTC) para alinear credenciales sembradas → permitió que `CI (Main Branch)` volviera a verde y habilitó la promoción automática.
+2. Vercel reintentó builds a las 01:05 UTC y marcó como **Ready** los despliegues:
+   - Web: `https://brisa-cubana-clean-intelligence-ov83pncfl-brisa-cubana.vercel.app` (commit `f14d575`, duration 2 m).
+   - API: `https://brisa-cubana-clean-intelligence-jjl943a0f-brisa-cubana.vercel.app` (commit `f14d575`, duration 55 s).
+3. Verificación manual:
+   - `curl https://api.brisacubanacleanintelligence.com/health` → 200 `{"status":"pass"}` (uptime 60 s).
+   - `curl -I https://brisacubanacleanintelligence.com` → `etag "a7644e23d04e1bab2a3cfbfaec689c0c"`, `x-vercel-cache: PRERENDER`, `age: 0`.
+4. Confirmado en CLI: `vercel list … --status READY` muestra ambos deployments al tope (hace 2 m y 25 m respectivamente). No hay entradas en `--status ERROR` posteriores a las 20-oct 19:01 UTC.
+
+## Acciones recomendadas (post-mortem)
+
+1. Mantener monitoreo durante 24 h (`vercel list … --status ERROR` cada hora) para detectar regresiones.
+2. Evaluar con Vercel si es necesario reporte formal; mantener la tabla de evidencia por si se solicitan datos adicionales.
+3. Registrar esta resolución en `docs/operations/deployment.md` y `docs/overview/status.md` (fecha/hora, commit desplegado).
+4. Considerar añadir alerta automática (Slack) si `vercel list --status ERROR` detecta más de N fallos consecutivos.
 
 ## Datos de soporte adicionales
 
@@ -57,6 +67,6 @@
 
 ## Seguimiento
 
-- Responsable actual: Plataforma (Codex)
-- Próxima actualización: 21-oct-2025 09:00 EDT o antes si Vercel responde.
-- Pendiente: ticket de soporte, redeploy confirmado, anotación final en changelog/runbooks.
+- Responsable: Plataforma (Codex).
+- No hay acciones abiertas; solo monitoreo reactivo.
+- Documentación actualizada: `CHANGELOG.md` (entrada en sección Docs, 21-oct-2025).
