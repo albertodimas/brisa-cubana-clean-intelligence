@@ -197,13 +197,13 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 - **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`; utiliza `scripts/prisma-deploy-or-baseline.sh` para resolver automáticamente escenarios con P3005 cuando la base ya contiene datos.
 
-**Estado (19-oct-2025)**: ✅ `PR Checks` 18632102829 (`workflow_dispatch`) verde tras propagar `NEXT_PUBLIC_POSTHOG_*` a la acción reutilizable; ✅ Pipelines en `main` (CI 18603217844, CodeQL 18603217867, Post-Deploy Seed 18612902776) completados el 18-oct; ✅ Nightly 18612838707 validó suite `full` con `ENABLE_TEST_UTILS="false"` y correo SMTP simulado; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` mantiene fallos en CodeQL y PR Checks pendientes.
+**Estado (21-oct-2025)**: ✅ Pipelines en `main` completados con commit `42ce036` (CI 18673346297, CodeQL 18673346290, Post-Deploy Seed 18673455328); ✅ Nightly 18612838707 continúa estable; ✅ PR #56 (dependabot) recompilando en verde tras corregir la versión Stripe API (previews `34uvqG2YoSs1D2qswdd7WDfhz7Jb` y `9AowLv563goRxEMaXJDsG6yGH7t2` listos para QA).
 
 ### 7.4 Calidad de Código
 
 - **TypeScript**: `pnpm typecheck` ✅
 - **Lint**: `pnpm lint` ✅
-- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: crear webhook Slack, publicar dashboard PostHog y resolver despliegues internos de Vercel.
+- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: confirmar mensaje de prueba en Slack (`#todo-brisa-cubana`), incorporar assets finales de marketing en la landing y automatizar alertas PostHog (`checkout_payment_failed` → Slack).
 
 ---
 
