@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   ShieldCheckIcon,
   SparklesIcon,
@@ -41,15 +40,15 @@ const testimonials = [
 const kpiHighlights = [
   {
     label: "Rotaciones por propiedad",
-    value: "12‑25/año",
+    value: "12-25/año",
     description:
       "Media de turnovers en STR de EE. UU.; planificamos buffers para picos turísticos.",
   },
   {
     label: "Impacto en reseñas",
-    value: "81 %",
+    value: "81%",
     description:
-      "De los viajeros prioriza limpieza; 78 % deja reviews positivas cuando está impecable.",
+      "De los viajeros prioriza limpieza; 78% deja reviews positivas cuando está impecable.",
   },
   {
     label: "Programación garantizada",
@@ -61,7 +60,7 @@ const kpiHighlights = [
     label: "Mercado Miami",
     value: "13K+ listings",
     description:
-      "Inventario activo con picos Nov‑Mar y 24 M de visitantes anuales.",
+      "Inventario activo con picos Nov-Mar y 24M de visitantes anuales.",
   },
 ];
 
@@ -115,7 +114,7 @@ const pricingTiers: PricingTier[] = [
     price: "$209+",
     priceSuffix: "por salida",
     description:
-      "Para listados urbanos con 12‑25 rotaciones al año. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
+      "Para listados urbanos con 12-25 rotaciones al año. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
     features: [
       "Reposición completa de amenities, textiles y welcome kit",
       "Checklist Airbnb Enhanced Cleaning y control RFID de inventario",
@@ -249,15 +248,75 @@ export default function LandingPage() {
                 </MarketingLink>
               </div>
             </div>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/60 shadow-xl shadow-brisa-900/5 dark:border-brisa-800">
-              <Image
-                src="/images/landing/hero-miami-sunset.png"
-                alt="Vista de Miami al atardecer con interiores preparados para la siguiente reserva."
-                fill
-                sizes="(max-width: 768px) 100vw, 420px"
-                className="object-cover"
-                priority
-              />
+            <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950">
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
+                  Lo que entregamos en cada turno
+                </h3>
+                <ul className="space-y-4 text-sm sm:text-base text-gray-600 dark:text-brisa-200">
+                  <li className="flex gap-3">
+                    <span
+                      aria-hidden
+                      className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brisa-100 text-brisa-600 font-semibold"
+                    >
+                      1
+                    </span>
+                    Checklists de 100+ puntos alineados al estándar Enhanced
+                    Cleaning y firmas digitales al cierre.
+                  </li>
+                  <li className="flex gap-3">
+                    <span
+                      aria-hidden
+                      className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brisa-100 text-brisa-600 font-semibold"
+                    >
+                      2
+                    </span>
+                    Inventario trazable (RFID) y restocking completo para evitar
+                    reclamos de huéspedes.
+                  </li>
+                  <li className="flex gap-3">
+                    <span
+                      aria-hidden
+                      className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brisa-100 text-brisa-600 font-semibold"
+                    >
+                      3
+                    </span>
+                    Evidencia fotográfica y reporte en menos de 4 horas listo
+                    para responder reseñas.
+                  </li>
+                </ul>
+                <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-white p-6 dark:from-brisa-900/60 dark:via-brisa-950">
+                  <p className="text-sm font-semibold text-brisa-700 dark:text-brisa-100">
+                    Datos clave
+                  </p>
+                  <dl className="grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-brisa-200">
+                    <div>
+                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
+                        12-25
+                      </dt>
+                      <dd>rotaciones/año por propiedad</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
+                        81%
+                      </dt>
+                      <dd>reviews influidas por la limpieza</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
+                        13K+
+                      </dt>
+                      <dd>listados activos en Miami y alrededores</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
+                        24/7
+                      </dt>
+                      <dd>cobertura operativa en temporada alta</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
             </div>
           </header>
         </div>
@@ -327,14 +386,39 @@ export default function LandingPage() {
                 </li>
               </ul>
             </div>
-            <div className="relative aspect-[3/4] overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl shadow-brisa-900/5 dark:border-brisa-700 dark:bg-brisa-950">
-              <Image
-                src="/images/landing/portal-preview.png"
-                alt="Vista del portal cliente de Brisa Cubana mostrando reservas y acciones disponibles."
-                fill
-                sizes="(max-width: 768px) 100vw, 380px"
-                className="object-cover"
-              />
+            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-brisa-100 via-white to-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:from-brisa-900/60 dark:via-brisa-950">
+              <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
+                KPI en el dashboard
+              </h3>
+              <dl className="mt-6 space-y-5 text-sm sm:text-base text-gray-600 dark:text-brisa-200">
+                <div>
+                  <dt className="font-medium text-brisa-600 dark:text-brisa-300">
+                    Turnovers on-time
+                  </dt>
+                  <dd>
+                    Seguimiento en tiempo real con timeline, fotos finales y
+                    estado de cada checklist.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-brisa-600 dark:text-brisa-300">
+                    Alertas automáticas
+                  </dt>
+                  <dd>
+                    Notificaciones Slack/SMS cuando el PMS cambia reservas o se
+                    registra una incidencia.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-brisa-600 dark:text-brisa-300">
+                    Auditoría e inventario
+                  </dt>
+                  <dd>
+                    Control de amenities y consumibles con reposición programada
+                    y trazabilidad por unidad.
+                  </dd>
+                </div>
+              </dl>
             </div>
           </div>
         </div>

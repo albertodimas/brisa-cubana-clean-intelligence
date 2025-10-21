@@ -9,10 +9,10 @@
 
 ## KPI Highlights
 
-1. **Rotaciones por propiedad:** 12‑25/año (media STR en EE. UU.).
-2. **Impacto en reseñas:** 81 % de huéspedes prioriza limpieza y 78 % deja reviews positivas cuando está impecable.
+1. **Rotaciones por propiedad:** 12-25/año (media STR en EE. UU.).
+2. **Impacto en reseñas:** 81% de huéspedes prioriza limpieza y 78% deja reviews positivas cuando está impecable.
 3. **Programación garantizada:** Disponibilidad 24/7 sincronizada con PMS (alertas same-day).
-4. **Mercado Miami:** 13 000+ alquileres activos, 24 M de visitantes anuales (picos Nov‑Mar).
+4. **Mercado Miami:** 13,000+ alquileres activos, 24M de visitantes anuales (picos Nov-Mar).
 
 ## Diferenciadores
 

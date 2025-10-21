@@ -22,9 +22,7 @@ describe("LandingPage", () => {
     expect(markup).toContain(
       "Alertas automáticas al detectar cambios de agenda o incidencias.",
     );
-    expect(markup).toContain(
-      "Vista del portal cliente de Brisa Cubana mostrando reservas y acciones disponibles.",
-    );
+    expect(markup).toContain("KPI en el dashboard");
   });
 
   it("presenta pricing, FAQ y formulario de contacto", async () => {
