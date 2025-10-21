@@ -62,7 +62,7 @@ Este documento describe la estructura y métricas propuestas para el dashboard e
 
 ## Dashboard en PostHog
 
-**URL del Dashboard:** https://us.posthog.com/project/225064/dashboard/607007
+**URL del Dashboard:** https://us.i.posthog.com/project/225064/dashboard/607007
 **Nombre:** Brisa Cubana - Funnel Comercial
 **ID:** 607007
 **Creado:** 21 de octubre de 2025
@@ -82,19 +82,19 @@ El dashboard está creado y listo para configuración. Para añadir charts y vis
 
 Todos los insights han sido creados programáticamente y están listos para añadir al dashboard:
 
-| #   | Nombre                               | ID      | Tipo           | URL                                                            |
-| --- | ------------------------------------ | ------- | -------------- | -------------------------------------------------------------- |
-| 1   | Funnel Comercial - Landing a Pago    | 3767234 | Funnel         | [Ver](https://us.posthog.com/project/225064/insights/zu0eTQCm) |
-| 2   | Funnel Portal - Login a Confirmación | 3767282 | Funnel         | [Ver](https://us.posthog.com/project/225064/insights/3767282)  |
-| 3   | Checkout Health - Serie Temporal     | 3767283 | Trends         | [Ver](https://us.posthog.com/project/225064/insights/3767283)  |
-| 4   | Checkout - Errores por Tipo          | 3767284 | Trends (Table) | [Ver](https://us.posthog.com/project/225064/insights/3767284)  |
-| 5   | Portal Cliente - Engagement          | 3767285 | Trends         | [Ver](https://us.posthog.com/project/225064/insights/3767285)  |
-| 6   | Marketing - CTAs y Leads             | 3767286 | Trends         | [Ver](https://us.posthog.com/project/225064/insights/3767286)  |
-| 7   | Marketing - Fuentes UTM              | 3767287 | Trends (Pie)   | [Ver](https://us.posthog.com/project/225064/insights/3767287)  |
+| #   | Nombre                               | ID      | Tipo           | URL                                                              |
+| --- | ------------------------------------ | ------- | -------------- | ---------------------------------------------------------------- |
+| 1   | Funnel Comercial - Landing a Pago    | 3767234 | Funnel         | [Ver](https://us.i.posthog.com/project/225064/insights/zu0eTQCm) |
+| 2   | Funnel Portal - Login a Confirmación | 3767282 | Funnel         | [Ver](https://us.i.posthog.com/project/225064/insights/3767282)  |
+| 3   | Checkout Health - Serie Temporal     | 3767283 | Trends         | [Ver](https://us.i.posthog.com/project/225064/insights/3767283)  |
+| 4   | Checkout - Errores por Tipo          | 3767284 | Trends (Table) | [Ver](https://us.i.posthog.com/project/225064/insights/3767284)  |
+| 5   | Portal Cliente - Engagement          | 3767285 | Trends         | [Ver](https://us.i.posthog.com/project/225064/insights/3767285)  |
+| 6   | Marketing - CTAs y Leads             | 3767286 | Trends         | [Ver](https://us.i.posthog.com/project/225064/insights/3767286)  |
+| 7   | Marketing - Fuentes UTM              | 3767287 | Trends (Pie)   | [Ver](https://us.i.posthog.com/project/225064/insights/3767287)  |
 
 ### Añadir al Dashboard
 
-**URL del Dashboard:** https://us.posthog.com/project/225064/dashboard/607007
+**URL del Dashboard:** https://us.i.posthog.com/project/225064/dashboard/607007
 
 Para añadir cada insight al dashboard:
 

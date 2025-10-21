@@ -37,17 +37,17 @@ Esta guía resume los dominios activos del proyecto y los subdominios planeados 
 
 Configurar los valores siguientes (Development / Preview / Production) con los dominios definitivos:
 
-| Variable                                                   | Valor producción                                              | Paquete(s) |
-| ---------------------------------------------------------- | ------------------------------------------------------------- | ---------- |
-| `NEXT_PUBLIC_BASE_URL`                                     | `https://brisacubanacleanintelligence.com`                    | web        |
-| `NEXTAUTH_URL`                                             | `https://brisacubanacleanintelligence.com`                    | web        |
-| `NEXT_PUBLIC_SITE_URL`                                     | `https://brisacubanacleanintelligence.com`                    | web        |
-| `NEXT_PUBLIC_API_URL`                                      | `https://api.brisacubanacleanintelligence.com`                | web        |
-| `INTERNAL_API_URL`                                         | `https://api.brisacubanacleanintelligence.com`                | web        |
-| `PORTAL_MAGIC_LINK_BASE_URL`                               | `https://brisacubanacleanintelligence.com`                    | api        |
-| `SLACK_WEBHOOK_URL`                                        | URL del webhook Slack (canal #brisa-alerts / #brisa-critical) | web, api   |
-| `LEAD_WEBHOOK_URL`                                         | URL del CRM/automation para leads                             | web        |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` | Claves Stripe modo live                                       | web, api   |
+| Variable                                                   | Valor producción                                 | Paquete(s) |
+| ---------------------------------------------------------- | ------------------------------------------------ | ---------- |
+| `NEXT_PUBLIC_BASE_URL`                                     | `https://brisacubanacleanintelligence.com`       | web        |
+| `NEXTAUTH_URL`                                             | `https://brisacubanacleanintelligence.com`       | web        |
+| `NEXT_PUBLIC_SITE_URL`                                     | `https://brisacubanacleanintelligence.com`       | web        |
+| `NEXT_PUBLIC_API_URL`                                      | `https://api.brisacubanacleanintelligence.com`   | web        |
+| `INTERNAL_API_URL`                                         | `https://api.brisacubanacleanintelligence.com`   | web        |
+| `PORTAL_MAGIC_LINK_BASE_URL`                               | `https://brisacubanacleanintelligence.com`       | api        |
+| `SLACK_WEBHOOK_URL`                                        | URL del webhook Slack (canal #todo-brisa-cubana) | web        |
+| `LEAD_WEBHOOK_URL`                                         | URL del CRM/automation para leads                | web        |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` | Claves Stripe modo live                          | web, api   |
 
 ## 5. Checklist de despliegue por dominio
 
@@ -60,7 +60,7 @@ Configurar los valores siguientes (Development / Preview / Production) con los d
 ## 6. Tareas pendientes
 
 - [ ] Definir proveedor para `status.*` y `docs.*`.
-- [ ] Configurar `SLACK_WEBHOOK_URL`, `LEAD_WEBHOOK_URL` y credenciales Stripe live (ver [env-sync.md](env-sync.md)).
+- [x] Configurar `SLACK_WEBHOOK_URL`, `LEAD_WEBHOOK_URL` y credenciales Stripe live (ver [env-sync.md](env-sync.md)). _Actualizado 21-oct-2025; revisar al rotar claves._
 - [ ] Añadir prueba automatizada de validación de dominios (curl/uptime) a los pipelines nightly.
 
 Asegúrate de revisar esta guía antes de crear nuevos entornos o compartir URLs con clientes. Mantener una fuente única de verdad evita inconsistencias entre DNS, certificados y variables de entorno.

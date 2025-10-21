@@ -77,7 +77,8 @@ export default defineConfig({
               process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
-              process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
+              process.env.NEXT_PUBLIC_POSTHOG_HOST ??
+              "https://us.i.posthog.com",
             NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
             NEXTAUTH_URL:
               process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
@@ -125,7 +126,8 @@ export default defineConfig({
               process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             NEXT_PUBLIC_POSTHOG_KEY: posthogKey,
             NEXT_PUBLIC_POSTHOG_HOST:
-              process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.posthog.com",
+              process.env.NEXT_PUBLIC_POSTHOG_HOST ??
+              "https://us.i.posthog.com",
             NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
             NEXTAUTH_URL:
               process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",

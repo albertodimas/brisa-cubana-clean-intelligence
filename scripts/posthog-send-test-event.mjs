@@ -15,7 +15,7 @@ import { randomUUID } from "node:crypto";
 
 const apiKey =
   process.env.POSTHOG_API_KEY ?? process.env.NEXT_PUBLIC_POSTHOG_KEY;
-const host = (process.env.POSTHOG_HOST ?? "https://us.posthog.com").replace(
+const host = (process.env.POSTHOG_HOST ?? "https://us.i.posthog.com").replace(
   /\/$/,
   "",
 );
