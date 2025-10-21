@@ -1,9 +1,9 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 20 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ✅ Slack webhook configurado y probado · ✅ Health check público `/healthz` con token opcional
+**Última actualización:** 21 de octubre de 2025
+**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ✅ Slack webhook configurado y probado (`#todo-brisa-cubana`) · ✅ Health check público `/healthz` con token opcional
 
-> Nota: `SLACK_WEBHOOK_URL` configurado en Vercel (20-oct-2025). Falta conectar alertas Sentry/PostHog al webhook (requiere configuración manual en dashboards).
+> Nota: Sentry envía alertas y eventos de prueba a Slack/correo (ver `pnpm sentry:test-event`). PostHog usa host `https://us.i.posthog.com`; añade automatizaciones en el dashboard para enviar alertas al mismo webhook según necesidad.
 
 ---
 
@@ -183,7 +183,7 @@ vercel logs --output=logs.txt
 - Detalle de la decisión en `docs/product/analytics-decision.md`.
 - Variables nuevas:
   - `NEXT_PUBLIC_POSTHOG_KEY`
-  - `NEXT_PUBLIC_POSTHOG_HOST` (opcional, default `https://us.posthog.com`)
+  - `NEXT_PUBLIC_POSTHOG_HOST` (opcional, default `https://us.i.posthog.com`)
 
 ### 4.3 Checklist de implementación
 
@@ -199,7 +199,7 @@ vercel logs --output=logs.txt
 
 ### 4.4 Enlaces
 
-- Dashboard PostHog: https://us.posthog.com/project/brisa-cubana/dashboards/funnel-fase2
+- Dashboard PostHog: https://us.i.posthog.com/project/brisa-cubana/dashboards/funnel-fase2
 - Diccionario de eventos: `docs/product/analytics-events.md`.
 - Reportes Lighthouse: `pnpm exec lhci autorun --config=.lighthouserc.preview.json` (URL `/?lhci=1` desactiva analytics y Speed Insights durante las corridas).
 - Allowlist de advertencias Lighthouse: tras cada ejecución se corre `scripts/verify-lhci-warnings.sh`; falla si aparecen nuevas advertencias distintas a `legacy-javascript`, `render-blocking-insight` o `network-dependency-tree-insight`.

@@ -15,7 +15,8 @@
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Despliegues en Vercel restaurados (21-oct-2025 01:30 UTC). Últimos deployments `Ready`: web `https://brisa-cubana-clean-intelligence-ov83pncfl-...` y API `https://brisa-cubana-clean-intelligence-jjl943a0f-...` (commit `f14d575`). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN) listas en Development/Preview/Production; `SLACK_WEBHOOK_URL` sigue pendiente de alta.
+- Despliegues en Vercel restaurados (21-oct-2025 01:30 UTC). Últimos deployments `Ready`: web `https://brisa-cubana-clean-intelligence-ov83pncfl-...` y API `https://brisa-cubana-clean-intelligence-jjl943a0f-...` (commit `f14d575`). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN/SLACK_WEBHOOK_URL/LEAD_WEBHOOK_URL) están cargadas en Development/Preview/Production.
+- Observabilidad verificada manualmente el 21-oct-2025: evento Sentry `ec904a19-899c-4e91-9386-8304c02cd724` (via `pnpm sentry:test-event`) y captura PostHog `checkout_payment_failed` (`pnpm posthog:test-event` con distinct `brisa-cli-*`).
 - Sitio público `/` sirve la landing comercial con métricas basadas en datos reales del mercado STR (rotaciones 12-25/año, 81% reviews impactadas por limpieza, 13K listings en Miami) y CTA de checkout/portal. Los placeholders de imagen permanecen a la espera de los activos listados en `docs/marketing/visual-assets-checklist.md`. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
 - Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
@@ -196,13 +197,13 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 - **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`; utiliza `scripts/prisma-deploy-or-baseline.sh` para resolver automáticamente escenarios con P3005 cuando la base ya contiene datos.
 
-**Estado (19-oct-2025)**: ✅ `PR Checks` 18632102829 (`workflow_dispatch`) verde tras propagar `NEXT_PUBLIC_POSTHOG_*` a la acción reutilizable; ✅ Pipelines en `main` (CI 18603217844, CodeQL 18603217867, Post-Deploy Seed 18612902776) completados el 18-oct; ✅ Nightly 18612838707 validó suite `full` con `ENABLE_TEST_UTILS="false"` y correo SMTP simulado; ❌ PR `dependabot/npm_and_yarn/production-dependencies-d7805deed1` mantiene fallos en CodeQL y PR Checks pendientes.
+**Estado (21-oct-2025)**: ✅ Pipelines en `main` completados con commit `42ce036` (CI 18673346297, CodeQL 18673346290, Post-Deploy Seed 18673455328); ✅ Nightly 18612838707 continúa estable; ✅ PR #56 (dependabot) recompilando en verde tras corregir la versión Stripe API (previews `34uvqG2YoSs1D2qswdd7WDfhz7Jb` y `9AowLv563goRxEMaXJDsG6yGH7t2` listos para QA).
 
 ### 7.4 Calidad de Código
 
 - **TypeScript**: `pnpm typecheck` ✅
 - **Lint**: `pnpm lint` ✅
-- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: crear webhook Slack, publicar dashboard PostHog y resolver despliegues internos de Vercel.
+- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: confirmar mensaje de prueba en Slack (`#todo-brisa-cubana`), incorporar assets finales de marketing en la landing y automatizar alertas PostHog (`checkout_payment_failed` → Slack).
 
 ---
 

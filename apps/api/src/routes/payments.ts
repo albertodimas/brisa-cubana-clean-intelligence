@@ -13,15 +13,19 @@ const stripeDefaultCurrency =
 const stripePackageVersion = (Stripe as unknown as { PACKAGE_VERSION?: string })
   .PACKAGE_VERSION;
 
-const stripeApiVersion =
+// Stripe 19 cambia el literal de versión de API a "2025-09-30.clover". Para evitar
+// errores de tipo al compilar con distintas versiones del SDK reutilizamos la versión
+// indicada en el entorno o derivamos el valor adecuado según el paquete instalado.
+const runtimeStripeApiVersion =
   process.env.STRIPE_API_VERSION ??
   (stripePackageVersion?.startsWith("19.")
     ? "2025-09-30.clover"
     : "2023-10-16");
+const stripeApiVersion = runtimeStripeApiVersion as Stripe.LatestApiVersion;
 
 const stripeClient = stripeSecret
   ? new Stripe(stripeSecret, {
-      apiVersion: stripeApiVersion as Stripe.LatestApiVersion,
+      apiVersion: stripeApiVersion,
     })
   : null;
 

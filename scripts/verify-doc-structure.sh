@@ -34,6 +34,7 @@ required_files=(
   "docs/operations/alerts.md"
   "docs/operations/incident-runbook.md"
   "docs/operations/sentry.md"
+  "docs/operations/slack-integration.md"
   "docs/qa/e2e-strategy.md"
   "docs/qa/regression-checklist.md"
   "docs/qa/performance-budgets.md"

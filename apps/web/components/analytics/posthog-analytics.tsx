@@ -8,7 +8,7 @@ const POSTHOG_KEY =
   (process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "").trim() || "phc_test_e2e";
 const POSTHOG_HOST =
   (process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "").trim() ||
-  "https://us.posthog.com";
+  "https://us.i.posthog.com";
 const POSTHOG_FORCE_ENABLE =
   (process.env.NEXT_PUBLIC_POSTHOG_FORCE_ENABLE ?? "").toLowerCase() === "true";
 

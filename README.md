@@ -1,135 +1,165 @@
 # Brisa Cubana Clean Intelligence
 
-Monorepo reiniciado para convertir el proyecto en una plataforma operativa y verificable.  
-Actualizado al **19 de octubre de 2025** con **188 pruebas automatizadas** (161 unit/integration + 27 E2E) pasando en CI; release etiquetado como **v0.4.1** tras lanzar la landing comercial con telemetría, el formulario de leads, el panel operativo en `/panel` y cobertura documental actualizada.
+[![CI (Main Branch)](https://img.shields.io/github/actions/workflow/status/albertodimas/brisa-cubana-clean-intelligence/ci.yml?label=CI&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/ci.yml)
+[![Nightly E2E](https://img.shields.io/github/actions/workflow/status/albertodimas/brisa-cubana-clean-intelligence/nightly.yml?label=Nightly%20E2E&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/nightly.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/albertodimas/brisa-cubana-clean-intelligence/codeql.yml?label=CodeQL&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/codeql.yml)
+[![Release](https://img.shields.io/github/v/tag/albertodimas/brisa-cubana-clean-intelligence?color=0EA5E9&label=release&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/tags)
 
-## Stack actualizado
+Monorepo verificado para la plataforma operativa de **Brisa Cubana Clean Intelligence**.  
+Al día **21 de octubre de 2025**, la serie `v0.4.x` está totalmente documentada, con **188 pruebas automatizadas** (161 unit/integration + 27 E2E) pasando en CI y despliegues productivos estables.
 
-- **Frontend:** Next.js 15.5.5 + React 19.2.0 (`apps/web`) con Auth.js (NextAuth v5), server actions y proxy interno `/api/*` hacia la API Hono (`INTERNAL_API_URL`).
-- **API:** Hono 4.9.12 (`apps/api`) sobre Node.js 22, autenticación JWT, RBAC por middleware, rate limiting configurable y repositorios Prisma desacoplados.
-- **Persistencia:** Prisma ORM 6.17.1 sobre PostgreSQL 16 (Docker local) / PostgreSQL 17 (Neon en producción) con soft delete (`deletedAt`) en todos los modelos.
-- **Estilos:** Tailwind CSS 4.1.0 (configuración híbrida `@config` + `tailwind.config.ts`, migrada el 17-oct-2025 según `docs/decisions/tailwind-v4-plan.md`).
-- **Observabilidad:** Logging con Pino, métricas básicas en `/health`, captura de errores con Sentry y Web Vitals a través de Speed Insights + métricas personalizadas.
-- **Tooling base:** pnpm 10.18, Turborepo 2.5.8, TypeScript 5.9, Vitest 3.2, Playwright 1.56, Husky + lint-staged, CI en GitHub Actions.
+---
 
-## Estado al 19 de octubre de 2025
+## 🧭 Visión general
 
-| Área          | Estado | Detalle                                                                                                                                                                                             |
-| ------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Frontend web  | 🟢     | Panel operativo en `/panel` con estados de carga resilientes, búsqueda debounced, chips de filtros activos, landing comercial relanzada (hero, precios, FAQ, testimonios) y proxy interno `/api/*`. |
-| API           | 🟢     | CRUD completo (servicios, propiedades, reservas, clientes, usuarios) con repositorios, búsqueda paginada, soft delete, rate limiting en login y webhook de leads documentado.                       |
-| Tests         | 🟢     | 161 pruebas unitarias/integración + 27 E2E (smoke/critical/full); `pnpm test`, `pnpm test:e2e:*`.                                                                                                   |
-| Documentación | 🟢     | README, `docs/guides/quickstart.md`, `docs/overview/status.md` y OpenAPI (`docs/reference/openapi.yaml`) sincronizados con la serie 0.4.x.                                                          |
-| Deploy        | 🟢     | Web (Next.js) y API (Hono) corriendo en Vercel, conectados a PostgreSQL Neon; pipelines CI/CD verdes.                                                                                               |
-| Checkout test | 🟡     | Flujo `/checkout` habilitado con Stripe Payment Element (modo test) y endpoint `POST /api/payments/stripe/intent`; rota claves antes de modo live.                                                  |
+- **Frontend (`apps/web`)**: Next.js 15.5.5 + React 19.2.0, Auth.js (NextAuth v5), server actions y proxy interno `/api/*`.
+- **API (`apps/api`)**: Hono 4.9.12 sobre Node.js 22, RBAC por middleware, repositorios Prisma, rate limiting y webhook de leads.
+- **Persistencia**: Prisma Client 6.17.1 → PostgreSQL 17 (Neon en producción) / PostgreSQL 16 en Docker local con soft delete en todos los modelos.
+- **Observabilidad**: Pino + Sentry (web/API), Speed Insights, métricas `/health`, logs estructurados y monitoreo E2E nocturno.
+- **Tooling**: pnpm 10.18 · Turborepo 2.5 · TypeScript 5.9 · Vitest 3.2 · Playwright 1.56 · Husky + lint-staged.
 
-## Requisitos
+---
 
-- Node.js 22.x (LTS, compatible con Vercel).
-- pnpm 10.18 (`corepack enable` lo instala).
-- Docker 24+ (para PostgreSQL local).
-- Git 2.40+.
+## 🗂️ Monorepo
 
-## Puesta en marcha
+```
+apps/
+  api/       # Hono + Prisma + tests de integración
+  web/       # Next.js + Auth.js + componentes UI
+docs/
+  guides/    # Quickstart, portal y procedimientos
+  marketing/ # Brand voice, assets, social
+  operations/# Runbooks, despliegue, env-sync
+  overview/  # Estado y métricas del proyecto
+tests/       # Suites Playwright (smoke/critical/full)
+scripts/     # Utilidades (Prisma, verificación docs, seeds)
+```
 
-1. Instala dependencias:
+---
+
+## 🚀 Quick start
+
+1. **Instala dependencias**
    ```bash
    pnpm install
    ```
-2. Copia variables de entorno:
+2. **Configura variables**
    ```bash
    cp apps/api/.env.example apps/api/.env.local
+   cp apps/web/.env.example apps/web/.env.local
    ```
-3. Levanta PostgreSQL local:
+3. **Levanta PostgreSQL local**
    ```bash
    docker compose up -d
-   ```
-4. Sincroniza y siembra la base:
-   ```bash
    pnpm db:push
    pnpm db:seed
    ```
-5. Ejecuta el stack (Next.js + API):
+4. **Ejecuta el stack**
 
    ```bash
-   pnpm dev -- --parallel
+   pnpm dev
    ```
 
-   - Web: <http://localhost:3000>
-   - API: <http://localhost:3001>
+   - Web → <http://localhost:3000>
+   - API → <http://localhost:3001>
 
-Para los tests de humo:
+5. **Pruebas rápidas**
+   ```bash
+   pnpm lint && pnpm typecheck
+   pnpm test                  # Vitest
+   pnpm test:e2e:smoke        # Playwright (smoke)
+   ```
 
-```bash
-pnpm test           # Vitest en todos los paquetes
-pnpm test:e2e:smoke # Playwright (recomendado instalar navegadores la primera vez)
-```
+Usuarios seed: `admin@brisacubanacleanintelligence.com / Brisa123!`, `operaciones@... / Brisa123!`, `cliente@... / Brisa123!`.
 
-## Scripts útiles
+---
 
-| Comando                         | Descripción                                        |
-| ------------------------------- | -------------------------------------------------- |
-| `pnpm dev`                      | Ejecuta los `dev` scripts en paralelo (web + api). |
-| `pnpm lint`                     | ESLint sobre todos los paquetes.                   |
-| `pnpm typecheck`                | Verifica TypeScript de forma estricta.             |
-| `pnpm test`                     | Ejecuta Vitest (unit + integration).               |
-| `pnpm test:e2e:*`               | Ejecuta Playwright (`smoke`, `critical`, `full`).  |
-| `pnpm docs:verify`              | Valida la estructura mínima de documentación.      |
-| `pnpm db:push` / `pnpm db:seed` | Sincroniza y popula la base de datos local.        |
-| `pnpm build`                    | Compila Next.js y genera `dist` de la API.         |
-| `pnpm format`                   | Ejecuta Prettier en código y markdown.             |
+## 🧪 Testing matrix
 
-## Infraestructura y despliegue
+| Comando                    | Descripción                                  |
+| -------------------------- | -------------------------------------------- |
+| `pnpm test`                | Vitest (unit + integration) en web y API.    |
+| `pnpm test:e2e:smoke`      | Playwright smoke (5 min).                    |
+| `pnpm test:e2e:critical`   | Playwright critical (CI principal).          |
+| `pnpm test:e2e:full`       | Playwright full (Nightly 02:00 UTC).         |
+| `pnpm docs:verify`         | Verifica estructura mínima de documentación. |
+| `pnpm db:push` / `db:seed` | Sincroniza y siembra PostgreSQL local.       |
+| `pnpm build`               | Compila Next.js + API (`dist`).              |
 
-- **Producción Vercel:**
-- Web: https://brisacubanacleanintelligence.com
-- API: https://api.brisacubanacleanintelligence.com
-- **Base de datos:** PostgreSQL Neon (17) con seed de usuarios, servicios, propiedades y reservas demo.
-- **Proxy interno:** La web reexpone `/api/*` hacia la API Hono vía `INTERNAL_API_URL`, evitando exponer secretos en el navegador.
-- **Observabilidad:** `GET /health` reporta estado de DB; Sentry captura excepciones (web + API) y Web Vitals se envían a Sentry + Speed Insights para monitoreo continuo.
-- **Dominios:** consulta `docs/operations/domain-map.md` para alias activos, subdominios reservados y checklist DNS/env vars.
-- **Sync de variables:** pasos detallados en `docs/operations/env-sync.md` para alinear Vercel y GitHub Actions con los dominios oficiales.
+> CI (Main Branch) ejecuta lint + typecheck + Vitest + Playwright critical.  
+> Nightly Full E2E valida smoke + critical + full + Lighthouse contra producción.
 
-## Contacto oficial
+---
 
-- Dirección: 511 SW 4th Ave, Miami, FL 33130
-- Teléfono: +1 (786) 436-7132
-- Emails:
-  - `admin@brisacubanacleanintelligence.com`
-  - `operaciones@brisacubanacleanintelligence.com`
-  - `soporte@brisacubanacleanintelligence.com`
-  - `ventas@brisacubanacleanintelligence.com`
-  - `facturacion@brisacubanacleanintelligence.com`
-  - `seguridad@brisacubanacleanintelligence.com`
-  - `devops@brisacubanacleanintelligence.com`
-  - `no-reply@brisacubanacleanintelligence.com` (automatizado)
-- Redes sociales:
-  - Instagram: https://instagram.com/BrisaCleanIntelligence
-  - Facebook: https://facebook.com/BrisaCleanIntelligence
-  - LinkedIn: https://www.linkedin.com/company/brisa-clean-intelligence
-  - TikTok: https://www.tiktok.com/@brisacleanintelligence
-  - YouTube: https://www.youtube.com/@BrisaCleanIntelligence
+## 🌐 Environments
 
-## Autenticación y RBAC
+| Entorno            | Host                                                                         | Estado                                          |
+| ------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------- |
+| `Production – web` | https://brisacubanacleanintelligence.com                                     | ✅                                              |
+| `Production – api` | https://api.brisacubanacleanintelligence.com                                 | ✅                                              |
+| `Preview – web`    | Deploy previews automáticos (`brisa-cubana-clean-intelligence-*.vercel.app`) | ✅                                              |
+| `Preview – api`    | `brisa-cubana-clean-intelligence-api-*.vercel.app`                           | ⚠️ revisar logs de Vercel cuando falle el build |
 
-- Login API (`POST /api/authentication/login`) con rate limiting configurable (`LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`).
-- Credenciales sembradas: `admin@brisacubanacleanintelligence.com / Brisa123!`, `operaciones@brisacubanacleanintelligence.com / Brisa123!`, `cliente@brisacubanacleanintelligence.com / Brisa123!`.
-- Cookies HttpOnly gestionadas por Auth.js; el panel muestra la sesión activa y permite cerrar sesión con seguridad.
-- Endpoints protegidos (`/api/services`, `/api/properties`, `/api/bookings`, `/api/users`, `/api/customers`) exigen roles `ADMIN` o `COORDINATOR`.
-- `API_TOKEN` reservado para integraciones servidor-servidor (la UI no depende de él).
-- Rotación de contraseñas y actualización de roles disponibles para usuarios `ADMIN` desde la UI y la API.
+Neon (PostgreSQL 17) sirve la base productiva con seeds demo, ver `docs/operations/env-sync.md` y `docs/operations/domain-map.md` para mantener las variables entre Vercel y GitHub Actions.
 
-## Documentación verificada
+---
 
-- Índice maestro: `docs/README.md` (estructura por dominios y reglas de mantenimiento).
-- Estado y métricas: `docs/overview/status.md`.
-- Quickstart de desarrollo local: `docs/guides/quickstart.md`.
-- Operación del portal cliente: `docs/guides/portal-client.md`.
-- Brand voice & social media: `docs/marketing/brand-voice.md`.
-- Referencia API: `docs/reference/api-reference.md` + `docs/reference/openapi.yaml`.
-- Decisiones técnicas: `docs/decisions/dependency-updates.md`, `docs/decisions/tailwind-v4-deferral.md` y `docs/decisions/tailwind-v4-plan.md` (Issue #40).
+## 📚 Documentación clave
 
-## Desarrollo activo
+- [Estado del proyecto](docs/overview/status.md) – métricas, despliegues y bitácora.
+- [Quickstart local](docs/guides/quickstart.md) – guía paso a paso para levantar el stack.
+- [Portal cliente](docs/guides/portal-client.md) – flujos y requisitos operativos.
+- [Operaciones & despliegue](docs/operations/deployment.md) – pipeline, verificación y rollback.
+- [Brand & marketing](docs/marketing/brand-voice.md) – tono, assets, campañas.
+- [Decisiones técnicas](docs/decisions/) – histórico de migraciones y justificaciones (Tailwind v4, dependencia Stripe, etc.).
+- [Referencia API](docs/reference/openapi.yaml) – especificación OpenAPI.
 
-El proyecto continúa en desarrollo controlado. Próximos hitos: consolidar componentes públicos (Fase 2) y desplegar alertas de observabilidad avanzadas (Slack + métricas de negocio).  
-Se aceptan contribuciones que mantengan la regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI.** Usa `pnpm docs:verify` antes de abrir un PR y mantén Playwright/Vitest verdes.
+---
+
+## 🔄 CI / CD
+
+- **CI (Main Branch)** → lint + typecheck + tests + Playwright critical.
+- **PR Checks** → smoke E2E + validaciones rápidas.
+- **Nightly Full E2E** → suite completa + Lighthouse budgets.
+- **CodeQL** → escaneo estático (JavaScript/TypeScript).
+- **Post-Deploy Seed** → sincroniza Prisma en producción tras cada merge a `main`.
+- **Dependabot Updates** → actualizaciones semanales (agrupadas por producción/dev/CI).
+
+Consulta el tablero de acciones: <https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions>.
+
+---
+
+## 🛡️ Seguridad
+
+- Política completa: [`SECURITY.md`](SECURITY.md).
+- Reportes vía `seguridad@brisacubanacleanintelligence.com` o GitHub Security Advisories.
+- Tiempos objetivo: acuse ≤2 días hábiles · triage ≤5 días · parche ≤10 días (alta).
+
+Alertas actuales: consulta <https://github.com/albertodimas/brisa-cubana-clean-intelligence/security> (Dependabot + CodeQL).
+
+---
+
+## 🤝 Contribuciones
+
+1. Basar cambios en ramas descriptivas.
+2. Ejecutar `pnpm lint && pnpm typecheck && pnpm test`.
+3. Corridas Playwright (`pnpm test:e2e:smoke`) para cambios que toquen UI/flows.
+4. Actualizar documentación (README, `docs/overview/status.md`, CHANGELOG cuando aplique).
+5. Abrir PR contra `main` y esperar CI verde.
+
+> Regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI**.
+
+---
+
+## 📞 Contacto
+
+- Email general: `contacto@brisacubanacleanintelligence.com`
+- Operaciones: `operaciones@brisacubanacleanintelligence.com`
+- Ventas: `ventas@brisacubanacleanintelligence.com`
+- Facturación: `facturacion@brisacubanacleanintelligence.com`
+- Soporte técnico: `devops@brisacubanacleanintelligence.com`
+- Redes: [Instagram](https://instagram.com/BrisaCleanIntelligence) · [LinkedIn](https://www.linkedin.com/company/brisa-clean-intelligence) · [TikTok](https://www.tiktok.com/@brisacleanintelligence) · [YouTube](https://www.youtube.com/@BrisaCleanIntelligence)
+
+---
+
+Hecho con 💚 desde Miami para anfitriones premium. Mantengamos el stack limpio, la documentación viva y los despliegues en verde.

@@ -26,7 +26,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 | Web (Stripe)                                | `STRIPE_PUBLISHABLE_KEY`                                                                                                                                    | All                 | Clave pública usada por Stripe.js                                              |
 | Web (Leads opcional)                        | `LEAD_WEBHOOK_URL`                                                                                                                                          | Production+Preview  | Endpoint HTTPS (Slack/CRM) que recibirá payloads del formulario público        |
 | Web (Log drains)                            | `LOG_DRAIN_VERIFICATION_CODE`                                                                                                                               | All                 | Código devuelto en `x-vercel-verify` para validar el endpoint `/api/logdrain`. |
-| Web (Analítica)                             | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`                                                                                                       | All                 | API key y host para PostHog (`https://us.posthog.com` por defecto).            |
+| Web (Analítica)                             | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`                                                                                                       | All                 | API key y host para PostHog (`https://us.i.posthog.com` por defecto).          |
 
 ## 3. Configuración de Dominios Personalizados
 

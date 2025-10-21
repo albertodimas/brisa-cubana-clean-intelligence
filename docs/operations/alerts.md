@@ -4,13 +4,13 @@
 
 Este documento describe la configuración de alertas para monitoreo proactivo de errores, performance y disponibilidad del sistema.
 
-> **Estado 20-oct-2025:** Las reglas de Sentry envían correo; la notificación a Slack quedará operativa en cuanto se configure `SLACK_WEBHOOK_URL` en Vercel/GitHub.
+> **Estado 21-oct-2025:** Slack (`#todo-brisa-cubana`) y correo están activos vía `SLACK_WEBHOOK_URL`; las reglas existentes se actualizan para usar ambos canales.
 
 ## Sentry Alerts
 
 ### Configuración de Alertas de Errores
 
-**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar las notificaciones. Hasta configurar Slack, la confirmación llegará por email (`notify_event`).
+**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar las notificaciones. Verifica en `#todo-brisa-cubana` y correo que se reciba el aviso.
 
 #### 1. New Issue Alert (Errores Nuevos)
 

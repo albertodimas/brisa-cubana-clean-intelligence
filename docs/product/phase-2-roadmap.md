@@ -1,6 +1,6 @@
 # Roadmap Fase 2 – Experiencia Comercial y Clientes
 
-**Última actualización:** 18 de octubre de 2025  
+**Última actualización:** 21 de octubre de 2025  
 **Responsables:** Producto · Plataforma · Operaciones
 
 ## 1. Objetivo general
@@ -29,7 +29,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 
 ## 5. Próximos pasos inmediatos
 
-1. Analítica base lista (18-oct-2025): CTA y checkout disparan `cta_request_proposal`, `cta_portal_demo`, `checkout_started`, `checkout_completed` vía `@vercel/analytics` + Sentry. Pendiente: seleccionar plataforma definitiva (PostHog/GA4/Segment), normalizar naming/UTM y publicar dashboard.
+1. Analítica base lista (21-oct-2025): CTA y checkout disparan `cta_request_proposal`, `cta_portal_demo`, `checkout_started`, `checkout_completed` vía `@vercel/analytics` + Sentry. Plataforma definitiva: **PostHog Cloud** con dashboard `ID 607007` enlazado y 7 insights publicados. Pendiente: activar alertas automáticas y reportes semanales cuando exista tráfico real.
 2. Contenido comercial iterado el 18-oct-2025: landing incorpora secciones "Planes y precios", FAQ ampliada y formulario de captura que envía a `/api/leads` (webhook opcional `LEAD_WEBHOOK_URL`). Pendiente: cerrar copy definitivo con marketing y añadir assets/hero photography para la release pública.
 3. Definir proceso post-lanzamiento: monitoreo diario de alertas Sentry/Slack, revisión de logs Stripe live y QA regresivo semanal (ver `docs/qa/reports/2025-10-20-go-live.md`).
 4. **Coordinación marketing**:
@@ -41,7 +41,8 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
    - [x] Seleccionar plataforma → **PostHog Cloud** (ver `docs/product/analytics-decision.md`).
    - [x] Implementar SDK `posthog-js-lite`, exponer `window.__brisaPostHogClient` y validar carga vía Playwright (`tests/e2e/analytics.spec.ts`).
    - [x] Añadir script `pnpm posthog:test-event` para validar manualmente dashboards/alertas.
-   - [ ] Publicar dashboard accesible para stakeholders y enlazarlo en este roadmap.
+   - [x] Publicar dashboard accesible para stakeholders (ver sección “Insights creados”).
+   - [ ] Configurar automatizaciones y alertas (`checkout_payment_failed` → Slack) una vez exista volumen de eventos.
 
 ## 6. Artefactos en elaboración
 
