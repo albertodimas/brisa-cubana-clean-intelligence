@@ -7,6 +7,7 @@ on:
 
 jobs:
   monitor:
+    if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.SLACK_WEBHOOK_URL != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,3 +26,11 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           POSTHOG_CHECKOUT_LOOKBACK_MINUTES: '10'
         run: pnpm posthog:monitor
+
+  warn-missing-secrets:
+    if: ${{ secrets.POSTHOG_API_KEY == '' || secrets.SLACK_WEBHOOK_URL == '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "### PostHog monitor omitido" >> $GITHUB_STEP_SUMMARY
+          echo "Se requieren los secretos \\`POSTHOG_API_KEY\\` y \\`SLACK_WEBHOOK_URL\\` en GitHub → Settings → Secrets → Actions." >> $GITHUB_STEP_SUMMARY
