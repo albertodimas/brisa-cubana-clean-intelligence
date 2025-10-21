@@ -1,7 +1,7 @@
 # Slack Integration - Brisa Cubana Clean Intelligence
 
 **Last Updated:** October 21, 2025
-**Status:** ✅ Configured (en producción) y monitoreada; se requiere confirmación visual periódica en `#todo-brisa-cubana`.
+**Status:** ✅ Configured (en producción) y monitoreada; última confirmación visual en `#todo-brisa-cubana` el 21-oct-2025.
 
 ---
 
@@ -224,25 +224,23 @@ Expected response: `ok`
 
 2. **Rotate webhook if compromised:**
    - Go to: https://api.slack.com/apps/A09MF1LE9UK/incoming-webhooks
-
-- Delete old webhook
-- Create new webhook
-- Update `SLACK_WEBHOOK_URL` in Vercel
-- Redeploy
+   - Delete old webhook
+   - Create new webhook
+   - Update `SLACK_WEBHOOK_URL` in Vercel
+   - Redeploy
 
 3. **Monitor usage:**
    - Slack has rate limits (1 message per second)
    - Monitor for unexpected spikes
-
-- Implement retry logic for failures
+   - Implement retry logic for failures
 
 ---
 
 ## Registro de verificaciones
 
-| Fecha (UTC)          | Resultado | Notas                               |
-| -------------------- | --------- | ----------------------------------- |
-| 2025-10-21 06:12 UTC | ⚠️        | Mensaje enviado; confirmar en Slack |
+| Fecha (UTC)          | Resultado | Notas                                             |
+| -------------------- | --------- | ------------------------------------------------- |
+| 2025-10-21 06:12 UTC | ✅        | Mensaje recibido (inicio del historial en Slack). |
 
 ---
 
@@ -265,4 +263,4 @@ Expected response: `ok`
 
 **Maintained by:** DevOps Team
 **Contact:** Alberto Dimas (albertodimasmorazaldivar-7548)
-**Last Test:** October 21, 2025 ⚠️ (mensaje enviado; confirmar visual en Slack)
+**Last Test:** October 21, 2025 ✅ (mensaje confirmado en `#todo-brisa-cubana`)
