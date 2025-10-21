@@ -40,7 +40,7 @@ inputs:
   e2e-admin-email:
     description: Admin email used in seeded data.
     required: false
-    default: "admin@brisacubanaclean.com"
+    default: "admin@brisacubanacleanintelligence.com"
   e2e-admin-password:
     description: Admin password used in seeded data.
     required: false
@@ -48,7 +48,7 @@ inputs:
   e2e-coordinator-email:
     description: Coordinator email used in seeded data.
     required: false
-    default: "ops@brisacubanaclean.com"
+    default: "operaciones@brisacubanacleanintelligence.com"
   e2e-coordinator-password:
     description: Coordinator password used in seeded data.
     required: false
@@ -173,9 +173,9 @@ runs:
         if [ -z "$next_public_api_url" ]; then next_public_api_url="http://localhost:3001"; fi
         if [ -z "$login_rate_limit" ]; then login_rate_limit="20"; fi
         if [ -z "$login_rate_limit_window_ms" ]; then login_rate_limit_window_ms="60000"; fi
-        if [ -z "$e2e_admin_email" ]; then e2e_admin_email="admin@brisacubanaclean.com"; fi
+        if [ -z "$e2e_admin_email" ]; then e2e_admin_email="admin@brisacubanacleanintelligence.com"; fi
         if [ -z "$e2e_admin_password" ]; then e2e_admin_password="Brisa123!"; fi
-        if [ -z "$e2e_coordinator_email" ]; then e2e_coordinator_email="ops@brisacubanaclean.com"; fi
+        if [ -z "$e2e_coordinator_email" ]; then e2e_coordinator_email="operaciones@brisacubanacleanintelligence.com"; fi
         if [ -z "$e2e_coordinator_password" ]; then e2e_coordinator_password="Brisa123!"; fi
         if [ -z "$enable_test_utils" ]; then enable_test_utils="true"; fi
         if [ -z "$portal_magic_link_base_url" ]; then portal_magic_link_base_url="http://localhost:3000"; fi
