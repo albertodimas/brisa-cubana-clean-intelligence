@@ -58,8 +58,30 @@ Este documento describe la estructura y métricas propuestas para el dashboard e
 
 ---
 
-## Pendientes
+---
 
-- Obtener URL pública/privada del dashboard y documentarla. (Pendiente: dashboard aún no publicado en PostHog).
-- Configurar automatización de reportes (ej. weekly digest en Slack).
-- Validar series/propiedades con el DWH cuando esté disponible.
+## Dashboard en PostHog
+
+**URL del Dashboard:** https://us.posthog.com/project/225064/dashboard/607007
+**Nombre:** Brisa Cubana - Funnel Comercial
+**ID:** 607007
+**Creado:** 21 de octubre de 2025
+
+El dashboard está creado y listo para configuración. Para añadir charts y visualizaciones:
+
+1. Accede al dashboard usando la URL de arriba
+2. Click "Add insight" o "Add text card" según necesites
+3. Configura los insights según las secciones definidas en este documento
+4. Guarda cada insight al dashboard
+
+---
+
+## Próximos pasos
+
+- [ ] Añadir charts del Panel "Funnel Comercial" (funnels de conversión)
+- [ ] Añadir charts del Panel "Checkout Health" (gráficas temporales, tasas de error)
+- [ ] Añadir charts del Panel "Portal Cliente" (métricas de engagement)
+- [ ] Añadir charts del Panel "Top of Funnel" (eventos de marketing, UTM)
+- [ ] Configurar alertas en PostHog (webhook Slack) para `checkout_payment_failed`
+- [ ] Configurar automatización de reportes (ej. weekly digest en Slack)
+- [ ] Validar series/propiedades con el DWH cuando esté disponible
