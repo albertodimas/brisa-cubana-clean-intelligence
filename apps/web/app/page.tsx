@@ -19,46 +19,49 @@ import { MarketingLink } from "@/components/landing/marketing-link";
 const testimonials = [
   {
     quote:
-      "Con Brisa Cubana dejamos de bloquear noches entre huéspedes. 0 sorpresas, 100 % check-ins felices.",
-    author: "Ana",
-    role: "Superhost · Brickell",
+      "Entre 12 y 25 turnovers por propiedad al año es la media del sector STR. Planificamos cuadrillas con capacidad extra para cubrir temporadas altas sin bloqueos.",
+    author: "Fuente: Vacation Rental Cleaning Market Outlook 2024",
+    role: "pmarketresearch.com",
   },
   {
     quote:
-      "La auditoría RFID y los reportes en el portal me ahorran visitas improvisadas. El equipo opera como si fuera propio.",
-    author: "Carlos",
-    role: "Propietario · Key Biscayne",
+      "El 81 % de los huéspedes prioriza la limpieza al reservar y 78 % deja reseñas positivas cuando todo está impecable; nuestros checklists documentados sostienen ratings altos.",
+    author:
+      "Fuente: Hospitable · Impact of Cleanliness on Guest Reviews (2024)",
+    role: "hospitable.com",
   },
   {
     quote:
-      "Escalar de 5 a 40 unidades sin aumentar staff interno fue posible gracias a su logística 24/7 y Amenity Refresh Express.",
-    author: "Valeria",
-    role: "Property Manager · Coconut Grove",
+      "El mercado de Miami supera las 13 000 propiedades activas y los stays de 4‑5 noches exigen turnos mismos día. Operamos 24/7 con evidencia fotográfica en cada entrega.",
+    author: "Fuente: Turno · Miami Airbnb Cleaners / STR trend reports 2024",
+    role: "turno.com",
   },
 ];
 
 const kpiHighlights = [
   {
-    label: "Turnovers gestionados",
-    value: "+12K",
-    description: "Historias de check-in impecables para anfitriones premium.",
-  },
-  {
-    label: "Satisfacción del huésped",
-    value: "97%",
+    label: "Rotaciones por propiedad",
+    value: "12‑25/año",
     description:
-      "Encuestas post estancia en propiedades operadas por Brisa Cubana.",
+      "Media de turnovers en STR de EE. UU.; planificamos buffers para picos turísticos.",
   },
   {
-    label: "Alertas resueltas",
-    value: "< 15 min",
-    description: "Tiempo promedio de respuesta ante incidencias reportadas.",
+    label: "Impacto en reseñas",
+    value: "81 %",
+    description:
+      "De los viajeros prioriza limpieza; 78 % deja reviews positivas cuando está impecable.",
   },
   {
-    label: "Cobertura",
+    label: "Programación garantizada",
     value: "24/7",
     description:
-      "Cuadrillas activas en Miami, Brickell, Key Biscayne y Surfside.",
+      "Calendarios sincronizados con alertas same-day y soporte priorizado.",
+  },
+  {
+    label: "Mercado Miami",
+    value: "13K+ listings",
+    description:
+      "Inventario activo con picos Nov‑Mar y 24 M de visitantes anuales.",
   },
 ];
 
@@ -66,19 +69,19 @@ const differentiators = [
   {
     title: "Protocolos cinco estrellas",
     description:
-      "Checklist digital, reposición certificada y evidencia fotográfica en menos de seis horas.",
+      "Adherimos al Airbnb Enhanced Cleaning estándar: checklists de 100+ puntos, sanitización hospitalaria y reportes firmados digitalmente.",
     icon: SparklesIcon,
   },
   {
     title: "Seguridad y compliance",
     description:
-      "Supervisión operativa, inventario controlado y pólizas de responsabilidad civil actualizadas.",
+      "Cumplimos normativas municipales/estatales, inventario trazable y pólizas activas para evitar sanciones en mercados regulados.",
     icon: ShieldCheckIcon,
   },
   {
     title: "Integraciones PMS",
     description:
-      "Sincronizamos agenda con Guesty, Hostaway, ResNexus y reportamos incidencias en tiempo real.",
+      "Sincronizamos Guesty, Hostaway, ResNexus o Breezeway, generamos alertas automáticas y evidencias fotográficas con timestamp.",
     icon: CloudArrowUpIcon,
   },
 ];
@@ -87,19 +90,19 @@ const processSteps = [
   {
     title: "Diagnóstico express",
     description:
-      "Levantamos checklist, inventario y frecuencia ideal en una sesión remota de 30 minutos.",
+      "Auditamos inventario, tiempos de estancia (media 4‑5 noches) y reseñas para definir SLAs sin bloquear ingresos.",
     icon: ClipboardDocumentCheckIcon,
   },
   {
     title: "Operación continua",
     description:
-      "Cuadrillas asignadas, reposición centralizada y inspección final con reporte fotográfico.",
+      "Cuadrillas con suministros estandarizados, lavado propio y checklists firmados in situ para cada turnover.",
     icon: ArrowPathIcon,
   },
   {
     title: "Visibilidad total",
     description:
-      "Dashboard y alertas automatizadas, soporte humano 24/7 y mejoras trimestrales con tu equipo.",
+      "Portal con fotos finales, métricas en tiempo real y alertas automáticas cuando el PMS detecta cambios.",
     icon: ChatBubbleLeftRightIcon,
   },
 ];
@@ -112,12 +115,12 @@ const pricingTiers: PricingTier[] = [
     price: "$209+",
     priceSuffix: "por salida",
     description:
-      "Para anfitriones con turnovers frecuentes que exigen restocking completo, lavandería express y evidencia fotográfica en <4 h.",
+      "Para listados urbanos con 12‑25 rotaciones al año. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
     features: [
       "Reposición completa de amenities, textiles y welcome kit",
-      "Checklist Airbnb Pro con auditoría RFID de inventario",
+      "Checklist Airbnb Enhanced Cleaning y control RFID de inventario",
       "Reporte en portal cliente en menos de 4 horas",
-      "Supervisión on-site durante ventanas críticas",
+      "Supervisión on-site en ventanas críticas y lanzamientos",
     ],
   },
   {
@@ -127,7 +130,7 @@ const pricingTiers: PricingTier[] = [
     price: "$289+",
     priceSuffix: "por servicio",
     description:
-      "Ideal para residencias y segundas propiedades que requieren detailing premium, tratamiento antivaho y cuidado de superficies.",
+      "Ideal para residencias y segundas propiedades con stays superiores a 7 noches. Incluye detailing premium y tratamiento antivaho.",
     features: [
       "Detallado premium de cocina, baños y textiles de lujo",
       "Insumos hipoalergénicos certificados EPA",
@@ -143,7 +146,7 @@ const pricingTiers: PricingTier[] = [
     price: "$349+",
     priceSuffix: "por servicio",
     description:
-      "Para entregas de penthouses y villas boutique tras obra o remodelación, con acabado de hotel cinco estrellas.",
+      "Para entregas de penthouses y villas tras obra o remodelación con requisitos OSHA. Incluye pulido final y staging ejecutivo.",
     features: [
       "Pulido de superficies y eliminación de polvo de obra",
       "Staging final con inspección fotográfica ejecutiva",
@@ -192,17 +195,17 @@ const faqItems = [
   {
     question: "¿Operan 24/7?",
     answer:
-      "Sí. Contamos con equipos de guardia para turnovers de madrugada y emergencias calendarizadas con menos de 12 horas de aviso.",
+      "Sí. Miami concentra la demanda en temporada alta (noviembre-marzo); mantenemos guardias 24/7 para cubrir emergencias y same-day turnovers.",
   },
   {
     question: "¿Usan productos ecológicos?",
     answer:
-      "Trabajamos con líneas hipoalergénicas y certificados EPA. Podemos operar con tu inventario o proveerlo según plan.",
+      "Operamos con líneas certificadas por EPA Safer Choice e insumos hipoalergénicos; podemos trabajar con tu inventario o abastecerlo íntegramente.",
   },
   {
     question: "¿Cómo funciona el portal cliente?",
     answer:
-      "Recibes un enlace mágico válido por 12 horas con acceso a reservas, reagendos, cancelaciones y reportes 24/7.",
+      "Recibes un enlace mágico válido por 12 horas; allí gestionas reservas, reagendos, cancelaciones y descargas evidencias con fotos y firmas digitales.",
   },
 ];
 
@@ -219,11 +222,13 @@ export default function LandingPage() {
                 Brisa Cubana Clean Intelligence
               </span>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] max-w-3xl">
-                Limpieza profesional para propiedades premium en Miami.
+                Limpieza profesional y documentada para propiedades premium en
+                Miami.
               </h1>
               <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 dark:text-brisa-200 max-w-2xl">
-                Turnover express, deep cleaning y mantenimiento preventivo para
-                anfitriones con estándares cinco estrellas.
+                Turnovers same-day con checklists de más de 100 puntos, deep
+                cleaning y mantenimiento preventivo con reportes en menos de 4
+                horas.
               </p>
               <div className="flex flex-wrap gap-4">
                 <MarketingLink

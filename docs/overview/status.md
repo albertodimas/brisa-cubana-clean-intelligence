@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 20 de octubre de 2025 (CI main – run 18603217844 – ✅ Playwright `critical`; CodeQL 18603217867; Post-Deploy Seed 18612902776; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 21 de octubre de 2025 (CI main – run 18669471728 – ✅ Playwright `critical`; CodeQL 18669470308; Post-Deploy Seed 18669614987; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -15,8 +15,8 @@
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Build local (`vercel build --prod`) sin errores; los despliegues en Vercel están fallando en fase de publicación con "An unexpected error happened..." (investigación en curso con soporte). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN) listas en Development/Preview/Production; `SLACK_WEBHOOK_URL` sigue pendiente de alta.
-- Sitio público `/` sirve la landing comercial (hero + CTA checkout/portal) con métricas KPI, bloques de diferenciadores, proceso operativo, testimonios y FAQ. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
+- Despliegues en Vercel restaurados (21-oct-2025 01:30 UTC). Últimos deployments `Ready`: web `https://brisa-cubana-clean-intelligence-ov83pncfl-...` y API `https://brisa-cubana-clean-intelligence-jjl943a0f-...` (commit `f14d575`). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN) listas en Development/Preview/Production; `SLACK_WEBHOOK_URL` sigue pendiente de alta.
+- Sitio público `/` sirve la landing comercial con métricas basadas en datos reales del mercado STR (rotaciones 12‑25/año, 81 % reviews impactadas por limpieza, 13K listings en Miami) y CTA de checkout/portal. Los placeholders de imagen permanecen a la espera de los activos listados en `docs/marketing/visual-assets-checklist.md`. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
 - Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
