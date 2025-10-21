@@ -10,9 +10,18 @@ const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripeDefaultCurrency =
   process.env.STRIPE_DEFAULT_CURRENCY?.toLowerCase() ?? "usd";
 
+const stripePackageVersion = (Stripe as unknown as { PACKAGE_VERSION?: string })
+  .PACKAGE_VERSION;
+
+const stripeApiVersion =
+  process.env.STRIPE_API_VERSION ??
+  (stripePackageVersion?.startsWith("19.")
+    ? "2025-09-30.clover"
+    : "2023-10-16");
+
 const stripeClient = stripeSecret
   ? new Stripe(stripeSecret, {
-      apiVersion: "2023-10-16",
+      apiVersion: stripeApiVersion as Stripe.LatestApiVersion,
     })
   : null;
 
