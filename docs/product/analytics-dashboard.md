@@ -76,12 +76,41 @@ El dashboard está creado y listo para configuración. Para añadir charts y vis
 
 ---
 
+---
+
+## Insights Creados via API
+
+Todos los insights han sido creados programáticamente y están listos para añadir al dashboard:
+
+| #   | Nombre                               | ID      | Tipo           | URL                                                            |
+| --- | ------------------------------------ | ------- | -------------- | -------------------------------------------------------------- |
+| 1   | Funnel Comercial - Landing a Pago    | 3767234 | Funnel         | [Ver](https://us.posthog.com/project/225064/insights/zu0eTQCm) |
+| 2   | Funnel Portal - Login a Confirmación | 3767282 | Funnel         | [Ver](https://us.posthog.com/project/225064/insights/3767282)  |
+| 3   | Checkout Health - Serie Temporal     | 3767283 | Trends         | [Ver](https://us.posthog.com/project/225064/insights/3767283)  |
+| 4   | Checkout - Errores por Tipo          | 3767284 | Trends (Table) | [Ver](https://us.posthog.com/project/225064/insights/3767284)  |
+| 5   | Portal Cliente - Engagement          | 3767285 | Trends         | [Ver](https://us.posthog.com/project/225064/insights/3767285)  |
+| 6   | Marketing - CTAs y Leads             | 3767286 | Trends         | [Ver](https://us.posthog.com/project/225064/insights/3767286)  |
+| 7   | Marketing - Fuentes UTM              | 3767287 | Trends (Pie)   | [Ver](https://us.posthog.com/project/225064/insights/3767287)  |
+
+### Añadir al Dashboard
+
+**URL del Dashboard:** https://us.posthog.com/project/225064/dashboard/607007
+
+Para añadir cada insight al dashboard:
+
+1. Visita el dashboard usando la URL de arriba
+2. Click "Add insight"
+3. Busca por nombre (ej. "Funnel Comercial")
+4. Click en el insight → "Add to dashboard"
+5. Repite para todos los insights
+
+**Nota:** La API pública de PostHog no soporta añadir tiles a dashboards programáticamente. Los insights se crearon via API y deben añadirse manualmente (toma ~2 minutos).
+
+---
+
 ## Próximos pasos
 
-- [ ] Añadir charts del Panel "Funnel Comercial" (funnels de conversión)
-- [ ] Añadir charts del Panel "Checkout Health" (gráficas temporales, tasas de error)
-- [ ] Añadir charts del Panel "Portal Cliente" (métricas de engagement)
-- [ ] Añadir charts del Panel "Top of Funnel" (eventos de marketing, UTM)
-- [ ] Configurar alertas en PostHog (webhook Slack) para `checkout_payment_failed`
-- [ ] Configurar automatización de reportes (ej. weekly digest en Slack)
-- [ ] Validar series/propiedades con el DWH cuando esté disponible
+- [ ] Añadir los 7 insights al dashboard manualmente (instrucciones arriba)
+- [ ] Configurar alertas en PostHog para `checkout_payment_failed` → Slack
+- [ ] Configurar automatización de reportes semanales
+- [ ] Validar que los eventos estén emitiendo datos en producción
