@@ -8,7 +8,7 @@ describe("LandingPage", () => {
     const markup = renderToStaticMarkup(<LandingPage />);
 
     expect(markup).toContain(
-      "Limpieza profesional para propiedades premium en Miami.",
+      "Limpieza profesional y documentada para propiedades premium en Miami.",
     );
     expect(markup).toContain("Solicitar cotización");
     expect(markup).toContain("Explora el portal cliente");
