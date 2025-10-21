@@ -33,6 +33,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/qa/e2e-strategy.md` documenta el uso de builds de producción y las variables `API_PORT`/`WEB_PORT`/`PLAYWRIGHT_BASE_URL` para entornos locales y CI.
 - `docs/overview/status.md` registra la verificación del 19-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.
+- `docs/operations/incident-2025-10-20-vercel-deployment-failure.md` documenta el incidente en curso con Vercel (`temporary_failure` en `patchBuild`) y los pasos para soporte.
 
 ## [0.4.1] - 2025-10-18
 
