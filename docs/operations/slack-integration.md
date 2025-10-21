@@ -1,7 +1,7 @@
 # Slack Integration - Brisa Cubana Clean Intelligence
 
 **Last Updated:** October 21, 2025
-**Status:** ✅ Configured and Active
+**Status:** ✅ Configured (en producción) y monitoreada; se requiere confirmación visual periódica en `#todo-brisa-cubana`.
 
 ---
 
@@ -88,7 +88,18 @@ When a new lead is created via the contact form on the landing page, a notificat
 
 ### Manual Testing
 
-Test the webhook integration using the provided script:
+**Secuencia recomendada (producción):**
+
+```bash
+vercel env pull .env.vercel-prod --environment production --scope brisa-cubana
+source .env.vercel-prod
+SLACK_WEBHOOK_URL="$SLACK_WEBHOOK_URL" bash scripts/test-slack-webhook.sh "🛰️ Monitoreo automático: webhook activo $(date -u '+%Y-%m-%d %H:%M UTC')"
+rm .env.vercel-prod
+```
+
+1. Ejecuta los comandos anteriores en una terminal segura. Descarga temporalmente el `.env`, envía un mensaje de control y elimina el archivo inmediatamente.
+2. Abre Slack y confirma que el mensaje aparece en `#todo-brisa-cubana`. Registra la fecha en la tabla de verificaciones.
+3. Para pruebas locales o puntuales puedes usar:
 
 ```bash
 # Basic test
@@ -213,15 +224,25 @@ Expected response: `ok`
 
 2. **Rotate webhook if compromised:**
    - Go to: https://api.slack.com/apps/A09MF1LE9UK/incoming-webhooks
-   - Delete old webhook
-   - Create new webhook
-   - Update `SLACK_WEBHOOK_URL` in Vercel
-   - Redeploy
+
+- Delete old webhook
+- Create new webhook
+- Update `SLACK_WEBHOOK_URL` in Vercel
+- Redeploy
 
 3. **Monitor usage:**
    - Slack has rate limits (1 message per second)
    - Monitor for unexpected spikes
-   - Implement retry logic for failures
+
+- Implement retry logic for failures
+
+---
+
+## Registro de verificaciones
+
+| Fecha (UTC)          | Resultado | Notas                               |
+| -------------------- | --------- | ----------------------------------- |
+| 2025-10-21 06:12 UTC | ⚠️        | Mensaje enviado; confirmar en Slack |
 
 ---
 
@@ -244,4 +265,4 @@ Expected response: `ok`
 
 **Maintained by:** DevOps Team
 **Contact:** Alberto Dimas (albertodimasmorazaldivar-7548)
-**Last Test:** October 21, 2025 ✅
+**Last Test:** October 21, 2025 ⚠️ (mensaje enviado; confirmar visual en Slack)

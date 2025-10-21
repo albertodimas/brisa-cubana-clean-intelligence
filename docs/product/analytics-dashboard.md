@@ -111,6 +111,10 @@ Para añadir cada insight al dashboard:
 ## Próximos pasos
 
 - [ ] Añadir los 7 insights al dashboard manualmente (instrucciones arriba)
-- [ ] Configurar alertas en PostHog para `checkout_payment_failed` → Slack
-- [ ] Configurar automatización de reportes semanales
+- [ ] Configurar alertas en PostHog para `checkout_payment_failed` → Slack (`#todo-brisa-cubana`).
+  1. PostHog → Automations → New automation.
+  2. Trigger: Event `checkout_payment_failed` con filtro `environment = production`.
+  3. Action: Slack Webhook → URL `SLACK_WEBHOOK_URL` (copiar desde Vercel). Mensaje sugerido: `:rotating_light: Checkout fallido {{properties.error_code}} – lead {{distinct_id}}`.
+  4. Guardar y probar enviando `POSTHOG_API_KEY=… pnpm posthog:test-event checkout_payment_failed`.
+- [ ] Configurar automatización de reportes semanales (Insights → Share → Schedule) hacia el mismo webhook una vez haya datos reales.
 - [ ] Validar que los eventos estén emitiendo datos en producción
