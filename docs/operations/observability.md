@@ -208,11 +208,17 @@ vercel logs --output=logs.txt
 
 1. En PostHog → **Project settings → Webhooks**, crea un webhook HTTP para Slack (`https://hooks.slack.com/...`) con nombre `slack-product`.
 2. En **Automations → New automation**:
-   - Trigger: `Event is recorded` → `checkout_payment_failed`.
-   - Condition: `count` superior a 3 eventos en 5 minutos.
+   - Trigger: `checkout_payment_failed` (environment ≠ development).
    - Action: `Send webhook` → `slack-product` (payload sugerido en `docs/product/analytics-events.md`).
-3. Documenta la URL del webhook en 1Password (`Brisa Cubana – SaaS / Slack Hooks`).
-4. Añade chequeo semanal en `docs/operations/runbook-daily-monitoring.md` para validar que se reciben notificaciones (usar script `pnpm posthog:test-event checkout_payment_failed`).
+   - Guardar y probar con `POSTHOG_API_KEY=... pnpm posthog:test-event checkout_payment_failed`.
+3. **Automatización recurrente** (CLI/GitHub Actions):
+   - Script local: `POSTHOG_API_KEY=... SLACK_WEBHOOK_URL=... pnpm posthog:monitor`.
+   - Workflow programado: `.github/workflows/posthog-monitor.yml` ejecuta el script cada 10 minutos.
+   - Configurar secretos en GitHub → Settings → Secrets → Actions:
+     - `POSTHOG_API_KEY` (token personal con acceso HogQL).
+     - `SLACK_WEBHOOK_URL` (webhook de `#todo-brisa-cubana`).
+   - Registrar cada verificación en `docs/operations/slack-integration.md`.
+4. Documenta la URL del webhook en 1Password (`Brisa Cubana – SaaS / Slack Hooks`).
 
 > **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.
 

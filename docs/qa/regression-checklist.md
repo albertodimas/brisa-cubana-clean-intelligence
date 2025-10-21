@@ -381,6 +381,14 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Errores incluyen stack traces (en desarrollo)
 - [ ] No se loguean datos sensibles (passwords, tokens)
 
+### 11.2 Circuito Lead → Slack → PostHog
+
+- [ ] Enviar lead desde landing (`/`), validar mensaje de confirmación.
+- [ ] Confirmar en Slack `#todo-brisa-cubana` el mensaje `🆕 Nuevo Lead Recibido`.
+- [ ] Ejecutar `POSTHOG_API_KEY=… pnpm posthog:test-event checkout_payment_failed` para verificar ingestión.
+- [ ] Ejecutar `POSTHOG_API_KEY=… SLACK_WEBHOOK_URL=… pnpm posthog:monitor` y confirmar alerta `:rotating_light:`.
+- [ ] Registrar fecha en `docs/operations/slack-integration.md` (tabla de verificaciones).
+
 ## 12. Documentación
 
 ### 12.1 Consistencia
