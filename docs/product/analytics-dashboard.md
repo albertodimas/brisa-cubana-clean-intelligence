@@ -116,5 +116,6 @@ Para añadir cada insight al dashboard:
   2. Trigger: Event `checkout_payment_failed` con filtro `environment = production`.
   3. Action: Slack Webhook → URL `SLACK_WEBHOOK_URL` (copiar desde Vercel). Mensaje sugerido: `:rotating_light: Checkout fallido {{properties.error_code}} – lead {{distinct_id}}`.
   4. Guardar y probar enviando `POSTHOG_API_KEY=… pnpm posthog:test-event checkout_payment_failed`.
+  5. Confirmar en `#todo-brisa-cubana` la recepción del mensaje y registrar la fecha en `docs/operations/slack-integration.md`.
 - [ ] Configurar automatización de reportes semanales (Insights → Share → Schedule) hacia el mismo webhook una vez haya datos reales.
 - [ ] Validar que los eventos estén emitiendo datos en producción
