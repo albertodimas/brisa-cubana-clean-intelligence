@@ -24,6 +24,7 @@
     "analyze:web": "pnpm --filter @brisa/web analyze",
     "verify:versions": "node scripts/verify-versions.mjs",
     "docs:verify": "pnpm verify:versions && bash scripts/verify-doc-structure.sh",
+    "posthog:monitor": "node scripts/posthog-checkout-monitor.mjs",
     "format": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
     "clean": "rm -rf node_modules .turbo",
     "prepare": "husky",

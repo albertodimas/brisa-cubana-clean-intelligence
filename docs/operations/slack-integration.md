@@ -238,9 +238,10 @@ Expected response: `ok`
 
 ## Registro de verificaciones
 
-| Fecha (UTC)          | Resultado | Notas                                             |
-| -------------------- | --------- | ------------------------------------------------- |
-| 2025-10-21 06:12 UTC | ✅        | Mensaje recibido (inicio del historial en Slack). |
+| Fecha (UTC)          | Resultado | Notas                                                     |
+| -------------------- | --------- | --------------------------------------------------------- |
+| 2025-10-21 06:12 UTC | ✅        | Mensaje recibido (inicio del historial en Slack).         |
+| 2025-10-21 13:59 UTC | ✅        | Alerta enviada con `pnpm posthog:monitor` (hook PostHog). |
 
 ---
 
