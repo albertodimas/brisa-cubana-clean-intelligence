@@ -7,30 +7,33 @@
 {
 "title": "Observabilidad y performance",
 "tasks": [
-"Monitorear advertencia `legacy-javascript` (ver docs/tech-debt/legacy-chunk-885.md); probar upgrade de Next.js cuando haya release que elimine el chunk 885.",
-"[Completado 20-oct-2025] Webhook Slack configurado y probado. Pendiente: conectar alertas en dashboards Sentry/PostHog (requiere UI).",
-"Publicar dashboard PostHog con KPIs y enlazarlo en docs/product/analytics-decision.md (requiere acceso a PostHog UI)."
+"Monitorear advertencia `legacy-javascript` (ver docs/tech-debt/legacy-chunk-885.md) y probar upgrade de Next.js en cuanto haya release estable.",
+"Conectar alertas Slack/PostHog una vez que se definan `SLACK_WEBHOOK_URL` y las claves PostHog definitivas.",
+"Publicar dashboard PostHog con KPIs consolidados y enlazarlo en docs/product/analytics-decision.md."
 ]
 },
 {
 "title": "CI/CD y seguridad",
 "tasks": [
-"[Completado 20-oct-2025] Crear alerta en GitHub Actions/Nightly para fallos recurrentes de Lighthouse budgets.",
-"Automatizar validación de robots.txt & sitemap en CI (curl) para evitar regresiones (en progreso con scripts/verify-lhci-warnings.sh)."
+"Reactivar Dependabot (o rama manual) para actualizar dependencias una vez estabilizados los despliegues.",
+"Automatizar validación de robots.txt & sitemap en CI (curl) usando scripts/verify-lhci-warnings.sh.",
+"Revisar secrets pendientes / eliminar los que ya no se usen (ej. tokens temporales)."
 ]
 },
 {
 "title": "Experiencia de usuario",
 "tasks": [
-"Optimizar chunk 885 (revisar bundling de Next runtime, tree-shake libs) o abrir issue para actualización a runtime moderno.",
-"Cross-check flujos Portal/Checkout con QA manual guiado (docs/qa/regression-checklist.md) tras la migración analytics."
+"Completar QA manual de portal y checkout (docs/qa/regression-checklist.md) tras cambios de analytics.",
+"Reemplazar placeholders visuales de la landing con assets finales (ver docs/marketing/visual-assets-checklist.md).",
+"Planificar optimización del chunk 885 o levantar issue para migración a runtime moderno."
 ]
 },
 {
 "title": "Documentación",
 "tasks": [
-"Actualizar docs/operations/incident-runbook.md con responsables definitivos (guardias) cuando se asignen.",
-"Documentar la URL del dashboard PostHog y mantener docs/product/analytics-dashboard.md al día tras su publicación."
+"Asignar responsables en docs/operations/incident-runbook.md cuando se definan guardias.",
+"Mantener docs/overview/status.md y docs/marketing/landing-copy-2025-10-19.md sincronizados con métricas reales.",
+"Depurar documentación redundante conforme se publiquen los dashboards (PostHog/Sentry)."
 ]
 }
 ]
