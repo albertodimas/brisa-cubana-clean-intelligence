@@ -421,7 +421,7 @@ export default function LandingPage() {
                 key={mockup.title}
                 className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
               >
-                <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
+                <div className="relative aspect-video overflow-hidden rounded-2xl">
                   <Image
                     src={mockup.src}
                     alt={mockup.title}
@@ -594,7 +594,7 @@ export default function LandingPage() {
               data-mockup="portal-dashboard"
             >
               <div className="space-y-4">
-                <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-brisa-100/70 shadow-inner dark:border-brisa-800">
+                <div className="relative aspect-video overflow-hidden rounded-2xl border border-brisa-100/70 shadow-inner dark:border-brisa-800">
                   <Image
                     src="/assets/mockups/16-9/portal-dashboard-1920w.webp"
                     alt="Dashboard del portal cliente con métricas en tiempo real"
