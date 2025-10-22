@@ -9,7 +9,7 @@ Este inventario resume los artefactos activos del monorepo para acelerar handoff
 
 | Ruta       | Stack clave                         | Descripción                                                                                    | Build                                      |
 | ---------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `apps/web` | Next.js 15.5.5, React 19, Auth.js 5 | Frontend operativo + futuras páginas públicas (landing, checkout, portal cliente).             | `pnpm turbo run build --filter=@brisa/web` |
+| `apps/web` | Next.js 15.5.6, React 19, Auth.js 5 | Frontend operativo + futuras páginas públicas (landing, checkout, portal cliente).             | `pnpm turbo run build --filter=@brisa/web` |
 | `apps/api` | Hono 4.9.12, Prisma 6.17.1, Stripe  | API REST + webhooks (`/api/payments/stripe/webhook`), seeds operativos/demo, OpenAPI expuesto. | `pnpm --filter @brisa/api build`           |
 
 ## 2. Librerías y utilidades compartidas
@@ -29,8 +29,8 @@ Este inventario resume los artefactos activos del monorepo para acelerar handoff
 
 ## 4. QA y pruebas
 
-- **Vitest Web:** `apps/web` (~60 tests) ejecutados con `pnpm --filter @brisa/web test`.
-- **Vitest API:** unit (`vitest.unit.config.ts`) + integración (`vitest.integration.config.ts`)
+- **Vitest Web:** `apps/web` (81 tests) ejecutados con `pnpm --filter @brisa/web test`.
+- **Vitest API:** unit (`vitest.unit.config.ts`) + integración (`vitest.integration.config.ts`) – 123 tests totales
   - Comandos: `pnpm --filter @brisa/api test:unit`, `pnpm --filter @brisa/api test:integration`
   - Ubicación integration: `apps/api/tests/integration/**`
 - **Playwright:** suites en `tests/e2e/*.spec.ts` (smoke, critical, full) con soporte en `tests/e2e/support`.

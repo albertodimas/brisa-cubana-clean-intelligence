@@ -1,6 +1,6 @@
 # Checklist de Activos Visuales · Lanzamiento
 
-## 1. Contenido prioritario (Semanas 1-4)
+## 1. Contenido prioritario (Semanas 1-4) — Actualizado 22-oct-2025
 
 | Asset                             | Formato                                       | Uso                                  | Estado (21-oct-2025) / Responsable                     | Requisitos                                                                                       |
 | --------------------------------- | --------------------------------------------- | ------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
@@ -33,4 +33,5 @@
 - [ ] Captura de pantalla portal con nueva sección de auditoría RFID. _Owner: Diseño (Marta)._
 - [ ] Video testimonial en inglés (subtítulos español) para LinkedIn Ads. _Owner: Field Ops + Marketing. Grabación a agendar._
 
-> Mantén actualizado este checklist conforme se produzcan nuevos activos o se cierre material. Guarda versiones finales con naming `YYYYMMDD_asset-descripcion.ext`.
+> Mantén actualizado este checklist conforme se produzcan nuevos activos o se cierre material. Guarda versiones finales con naming `YYYYMMDD_asset-descripcion.ext`.  
+> **Acción inmediata:** Marketing debe confirmar la entrega de los assets marcados ⚠️ antes del 25-oct para desbloquear el reemplazo de placeholders en la landing (`apps/web/app/page.tsx`) y los reportes Lighthouse.

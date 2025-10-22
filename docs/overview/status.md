@@ -1,12 +1,12 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 21 de octubre de 2025 (CI main – run 18669471728 – ✅ Playwright `critical`; CodeQL 18669470308; Post-Deploy Seed 18669614987; Nightly Full E2E Suite 18612838707; 188 tests locales passing – 161 unit/integration + 27 E2E; Node.js 22.13.0 como estándar)
+**Última revisión:** 22 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 204 unit/integration –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
 
 ---
 
 ## 1. Resumen ejecutivo
 
-- Plataforma verificada con frontend Next.js 15.5.5 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
+- Plataforma verificada con frontend Next.js 15.5.6 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
 - Versionado actual: `@brisa/api` 0.4.1 · `@brisa/web` 0.4.1 (tag `v0.4.1`, 19-oct-2025).
 - Entorno estándar: Node.js 22.13.0 (Active LTS). Evaluaremos Node.js 24 cuando entre a ciclo LTS el 28-oct-2025 y tras validar CI/CD completo.
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
@@ -31,7 +31,7 @@
 ## 2. Arquitectura y componentes
 
 - **Frontend (apps/web)**
-  - Next.js 15.5.5 + React 19.
+  - Next.js 15.5.6 + React 19.
   - Autenticación con Auth.js (NextAuth v5) y session strategy `jwt`.
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
@@ -168,24 +168,24 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 ### 7.1 Tests Unitarios
 
-- **`apps/api`**: 95 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI y filtros/búsqueda)
+- **`apps/api`**: 123 pruebas Vitest (unitarias + integración, incluyen validación OpenAPI, rate limiting y flujos Stripe/portal)
   - Coverage thresholds: 85% lines, 65% functions, 50% branches
-- **`apps/web`**: 66 pruebas Vitest (hooks, server actions y componentes UI con SearchBar/FilterChips/UsersManager)
+- **`apps/web`**: 81 pruebas Vitest (hooks, server actions y componentes UI como SearchBar, FilterChips, UsersManager)
   - Coverage threshold: 70%
-- **Total**: 161 pruebas unitarias/integración passing (188 en total incluyendo 27 E2E)
+- **Total**: 204 pruebas unitarias/integración passing (253 en total incluyendo 49 E2E)
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
 
 | Suite    | Tests | Duración | Comando                  |
 | -------- | ----- | -------- | ------------------------ |
-| Smoke    | 2     | ~25s     | `pnpm test:e2e:smoke`    |
-| Critical | 17    | ~60s     | `pnpm test:e2e:critical` |
-| Full     | 27    | ~95s     | `pnpm test:e2e:full`     |
+| Smoke    | 3     | ~40s     | `pnpm test:e2e:smoke`    |
+| Critical | 20    | ~6min    | `pnpm test:e2e:critical` |
+| Full     | 49    | ~11min   | `pnpm test:e2e:full`     |
 
 **Documentación:** [`qa/e2e-strategy.md`](../qa/e2e-strategy.md)
 
-**Estado 17-oct-2025:** La suite `full` volvió a ser estable tras bloquear acciones concurrentes en el panel de notificaciones y descartar respuestas obsoletas en `usePaginatedResource`. La nightly 18581096720 se reintentará una vez mergeado el fix.
+**Estado 22-oct-2025:** `pnpm test:e2e:smoke` pasó en entorno local tras reseed automático; la nightly 18612838707 mantiene estabilidad y monitorea Lighthouse con streak < 3.
 
 ### 7.3 CI/CD Workflows
 
@@ -196,6 +196,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 - **CodeQL** (`codeql.yml`): escaneo estático para JavaScript/TypeScript en push, PR y weekly schedule.
 - **Dependency Review** (`dependency-review.yml`): obliga revisión de dependencias externas en cada PR.
 - **Post-Deploy Seed** (`post-deploy-seed.yml`): tras un merge exitoso en `main`, sincroniza el esquema y ejecuta el seed contra la base de datos de producción usando los secretos `PRODUCTION_DATABASE_URL` y `PRODUCTION_DATABASE_URL_UNPOOLED`; utiliza `scripts/prisma-deploy-or-baseline.sh` para resolver automáticamente escenarios con P3005 cuando la base ya contiene datos.
+- **Monthly Bundle Audit** (`monthly-bundle.yml`): corre el primer día del mes para generar `pnpm --filter @brisa/web analyze` y adjuntar el reporte como artefacto.
 
 **Estado (21-oct-2025)**: ✅ Pipelines en `main` completados con commit `42ce036` (CI 18673346297, CodeQL 18673346290, Post-Deploy Seed 18673455328); ✅ Nightly 18612838707 continúa estable; ✅ PR #56 (dependabot) recompilando en verde tras corregir la versión Stripe API (previews `34uvqG2YoSs1D2qswdd7WDfhz7Jb` y `9AowLv563goRxEMaXJDsG6yGH7t2` listos para QA).
 

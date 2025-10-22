@@ -6,13 +6,13 @@
 [![Release](https://img.shields.io/github/v/tag/albertodimas/brisa-cubana-clean-intelligence?color=0EA5E9&label=release&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/tags)
 
 Monorepo verificado para la plataforma operativa de **Brisa Cubana Clean Intelligence**.  
-Al día **21 de octubre de 2025**, la serie `v0.4.x` está totalmente documentada, con **188 pruebas automatizadas** (161 unit/integration + 27 E2E) pasando en CI y despliegues productivos estables.
+Al día **22 de octubre de 2025**, la serie `v0.4.x` está totalmente documentada, con **253 pruebas automatizadas** (204 unit/integration + 49 E2E) pasando en CI y despliegues productivos estables.
 
 ---
 
 ## 🧭 Visión general
 
-- **Frontend (`apps/web`)**: Next.js 15.5.5 + React 19.2.0, Auth.js (NextAuth v5), server actions y proxy interno `/api/*`.
+- **Frontend (`apps/web`)**: Next.js 15.5.6 + React 19.2.0, Auth.js (NextAuth v5), server actions y proxy interno `/api/*`.
 - **API (`apps/api`)**: Hono 4.9.12 sobre Node.js 22, RBAC por middleware, repositorios Prisma, rate limiting y webhook de leads.
 - **Persistencia**: Prisma Client 6.17.1 → PostgreSQL 17 (Neon en producción) / PostgreSQL 16 en Docker local con soft delete en todos los modelos.
 - **Observabilidad**: Pino + Sentry (web/API), Speed Insights, métricas `/health`, logs estructurados y monitoreo E2E nocturno.
@@ -79,9 +79,9 @@ Usuarios seed: `admin@brisacubanacleanintelligence.com / Brisa123!`, `operacione
 | Comando                    | Descripción                                  |
 | -------------------------- | -------------------------------------------- |
 | `pnpm test`                | Vitest (unit + integration) en web y API.    |
-| `pnpm test:e2e:smoke`      | Playwright smoke (5 min).                    |
-| `pnpm test:e2e:critical`   | Playwright critical (CI principal).          |
-| `pnpm test:e2e:full`       | Playwright full (Nightly 02:00 UTC).         |
+| `pnpm test:e2e:smoke`      | Playwright smoke (~40 s, 3 tests).           |
+| `pnpm test:e2e:critical`   | Playwright critical (~6 min, 20 tests).      |
+| `pnpm test:e2e:full`       | Playwright full (~11 min, 49 tests).         |
 | `pnpm docs:verify`         | Verifica estructura mínima de documentación. |
 | `pnpm db:push` / `db:seed` | Sincroniza y siembra PostgreSQL local.       |
 | `pnpm build`               | Compila Next.js + API (`dist`).              |
@@ -146,6 +146,7 @@ Alertas actuales: consulta <https://github.com/albertodimas/brisa-cubana-clean-i
 3. Corridas Playwright (`pnpm test:e2e:smoke`) para cambios que toquen UI/flows.
 4. Actualizar documentación (README, `docs/overview/status.md`, CHANGELOG cuando aplique).
 5. Abrir PR contra `main` y esperar CI verde.
+6. Coordinar con Operations/Onboarding cuando la guía cambie procesos (seeds, credenciales demo, runbooks).
 
 > Regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI**.
 

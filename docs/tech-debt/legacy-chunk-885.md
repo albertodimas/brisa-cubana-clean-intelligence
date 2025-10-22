@@ -17,7 +17,7 @@ Las auditorías Lighthouse sobre `https://brisa-cubana-clean-intelligence.vercel
 
 ## Hipótesis
 
-- Next.js 15.5.5 aún sirve polyfills por compatibilidad con navegadores _legacy_ cuando se usan ciertos módulos del App Router.
+- Next.js 15.5.6 aún sirve polyfills por compatibilidad con navegadores _legacy_ cuando se usan ciertos módulos del App Router.
 - El runtime podría eliminar estos polyfills en versiones futuras (canales canary / nightly) o habilitando nuevas flags (`nextConfig.experimental.nextScriptWorkers`, etc.).
 
 ## Plan de acción
@@ -28,6 +28,11 @@ Las auditorías Lighthouse sobre `https://brisa-cubana-clean-intelligence.vercel
    - Ejecutar `pnpm --filter @brisa/web build && pnpm exec lhci collect --url=http://127.0.0.1:4123/?lhci=1 ...` para validar si el chunk desaparece o reduce.
 3. **Fallback**: en caso de persistir, abrir issue en `vercel/next.js` compartiendo la evidencia y el reporte Lighthouse.
 4. **Tracking**: anotar resultados en este archivo (fecha, versión probada, conclusiones).
+
+## Seguimiento automatizado
+
+- El workflow `Monthly Bundle Audit` (`.github/workflows/monthly-bundle.yml`) corre el primer día del mes y adjunta el reporte de `pnpm --filter @brisa/web analyze` como artefacto. Revisa el artefacto y actualiza esta ficha con cualquier cambio en tamaños o presencia del chunk 885.
+- Si la auditoría detecta que el chunk desapareció o se redujo significativamente, programa un PR para actualizar Next.js y cerrar esta deuda técnica.
 
 ## Notas
 

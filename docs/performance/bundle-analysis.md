@@ -3,7 +3,7 @@
 **Comando:** `pnpm analyze:web`  
 **Salida:** `apps/web/.next/analyze/{client,edge,nodejs}.html` (HTML interactivos)
 
-## Métricas clave (Next.js 15.5.5)
+## Métricas clave (Next.js 15.5.6)
 
 - First Load JS compartido: **103 kB** (↓ ~81 kB vs. snapshot inicial)
 - Chunk `static/chunks/8145…js` (Sentry bundle diferido): 103 kB  
@@ -20,6 +20,6 @@
 
 ## Próximos pasos
 
-1. Automatizar `pnpm analyze:web` en nightly mensual (modo artefacto) para detectar crecimientos.
-2. Evaluar `@next/bundle-analyzer` output para identificar módulos con alto peso (p.ej. componentes de portal y panel).
-3. Registrar hallazgos en `docs/tech-debt/legacy-chunk-885.md` cuando se detecten regresiones.
+1. Evaluar `@next/bundle-analyzer` output para identificar módulos con alto peso (p.ej. componentes de portal y panel).
+2. Registrar hallazgos en `docs/tech-debt/legacy-chunk-885.md` cuando se detecten regresiones.
+3. Revisar el artefacto del workflow `Monthly Bundle Audit` (`monthly-bundle.yml`) tras cada ejecución programada y actualizar esta ficha según corresponda.

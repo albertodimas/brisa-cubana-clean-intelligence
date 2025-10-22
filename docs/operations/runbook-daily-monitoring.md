@@ -52,6 +52,9 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
    - KPI acordados (conversiones, porcentaje de autoservicio).
    - Compartir resumen en `#producto` + actualizar sección 4.4 de `docs/operations/observability.md`.
 
+4. **Sincronización Onboarding**
+   - Repasar cambios recientes en documentación base (README, `docs/overview/status.md`, guías de seeds) y confirmar con el equipo de Onboarding que su checklist refleja las versiones y credenciales vigentes. Registrar confirmación o ajustes pendientes en `#alerts-operaciones`.
+
 ---
 
 ## 4. Respuesta ante incidentes

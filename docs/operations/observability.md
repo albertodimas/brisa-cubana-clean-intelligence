@@ -1,6 +1,6 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 21 de octubre de 2025
+**Última actualización:** 22 de octubre de 2025
 **Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ✅ Slack webhook configurado y probado (`#todo-brisa-cubana`) · ✅ Health check público `/healthz` con token opcional
 
 > Nota: Sentry envía alertas y eventos de prueba a Slack/correo (ver `pnpm sentry:test-event`). PostHog usa host `https://us.i.posthog.com`; añade automatizaciones en el dashboard para enviar alertas al mismo webhook según necesidad.
@@ -108,6 +108,8 @@ Los siguientes campos se redactan automáticamente con `[REDACTED]`:
   - Frecuencia esperada: diaria 02:00 UTC (workflow GitHub Actions `nightly.yml`).
   - Acción actual: email por ausencia del run (webhook Slack disponible para configurar).
   - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *"` (webhook disponible en `SLACK_WEBHOOK_URL`).
+  - Si el script `scripts/check_lighthouse_streak.py` reporta ≥3 fallos consecutivos, abrir incidente y pausar campañas hasta ajustar budgets o landing assets.
+  - Tras cada despliegue a producción, ejecuta `pnpm sentry:test-event` y genera un error controlado en la web (p.ej. activando un feature flag de prueba que lanza `throw new Error("brisa-global-error-check")`) para confirmar que `app/global-error.tsx` captura la excepción en Sentry.
 
 ---
 

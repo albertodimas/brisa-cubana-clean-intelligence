@@ -1,0 +1,47 @@
+name: Monthly Bundle Audit
+
+on:
+  schedule:
+    # Primer día de cada mes a las 05:00 UTC
+    - cron: "0 5 1 * *"
+  workflow_dispatch:
+
+jobs:
+  bundle-analyze:
+    name: Generate bundle analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          node-version: 22.13.0
+          pnpm-version: 10.18.0
+          run-prisma-generate: false
+          install-playwright: false
+
+      - name: Build web bundle with analyzer
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+        run: pnpm --filter @brisa/web analyze
+
+      - name: Package analyzer reports
+        run: |
+          tar -czf bundle-analyze.tar.gz -C apps/web/.next analyze
+
+      - name: Upload analyzer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-bundle-analyze
+          path: bundle-analyze.tar.gz
+          retention-days: 30
+
+      - name: Post summary
+        run: |
+          TOTAL_SIZE=$(du -sh apps/web/.next/analyze 2>/dev/null | cut -f1 || echo "n/a")
+          echo "### Bundle analyze summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Report path: apps/web/.next/analyze" >> $GITHUB_STEP_SUMMARY
+          echo "- Approx size: ${TOTAL_SIZE}" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifact: monthly-bundle-analyze" >> $GITHUB_STEP_SUMMARY

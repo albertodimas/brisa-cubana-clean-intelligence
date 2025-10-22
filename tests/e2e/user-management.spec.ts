@@ -202,7 +202,7 @@ test.describe.serial("Gestión de usuarios", () => {
   test("Admin cannot deactivate themselves", async ({ page }, testInfo) => {
     await loginAsAdmin(page, testInfo);
     const adminRow = page.getByRole("row", {
-      name: /admin@brisacubanaclean\.com/i,
+      name: /admin@brisacubanacleanintelligence\.com/i,
     });
     await expect(adminRow).toBeVisible();
     const adminToggle = adminRow.getByRole("checkbox", { name: "Activo" });
