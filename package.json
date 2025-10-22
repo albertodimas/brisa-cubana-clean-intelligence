@@ -66,6 +66,6 @@
     ]
   },
   "dependencies": {
-    "@sentry/nextjs": "^10.20.0"
+    "@sentry/nextjs": "^10.21.0"
   }
 }

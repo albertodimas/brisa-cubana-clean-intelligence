@@ -23,9 +23,7 @@ export type NotificationSearchParams = {
 };
 
 export interface INotificationRepository {
-  findManyForUser(
-    params: NotificationSearchParams,
-  ): Promise<{
+  findManyForUser(params: NotificationSearchParams): Promise<{
     data: NotificationResponse[];
     pagination: NotificationPagination;
   }>;
