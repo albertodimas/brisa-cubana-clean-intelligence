@@ -15,6 +15,7 @@ import {
   type PricingTier,
 } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
+import { NightShiftMedia } from "@/components/landing/night-shift-media";
 
 const testimonials = [
   {
@@ -507,20 +508,7 @@ export default function LandingPage() {
 
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-center">
-          <div
-            className="rounded-3xl border border-dashed border-brisa-200 bg-brisa-50/70 p-6 text-brisa-600 shadow-sm dark:border-brisa-800 dark:bg-brisa-900/40 dark:text-brisa-200"
-            data-mockup="night-shift-placeholder"
-          >
-            <h3 className="text-xl font-semibold">B-roll nocturno en camino</h3>
-            <p className="mt-3 text-sm leading-relaxed text-brisa-500 dark:text-brisa-300">
-              Este espacio mostrará el video vertical del turno nocturno (#60).
-              Usa clip 9:16 (1080×1920) con duración de 60–90 segundos y exporta
-              una miniatura 4:5 para versiones sociales.
-            </p>
-            <p className="mt-4 text-xs uppercase tracking-[0.3em] text-brisa-400 dark:text-brisa-500">
-              Fecha objetivo: 27-oct-2025
-            </p>
-          </div>
+          <NightShiftMedia />
           <div className="relative aspect-[9/16] w-full overflow-hidden rounded-3xl border border-dashed border-brisa-200 bg-gradient-to-br from-brisa-200 via-white to-brisa-50 text-center shadow-inner dark:border-brisa-700 dark:from-brisa-800 dark:via-brisa-900 dark:to-brisa-950">
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-brisa-500 dark:text-brisa-300">
               <ArrowUpRightIcon className="h-8 w-8" aria-hidden />
