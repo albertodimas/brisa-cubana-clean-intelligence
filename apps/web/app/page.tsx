@@ -250,6 +250,18 @@ export default function LandingPage() {
             </div>
             <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950">
               <div className="space-y-6">
+                <div className="relative overflow-hidden rounded-2xl border border-dashed border-brisa-200 bg-gradient-to-br from-brisa-50 via-white to-white p-6 text-center text-sm text-brisa-500 dark:border-brisa-700 dark:from-brisa-900 dark:via-brisa-950 dark:text-brisa-300">
+                  <span className="font-semibold uppercase tracking-[0.3em] text-brisa-400 dark:text-brisa-500">
+                    Hero visual
+                  </span>
+                  <p className="mt-3 text-base font-semibold text-brisa-700 dark:text-brisa-100">
+                    Foto Skyline Loft · entrega #57
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-gray-500 dark:text-brisa-400">
+                    Sustituir este bloque con la imagen final (2400×1600) antes
+                    del 29-oct para lanzar la campaña.
+                  </p>
+                </div>
                 <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
                   Lo que entregamos en cada turno
                 </h3>
@@ -390,6 +402,15 @@ export default function LandingPage() {
               <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
                 KPI en el dashboard
               </h3>
+              <div className="mt-4 rounded-2xl border border-dashed border-brisa-200 bg-white/80 p-4 text-sm text-brisa-500 dark:border-brisa-700 dark:bg-brisa-950/60 dark:text-brisa-300">
+                <p className="font-semibold uppercase tracking-[0.25em] text-brisa-400 dark:text-brisa-500">
+                  Mockup pendiente
+                </p>
+                <p className="mt-2 text-xs leading-relaxed">
+                  Integrar capturas del portal con módulo RFID (#59) en 16:9 y
+                  4:5 cuando Diseño entregue la versión final (25-oct).
+                </p>
+              </div>
               <dl className="mt-6 space-y-5 text-sm sm:text-base text-gray-600 dark:text-brisa-200">
                 <div>
                   <dt className="font-medium text-brisa-600 dark:text-brisa-300">
@@ -473,6 +494,34 @@ export default function LandingPage() {
                   </p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-center">
+          <div className="rounded-3xl border border-dashed border-brisa-200 bg-brisa-50/70 p-6 text-brisa-600 shadow-sm dark:border-brisa-800 dark:bg-brisa-900/40 dark:text-brisa-200">
+            <h3 className="text-xl font-semibold">B-roll nocturno en camino</h3>
+            <p className="mt-3 text-sm leading-relaxed text-brisa-500 dark:text-brisa-300">
+              Este espacio mostrará el video vertical del turno nocturno (#60).
+              Usa clip 9:16 (1080×1920) con duración de 60–90 segundos y exporta
+              una miniatura 4:5 para versiones sociales.
+            </p>
+            <p className="mt-4 text-xs uppercase tracking-[0.3em] text-brisa-400 dark:text-brisa-500">
+              Fecha objetivo: 27-oct-2025
+            </p>
+          </div>
+          <div className="relative aspect-[9/16] w-full overflow-hidden rounded-3xl border border-dashed border-brisa-200 bg-gradient-to-br from-brisa-200 via-white to-brisa-50 text-center shadow-inner dark:border-brisa-700 dark:from-brisa-800 dark:via-brisa-900 dark:to-brisa-950">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-brisa-500 dark:text-brisa-300">
+              <ArrowUpRightIcon className="h-8 w-8" aria-hidden />
+              <p className="text-sm font-semibold">
+                Inserta video vertical (MP4) + poster estático
+              </p>
+              <p className="text-xs leading-relaxed">
+                El reproductor se configurará con auto-play, loop y captions
+                cuando recibamos el asset final.
+              </p>
             </div>
           </div>
         </div>
