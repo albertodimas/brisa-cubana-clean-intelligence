@@ -6,17 +6,9 @@ import "../styles/theme.css";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WebVitalsReporter } from "@/components/analytics/web-vitals-reporter";
-import { SpeedInsightsClient } from "@/components/analytics/speed-insights-client";
-import dynamic from "next/dynamic";
 import { Inter } from "next/font/google";
-
-const PostHogAnalytics = dynamic(
-  () =>
-    import("@/components/analytics/posthog-analytics").then(
-      (mod) => mod.PostHogAnalytics,
-    ),
-  { ssr: false, loading: () => null },
-);
+import { SpeedInsightsClient } from "@/components/analytics/speed-insights-client";
+import { PostHogAnalytics } from "@/components/analytics/posthog-analytics";
 
 const inter = Inter({
   subsets: ["latin"],
