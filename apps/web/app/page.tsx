@@ -7,6 +7,7 @@ import {
   ClipboardDocumentCheckIcon,
   ArrowUpRightIcon,
 } from "@heroicons/react/24/outline";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
@@ -15,7 +16,34 @@ import {
   type PricingTier,
 } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
-import { NightShiftMedia } from "@/components/landing/night-shift-media";
+
+const NightShiftMedia = dynamic(
+  () =>
+    import("@/components/landing/night-shift-media").then(
+      (mod) => mod.NightShiftMedia,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-3xl border border-dashed border-brisa-200 bg-gradient-to-br from-white to-brisa-50/60 p-6 shadow-sm dark:border-brisa-800 dark:from-brisa-900/20 dark:to-brisa-900/40">
+        <div className="flex h-full flex-col justify-between gap-6">
+          <div>
+            <p className="text-sm font-semibold text-brisa-600 dark:text-brisa-200">
+              Cargando contenido nocturno
+            </p>
+            <p className="mt-2 text-sm text-brisa-500 dark:text-brisa-300">
+              Preparamos el B-roll del turno nocturno para mostrarlo sin afectar
+              el rendimiento inicial de la página.
+            </p>
+          </div>
+          <div className="h-64 rounded-2xl border border-brisa-200/60 bg-brisa-100/40 dark:border-brisa-700/60 dark:bg-brisa-900/30">
+            <div className="h-full w-full animate-pulse rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-brisa-50 dark:from-brisa-800 dark:via-brisa-900 dark:to-brisa-950" />
+          </div>
+        </div>
+      </div>
+    ),
+  },
+);
 
 const testimonials = [
   {
@@ -192,6 +220,54 @@ const socialLinks = [
   },
 ];
 
+const operationsMockups = [
+  {
+    title: "Dashboard en tiempo real",
+    description:
+      "Alertas críticas, checklists cerrados y estadísticas de satisfacción en un solo panel.",
+    src: "/assets/mockups/16-9/portal-dashboard-1920w.webp",
+    placeholder: "/assets/mockups/16-9/portal-dashboard-1280w.webp",
+  },
+  {
+    title: "Gestión de reservas",
+    description:
+      "Reasigna turnos, confirma cancelaciones y prioriza incidencias desde un timeline auditable.",
+    src: "/assets/mockups/16-9/portal-bookings-1920w.webp",
+    placeholder: "/assets/mockups/16-9/portal-bookings-1280w.webp",
+  },
+  {
+    title: "Servicios y stock",
+    description:
+      "Checklist RFID, niveles de amenities y reposiciones automáticas por propiedad.",
+    src: "/assets/mockups/16-9/portal-services-1920w.webp",
+    placeholder: "/assets/mockups/16-9/portal-services-1280w.webp",
+  },
+];
+
+const mobileMockups = [
+  {
+    title: "Login seguro en segundos",
+    description:
+      "Enlace mágico y MFA opcional para administradores y field ops.",
+    src: "/assets/mockups/4-5/portal-mobile-dashboard-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-dashboard-540w.webp",
+  },
+  {
+    title: "Turnos desde el móvil",
+    description:
+      "Confirma servicios, carga evidencias y cierra turnos in situ.",
+    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
+  },
+  {
+    title: "Reposiciones inteligentes",
+    description:
+      "Solicita kits y amenities críticos con trazabilidad por lote.",
+    src: "/assets/mockups/4-5/portal-mobile-services-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-services-540w.webp",
+  },
+];
+
 const faqItems = [
   {
     question: "¿Operan 24/7?",
@@ -348,6 +424,48 @@ export default function LandingPage() {
                 </span>
                 <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
                   {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="space-y-10">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl font-semibold">
+              Visibilidad operativa al instante
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-brisa-300 leading-relaxed">
+              Consolida métricas, incidencias y consumos RFID en tiempo real. El
+              portal centraliza el ciclo completo: programar, ejecutar,
+              documentar y auditar.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {operationsMockups.map((mockup) => (
+              <div
+                key={mockup.title}
+                className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
+              >
+                <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
+                  <Image
+                    src={mockup.src}
+                    alt={mockup.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 360px"
+                    placeholder="blur"
+                    blurDataURL={mockup.placeholder}
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="mt-6 text-lg font-semibold text-brisa-700 dark:text-white">
+                  {mockup.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-brisa-200">
+                  {mockup.description}
                 </p>
               </div>
             ))}
@@ -620,6 +738,48 @@ export default function LandingPage() {
                 cuando recibamos el asset final.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="space-y-8">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl font-semibold">
+              Experiencia móvil sin fricciones
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-brisa-300 leading-relaxed">
+              Field ops confirman turnos, suben evidencias y solicitan
+              reposición desde el teléfono. Los administradores obtienen
+              trazabilidad total incluso fuera de la oficina.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {mobileMockups.map((mockup) => (
+              <div
+                key={mockup.title}
+                className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
+                  <Image
+                    src={mockup.src}
+                    alt={mockup.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 80vw, (max-width: 1280px) 40vw, 320px"
+                    placeholder="blur"
+                    blurDataURL={mockup.placeholder}
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-brisa-700 dark:text-white">
+                  {mockup.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-brisa-200">
+                  {mockup.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

@@ -56,6 +56,8 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 ./scripts/optimize-landing-assets.sh assets-input
 ```
 
+> Consulta `docs/marketing/landing-assets-quickstart.md` para el paso a paso de importación y optimización de archivos.
+
 **Estado 22-oct 19:45 EDT:** Screenshot capturado (`hero-2400w.webp` + variantes) e integrado en `apps/web/app/page.tsx`.
 
 ---
@@ -77,6 +79,14 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 - "Always have backup equipment available on set" (Venture Videos, Jan 2025)
 - "Resource Allocation: Ensuring that backup [...] personnel are readily available" (BytePlus, 2025)
 - Mejor footage imperfecto hoy que perfecto en 2 semanas
+
+**Checklist previo al deploy:**
+
+1. Footage final optimizado (`night-shift.mp4`) ≤ 8 Mbps, duración 60–90 s.
+2. Poster (`night-shift-poster.jpg`) 1080×1920 < 300 KB.
+3. Placeholder temporal incluido en el repositorio reemplazado por el clip definitivo (sin textos “Placeholder” visibles).
+4. QA mobile/desktop completado (autoplay silencioso, sin stutter).
+5. Lighthouse Performance ≥ 90 y LCP estable tras integrar el video.
 
 **Contacto directo:**
 
@@ -140,6 +150,8 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 - "Screenshots reales del sistema (no mockups ficticios)" - Best Practice 2025
 - "Datos de demo realistas (no 'Lorem Ipsum')" - Conversion optimization
 - Disponibilidad: 1 hora vs 5-7 días diseño + aprobaciones
+
+**Estado 22-oct 20:25 EDT:** Se generaron las 3 variantes 16:9 (`portal-dashboard`, `portal-bookings`, `portal-services`) y 3 variantes 4:5 (`portal-mobile-dashboard`, `portal-mobile`, `portal-mobile-services`) usando `capture-landing-section.mjs` + `optimize-landing-assets.sh` e integradas en la landing.
 
 **Estado 22-oct 20:45 EDT:**
 
@@ -212,7 +224,7 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 🔴 **Sin respuesta de Operaciones/Marketing antes de 19:00 EDT**
 → Plan B activado automáticamente según protocolo
 → Notificación a @alberto (Product Owner) con resumen ejecutivo
-→ Documentación completa en `docs/marketing/CONTINGENCY-PLAN-VISUAL-ASSETS.md`
+→ Documentación completa en `docs/marketing/plan-b-visual-assets-contingency-manual.md`
 
 ### Próximo standup (2025-10-23 09:00 EDT)
 
