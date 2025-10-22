@@ -56,6 +56,8 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 ./scripts/optimize-landing-assets.sh assets-input
 ```
 
+**Estado 22-oct 19:45 EDT:** Screenshot capturado (`hero-2400w.webp` + variantes) e integrado en `apps/web/app/page.tsx`.
+
 ---
 
 #### 2. B-roll Guardia Nocturna (#60) → **Plan "Shift A" Activado**
@@ -139,18 +141,20 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 - "Datos de demo realistas (no 'Lorem Ipsum')" - Conversion optimization
 - Disponibilidad: 1 hora vs 5-7 días diseño + aprobaciones
 
+**Estado 22-oct 20:20 EDT:** Mockup desktop (`portal-dashboard-{1920w,1280w}.webp`) generado con `capture-landing-section.mjs` e integrado en la landing.
+
 ---
 
 ## Timeline de Ejecución
 
-| Tarea                                | Responsable       | Deadline         | Status       |
-| ------------------------------------ | ----------------- | ---------------- | ------------ |
-| ✅ Activar Plan B                    | Desarrollo        | 2025-10-22 19:00 | ✅ ACTIVADO  |
-| 📸 Screenshots dashboard/mockups     | Desarrollo        | 2025-10-22 20:00 | 🔄 EN CURSO  |
-| 🎬 B-roll Shift A (footage nocturno) | Ops disponible    | 2025-10-22 23:00 | ⏳ PENDIENTE |
-| 🎥 Reel Unidad Modelo                | Marketing + Staff | 2025-10-23 12:00 | ⏳ PENDIENTE |
-| 🖼️ Optimización assets               | Desarrollo        | 2025-10-23 14:00 | ⏳ PENDIENTE |
-| 🚀 Deploy feat/landing-assets        | Desarrollo        | 2025-10-23 17:00 | ⏳ PENDIENTE |
+| Tarea                                | Responsable       | Deadline         | Status        |
+| ------------------------------------ | ----------------- | ---------------- | ------------- |
+| ✅ Activar Plan B                    | Desarrollo        | 2025-10-22 19:00 | ✅ ACTIVADO   |
+| 📸 Screenshots dashboard/mockups     | Desarrollo        | 2025-10-22 20:00 | ✅ COMPLETADO |
+| 🎬 B-roll Shift A (footage nocturno) | Ops disponible    | 2025-10-22 23:00 | ⏳ PENDIENTE  |
+| 🎥 Reel Unidad Modelo                | Marketing + Staff | 2025-10-23 12:00 | ⏳ PENDIENTE  |
+| 🖼️ Optimización assets               | Desarrollo        | 2025-10-23 14:00 | ⏳ PENDIENTE  |
+| 🚀 Deploy feat/landing-assets        | Desarrollo        | 2025-10-23 17:00 | ⏳ PENDIENTE  |
 
 ---
 
