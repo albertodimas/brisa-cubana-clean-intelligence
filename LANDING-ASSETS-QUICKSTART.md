@@ -56,6 +56,21 @@ pnpm capture:hero
 
 El archivo quedará en `assets-input/hero/hero-source.png` listo para optimizar.
 
+### 2.2 Capturar secciones específicas (mockups)
+
+Para obtener mockups puntuales (ej. módulo RFID, dashboard), usa el script de sección:
+
+```bash
+node scripts/capture-landing-section.mjs --selector "[data-mockup='portal']" --out mockup-portal
+
+# Opciones útiles
+--url http://localhost:3000    # URL alternativa
+--padding 32                   # Padding extra alrededor del elemento
+```
+
+Los archivos se guardan en `assets-input/mockups/raw/`. Después ejecuta `./scripts/optimize-landing-assets.sh assets-input`
+para generar las variantes WebP y moverlas automáticamente a `apps/web/public/assets/mockups/...`.
+
 ### 4. Actualizar componentes React
 
 Editar `apps/web/app/page.tsx` (o componente correspondiente):
