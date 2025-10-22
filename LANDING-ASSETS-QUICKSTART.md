@@ -66,9 +66,10 @@ node scripts/capture-landing-section.mjs --selector "[data-mockup='portal']" --o
 # Opciones útiles
 --url http://localhost:3000    # URL alternativa
 --padding 32                   # Padding extra alrededor del elemento
+--ratio 16-9                   # Guarda directamente en assets-input/mockups/16-9
 ```
 
-Los archivos se guardan en `assets-input/mockups/raw/`. Después ejecuta `./scripts/optimize-landing-assets.sh assets-input`
+Los archivos se guardan en `assets-input/mockups/<ratio>/` (por defecto `raw/`). Después ejecuta `./scripts/optimize-landing-assets.sh assets-input`
 para generar las variantes WebP y moverlas automáticamente a `apps/web/public/assets/mockups/...`.
 
 ### 4. Actualizar componentes React

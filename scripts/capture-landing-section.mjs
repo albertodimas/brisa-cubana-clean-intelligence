@@ -16,7 +16,7 @@
  * El script genera PNG fuente en assets-input/mockups/<ratio>/ y se integra con optimize-landing-assets.sh.
  */
 
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,7 +44,14 @@ const outputBase = getOption("--out", "section");
 const url = getOption("--url", "http://localhost:3000");
 const padding = parseInt(getOption("--padding", "24"), 10);
 
-const OUTPUT_DIR = join(__dirname, "..", "assets-input", "mockups", "raw");
+const ratio = getOption("--ratio", "raw"); // valores esperados: raw, 16-9, 4-5
+const validRatios = new Set(["raw", "16-9", "4-5"]);
+if (!validRatios.has(ratio)) {
+  console.error("❌ --ratio debe ser 'raw', '16-9' o '4-5'.");
+  process.exit(1);
+}
+
+const OUTPUT_DIR = join(__dirname, "..", "assets-input", "mockups", ratio);
 const OUTPUT_FILE = join(OUTPUT_DIR, `${outputBase}.png`);
 
 async function main() {
@@ -65,19 +72,18 @@ async function main() {
     throw new Error(`No se encontró el selector ${selector}.`);
   }
 
+  await element.scrollIntoViewIfNeeded();
+
   const box = await element.boundingBox();
-  if (!box) {
-    throw new Error(`No fue posible obtener el bounding box de ${selector}.`);
+  if (!box || box.width === 0 || box.height === 0) {
+    throw new Error(
+      `El selector ${selector} no tiene dimensiones visibles. Ajusta el selector o asegúrate de que esté renderizado.`
+    );
   }
 
-  await page.screenshot({
+  await element.screenshot({
     path: OUTPUT_FILE,
-    clip: {
-      x: Math.max(box.x - padding, 0),
-      y: Math.max(box.y - padding, 0),
-      width: box.width + padding * 2,
-      height: box.height + padding * 2,
-    },
+    type: "png",
   });
 
   await browser.close();

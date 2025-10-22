@@ -11,7 +11,7 @@
  * El archivo se guarda en assets-input/hero/hero-source.png
  */
 
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

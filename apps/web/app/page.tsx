@@ -398,18 +398,24 @@ export default function LandingPage() {
                 </li>
               </ul>
             </div>
-            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-brisa-100 via-white to-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:from-brisa-900/60 dark:via-brisa-950">
-              <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
-                KPI en el dashboard
-              </h3>
-              <div className="mt-4 rounded-2xl border border-dashed border-brisa-200 bg-white/80 p-4 text-sm text-brisa-500 dark:border-brisa-700 dark:bg-brisa-950/60 dark:text-brisa-300">
-                <p className="font-semibold uppercase tracking-[0.25em] text-brisa-400 dark:text-brisa-500">
-                  Mockup pendiente
-                </p>
-                <p className="mt-2 text-xs leading-relaxed">
-                  Integrar capturas del portal con módulo RFID (#59) en 16:9 y
-                  4:5 cuando Diseño entregue la versión final (25-oct).
-                </p>
+            <div
+              className="rounded-3xl border border-gray-200 bg-gradient-to-br from-brisa-100 via-white to-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:from-brisa-900/60 dark:via-brisa-950"
+              data-mockup="portal-dashboard"
+            >
+              <div className="space-y-4">
+                <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-brisa-100/70 shadow-inner dark:border-brisa-800">
+                  <Image
+                    src="/assets/mockups/16-9/portal-dashboard-1920w.webp"
+                    alt="Dashboard del portal cliente con métricas en tiempo real"
+                    fill
+                    loading="lazy"
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 360px"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
+                  KPI en el dashboard
+                </h3>
               </div>
               <dl className="mt-6 space-y-5 text-sm sm:text-base text-gray-600 dark:text-brisa-200">
                 <div>
@@ -501,7 +507,10 @@ export default function LandingPage() {
 
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-center">
-          <div className="rounded-3xl border border-dashed border-brisa-200 bg-brisa-50/70 p-6 text-brisa-600 shadow-sm dark:border-brisa-800 dark:bg-brisa-900/40 dark:text-brisa-200">
+          <div
+            className="rounded-3xl border border-dashed border-brisa-200 bg-brisa-50/70 p-6 text-brisa-600 shadow-sm dark:border-brisa-800 dark:bg-brisa-900/40 dark:text-brisa-200"
+            data-mockup="night-shift-placeholder"
+          >
             <h3 className="text-xl font-semibold">B-roll nocturno en camino</h3>
             <p className="mt-3 text-sm leading-relaxed text-brisa-500 dark:text-brisa-300">
               Este espacio mostrará el video vertical del turno nocturno (#60).
