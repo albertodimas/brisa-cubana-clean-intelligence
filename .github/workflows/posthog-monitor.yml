@@ -7,31 +7,36 @@ on:
 
 jobs:
   monitor:
-    if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
+      - name: Registrar omisión
+        if: ${{ secrets.POSTHOG_API_KEY == '' || secrets.POSTHOG_API_KEY == null || secrets.SLACK_WEBHOOK_URL == '' || secrets.SLACK_WEBHOOK_URL == null }}
+        run: |
+          echo "### PostHog monitor omitido" >> $GITHUB_STEP_SUMMARY
+          echo "Se requieren los secretos \`POSTHOG_API_KEY\` y \`SLACK_WEBHOOK_URL\` en GitHub → Settings → Secrets → Actions." >> $GITHUB_STEP_SUMMARY
+
       - name: Checkout
+        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
         uses: actions/checkout@v4
-      - name: Use Node.js 22
+
+      - name: Usar Node.js 22
+        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
         uses: actions/setup-node@v3
         with:
           node-version: '22'
-      - name: Install pnpm
+
+      - name: Instalar pnpm
+        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
         run: npm install -g pnpm@10.18.0
-      - name: Install dependencies
+
+      - name: Instalar dependencias
+        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
         run: pnpm install --frozen-lockfile
-      - name: Run PostHog monitor
+
+      - name: Ejecutar monitor de PostHog
+        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
         env:
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           POSTHOG_CHECKOUT_LOOKBACK_MINUTES: '10'
         run: pnpm posthog:monitor
-
-  warn-missing-secrets:
-    if: ${{ secrets.POSTHOG_API_KEY == '' || secrets.POSTHOG_API_KEY == null || secrets.SLACK_WEBHOOK_URL == '' || secrets.SLACK_WEBHOOK_URL == null }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "### PostHog monitor omitido" >> $GITHUB_STEP_SUMMARY
-          echo "Se requieren los secretos \\`POSTHOG_API_KEY\\` y \\`SLACK_WEBHOOK_URL\\` en GitHub → Settings → Secrets → Actions." >> $GITHUB_STEP_SUMMARY
