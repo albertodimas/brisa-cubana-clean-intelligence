@@ -7,6 +7,7 @@ import {
   ClipboardDocumentCheckIcon,
   ArrowUpRightIcon,
 } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
 import {
@@ -14,6 +15,7 @@ import {
   type PricingTier,
 } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
+import { NightShiftMedia } from "@/components/landing/night-shift-media";
 
 const testimonials = [
   {
@@ -190,6 +192,54 @@ const socialLinks = [
   },
 ];
 
+const operationsMockups = [
+  {
+    title: "Dashboard en tiempo real",
+    description:
+      "Alertas críticas, checklists cerrados y estadísticas de satisfacción en un solo panel.",
+    src: "/assets/mockups/16-9/portal-dashboard-1920w.webp",
+    placeholder: "/assets/mockups/16-9/portal-dashboard-1280w.webp",
+  },
+  {
+    title: "Gestión de reservas",
+    description:
+      "Reasigna turnos, confirma cancelaciones y prioriza incidencias desde un timeline auditable.",
+    src: "/assets/mockups/16-9/portal-bookings-1920w.webp",
+    placeholder: "/assets/mockups/16-9/portal-bookings-1280w.webp",
+  },
+  {
+    title: "Servicios y stock",
+    description:
+      "Checklist RFID, niveles de amenities y reposiciones automáticas por propiedad.",
+    src: "/assets/mockups/16-9/portal-services-1920w.webp",
+    placeholder: "/assets/mockups/16-9/portal-services-1280w.webp",
+  },
+];
+
+const mobileMockups = [
+  {
+    title: "Login seguro en segundos",
+    description:
+      "Enlace mágico y MFA opcional para administradores y field ops.",
+    src: "/assets/mockups/4-5/portal-mobile-dashboard-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-dashboard-540w.webp",
+  },
+  {
+    title: "Turnos desde el móvil",
+    description:
+      "Confirma servicios, carga evidencias y cierra turnos in situ.",
+    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
+  },
+  {
+    title: "Reposiciones inteligentes",
+    description:
+      "Solicita kits y amenities críticos con trazabilidad por lote.",
+    src: "/assets/mockups/4-5/portal-mobile-services-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-services-540w.webp",
+  },
+];
+
 const faqItems = [
   {
     question: "¿Operan 24/7?",
@@ -250,6 +300,17 @@ export default function LandingPage() {
             </div>
             <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950">
               <div className="space-y-6">
+                <div className="relative overflow-hidden rounded-2xl">
+                  <Image
+                    src="/assets/hero/hero-2400w.webp"
+                    alt="Brisa Cubana Clean Intelligence - Professional Cleaning Services Landing Page"
+                    width={2400}
+                    height={1600}
+                    priority
+                    className="h-auto w-full rounded-xl shadow-lg ring-1 ring-brisa-100/60 dark:ring-brisa-800/60"
+                    sizes="(max-width: 1024px) 100vw, 420px"
+                  />
+                </div>
                 <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
                   Lo que entregamos en cada turno
                 </h3>
@@ -342,6 +403,148 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="space-y-10">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl font-semibold">
+              Visibilidad operativa al instante
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-brisa-300 leading-relaxed">
+              Consolida métricas, incidencias y consumos RFID en tiempo real. El
+              portal centraliza el ciclo completo: programar, ejecutar,
+              documentar y auditar.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {operationsMockups.map((mockup) => (
+              <div
+                key={mockup.title}
+                className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
+              >
+                <div className="relative aspect-video overflow-hidden rounded-2xl">
+                  <Image
+                    src={mockup.src}
+                    alt={mockup.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 360px"
+                    placeholder="blur"
+                    blurDataURL={mockup.placeholder}
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="mt-6 text-lg font-semibold text-brisa-700 dark:text-white">
+                  {mockup.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-brisa-200">
+                  {mockup.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950">
+            <div className="space-y-4">
+              <header>
+                <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                  Agenda en vivo
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-brisa-50">
+                  Turnos coordinados minuto a minuto
+                </h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300">
+                  Visualiza en una sola vista quién está en campo, qué
+                  propiedades siguen en cola y cuándo se libera cada cuadrilla.
+                </p>
+              </header>
+              <div className="relative overflow-hidden rounded-2xl border border-brisa-200/70 shadow-inner dark:border-brisa-700">
+                <Image
+                  src="/assets/mockups/16-9/portal-bookings-1920w.webp"
+                  alt="Panel con turnos confirmados y cuadrillas en progreso"
+                  width={1920}
+                  height={793}
+                  loading="lazy"
+                  className="h-auto w-full"
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                />
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950">
+            <div className="space-y-4">
+              <header>
+                <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                  Matriz de servicios
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-brisa-50">
+                  SLA y equipos asignados en tiempo real
+                </h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300">
+                  Controlamos indicadores por servicio (Turnover, Deep Clean,
+                  Amenity Refresh) y alertamos antes de que un SLA se desvíe.
+                </p>
+              </header>
+              <div className="relative overflow-hidden rounded-2xl border border-brisa-200/70 shadow-inner dark:border-brisa-700">
+                <Image
+                  src="/assets/mockups/16-9/portal-services-1920w.webp"
+                  alt="Matriz de servicios con KPIs y equipos asignados"
+                  width={1920}
+                  height={626}
+                  loading="lazy"
+                  className="h-auto w-full"
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                />
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-center">
+          <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-brisa-800 dark:bg-brisa-950">
+            <header>
+              <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                Portal móvil
+              </p>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-brisa-50">
+                Acciones rápidas desde el teléfono
+              </h3>
+            </header>
+            <ul className="mt-4 space-y-4 text-sm text-gray-600 dark:text-brisa-300">
+              <li>
+                🗓️ Solicita turnos y bloquea horarios críticos en menos de 30
+                segundos.
+              </li>
+              <li>
+                📸 Revisa evidencias fotográficas y reportes con firmas
+                digitales desde cualquier lugar.
+              </li>
+              <li>
+                💬 Comunícate 24/7 con operaciones vía WhatsApp Business sin
+                salir del portal.
+              </li>
+            </ul>
+          </article>
+          <div className="relative mx-auto max-w-xs overflow-hidden rounded-[2rem] border border-brisa-200/60 shadow-2xl dark:border-brisa-700">
+            <Image
+              src="/assets/mockups/4-5/portal-mobile-1080w.webp"
+              alt="Vista móvil del portal cliente mostrando acciones rápidas"
+              width={1080}
+              height={1342}
+              loading="lazy"
+              className="h-auto w-full"
+              sizes="(max-width: 768px) 80vw, 420px"
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="bg-gray-50 dark:bg-brisa-900/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-center">
@@ -386,10 +589,25 @@ export default function LandingPage() {
                 </li>
               </ul>
             </div>
-            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-brisa-100 via-white to-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:from-brisa-900/60 dark:via-brisa-950">
-              <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
-                KPI en el dashboard
-              </h3>
+            <div
+              className="rounded-3xl border border-gray-200 bg-gradient-to-br from-brisa-100 via-white to-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:from-brisa-900/60 dark:via-brisa-950"
+              data-mockup="portal-dashboard"
+            >
+              <div className="space-y-4">
+                <div className="relative aspect-video overflow-hidden rounded-2xl border border-brisa-100/70 shadow-inner dark:border-brisa-800">
+                  <Image
+                    src="/assets/mockups/16-9/portal-dashboard-1920w.webp"
+                    alt="Dashboard del portal cliente con métricas en tiempo real"
+                    fill
+                    loading="lazy"
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 360px"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
+                  KPI en el dashboard
+                </h3>
+              </div>
               <dl className="mt-6 space-y-5 text-sm sm:text-base text-gray-600 dark:text-brisa-200">
                 <div>
                   <dt className="font-medium text-brisa-600 dark:text-brisa-300">
@@ -474,6 +692,66 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-center">
+          <NightShiftMedia />
+          <div className="relative aspect-[9/16] w-full overflow-hidden rounded-3xl border border-dashed border-brisa-200 bg-gradient-to-br from-brisa-200 via-white to-brisa-50 text-center shadow-inner dark:border-brisa-700 dark:from-brisa-800 dark:via-brisa-900 dark:to-brisa-950">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-brisa-500 dark:text-brisa-300">
+              <ArrowUpRightIcon className="h-8 w-8" aria-hidden />
+              <p className="text-sm font-semibold">
+                Inserta video vertical (MP4) + poster estático
+              </p>
+              <p className="text-xs leading-relaxed">
+                El reproductor se configurará con auto-play, loop y captions
+                cuando recibamos el asset final.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="space-y-8">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl font-semibold">
+              Experiencia móvil sin fricciones
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-brisa-300 leading-relaxed">
+              Field ops confirman turnos, suben evidencias y solicitan
+              reposición desde el teléfono. Los administradores obtienen
+              trazabilidad total incluso fuera de la oficina.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {mobileMockups.map((mockup) => (
+              <div
+                key={mockup.title}
+                className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
+                  <Image
+                    src={mockup.src}
+                    alt={mockup.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 80vw, (max-width: 1280px) 40vw, 320px"
+                    placeholder="blur"
+                    blurDataURL={mockup.placeholder}
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-brisa-700 dark:text-white">
+                  {mockup.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-brisa-200">
+                  {mockup.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
