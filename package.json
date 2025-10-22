@@ -52,7 +52,8 @@
   "pnpm": {
     "overrides": {
       "esbuild": "^0.25.10",
-      "tmp": "^0.2.4"
+      "tmp": "^0.2.4",
+      "vite": "7.1.11"
     }
   },
   "lint-staged": {
