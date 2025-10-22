@@ -7,7 +7,8 @@ on:
 
 jobs:
   monitor:
-    if: ${{ secrets.POSTHOG_API_KEY && secrets.SLACK_WEBHOOK_URL }}
+    if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,7 +29,7 @@ jobs:
         run: pnpm posthog:monitor
 
   warn-missing-secrets:
-    if: ${{ !secrets.POSTHOG_API_KEY || !secrets.SLACK_WEBHOOK_URL }}
+    if: ${{ secrets.POSTHOG_API_KEY == '' || secrets.POSTHOG_API_KEY == null || secrets.SLACK_WEBHOOK_URL == '' || secrets.SLACK_WEBHOOK_URL == null }}
     runs-on: ubuntu-latest
     steps:
       - run: |
