@@ -46,6 +46,16 @@ du -h apps/web/public/assets/mockups/16-9/*
 du -h apps/web/public/assets/mockups/4-5/*
 ```
 
+### 2.1 (Opcional) Capturar hero automáticamente
+
+Si tienes el servidor local corriendo (`pnpm --filter @brisa/web dev`), puedes generar el screenshot base del hero con:
+
+```bash
+pnpm capture:hero
+```
+
+El archivo quedará en `assets-input/hero/hero-source.png` listo para optimizar.
+
 ### 4. Actualizar componentes React
 
 Editar `apps/web/app/page.tsx` (o componente correspondiente):
