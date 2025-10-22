@@ -7,7 +7,6 @@ import {
   ClipboardDocumentCheckIcon,
   ArrowUpRightIcon,
 } from "@heroicons/react/24/outline";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
@@ -16,34 +15,7 @@ import {
   type PricingTier,
 } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
-
-const NightShiftMedia = dynamic(
-  () =>
-    import("@/components/landing/night-shift-media").then(
-      (mod) => mod.NightShiftMedia,
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="rounded-3xl border border-dashed border-brisa-200 bg-gradient-to-br from-white to-brisa-50/60 p-6 shadow-sm dark:border-brisa-800 dark:from-brisa-900/20 dark:to-brisa-900/40">
-        <div className="flex h-full flex-col justify-between gap-6">
-          <div>
-            <p className="text-sm font-semibold text-brisa-600 dark:text-brisa-200">
-              Cargando contenido nocturno
-            </p>
-            <p className="mt-2 text-sm text-brisa-500 dark:text-brisa-300">
-              Preparamos el B-roll del turno nocturno para mostrarlo sin afectar
-              el rendimiento inicial de la página.
-            </p>
-          </div>
-          <div className="h-64 rounded-2xl border border-brisa-200/60 bg-brisa-100/40 dark:border-brisa-700/60 dark:bg-brisa-900/30">
-            <div className="h-full w-full animate-pulse rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-brisa-50 dark:from-brisa-800 dark:via-brisa-900 dark:to-brisa-950" />
-          </div>
-        </div>
-      </div>
-    ),
-  },
-);
+import { NightShiftMedia } from "@/components/landing/night-shift-media";
 
 const testimonials = [
   {
