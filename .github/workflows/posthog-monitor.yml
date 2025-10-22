@@ -8,35 +8,43 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
+    env:
+      SKIP_MONITOR: "false"
     steps:
-      - name: Registrar omisión
-        if: ${{ secrets.POSTHOG_API_KEY == '' || secrets.POSTHOG_API_KEY == null || secrets.SLACK_WEBHOOK_URL == '' || secrets.SLACK_WEBHOOK_URL == null }}
+      - name: Evaluar secretos
         run: |
-          echo "### PostHog monitor omitido" >> $GITHUB_STEP_SUMMARY
-          echo "Se requieren los secretos \`POSTHOG_API_KEY\` y \`SLACK_WEBHOOK_URL\` en GitHub → Settings → Secrets → Actions." >> $GITHUB_STEP_SUMMARY
+          if [ -z "${{ secrets.POSTHOG_API_KEY }}" ] || [ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "SKIP_MONITOR=true" >> "$GITHUB_ENV"
+            echo "### PostHog monitor omitido" >> "$GITHUB_STEP_SUMMARY"
+            echo "Se requieren los secretos \`POSTHOG_API_KEY\` y \`SLACK_WEBHOOK_URL\` en GitHub → Settings → Secrets → Actions." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}" >> "$GITHUB_ENV"
+            echo "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" >> "$GITHUB_ENV"
+            echo "POSTHOG_CHECKOUT_LOOKBACK_MINUTES=10" >> "$GITHUB_ENV"
+          fi
 
       - name: Checkout
-        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
+        if: env.SKIP_MONITOR == 'false'
         uses: actions/checkout@v4
 
       - name: Usar Node.js 22
-        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
+        if: env.SKIP_MONITOR == 'false'
         uses: actions/setup-node@v3
         with:
           node-version: '22'
 
       - name: Instalar pnpm
-        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
+        if: env.SKIP_MONITOR == 'false'
         run: npm install -g pnpm@10.18.0
 
       - name: Instalar dependencias
-        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
+        if: env.SKIP_MONITOR == 'false'
         run: pnpm install --frozen-lockfile
 
       - name: Ejecutar monitor de PostHog
-        if: ${{ secrets.POSTHOG_API_KEY != '' && secrets.POSTHOG_API_KEY != null && secrets.SLACK_WEBHOOK_URL != '' && secrets.SLACK_WEBHOOK_URL != null }}
+        if: env.SKIP_MONITOR == 'false'
         env:
-          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          POSTHOG_CHECKOUT_LOOKBACK_MINUTES: '10'
+          POSTHOG_API_KEY: ${{ env.POSTHOG_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+          POSTHOG_CHECKOUT_LOOKBACK_MINUTES: ${{ env.POSTHOG_CHECKOUT_LOOKBACK_MINUTES }}
         run: pnpm posthog:monitor
