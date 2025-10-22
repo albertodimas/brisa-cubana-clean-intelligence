@@ -7,6 +7,7 @@ import {
   ClipboardDocumentCheckIcon,
   ArrowUpRightIcon,
 } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
 import {
@@ -250,17 +251,16 @@ export default function LandingPage() {
             </div>
             <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950">
               <div className="space-y-6">
-                <div className="relative overflow-hidden rounded-2xl border border-dashed border-brisa-200 bg-gradient-to-br from-brisa-50 via-white to-white p-6 text-center text-sm text-brisa-500 dark:border-brisa-700 dark:from-brisa-900 dark:via-brisa-950 dark:text-brisa-300">
-                  <span className="font-semibold uppercase tracking-[0.3em] text-brisa-400 dark:text-brisa-500">
-                    Hero visual
-                  </span>
-                  <p className="mt-3 text-base font-semibold text-brisa-700 dark:text-brisa-100">
-                    Foto Skyline Loft · entrega #57
-                  </p>
-                  <p className="mt-2 text-xs leading-relaxed text-gray-500 dark:text-brisa-400">
-                    Sustituir este bloque con la imagen final (2400×1600) antes
-                    del 29-oct para lanzar la campaña.
-                  </p>
+                <div className="relative overflow-hidden rounded-2xl">
+                  <Image
+                    src="/assets/hero/hero-2400w.webp"
+                    alt="Brisa Cubana Clean Intelligence - Professional Cleaning Services Landing Page"
+                    width={2400}
+                    height={1600}
+                    priority
+                    className="h-auto w-full rounded-xl shadow-lg ring-1 ring-brisa-100/60 dark:ring-brisa-800/60"
+                    sizes="(max-width: 1024px) 100vw, 420px"
+                  />
                 </div>
                 <h3 className="text-lg font-semibold text-brisa-700 dark:text-white">
                   Lo que entregamos en cada turno
