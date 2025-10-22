@@ -355,6 +355,106 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950">
+            <div className="space-y-4">
+              <header>
+                <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                  Agenda en vivo
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-brisa-50">
+                  Turnos coordinados minuto a minuto
+                </h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300">
+                  Visualiza en una sola vista quién está en campo, qué
+                  propiedades siguen en cola y cuándo se libera cada cuadrilla.
+                </p>
+              </header>
+              <div className="relative overflow-hidden rounded-2xl border border-brisa-200/70 shadow-inner dark:border-brisa-700">
+                <Image
+                  src="/assets/mockups/16-9/portal-bookings-1920w.webp"
+                  alt="Panel con turnos confirmados y cuadrillas en progreso"
+                  width={1920}
+                  height={793}
+                  loading="lazy"
+                  className="h-auto w-full"
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                />
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950">
+            <div className="space-y-4">
+              <header>
+                <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                  Matriz de servicios
+                </p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-brisa-50">
+                  SLA y equipos asignados en tiempo real
+                </h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300">
+                  Controlamos indicadores por servicio (Turnover, Deep Clean,
+                  Amenity Refresh) y alertamos antes de que un SLA se desvíe.
+                </p>
+              </header>
+              <div className="relative overflow-hidden rounded-2xl border border-brisa-200/70 shadow-inner dark:border-brisa-700">
+                <Image
+                  src="/assets/mockups/16-9/portal-services-1920w.webp"
+                  alt="Matriz de servicios con KPIs y equipos asignados"
+                  width={1920}
+                  height={626}
+                  loading="lazy"
+                  className="h-auto w-full"
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                />
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-center">
+          <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-brisa-800 dark:bg-brisa-950">
+            <header>
+              <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                Portal móvil
+              </p>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-brisa-50">
+                Acciones rápidas desde el teléfono
+              </h3>
+            </header>
+            <ul className="mt-4 space-y-4 text-sm text-gray-600 dark:text-brisa-300">
+              <li>
+                🗓️ Solicita turnos y bloquea horarios críticos en menos de 30
+                segundos.
+              </li>
+              <li>
+                📸 Revisa evidencias fotográficas y reportes con firmas
+                digitales desde cualquier lugar.
+              </li>
+              <li>
+                💬 Comunícate 24/7 con operaciones vía WhatsApp Business sin
+                salir del portal.
+              </li>
+            </ul>
+          </article>
+          <div className="relative mx-auto max-w-xs overflow-hidden rounded-[2rem] border border-brisa-200/60 shadow-2xl dark:border-brisa-700">
+            <Image
+              src="/assets/mockups/4-5/portal-mobile-1080w.webp"
+              alt="Vista móvil del portal cliente mostrando acciones rápidas"
+              width={1080}
+              height={1342}
+              loading="lazy"
+              className="h-auto w-full"
+              sizes="(max-width: 768px) 80vw, 420px"
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="bg-gray-50 dark:bg-brisa-900/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-center">

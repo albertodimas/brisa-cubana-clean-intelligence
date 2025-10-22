@@ -141,7 +141,11 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 - "Datos de demo realistas (no 'Lorem Ipsum')" - Conversion optimization
 - Disponibilidad: 1 hora vs 5-7 días diseño + aprobaciones
 
-**Estado 22-oct 20:20 EDT:** Mockup desktop (`portal-dashboard-{1920w,1280w}.webp`) generado con `capture-landing-section.mjs` e integrado en la landing.
+**Estado 22-oct 20:45 EDT:**
+
+- Mockup dashboard (`portal-dashboard-{1920w,1280w}.webp`) integrado.
+- Mockup agenda (`portal-bookings-{1920w,1280w}.webp`) y matriz de servicios (`portal-services-{1920w,1280w}.webp`) listos.
+- Mockup mobile (`portal-mobile-{1080w,540w}.webp`) disponible para assets sociales.
 
 ---
 
@@ -153,7 +157,7 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 | 📸 Screenshots dashboard/mockups     | Desarrollo        | 2025-10-22 20:00 | ✅ COMPLETADO |
 | 🎬 B-roll Shift A (footage nocturno) | Ops disponible    | 2025-10-22 23:00 | ⏳ PENDIENTE  |
 | 🎥 Reel Unidad Modelo                | Marketing + Staff | 2025-10-23 12:00 | ⏳ PENDIENTE  |
-| 🖼️ Optimización assets               | Desarrollo        | 2025-10-23 14:00 | ⏳ PENDIENTE  |
+| 🖼️ Optimización assets               | Desarrollo        | 2025-10-23 14:00 | ✅ COMPLETADO |
 | 🚀 Deploy feat/landing-assets        | Desarrollo        | 2025-10-23 17:00 | ⏳ PENDIENTE  |
 
 ---
