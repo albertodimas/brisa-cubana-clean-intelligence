@@ -50,25 +50,16 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+      - name: Build applications
+        run: pnpm build
+
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
-
-      - name: Pull Vercel Environment Information (Web)
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
-
-      - name: Build Web Application
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
 
       - name: Deploy Web to Vercel Preview
         id: deploy-web
         run: |
-          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web)
+          URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web)
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🌐 Web Preview Deployed" >> $GITHUB_STEP_SUMMARY
           echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
@@ -76,22 +67,10 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
 
-      - name: Pull Vercel Environment Information (API)
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
-
-      - name: Build API Application
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
-
       - name: Deploy API to Vercel Preview
         id: deploy-api
         run: |
-          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api)
+          URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api)
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🚀 API Preview Deployed" >> $GITHUB_STEP_SUMMARY
           echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
