@@ -56,17 +56,10 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Debug - Check paths
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          ls -la apps/web/.vercel/ || echo "No .vercel directory"
-          cat apps/web/.vercel/project.json || echo "No project.json"
-
       - name: Deploy Web to Vercel Preview
         id: deploy-web
         run: |
-          URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/web)
+          URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🌐 Web Preview Deployed" >> $GITHUB_STEP_SUMMARY
           echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
@@ -77,7 +70,7 @@ jobs:
       - name: Deploy API to Vercel Preview
         id: deploy-api
         run: |
-          URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/api)
+          URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🚀 API Preview Deployed" >> $GITHUB_STEP_SUMMARY
           echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
