@@ -5,9 +5,15 @@ on:
     branches:
       - main
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch o tag a desplegar (por defecto, main)"
+        required: false
+        default: "main"
 
 concurrency:
-  group: vercel-preview-${{ github.ref }}
+  group: vercel-preview-${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -23,6 +29,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
