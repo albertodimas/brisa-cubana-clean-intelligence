@@ -153,7 +153,7 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 
 ## 4. Despliegue
 
-1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` invoca `vercel deploy --prod` (API y Web) con las credenciales (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID_*`, `VERCEL_ORG_ID`). El resultado queda documentado en el `GITHUB_STEP_SUMMARY`.
+1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` invoca `vercel deploy --prod` (API y Web) con las credenciales (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID_*`, `VERCEL_ORG_ID`). El resultado queda documentado en el `GITHUB_STEP_SUMMARY`, junto con una auditoría automática de los últimos deployments generada por `scripts/report-vercel-deployments.sh`.
 2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
 3. Los pull requests hacia `main` generan previews mediante `.github/workflows/vercel-preview.yml`; ese workflow es el único responsable de publicar entornos Preview (no hay auto-deploy directo desde Vercel gracias a `vercel.json`).
 4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:

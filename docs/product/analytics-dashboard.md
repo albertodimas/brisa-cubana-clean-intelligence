@@ -104,7 +104,7 @@ Para añadir cada insight al dashboard:
 4. Click en el insight → "Add to dashboard"
 5. Repite para todos los insights
 
-**Nota:** La API pública de PostHog no soporta añadir tiles a dashboards programáticamente. Los insights se crearon via API y deben añadirse manualmente (toma ~2 minutos).
+**Nota:** Ahora puedes sincronizar el panel automáticamente ejecutando `POSTHOG_API_KEY=<clave_personal> pnpm posthog:sync-dashboard`. El comando crea/actualiza el insight `Checkout failures (CI monitor)` y lo inserta en el dashboard (`POSTHOG_DASHBOARD_ID=607007` por defecto). Mantén la clave en 1Password y exporta temporalmente la variable sólo para correr el script.
 
 ---
 
@@ -112,6 +112,6 @@ Para añadir cada insight al dashboard:
 
 - [ ] Añadir los 7 insights al dashboard manualmente (instrucciones arriba)
 - [x] Configurar alertas en PostHog para `checkout_payment_failed` → Slack (`#alerts-operaciones`) — ahora automatizadas vía workflow `posthog-monitor.yml` (ver GitHub Actions).
-- [ ] Añadir panel de métricas del workflow `posthog-monitor` al dashboard (due 05-nov-2025).
+- [ ] Añadir panel de métricas del workflow `posthog-monitor` al dashboard (due 05-nov-2025). _Usa `pnpm posthog:sync-dashboard` para crear o actualizar el insight en el tablero comercial._
 - [ ] Configurar automatización de reportes semanales (Insights → Share → Schedule) hacia el mismo webhook una vez haya datos reales.
 - [ ] Validar que los eventos estén emitiendo datos en producción
