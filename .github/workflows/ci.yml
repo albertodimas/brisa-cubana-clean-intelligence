@@ -32,9 +32,6 @@ jobs:
     needs: quality
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      PNPM_HOME: ${{ env.PNPM_HOME || '/home/runner/setup-pnpm/node_modules/.bin' }}
-      PATH: ${{ env.PATH || format('{0}:{1}', env.PNPM_HOME || '/home/runner/setup-pnpm/node_modules/.bin', '/usr/local/bin') }}
     environment:
       name: production-web
     env:
