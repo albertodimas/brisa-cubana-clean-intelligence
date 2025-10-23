@@ -149,7 +149,9 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 | `LOG_DRAIN_VERIFICATION_CODE`                                                                | Verificación del endpoint `/api/logdrain` en CI y creación de drains. |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_COORDINATOR_EMAIL`, `E2E_COORDINATOR_PASSWORD` | Credenciales sembradas para smoke/critical.                           |
 | `PORTAL_MAGIC_LINK_*`                                                                        | Flujos de enlaces mágicos (Nightly).                                  |
-| `PRODUCTION_DATABASE_URL`, `PRODUCTION_DATABASE_URL_UNPOOLED`                                | Workflow `Post-Deploy Seed`.                                          |
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED`                                                      | Workflow `Post-Deploy Seed` (extraídos del entorno `production-api`). |
+
+> ℹ️ Desde el 23-oct-2025 consolidamos los secretos de CI/CD en los entornos de GitHub Actions (`preview-web`, `preview-api`, `production-web`, `production-api`). Los workflows consumen estos secretos mediante `environment:` y ya no dependen de duplicados a nivel de repositorio, lo que evita desalineaciones con Vercel.
 
 ## 4. Despliegue
 

@@ -25,6 +25,8 @@ jobs:
     name: Deploy to Vercel Preview
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment:
+      name: preview-web
 
     steps:
       - name: Checkout repository
