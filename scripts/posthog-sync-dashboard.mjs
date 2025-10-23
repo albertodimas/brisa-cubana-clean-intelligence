@@ -70,7 +70,6 @@ async function createInsight() {
     query: {
       kind: "HogQLQuery",
       query: hogqlQuery,
-      filterTestAccounts: false,
     },
     filters: {
       insight: "TRENDS",
@@ -103,7 +102,6 @@ async function updateInsight(insightId) {
     query: {
       kind: "HogQLQuery",
       query: hogqlQuery,
-      filterTestAccounts: false,
     },
     filters: {
       insight: "TRENDS",

@@ -112,6 +112,6 @@ Para añadir cada insight al dashboard:
 
 - [ ] Añadir los 7 insights al dashboard manualmente (instrucciones arriba)
 - [x] Configurar alertas en PostHog para `checkout_payment_failed` → Slack (`#alerts-operaciones`) — ahora automatizadas vía workflow `posthog-monitor.yml` (ver GitHub Actions).
-- [ ] Añadir panel de métricas del workflow `posthog-monitor` al dashboard (due 05-nov-2025). _Usa `pnpm posthog:sync-dashboard` para crear o actualizar el insight en el tablero comercial._
+- [x] Añadir panel de métricas del workflow `posthog-monitor` al dashboard (due 05-nov-2025). _Se creó el insight "Checkout failures (CI monitor)" (ID 3796012) con `pnpm posthog:sync-dashboard`; consulta https://us.i.posthog.com/project/225064/insight/3796012._
 - [ ] Configurar automatización de reportes semanales (Insights → Share → Schedule) hacia el mismo webhook una vez haya datos reales.
 - [ ] Validar que los eventos estén emitiendo datos en producción

@@ -457,7 +457,7 @@ curl -X POST YOUR_SLACK_WEBHOOK_URL \
 ## Próximos Pasos
 
 1. Revisar y, si es necesario, ajustar umbrales de Sentry/PostHog el 30-oct-2025; registrar cualquier cambio adicional en la tabla de implementación.
-2. Añadir panel de seguimiento del workflow `posthog-monitor.yml` al dashboard PostHog (due 05-nov-2025) ejecutando `POSTHOG_API_KEY=<clave> pnpm posthog:sync-dashboard` y documentando el enlace resultante en `docs/product/analytics-dashboard.md`.
+2. (Completo 23-oct-2025) Añadir panel de seguimiento del workflow `posthog-monitor.yml` al dashboard PostHog ejecutando `POSTHOG_API_KEY=<clave> pnpm posthog:sync-dashboard`; el insight generado (ID 3796012) quedó documentado en `docs/product/analytics-dashboard.md`.
 3. Revisar retención de datos en PostHog (plan Starter) antes del 30-nov-2025.
 
 ---
