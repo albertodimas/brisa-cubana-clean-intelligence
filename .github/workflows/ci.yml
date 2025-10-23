@@ -53,11 +53,6 @@ jobs:
         with:
           node-version: '22.13.0'
 
-      - name: Enable pnpm via Corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.18.0 --activate
-
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
@@ -66,6 +61,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          export PATH="$PNPM_HOME:$PATH"
           pushd apps/api
           vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
           vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
@@ -91,6 +87,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          export PATH="$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
           vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
 
