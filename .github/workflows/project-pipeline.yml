@@ -259,7 +259,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pnpm --filter @brisa/web start -- --hostname 127.0.0.1 --port 4000 &
+          pnpm --filter @brisa/web exec next start --hostname 127.0.0.1 --port 4000 &
           NEXT_PID=$!
           trap "kill $NEXT_PID >/dev/null 2>&1 || true" EXIT
           for i in {1..30}; do
