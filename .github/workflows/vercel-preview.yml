@@ -73,7 +73,6 @@ jobs:
 
       - name: Deploy API to Vercel Preview
         id: deploy-api
-        working-directory: apps/api
         run: |
           URL=$(vercel deploy --yes --force --scope brisa-cubana --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$URL" >> $GITHUB_OUTPUT
