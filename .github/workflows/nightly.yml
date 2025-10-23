@@ -10,9 +10,8 @@ jobs:
   full-e2e:
     uses: ./.github/workflows/project-pipeline.yml
     secrets: inherit
-    environment:
-      name: preview-web
     with:
+      environment-name: preview-web
       job-name: Nightly full e2e
       run-database-prep: true
       run-e2e-suite: full

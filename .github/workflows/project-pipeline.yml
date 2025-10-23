@@ -7,6 +7,9 @@ on:
         required: false
         type: string
         default: "Quality checks"
+      environment-name:
+        required: true
+        type: string
       node-version:
         required: false
         type: string
@@ -148,6 +151,8 @@ concurrency:
 jobs:
   pipeline:
     name: ${{ inputs.job-name }}
+    environment:
+      name: ${{ inputs.environment-name }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     services:

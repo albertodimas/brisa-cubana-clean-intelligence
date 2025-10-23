@@ -15,9 +15,8 @@ jobs:
   quality:
     uses: ./.github/workflows/project-pipeline.yml
     secrets: inherit
-    environment:
-      name: preview-web
     with:
+      environment-name: preview-web
       job-name: Main branch safety checks
       checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
       run-secret-scan: true
