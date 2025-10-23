@@ -44,6 +44,7 @@ jobs:
         uses: pnpm/action-setup@v3
         with:
           version: 10.18.0
+          run_install: false
 
       - name: Add pnpm to PATH
         run: echo "$PNPM_HOME" >> $GITHUB_PATH
@@ -54,10 +55,7 @@ jobs:
           node-version: '22.13.0'
 
       - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      - name: Install pnpm globally (fallback for Vercel CLI)
-        run: npm install -g pnpm@10.18.0
+        run: pnpm add --global vercel@latest
 
       - name: Build API (prebuilt)
         env:
