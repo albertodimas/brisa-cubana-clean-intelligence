@@ -172,7 +172,31 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
    ```
    El script consulta la API de Vercel y resume los últimos deployments por entorno/autor. Si detectas más de un `production` en la misma ventana, revisa los workflows correspondientes.
 
-## 5. Seed y migraciones
+## 5. Mantenimiento del historial en Vercel
+
+Los despliegues antiguos pueden acumularse y generar notificaciones de error. Usa el script `scripts/clean-vercel-deployments.mjs` para eliminar en bloque los deployments que no quieras conservar.
+
+```bash
+# Web: conserva únicamente el preview y el deploy productivo actual
+VERCEL_TOKEN=$(jq -r '.token' ~/.vercel/auth.json) \
+VERCEL_ORG_ID=team_GI7iQ5ivPN36nVRB1Y9IJ9UW \
+node scripts/clean-vercel-deployments.mjs \
+  brisa-cubana-clean-intelligence-rh1pzvd6n-brisa-cubana.vercel.app \
+  brisa-cubana-clean-intelligence-l5cb3w50e-brisa-cubana.vercel.app \
+  brisa-cubana-clean-intelligence-3l7xjje4s-brisa-cubana.vercel.app
+
+# API: conserva el preview y el productivo
+VERCEL_TOKEN=$(jq -r '.token' ~/.vercel/auth.json) \
+VERCEL_ORG_ID=team_GI7iQ5ivPN36nVRB1Y9IJ9UW \
+VERCEL_PROJECT_ID=prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j \
+node scripts/clean-vercel-deployments.mjs \
+  brisa-cubana-clean-intelligence-qtcgx6jdc-brisa-cubana.vercel.app \
+  brisa-cubana-clean-intelligence-bdgx8axc2-brisa-cubana.vercel.app
+```
+
+El script acepta un tope de borrado por ejecución (`MAX_DELETE`, por defecto 200). Si aparece un mensaje de _rate limited_, espera unos minutos y vuelve a ejecutarlo.
+
+## 6. Seed y migraciones
 
 1. Migraciones Prisma se aplican automáticamente vía `prisma generate` + `tsc`. Si cambiaste el schema, sincroniza producción ejecutando las migraciones generadas:
    ```bash

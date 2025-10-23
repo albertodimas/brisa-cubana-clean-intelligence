@@ -50,19 +50,38 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      - name: Build API (prebuilt)
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          pushd apps/api
+          vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
+          vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
+          popd
+
       - name: Deploy API to Vercel Production
         id: deploy-api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy --yes --force --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
+          URL=$(vercel deploy apps/api/.vercel/output --prebuilt --yes --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo "### 🚀 API Production Deployment"
             echo ""
             echo "- URL: $URL"
           } >> "$GITHUB_STEP_SUMMARY"
+          rm -rf apps/api/.vercel/output
+
+      - name: Build Web (prebuilt)
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
+          vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Production
         id: deploy-web
@@ -70,7 +89,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy --yes --force --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
+          URL=$(vercel deploy .vercel/output --prebuilt --yes --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo ""
@@ -78,6 +97,7 @@ jobs:
             echo ""
             echo "- URL: $URL"
           } >> "$GITHUB_STEP_SUMMARY"
+          rm -rf .vercel/output
 
       - name: Audit recent Vercel deployments
         env:
