@@ -1,0 +1,87 @@
+name: Watch Vercel CLI updates
+
+on:
+  schedule:
+    - cron: "0 10 * * *" # 10:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.18.0
+          run_install: false
+
+      - name: Check latest Vercel CLI version
+        id: versions
+        run: |
+          set -euo pipefail
+          CURRENT="$(cat ops/vercel-cli.version)"
+          LATEST="$(pnpm dlx npm view vercel version)"
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+          if [ "$LATEST" != "$CURRENT" ]; then
+            echo "needs-update=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs-update=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open/update tracking issue
+        if: steps.versions.outputs.needs-update == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const latest = core.getInput('latest');
+            const current = core.getInput('current');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = `Track Vercel CLI ${latest}`;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'infra',
+              per_page: 100,
+            });
+
+            const existing = issues.find(issue => issue.title === title);
+
+            const body = [
+              `Detected new Vercel CLI version **${latest}** (current tracked: ${current}).`,
+              '',
+              'Next steps:',
+              '- [ ] Actualizar `ops/vercel-cli.version` cuando validemos el build con esta versión.',
+              '- [ ] Reejecutar el workflow `CI (Main Branch)` para comprobar si el bug `spawn pnpm ENOENT` se resuelve.',
+              '- [ ] Cerrar este issue una vez integrada la nueva versión.',
+              '',
+              '_Este issue fue creado automáticamente por `vercel-cli-watch.yml`._'
+            ].join('\n');
+
+            if (existing) {
+              core.info(`Issue already exists: ${existing.html_url}`);
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body: `Nueva detección automática: ${body}`,
+              });
+            } else {
+              const { data: issue } = await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['infra'],
+              });
+              core.info(`Created issue: ${issue.html_url}`);
+            }
+        env:
+          latest: ${{ steps.versions.outputs.latest }}
+          current: ${{ steps.versions.outputs.current }}

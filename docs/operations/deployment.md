@@ -157,7 +157,11 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 
 1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` invoca `vercel deploy --prod` (API y Web) con las credenciales (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID_*`, `VERCEL_ORG_ID`). El resultado queda documentado en el `GITHUB_STEP_SUMMARY`, junto con una auditoría automática de los últimos deployments generada por `scripts/report-vercel-deployments.sh`.
 
-> ⚠️ _Estado al 23-oct-2025_: Vercel CLI `48.6.x` tiene un bug conocido (`spawn pnpm ENOENT`) cuando ejecuta `vercel build` en runners de GitHub Actions. Mientras Vercel entrega un fix, el pipeline fallará en el paso “Build API (prebuilt)”. Usa el fallback manual del punto 4 o ejecuta `vercel deploy --prod` localmente tras generar el build con `pnpm`. Documenta el incidente en el PR hasta que el job vuelva a verde. 2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow. 3. Los pull requests hacia `main` generan previews mediante `.github/workflows/vercel-preview.yml`; ese workflow es el único responsable de publicar entornos Preview (no hay auto-deploy directo desde Vercel gracias a `vercel.json`). 4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
+   > ⚠️ _Estado al 23-oct-2025_: Vercel CLI `48.6.x` tiene un bug conocido (`spawn pnpm ENOENT`) cuando ejecuta `vercel build` en runners de GitHub Actions. Mientras Vercel entrega un fix, el pipeline fallará en el paso “Build API (prebuilt)”. Usa el script `scripts/manual-vercel-deploy.sh` o ejecuta `vercel deploy --prod` manualmente tras generar el prebuild con `pnpm`. Documenta el incidente en el PR hasta que el job vuelva a verde.
+
+2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
+3. Los pull requests hacia `main` generan previews mediante `.github/workflows/vercel-preview.yml`; ese workflow es el único responsable de publicar entornos Preview (no hay auto-deploy directo desde Vercel gracias a `vercel.json`).
+4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
 
 ```bash
 gh workflow run vercel-preview.yml --ref fix/posthog-ci -f ref=fix/posthog-ci
@@ -201,6 +205,9 @@ node scripts/clean-vercel-deployments.mjs \
 ```
 
 El script acepta un tope de borrado por ejecución (`MAX_DELETE`, por defecto 200). Si aparece un mensaje de _rate limited_, espera unos minutos y vuelve a ejecutarlo.
+
+6. Si el bug del CLI persiste, ejecuta `scripts/manual-vercel-deploy.sh web` / `scripts/manual-vercel-deploy.sh api` desde tu máquina con Vercel autenticado. El script reproduce `vercel pull`, `vercel build` y `vercel deploy --prebuilt` usando la CLI local.
+7. Mantén un ojo en el workflow `vercel-cli-watch.yml`, que abre un issue automático (“Track Vercel CLI x.y.z”) cuando aparece una versión nueva en npm. Una vez verificado un fix, actualiza `ops/vercel-cli.version` y cierra el issue.
 
 ## 6. Seed y migraciones
 
