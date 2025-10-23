@@ -48,3 +48,15 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
           POSTHOG_CHECKOUT_LOOKBACK_MINUTES: ${{ env.POSTHOG_CHECKOUT_LOOKBACK_MINUTES }}
         run: pnpm posthog:monitor
+
+      - name: Publicar resumen
+        if: env.SKIP_MONITOR == 'false'
+        env:
+          POSTHOG_CHECKOUT_LOOKBACK_MINUTES: ${{ env.POSTHOG_CHECKOUT_LOOKBACK_MINUTES }}
+        run: |
+          {
+            echo "### PostHog monitor"
+            echo ""
+            echo "- Ejecución completada a $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo "- Ventana analizada: ${POSTHOG_CHECKOUT_LOOKBACK_MINUTES} minutos"
+          } >> "$GITHUB_STEP_SUMMARY"

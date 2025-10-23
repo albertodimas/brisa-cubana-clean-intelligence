@@ -2,7 +2,8 @@
 
 **Fecha:** 19 de octubre de 2025  
 **Autor:** Equipo Producto / Plataforma  
-**Estado:** ✅ Selección realizada – PostHog Cloud (EE. UU.)
+**Estado:** ✅ Selección realizada – PostHog Cloud (EE. UU.)  
+**Última actualización:** 23 de octubre de 2025
 
 ---
 
@@ -60,7 +61,7 @@ Se habilitará el dominio US inicialmente; si marketing/legal solicita residenci
 1. Funnel “Landing → Checkout → Pago” (Dashboard `funnel-fase2` en PostHog).
 2. Event trends: `portal.booking.action.*`, `checkout_payment_failed`.
 3. Dashboard compartido enlazado en `docs/operations/observability.md#4-analítica-comercial-plan-fase-2`.
-4. Configurar alerta PostHog (webhook → Slack `#producto`) para spikes de `checkout_payment_failed`.
+4. Configurar alerta PostHog (webhook → Slack `#alerts-operaciones`) para spikes de `checkout_payment_failed`.
 
 ### 4.3 Política de datos / cumplimiento
 

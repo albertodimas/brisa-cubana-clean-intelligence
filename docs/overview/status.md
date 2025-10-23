@@ -204,7 +204,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 - **TypeScript**: `pnpm typecheck` ✅
 - **Lint**: `pnpm lint` ✅
-- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: confirmar mensaje de prueba en Slack (`#todo-brisa-cubana`), incorporar assets finales de marketing en la landing y automatizar alertas PostHog (`checkout_payment_failed` → Slack).
+- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: revisar umbrales de alertas Sentry/PostHog el 30-oct-2025, añadir panel del workflow `posthog-monitor.yml` al dashboard comercial (05-nov-2025) e investigar retención de datos PostHog antes del 30-nov-2025.
 
 ---
 

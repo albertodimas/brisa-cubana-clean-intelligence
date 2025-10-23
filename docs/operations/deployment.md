@@ -7,6 +7,7 @@ Proceso verificado para promover cambios de Brisa Cubana Clean Intelligence a lo
 - Branch `main` en verde (ver GitHub Actions: CI, CodeQL, Nightly si corresponde).
 - `CHANGELOG.md` actualizado con los cambios a desplegar.
 - Checklist de regresión ejecutada según [`qa/regression-checklist.md`](../qa/regression-checklist.md); adjuntar resultados en el PR.
+- `vercel.json` (raíz) y `apps/api/vercel.json` versionados con `"git.deploymentEnabled": false` para evitar auto-builds directos desde Vercel.
 
 ## 2. Variables de entorno requeridas
 
@@ -152,16 +153,20 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 
 ## 4. Despliegue
 
-1. Merge a `main` activa automáticamente los builds en Vercel para `Production`.
-2. Confirma que los pipelines (`CI (Main Branch)`, `CodeQL`) estén en verde antes de aprobar el despliegue.
-3. En Vercel:
-   - API: Tab **Deployments** → verifica que la última build de `main` tenga badge `Ready`.
-   - Web: Mismo procedimiento. Asegúrate de que las build logs no tengan advertencias rojas.
-4. Si se requiere despliegue manual (hotfix):
+1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` invoca `vercel deploy --prod` (API y Web) con las credenciales (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID_*`, `VERCEL_ORG_ID`). El resultado queda documentado en el `GITHUB_STEP_SUMMARY`.
+2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
+3. Los pull requests hacia `main` generan previews mediante `.github/workflows/vercel-preview.yml`; ese workflow es el único responsable de publicar entornos Preview (no hay auto-deploy directo desde Vercel gracias a `vercel.json`).
+4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` (indicando el ref deseado) o, en caso extremo, ejecutar localmente:
    ```bash
-   vercel deploy --prod --scope <team> --confirm
+   vercel deploy --prod --scope brisa-cubana --token "$VERCEL_TOKEN" --yes --force
    ```
-   Usa el scope del equipo configurado (requiere `vercel login`).
+   Recuerda exportar los IDs de proyecto (`VERCEL_PROJECT_ID_*`) antes de ejecutar el comando.
+5. Para auditar despliegues recientes desde local o CI, usa `scripts/report-vercel-deployments.sh`:
+   ```bash
+   VERCEL_TOKEN=<token> ./scripts/report-vercel-deployments.sh           # Web
+   VERCEL_TOKEN=<token> ./scripts/report-vercel-deployments.sh apps/api  # API
+   ```
+   El script consulta la API de Vercel y resume los últimos deployments por entorno/autor. Si detectas más de un `production` en la misma ventana, revisa los workflows correspondientes.
 
 ## 5. Seed y migraciones
 

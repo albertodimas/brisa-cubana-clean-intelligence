@@ -1,6 +1,6 @@
 # Dashboard de Analítica Comercial
 
-**Última actualización:** 20 de octubre de 2025
+**Última actualización:** 23 de octubre de 2025
 
 Este documento describe la estructura y métricas propuestas para el dashboard en PostHog.
 
@@ -111,12 +111,7 @@ Para añadir cada insight al dashboard:
 ## Próximos pasos
 
 - [ ] Añadir los 7 insights al dashboard manualmente (instrucciones arriba)
-- [ ] Configurar alertas en PostHog para `checkout_payment_failed` → Slack (`#todo-brisa-cubana`).
-  1. PostHog → Automations → New automation.
-  2. Trigger: Event `checkout_payment_failed` con filtro `environment = production`.
-  3. Action: Slack Webhook → URL `SLACK_WEBHOOK_URL` (copiar desde Vercel). Mensaje sugerido: `:rotating_light: Checkout fallido {{properties.error_code}} – lead {{distinct_id}}`.
-  4. Guardar y probar enviando `POSTHOG_API_KEY=… pnpm posthog:test-event checkout_payment_failed`.
-  5. Confirmar en `#todo-brisa-cubana` la recepción del mensaje y registrar la fecha en `docs/operations/slack-integration.md`.
-  6. Opcional: ejecutar `POSTHOG_API_KEY=… SLACK_WEBHOOK_URL=… pnpm posthog:monitor` para validar desde CLI (usa HogQL para contar fallos en los últimos 5 minutos y enviar alerta).
+- [x] Configurar alertas en PostHog para `checkout_payment_failed` → Slack (`#alerts-operaciones`) — ahora automatizadas vía workflow `posthog-monitor.yml` (ver GitHub Actions).
+- [ ] Añadir panel de métricas del workflow `posthog-monitor` al dashboard (due 05-nov-2025).
 - [ ] Configurar automatización de reportes semanales (Insights → Share → Schedule) hacia el mismo webhook una vez haya datos reales.
 - [ ] Validar que los eventos estén emitiendo datos en producción

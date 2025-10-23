@@ -2,7 +2,7 @@
 
 ## 1. Estructura sugerida
 
-- **Sheet `Calendar`**: replica la tabla de `tracking-dashboard-template` (content_id, fecha, plataforma, etc.).
+- **Sheet `Calendar`**: calendario de contenido programado (content_id, fecha, plataforma, etc.).
 - **Sheet `Results`**: importará los datos reales (alcance, clicks, leads, follow-up).
 - **Sheet `Summary`**: indicadores agregados (por campaña, plataforma y semana).
 

@@ -33,7 +33,7 @@ Completar los flujos comerciales de cara al usuario final para habilitar ventas 
 2. Contenido comercial iterado el 18-oct-2025: landing incorpora secciones "Planes y precios", FAQ ampliada y formulario de captura que envía a `/api/leads` (webhook opcional `LEAD_WEBHOOK_URL`). Pendiente: cerrar copy definitivo con marketing y añadir assets/hero photography para la release pública.
 3. Definir proceso post-lanzamiento: monitoreo diario de alertas Sentry/Slack, revisión de logs Stripe live y QA regresivo semanal (ver `docs/qa/reports/2025-10-20-go-live.md`).
 4. **Coordinación marketing**:
-   - [x] Reunión con Marketing (19-oct-2025) – copy definitivo en `docs/marketing/landing-copy-2025-10-19.md`.
+   - [x] Reunión con Marketing (19-oct-2025) – copy definitivo en `docs/marketing/landing-copy-2025-10-21.md`.
    - [x] Assets en `docs/assets/public-components/` (hero, iconografía, testimonios).
    - [x] Actualizar landing con assets definitivos y anotar cambios en CHANGELOG (`apps/web/app/page.tsx`, `public/images/landing/*`).
 

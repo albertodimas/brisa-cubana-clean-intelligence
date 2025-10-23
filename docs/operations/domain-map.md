@@ -1,5 +1,6 @@
 # Mapa de Dominios e Integraciones
 
+**Última actualización:** 23 de octubre de 2025  
 Esta guía resume los dominios activos del proyecto y los subdominios planeados para escalabilidad futura. Úsala al coordinar DNS, certificados y variables de entorno en Vercel.
 
 ## 1. Dominios activos
@@ -37,17 +38,17 @@ Esta guía resume los dominios activos del proyecto y los subdominios planeados 
 
 Configurar los valores siguientes (Development / Preview / Production) con los dominios definitivos:
 
-| Variable                                                   | Valor producción                                 | Paquete(s) |
-| ---------------------------------------------------------- | ------------------------------------------------ | ---------- |
-| `NEXT_PUBLIC_BASE_URL`                                     | `https://brisacubanacleanintelligence.com`       | web        |
-| `NEXTAUTH_URL`                                             | `https://brisacubanacleanintelligence.com`       | web        |
-| `NEXT_PUBLIC_SITE_URL`                                     | `https://brisacubanacleanintelligence.com`       | web        |
-| `NEXT_PUBLIC_API_URL`                                      | `https://api.brisacubanacleanintelligence.com`   | web        |
-| `INTERNAL_API_URL`                                         | `https://api.brisacubanacleanintelligence.com`   | web        |
-| `PORTAL_MAGIC_LINK_BASE_URL`                               | `https://brisacubanacleanintelligence.com`       | api        |
-| `SLACK_WEBHOOK_URL`                                        | URL del webhook Slack (canal #todo-brisa-cubana) | web        |
-| `LEAD_WEBHOOK_URL`                                         | URL del CRM/automation para leads                | web        |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` | Claves Stripe modo live                          | web, api   |
+| Variable                                                   | Valor producción                                  | Paquete(s) |
+| ---------------------------------------------------------- | ------------------------------------------------- | ---------- |
+| `NEXT_PUBLIC_BASE_URL`                                     | `https://brisacubanacleanintelligence.com`        | web        |
+| `NEXTAUTH_URL`                                             | `https://brisacubanacleanintelligence.com`        | web        |
+| `NEXT_PUBLIC_SITE_URL`                                     | `https://brisacubanacleanintelligence.com`        | web        |
+| `NEXT_PUBLIC_API_URL`                                      | `https://api.brisacubanacleanintelligence.com`    | web        |
+| `INTERNAL_API_URL`                                         | `https://api.brisacubanacleanintelligence.com`    | web        |
+| `PORTAL_MAGIC_LINK_BASE_URL`                               | `https://brisacubanacleanintelligence.com`        | api        |
+| `SLACK_WEBHOOK_URL`                                        | URL del webhook Slack (canal #alerts-operaciones) | web        |
+| `LEAD_WEBHOOK_URL`                                         | URL del CRM/automation para leads                 | web        |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` | Claves Stripe modo live                           | web, api   |
 
 ## 5. Checklist de despliegue por dominio
 

@@ -1,6 +1,6 @@
 # Runbook de Incidentes
 
-**Última actualización:** 20 de octubre de 2025
+**Última actualización:** 23 de octubre de 2025
 
 Este documento describe el flujo de respuesta ante incidentes en Brisa Cubana Clean Intelligence.
 
@@ -37,7 +37,7 @@ Este documento describe el flujo de respuesta ante incidentes en Brisa Cubana Cl
    - Monitoreo manual / reporte del equipo.
 
 2. **Acknowledgement**
-   - Primer respondedor confirma recepción en `#brisa-alerts` (o canal temporal `#incident-<fecha>`).
+   - Primer respondedor confirma recepción en `#alerts-operaciones` (o canal temporal `#incident-<fecha>`).
 
 3. **Diagnóstico inicial**
    - Revisar dashboards: Sentry, PostHog, Vercel (deploys) y logs (`pnpm --filter @brisa/api dev` / `pino` outputs).
@@ -79,6 +79,6 @@ Este documento describe el flujo de respuesta ante incidentes en Brisa Cubana Cl
 
 ## 6. Próximos pasos pendientes
 
-- Configurar canales Slack dedicados (`#brisa-alerts`, `#brisa-critical`).
+- Configurar canales Slack dedicados (`#alerts-operaciones`, `#alerts-criticos`).
 - Publicar el dashboard KPI en PostHog y enlazarlo en este runbook.
 - Formalizar guardias/on-call y actualizar la tabla de roles.

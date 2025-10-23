@@ -25,3 +25,52 @@ jobs:
       playwright-report-name: playwright-report-critical
       playwright-retention-days: 7
       upload-playwright-only-on-failure: true
+
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.13.0'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy API to Vercel Production
+        id: deploy-api
+        working-directory: apps/api
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --yes --force --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          {
+            echo "### 🚀 API Production Deployment"
+            echo ""
+            echo "- URL: $URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy Web to Vercel Production
+        id: deploy-web
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --yes --force --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          {
+            echo ""
+            echo "### 🌐 Web Production Deployment"
+            echo ""
+            echo "- URL: $URL"
+          } >> "$GITHUB_STEP_SUMMARY"
