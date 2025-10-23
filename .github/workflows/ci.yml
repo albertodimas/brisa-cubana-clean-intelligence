@@ -68,8 +68,8 @@ jobs:
           echo "pnpm binary: $(command -v pnpm || echo 'NOT FOUND')"
           ls -l "$PNPM_HOME" || true
           pushd apps/api
-          vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
-          vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
+          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
+          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
           popd
 
       - name: Deploy API to Vercel Production
@@ -94,8 +94,8 @@ jobs:
         run: |
           export PATH="$PNPM_HOME:/usr/local/bin:$PATH"
           echo "pnpm binary: $(command -v pnpm || echo 'NOT FOUND')"
-          vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
-          vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
+          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
+          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Production
         id: deploy-web
