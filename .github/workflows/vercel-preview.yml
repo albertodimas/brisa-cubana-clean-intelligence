@@ -20,13 +20,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Setup Node.js and pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.18.0
+
+      - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '22.13.0'
-
-      - name: Install pnpm
-        run: npm install -g pnpm@10.18.0
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
