@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Add pnpm to PATH
+        run: echo "$PNPM_HOME" >> $GITHUB_PATH
+
       - name: Generate Prisma Client
         run: pnpm exec prisma generate
         working-directory: apps/api
@@ -61,7 +64,6 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
-          PATH: ${{ env.PNPM_HOME }}:${{ env.PATH }}
 
       - name: Deploy Web to Vercel Preview
         id: deploy-web
@@ -85,7 +87,6 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
-          PATH: ${{ env.PNPM_HOME }}:${{ env.PATH }}
 
       - name: Deploy API to Vercel Preview
         id: deploy-api
