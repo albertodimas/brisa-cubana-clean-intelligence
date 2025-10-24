@@ -128,14 +128,24 @@ jobs:
             exit 1
           fi
 
+      - name: Export Slack webhook secret
+        id: slack-secret
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" >> "$GITHUB_ENV"
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install jq (for Slack payloads)
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        if: ${{ steps.slack-secret.outputs.present == 'true' }}
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Post deploy Slack notification
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        if: ${{ steps.slack-secret.outputs.present == 'true' }}
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
           WEB_URL: ${{ steps.deploy-web.outputs.url }}
           API_URL: ${{ steps.deploy-api.outputs.url }}
           COMMIT: ${{ github.sha }}
