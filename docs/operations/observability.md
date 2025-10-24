@@ -25,6 +25,7 @@
 | PostHog                     | Funnel comercial + portal cliente                                                       | Producto                 | `docs/product/analytics-dashboard.md`, `docs/product/analytics-events.md`      |
 | Slack alerting              | `#alerts-operaciones`, `#alerts-criticos`, `#alerts-performance`, `#alerts-deployments` | Plataforma / Operaciones | `docs/operations/slack-integration.md`, `docs/operations/alerts.md`            |
 | Vercel logs/analytics       | Despliegues web/API, Web Vitals                                                         | Operaciones              | `docs/operations/deployment.md`, `docs/operations/runbook-daily-monitoring.md` |
+| GitHub Health Monitor       | Workflow `health-monitor.yml` (cada 15 min). SMS/Slack cuando `/healthz` falla.         | Operaciones              | `docs/operations/deployment.md#4-despliegue`                                   |
 | Neon monitoreo              | Performance base de datos                                                               | Plataforma               | `docs/operations/observability-setup.md#3-prisma-query-logs`                   |
 | Dashboards de negocio       | PostHog Funnel + Lighthouse                                                             | Producto                 | `docs/product/analytics-dashboard.md`, `docs/performance/bundle-analysis.md`   |
 

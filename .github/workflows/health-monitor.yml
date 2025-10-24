@@ -1,0 +1,80 @@
+name: Production Health Monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"  # Cada 15 minutos
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WEB_HEALTH_URL: https://brisacubanacleanintelligence.com/healthz
+      API_HEALTH_URL: https://api.brisacubanacleanintelligence.com/healthz
+      HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Verificar endpoints
+        id: checks
+        run: |
+          set -euo pipefail
+
+          auth_args=()
+          if [ -n "${HEALTH_CHECK_TOKEN:-}" ]; then
+            auth_args=(--header "Authorization: Bearer ${HEALTH_CHECK_TOKEN}")
+          fi
+
+          echo "Verificando ${WEB_HEALTH_URL}"
+          web_status=$(curl -s -o /tmp/web-health.log -w "%{http_code}" "${auth_args[@]}" "$WEB_HEALTH_URL" || echo "000")
+          echo "Verificando ${API_HEALTH_URL}"
+          api_status=$(curl -s -o /tmp/api-health.log -w "%{http_code}" "${auth_args[@]}" "$API_HEALTH_URL" || echo "000")
+
+          failures=""
+          if [ "$web_status" -ge 400 ] || [ "$web_status" -lt 200 ]; then
+            failures+=$'• Web healthz falló (status '
+            failures+="$web_status"
+            failures+=$')\n'
+          fi
+          if [ "$api_status" -ge 400 ] || [ "$api_status" -lt 200 ]; then
+            failures+=$'• API healthz falló (status '
+            failures+="$api_status"
+            failures+=$')\n'
+          fi
+
+          if [ -n "$failures" ]; then
+            echo "check_result=failed" >> "$GITHUB_OUTPUT"
+            printf '%s' "$failures" > /tmp/health-failures.txt
+            exit 1
+          else
+            echo "check_result=passed" >> "$GITHUB_OUTPUT"
+            printf 'Web (%s): %s\n' "$WEB_HEALTH_URL" "$web_status" >> "$GITHUB_STEP_SUMMARY"
+            printf 'API (%s): %s\n' "$API_HEALTH_URL" "$api_status" >> "$GITHUB_STEP_SUMMARY"
+          fi
+        continue-on-error: true
+
+      - name: Notificar a Slack si falla
+        if: steps.checks.outcome == 'failure' && env.SLACK_WEBHOOK_URL != ''
+        run: |
+          set -euo pipefail
+          failures=$(cat /tmp/health-failures.txt)
+          DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          payload=$(jq -n --arg issues "$failures" --arg time "$DEPLOY_TIME" --arg web "$WEB_HEALTH_URL" --arg api "$API_HEALTH_URL" '{
+            text: "⚠️ Falla en health-check",
+            blocks: [
+              {"type": "section", "text": {"type": "mrkdwn", "text": "*⚠️ Falla en health-check*"}},
+              {"type": "section", "text": {"type": "mrkdwn", "text": "`" + $issues + "`"}},
+              {"type": "context", "elements": [
+                {"type": "mrkdwn", "text": "Web: <" + $web + "|healthz> · API: <" + $api + "|healthz>"},
+                {"type": "mrkdwn", "text": "Hora (UTC): " + $time}
+              ]}
+            ]
+          }')
+          curl -fsS -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Fallar trabajo si hubo errores
+        if: steps.checks.outcome == 'failure'
+        run: exit 1
