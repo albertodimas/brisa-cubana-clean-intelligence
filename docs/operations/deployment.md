@@ -162,8 +162,11 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
 3. Los pushes a `main` disparan el workflow `ci.yml`, que después de pasar lint/typecheck/tests ejecuta `vercel deploy --prebuilt --prod` para API y web sin aprobación manual. Los pull requests siguen usando `.github/workflows/vercel-preview.yml` para entornos Preview.
 4. Tras el despliegue, el job ejecuta un smoke test automático sobre `https://<deployment>/healthz` (API y web) para detectar problemas inmediatos. Si falla, el workflow se marca en rojo.
+5. Si `SLACK_WEBHOOK_URL` está presente, el workflow publica un resumen del deploy en Slack (web/API, commit, timestamp), lo que permite monitorear releases sin entrar a GitHub.
 
-> **Seguridad:** la rama `main` está protegida (`Settings → Branches`) y exige al menos una revisión aprobatoria antes del merge; de esta forma sólo cambios revisados activan el deploy automático. 4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
+> **Seguridad:** la rama `main` está protegida (`Settings → Branches`) y exige al menos una revisión aprobatoria antes del merge; de esta forma sólo cambios revisados activan el deploy automático.
+
+4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
 
 ```bash
 gh workflow run vercel-preview.yml --ref fix/posthog-ci -f ref=fix/posthog-ci
@@ -186,7 +189,7 @@ El script consulta la API de Vercel y resume los últimos deployments por entorn
 
 ## 5. Mantenimiento del historial en Vercel
 
-Los despliegues antiguos pueden acumularse y generar notificaciones de error. Usa el script `scripts/clean-vercel-deployments.mjs` para eliminar en bloque los deployments que no quieras conservar.
+Los despliegues antiguos pueden acumularse y generar notificaciones de error. Usa el script `scripts/clean-vercel-deployments.mjs` para eliminar en bloque los deployments que no quieras conservar. El workflow programado `.github/workflows/vercel-cleanup.yml` ejecuta esta limpieza cada lunes a las 04:00 UTC (keep=3 para web y API) y puede dispararse manualmente desde la pestaña _Actions_.
 
 ```bash
 # Web: conserva únicamente el preview y el deploy productivo actual

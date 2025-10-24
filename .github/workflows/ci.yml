@@ -126,6 +126,30 @@ jobs:
             exit 1
           fi
 
+      - name: Post deploy Slack notification
+        if: ${{ secrets.SLACK_WEBHOOK_URL }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          WEB_URL: ${{ steps.deploy-web.outputs.url }}
+          API_URL: ${{ steps.deploy-api.outputs.url }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          PAYLOAD=$(jq -n --arg web "$WEB_URL" --arg api "$API_URL" --arg commit "$COMMIT" --arg time "$DEPLOY_TIME" '{
+            text: "🚀 *Deploy completado*",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: "*Deploy completado*\n• Web: <\($web)|\($web)>\n• API: <\($api)|\($api)>\n• Commit: `<\($commit)>`\n• Momento (UTC): \($time)"
+                }
+              }
+            ]
+          }')
+          curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
       - name: Audit recent Vercel deployments
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
