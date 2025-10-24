@@ -13,6 +13,7 @@ let bookingsFixture: any[] = [];
 let usersFixture: any[] = [];
 let propertiesFixture: any[] = [];
 let notificationsFixture: any[] = [];
+let verificationCodesFixture: any[] = [];
 
 const makeCuid = (index: number) => `c${index.toString(36).padStart(24, "0")}`;
 
@@ -504,20 +505,27 @@ const mockPrisma = {
       }
       return record;
     }),
-    update: vi.fn().mockImplementation(async ({ where, data }: any) => {
+    update: vi.fn().mockImplementation(async (args: any) => {
+      const { where, data, select } = args;
       const user = usersFixture.find((item) => item.id === where.id);
       if (!user) {
         throw new Error("User not found");
       }
-      Object.assign(user, data, { updatedAt: new Date() });
-      return {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName ?? null,
-        role: user.role,
-        isActive: user.isActive,
-        updatedAt: user.updatedAt,
-      };
+      Object.assign(user, data);
+      user.updatedAt = new Date();
+      const result = { ...user };
+
+      if (select) {
+        const picked: Record<string, unknown> = {};
+        for (const key of Object.keys(select)) {
+          if (select[key]) {
+            picked[key] = (result as any)[key];
+          }
+        }
+        return picked;
+      }
+
+      return result;
     }),
   },
   property: {
@@ -747,6 +755,90 @@ const mockPrisma = {
       return record;
     }),
   },
+  verificationCode: {
+    deleteMany: vi.fn().mockImplementation(async ({ where }: any) => {
+      const before = verificationCodesFixture.length;
+      verificationCodesFixture = verificationCodesFixture.filter((record) => {
+        if (where?.email && record.email !== where.email) {
+          return true;
+        }
+        if (where?.type && record.type !== where.type) {
+          return true;
+        }
+        if (
+          Object.prototype.hasOwnProperty.call(where ?? {}, "consumedAt") &&
+          where.consumedAt === null &&
+          record.consumedAt === null
+        ) {
+          return false;
+        }
+        return true;
+      });
+      return { count: before - verificationCodesFixture.length };
+    }),
+    create: vi.fn().mockImplementation(async ({ data }: any) => {
+      const record = {
+        id: makeCuid(1200 + verificationCodesFixture.length),
+        createdAt: new Date(),
+        consumedAt: null,
+        metadata: data.metadata ?? null,
+        ...data,
+      };
+      verificationCodesFixture.unshift(record);
+      return record;
+    }),
+    findFirst: vi.fn().mockImplementation(async ({ where, orderBy }: any) => {
+      let filtered = verificationCodesFixture.filter((record) => {
+        if (where?.email && record.email !== where.email) {
+          return false;
+        }
+        if (where?.type && record.type !== where.type) {
+          return false;
+        }
+        if (where?.code && record.code !== where.code) {
+          return false;
+        }
+        if (
+          Object.prototype.hasOwnProperty.call(where ?? {}, "consumedAt") &&
+          where.consumedAt === null &&
+          record.consumedAt !== null
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      if (Array.isArray(orderBy) && orderBy.length > 0) {
+        filtered = [...filtered].sort((a, b) => {
+          return orderBy.reduce((acc: number, clause: any) => {
+            if (clause.createdAt === "desc") {
+              return acc !== 0
+                ? acc
+                : b.createdAt.getTime() - a.createdAt.getTime();
+            }
+            if (clause.createdAt === "asc") {
+              return acc !== 0
+                ? acc
+                : a.createdAt.getTime() - b.createdAt.getTime();
+            }
+            return acc;
+          }, 0);
+        });
+      }
+
+      return filtered[0] ?? null;
+    }),
+    update: vi.fn().mockImplementation(async ({ where, data }: any) => {
+      const record = verificationCodesFixture.find(
+        (item) => item.id === where.id,
+      );
+      if (!record) {
+        throw new Error("Verification code not found");
+      }
+      Object.assign(record, data);
+      return record;
+    }),
+  },
 };
 
 const mockVerify = vi.fn((token: string) =>
@@ -860,6 +952,8 @@ describe("app", () => {
         role: "CLIENT",
         isActive: true,
         deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: makeCuid(102),
@@ -869,6 +963,8 @@ describe("app", () => {
         role: "ADMIN",
         isActive: true,
         deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: makeCuid(103),
@@ -878,6 +974,8 @@ describe("app", () => {
         role: "COORDINATOR",
         isActive: true,
         deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: makeCuid(104),
@@ -887,6 +985,8 @@ describe("app", () => {
         role: "STAFF",
         isActive: false,
         deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ];
     propertiesFixture = [
@@ -964,6 +1064,7 @@ describe("app", () => {
         deletedAt: null,
       },
     ];
+    verificationCodesFixture = [];
     notificationsFixture = [
       {
         id: makeCuid(900),
@@ -1859,6 +1960,161 @@ describe("app", () => {
     expect(res.status).toBe(401);
     const json = await res.json();
     expect(json.error).toBe("Invalid credentials");
+  });
+
+  it("registers a new client and stores a verification code", async () => {
+    const res = await app.request("/api/authentication/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "fresh-user@test.com",
+        password: "SecurePass123",
+        fullName: "Fresh User",
+      }),
+    });
+
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.message).toBe("Verification code sent");
+    expect(json.data.user.email).toBe("fresh-user@test.com");
+    expect(json.data.verification.code).toBeDefined();
+    expect(mockHash).toHaveBeenCalledWith("SecurePass123", 10);
+
+    const created = usersFixture.find(
+      (user) => user.email === "fresh-user@test.com",
+    );
+    expect(created).toBeDefined();
+    expect(created?.isActive).toBe(false);
+    expect(created?.role).toBe("CLIENT");
+
+    const codeRecord = verificationCodesFixture.find(
+      (code) =>
+        code.email === "fresh-user@test.com" && code.type === "REGISTER",
+    );
+    expect(codeRecord).toBeDefined();
+  });
+
+  it("verifies the registration code and activates the account", async () => {
+    await app.request("/api/authentication/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "pending-user@test.com",
+        password: "SecurePass123",
+        fullName: "Pending User",
+      }),
+    });
+
+    const codeRecord = verificationCodesFixture.find(
+      (code) =>
+        code.email === "pending-user@test.com" && code.type === "REGISTER",
+    );
+    expect(codeRecord).toBeDefined();
+
+    const res = await app.request("/api/authentication/register/verify", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "pending-user@test.com",
+        code: codeRecord?.code,
+      }),
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toBe("Account verified");
+    expect(json.data.email).toBe("pending-user@test.com");
+
+    const updated = usersFixture.find(
+      (user) => user.email === "pending-user@test.com",
+    );
+    expect(updated?.isActive).toBe(true);
+  });
+
+  it("resends verification codes for pending accounts", async () => {
+    await app.request("/api/authentication/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "resend-user@test.com",
+        password: "SecurePass123",
+      }),
+    });
+
+    const firstCode = verificationCodesFixture.find(
+      (code) =>
+        code.email === "resend-user@test.com" && code.type === "REGISTER",
+    );
+    expect(firstCode).toBeDefined();
+
+    const res = await app.request("/api/authentication/register/resend", {
+      method: "POST",
+      body: JSON.stringify({ email: "resend-user@test.com" }),
+    });
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.message).toContain("verification code has been sent");
+    expect(json.data.code).toBeDefined();
+
+    const latestCode = verificationCodesFixture.find(
+      (code) =>
+        code.email === "resend-user@test.com" && code.type === "REGISTER",
+    );
+    expect(latestCode?.code).not.toBe(firstCode?.code);
+  });
+
+  it("handles password reset flow end-to-end", async () => {
+    const target = usersFixture.find(
+      (user) => user.email === "admin@brisacubanacleanintelligence.com",
+    );
+    expect(target).toBeDefined();
+
+    const request = await app.request("/api/authentication/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email: target?.email }),
+    });
+
+    expect(request.status).toBe(200);
+    const codeRecord = verificationCodesFixture.find(
+      (code) => code.email === target?.email && code.type === "RESET_PASSWORD",
+    );
+    expect(codeRecord).toBeDefined();
+
+    const reset = await app.request("/api/authentication/reset-password", {
+      method: "POST",
+      body: JSON.stringify({
+        email: target?.email,
+        code: codeRecord?.code,
+        password: "BrandNewPass123",
+      }),
+    });
+
+    expect(reset.status).toBe(200);
+    const json = await reset.json();
+    expect(json.message).toBe("Password updated");
+    expect(mockHash).toHaveBeenCalledWith("BrandNewPass123", 10);
+  });
+
+  it("rejects password reset with invalid code", async () => {
+    const target = usersFixture.find(
+      (user) => user.email === "client@test.com",
+    );
+    expect(target).toBeDefined();
+
+    await app.request("/api/authentication/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email: target?.email }),
+    });
+
+    const reset = await app.request("/api/authentication/reset-password", {
+      method: "POST",
+      body: JSON.stringify({
+        email: target?.email,
+        code: "000000",
+        password: "AnotherPass123",
+      }),
+    });
+
+    expect(reset.status).toBe(400);
+    const json = await reset.json();
+    expect(json.error).toBe("Invalid reset code");
   });
 
   describe("OpenAPI contract", () => {

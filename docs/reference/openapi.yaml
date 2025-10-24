@@ -58,6 +58,148 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/authentication/register:
+    post:
+      tags: [Auth]
+      summary: Registra un cliente u owner pendiente de verificación
+      description: Crea un usuario inactivo y envía un código de verificación al correo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registro pendiente de verificación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Cuenta ya verificada o correo en uso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/authentication/register/verify:
+    post:
+      tags: [Auth]
+      summary: Verifica el código de registro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
+      responses:
+        '200':
+          description: Cuenta verificada o ya activa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyCodeResponse'
+        '400':
+          description: Código inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '410':
+          description: Código expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/authentication/register/resend:
+    post:
+      tags: [Auth]
+      summary: Reenvía el código de verificación de registro
+      description: Devuelve una respuesta genérica cuando la cuenta no existe para evitar enumeración.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendCodeRequest'
+      responses:
+        '200':
+          description: Código reenviado (respuesta genérica)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResendCodeResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/authentication/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Solicita código para resetear contraseña
+      description: Siempre responde 200 para evitar enumeración de cuentas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Código enviado si la cuenta existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPasswordResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/authentication/reset-password:
+    post:
+      tags: [Auth]
+      summary: Resetea la contraseña usando código de verificación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Contraseña actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetPasswordResponse'
+        '400':
+          description: Código inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cuenta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '410':
+          description: Código expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/authentication/logout:
     post:
       tags: [Auth]
@@ -729,6 +871,126 @@ components:
           $ref: '#/components/schemas/AuthUser'
         token:
           type: string
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        fullName:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [CLIENT, COORDINATOR]
+          default: CLIENT
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Verification code sent
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            verification:
+              type: object
+              properties:
+                expiresAt:
+                  type: string
+                  format: date-time
+                code:
+                  type: string
+                  nullable: true
+    VerifyCodeRequest:
+      type: object
+      required: [email, code]
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+    VerifyCodeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Account verified
+        data:
+          $ref: '#/components/schemas/User'
+    ResendCodeRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    ResendCodeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          oneOf:
+            - type: object
+              properties:
+                expiresAt:
+                  type: string
+                  format: date-time
+                code:
+                  type: string
+                  nullable: true
+            - $ref: '#/components/schemas/User'
+          nullable: true
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    ForgotPasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+          properties:
+            expiresAt:
+              type: string
+              format: date-time
+            code:
+              type: string
+              nullable: true
+    ResetPasswordRequest:
+      type: object
+      required: [email, code, password]
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+        password:
+          type: string
+          minLength: 8
+    ResetPasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Password updated
+        data:
+          $ref: '#/components/schemas/User'
     AuthContext:
       type: object
       properties:

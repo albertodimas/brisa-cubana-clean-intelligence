@@ -355,6 +355,145 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/authentication/register": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Register client or owner account",
+        description:
+          "Creates a pending user record and sends a verification code via email. The account remains inactive until the code is verified.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/RegisterRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Registration pending verification",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/RegisterResponse" },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+    },
+    "/api/authentication/register/verify": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Verify registration code",
+        description:
+          "Validates the verification code received via email and activates the account when successful.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/VerifyCodeRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Account verified or already active",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/VerifyCodeResponse" },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "410": { $ref: "#/components/responses/Gone" },
+        },
+      },
+    },
+    "/api/authentication/register/resend": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Resend registration verification code",
+        description:
+          "Generates a new verification code for pending accounts. Returns a generic response when the account is not found to avoid email enumeration.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ResendCodeRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Verification code resent",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ResendCodeResponse" },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+        },
+      },
+    },
+    "/api/authentication/forgot-password": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Request password reset code",
+        description:
+          "Sends a password reset verification code when the account exists. Always returns a generic success message to prevent account enumeration.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ForgotPasswordRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Password reset code dispatched",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ForgotPasswordResponse" },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+        },
+      },
+    },
+    "/api/authentication/reset-password": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Reset password with verification code",
+        description:
+          "Validates the reset code and updates the account password when valid.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ResetPasswordRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Password reset successfully",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ResetPasswordResponse" },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "404": { $ref: "#/components/responses/NotFound" },
+          "410": { $ref: "#/components/responses/Gone" },
+        },
+      },
+    },
     "/api/authentication/logout": {
       post: {
         tags: ["Authentication"],
@@ -1185,7 +1324,208 @@ export const openApiSpec = {
             type: "string",
             example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
           },
-          user: { $ref: "#/components/schemas/User" },
+          data: {
+            type: "object",
+            properties: {
+              id: { type: "string", example: "clxyz123456789" },
+              email: {
+                type: "string",
+                format: "email",
+                example: "admin@brisacubanacleanintelligence.com",
+              },
+              role: {
+                type: "string",
+                enum: ["ADMIN", "COORDINATOR", "STAFF", "CLIENT"],
+                example: "ADMIN",
+              },
+            },
+          },
+        },
+      },
+      RegisterRequest: {
+        type: "object",
+        required: ["email", "password"],
+        properties: {
+          email: {
+            type: "string",
+            format: "email",
+            example: "new.user@example.com",
+          },
+          password: {
+            type: "string",
+            format: "password",
+            example: "SecurePass123",
+          },
+          fullName: {
+            type: "string",
+            nullable: true,
+            example: "New Owner",
+          },
+          role: {
+            type: "string",
+            enum: ["CLIENT", "COORDINATOR"],
+            default: "CLIENT",
+            example: "CLIENT",
+          },
+        },
+      },
+      RegisterResponse: {
+        type: "object",
+        properties: {
+          message: { type: "string", example: "Verification code sent" },
+          data: {
+            type: "object",
+            properties: {
+              user: { $ref: "#/components/schemas/User" },
+              verification: {
+                type: "object",
+                properties: {
+                  expiresAt: {
+                    type: "string",
+                    format: "date-time",
+                    example: "2025-10-24T18:00:00.000Z",
+                  },
+                  code: {
+                    type: "string",
+                    nullable: true,
+                    example: "123456",
+                    description:
+                      "Código de verificación. Solo se expone en entornos no productivos.",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      VerifyCodeRequest: {
+        type: "object",
+        required: ["email", "code"],
+        properties: {
+          email: {
+            type: "string",
+            format: "email",
+            example: "new.user@example.com",
+          },
+          code: {
+            type: "string",
+            example: "123456",
+          },
+        },
+      },
+      VerifyCodeResponse: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            example: "Account verified",
+          },
+          data: { $ref: "#/components/schemas/User" },
+        },
+      },
+      ResendCodeRequest: {
+        type: "object",
+        required: ["email"],
+        properties: {
+          email: {
+            type: "string",
+            format: "email",
+            example: "pending.user@example.com",
+          },
+        },
+      },
+      ResendCodeResponse: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            example:
+              "If the account exists, a verification code has been sent.",
+          },
+          data: {
+            nullable: true,
+            oneOf: [
+              {
+                type: "object",
+                properties: {
+                  expiresAt: {
+                    type: "string",
+                    format: "date-time",
+                    example: "2025-10-24T18:00:00.000Z",
+                  },
+                  code: {
+                    type: "string",
+                    nullable: true,
+                    example: "654321",
+                  },
+                },
+              },
+              { $ref: "#/components/schemas/User" },
+            ],
+          },
+        },
+      },
+      ForgotPasswordRequest: {
+        type: "object",
+        required: ["email"],
+        properties: {
+          email: {
+            type: "string",
+            format: "email",
+            example: "client@example.com",
+          },
+        },
+      },
+      ForgotPasswordResponse: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            example: "If the account exists, a reset code has been sent.",
+          },
+          data: {
+            nullable: true,
+            type: "object",
+            properties: {
+              expiresAt: {
+                type: "string",
+                format: "date-time",
+                example: "2025-10-24T18:15:00.000Z",
+              },
+              code: {
+                type: "string",
+                nullable: true,
+                example: "789012",
+              },
+            },
+          },
+        },
+      },
+      ResetPasswordRequest: {
+        type: "object",
+        required: ["email", "code", "password"],
+        properties: {
+          email: {
+            type: "string",
+            format: "email",
+            example: "client@example.com",
+          },
+          code: {
+            type: "string",
+            example: "789012",
+          },
+          password: {
+            type: "string",
+            format: "password",
+            example: "NewSecurePass2025!",
+          },
+        },
+      },
+      ResetPasswordResponse: {
+        type: "object",
+        properties: {
+          message: { type: "string", example: "Password updated" },
+          data: { $ref: "#/components/schemas/User" },
         },
       },
       User: {
@@ -1822,6 +2162,25 @@ export const openApiSpec = {
           "application/json": {
             schema: { $ref: "#/components/schemas/ErrorResponse" },
             example: { error: "Validación fallida: email es requerido" },
+          },
+        },
+      },
+      Conflict: {
+        description:
+          "Conflicto - el recurso ya existe o el estado no permite la operación",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+            example: { error: "Account already verified" },
+          },
+        },
+      },
+      Gone: {
+        description: "Recurso expirado o código caducado",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+            example: { error: "Verification code expired" },
           },
         },
       },
