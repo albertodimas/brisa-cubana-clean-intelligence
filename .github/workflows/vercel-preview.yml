@@ -17,15 +17,13 @@ jobs:
       - name: Clear Corepack Cache
         run: rm -rf ~/.cache/corepack
 
-      - name: Setup pnpm
-        run: corepack prepare pnpm@latest --activate
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
+      - name: Setup pnpm
+        run: corepack prepare pnpm@latest --activate
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
