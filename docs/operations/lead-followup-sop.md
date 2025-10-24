@@ -24,6 +24,7 @@ Garantizar que cada lead captado desde campañas digitales reciba seguimiento en
 ### 1. Recepción y asignación
 
 - Slack mensaje incluye: nombre, email, teléfono, servicio, utm_source/medium/campaign/content.
+- El formulario público conserva automáticamente los últimos parámetros UTM conocidos, así que incluso leads sin querystring visible llegan con contexto de campaña.
 - CO debe reaccionar dentro de 30 minutos hábiles.
 - En la Sheet (`Results`):
   - Registrar `timestamp`, `content_id` (de utm_content), `platform` y `follow_up_owner`.

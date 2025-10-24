@@ -7,6 +7,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Added
 
 - Hero comercial con imagen aprobada por marketing y sección portal actualizada con assets finales (`apps/web/app/page.tsx`, `public/images/landing/*`).
+- Formulario de leads captura parámetros UTM desde la URL/visitas previas y los envía al webhook y telemetría (`apps/web/components/landing/lead-capture-form.tsx`, `apps/web/lib/utm-tracking.ts`).
 - Prueba Playwright `analytics.spec.ts` que verifica la inicialización de PostHog desde la landing pública.
 - Scripts de verificación `pnpm posthog:test-event` y `pnpm sentry:test-event` para validar ingestión y alertas desde la CLI.
 - Wrapper `SpeedInsightsClient` que omite la carga de Speed Insights en corridas Lighthouse (`apps/web/components/analytics/speed-insights-client.tsx`).

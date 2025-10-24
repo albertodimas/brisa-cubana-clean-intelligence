@@ -1,92 +1,94 @@
-# Slack Integration - Brisa Cubana Clean Intelligence
+# Integración con Slack - Brisa Cubana Clean Intelligence
 
-**Last Updated:** October 21, 2025
-**Status:** ✅ Configured (en producción) y monitoreada; última confirmación visual en `#todo-brisa-cubana` el 21-oct-2025.
-
----
-
-## Overview
-
-Brisa Cubana Clean Intelligence integrates with Slack to send real-time notifications about leads and important events. Notifications are sent to the `#todo-brisa-cubana` channel via an Incoming Webhook.
+**Última actualización:** 21 de octubre de 2025  
+**Estado:** ✅ Configurada (en producción) y monitoreada; última confirmación visual en `#todo-brisa-cubana` el 21-oct-2025.
 
 ---
 
-## Configuration
+## Resumen
 
-### Slack App Details
+Brisa Cubana Clean Intelligence se integra con Slack para enviar notificaciones en tiempo real sobre leads y eventos operativos relevantes. Todos los avisos se publican en el canal `#todo-brisa-cubana` mediante un Incoming Webhook.
 
-- **App Name:** Brisa Cubana Notifications
+---
+
+## Configuración
+
+### Detalles de la app de Slack
+
+- **Nombre de la app:** Brisa Cubana Notifications
 - **Workspace:** Brisa Cubana
-- **Channel:** `#todo-brisa-cubana`
-- **Created:** October 21, 2025
+- **Canal:** `#todo-brisa-cubana`
+- **Creada:** 21 de octubre de 2025
 - **App ID:** A09MF1LE9UK
 
-### Webhook URL
+### URL del Webhook
 
 ```
 https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_SECRET
 ```
 
-**⚠️ Security Note:** This URL is secret. Do NOT commit it to the repository. It's stored as an environment variable in Vercel.
+**⚠️ Nota de seguridad:** Esta URL es secreta. No la confirmes en el repositorio. Se guarda como variable de entorno en Vercel.
 
 ---
 
-## Environment Variables
+## Variables de entorno
 
-### Production (Vercel)
+### Producción (Vercel)
 
-The webhook URL must be configured in Vercel as an environment variable:
+La URL del webhook debe configurarse en Vercel como variable de entorno:
 
 ```bash
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_SECRET
 ```
 
-**To configure in Vercel Dashboard:**
+**Para configurarla desde el dashboard de Vercel:**
 
-1. Go to: https://vercel.com/brisa-cubana/brisa-cubana-clean-intelligence/settings/environment-variables
-2. Click **"Add New"**
-3. Set:
+1. Visita: https://vercel.com/brisa-cubana/brisa-cubana-clean-intelligence/settings/environment-variables
+2. Haz clic en **"Add New"**
+3. Define:
    - **Name:** `SLACK_WEBHOOK_URL`
    - **Value:** `https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_SECRET`
    - **Environment:** Production
-4. Click **"Save"**
-5. Redeploy when prompted
+4. Guarda con **"Save"**
+5. Re desplega cuando el panel lo solicite
 
-**To configure via Vercel CLI:**
+**Para configurarla vía Vercel CLI:**
 
 ```bash
 echo "https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_SECRET" | vercel env add SLACK_WEBHOOK_URL production
 ```
 
-### Local Development
+### Desarrollo local
 
-For local testing, add to your `.env.local`:
+Para pruebas locales agrega a tu `.env.local`:
 
 ```bash
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_SECRET
 ```
 
-**⚠️ Important:** Never commit `.env.local` to the repository.
+**⚠️ Importante:** Nunca confirmes `.env.local` en el repositorio.
 
 ---
 
-## Usage
+## Uso
 
-### Lead Notifications
+### Notificaciones de leads
 
-When a new lead is created via the contact form on the landing page, a notification is automatically sent to Slack with:
+Cuando se crea un nuevo lead mediante el formulario público de la landing, se envía automáticamente una notificación a Slack con:
 
-- **Lead Name**
+- **Nombre del lead**
 - **Email**
-- **Phone** (if provided)
-- **Marketing UTM Parameters:**
-  - Source (utm_source)
-  - Medium (utm_medium)
-  - Campaign (utm_campaign)
+- **Teléfono** (si se captura)
+- **Parámetros UTM de marketing:**
+  - Fuente (`utm_source`)
+  - Medio (`utm_medium`)
+  - Campaña (`utm_campaign`)
 
-**Implementation:** See [apps/web/app/api/leads/route.ts](../../apps/web/app/api/leads/route.ts:1)
+> Desde el 22-oct-2025 el formulario público persiste y reenvía automáticamente los parámetros UTM capturados en la URL (o en visitas previas), por lo que las notificaciones siempre incluyen el último contexto de campaña disponible.
 
-### Manual Testing
+**Implementación:** consulta [apps/web/app/api/leads/route.ts](../../apps/web/app/api/leads/route.ts:1)
+
+### Pruebas manuales
 
 **Secuencia recomendada (producción):**
 
@@ -102,29 +104,29 @@ rm .env.vercel-prod
 3. Para pruebas locales o puntuales puedes usar:
 
 ```bash
-# Basic test
-bash scripts/test-slack-webhook.sh "Test message"
+# Prueba básica
+bash scripts/test-slack-webhook.sh "Mensaje de prueba"
 
-# Test with rich formatting
-bash scripts/test-slack-webhook.sh "🎉 *Production deployment successful*\n\nVersion: 0.3.0\nTime: $(date)"
+# Prueba con formato enriquecido
+bash scripts/test-slack-webhook.sh "🎉 *Despliegue en producción exitoso*\n\nVersión: 0.3.0\nHora: $(date)"
 ```
 
-### Direct curl Test
+### Prueba directa con curl
 
 ```bash
 curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"text":"Test notification from Brisa Cubana"}' \
+  -d '{"text":"Notificación de prueba desde Brisa Cubana"}' \
   https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_SECRET
 ```
 
-Expected response: `ok`
+Respuesta esperada: `ok`
 
 ---
 
-## Message Format
+## Formato del mensaje
 
-### Lead Notification Example
+### Ejemplo de notificación de lead
 
 ```json
 {
@@ -163,7 +165,7 @@ Expected response: `ok`
       "elements": [
         {
           "type": "mrkdwn",
-          "text": "📊 Campaign: summer_promo | Received: 2025-10-21 14:30:00"
+          "text": "📊 Campaña: summer_promo | Recibido: 2025-10-21 14:30:00"
         }
       ]
     }
@@ -173,17 +175,17 @@ Expected response: `ok`
 
 ---
 
-## Troubleshooting
+## Solución de problemas
 
-### Webhook Not Sending Notifications
+### El webhook no envía notificaciones
 
-1. **Verify environment variable is set:**
+1. **Verifica que la variable de entorno exista:**
 
    ```bash
    vercel env ls production
    ```
 
-2. **Check webhook URL is valid:**
+2. **Confirma que la URL del webhook sea válida:**
 
    ```bash
    curl -X POST \
@@ -192,47 +194,47 @@ Expected response: `ok`
      $SLACK_WEBHOOK_URL
    ```
 
-   Should return: `ok`
+   La respuesta debe ser: `ok`
 
-3. **Check Slack app is still installed:**
-   - Go to: https://api.slack.com/apps/A09MF1LE9UK
-   - Verify app is installed in workspace
-   - Check webhook is still active
+3. **Comprueba que la app de Slack siga instalada:**
+   - Visita: https://api.slack.com/apps/A09MF1LE9UK
+   - Verifica que la app continúe instalada en el workspace
+   - Confirma que el webhook siga activo
 
-4. **Review application logs:**
+4. **Revisa los logs de la aplicación:**
    ```bash
    vercel logs --prod
    ```
 
-### Webhook Returns Error
+### El webhook devuelve un error
 
-| Error               | Cause                 | Solution                                 |
-| ------------------- | --------------------- | ---------------------------------------- |
-| `invalid_payload`   | Malformed JSON        | Validate JSON structure                  |
-| `channel_not_found` | Channel was deleted   | Recreate webhook for different channel   |
-| `account_inactive`  | Slack workspace issue | Contact Slack workspace admin            |
-| `invalid_token`     | Webhook URL expired   | Regenerate webhook in Slack app settings |
+| Error               | Causa                    | Solución                                          |
+| ------------------- | ------------------------ | ------------------------------------------------- |
+| `invalid_payload`   | JSON mal formado         | Valida la estructura del JSON                     |
+| `channel_not_found` | Canal eliminado          | Recrea el webhook apuntando a otro canal          |
+| `account_inactive`  | Problema en el workspace | Contacta al administrador del workspace Slack     |
+| `invalid_token`     | URL del webhook expirada | Regenera el webhook en la configuración de la app |
 
 ---
 
-## Security Best Practices
+## Mejores prácticas de seguridad
 
-1. **Never expose webhook URL publicly**
-   - Don't commit to git
-   - Don't log in client-side code
-   - Don't share in public channels
+1. **Nunca expongas la URL del webhook públicamente**
+   - No la confirmes en git
+   - No la registres en logs del cliente
+   - No la compartas en canales públicos
 
-2. **Rotate webhook if compromised:**
-   - Go to: https://api.slack.com/apps/A09MF1LE9UK/incoming-webhooks
-   - Delete old webhook
-   - Create new webhook
-   - Update `SLACK_WEBHOOK_URL` in Vercel
-   - Redeploy
+2. **Rota el webhook si se compromete:**
+   - Visita: https://api.slack.com/apps/A09MF1LE9UK/incoming-webhooks
+   - Elimina el webhook anterior
+   - Crea uno nuevo
+   - Actualiza `SLACK_WEBHOOK_URL` en Vercel
+   - Vuelve a desplegar
 
-3. **Monitor usage:**
-   - Slack has rate limits (1 message per second)
-   - Monitor for unexpected spikes
-   - Implement retry logic for failures
+3. **Monitorea el uso:**
+   - Slack aplica límites (1 mensaje por segundo)
+   - Vigila picos inesperados
+   - Implementa reintentos ante fallas
 
 ---
 
@@ -245,23 +247,23 @@ Expected response: `ok`
 
 ---
 
-## Related Documentation
+## Documentación relacionada
 
-- [PostHog Analytics Dashboard](../product/analytics-dashboard.md) - Analytics configuration
-- [Deployment Guide](../operations/deployment.md) - Production deployment process
-- [Environment Variables](../guides/development.md#environment-variables) - Complete env vars reference
-
----
-
-## Appendix: Slack API Resources
-
-- **App Management:** https://api.slack.com/apps/A09MF1LE9UK
-- **Incoming Webhooks Docs:** https://api.slack.com/messaging/webhooks
-- **Message Formatting:** https://api.slack.com/reference/block-kit
-- **Slack Workspace:** https://brisacubana.slack.com/
+- [Dashboard de PostHog Analytics](../product/analytics-dashboard.md) - Configuración de analítica
+- [Guía de despliegues](../operations/deployment.md) - Proceso de despliegue a producción
+- [Variables de entorno](../guides/development.md#environment-variables) - Referencia completa de variables
 
 ---
 
-**Maintained by:** DevOps Team
-**Contact:** Alberto Dimas (albertodimasmorazaldivar-7548)
-**Last Test:** October 21, 2025 ✅ (mensaje confirmado en `#todo-brisa-cubana`)
+## Apéndice: recursos de la API de Slack
+
+- **Administración de la app:** https://api.slack.com/apps/A09MF1LE9UK
+- **Documentación de Incoming Webhooks:** https://api.slack.com/messaging/webhooks
+- **Formato de mensajes (Block Kit):** https://api.slack.com/reference/block-kit
+- **Workspace de Slack:** https://brisacubana.slack.com/
+
+---
+
+**Responsable:** Equipo de DevOps
+**Contacto:** Alberto Dimas (albertodimasmorazaldivar-7548)
+**Última prueba:** 21 de octubre de 2025 ✅ (mensaje confirmado en `#todo-brisa-cubana`)

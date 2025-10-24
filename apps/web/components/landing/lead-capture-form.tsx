@@ -1,7 +1,19 @@
 "use client";
 
-import { useId, useState, useTransition, type FormEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useState,
+  useTransition,
+  type FormEvent,
+} from "react";
 import { recordMarketingEvent } from "@/lib/marketing-telemetry";
+import {
+  resolveAndStoreUtm,
+  loadStoredUtm,
+  hasUtm,
+  type UtmParams,
+} from "@/lib/utm-tracking";
 
 type LeadCaptureFormProps = {
   title?: string;
@@ -24,13 +36,35 @@ export function LeadCaptureForm({
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [utmParams, setUtmParams] = useState<UtmParams | null>(null);
 
-  async function submitLead(values: LeadPayload) {
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const resolved = resolveAndStoreUtm(window.location.search);
+    if (hasUtm(resolved)) {
+      setUtmParams(resolved);
+    }
+  }, []);
+
+  async function submitLead(values: LeadPayload, utm: UtmParams | null) {
     try {
+      const body: Record<string, unknown> = { ...values };
+
+      if (utm) {
+        if (utm.source) body.utm_source = utm.source;
+        if (utm.medium) body.utm_medium = utm.medium;
+        if (utm.campaign) body.utm_campaign = utm.campaign;
+        if (utm.content) body.utm_content = utm.content;
+        if (utm.term) body.utm_term = utm.term;
+      }
+
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -71,8 +105,13 @@ export function LeadCaptureForm({
     }
 
     startTransition(async () => {
+      const resolvedUtm = utmParams ?? loadStoredUtm();
+      if (!utmParams && hasUtm(resolvedUtm)) {
+        setUtmParams(resolvedUtm);
+      }
+
       try {
-        await submitLead(payload);
+        await submitLead(payload, resolvedUtm ?? null);
         form.reset();
         setStatus("success");
         recordMarketingEvent("cta_request_proposal", {
@@ -80,6 +119,9 @@ export function LeadCaptureForm({
         });
         recordMarketingEvent("lead_form_submitted", {
           source: "landing_form",
+          utmSource: resolvedUtm?.source,
+          utmMedium: resolvedUtm?.medium,
+          utmCampaign: resolvedUtm?.campaign,
         });
       } catch (error) {
         const message =
@@ -90,6 +132,9 @@ export function LeadCaptureForm({
         setErrorMessage(message);
         recordMarketingEvent("lead_form_failed", {
           reason: message,
+          utmSource: resolvedUtm?.source,
+          utmMedium: resolvedUtm?.medium,
+          utmCampaign: resolvedUtm?.campaign,
         });
       }
     });
