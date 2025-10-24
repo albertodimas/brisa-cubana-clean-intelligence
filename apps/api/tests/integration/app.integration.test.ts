@@ -1840,7 +1840,9 @@ describe("app", () => {
 
     expect(blocked.status).toBe(429);
     const blockedBody = await blocked.json();
-    expect(blockedBody.error).toContain("Too many login attempts");
+    expect(blockedBody.error).toContain(
+      "Demasiados intentos de inicio de sesión",
+    );
 
     await new Promise((resolve) => setTimeout(resolve, windowMs + 100));
   });

@@ -103,16 +103,19 @@
 
 ## 4. Variables de entorno
 
-| Variable                            | Web | API | Descripción                                 |
-| ----------------------------------- | --- | --- | ------------------------------------------- |
-| `NEXT_PUBLIC_API_URL`               | ✅  | –   | Endpoint público (fallback).                |
-| `INTERNAL_API_URL`                  | ✅  | –   | URL privada de la API usada por el proxy.   |
-| `AUTH_SECRET`                       | ✅  | –   | Requerido por Auth.js.                      |
-| `DATABASE_URL` / `_UNPOOLED`        | –   | ✅  | Conexión PostgreSQL (prod/local).           |
-| `JWT_SECRET`                        | ✅  | ✅  | Firma/verificación JWT.                     |
-| `API_TOKEN`                         | ✅  | ✅  | Token para integraciones servidor-servidor. |
-| `ALLOWED_ORIGINS`                   | ✅  | ✅  | CORS para Hono/WS.                          |
-| `LOGIN_RATE_LIMIT` (+ `_WINDOW_MS`) | ✅  | ✅  | Configura rate limiting del login.          |
+| Variable                                               | Web | API | Descripción                                                          |
+| ------------------------------------------------------ | --- | --- | -------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`                                  | ✅  | –   | Endpoint público (fallback).                                         |
+| `INTERNAL_API_URL`                                     | ✅  | –   | URL privada de la API usada por el proxy.                            |
+| `AUTH_SECRET`                                          | ✅  | –   | Requerido por Auth.js.                                               |
+| `DATABASE_URL` / `_UNPOOLED`                           | –   | ✅  | Conexión PostgreSQL (prod/local).                                    |
+| `JWT_SECRET`                                           | ✅  | ✅  | Firma/verificación JWT.                                              |
+| `API_TOKEN`                                            | ✅  | ✅  | Token para integraciones servidor-servidor.                          |
+| `ALLOWED_ORIGINS`                                      | ✅  | ✅  | CORS para Hono/WS.                                                   |
+| `LOGIN_RATE_LIMIT` (+ `_WINDOW_MS`)                    | ✅  | ✅  | Configura rate limiting del login.                                   |
+| `PORTAL_MAGIC_LINK_RATE_LIMIT` (+ `_WINDOW_MS`)        | –   | ✅  | Limita solicitudes de enlaces mágicos (3/15 min por defecto).        |
+| `PORTAL_MAGIC_LINK_VERIFY_RATE_LIMIT` (+ `_WINDOW_MS`) | –   | ✅  | Limita verificaciones de enlaces mágicos (5/15 min por defecto).     |
+| `CHECKOUT_PAYMENT_RATE_LIMIT` (+ `_WINDOW_MS`)         | –   | ✅  | Limita la creación de intents de pago públicos (10/60s por defecto). |
 
 En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`, por lo que ya no se listan variables “faltantes” del backend.
 

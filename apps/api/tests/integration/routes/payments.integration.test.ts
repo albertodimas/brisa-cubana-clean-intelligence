@@ -20,6 +20,8 @@ describe("Stripe webhook", () => {
     process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
     process.env.DATABASE_URL_UNPOOLED =
       "postgresql://test:test@localhost:5432/test";
+    process.env.CHECKOUT_PAYMENT_RATE_LIMIT = "3";
+    process.env.CHECKOUT_PAYMENT_WINDOW_MS = "1000";
     vi.resetModules();
     app = (await import("../../../src/app.js")).default;
     const paymentsModule = await import("../../../src/routes/payments.js");
@@ -31,6 +33,8 @@ describe("Stripe webhook", () => {
     delete process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_URL_UNPOOLED;
+    delete process.env.CHECKOUT_PAYMENT_RATE_LIMIT;
+    delete process.env.CHECKOUT_PAYMENT_WINDOW_MS;
   });
 
   it("acepta eventos con firma válida", async () => {
@@ -140,5 +144,68 @@ describe("Stripe webhook", () => {
 
     paymentIntentSpy.mockRestore();
     repositorySpy.mockRestore();
+  });
+
+  it("aplica rate limiting tras solicitudes consecutivas de intents", async () => {
+    if (!stripeClientInstance) {
+      throw new Error("Stripe client no inicializado en modo test");
+    }
+
+    const limit = Number(process.env.CHECKOUT_PAYMENT_RATE_LIMIT ?? "10");
+    const windowMs = Number(process.env.CHECKOUT_PAYMENT_WINDOW_MS ?? "60000");
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
+
+    const paymentIntentCreateMock = vi.fn().mockResolvedValue({
+      id: "pi_rate_limit",
+      client_secret: "pi_rate_limit_secret",
+    });
+    const paymentIntentSpy = vi
+      .spyOn(stripeClientInstance.paymentIntents, "create")
+      .mockImplementation(paymentIntentCreateMock as any);
+
+    const containerModule = await import("../../../src/container.js");
+    const repositoryMock: Partial<ServiceRepository> = {
+      findById: vi.fn().mockResolvedValue({
+        id: "srv_rate",
+        name: "Servicio Rate Limit",
+        basePrice: 120,
+        durationMin: 60,
+        active: true,
+      }),
+    };
+    const repositorySpy = vi
+      .spyOn(containerModule, "getServiceRepository")
+      .mockReturnValue(repositoryMock as ServiceRepository);
+
+    for (let attempt = 0; attempt < limit; attempt += 1) {
+      const response = await app.request("/api/payments/stripe/intent", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          serviceId: "srv_rate",
+          customerEmail: "cliente@example.com",
+        }),
+      });
+      expect(response.status).toBe(200);
+    }
+
+    const blocked = await app.request("/api/payments/stripe/intent", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        serviceId: "srv_rate",
+        customerEmail: "cliente@example.com",
+      }),
+    });
+
+    expect(blocked.status).toBe(429);
+    const body = (await blocked.json()) as { error: string };
+    expect(body.error).toMatch(/Demasiadas solicitudes de pago/);
+
+    paymentIntentSpy.mockRestore();
+    repositorySpy.mockRestore();
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
   });
 });

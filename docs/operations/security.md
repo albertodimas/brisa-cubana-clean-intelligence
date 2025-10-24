@@ -94,6 +94,44 @@ Las credenciales de producción están configuradas en:
 4. Ejecuta `stripe trigger checkout.session.completed` y valida recepción en logs (`payments: PaymentIntent de Stripe creado`).
 5. Revoca inmediatamente las claves previas en Stripe y documenta el cambio en `docs/operations/deployment.md` §2.1.
 
+## 🚦 Rate Limiting
+
+La API protege endpoints públicos y con superficie de ataque elevada utilizando el helper compartido `createRateLimiter` (`apps/api/src/lib/rate-limiter.ts`).
+
+- **Identificador de cliente**: prioriza `x-forwarded-for` → `x-real-ip` → `cf-connecting-ip` → `fastly-client-ip` y cae en `user-agent` como último recurso.
+- **Logging estructurado**: usa `rateLimitLogger` (child de `logger`) para registrar eventos `debug` en cada intento y `warn` cuando se bloquea una solicitud.
+- **Mensajes consistentes**: las respuestas JSON siguen el formato `{ error: "…" }` en español.
+
+### Limites por Endpoint (valores por defecto)
+
+| Endpoint                           | Límite | Ventana | Variables de entorno                                                        |
+| ---------------------------------- | ------ | ------- | --------------------------------------------------------------------------- |
+| `POST /api/authentication/login`   | 5      | 60 s    | `LOGIN_RATE_LIMIT`, `LOGIN_RATE_LIMIT_WINDOW_MS`                            |
+| `POST /api/portal/auth/request`    | 3      | 15 min  | `PORTAL_MAGIC_LINK_RATE_LIMIT`, `PORTAL_MAGIC_LINK_WINDOW_MS`               |
+| `POST /api/portal/auth/verify`     | 5      | 15 min  | `PORTAL_MAGIC_LINK_VERIFY_RATE_LIMIT`, `PORTAL_MAGIC_LINK_VERIFY_WINDOW_MS` |
+| `POST /api/payments/stripe/intent` | 10     | 60 s    | `CHECKOUT_PAYMENT_RATE_LIMIT`, `CHECKOUT_PAYMENT_WINDOW_MS`                 |
+
+> Ajusta los valores en Vercel con `vercel env add VARIABLE ambiente` cuando sea necesario (ej. campañas puntuales).
+
+### Visibilidad
+
+Los excedentes aparecen en los logs con estructura similar a:
+
+```json
+{
+  "level": "warn",
+  "component": "rate-limit",
+  "endpoint": "checkout-payment-intent",
+  "clientId": "203.0.113.42",
+  "limit": 10,
+  "windowMs": 60000,
+  "path": "/api/payments/stripe/intent",
+  "msg": "Rate limit excedido para checkout-payment-intent"
+}
+```
+
+Configura alertas en Sentry/PostHog si detectas patrones de abuso (se recomienda activarlas a partir de 5 eventos/minuto).
+
 ---
 
 ## 🛡️ Content Security Policy (CSP)

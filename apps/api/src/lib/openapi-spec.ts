@@ -1830,7 +1830,9 @@ export const openApiSpec = {
         content: {
           "application/json": {
             schema: { $ref: "#/components/schemas/ErrorResponse" },
-            example: { error: "Too many requests" },
+            example: {
+              error: "Demasiadas solicitudes. Intenta nuevamente más tarde.",
+            },
           },
         },
       },
