@@ -16,6 +16,7 @@ type CheckoutClientProps = {
     Pick<Service, "id" | "name" | "basePrice" | "durationMin" | "description">
   >;
   publishableKey: string;
+  isTestMode?: boolean;
 };
 
 type CheckoutIntent = {
@@ -39,14 +40,26 @@ const currencyFormatter = new Intl.NumberFormat("es-US", {
   currency: "USD",
 });
 
+function getDefaultScheduledISO(offsetMinutes = 1440) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + offsetMinutes);
+  now.setSeconds(0, 0);
+  const localISO = new Date(
+    now.getTime() - now.getTimezoneOffset() * 60_000,
+  ).toISOString();
+  return localISO.slice(0, 16);
+}
+
 function CheckoutPaymentStep({
   intent,
   onSuccess,
   onFailure,
+  isTestMode,
 }: {
   intent: CheckoutIntent;
   onSuccess: (paymentIntentId: string) => void;
   onFailure: (errorMessage: string) => void;
+  isTestMode: boolean;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -100,8 +113,9 @@ function CheckoutPaymentStep({
           Confirmar pago seguro con Stripe
         </h2>
         <p className="text-sm text-gray-600 dark:text-brisa-300">
-          El monto se autorizará en modo prueba con tu tarjeta demo de Stripe.
-          Se almacenarán los metadatos necesarios para registrar la reserva.
+          {isTestMode
+            ? "El monto se autorizará en modo prueba con tu tarjeta demo de Stripe. Se almacenarán los metadatos necesarios para registrar la reserva."
+            : "El monto se cargará de forma segura usando Stripe. Se almacenarán los metadatos necesarios para registrar y calendarizar la reserva."}
         </p>
       </div>
 
@@ -140,22 +154,28 @@ function CheckoutPaymentStep({
 export function CheckoutClient({
   services,
   publishableKey,
+  isTestMode,
 }: CheckoutClientProps) {
   const [selectedServiceId, setSelectedServiceId] = useState<string>(
     services.at(0)?.id ?? "",
   );
-  const [details, setDetails] = useState<ContactDetails>({
+  const [details, setDetails] = useState<ContactDetails>(() => ({
     fullName: "",
     email: "",
-    scheduledFor: "",
+    scheduledFor: getDefaultScheduledISO(),
     notes: "",
-  });
+  }));
   const [phase, setPhase] = useState<CheckoutPhase>("details");
   const [intent, setIntent] = useState<CheckoutIntent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const sentryModuleRef = useRef<typeof import("@sentry/nextjs") | null>(null);
+  const resolvedTestMode =
+    typeof isTestMode === "boolean"
+      ? isTestMode
+      : publishableKey.startsWith("pk_test_");
+  const minScheduledFor = useMemo(() => getDefaultScheduledISO(1440), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -218,6 +238,23 @@ export function CheckoutClient({
     }
     if (!details.email) {
       setErrorMessage("Necesitamos un correo para enviar la confirmación.");
+      return;
+    }
+    if (!details.scheduledFor) {
+      setErrorMessage(
+        "Define una fecha y hora tentativas para coordinar al equipo.",
+      );
+      return;
+    }
+    const scheduledDate = new Date(details.scheduledFor);
+    const earliestAllowed = new Date(minScheduledFor);
+    if (
+      Number.isNaN(scheduledDate.getTime()) ||
+      scheduledDate < earliestAllowed
+    ) {
+      setErrorMessage(
+        "Selecciona una fecha futura para planificar la cuadrilla (mínimo 24 horas de anticipación).",
+      );
       return;
     }
     setIsCreatingIntent(true);
@@ -298,6 +335,12 @@ export function CheckoutClient({
     setPhase("details");
     setSuccessId(null);
     setErrorMessage(null);
+    setDetails({
+      fullName: "",
+      email: "",
+      scheduledFor: getDefaultScheduledISO(),
+      notes: "",
+    });
   };
 
   if (!publishableKey) {
@@ -333,8 +376,10 @@ export function CheckoutClient({
               Selecciona servicio y comparte tus datos
             </h2>
             <p className="text-sm text-gray-600 dark:text-brisa-300">
-              Usa tu correo real para recibir la confirmación. Este flujo opera
-              en modo prueba y no genera cargos reales.
+              Usa tu correo real para recibir la confirmación.
+              {resolvedTestMode
+                ? " Este flujo opera en modo prueba y no genera cargos reales."
+                : " El cargo se realizará una vez confirmemos la disponibilidad del equipo."}
             </p>
           </div>
 
@@ -345,7 +390,7 @@ export function CheckoutClient({
             <select
               value={selectedServiceId}
               onChange={(event) => setSelectedServiceId(event.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
             >
               <option value="">Selecciona un servicio</option>
@@ -377,7 +422,8 @@ export function CheckoutClient({
                 }))
               }
               placeholder="Ej. Laura Pérez"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              autoComplete="name"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
               minLength={2}
             />
@@ -399,7 +445,7 @@ export function CheckoutClient({
               inputMode="email"
               autoComplete="email"
               placeholder="tu-correo@ejemplo.com"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
             />
           </label>
@@ -407,6 +453,10 @@ export function CheckoutClient({
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-gray-900 dark:text-white">
               Fecha y hora deseada
+            </span>
+            <span className="text-xs text-gray-500 dark:text-brisa-400">
+              Horario local Miami (UTC-05:00) con mínimo 24 horas de
+              anticipación.
             </span>
             <input
               type="datetime-local"
@@ -417,7 +467,8 @@ export function CheckoutClient({
                   scheduledFor: event.target.value,
                 }))
               }
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              min={minScheduledFor}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
             />
           </label>
@@ -436,7 +487,7 @@ export function CheckoutClient({
               }
               maxLength={500}
               rows={3}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               placeholder="Comparte instrucciones especiales para el equipo."
             />
           </label>
@@ -503,6 +554,7 @@ export function CheckoutClient({
           >
             <CheckoutPaymentStep
               intent={intent}
+              isTestMode={resolvedTestMode}
               onSuccess={(paymentIntentId) => {
                 setSuccessId(paymentIntentId);
                 setPhase("completed");

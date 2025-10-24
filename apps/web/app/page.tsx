@@ -281,10 +281,11 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <MarketingLink
-                  href="/checkout"
+                  href="#contacto"
                   eventName="cta_request_proposal"
-                  metadata={{ placement: "hero" }}
+                  metadata={{ placement: "hero", target: "contact_form" }}
                   className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 transition-colors"
+                  prefetch={false}
                 >
                   Solicitar cotización
                 </MarketingLink>
@@ -792,10 +793,15 @@ export default function LandingPage() {
         tiers={pricingTiers}
         renderCTA={(tier) => (
           <MarketingLink
-            href="/checkout"
+            href={`/?plan=${tier.id}#contacto`}
             eventName="cta_request_proposal"
-            metadata={{ placement: "pricing", tierId: tier.id }}
+            metadata={{
+              placement: "pricing",
+              tierId: tier.id,
+              target: "contact_form",
+            }}
             className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-4 py-2 text-sm font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
+            prefetch={false}
           >
             Solicitar onboarding
           </MarketingLink>
