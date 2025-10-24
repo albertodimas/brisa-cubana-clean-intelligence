@@ -1,4 +1,5 @@
 name: PostHog Checkout Monitor
+# Fix: Updated to use pnpm/action-setup@v4 with latest version and Node 20 to resolve Corepack signature verification failures
 
 on:
   schedule:
@@ -27,15 +28,19 @@ jobs:
         if: env.SKIP_MONITOR == 'false'
         uses: actions/checkout@v4
 
-      - name: Usar Node.js 22
+      - name: Setup pnpm
         if: env.SKIP_MONITOR == 'false'
-        uses: actions/setup-node@v3
+        uses: pnpm/action-setup@v4
         with:
-          node-version: '22'
+          version: 'latest'
+          run_install: false
 
-      - name: Instalar pnpm
+      - name: Setup Node.js
         if: env.SKIP_MONITOR == 'false'
-        run: npm install -g pnpm@10.18.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Instalar dependencias
         if: env.SKIP_MONITOR == 'false'

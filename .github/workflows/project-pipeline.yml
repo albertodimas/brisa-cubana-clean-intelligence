@@ -1,4 +1,5 @@
 name: Project Pipeline
+# Fix: Updated to use pnpm latest and Node 20 to resolve Corepack signature verification failures (job 53614035929, ref e1f5bd7)
 
 on:
   workflow_call:
@@ -10,11 +11,11 @@ on:
       node-version:
         required: false
         type: string
-        default: "22.13.0"
+        default: "20"
       pnpm-version:
         required: false
         type: string
-        default: "10.18.0"
+        default: "latest"
       run-lint:
         required: false
         type: boolean

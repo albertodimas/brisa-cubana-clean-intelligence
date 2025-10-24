@@ -1,14 +1,15 @@
 name: Setup project
 description: Prepare the pnpm workspace with Node.js, dependencies, Prisma artifacts, and test environment variables.
+# Fix: Updated to use pnpm latest and Node 20 to resolve Corepack signature verification failures
 inputs:
   node-version:
     description: Node.js version to install.
     required: false
-    default: "22.x"
+    default: "20"
   pnpm-version:
     description: pnpm version to install.
     required: false
-    default: "10.18.0"
+    default: "latest"
   install-playwright:
     description: Install Playwright browsers.
     required: false
