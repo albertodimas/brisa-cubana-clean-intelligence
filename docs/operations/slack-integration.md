@@ -50,7 +50,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/Y
    - **Value:** `https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_SECRET`
    - **Environment:** Production
 4. Guarda con **"Save"**
-5. Re desplega cuando el panel lo solicite
+5. Redesplega cuando el panel lo solicite
 
 **Para configurarla vía Vercel CLI:**
 
