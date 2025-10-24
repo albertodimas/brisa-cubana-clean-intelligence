@@ -50,6 +50,7 @@ jobs:
         run: |
           echo "$PNPM_HOME" >> $GITHUB_PATH
           sudo ln -sf "$PNPM_HOME/pnpm" /usr/local/bin/pnpm
+          sudo install -m 755 "$PNPM_HOME/pnpm" /usr/bin/pnpm
 
       - name: Ensure pnpm executable (corepack fallback)
         run: |
