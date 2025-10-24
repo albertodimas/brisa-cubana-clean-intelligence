@@ -112,5 +112,6 @@ Confirma que `link.productionBranch` sea `main` y que los dominios correspondan 
 - [ ] Workflows en GitHub pasan con las variables sincronizadas.
 - [ ] Actualiza `docs/operations/domain-map.md` si hubiera cambios en dominios o integraciones.
 - [ ] Mantén el CLI de Vercel en `48.4.1` hasta que se resuelva el bug `spawn pnpm ENOENT` (ver issue de coordinación con Claude).
+- [ ] Si se modifica el pipeline, conserva el paso `corepack prepare pnpm@10.18.0 --activate` para que `vercel build` encuentre el binario de `pnpm`.
 
 Guarda este documento como referencia antes de cada rotación de claves o alta de nuevos subdominios.

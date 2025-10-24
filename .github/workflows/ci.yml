@@ -51,6 +51,11 @@ jobs:
           echo "$PNPM_HOME" >> $GITHUB_PATH
           sudo ln -sf "$PNPM_HOME/pnpm" /usr/local/bin/pnpm
 
+      - name: Ensure pnpm executable (corepack fallback)
+        run: |
+          corepack prepare pnpm@10.18.0 --activate
+          which pnpm
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:

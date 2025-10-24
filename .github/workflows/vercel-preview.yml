@@ -51,6 +51,11 @@ jobs:
       - name: Add pnpm to PATH
         run: echo "$PNPM_HOME" >> $GITHUB_PATH
 
+      - name: Ensure pnpm executable (corepack fallback)
+        run: |
+          corepack prepare pnpm@10.18.0 --activate
+          which pnpm
+
       - name: Generate Prisma Client
         run: pnpm exec prisma generate
         working-directory: apps/api
