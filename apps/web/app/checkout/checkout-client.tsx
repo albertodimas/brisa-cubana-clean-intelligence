@@ -1,7 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import {
+  Component,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import {
   Elements,
   PaymentElement,
@@ -39,6 +47,38 @@ const currencyFormatter = new Intl.NumberFormat("es-US", {
   style: "currency",
   currency: "USD",
 });
+
+class PaymentElementErrorBoundary extends Component<
+  {
+    onError: (error: Error) => void;
+    children: ReactNode;
+  },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    this.props.onError(error);
+  }
+
+  componentDidUpdate(prevProps: Readonly<{ children: ReactNode }>) {
+    if (this.state.hasError && prevProps.children !== this.props.children) {
+      // Reset boundary cuando el intent cambia
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
 
 function getDefaultScheduledISO(offsetMinutes = 1440) {
   const now = new Date();
@@ -170,6 +210,9 @@ export function CheckoutClient({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
+  const [fatalError, setFatalError] = useState<Error | null>(null);
+  const [stripePromise, setStripePromise] =
+    useState<Promise<Stripe | null> | null>(null);
   const sentryModuleRef = useRef<typeof import("@sentry/nextjs") | null>(null);
   const resolvedTestMode =
     typeof isTestMode === "boolean"
@@ -218,11 +261,48 @@ export function CheckoutClient({
     }
   }, [captureMessage, publishableKey]);
 
-  const stripePromise = useMemo(() => {
+  useEffect(() => {
     if (!publishableKey) {
-      return null;
+      setStripePromise(null);
+      return;
     }
-    return loadStripe(publishableKey);
+
+    let cancelled = false;
+    const promise = loadStripe(publishableKey);
+    if (!promise) {
+      setFatalError(
+        new Error(
+          "No se pudo inicializar Stripe. Verifica la clave pública y la conexión.",
+        ),
+      );
+      return;
+    }
+
+    setStripePromise(promise);
+
+    promise
+      .then((instance) => {
+        if (cancelled) return;
+        if (!instance) {
+          setFatalError(
+            new Error(
+              "No se pudo inicializar Stripe. Verifica la clave pública y la conexión.",
+            ),
+          );
+        }
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setFatalError(
+          error instanceof Error
+            ? error
+            : new Error("Falló la carga de Stripe. Intenta nuevamente."),
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [publishableKey]);
 
   const selectedService = services.find(
@@ -306,11 +386,6 @@ export function CheckoutClient({
         currency: payload.data.currency,
       });
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No pudimos crear la intención de pago.",
-      );
       recordCheckoutEvent("checkout_failed", {
         stage: "intent",
         serviceId: selectedService?.id,
@@ -325,6 +400,11 @@ export function CheckoutClient({
           },
         },
       });
+      setFatalError(
+        error instanceof Error
+          ? error
+          : new Error("No pudimos crear la intención de pago."),
+      );
     } finally {
       setIsCreatingIntent(false);
     }
@@ -335,6 +415,7 @@ export function CheckoutClient({
     setPhase("details");
     setSuccessId(null);
     setErrorMessage(null);
+    setFatalError(null);
     setDetails({
       fullName: "",
       email: "",
@@ -342,6 +423,10 @@ export function CheckoutClient({
       notes: "",
     });
   };
+
+  if (fatalError) {
+    throw fatalError;
+  }
 
   if (!publishableKey) {
     return (
@@ -552,52 +637,76 @@ export function CheckoutClient({
               },
             }}
           >
-            <CheckoutPaymentStep
-              intent={intent}
-              isTestMode={resolvedTestMode}
-              onSuccess={(paymentIntentId) => {
-                setSuccessId(paymentIntentId);
-                setPhase("completed");
-                captureMessage("checkout.payment.confirmed", "info", {
-                  paymentIntentId,
+            <PaymentElementErrorBoundary
+              key={intent.clientSecret}
+              onError={(boundaryError) => {
+                captureMessage("checkout.payment.element.crashed", "error", {
                   serviceId: selectedService?.id,
+                  message: boundaryError.message,
                 });
-                sentryModuleRef.current?.addBreadcrumb({
-                  category: "checkout",
-                  message: "payment_confirmed",
-                  data: {
-                    paymentIntentId,
-                    serviceId: selectedService?.id,
+                sentryModuleRef.current?.captureException(boundaryError, {
+                  contexts: {
+                    checkout: {
+                      stage: "payment",
+                      serviceId: selectedService?.id,
+                    },
                   },
-                  level: "info",
-                });
-                recordCheckoutEvent("checkout_completed", {
-                  paymentIntentId,
-                  serviceId: selectedService?.id,
-                });
-              }}
-              onFailure={(message) => {
-                setErrorMessage(message);
-                captureMessage("checkout.payment.failed", "warning", {
-                  serviceId: selectedService?.id,
-                  error: message,
-                });
-                sentryModuleRef.current?.addBreadcrumb({
-                  category: "checkout",
-                  message: "payment_failed",
-                  data: {
-                    serviceId: selectedService?.id,
-                    error: message,
-                  },
-                  level: "warning",
                 });
                 recordCheckoutEvent("checkout_failed", {
-                  stage: "payment",
+                  stage: "payment_element",
                   serviceId: selectedService?.id,
-                  error: message,
+                  error: boundaryError.message,
                 });
+                setFatalError(boundaryError);
               }}
-            />
+            >
+              <CheckoutPaymentStep
+                intent={intent}
+                isTestMode={resolvedTestMode}
+                onSuccess={(paymentIntentId) => {
+                  setSuccessId(paymentIntentId);
+                  setPhase("completed");
+                  captureMessage("checkout.payment.confirmed", "info", {
+                    paymentIntentId,
+                    serviceId: selectedService?.id,
+                  });
+                  sentryModuleRef.current?.addBreadcrumb({
+                    category: "checkout",
+                    message: "payment_confirmed",
+                    data: {
+                      paymentIntentId,
+                      serviceId: selectedService?.id,
+                    },
+                    level: "info",
+                  });
+                  recordCheckoutEvent("checkout_completed", {
+                    paymentIntentId,
+                    serviceId: selectedService?.id,
+                  });
+                }}
+                onFailure={(message) => {
+                  setErrorMessage(message);
+                  captureMessage("checkout.payment.failed", "warning", {
+                    serviceId: selectedService?.id,
+                    error: message,
+                  });
+                  sentryModuleRef.current?.addBreadcrumb({
+                    category: "checkout",
+                    message: "payment_failed",
+                    data: {
+                      serviceId: selectedService?.id,
+                      error: message,
+                    },
+                    level: "warning",
+                  });
+                  recordCheckoutEvent("checkout_failed", {
+                    stage: "payment",
+                    serviceId: selectedService?.id,
+                    error: message,
+                  });
+                }}
+              />
+            </PaymentElementErrorBoundary>
           </Elements>
           {errorMessage ? (
             <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
