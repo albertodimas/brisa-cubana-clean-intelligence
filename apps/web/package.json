@@ -16,7 +16,6 @@
     "test": "VITE_CJS_IGNORE_WARNING=true vitest run"
   },
   "dependencies": {
-    "@brisa/core": "workspace:*",
     "@heroicons/react": "^2.1.5",
     "@sentry/nextjs": "^10.20.0",
     "@stripe/react-stripe-js": "^5.2.0",

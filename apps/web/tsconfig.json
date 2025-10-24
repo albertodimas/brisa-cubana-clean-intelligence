@@ -4,9 +4,7 @@
   "compilerOptions": {
     "types": ["node", "react", "next-auth", "vitest/globals"],
     "paths": {
-      "@/*": ["./*"],
-      "@brisa/core": ["../../packages/core/src/index.ts"],
-      "@brisa/core/*": ["../../packages/core/src/*"]
+      "@/*": ["./*"]
     },
     "incremental": true,
     "isolatedModules": true,

@@ -1,7 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { createAuthService, createVerificationService } from "@brisa/core";
-import type { AuthService, VerificationService } from "@brisa/core";
-import * as bcrypt from "bcryptjs";
 import { ServiceRepository } from "./repositories/service-repository.js";
 import { BookingRepository } from "./repositories/booking-repository.js";
 import { PropertyRepository } from "./repositories/property-repository.js";
@@ -9,10 +6,7 @@ import { UserRepository } from "./repositories/user-repository.js";
 import { CustomerRepository } from "./repositories/customer-repository.js";
 import { NotificationRepository } from "./repositories/notification-repository.js";
 import { MagicLinkTokenRepository } from "./repositories/magic-link-token-repository.js";
-import { VerificationCodeRepository } from "./repositories/verification-code-repository.js";
-import { AuthCoreUserRepository } from "./repositories/auth-core-user-repository.js";
 import { prisma as prismaClient } from "./lib/prisma.js";
-import { signAuthToken } from "./lib/jwt.js";
 
 /**
  * Dependency Injection Container
@@ -83,10 +77,6 @@ export const ServiceKeys = {
   CUSTOMER_REPOSITORY: "customerRepository",
   NOTIFICATION_REPOSITORY: "notificationRepository",
   MAGIC_LINK_TOKEN_REPOSITORY: "magicLinkTokenRepository",
-  VERIFICATION_CODE_REPOSITORY: "verificationCodeRepository",
-  AUTH_CORE_USER_REPOSITORY: "authCoreUserRepository",
-  VERIFICATION_SERVICE: "verificationService",
-  AUTH_SERVICE: "authService",
 } as const;
 
 /**
@@ -136,54 +126,6 @@ export function initializeContainer(): void {
     ServiceKeys.MAGIC_LINK_TOKEN_REPOSITORY,
     () => new MagicLinkTokenRepository(prisma),
   );
-
-  container.register(
-    ServiceKeys.VERIFICATION_CODE_REPOSITORY,
-    () => new VerificationCodeRepository(prisma),
-  );
-
-  container.register(
-    ServiceKeys.AUTH_CORE_USER_REPOSITORY,
-    () => new AuthCoreUserRepository(prisma),
-  );
-
-  const bcryptNamespace = bcrypt as unknown as {
-    hash?: typeof bcrypt.hash;
-    compare?: typeof bcrypt.compare;
-    default?: {
-      hash?: typeof bcrypt.hash;
-      compare?: typeof bcrypt.compare;
-    };
-  };
-
-  const hashFn = bcryptNamespace.hash ?? bcryptNamespace.default?.hash;
-  const compareFn = bcryptNamespace.compare ?? bcryptNamespace.default?.compare;
-
-  if (!hashFn || !compareFn) {
-    throw new Error("bcryptjs compare/hash unavailable");
-  }
-
-  container.register(ServiceKeys.VERIFICATION_SERVICE, () =>
-    createVerificationService({
-      repository: container.resolve(ServiceKeys.VERIFICATION_CODE_REPOSITORY),
-    }),
-  );
-
-  container.register(ServiceKeys.AUTH_SERVICE, () =>
-    createAuthService({
-      users: container.resolve(ServiceKeys.AUTH_CORE_USER_REPOSITORY),
-      verification: container.resolve(ServiceKeys.VERIFICATION_SERVICE),
-      passwordHasher: (password: string) => hashFn(password, 10),
-      passwordComparer: (password: string, hash: string) =>
-        compareFn(password, hash),
-      tokenIssuer: (user) =>
-        signAuthToken({
-          sub: user.id,
-          email: user.email,
-          role: user.role,
-        }),
-    }),
-  );
 }
 
 /**
@@ -229,16 +171,6 @@ export function getMagicLinkTokenRepository(): MagicLinkTokenRepository {
   return container.resolve<MagicLinkTokenRepository>(
     ServiceKeys.MAGIC_LINK_TOKEN_REPOSITORY,
   );
-}
-
-export function getVerificationService(): VerificationService {
-  return container.resolve<VerificationService>(
-    ServiceKeys.VERIFICATION_SERVICE,
-  );
-}
-
-export function getAuthService(): AuthService {
-  return container.resolve<AuthService>(ServiceKeys.AUTH_SERVICE);
 }
 
 /**

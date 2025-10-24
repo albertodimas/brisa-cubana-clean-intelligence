@@ -37,11 +37,6 @@ enum NotificationType {
   SERVICE_UPDATED
 }
 
-enum VerificationCodeType {
-  REGISTER
-  RESET_PASSWORD
-}
-
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -131,20 +126,6 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([createdAt])
-}
-
-model VerificationCode {
-  id         String               @id @default(cuid())
-  email      String
-  code       String
-  type       VerificationCodeType
-  metadata   Json?
-  expiresAt  DateTime
-  consumedAt DateTime?
-  createdAt  DateTime             @default(now())
-
-  @@index([email, type])
-  @@index([expiresAt])
 }
 
 model MagicLinkToken {
