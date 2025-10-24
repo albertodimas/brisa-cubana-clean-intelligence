@@ -113,5 +113,6 @@ Confirma que `link.productionBranch` sea `main` y que los dominios correspondan 
 - [ ] Actualiza `docs/operations/domain-map.md` si hubiera cambios en dominios o integraciones.
 - [ ] Mantén el CLI de Vercel en `48.4.1` hasta que se resuelva el bug `spawn pnpm ENOENT` (ver issue de coordinación con Claude).
 - [ ] Si se modifica el pipeline, conserva el paso `corepack prepare pnpm@10.18.0 --activate`, la copia de `pnpm` a `/usr/bin` y el shim `node_modules/.bin/pnpm` antes de ejecutar `vercel build`.
+- [ ] Si el bug persiste, sigue `docs/operations/manual-vercel-deploy.md` para ejecutar `vercel build`/`vercel deploy` manualmente.
 
 Guarda este documento como referencia antes de cada rotación de claves o alta de nuevos subdominios.
