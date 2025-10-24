@@ -84,10 +84,15 @@ function getDefaultScheduledISO(offsetMinutes = 1440) {
   const now = new Date();
   now.setMinutes(now.getMinutes() + offsetMinutes);
   now.setSeconds(0, 0);
-  const localISO = new Date(
-    now.getTime() - now.getTimezoneOffset() * 60_000,
-  ).toISOString();
-  return localISO.slice(0, 16);
+  now.setMilliseconds(0);
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const date = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${date}T${hours}:${minutes}`;
 }
 
 function CheckoutPaymentStep({
