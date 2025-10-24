@@ -106,9 +106,6 @@ export function LeadCaptureForm({
 
     startTransition(async () => {
       const resolvedUtm = utmParams ?? loadStoredUtm();
-      if (!utmParams && hasUtm(resolvedUtm)) {
-        setUtmParams(resolvedUtm);
-      }
 
       try {
         await submitLead(payload, resolvedUtm ?? null);
