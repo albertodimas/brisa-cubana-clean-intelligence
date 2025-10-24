@@ -160,7 +160,7 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
    > ⚠️ _Estado al 23-oct-2025_: Vercel CLI `48.6.x` tiene un bug conocido (`spawn pnpm ENOENT`) cuando ejecuta `vercel build` en runners de GitHub Actions. Mientras Vercel entrega un fix, el pipeline fallará en el paso “Build API (prebuilt)”. Usa el script `scripts/manual-vercel-deploy.sh` o ejecuta `vercel deploy --prod` manualmente tras generar el prebuild con `pnpm`. Documenta el incidente en el PR hasta que el job vuelva a verde.
 
 2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
-3. Los pull requests hacia `main` generan previews mediante `.github/workflows/vercel-preview.yml`; ese workflow es el único responsable de publicar entornos Preview (no hay auto-deploy directo desde Vercel gracias a `vercel.json`).
+3. Los pushes a `main` disparan el workflow `ci.yml`, que después de pasar lint/typecheck/tests ejecuta `vercel deploy --prebuilt --prod` para API y web sin aprobación manual. Los pull requests siguen usando `.github/workflows/vercel-preview.yml` para entornos Preview.
 4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
 
 ```bash
