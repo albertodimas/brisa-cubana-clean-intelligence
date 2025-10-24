@@ -161,7 +161,9 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 
 2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
 3. Los pushes a `main` disparan el workflow `ci.yml`, que después de pasar lint/typecheck/tests ejecuta `vercel deploy --prebuilt --prod` para API y web sin aprobación manual. Los pull requests siguen usando `.github/workflows/vercel-preview.yml` para entornos Preview.
-4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
+4. Tras el despliegue, el job ejecuta un smoke test automático sobre `https://<deployment>/healthz` (API y web) para detectar problemas inmediatos. Si falla, el workflow se marca en rojo.
+
+> **Seguridad:** la rama `main` está protegida (`Settings → Branches`) y exige al menos una revisión aprobatoria antes del merge; de esta forma sólo cambios revisados activan el deploy automático. 4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
 
 ```bash
 gh workflow run vercel-preview.yml --ref fix/posthog-ci -f ref=fix/posthog-ci
