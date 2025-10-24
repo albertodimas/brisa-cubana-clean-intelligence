@@ -74,6 +74,8 @@ jobs:
           echo "pnpm binary: $(command -v pnpm || echo 'NOT FOUND')"
           ls -l "$PNPM_HOME" || true
           pushd apps/api
+          mkdir -p node_modules/.bin
+          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
           PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
           PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
           popd
@@ -100,6 +102,8 @@ jobs:
         run: |
           export PATH="$PNPM_HOME:/usr/local/bin:$PATH"
           echo "pnpm binary: $(command -v pnpm || echo 'NOT FOUND')"
+          mkdir -p node_modules/.bin
+          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
           PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
           PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
 
