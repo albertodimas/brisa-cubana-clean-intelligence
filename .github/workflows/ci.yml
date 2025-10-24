@@ -57,7 +57,7 @@ jobs:
           node-version: '22.13.0'
 
       - name: Install Vercel CLI
-        run: pnpm add --global vercel@latest
+        run: pnpm add --global vercel@48.4.1
 
       - name: Build API (prebuilt)
         env:
