@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 25 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 204 unit/integration –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
+**Última revisión:** 25 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 218 unit/integration (126 API + 92 Web) –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -36,12 +36,17 @@
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
   - Diseño declarativo en `app/page.tsx` (landing) y `app/panel/page.tsx` (panel operativo autenticado).
+  - **Patrón de Manager Components** (ver [docs/architecture/manager-pattern.md](../architecture/manager-pattern.md)):
+    - Arquitectura consistente en 5 managers: BookingsManager, ServicesManager, UsersManager, PropertiesManager, CustomersManager
+    - API unificado: `currentQuery`/`setQuery`/`resetQuery`, `ActionResult`, `onToast`, estado interno de loading
+    - 24 tests unitarios cubriendo el patrón (6 BookingsManager, 5 ServicesManager, 5 UsersManager, 5 PropertiesManager, 3 CustomersManager)
   - **Shared utilities**:
     - `lib/types.ts`: Tipos TypeScript compartidos (PaginatedResult, User, Service, etc.)
     - `lib/api-client.ts`: Cliente HTTP reutilizable con manejo de errores
     - `hooks/use-update-handler.ts`: Hook personalizado para manejar actualizaciones con debounce
     - `hooks/use-paginated-resource.ts`: Hook para paginación cursor-based
-  - Componente UI `Pagination` con contador y botón “Cargar más” integrado en paneles de servicios, propiedades, reservas y clientes.
+  - Componente UI `Pagination` con contador y botón "Cargar más" integrado en paneles de servicios, propiedades, reservas y clientes.
+  - **Design System completo**: 40+ componentes UI/UX, 250+ design tokens, glassmorphism, animaciones Framer Motion (ver [docs/ui-ux-guide.md](../ui-ux-guide.md))
 
 - **API (apps/api)**
   - Hono 4.9.12 corriendo en Vercel Node 22.x (builds apuntan a 22.13.0).
