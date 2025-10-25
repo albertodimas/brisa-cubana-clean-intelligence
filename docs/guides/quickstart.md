@@ -91,6 +91,12 @@ pnpm build       # Compila Next.js y API
 
 > Tip: instala los navegadores de Playwright la primera vez con `pnpm exec playwright install`.
 
+### Higiene del repositorio
+
+- Antes de abrir un PR, ejecuta `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm docs:verify`.
+- Si has acumulado builds o caches, limpia el entorno con `pnpm clean:workspace` (envuelve `scripts/cleanup-local-env.sh`).
+- Sigue el playbook operativo en [`docs/operations/repo-hygiene.md`](../operations/repo-hygiene.md) para mantener ramas y documentación bajo control.
+
 ## Autenticación en la UI
 
 1. Accede a <http://localhost:3000/login> y autentícate con un usuario `ADMIN` o `COORDINATOR`.
