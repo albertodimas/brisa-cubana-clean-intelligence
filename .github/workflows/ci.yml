@@ -85,7 +85,15 @@ jobs:
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
           GLOBAL_PNPM="$(pnpm root -g)/pnpm"
-          if [ -d "$GLOBAL_PNPM" ]; then
+          if [ ! -d "$GLOBAL_PNPM" ]; then
+            ALT_PNPM="$(dirname "$(command -v pnpm)")/../lib/node_modules/pnpm"
+            if [ -d "$ALT_PNPM" ]; then
+              GLOBAL_PNPM="$ALT_PNPM"
+            else
+              GLOBAL_PNPM=""
+            fi
+          fi
+          if [ -n "$GLOBAL_PNPM" ] && [ -d "$GLOBAL_PNPM" ]; then
             mkdir -p node_modules
             ln -snf "$GLOBAL_PNPM" node_modules/pnpm
           fi
@@ -125,7 +133,15 @@ jobs:
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
           GLOBAL_PNPM="$(pnpm root -g)/pnpm"
-          if [ -d "$GLOBAL_PNPM" ]; then
+          if [ ! -d "$GLOBAL_PNPM" ]; then
+            ALT_PNPM="$(dirname "$(command -v pnpm)")/../lib/node_modules/pnpm"
+            if [ -d "$ALT_PNPM" ]; then
+              GLOBAL_PNPM="$ALT_PNPM"
+            else
+              GLOBAL_PNPM=""
+            fi
+          fi
+          if [ -n "$GLOBAL_PNPM" ] && [ -d "$GLOBAL_PNPM" ]; then
             mkdir -p node_modules
             ln -snf "$GLOBAL_PNPM" node_modules/pnpm
           fi
