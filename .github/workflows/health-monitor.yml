@@ -34,12 +34,12 @@ jobs:
           api_status=$(curl -s -o /tmp/api-health.log -w "%{http_code}" "${auth_args[@]}" "$API_HEALTH_URL" || echo "000")
 
           failures=""
-          if [ "$web_status" -ge 400 ] || [ "$web_status" -lt 200 ]; then
+          if [ "$web_status" -lt 200 ] || [ "$web_status" -ge 300 ]; then
             failures+=$'• Web healthz falló (status '
             failures+="$web_status"
             failures+=$')\n'
           fi
-          if [ "$api_status" -ge 400 ] || [ "$api_status" -lt 200 ]; then
+          if [ "$api_status" -lt 200 ] || [ "$api_status" -ge 300 ]; then
             failures+=$'• API healthz falló (status '
             failures+="$api_status"
             failures+=$')\n'
