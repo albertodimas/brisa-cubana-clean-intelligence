@@ -42,10 +42,12 @@ jobs:
       - name: Add pnpm to PATH
         run: |
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
-          sudo ln -sf "$PNPM_HOME/pnpm" /usr/local/bin/pnpm
-          sudo install -m 755 "$PNPM_HOME/pnpm" /usr/bin/pnpm
           mkdir -p node_modules/.bin
           ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+
+      - name: Refuerzo pnpm global
+        run: |
+          sudo npm install -g pnpm@10.18.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
