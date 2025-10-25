@@ -264,18 +264,32 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          robots_path="apps/web/.next/server/app/robots.txt"
-          sitemap_path="apps/web/.next/server/app/sitemap.xml"
-          if [[ ! -f "$robots_path" ]]; then
-            echo "Error: no se encontró $robots_path" >&2
+          root_dir="apps/web/.next/server/app"
+          resolve_asset() {
+            local base="$root_dir/$1"
+            # Next.js App Router emite archivos de metadata como archivos de texto o *.body; aceptamos ambos.
+            if [[ -f "$base" ]]; then
+              printf '%s\n' "$base"
+              return 0
+            fi
+            if [[ -f "${base}.body" ]]; then
+              printf '%s\n' "${base}.body"
+              return 0
+            fi
+            return 1
+          }
+          robots_asset="$(resolve_asset "robots.txt")" || {
+            echo "Error: no se encontró robots.txt compilado en ${root_dir}" >&2
+            ls -R "$root_dir" >&2
             exit 1
-          fi
-          if [[ ! -f "$sitemap_path" ]]; then
-            echo "Error: no se encontró $sitemap_path" >&2
+          }
+          sitemap_asset="$(resolve_asset "sitemap.xml")" || {
+            echo "Error: no se encontró sitemap.xml compilado en ${root_dir}" >&2
+            ls -R "$root_dir" >&2
             exit 1
-          fi
-          grep -qi "user-agent" "$robots_path"
-          grep -qi "<urlset" "$sitemap_path"
+          }
+          grep -qi "user-agent" "$robots_asset"
+          grep -qi "<urlset" "$sitemap_asset"
 
       - name: Lighthouse CI
         if: ${{ inputs.run-lighthouse }}
