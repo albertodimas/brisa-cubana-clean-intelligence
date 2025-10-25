@@ -61,10 +61,20 @@ jobs:
         run: |
           sudo npm install -g pnpm@10.18.0
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Validar pnpm en PATH
         run: |
           pnpm --version
           command -v pnpm
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+        working-directory: apps/api
+
+      - name: Build applications (prebuild)
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
 
       - name: Instalar Vercel CLI
         run: pnpm add --global vercel@48.3.0

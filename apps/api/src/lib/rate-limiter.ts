@@ -27,11 +27,9 @@ function extractClientIdentifier(c: Context): string {
   const fallback =
     c.req.raw.headers.get("x-forwarded-for") ??
     c.req.raw.headers.get("x-real-ip") ??
-    c.req.raw.headers.get("cf-connecting-ip") ??
-    c.req.header("user-agent") ??
-    "anonymous";
+    c.req.raw.headers.get("cf-connecting-ip");
 
-  return fallback;
+  return fallback ?? "anonymous";
 }
 
 export function createRateLimiter({

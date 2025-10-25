@@ -13,11 +13,6 @@ root_dir="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 project_path="${1:-.}"
 config_path="$root_dir/${project_path%/}/.vercel/project.json"
 
-if [[ ! -f "$config_path" ]]; then
-  echo "❌ No se encontró $config_path. Asegúrate de ejecutar este script en un repo vinculado a Vercel." >&2
-  exit 1
-fi
-
 if [[ -z "${VERCEL_TOKEN:-}" ]]; then
   echo "❌ La variable VERCEL_TOKEN no está definida. Exporta el token de Vercel antes de ejecutar el script." >&2
   exit 1
@@ -28,9 +23,26 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-project_id="$(jq -r '.projectId' "$config_path")"
-org_id="$(jq -r '.orgId' "$config_path")"
-project_name="$(jq -r '.projectName // "desconocido"' "$config_path")"
+# Determinar project/org IDs según disponibilidad local o variables de entorno
+if [[ -f "$config_path" ]]; then
+  project_id="$(jq -r '.projectId' "$config_path")"
+  org_id="$(jq -r '.orgId' "$config_path")"
+  project_name="$(jq -r '.projectName // "desconocido"' "$config_path")"
+else
+  if [[ "${project_path%/}" == "apps/api" ]]; then
+    project_id="${VERCEL_PROJECT_ID_API:-${VERCEL_PROJECT_ID:-}}"
+  else
+    project_id="${VERCEL_PROJECT_ID_WEB:-${VERCEL_PROJECT_ID:-}}"
+  fi
+  org_id="${VERCEL_ORG_ID:-}"
+  project_name="${project_path%/}"
+
+  if [[ -z "$project_id" || -z "$org_id" ]]; then
+    echo "❌ No se encontró $config_path y faltan variables VERCEL_PROJECT_ID(_WEB/_API) o VERCEL_ORG_ID." >&2
+    exit 1
+  fi
+fi
+
 limit="${LIMIT:-10}"
 
 response="$(curl -fsSL \

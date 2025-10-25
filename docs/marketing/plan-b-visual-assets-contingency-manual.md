@@ -56,7 +56,7 @@ Según Content Marketing Institute y estudios recientes de producción de conten
 ./scripts/optimize-landing-assets.sh assets-input
 ```
 
-> Consulta `docs/marketing/landing-assets-quickstart.md` para el paso a paso de importación y optimización de archivos.
+> Consulta `docs/marketing/visual-assets-checklist.md` para el checklist operativo de importación y optimización de archivos.
 
 **Estado 22-oct 19:45 EDT:** Screenshot capturado (`hero-2400w.webp` + variantes) e integrado en `apps/web/app/page.tsx`.
 

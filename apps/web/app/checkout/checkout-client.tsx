@@ -4,7 +4,6 @@ import {
   Component,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -87,10 +86,10 @@ function getDefaultScheduledISO(offsetMinutes = 1440) {
   now.setMilliseconds(0);
 
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const date = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const date = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
 
   return `${year}-${month}-${date}T${hours}:${minutes}`;
 }
@@ -223,7 +222,18 @@ export function CheckoutClient({
     typeof isTestMode === "boolean"
       ? isTestMode
       : publishableKey.startsWith("pk_test_");
-  const minScheduledFor = useMemo(() => getDefaultScheduledISO(1440), []);
+  const [minScheduledFor, setMinScheduledFor] = useState(() =>
+    getDefaultScheduledISO(1440),
+  );
+
+  useEffect(() => {
+    setMinScheduledFor(getDefaultScheduledISO(1440));
+    const interval = setInterval(
+      () => setMinScheduledFor(getDefaultScheduledISO(1440)),
+      60 * 1000,
+    );
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -353,7 +363,7 @@ export function CheckoutClient({
           hasSchedule: Boolean(details.scheduledFor),
         },
       });
-      const response = await fetch("/api/checkout/intent", {
+      const response = await fetch("/api/payments/stripe/intent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

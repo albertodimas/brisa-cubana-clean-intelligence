@@ -29,6 +29,7 @@ export default function CheckoutErrorBoundary({
 
   useEffect(() => {
     let cancelled = false;
+    hasLoggedRef.current = false;
 
     const logError = async () => {
       let sentry: typeof import("@sentry/nextjs") | null = null;
