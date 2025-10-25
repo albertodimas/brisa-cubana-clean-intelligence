@@ -264,7 +264,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pnpm --filter @brisa/web exec next start --hostname 127.0.0.1 --port 3000 &
+          pnpm --filter @brisa/web start -- --hostname 127.0.0.1 --port 3000 &
           NEXT_PID=$!
           trap "kill $NEXT_PID >/dev/null 2>&1 || true" EXIT
           server_started=0
