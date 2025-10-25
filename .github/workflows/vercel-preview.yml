@@ -76,7 +76,7 @@ jobs:
       - name: Deploy Web to Vercel Preview
         id: deploy-web
         run: |
-          URL=$(vercel deploy --yes --force --scope brisa-cubana --token=${{ secrets.VERCEL_TOKEN }})
+          URL=$(vercel deploy --cwd . --yes --force --scope brisa-cubana --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🌐 Web Preview Deployed" >> $GITHUB_STEP_SUMMARY
           echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
@@ -86,9 +86,8 @@ jobs:
 
       - name: Deploy API to Vercel Preview
         id: deploy-api
-        working-directory: apps/api
         run: |
-          URL=$(vercel deploy --yes --force --scope brisa-cubana --token=${{ secrets.VERCEL_TOKEN }})
+          URL=$(vercel deploy --cwd apps/api --yes --force --scope brisa-cubana --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🚀 API Preview Deployed" >> $GITHUB_STEP_SUMMARY
           echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
