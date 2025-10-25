@@ -95,3 +95,17 @@ export {
   MagneticCard,
   type TiltCardProps,
 } from "./tilt-card";
+export {
+  Parallax,
+  ParallaxImage,
+  ParallaxLayer,
+  useParallax,
+  type ParallaxProps,
+} from "./parallax";
+export { CountUp, KPICountUp, type CountUpProps } from "./count-up";
+export {
+  ScrollProgress,
+  ScrollProgressCircle,
+  ScrollProgressWithPercentage,
+  type ScrollProgressProps,
+} from "./scroll-progress";

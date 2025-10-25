@@ -16,6 +16,15 @@ import {
 } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
 import { NightShiftMedia } from "@/components/landing/night-shift-media";
+import {
+  ScrollProgress,
+  ScrollReveal,
+  StaggerContainer,
+  StaggerItem,
+  GradientMesh,
+  CountUp,
+  TiltCard,
+} from "@/components/ui";
 
 const testimonials = [
   {
@@ -263,41 +272,66 @@ export const revalidate = 3600;
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white dark:bg-brisa-950 text-gray-900 dark:text-brisa-50">
+      {/* Scroll Progress Bar */}
+      <ScrollProgress position="top" thickness={3} glow />
+
       <div className="relative overflow-hidden bg-gradient-to-br from-brisa-100 via-white to-white dark:from-brisa-900/60 dark:via-brisa-950 dark:to-brisa-950">
+        {/* Gradient Mesh Background - Premium Effect */}
+        <GradientMesh
+          colors={{
+            primary: "rgba(20, 184, 166, 0.3)",
+            secondary: "rgba(139, 92, 246, 0.25)",
+            accent: "rgba(6, 182, 212, 0.3)",
+          }}
+          opacity={0.4}
+          shimmer
+        />
+
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
           <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] items-center">
             <div className="flex flex-col gap-6 lg:gap-8">
-              <span className="text-xs tracking-[0.45em] uppercase text-brisa-600 dark:text-brisa-300">
-                Brisa Cubana Clean Intelligence
-              </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] max-w-3xl">
-                Limpieza profesional y documentada para propiedades premium en
-                Miami.
-              </h1>
-              <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 dark:text-brisa-200 max-w-2xl">
-                Turnovers same-day con checklists de más de 100 puntos, deep
-                cleaning y mantenimiento preventivo con reportes en menos de 4
-                horas.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <MarketingLink
-                  href="#contacto"
-                  eventName="cta_request_proposal"
-                  metadata={{ placement: "hero", target: "contact_form" }}
-                  className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 transition-colors"
-                  prefetch={false}
-                >
-                  Solicitar cotización
-                </MarketingLink>
-                <MarketingLink
-                  href="/clientes"
-                  eventName="cta_portal_demo"
-                  metadata={{ placement: "hero" }}
-                  className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
-                >
-                  Explora el portal cliente
-                </MarketingLink>
-              </div>
+              <ScrollReveal variant="fadeDown" delay={0.1}>
+                <span className="text-xs tracking-[0.45em] uppercase text-brisa-600 dark:text-brisa-300">
+                  Brisa Cubana Clean Intelligence
+                </span>
+              </ScrollReveal>
+
+              <ScrollReveal variant="fadeUp" delay={0.2}>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] max-w-3xl">
+                  Limpieza profesional y documentada para propiedades premium en
+                  Miami.
+                </h1>
+              </ScrollReveal>
+
+              <ScrollReveal variant="fadeUp" delay={0.3}>
+                <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 dark:text-brisa-200 max-w-2xl">
+                  Turnovers same-day con checklists de más de 100 puntos, deep
+                  cleaning y mantenimiento preventivo con reportes en menos de 4
+                  horas.
+                </p>
+              </ScrollReveal>
+
+              <ScrollReveal variant="fadeUp" delay={0.4}>
+                <div className="flex flex-wrap gap-4">
+                  <MarketingLink
+                    href="#contacto"
+                    eventName="cta_request_proposal"
+                    metadata={{ placement: "hero", target: "contact_form" }}
+                    className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 hover:shadow-xl transition-all hover:-translate-y-0.5"
+                    prefetch={false}
+                  >
+                    Solicitar cotización
+                  </MarketingLink>
+                  <MarketingLink
+                    href="/clientes"
+                    eventName="cta_portal_demo"
+                    metadata={{ placement: "hero" }}
+                    className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-all hover:-translate-y-0.5"
+                  >
+                    Explora el portal cliente
+                  </MarketingLink>
+                </div>
+              </ScrollReveal>
             </div>
             <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950">
               <div className="space-y-6">
@@ -386,21 +420,78 @@ export default function LandingPage() {
 
       <section className="relative -mt-12 sm:-mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 rounded-3xl border border-white/70 bg-white/90 p-6 shadow-xl backdrop-blur dark:border-brisa-800/60 dark:bg-brisa-950/80 dark:shadow-brisa-900/50">
-            {kpiHighlights.map((item) => (
-              <div key={item.label} className="flex flex-col gap-1">
-                <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
-                  {item.label}
-                </span>
-                <span className="text-3xl font-semibold text-brisa-700 dark:text-white">
-                  {item.value}
-                </span>
-                <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <ScrollReveal variant="scale" delay={0.2}>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 rounded-3xl border border-white/70 glass-strong p-6 shadow-xl">
+              <StaggerContainer staggerDelay={0.15}>
+                {/* Rotaciones por propiedad */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Rotaciones por propiedad
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
+                      <CountUp end={12} duration={2} />-
+                      <CountUp end={25} duration={2.2} />
+                      /año
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      Media de turnovers en STR de EE. UU.; planificamos buffers
+                      para picos turísticos.
+                    </p>
+                  </div>
+                </StaggerItem>
+
+                {/* Impacto en reseñas */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Impacto en reseñas
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
+                      <CountUp end={81} suffix="%" duration={2.5} />
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      De los viajeros prioriza limpieza; 78% deja reviews
+                      positivas cuando está impecable.
+                    </p>
+                  </div>
+                </StaggerItem>
+
+                {/* Programación 24/7 */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Programación garantizada
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white">
+                      24/7
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      Calendarios sincronizados con alertas same-day y soporte
+                      priorizado.
+                    </p>
+                  </div>
+                </StaggerItem>
+
+                {/* Mercado Miami */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Mercado Miami
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
+                      <CountUp end={13} duration={2} />
+                      K+ listings
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      Inventario activo con picos Nov-Mar y 24M de visitantes
+                      anuales.
+                    </p>
+                  </div>
+                </StaggerItem>
+              </StaggerContainer>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -644,24 +735,32 @@ export default function LandingPage() {
       </section>
 
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <div className="grid gap-8 lg:grid-cols-3">
+        <StaggerContainer
+          className="grid gap-8 lg:grid-cols-3"
+          staggerDelay={0.2}
+        >
           {differentiators.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
-            >
-              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brisa-100 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
-                <item.icon className="h-6 w-6" aria-hidden />
-              </div>
-              <h3 className="text-xl font-semibold text-brisa-700 dark:text-white">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-brisa-200">
-                {item.description}
-              </p>
-            </div>
+            <StaggerItem key={item.title}>
+              <TiltCard
+                maxTilt={8}
+                glowEffect
+                glowColor="rgba(126, 231, 196, 0.2)"
+              >
+                <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-brisa-800 dark:bg-brisa-950 h-full">
+                  <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brisa-100 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
+                    <item.icon className="h-6 w-6" aria-hidden />
+                  </div>
+                  <h3 className="text-xl font-semibold text-brisa-700 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-brisa-200">
+                    {item.description}
+                  </p>
+                </div>
+              </TiltCard>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </section>
 
       <section className="bg-gradient-to-br from-brisa-600 via-brisa-500 to-brisa-400 text-white">
