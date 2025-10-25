@@ -6,15 +6,8 @@ import "../styles/theme.css";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WebVitalsReporter } from "@/components/analytics/web-vitals-reporter";
-import { Inter } from "next/font/google";
-import { SpeedInsightsClient } from "@/components/analytics/speed-insights-client";
 import { PostHogAnalytics } from "@/components/analytics/posthog-analytics";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
+import { SpeedInsightsClient } from "@/components/analytics/speed-insights-client";
 
 const SITE_DESCRIPTION =
   "Servicios profesionales de limpieza premium en Miami con logística inteligente y soporte 24/7 para hogares, alquileres vacacionales y negocios.";
@@ -108,11 +101,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <html
-      lang="es"
-      className={`${inter.variable} dark`}
-      suppressHydrationWarning
-    >
+    <html lang="es" className="dark" suppressHydrationWarning>
       <head>
         <meta name="description" content={SITE_DESCRIPTION} />
         <script
@@ -122,7 +111,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }}
         />
       </head>
-      <body className={inter.className}>
+      <body>
         <ThemeProvider>
           <ToastProvider>{children}</ToastProvider>
           <WebVitalsReporter />

@@ -1,21 +1,23 @@
-import type { MetadataRoute } from "next";
-
-const DEFAULT_SITE_URL = "https://brisacubanacleanintelligence.com";
-
-function getBaseUrl() {
-  const url =
-    process.env.NEXT_PUBLIC_BASE_URL ??
-    process.env.NEXTAUTH_URL ??
-    DEFAULT_SITE_URL;
-  return url.replace(/\/+$/, "");
-}
+import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = getBaseUrl();
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://brisacubanacleanintelligence.com";
+
   return [
     {
       url: baseUrl,
       lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/login`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
     },
   ];
 }

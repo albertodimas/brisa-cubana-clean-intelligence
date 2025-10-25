@@ -14,7 +14,6 @@ export default async function middleware(req: NextRequest) {
     "/login",
     "/checkout",
     "/clientes",
-    "/mockups",
     "/api/auth",
     "/lhci",
     "/robots.txt",

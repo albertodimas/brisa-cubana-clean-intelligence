@@ -94,9 +94,6 @@ temp/
 backups/
 .neon
 
-# Landing asset processing (intermediate inputs)
-assets-input/
-
 # Archives
 _archived/
 
