@@ -54,6 +54,13 @@ for file in "${required_files[@]}"; do
   fi
 done
 
+# 2b. El runbook git-remote-push fue retirado y no debe existir
+deprecated_runbook="docs/operations/git-remote-push.md"
+if [[ -f "${deprecated_runbook}" ]]; then
+  echo "❌ Documentación obsoleta detectada: ${deprecated_runbook}"
+  violations=1
+fi
+
 # 3. Patrones prohibidos (referencias a rutas antiguas o dispersas)
 forbidden_patterns=(
   "docs/quickstart.md"
@@ -69,6 +76,7 @@ forbidden_patterns=(
   "docs/API_DOCUMENTATION.md"
   "docs/SESSION_LOG.md"
   "docs/DEPLOYMENT.md"
+  "docs/operations/git-remote-push.md"
 )
 
 for pattern in "${forbidden_patterns[@]}"; do
