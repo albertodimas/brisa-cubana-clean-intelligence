@@ -68,42 +68,41 @@ jobs:
         run: pnpm add --global vercel@48.3.0
 
       - name: Sincronizar configuración Vercel API
+        working-directory: apps/api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           export PATH="$PNPM_HOME:$PATH"
-          pushd apps/api
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
-          popd
 
       - name: Build API (prebuilt)
+        working-directory: apps/api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          pushd apps/api
           mkdir -p node_modules/.bin
           ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
           vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
-          popd
 
       - name: Deploy API to Vercel Production
         id: deploy-api
+        working-directory: apps/api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy apps/api/.vercel/output --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
+          URL=$(vercel deploy .vercel/output --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo "### 🚀 API Production Deployment"
             echo ""
             echo "- URL: $URL"
           } >> "$GITHUB_STEP_SUMMARY"
-          rm -rf apps/api/.vercel/output
+          rm -rf .vercel/output
 
       - name: Sincronizar configuración Vercel Web
         env:
