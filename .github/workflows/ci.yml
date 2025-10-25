@@ -66,7 +66,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          vercel pull --cwd apps/api --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
+          vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy API to Vercel Production
         id: deploy-api
@@ -74,7 +74,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy --cwd apps/api --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
+          URL=$(vercel deploy apps/api --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo "### 🚀 API Production Deployment"
