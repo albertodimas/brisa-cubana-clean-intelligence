@@ -84,21 +84,16 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          GLOBAL_PNPM="$(pnpm root -g)/pnpm"
-          if [ ! -d "$GLOBAL_PNPM" ]; then
-            ALT_PNPM="$(dirname "$(command -v pnpm)")/../lib/node_modules/pnpm"
-            if [ -d "$ALT_PNPM" ]; then
-              GLOBAL_PNPM="$ALT_PNPM"
-            else
-              GLOBAL_PNPM=""
-            fi
-          fi
-          if [ -n "$GLOBAL_PNPM" ] && [ -d "$GLOBAL_PNPM" ]; then
-            mkdir -p node_modules
-            ln -snf "$GLOBAL_PNPM" node_modules/pnpm
-          fi
-          mkdir -p node_modules/.bin
-          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+          PNPM_BIN="$(command -v pnpm)"
+          mkdir -p node_modules/pnpm/bin node_modules/.bin
+          cat <<EOF > node_modules/pnpm/bin/pnpm.cjs
+#!/usr/bin/env node
+const { spawnSync } = require('node:child_process');
+const result = spawnSync("${PNPM_BIN}", process.argv.slice(2), { stdio: 'inherit' });
+process.exit(result.status ?? 1);
+EOF
+          chmod +x node_modules/pnpm/bin/pnpm.cjs
+          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
           vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy API to Vercel Production
@@ -132,21 +127,16 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          GLOBAL_PNPM="$(pnpm root -g)/pnpm"
-          if [ ! -d "$GLOBAL_PNPM" ]; then
-            ALT_PNPM="$(dirname "$(command -v pnpm)")/../lib/node_modules/pnpm"
-            if [ -d "$ALT_PNPM" ]; then
-              GLOBAL_PNPM="$ALT_PNPM"
-            else
-              GLOBAL_PNPM=""
-            fi
-          fi
-          if [ -n "$GLOBAL_PNPM" ] && [ -d "$GLOBAL_PNPM" ]; then
-            mkdir -p node_modules
-            ln -snf "$GLOBAL_PNPM" node_modules/pnpm
-          fi
-          mkdir -p node_modules/.bin
-          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+          PNPM_BIN="$(command -v pnpm)"
+          mkdir -p node_modules/pnpm/bin node_modules/.bin
+          cat <<EOF > node_modules/pnpm/bin/pnpm.cjs
+#!/usr/bin/env node
+const { spawnSync } = require('node:child_process');
+const result = spawnSync("${PNPM_BIN}", process.argv.slice(2), { stdio: 'inherit' });
+process.exit(result.status ?? 1);
+EOF
+          chmod +x node_modules/pnpm/bin/pnpm.cjs
+          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
           vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Production
