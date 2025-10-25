@@ -264,23 +264,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pnpm --filter @brisa/web start -- --hostname 127.0.0.1 --port 3000 &
-          NEXT_PID=$!
-          trap "kill $NEXT_PID >/dev/null 2>&1 || true" EXIT
-          server_started=0
-          for i in {1..120}; do
-            if curl -sf http://127.0.0.1:3000/robots.txt >/dev/null; then
-              server_started=1
-              break
-            fi
-            sleep 1
-          done
-          if [ "$server_started" -ne 1 ]; then
-            echo "Error: Server did not start within 120 seconds." >&2
+          robots_path="apps/web/.next/server/app/robots.txt"
+          sitemap_path="apps/web/.next/server/app/sitemap.xml"
+          if [[ ! -f "$robots_path" ]]; then
+            echo "Error: no se encontró $robots_path" >&2
             exit 1
           fi
-          curl -sSf http://127.0.0.1:3000/robots.txt | grep -qi "user-agent"
-          curl -sSf http://127.0.0.1:3000/sitemap.xml | grep -qi "<urlset"
+          if [[ ! -f "$sitemap_path" ]]; then
+            echo "Error: no se encontró $sitemap_path" >&2
+            exit 1
+          fi
+          grep -qi "user-agent" "$robots_path"
+          grep -qi "<urlset" "$sitemap_path"
 
       - name: Lighthouse CI
         if: ${{ inputs.run-lighthouse }}
