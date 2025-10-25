@@ -110,6 +110,7 @@ Neon (PostgreSQL 17) sirve la base productiva con seeds demo, ver `docs/operatio
 - [Quickstart local](docs/guides/quickstart.md) – guía paso a paso para levantar el stack.
 - [Portal cliente](docs/guides/portal-client.md) – flujos y requisitos operativos.
 - [Operaciones & despliegue](docs/operations/deployment.md) – pipeline, verificación y rollback.
+- [Despliegue manual (contingencia)](docs/operations/manual-vercel-deploy.md) – pasos para publicar desde CLI cuando GitHub Actions falle.
 - [Higiene del repositorio](docs/operations/repo-hygiene.md) – rutinas semanales/mensuales y checklist por PR.
 - [Brand & marketing](docs/marketing/brand-voice.md) – tono, assets, campañas.
 - [Decisiones técnicas](docs/decisions/) – histórico de migraciones y justificaciones (Tailwind v4, dependencia Stripe, etc.).

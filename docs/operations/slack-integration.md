@@ -16,13 +16,13 @@ Slack es el canal oficial para notificaciones operativas, incidencias y leads. T
 
 ## 2. Taxonomía de canales
 
-| Canal                 | Propósito principal                                 | Propietario | Observaciones                                                   |
-| --------------------- | --------------------------------------------------- | ----------- | --------------------------------------------------------------- |
-| `#alerts-operaciones` | Canal primario de alertas (Sentry, PostHog, health) | Plataforma  | Mensajes automáticos + reacciones manuales (`:eyes:` para ACK). |
-| `#alerts-criticos`    | Escalaciones SEV0/SEV1 y paging                     | Plataforma  | Solo incidentes confirmados o fails recurrentes.                |
-| `#alerts-performance` | Métricas de rendimiento (Lighthouse, p95 API)       | Producto    | Usar para degradaciones sostenidas, no para spikes aislados.    |
-| `#alerts-deployments` | Notificaciones de CI/CD y verificación post-deploy  | Operaciones | GitHub Actions + integraciones Vercel.                          |
-| `#leads-operaciones`  | Leads entrantes desde landing, campañas y redes     | Marketing   | El coordinador comercial asigna ownership con reacciones.       |
+| Canal                 | Propósito principal                                 | Propietario | Observaciones                                                                                                                       |
+| --------------------- | --------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `#alerts-operaciones` | Canal primario de alertas (Sentry, PostHog, health) | Plataforma  | Mensajes automáticos + reacciones manuales (`:eyes:` para ACK).                                                                     |
+| `#alerts-criticos`    | Escalaciones SEV0/SEV1 y paging                     | Plataforma  | Solo incidentes confirmados o fails recurrentes.                                                                                    |
+| `#alerts-performance` | Métricas de rendimiento (Lighthouse, p95 API)       | Producto    | Usar para degradaciones sostenidas, no para spikes aislados.                                                                        |
+| `#alerts-deployments` | Notificaciones de CI/CD y verificación post-deploy  | Operaciones | GitHub Actions + integraciones Vercel; fijar [`manual-vercel-deploy`](manual-vercel-deploy.md) y [`repo-hygiene`](repo-hygiene.md). |
+| `#leads-operaciones`  | Leads entrantes desde landing, campañas y redes     | Marketing   | El coordinador comercial asigna ownership con reacciones.                                                                           |
 
 > Si se crean canales adicionales, documentarlos aquí y en `docs/operations/domain-map.md`.
 
