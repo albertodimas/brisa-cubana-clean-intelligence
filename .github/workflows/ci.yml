@@ -53,10 +53,8 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Ensure pnpm disponible
+      - name: Validar pnpm en PATH
         run: |
-          corepack enable
-          corepack prepare pnpm@10.18.0 --activate
           pnpm --version
           command -v pnpm
 

@@ -49,10 +49,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Asegurar pnpm via Corepack
+      - name: Validar pnpm en PATH
         run: |
-          corepack enable
-          corepack prepare pnpm@10.18.0 --activate
           pnpm --version
           which pnpm
 
