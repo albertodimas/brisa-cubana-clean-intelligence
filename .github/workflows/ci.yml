@@ -86,14 +86,9 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          PNPM_BIN="$(command -v pnpm)"
+          export PNPM_BIN="$(command -v pnpm)"
           mkdir -p node_modules/pnpm/bin node_modules/.bin
-          cat <<EOF > node_modules/pnpm/bin/pnpm.cjs
-#!/usr/bin/env node
-const { spawnSync } = require('node:child_process');
-const result = spawnSync("${PNPM_BIN}", process.argv.slice(2), { stdio: 'inherit' });
-process.exit(result.status ?? 1);
-EOF
+          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
           chmod +x node_modules/pnpm/bin/pnpm.cjs
           ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
           vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
@@ -129,14 +124,9 @@ EOF
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          PNPM_BIN="$(command -v pnpm)"
+          export PNPM_BIN="$(command -v pnpm)"
           mkdir -p node_modules/pnpm/bin node_modules/.bin
-          cat <<EOF > node_modules/pnpm/bin/pnpm.cjs
-#!/usr/bin/env node
-const { spawnSync } = require('node:child_process');
-const result = spawnSync("${PNPM_BIN}", process.argv.slice(2), { stdio: 'inherit' });
-process.exit(result.status ?? 1);
-EOF
+          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
           chmod +x node_modules/pnpm/bin/pnpm.cjs
           ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
           vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
