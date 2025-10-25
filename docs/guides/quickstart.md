@@ -97,6 +97,11 @@ pnpm build       # Compila Next.js y API
 - Si has acumulado builds o caches, limpia el entorno con `pnpm clean:workspace` (envuelve `scripts/cleanup-local-env.sh`).
 - Sigue el playbook operativo en [`docs/operations/repo-hygiene.md`](../operations/repo-hygiene.md) para mantener ramas y documentación bajo control.
 
+### Despliegues de contingencia
+
+- Los despliegues manuales a Vercel deben seguir el procedimiento documentado en [`docs/operations/manual-vercel-deploy.md`](../operations/manual-vercel-deploy.md).
+- Cada vez que recurras a ese playbook, anuncia el inicio y fin del despliegue en Slack (`#alerts-deployments`) y documenta cualquier incidencia en el PR asociado.
+
 ## Autenticación en la UI
 
 1. Accede a <http://localhost:3000/login> y autentícate con un usuario `ADMIN` o `COORDINATOR`.
