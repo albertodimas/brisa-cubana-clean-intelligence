@@ -78,7 +78,7 @@ jobs:
         run: pnpm build
 
       - name: Install Vercel CLI
-        run: npm install -g vercel@48.4.1
+        run: npm install -g vercel@48.3.0
 
       - name: Deploy Web to Vercel Preview
         id: deploy-web
