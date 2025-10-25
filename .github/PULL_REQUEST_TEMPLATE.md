@@ -24,6 +24,10 @@
 - [ ] Tests de integración
 - [ ] Tests E2E
 - [ ] Pruebas manuales
+- [ ] `pnpm lint`
+- [ ] `pnpm typecheck`
+- [ ] `pnpm test`
+- [ ] `pnpm docs:verify`
 
 **Detalles de testing:**
 
@@ -39,3 +43,5 @@
 - [ ] He agregado tests que prueban mi fix/feature
 - [ ] Todos los tests nuevos y existentes pasan
 - [ ] He actualizado el CHANGELOG (si aplica)
+- [ ] He ejecutado `scripts/cleanup-local-env.sh` o equivalente si mi rama ha acumulado artefactos locales
+- [ ] He programado la eliminación de la rama una vez se fusione el PR

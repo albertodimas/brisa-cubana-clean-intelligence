@@ -35,6 +35,7 @@ required_files=(
   "docs/operations/incident-runbook.md"
   "docs/operations/incident-template.md"
   "docs/operations/slack-integration.md"
+  "docs/operations/repo-hygiene.md"
   "docs/qa/e2e-strategy.md"
   "docs/qa/regression-checklist.md"
   "docs/qa/performance-budgets.md"
