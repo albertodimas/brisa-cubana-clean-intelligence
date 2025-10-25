@@ -39,6 +39,14 @@ jobs:
         with:
           version: 10.18.0
 
+      - name: Add pnpm to PATH
+        run: |
+          echo "$PNPM_HOME" >> "$GITHUB_PATH"
+          sudo ln -sf "$PNPM_HOME/pnpm" /usr/local/bin/pnpm
+          sudo install -m 755 "$PNPM_HOME/pnpm" /usr/bin/pnpm
+          mkdir -p node_modules/.bin
+          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -51,6 +59,8 @@ jobs:
 
       - name: Validar pnpm en PATH
         run: |
+          corepack enable
+          corepack prepare pnpm@10.18.0 --activate
           pnpm --version
           which pnpm
 
@@ -71,30 +81,75 @@ jobs:
         run: pnpm build
 
       - name: Install Vercel CLI
-        run: npm install -g vercel@48.3.0
+        run: pnpm add --global vercel@48.3.0
+
+      - name: Sincronizar configuración Vercel API
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          export PATH="$PNPM_HOME:$PATH"
+          pushd apps/api
+          vercel pull --yes --environment=preview --scope brisa-cubana --token "$VERCEL_TOKEN"
+          popd
+
+      - name: Build API (prebuilt preview)
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          pushd apps/api
+          mkdir -p node_modules/.bin
+          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+          vercel build --scope brisa-cubana --token "$VERCEL_TOKEN"
+          popd
+
+      - name: Sincronizar configuración Vercel Web
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          export PATH="$PNPM_HOME:$PATH"
+          vercel pull --yes --environment=preview --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Build Web (prebuilt preview)
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          mkdir -p node_modules/.bin
+          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+          vercel build --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Preview
         id: deploy-web
-        run: |
-          URL=$(vercel deploy . --yes --force --scope brisa-cubana --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "### 🌐 Web Preview Deployed" >> $GITHUB_STEP_SUMMARY
-          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy .vercel/output --prebuilt --yes --force --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "### 🌐 Web Preview Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
+          rm -rf .vercel/output
 
       - name: Deploy API to Vercel Preview
         id: deploy-api
-        working-directory: apps/api
-        run: |
-          URL=$(vercel deploy --yes --force --scope brisa-cubana --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "### 🚀 API Preview Deployed" >> $GITHUB_STEP_SUMMARY
-          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy apps/api/.vercel/output --prebuilt --yes --force --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "### 🚀 API Preview Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
+          rm -rf apps/api/.vercel/output
 
       - name: Comment PR with deployment URLs
         if: ${{ github.event_name == 'pull_request' }}
