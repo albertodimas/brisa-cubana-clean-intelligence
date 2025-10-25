@@ -53,13 +53,6 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 
 > **Env vars obligatorias:** tras aplicar un alias nuevo, confirma en Vercel → Settings → Environment Variables que `NEXT_PUBLIC_BASE_URL`, `NEXTAUTH_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL`, `INTERNAL_API_URL` y `PORTAL_MAGIC_LINK_BASE_URL` apuntan al dominio final. Replica los cambios en GitHub Actions si usas secretos espejo.
 
-**Procedimiento recomendado**
-
-1. Desde el proyecto **web**, elimina cualquier alias previo a `api.brisacubanacleanintelligence.com` para evitar conflictos. Puedes hacerlo desde _Settings → Domains_ o ejecutando `vercel alias rm api.brisacubanacleanintelligence.com`.
-2. En el proyecto **API**, añade el dominio `api.brisacubanacleanintelligence.com` (Settings → Domains o `vercel domains add api.brisacubanacleanintelligence.com`) y, una vez disponible el deployment productivo deseado, asígnalo con `vercel alias set <deployment-url> api.brisacubanacleanintelligence.com`.
-3. Si administras el DNS fuera de Vercel, crea/actualiza el registro CNAME del subdominio para que apunte a `cname.vercel-dns.com`. Si usas Vercel DNS, no se requieren cambios adicionales.
-4. Verifica que la respuesta `GET https://api.brisacubanacleanintelligence.com/health` devuelva `200` antes de actualizar configuraciones (por ejemplo, `NEXT_PUBLIC_API_URL`) en web, GitHub y workflows.
-
 ### Certificados SSL
 
 Vercel genera y renueva automáticamente certificados SSL/TLS (Let's Encrypt). No se requiere acción manual.

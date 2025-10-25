@@ -264,12 +264,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pnpm --filter @brisa/web exec next start --hostname 127.0.0.1 --port 4000 &
+          pnpm --filter @brisa/web exec next start --hostname 127.0.0.1 --port 3000 &
           NEXT_PID=$!
           trap "kill $NEXT_PID >/dev/null 2>&1 || true" EXIT
           server_started=0
           for i in {1..30}; do
-            if curl -sf http://127.0.0.1:4000/robots.txt >/dev/null; then
+            if curl -sf http://127.0.0.1:3000/robots.txt >/dev/null; then
               server_started=1
               break
             fi
@@ -279,10 +279,8 @@ jobs:
             echo "Error: Server did not start within 30 seconds." >&2
             exit 1
           fi
-          curl -sSf http://127.0.0.1:4000/robots.txt | grep -qi "user-agent"
-          curl -sSf http://127.0.0.1:4000/sitemap.xml | grep -qi "<urlset"
-          kill $NEXT_PID
-          trap - EXIT
+          curl -sSf http://127.0.0.1:3000/robots.txt | grep -qi "user-agent"
+          curl -sSf http://127.0.0.1:3000/sitemap.xml | grep -qi "<urlset"
 
       - name: Lighthouse CI
         if: ${{ inputs.run-lighthouse }}
