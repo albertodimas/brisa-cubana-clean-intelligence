@@ -268,7 +268,7 @@ jobs:
           NEXT_PID=$!
           trap "kill $NEXT_PID >/dev/null 2>&1 || true" EXIT
           server_started=0
-          for i in {1..30}; do
+          for i in {1..60}; do
             if curl -sf http://127.0.0.1:3000/robots.txt >/dev/null; then
               server_started=1
               break
