@@ -186,15 +186,46 @@ const config = {
       addUtilities({
         ".glass": {
           backgroundColor: "rgba(13, 61, 56, 0.3)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
+          backdropFilter: "blur(12px) saturate(180%)",
+          WebkitBackdropFilter: "blur(12px) saturate(180%)",
           border: "1px solid rgba(126, 231, 196, 0.1)",
         },
         ".glass-strong": {
           backgroundColor: "rgba(13, 61, 56, 0.6)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          backdropFilter: "blur(16px) saturate(180%)",
+          WebkitBackdropFilter: "blur(16px) saturate(180%)",
           border: "1px solid rgba(126, 231, 196, 0.2)",
+        },
+        ".glass-ultra": {
+          background:
+            "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
+          backdropFilter: "blur(20px) saturate(200%) brightness(110%)",
+          WebkitBackdropFilter: "blur(20px) saturate(200%) brightness(110%)",
+          border: "1px solid rgba(255, 255, 255, 0.18)",
+          boxShadow:
+            "0 8px 32px rgba(0, 0, 0, 0.37), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
+        },
+        ".glass-frosted": {
+          backgroundColor: "rgba(13, 25, 30, 0.6)",
+          backdropFilter: "blur(16px) brightness(110%)",
+          WebkitBackdropFilter: "blur(16px) brightness(110%)",
+          border: "1px solid rgba(126, 231, 196, 0.15)",
+          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.25)",
+        },
+        ".glass-reflection": {
+          position: "relative",
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: "-50%",
+            left: "-50%",
+            width: "200%",
+            height: "200%",
+            background:
+              "linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%)",
+            animation: "shimmer 3s infinite",
+          },
         },
       });
 

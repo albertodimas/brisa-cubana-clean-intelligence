@@ -49,7 +49,7 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
 
     const animationClasses = {
       pulse: "animate-pulse",
-      wave: "animate-shimmer bg-gradient-to-r from-brisa-800/50 via-brisa-700/50 to-brisa-800/50 bg-[length:200%_100%]",
+      wave: "animate-shimmer bg-gradient-to-r from-brisa-900/60 via-brisa-700/60 to-brisa-900/60 bg-[length:200%_100%]",
       none: "",
     };
 

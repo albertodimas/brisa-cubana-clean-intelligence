@@ -75,3 +75,23 @@ export {
 
 // Utilities
 export { ThemeToggle } from "./theme-toggle";
+
+// Animation & Effects (Premium UI/UX)
+export {
+  ScrollReveal,
+  StaggerContainer,
+  StaggerItem,
+  scrollVariants,
+  type ScrollRevealProps,
+} from "./scroll-reveal";
+export {
+  GradientMesh,
+  GradientOrb,
+  type GradientMeshProps,
+} from "./gradient-mesh";
+export {
+  TiltCard,
+  HoverLiftCard,
+  MagneticCard,
+  type TiltCardProps,
+} from "./tilt-card";
