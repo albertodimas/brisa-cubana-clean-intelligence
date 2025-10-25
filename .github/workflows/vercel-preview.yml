@@ -42,8 +42,7 @@ jobs:
       - name: Add pnpm to PATH
         run: |
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
-          mkdir -p node_modules/.bin
-          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+          pnpm --version
 
       - name: Refuerzo pnpm global
         run: |
