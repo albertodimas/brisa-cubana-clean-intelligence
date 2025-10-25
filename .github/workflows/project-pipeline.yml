@@ -268,7 +268,7 @@ jobs:
           NEXT_PID=$!
           trap "kill $NEXT_PID >/dev/null 2>&1 || true" EXIT
           server_started=0
-          for i in {1..60}; do
+          for i in {1..120}; do
             if curl -sf http://127.0.0.1:3000/robots.txt >/dev/null; then
               server_started=1
               break
@@ -276,7 +276,7 @@ jobs:
             sleep 1
           done
           if [ "$server_started" -ne 1 ]; then
-            echo "Error: Server did not start within 30 seconds." >&2
+            echo "Error: Server did not start within 120 seconds." >&2
             exit 1
           fi
           curl -sSf http://127.0.0.1:3000/robots.txt | grep -qi "user-agent"
