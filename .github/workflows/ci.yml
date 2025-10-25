@@ -62,6 +62,7 @@ jobs:
         run: pnpm add --global vercel@48.3.0
 
       - name: Sincronizar configuración Vercel API
+        working-directory: apps/api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -70,11 +71,12 @@ jobs:
 
       - name: Deploy API to Vercel Production
         id: deploy-api
+        working-directory: apps/api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy apps/api --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
+          URL=$(vercel deploy --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo "### 🚀 API Production Deployment"
