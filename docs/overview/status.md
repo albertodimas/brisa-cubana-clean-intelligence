@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 22 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 204 unit/integration –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
+**Última revisión:** 25 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 204 unit/integration –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -15,7 +15,7 @@
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Despliegues en Vercel restaurados (21-oct-2025 01:30 UTC). Últimos deployments `Ready`: web `https://brisa-cubana-clean-intelligence-ov83pncfl-...` y API `https://brisa-cubana-clean-intelligence-jjl943a0f-...` (commit `f14d575`). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN/SLACK_WEBHOOK_URL/LEAD_WEBHOOK_URL) están cargadas en Development/Preview/Production.
+- Despliegues en Vercel: el run `CI (Main Branch)` #18797700488 (25-oct-2025 03:43 UTC) falló con `spawn pnpm ENOENT` durante `vercel build`. El 25-oct-2025 actualizamos `ci.yml` y `vercel-preview.yml` para reforzar la instalación global de `pnpm@10.18.0` (workaround temporal mientras Vercel corrige el bug 48.x). Tras hacer push de este commit se lanzará un nuevo `workflow_dispatch` para validar el deploy automático; hasta entonces mantenemos operativo el fallback manual (`scripts/manual-vercel-deploy.sh`).
 - Observabilidad verificada manualmente el 21-oct-2025: evento Sentry `ec904a19-899c-4e91-9386-8304c02cd724` (via `pnpm sentry:test-event`) y captura PostHog `checkout_payment_failed` (`pnpm posthog:test-event` con distinct `brisa-cli-*`).
 - Sitio público `/` sirve la landing comercial con métricas basadas en datos reales del mercado STR (rotaciones 12-25/año, 81% reviews impactadas por limpieza, 13K listings en Miami) y CTA de checkout/portal. Los placeholders de imagen permanecen a la espera de los activos listados en `docs/marketing/visual-assets-checklist.md`. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
 - Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).
@@ -103,16 +103,19 @@
 
 ## 4. Variables de entorno
 
-| Variable                            | Web | API | Descripción                                 |
-| ----------------------------------- | --- | --- | ------------------------------------------- |
-| `NEXT_PUBLIC_API_URL`               | ✅  | –   | Endpoint público (fallback).                |
-| `INTERNAL_API_URL`                  | ✅  | –   | URL privada de la API usada por el proxy.   |
-| `AUTH_SECRET`                       | ✅  | –   | Requerido por Auth.js.                      |
-| `DATABASE_URL` / `_UNPOOLED`        | –   | ✅  | Conexión PostgreSQL (prod/local).           |
-| `JWT_SECRET`                        | ✅  | ✅  | Firma/verificación JWT.                     |
-| `API_TOKEN`                         | ✅  | ✅  | Token para integraciones servidor-servidor. |
-| `ALLOWED_ORIGINS`                   | ✅  | ✅  | CORS para Hono/WS.                          |
-| `LOGIN_RATE_LIMIT` (+ `_WINDOW_MS`) | ✅  | ✅  | Configura rate limiting del login.          |
+| Variable                                               | Web | API | Descripción                                                          |
+| ------------------------------------------------------ | --- | --- | -------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`                                  | ✅  | –   | Endpoint público (fallback).                                         |
+| `INTERNAL_API_URL`                                     | ✅  | –   | URL privada de la API usada por el proxy.                            |
+| `AUTH_SECRET`                                          | ✅  | –   | Requerido por Auth.js.                                               |
+| `DATABASE_URL` / `_UNPOOLED`                           | –   | ✅  | Conexión PostgreSQL (prod/local).                                    |
+| `JWT_SECRET`                                           | ✅  | ✅  | Firma/verificación JWT.                                              |
+| `API_TOKEN`                                            | ✅  | ✅  | Token para integraciones servidor-servidor.                          |
+| `ALLOWED_ORIGINS`                                      | ✅  | ✅  | CORS para Hono/WS.                                                   |
+| `LOGIN_RATE_LIMIT` (+ `_WINDOW_MS`)                    | ✅  | ✅  | Configura rate limiting del login.                                   |
+| `PORTAL_MAGIC_LINK_RATE_LIMIT` (+ `_WINDOW_MS`)        | –   | ✅  | Limita solicitudes de enlaces mágicos (3/15 min por defecto).        |
+| `PORTAL_MAGIC_LINK_VERIFY_RATE_LIMIT` (+ `_WINDOW_MS`) | –   | ✅  | Limita verificaciones de enlaces mágicos (5/15 min por defecto).     |
+| `CHECKOUT_PAYMENT_RATE_LIMIT` (+ `_WINDOW_MS`)         | –   | ✅  | Limita la creación de intents de pago públicos (10/60s por defecto). |
 
 En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`, por lo que ya no se listan variables “faltantes” del backend.
 
@@ -204,7 +207,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 
 - **TypeScript**: `pnpm typecheck` ✅
 - **Lint**: `pnpm lint` ✅
-- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: confirmar mensaje de prueba en Slack (`#todo-brisa-cubana`), incorporar assets finales de marketing en la landing y automatizar alertas PostHog (`checkout_payment_failed` → Slack).
+- **Deuda técnica**: 0 TODOs/FIXME. Pendientes clave: revisar umbrales de alertas Sentry/PostHog el 30-oct-2025, añadir panel del workflow `posthog-monitor.yml` al dashboard comercial (05-nov-2025) e investigar retención de datos PostHog antes del 30-nov-2025.
 
 ---
 

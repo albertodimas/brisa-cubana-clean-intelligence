@@ -110,6 +110,7 @@ Neon (PostgreSQL 17) sirve la base productiva con seeds demo, ver `docs/operatio
 - [Quickstart local](docs/guides/quickstart.md) – guía paso a paso para levantar el stack.
 - [Portal cliente](docs/guides/portal-client.md) – flujos y requisitos operativos.
 - [Operaciones & despliegue](docs/operations/deployment.md) – pipeline, verificación y rollback.
+- [Higiene del repositorio](docs/operations/repo-hygiene.md) – rutinas semanales/mensuales y checklist por PR.
 - [Brand & marketing](docs/marketing/brand-voice.md) – tono, assets, campañas.
 - [Decisiones técnicas](docs/decisions/) – histórico de migraciones y justificaciones (Tailwind v4, dependencia Stripe, etc.).
 - [Referencia API](docs/reference/openapi.yaml) – especificación OpenAPI.
@@ -144,9 +145,11 @@ Alertas actuales: consulta <https://github.com/albertodimas/brisa-cubana-clean-i
 1. Basar cambios en ramas descriptivas.
 2. Ejecutar `pnpm lint && pnpm typecheck && pnpm test`.
 3. Corridas Playwright (`pnpm test:e2e:smoke`) para cambios que toquen UI/flows.
-4. Actualizar documentación (README, `docs/overview/status.md`, CHANGELOG cuando aplique).
-5. Abrir PR contra `main` y esperar CI verde.
-6. Coordinar con Operations/Onboarding cuando la guía cambie procesos (seeds, credenciales demo, runbooks).
+4. Limpia caches locales con `scripts/cleanup-local-env.sh` cuando la rama lleve más de una semana abierta o tras dependabot mayores.
+5. Actualizar documentación (README, `docs/overview/status.md`, CHANGELOG cuando aplique).
+6. Abrir PR contra `main` y esperar CI verde.
+7. Programa la eliminación de la rama tras el merge (checkbox en el template).
+8. Coordinar con Operations/Onboarding cuando la guía cambie procesos (seeds, credenciales demo, runbooks).
 
 > Regla de oro: **solo documentamos y desplegamos lo que existe, está probado y pasa en CI**.
 

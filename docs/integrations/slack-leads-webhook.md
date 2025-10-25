@@ -1,6 +1,8 @@
 # Slack Webhook · Leads con UTM
 
-Este flujo envía cada solicitud del formulario de diagnóstico a un canal Slack (`#brisa-alerts`) junto con los parámetros UTM y datos básicos del cliente.
+**Última actualización:** 23 de octubre de 2025
+
+Este flujo envía cada solicitud del formulario de diagnóstico a un canal Slack (`#leads-operaciones`) junto con los parámetros UTM y datos básicos del cliente.
 
 ## 1. Supuestos
 

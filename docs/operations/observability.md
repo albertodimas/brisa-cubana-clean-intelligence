@@ -1,650 +1,144 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 22 de octubre de 2025
-**Estado actual:** ✅ Logging estructurado + Sentry configurado (habilitado según DSN) · ✅ Slack webhook configurado y probado (`#todo-brisa-cubana`) · ✅ Health check público `/healthz` con token opcional
-
-> Nota: Sentry envía alertas y eventos de prueba a Slack/correo (ver `pnpm sentry:test-event`). PostHog usa host `https://us.i.posthog.com`; añade automatizaciones en el dashboard para enviar alertas al mismo webhook según necesidad.
+**Última actualización:** 23 de octubre de 2025  
+**Estado actual:** ✅ Logging estructurado en API y web · ✅ Alertas Sentry/PostHog entregadas a `#alerts-operaciones` · ✅ Health checks expuestos (`/healthz`) · ✅ Tableros PostHog y Lighthouse en operación
 
 ---
 
-## 1. Logging Estructurado (Pino)
+## 1. Resumen ejecutivo
 
-### 1.1 Implementación
-
-El proyecto usa **Pino** como logger estructurado para la API.
-
-**Características:**
-
-- Formato JSON en producción para parsing automático
-- Formato pretty con colores en desarrollo
-- Redacción automática de campos sensibles (passwords, tokens, cookies)
-- Niveles: trace, debug, info, warn, error, fatal
-- Timestamps ISO8601
-- Serializers para objetos comunes (req, res, err)
-
-**Archivos clave:**
-
-- `apps/api/src/lib/logger.ts` - Configuración del logger
-- `apps/api/src/middleware/logging.ts` - Middleware HTTP de Hono
-
-### 1.2 Uso en Código
-
-```typescript
-import { logger, authLogger, dbLogger } from "./lib/logger.js";
-
-// Log simple
-logger.info("Operación completada");
-logger.error({ err: error }, "Error al procesar");
-
-// Log con contexto
-logger.info(
-  {
-    userId: "123",
-    action: "create_service",
-    serviceId: "456",
-  },
-  "Usuario creó servicio",
-);
-
-// Logs especializados
-authLogger.info({ userId, role }, "Usuario autenticado");
-dbLogger.debug({ query: "SELECT ..." }, "Query ejecutada");
-```
-
-### 1.3 Logs HTTP Automáticos
-
-El middleware `loggingMiddleware` registra automáticamente:
-
-```json
-{
-  "level": "info",
-  "time": "2025-10-08T12:00:00.000Z",
-  "type": "http_response",
-  "method": "POST",
-  "path": "/api/bookings",
-  "status": 201,
-  "durationMs": 45,
-  "userId": "user-id-123",
-  "msg": "POST /api/bookings 201 45ms"
-}
-```
-
-### 1.4 Campos Redactados
-
-Los siguientes campos se redactan automáticamente con `[REDACTED]`:
-
-- `req.headers.authorization`
-- `req.headers.cookie`
-- `res.headers['set-cookie']`
-- Cualquier campo llamado `password`, `passwordHash`, `token`, `secret`
-
-### 1.5 Telemetría del stream SSE
-
-- `/api/notifications/stream` registra cada conexión con `logger.info` (usuario, `heartbeatInterval`, `streamLimit`, `Last-Event-ID`).
-- Heartbeat (`event: ping`) cada 25 s configurable mediante `NOTIFICATION_STREAM_HEARTBEAT_MS`.
-- El hook `useNotificationStream` añade breadcrumbs (`notifications.stream`) y mensajes `notifications.stream.fallback`/`notifications.stream.event.error` en Sentry.
-- Usa estas métricas para configurar alertas cuando el estado cambie a `polling` o se acumulen reintentos consecutivos.
-
-### 1.6 Checkout público
-
-- El formulario multipaso en `/checkout` emite breadcrumbs Sentry `intent:create:start`, `payment_confirmed`, `payment_failed` y eventos `checkout.intent.created`, `checkout.payment.confirmed`, `checkout.payment.failed`.
-- Errores al crear intents se reportan con `captureException` (`stage: intent:create`). Configura alertas en Sentry para monitorear spikes.
-- Cuando falta `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, se registra `checkout.publishable_key.missing` (nivel warning) para detectar entornos mal configurados.
-- Los endpoints de enlace mágico (`/api/portal/auth/request`/`verify`) registran eventos en logs (`Magic link solicitado para cliente`) y pueden instrumentarse con eventos Sentry adicionales cuando se integre el frontend.
-- El mailer SMTP (`sendPortalMagicLinkEmail`) registra `Magic link email dispatched` cuando el correo se entrega y `Magic link email failed` cuando el proveedor rechaza el envío.
-- Configura una alerta de Sentry con disparo cuando se acumulen ≥3 eventos `checkout.payment.failed` o `portal.booking.action.error` en 15 minutos y redirígela al canal `#alerts-operaciones`. Documenta el enlace del monitor en 1Password y mantenlo actualizado.
-
-### 1.7 Alertas activas (actualizado 20-oct-2025)
-
-- **Sentry Issue Alert – Checkout errores** (`checkout-payment-failed`):
-  - Condición: ≥3 eventos `checkout.payment.failed` en 15 minutos.
-  - Acción actual: email vía `notify_event` (webhook Slack configurado en Vercel, pendiente de conectar en Sentry dashboard).
-  - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:checkout-payment-failed` (registrado en 1Password «Sentry Alerts»).
-- **Sentry Issue Alert – Portal autoservicio** (`portal-booking-action-error`):
-  - Condición: ≥3 eventos `portal.booking.action.error` en 10 minutos.
-  - Acción actual: email a operaciones@brisacubanacleanintelligence.com (webhook Slack disponible, pendiente de configurar en alerta).
-  - URL monitor: `https://sentry.io/organizations/brisa-cubana/issues/?query=alert:portal-booking-action-error`.
-- **Sentry Cron Monitor – Nightly Full E2E** (`nightly-full-e2e-suite`):
-  - Frecuencia esperada: diaria 02:00 UTC (workflow GitHub Actions `nightly.yml`).
-  - Acción actual: email por ausencia del run (webhook Slack disponible para configurar).
-  - Configurado con `sentry-cli monitors update nightly-full-e2e-suite --schedule "0 2 * * *"` (webhook disponible en `SLACK_WEBHOOK_URL`).
-  - Si el script `scripts/check_lighthouse_streak.py` reporta ≥3 fallos consecutivos, abrir incidente y pausar campañas hasta ajustar budgets o landing assets.
-  - Tras cada despliegue a producción, ejecuta `pnpm sentry:test-event` y genera un error controlado en la web (p.ej. activando un feature flag de prueba que lanza `throw new Error("brisa-global-error-check")`) para confirmar que `app/global-error.tsx` captura la excepción en Sentry.
+- **Objetivo:** detectar y responder a incidentes en <15 min (SEV1) y monitorizar la salud comercial (checkout, portal cliente, leads).
+- **Alcance:** API (Hono), frontend (Next.js), pipelines CI/CD, eventos de negocio (checkout, portal) y señales externas (Neon, Stripe, Slack).
+- **Runbook diario:** ver `docs/operations/runbook-daily-monitoring.md`.
+- **Setup técnico completo:** `docs/operations/observability-setup.md`.
+- **Integración Slack:** `docs/operations/slack-integration.md`.
 
 ---
 
-## 2. Monitoreo en Vercel
+## 2. Componentes y responsables
 
-### 2.1 Logs de Runtime
-
-**Acceso:** Vercel Dashboard → Project → Logs
-
-**Filtros útiles:**
-
-```bash
-# Errores 5xx
-status:>=500
-
-# Requests lentas
-duration:>1000
-
-# Errores de autenticación
-"401" OR "403"
-
-# Rate limiting
-"429"
-```
-
-**Exportar logs:**
-
-```bash
-vercel logs --follow
-vercel logs --since=2h
-vercel logs --output=logs.txt
-```
-
-### 2.2 Analytics de Vercel
-
-**Métricas disponibles:**
-
-- Requests por minuto
-- Latencia (p50, p75, p95, p99)
-- Tasa de errores (4xx, 5xx)
-- Uso de bandwidth
-- Edge requests vs serverless
-
-**Health checks supervisados**
-
-- Endpoint público: `https://api.brisacubanacleanintelligence.com/healthz` (o `/api/healthz`). Si la personalización de dominio redirige a `/login`, usar el dominio del proyecto (`https://brisa-cubana-clean-intelligence-api.vercel.app/healthz`) o ajustar las rewrites en Vercel para saltar NextAuth.
-- Seguridad opcional: si se define `HEALTH_CHECK_TOKEN`, enviar `Authorization: Bearer <token>` o `?token=<token>`.
-- Monitoreo sugerido: configurar Vercel, UptimeRobot o BetterStack para solicitar el endpoint cada 1-5 minutos y alertar en caso de `status != pass` o código HTTP ≥ 500.
-- El handler valida conectividad a PostgreSQL (`SELECT 1`) y expone uptime y entorno.
+| Componente                  | Cobertura                                                                               | Responsable principal    | Documentación fuente                                                           |
+| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------ |
+| Logging estructurado (Pino) | API (`apps/api`) + proxy Next.js                                                        | Plataforma               | `apps/api/src/lib/logger.ts`, `apps/api/src/middleware/logging.ts`             |
+| Instrumentación frontend    | Next.js (Sentry, Web Vitals, PostHog, `@vercel/analytics`)                              | Producto                 | `apps/web/instrumentation.ts`, `apps/web/lib/web-vitals.ts`                    |
+| Sentry                      | Issues + performance web/API                                                            | Plataforma               | `docs/operations/observability-setup.md#sentry---monitoreo-de-errores`         |
+| PostHog                     | Funnel comercial + portal cliente                                                       | Producto                 | `docs/product/analytics-dashboard.md`, `docs/product/analytics-events.md`      |
+| Slack alerting              | `#alerts-operaciones`, `#alerts-criticos`, `#alerts-performance`, `#alerts-deployments` | Plataforma / Operaciones | `docs/operations/slack-integration.md`, `docs/operations/alerts.md`            |
+| Vercel logs/analytics       | Despliegues web/API, Web Vitals                                                         | Operaciones              | `docs/operations/deployment.md`, `docs/operations/runbook-daily-monitoring.md` |
+| GitHub Health Monitor       | Workflow `health-monitor.yml` (cada 15 min). SMS/Slack cuando `/healthz` falla.         | Operaciones              | `docs/operations/deployment.md#4-despliegue`                                   |
+| Neon monitoreo              | Performance base de datos                                                               | Plataforma               | `docs/operations/observability-setup.md#3-prisma-query-logs`                   |
+| Dashboards de negocio       | PostHog Funnel + Lighthouse                                                             | Producto                 | `docs/product/analytics-dashboard.md`, `docs/performance/bundle-analysis.md`   |
 
 ---
 
-## 3. Monitoreo de Base de Datos (Neon)
+## 3. Instrumentación y logging
 
-### 3.1 Métricas Neon
+### 3.1 API (Pino)
 
-**Acceso:** Neon Console → Project → Monitoring
+- **Formato:** JSON en producción con redactado automático (`password`, `token`, `authorization`).
+- **Logs HTTP automáticos:** middleware `loggingMiddleware` registra método, ruta, status, duración, `userId`.
+- **Serializadores dedicados:** `authLogger`, `dbLogger` para separar contexto y filtrar ruido.
+- **Ubicación:** `apps/api/src/lib/logger.ts`, `apps/api/src/middleware/logging.ts`.
+- **Referencia:** ver ejemplo de payload y campos en `observability-setup.md#11-logging-estructurado`.
 
----
+### 3.2 Flujos críticos instrumentados
 
-## 4. Analítica Comercial (Plan Fase 2)
+| Flujo                               | Señales capturadas                                                                                                                          | Alertas recomendadas                                                           |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Checkout público (`/checkout`)      | Eventos Sentry (`checkout.payment.failed`, `checkout.payment.confirmed`), PostHog (`checkout_payment_failed`), logs Pino (`Stripe intent`). | Issue alert ≥3 fallos/15 min → `#alerts-operaciones`.                          |
+| Portal cliente (SSE / autoservicio) | Breadcrumbs Sentry (`portal.dashboard.refresh`, `notifications.stream.fallback`), logs API (`Portal booking cancellation processed`).       | Issue alert fallback SSE ≥3 eventos/5 min → `#alerts-operaciones`.             |
+| Lead intake (`/api/leads`)          | Slack webhook (`#leads-operaciones`), PostHog (`lead_submitted`), log inbound UTM.                                                          | Revisar tiempo de respuesta semanal en `docs/operations/lead-followup-sop.md`. |
 
-### 4.1 Estado actual
+> Para ampliar o modificar instrumentación, registrar las decisiones en `docs/product/analytics-events.md` y actualizar las pruebas en `tests/e2e/analytics.spec.ts`.
 
-- Eventos enviados con `@vercel/analytics`:
-  - `cta_request_proposal`, `cta_portal_demo` (landing).
-  - `checkout_started`, `checkout_completed`, `checkout_payment_failed`.
-- Breadcrumbs/Sentry: `checkout.intent.created`, `portal.link.requested`, `portal.link.verify`, `portal.logout`.
-- Información consolidada en `apps/web/lib/marketing-telemetry.ts`.
+### 3.3 Métricas de negocio (eventos PostHog)
 
-### 4.2 Plataforma seleccionada: PostHog Cloud (US)
+- `checkout_started`, `checkout_payment_failed`, `checkout_payment_confirmed`
+- `portal.booking.action.*` (cancel/reschedule), `portal.session.expired`
+- `cta_request_proposal`, `cta_portal_demo`, `lead_submitted`
 
-- Detalle de la decisión en `docs/product/analytics-decision.md`.
-- Variables nuevas:
-  - `NEXT_PUBLIC_POSTHOG_KEY`
-  - `NEXT_PUBLIC_POSTHOG_HOST` (opcional, default `https://us.i.posthog.com`)
-
-### 4.3 Checklist de implementación
-
-1. **Integrar SDK PostHog** en `apps/web` (lazy load) con fallback si la key no está definida (`posthog-js-lite`).
-2. **Normalización de eventos** (`namespace.event`, props `source`, `campaign`, `serviceId`, `customerType`).
-3. **Persistir UTMs** en el telemetry helper y propagar a checkout/portal.
-4. **Dashboard compartido**:
-   - KPI iniciales: `cta → lead`, `lead → checkout`, `checkout → pago`, ratio uso portal.
-   - Responsable: Producto. Añadir enlace en sección 4.4 al publicarlo.
-5. **Alertas PostHog** para spikes de `checkout_payment_failed` → Slack `#producto` (ver rutina abajo).
-6. **QA**: actualizar `docs/qa/regression-checklist.md` para comprobar presencia de `window.posthog` cuando la key esté configurada.
-7. **Export warehouse (opcional)** cuando se superen 100k eventos/mes.
-
-### 4.4 Enlaces
-
-- Dashboard PostHog: https://us.i.posthog.com/project/brisa-cubana/dashboards/funnel-fase2
-- Diccionario de eventos: `docs/product/analytics-events.md`.
-- Reportes Lighthouse: `pnpm exec lhci autorun --config=.lighthouserc.preview.json` (URL `/?lhci=1` desactiva analytics y Speed Insights durante las corridas).
-- Allowlist de advertencias Lighthouse: tras cada ejecución se corre `scripts/verify-lhci-warnings.sh`; falla si aparecen nuevas advertencias distintas a `legacy-javascript`, `render-blocking-insight` o `network-dependency-tree-insight`.
-
-### 4.5 Alertas PostHog
-
-1. En PostHog → **Project settings → Webhooks**, crea un webhook HTTP para Slack (`https://hooks.slack.com/...`) con nombre `slack-product`.
-2. En **Automations → New automation**:
-   - Trigger: `checkout_payment_failed` (environment ≠ development).
-   - Action: `Send webhook` → `slack-product` (payload sugerido en `docs/product/analytics-events.md`).
-   - Guardar y probar con `POSTHOG_API_KEY=... pnpm posthog:test-event checkout_payment_failed`.
-3. **Automatización recurrente** (CLI/GitHub Actions):
-   - Script local: `POSTHOG_API_KEY=... SLACK_WEBHOOK_URL=... pnpm posthog:monitor`.
-   - Workflow programado: `.github/workflows/posthog-monitor.yml` ejecuta el script cada 10 minutos.
-   - Configurar secretos en GitHub → Settings → Secrets → Actions:
-     - `POSTHOG_API_KEY` (token personal con acceso HogQL).
-     - `SLACK_WEBHOOK_URL` (webhook de `#todo-brisa-cubana`).
-   - Registrar cada verificación en `docs/operations/slack-integration.md`.
-4. Documenta la URL del webhook en 1Password (`Brisa Cubana – SaaS / Slack Hooks`).
-
-> **Acción inmediata:** bloquear la decisión de plataforma con Marketing y, tras la evaluación, abrir ticket para implementar el SDK elegido. Documentar cualquier requisito de consentimiento/cookies en `docs/operations/security.md`.
-
-**Métricas clave:**
-
-- Active connections
-- Query duration (p50, p95, p99)
-- Database size
-- Storage usage
-- Compute hours
-
-### 3.2 Prisma Query Logs
-
-**Habilitar en desarrollo:**
-
-```bash
-# apps/api/.env.local
-DATABASE_URL="postgresql://...?connection_limit=10&pool_timeout=20"
-DEBUG="prisma:query"
-```
-
-```typescript
-// En código (mantén la DI consistente)
-import { getPrisma } from "../container.js";
-
-const prisma = getPrisma();
-
-// Habilitar query logging
-prisma.$on("query", (e) => {
-  dbLogger.debug(
-    {
-      query: e.query,
-      params: e.params,
-      duration: e.duration,
-    },
-    "Prisma query executed",
-  );
-});
-```
-
-### 3.3 Slow Query Alerts
-
-**Configurar en Neon Console:**
-
-- Settings → Alerts
-- Query duration > 1000ms (warning)
-- Query duration > 5000ms (critical)
+Definiciones y owners: `docs/product/analytics-events.md`.  
+Dashboard vivo: `docs/product/analytics-dashboard.md` (ID 607007 en PostHog).
 
 ---
 
-## 4. Sentry para Error Tracking
+## 4. Alertas y monitoreo
 
-### 4.1 Dependencias instaladas
+### 4.1 Sentry
 
-```bash
-cd apps/api
-pnpm add @sentry/node @sentry/profiling-node
+- Integración Slack → `#alerts-criticos`, `#alerts-operaciones`, `#alerts-performance`.
+- Reglas mínimas:
+  - Error rate >10 % (5 min) → `#alerts-criticos` + `oncall@`.
+  - New issue / regressed issue → `#alerts-operaciones`.
+  - Latencia p95 >2 s (`transaction.op = http.server`) → `#alerts-performance`.
+- Procedimiento detallado y variables: `docs/operations/observability-setup.md#sentry---monitoreo-de-errores`.
+- Tabla de implementación y evidencias: `observability-setup.md#registro-de-implementación`.
 
-cd ../web
-pnpm add @sentry/nextjs
-```
+### 4.2 PostHog
 
-### 4.2 Configuración API
+- Eventos de prueba: `POSTHOG_API_KEY=... pnpm posthog:test-event checkout_payment_failed`.
+- Automatizaciones → Slack `#alerts-operaciones` (checkout fallido) y `#alerts-performance` (anomalías SSE).
+- Workflow `posthog-monitor.yml` ejecuta `pnpm posthog:monitor` cada 10 minutos (GitHub Actions) y publica anomalías en `#alerts-operaciones`.
+- Métricas de conversión y acciones portal: dashboard `Brisa Cubana · Funnel Comercial`.
+- Configuración y tareas pendientes: `docs/product/analytics-dashboard.md` y `docs/product/analytics-decision.md`.
 
-```typescript
-// apps/api/src/lib/sentry.ts
-import * as Sentry from "@sentry/node";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
+### 4.3 Slack
 
-const dsn = process.env.SENTRY_DSN;
+- Webhook central documentado en `slack-integration.md`.
+- Mensajes de verificación se registran en la tabla del propio documento (última comprobación 23-oct-2025).
+- Triage: reaccionar con `:eyes:` en `#alerts-operaciones` y asignar responsable en `#incident-<fecha>` según `incident-runbook.md`.
 
-if (dsn) {
-  Sentry.init({
-    dsn,
-    environment: process.env.NODE_ENV ?? "development",
-    integrations: [nodeProfilingIntegration()],
-    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-    profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-    sendDefaultPii: true,
-  });
-} else if (process.env.NODE_ENV === "production") {
-  console.warn("SENTRY_DSN not configured, Sentry will not be initialized");
-}
+### 4.4 Vercel, Lighthouse y otros
 
-export { Sentry };
-```
-
-```typescript
-// apps/api/src/app.ts
-import Sentry from "./lib/sentry.js";
-
-// Middleware de error handling
-app.onError((err, c) => {
-  Sentry.captureException(err, {
-    extra: {
-      path: c.req.path,
-      method: c.req.method,
-      userId: c.get("userId"),
-    },
-  });
-
-  logger.error({ err }, "Unhandled error");
-
-  return c.json(
-    {
-      error:
-        process.env.NODE_ENV === "production"
-          ? "Internal server error"
-          : err.message,
-    },
-    500,
-  );
-});
-```
-
-### 4.3 Configuración Web (Next.js)
-
-```bash
-npx @sentry/wizard@latest -i nextjs
-```
-
-Sigue el wizard para configurar:
-
-- `sentry.client.config.ts`
-- `sentry.server.config.ts`
-- `sentry.edge.config.ts`
-
-### 4.4 Reportes CSP en Sentry
-
-- Los encabezados `Report-To` y `Reporting-Endpoints` del proyecto web envían violaciones CSP a `POST /api/security/csp-report`, que reenvía el payload a Sentry con el mensaje `CSP Violation` y la etiqueta `source:csp-report`.
-- Crea un **Saved Search** en Sentry con la consulta `source:csp-report level:warning` y compártelo con el equipo de operaciones.
-- Configura un **Issue Alert** (3 eventos en 10 minutos) hacia `#alerts-operaciones`. Este alertado indica que la política está bloqueando recursos inesperados o se requiere whitelisting controlado.
-- Mantén la política en modo `Report-Only` hasta que no existan falsos positivos durante ≥ 7 días consecutivos; después, cambia el encabezado a `Content-Security-Policy` en `apps/web/vercel.json` y actualiza la documentación.
-- Cada excepción aprobada (nuevo dominio externo) debe anotarse en `docs/operations/security.md` y en la descripción del alert correspondiente.
-
-### 4.5 Alertas Sentry
-
-**Configurar en Sentry Dashboard:**
-
-1. **Error rate spike**
-   - Condición: Errores > 10% en 5 minutos
-   - Notificar: Slack #alerts-prod
-
-2. **New issue**
-   - Condición: Error nunca visto antes
-   - Notificar: Email + Slack
-
-3. **Performance degradation**
-   - Condición: Latencia p95 > 2s
-   - Notificar: Slack #performance
+- Logs rápidos: `vercel logs --prod --scope brisa-cubana --since=2h`.
+- Lighthouse Nightly (`monthly-bundle.yml`) y reportes de bundle (`docs/performance/bundle-analysis.md`).
+- Health check: `https://api.brisacubanacleanintelligence.com/healthz` (token opcional `HEALTH_CHECK_TOKEN`).
+- Runbook diario/semanal: `docs/operations/runbook-daily-monitoring.md`.
 
 ---
 
-## 5. Alertas y métricas de negocio
+## 5. Procedimientos operativos
 
-### 5.1 Integración Sentry ↔ Slack
-
-1. En Sentry, navegar a **Settings → Integrations → Slack → Add Workspace**.
-2. Autorizar el workspace `brisa-cubana` y seleccionar los canales:
-   - `#alerts-prod` para errores críticos (`severity:error`).
-   - `#alerts-performance` para degradaciones de performance.
-3. Crear reglas en **Project Settings → Alerts → Issue Alerts**:
-   - **Portal booking action error:** condición `event.title contains "portal.booking.action.error"` con umbral ≥ 3 eventos en 15 min → Slack `#alerts-prod`.
-   - **Checkout intent failures:** condición `event.title contains "checkout.intent.create"` o `payment_failed` → Slack `#alerts-prod`.
-4. Agregar notificación secundaria por correo al on-call (`operaciones@brisacubanacleanintelligence.com`) para redundancia.
-5. Documentar en 1Password la URL del webhook y el responsable de rotación.
-
-### 5.2 Alertas específicas por flujo
-
-| Flujo          | Evento / métrica                             | Umbral recomendado     | Acción                                                    |
-| -------------- | -------------------------------------------- | ---------------------- | --------------------------------------------------------- |
-| Portal cliente | `portal.session.expired` (Sentry breadcrumb) | ≥ 10 eventos en 10 min | Revisar expiración anticipada de cookies, validar clocks. |
-| Portal cliente | `Magic link email failed` (log API)          | ≥ 1 evento             | Verificar credenciales SMTP.                              |
-| Checkout       | `checkout.payment.failed` (Sentry)           | ≥ 5 eventos en 15 min  | Revisar estado de Stripe, verificar claves y webhooks.    |
-| API            | Latencia P95 (`vercel analytics`)            | > 2 s durante 5 min    | Escalar a ingeniería para investigar queries/prisma.      |
-
-### 5.3 Métricas personalizadas con Pino
-
-```typescript
-import { logBusinessEvent } from "./lib/logger.js";
-
-// Ejemplo: Rastrear creación de reservas
-logBusinessEvent("booking_created", {
-  bookingId: booking.id,
-  serviceId: booking.serviceId,
-  finalPrice: booking.finalPrice,
-  customerId: booking.customerId,
-  scheduledFor: booking.scheduledFor,
-});
-
-// Ejemplo: Login exitoso
-logBusinessEvent("user_login", {
-  userId: user.id,
-  role: user.role,
-  email: user.email,
-});
-
-// Ejemplo: Acción portal
-logBusinessEvent("portal_action", {
-  bookingId: booking.id,
-  action: "reschedule",
-  customerId: booking.customerId,
-});
-```
-
-Enviar estos eventos a un collector (Datadog, New Relic o Grafana Loki) permite generar dashboards de negocio sin duplicar lógica.
-
-### 5.4 Dashboards recomendados
-
-- **Grafana Cloud (Loki + Prometheus):** Ingestar logs de Pino y visualizar `booking_created`, `portal_action`, `checkout.payment.confirmed`.
-- **Vercel Analytics:** Web Vitals por tipo de página (`pageType`), distribución de Core Web Vitals y tasa de errores.
-- **Neon Monitoring:** Queries lentas, conexiones activas y uso de almacenamiento.
-
-### 5.5 KPIs mínimos a monitorear
-
-| Métrica                                                               | Fuente                       | Objetivo                                              |
-| --------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------- |
-| Conversiones checkout (`checkout.payment.confirmed`)                  | Logs Pino / Sentry           | ≥ 95% éxito transacciones modo test.                  |
-| Cancelaciones portal (`portal.booking.cancelled`)                     | Logs Pino                    | Correlacionar con notificaciones `BOOKING_CANCELLED`. |
-| Tiempo medio de confirmación (creación booking → confirmación portal) | Logs Pino + Vercel Analytics | < 2 minutos en horario laboral.                       |
-| Latencia API `/api/portal/bookings` P95                               | Vercel Analytics             | < 500 ms.                                             |
-| Tasa de correos fallidos                                              | Logs API                     | 0 fallos; alerta inmediata ante ≥1.                   |
-
-### 5.6 Procedimiento para habilitar alertas (ejecutar una vez)
-
-1. **Conectar Slack a Sentry**
-   - Sentry → _Settings → Integrations → Slack → Add Workspace_.
-   - Autoriza el workspace `brisa-cubana` y selecciona:
-     - `#brisa-critical` (errores críticos / tasa de error).
-     - `#brisa-alerts` (issues nuevos y regresiones).
-     - `#brisa-performance` (latencia / rendimiento).
-2. **Crear reglas de issues**
-   - _When a new issue is created_ → Slack `#brisa-alerts`, email `operaciones@brisacubanacleanintelligence.com`.
-   - _When issue state changes to regressed_ → Slack `#brisa-alerts`.
-3. **Crear alertas métricas**
-   - Error rate > 5 % (dataset Transactions, env Production) → Slack `#brisa-critical`, email `oncall@brisacubanacleanintelligence.com`.
-   - Latencia P95 > 2000 ms (`transaction.op = http.server`) → Slack `#brisa-performance`.
-   - `message:"notifications.stream.fallback"` ≥ 3 eventos / 5 min → Slack `#brisa-alerts`.
-4. **Validación**
-   - Ejecutar `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación Slack"` y confirmar notificación en Slack.
-   - Adjuntar captura o enlace a la regla en `docs/operations/alerts.md`.
-5. **Actualizar tabla 5.7** con la fecha y responsable que completó cada integración.
-
-### 5.7 Registro de implementación (completar al habilitar)
-
-| Fecha       | Responsable | Integración                                  | Evidencia |
-| ----------- | ----------- | -------------------------------------------- | --------- |
-| _Pendiente_ | _Asignar_   | Slack ↔ Sentry (issues nuevos)              |           |
-| _Pendiente_ | _Asignar_   | Error rate > 5 %                             |           |
-| _Pendiente_ | _Asignar_   | Latencia P95 > 2 s                           |           |
-| _Pendiente_ | _Asignar_   | Fallback SSE `notifications.stream.fallback` |           |
-| _Pendiente_ | _Asignar_   | KPIs de negocio en Grafana/Loki              |           |
-
-### 5.8 Alertas PostHog (pendiente)
-
-1. Crear alerta de funnel `checkout_payment_failed` en PostHog → enviar a webhook Slack `#producto` (configurar en _Project → Alerts_).
-2. Duplicar la alerta para `portal.booking.action.error` con umbral ≥ 3 eventos en 15 minutos.
-3. Guardar los enlaces a las alertas en 1Password (`Brisa Cubana – SaaS`) y documentarlos en la tabla 5.7.
-4. Verificar recepción disparando eventos desde staging (`pnpm exec stripe trigger payment_intent.payment_failed` o acciones en el portal).
-   - También puedes usar `POSTHOG_API_KEY=... pnpm posthog:test-event checkout_payment_failed` para validar desde la CLI.
-
-## 6. Health Checks
-
-### 6.1 Endpoint de Health
-
-**URL:** `https://api.brisacubanacleanintelligence.com/api/health`
-
-**Response exitoso:**
-
-```json
-{
-  "status": "pass",
-  "checks": {
-    "uptime": 12345,
-    "environment": "production",
-    "database": "ok"
-  }
-}
-```
-
-**Response fallido:**
-
-```json
-{
-  "status": "fail",
-  "checks": {
-    "uptime": 12345,
-    "environment": "production",
-    "database": "error"
-  },
-  "error": "Connection timeout"
-}
-```
-
-### 6.2 Monitoreo Externo
-
-**Herramientas recomendadas:**
-
-- **UptimeRobot** (free tier): Ping cada 5 minutos
-- **Better Uptime** (paid): Monitoreo avanzado con status page
-- **Vercel Monitoring** (incluido): Uptime automático
-
-**Configuración UptimeRobot:**
-
-1. Monitor type: HTTP(s)
-2. URL: `https://api.brisacubanacleanintelligence.com/api/health`
-3. Monitoring interval: 5 minutes
-4. Keyword: `"status":"pass"`
-5. Alert contacts: Email, Slack
+| Frecuencia | Paso                                                                                 | Evidencia                                                |
+| ---------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| Diario     | Revisar alertas Sentry/PostHog (`#alerts-operaciones`, `#alerts-criticos`).          | Checklist en `runbook-daily-monitoring.md` §2.           |
+| Diario     | Validar collector del log drain Vercel (`/api/logdrain`).                            | `docs/operations/deployment.md#22-log-drains-en-vercel`. |
+| Semanal    | Descargar artefactos de `Nightly Full E2E` y Lighthouse.                             | `runbook-daily-monitoring.md` §3.                        |
+| Semanal    | Revisar dashboard comercial PostHog y compartir resumen en `#alerts-operaciones`.    | `analytics-dashboard.md`.                                |
+| Mensual    | Ejecutar `pnpm analyze:web` y actualizar `docs/performance/bundle-analysis.md`.      | Workflow `monthly-bundle.yml`.                           |
+| Trimestral | Rotar `SLACK_WEBHOOK_URL`, validar `SENTRY_AUTH_TOKEN`, revisar retención PITR Neon. | `slack-integration.md` §5, `backup-recovery.md`.         |
 
 ---
 
-## 7. Runbook de Incidentes
+## 6. KPIs y umbrales de alerta
 
-### 7.1 API No Responde
+| Métrica / señal                                  | Umbral                         | Destino Slack                 | Acción sugerida                                              |
+| ------------------------------------------------ | ------------------------------ | ----------------------------- | ------------------------------------------------------------ |
+| `checkout.payment.failed` (PostHog/Sentry)       | ≥3 eventos en 15 min           | `#alerts-operaciones`         | Revisar estado Stripe, reintentar pago, notificar Marketing. |
+| SSE fallback (`notifications.stream.fallback`)   | ≥3 eventos en 5 min            | `#alerts-operaciones`         | Verificar conectividad Vercel / proxies, reiniciar stream.   |
+| Error rate global Sentry                         | >10 % en 5 min                 | `#alerts-criticos`            | Escalar a on-call, evaluar rollback.                         |
+| Latencia p95 `/api/portal/bookings`              | >500 ms sostenido 10 min       | `#alerts-performance`         | Revisar consultas Prisma, indices Neon.                      |
+| Tiempo de respuesta leads (`#leads-operaciones`) | >120 min (promedio semanal)    | `#leads-operaciones`          | Coordinar follow-up con Marketing/Comercial.                 |
+| Fuga `Magic link email failed` (logs API)        | ≥1 evento                      | `#alerts-operaciones`         | Validar credenciales SMTP / SendGrid.                        |
+| Health check `/healthz`                          | Código ≠200 o `status != pass` | Monitor externo (BetterStack) | Reintentar despliegue o investigar dependencia caída.        |
 
-**Síntomas:**
-
-- Health check falla
-- 502/504 en Vercel
-- Timeouts en frontend
-
-**Diagnóstico:**
-
-```bash
-# 1. Verificar logs de Vercel
-vercel logs --since=30m
-
-# 2. Verificar deployment reciente
-vercel ls
-
-# 3. Verificar Neon status
-curl https://api.brisacubanacleanintelligence.com/api/health
-
-# 4. Verificar conexiones activas en Neon
-# Neon Console → Monitoring → Active connections
-```
-
-**Resolución:**
-
-- Si deployment reciente: Rollback (`vercel rollback`)
-- Si Neon down: Esperar restauración, notificar usuarios
-- Si rate limit en Neon: Escalar plan o reducir tráfico
-
-### 7.2 Tasa de Errores Alta
-
-**Síntomas:**
-
-- Sentry alerta de spike de errores
-- Logs muestran muchos 5xx
-
-**Diagnóstico:**
-
-```bash
-# 1. Identificar patrón de errores
-vercel logs --since=1h | grep "500\|502\|503"
-
-# 2. Verificar errores específicos en Sentry
-# Sentry Dashboard → Issues → Recent
-
-# 3. Verificar cambios recientes
-git log --since="1 hour ago"
-```
-
-**Resolución:**
-
-- Si error específico: Hotfix y deploy
-- Si error de base de datos: Verificar queries lentas, índices
-- Si error de memoria: Escalar serverless function size
-
-### 7.3 Rate Limiting Excesivo
-
-**Síntomas:**
-
-- Usuarios reportan "Too many requests"
-- Logs muestran muchos 429
-
-**Diagnóstico:**
-
-```bash
-# 1. Verificar logs de rate limit
-vercel logs --since=1h | grep "429"
-
-# 2. Identificar IPs afectadas
-# Logs → Filter por 429 → Ver req.headers['x-forwarded-for']
-```
-
-**Resolución:**
-
-- Si ataque: Bloquear IPs en Vercel settings
-- Si límite muy bajo: Ajustar `LOGIN_RATE_LIMIT` en env vars
-- Si bot legítimo: Whitelist IP o añadir `API_TOKEN`
+Actualiza esta tabla cuando se modifiquen los umbrales en Sentry/PostHog o se introduzcan nuevos flujos críticos.
 
 ---
 
-## 8. Próximos Pasos
+## 7. Documentos relacionados
 
-### Prioridad ALTA
-
-- [ ] Implementar Sentry en API y Web
-- [ ] Configurar alertas en Sentry (error rate, new issues)
-- [ ] Setup UptimeRobot para health checks
-- [ ] Documentar playbooks en Notion/Confluence
-
-### Prioridad MEDIA
-
-- [ ] Dashboard Grafana con métricas de negocio
-- [ ] Alertas proactivas (latencia p99, database size)
-- [ ] Tests de carga periódicos (k6, Artillery)
-- [ ] Logs estructurados en frontend (Console API + Sentry)
-
-### Prioridad BAJA
-
-- [ ] Distributed tracing (OpenTelemetry)
-- [ ] Performance profiling automático
-- [ ] Synthetic monitoring (Checkly)
-- [ ] Custom dashboard para stakeholders
+- `docs/operations/observability-setup.md` – Procedimiento técnico detallado (Sentry, PostHog, Neon, Slack).
+- `docs/operations/slack-integration.md` – Webhooks, taxonomía de canales y verificación.
+- `docs/operations/alerts.md` – Regla por severidad con pasos de configuración.
+- `docs/operations/runbook-daily-monitoring.md` – Checklist diario/semanal.
+- `docs/product/analytics-dashboard.md` – Dashboards PostHog.
+- `docs/product/analytics-events.md` – Diccionario de eventos y ownership.
+- `docs/performance/bundle-analysis.md` – Historial de análisis de bundles.
+- `docs/operations/incident-runbook.md` – Flujo completo de manejo de incidentes.
 
 ---
 
-## 9. Referencias
-
-- [Pino Documentation](https://getpino.io/)
-- [Sentry Node.js Guide](https://docs.sentry.io/platforms/node/)
-- [Vercel Observability](https://vercel.com/docs/observability)
-- [Neon Monitoring](https://neon.com/docs/manage/monitoring)
-- [Next.js Logging Best Practices](https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation)
+**Propietario:** Equipo Plataforma  
+**Contacto operativo:** `@oncall-platform` en Slack  
+**Próxima revisión sugerida:** 31 de octubre de 2025

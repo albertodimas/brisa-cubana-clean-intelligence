@@ -1,0 +1,193 @@
+name: Vercel Preview Deployment
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch o tag a desplegar (por defecto, main)"
+        required: false
+        default: "main"
+
+concurrency:
+  group: vercel-preview-${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview-deployment:
+    name: Deploy to Vercel Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: preview-web
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+
+      - name: Add pnpm to PATH
+        run: |
+          echo "$PNPM_HOME" >> "$GITHUB_PATH"
+          pnpm --version
+
+      - name: Refuerzo pnpm global
+        run: |
+          sudo npm install -g pnpm@10.18.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.13.0'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validar pnpm en PATH
+        run: |
+          pnpm --version
+          which pnpm
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+        working-directory: apps/api
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build applications
+        run: pnpm build
+
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@48.3.0
+
+      - name: Sincronizar configuración Vercel API
+        working-directory: apps/api
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          export PATH="$PNPM_HOME:$PATH"
+          vercel pull --yes --environment=preview --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Build API (prebuilt preview)
+        working-directory: apps/api
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          export PNPM_BIN="$(command -v pnpm)"
+          mkdir -p node_modules/pnpm/bin node_modules/.bin
+          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
+          chmod +x node_modules/pnpm/bin/pnpm.cjs
+          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
+          vercel build --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Sincronizar configuración Vercel Web
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          export PATH="$PNPM_HOME:$PATH"
+          vercel pull --yes --environment=preview --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Build Web (prebuilt preview)
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          export PNPM_BIN="$(command -v pnpm)"
+          mkdir -p node_modules/pnpm/bin node_modules/.bin
+          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
+          chmod +x node_modules/pnpm/bin/pnpm.cjs
+          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
+          vercel build --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Deploy Web to Vercel Preview
+        id: deploy-web
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --yes --force --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "### 🌐 Web Preview Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
+          rm -rf .vercel/output
+
+      - name: Deploy API to Vercel Preview
+        id: deploy-api
+        working-directory: apps/api
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --yes --force --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "### 🚀 API Preview Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
+          rm -rf .vercel/output
+
+      - name: Comment PR with deployment URLs
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!context.payload.pull_request) {
+              core.info('No pull request context available; skipping comment.');
+              return;
+            }
+
+            const webUrl = '${{ steps.deploy-web.outputs.url }}';
+            const apiUrl = '${{ steps.deploy-api.outputs.url }}';
+
+            const comment = `## 🚀 Preview Deployment Ready!
+
+            | Application | Preview URL |
+            |-------------|-------------|
+            | 🌐 Web | [${webUrl}](${webUrl}) |
+            | 🔧 API | [${apiUrl}](${apiUrl}) |
+
+            **Commit**: ${context.sha.substring(0, 7)}
+            **Deployed by**: GitHub Actions (Vercel CLI)
+
+            ---
+
+            ✅ Lint, Typecheck, and Tests passed before deployment.
+            `;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

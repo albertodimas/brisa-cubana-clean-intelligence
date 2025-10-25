@@ -14,6 +14,7 @@ import {
 } from "../services/magic-link-mailer.js";
 import { authenticatePortal } from "../middleware/auth.js";
 import { resolveCookiePolicy } from "../lib/cookies.js";
+import { createRateLimiter } from "../lib/rate-limiter.js";
 
 const router = new Hono();
 
@@ -33,6 +34,25 @@ const MAGIC_LINK_TTL_MINUTES = Number.parseInt(
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
+
+const portalRequestRateLimiter = createRateLimiter({
+  limit: Number(process.env.PORTAL_MAGIC_LINK_RATE_LIMIT ?? "3"),
+  windowMs: Number(process.env.PORTAL_MAGIC_LINK_WINDOW_MS ?? "900000"),
+  errorMessage:
+    "Demasiadas solicitudes de enlace mágico. Intenta nuevamente más tarde.",
+  identifier: "portal-magic-link-request",
+});
+
+const portalVerifyRateLimiter = createRateLimiter({
+  limit: Number(process.env.PORTAL_MAGIC_LINK_VERIFY_RATE_LIMIT ?? "5"),
+  windowMs: Number(process.env.PORTAL_MAGIC_LINK_VERIFY_WINDOW_MS ?? "900000"),
+  errorMessage:
+    "Demasiados intentos de verificación. Intenta nuevamente más tarde.",
+  identifier: "portal-magic-link-verify",
+});
+
+router.use("/request", portalRequestRateLimiter);
+router.use("/verify", portalVerifyRateLimiter);
 
 router.post("/request", async (c) => {
   const body = await c.req.json().catch(() => null);

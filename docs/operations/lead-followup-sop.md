@@ -1,5 +1,7 @@
 # SOP · Gestión de Leads Marketing → Operaciones
 
+**Última actualización:** 23 de octubre de 2025
+
 ## Objetivo
 
 Garantizar que cada lead captado desde campañas digitales reciba seguimiento en <2 horas hábiles y que el estado quede registrado hasta su cierre (ganado/perdido).
@@ -12,7 +14,7 @@ Garantizar que cada lead captado desde campañas digitales reciba seguimiento en
 
 ## Flujo resumido
 
-1. Lead envía formulario / DM → webhook envía datos a Slack `#brisa-alerts` y a Google Sheet `Leads`.
+1. Lead envía formulario / DM → webhook envía datos a Slack `#leads-operaciones` y a Google Sheet `Leads`.
 2. CO asigna lead (reacciona en Slack con emoji 👋 y escribe su nombre en la columna `follow_up_owner`).
 3. CO contacta al lead (respuesta inicial plantilla).
 4. Una vez agendado el diagnóstico, CO actualiza `status = Scheduled` y registra fecha/hora en `notes`.
@@ -48,7 +50,7 @@ Garantizar que cada lead captado desde campañas digitales reciba seguimiento en
   - Conversion Rate (Clicks → Leads) mínimo 8 %.
   - Tiempo promedio de respuesta < 120 min.
   - % leads por servicio (Turnover, Deep Clean, Amenity Refresh).
-- Compartir resultados en `#brisa-alerts` y en reunión semanal.
+- Compartir resultados en `#leads-operaciones` y en reunión semanal.
 
 ### 5. Checklist rápido
 

@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/project-pipeline.yml
     secrets: inherit
     with:
+      environment-name: preview-web
       job-name: Main branch safety checks
       checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
       run-secret-scan: true
@@ -25,3 +26,200 @@ jobs:
       playwright-report-name: playwright-report-critical
       playwright-retention-days: 7
       upload-playwright-only-on-failure: true
+
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production-web
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.13.0'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Add pnpm to PATH
+        run: |
+          echo "$PNPM_HOME" >> "$GITHUB_PATH"
+
+      - name: Refuerzo pnpm global
+        run: |
+          sudo npm install -g pnpm@10.18.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validar pnpm en PATH
+        run: |
+          pnpm --version
+          command -v pnpm
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+        working-directory: apps/api
+
+      - name: Build applications (prebuild)
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
+      - name: Instalar Vercel CLI
+        run: pnpm add --global vercel@48.3.0
+
+      - name: Sincronizar configuración Vercel API
+        working-directory: apps/api
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          export PATH="$PNPM_HOME:$PATH"
+          vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Build API (prebuilt)
+        working-directory: apps/api
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          export PNPM_BIN="$(command -v pnpm)"
+          mkdir -p node_modules/pnpm/bin node_modules/.bin
+          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
+          chmod +x node_modules/pnpm/bin/pnpm.cjs
+          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
+          vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Deploy API to Vercel Production
+        id: deploy-api
+        working-directory: apps/api
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          {
+            echo "### 🚀 API Production Deployment"
+            echo ""
+            echo "- URL: $URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -rf .vercel/output
+
+      - name: Sincronizar configuración Vercel Web
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          export PATH="$PNPM_HOME:$PATH"
+          vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Build Web (prebuilt)
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          export PNPM_BIN="$(command -v pnpm)"
+          mkdir -p node_modules/pnpm/bin node_modules/.bin
+          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
+          chmod +x node_modules/pnpm/bin/pnpm.cjs
+          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
+          vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Deploy Web to Vercel Production
+        id: deploy-web
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          {
+            echo ""
+            echo "### 🌐 Web Production Deployment"
+            echo ""
+            echo "- URL: $URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -rf .vercel/output
+
+      - name: Smoke test production endpoints
+        env:
+          API_HEALTH_URL: ${{ steps.deploy-api.outputs.url }}/healthz
+          WEB_HEALTH_URL: ${{ steps.deploy-web.outputs.url }}/healthz
+        run: |
+          set -euo pipefail
+          echo "ℹ️  Verificando $API_HEALTH_URL"
+          curl -fsS --retry 3 --retry-delay 2 "$API_HEALTH_URL" >/dev/null
+          echo "ℹ️  Verificando $WEB_HEALTH_URL"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --retry 3 --retry-delay 2 "$WEB_HEALTH_URL")
+          if [ "$STATUS" -ge 400 ]; then
+            echo "❌ Web health check failed with status $STATUS"
+            exit 1
+          fi
+
+      - name: Export Slack webhook secret
+        id: slack-secret
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" >> "$GITHUB_ENV"
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install jq (for Slack payloads)
+        if: ${{ steps.slack-secret.outputs.present == 'true' }}
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Post deploy Slack notification
+        if: ${{ steps.slack-secret.outputs.present == 'true' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+          WEB_URL: ${{ steps.deploy-web.outputs.url }}
+          API_URL: ${{ steps.deploy-api.outputs.url }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          PAYLOAD=$(jq -n --arg web "$WEB_URL" --arg api "$API_URL" --arg commit "$COMMIT" --arg time "$DEPLOY_TIME" '{
+            text: "🚀 *Deploy completado*",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: "*Deploy completado*\n• Web: <\($web)|\($web)>\n• API: <\($api)|\($api)>\n• Commit: `<\($commit)>`\n• Momento (UTC): \($time)"
+                }
+              }
+            ]
+          }')
+          curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
+      - name: Audit recent Vercel deployments
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          {
+            echo ""
+            echo "### 📊 Vercel deployment audit"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          LIMIT=5 scripts/report-vercel-deployments.sh >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          LIMIT=5 scripts/report-vercel-deployments.sh apps/api >> "$GITHUB_STEP_SUMMARY"

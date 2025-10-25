@@ -1,5 +1,6 @@
 # Entorno Staging – Brisa Cubana Clean Intelligence
 
+**Última actualización:** 23 de octubre de 2025  
 **Objetivo:** Proveer un espacio intermedio entre desarrollo local y producción para validar integraciones (Stripe, portal cliente, checkout) con datos realistas sin arriesgar clientes reales.
 
 ---
@@ -56,7 +57,7 @@
 - [ ] E2E (`pnpm test:e2e:critical`) en staging.
 - [ ] Validación manual portal (enlace mágico + acciones).
 - [ ] Pago Stripe test → webhook `checkout.session.completed`.
-- [ ] Alertas Sentry ↔ Slack operativas (reglas replicadas en ambiente staging o canal dedicado `#brisa-staging`).
+- [ ] Alertas Sentry ↔ Slack operativas (reglas replicadas en ambiente staging o canal dedicado `#alerts-staging`).
 - [ ] Informe de QA registrado (enlace a resultados / capturas).
 
 Mantén este documento sincronizado con cualquier cambio en infraestructura. Añade responsables y enlaces reales una vez aprovisionado el entorno.

@@ -1,7 +1,7 @@
 # Observabilidad y Monitoreo - Configuración Completa
 
-**Última actualización:** 20 de octubre, 2025
-**Estado:** ✅ Proyectos Sentry creados | ⏳ Integración Slack pendiente (webhook sin configurar)
+**Última actualización:** 23 de octubre de 2025
+**Estado:** ✅ Proyectos Sentry configurados · ✅ Integración Slack activa (`#alerts-operaciones`) · ✅ PostHog enlazado
 
 ---
 
@@ -32,6 +32,25 @@ Se han creado **dos proyectos** en Sentry para separar errores de frontend y bac
 - **Equipo:** `independiente-entusiasta`
 - **URL Web:** https://sentry.io/organizations/brisacubana/projects/brisa-cubana-web/
 - **URL API:** https://sentry.io/organizations/brisacubana/projects/brisa-cubana-api/
+
+### Arquitectura y características
+
+- **Frontend (Next.js 15)**
+  - SDK: `@sentry/nextjs` (cliente, servidor y edge).
+  - Funcionalidades activas: captura automática de errores, trazas (10 %), Session Replay (10 % base / 100 % en errores), perfiles (10 %).
+  - Integraciones clave: `instrumentation.ts` (`register`, `onRequestError`), `withSentryConfig` en `next.config.ts` para ocultar source maps.
+
+- **Backend (Hono + Node.js)**
+  - SDK: `@sentry/node` + `@sentry/profiling-node`.
+  - Se captura contexto de petición (`req.method`, `req.path`, `userId`), errores ≥500 y spans de Prisma.
+  - `sendDefaultPii` habilitado únicamente en producción; los headers sensibles se limpian en `beforeSend`.
+
+- **Sample rates**
+  - `tracesSampleRate`: 0.1 en producción, 1.0 en otros entornos.
+  - `profilesSampleRate`: 0.1 en producción (API) / 0.0 en el cliente (configurable).
+  - `replaysSessionSampleRate`: 0.1 (configurado en las plantillas de Next.js).
+
+- **Alertas**: ver `docs/operations/alerts.md` y la tabla 5.7 más abajo para responsables/asignaciones.
 
 ### Variables de Entorno
 
@@ -87,7 +106,7 @@ Se crearon reglas básicas que envían correo mediante la acción legacy `notify
 
 #### Próximos pasos
 
-- **Integrar Slack:** Cuando el webhook esté disponible, edita cada regla en Sentry UI y agrega la acción “Send a notification to Slack” (canal `#alerts`).
+- **Integrar Slack:** Cuando el webhook esté disponible, edita cada regla en Sentry UI y agrega la acción “Send a notification to Slack” (canal `#alerts-operaciones`).
 - **Ajustar umbrales:** Revisa periódicamente los thresholds según tráfico real.
 - **Dueños de issues:** Considera habilitar la acción “Send a notification to Issue Owners” una vez definido el modelo de ownership.
 
@@ -130,13 +149,17 @@ PostHog puede enviar alertas a Slack cuando se detectan anomalías o se cumplen 
 4. Configura eventos a enviar
 5. Valida con `SLACK_WEBHOOK_URL=<url> scripts/test-slack-webhook.sh "🧪 Observabilidad configurada"`
 
+> El workflow automatizado `posthog-monitor.yml` consume los secretos `POSTHOG_API_KEY` y `SLACK_WEBHOOK_URL` desde GitHub Actions. Asegúrate de definirlos en **Settings → Secrets and variables → Actions** antes de habilitar la programación cada 10 minutos.
+
 ---
 
 ## Slack - Alertas y Notificaciones
 
-### 🚨 **ACCIÓN REQUERIDA: Crear Webhook de Slack**
+> Para la guía operativa completa consulta `docs/operations/slack-integration.md`. Este apartado resume únicamente los pasos técnicos esenciales.
 
-Para que Sentry y PostHog puedan enviar alertas, necesitas crear un **Incoming Webhook** en Slack:
+### 🚨 **Webhook operativo**
+
+Existe un **Incoming Webhook** activo (`SLACK_WEBHOOK_URL`, canal `#alerts-operaciones`). En caso de rotarlo:
 
 #### **Pasos para crear el Webhook:**
 
@@ -148,9 +171,9 @@ Para que Sentry y PostHog puedan enviar alertas, necesitas crear un **Incoming W
 3. **Activa Incoming Webhooks:**
    - En el menú lateral: **"Incoming Webhooks"**
    - Toggle **"Activate Incoming Webhooks"** → ON
-4. **Crea un nuevo webhook:**
+4. **Crea un nuevo webhook (si es necesario):**
    - Click **"Add New Webhook to Workspace"**
-   - Selecciona canal: `#alerts` (o créalo si no existe)
+   - Selecciona canal: `#alerts-operaciones` (o créalo si no existe)
    - Click **"Allow"**
 5. **Copia la Webhook URL:**
    - Formato: `https://hooks.slack.com/services/T123ABC/B456DEF/xyz789abc`
@@ -160,10 +183,19 @@ Para que Sentry y PostHog puedan enviar alertas, necesitas crear un **Incoming W
 
 Crea estos canales en Slack para organizar alertas:
 
-- **#alerts** - Errores críticos de Sentry
-- **#monitoring** - Métricas y health checks
-- **#deployments** - Notificaciones de CI/CD
-- **#product-analytics** - Insights de PostHog
+- **#alerts-operaciones** - Errores críticos y nuevos issues
+- **#alerts-criticos** - Escalaciones SEV0/SEV1
+- **#alerts-performance** - Métricas y health checks
+- **#alerts-deployments** - Notificaciones de CI/CD
+- **#leads-operaciones** - Leads entrantes desde la landing
+
+### Registro de implementación
+
+| Fecha (UTC)          | Responsable | Integración / alcance                                                       | Evidencia documentada                                                                  |
+| -------------------- | ----------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 2025-10-23 14:05 UTC | Plataforma  | Sentry issue alert `checkout-payment-failed` → `#alerts-operaciones`        | Evento `pnpm sentry:test-event` con mensaje “Webhook verification” recibido en Slack.  |
+| 2025-10-23 14:12 UTC | Producto    | Sentry metric alert `notifications.stream.fallback` → `#alerts-operaciones` | Regla `Portal SSE fallback` activada en Sentry (Alerts › portal-sse-fallback).         |
+| 2025-10-23 14:20 UTC | Plataforma  | Workflow `posthog-monitor.yml` ejecutando `pnpm posthog:monitor` → Slack    | GitHub Actions run `posthog-monitor.yml` #1 confirmó mensaje en `#alerts-operaciones`. |
 
 ### Configurar Sentry → Slack
 
@@ -175,7 +207,7 @@ Una vez tengas la Webhook URL:
 4. En cada proyecto (web y api):
    - Ve a **Settings** → **Alerts**
    - Edita las alertas creadas
-   - En **"Then perform these actions"** → **"Send notification to"** → Selecciona `#alerts`
+   - En **"Then perform these actions"** → **"Send notification to"** → Selecciona `#alerts-operaciones`
 
 ### Configurar PostHog → Slack
 
@@ -399,37 +431,34 @@ curl -X POST YOUR_SLACK_WEBHOOK_URL \
 
 - [x] Proyectos creados (web + api)
 - [x] DSN obtenidos
-- [ ] Variables de entorno configuradas en Vercel
-- [ ] SDK instalado en apps/web
-- [ ] SDK instalado en apps/api
-- [ ] Alertas configuradas
-- [ ] Integración con Slack
+- [x] Variables de entorno configuradas en Vercel (Dev/Preview/Prod)
+- [x] SDK instalado en `apps/web`
+- [x] SDK instalado en `apps/api`
+- [x] Alertas configuradas y enlazadas a Slack
+- [x] Integración con Slack (`#alerts-operaciones`, `#alerts-criticos`, `#alerts-performance`)
 
-### PostHog ⏳
+### PostHog ✅
 
-- [ ] API Key obtenida
-- [ ] Variables de entorno configuradas
-- [ ] Webhooks configurados
-- [ ] Eventos clave definidos
+- [x] API Key obtenida y almacenada en 1Password
+- [x] Variables de entorno configuradas en Vercel/GitHub
+- [x] Webhooks configurados (Slack `#alerts-operaciones`)
+- [x] Eventos clave definidos (ver `docs/product/analytics-events.md`)
 
-### Slack ⏳
+### Slack ✅
 
-- [ ] Webhook URL obtenida
-- [ ] Canales creados (#alerts, #monitoring)
-- [ ] Integración Sentry configurada
-- [ ] Integración PostHog configurada
-- [ ] Webhook testeado
+- [x] Webhook URL vigente (`SLACK_WEBHOOK_URL`)
+- [x] Canales creados (`#alerts-operaciones`, `#alerts-performance`, `#alerts-deployments`, `#leads-operaciones`)
+- [x] Integración Sentry configurada
+- [x] Integración PostHog configurada
+- [x] Webhook testeado (último check 23-oct-2025)
 
 ---
 
 ## Próximos Pasos
 
-1. **Urgente:** Crear Slack Webhook siguiendo instrucciones arriba
-2. Configurar variables de entorno en Vercel (web y api)
-3. Instalar SDKs de Sentry en ambas apps
-4. Configurar alertas en Sentry
-5. Testear todas las integraciones
-6. Documentar runbook de respuesta a incidentes
+1. Revisar y, si es necesario, ajustar umbrales de Sentry/PostHog el 30-oct-2025; registrar cualquier cambio adicional en la tabla de implementación.
+2. (Completo 23-oct-2025) Añadir panel de seguimiento del workflow `posthog-monitor.yml` al dashboard PostHog ejecutando `POSTHOG_API_KEY=<clave> pnpm posthog:sync-dashboard`; el insight generado (ID 3796012) quedó documentado en `docs/product/analytics-dashboard.md`.
+3. Revisar retención de datos en PostHog (plan Starter) antes del 30-nov-2025.
 
 ---
 
@@ -442,5 +471,5 @@ curl -X POST YOUR_SLACK_WEBHOOK_URL \
 
 ---
 
-**Contacto:** Alberto Dimas (albertodimasmorazaldivar@gmail.com)
-**Última revisión:** 2025-10-20
+**Contacto:** Equipo Plataforma (`@oncall-platform`)
+**Última revisión:** 2025-10-23

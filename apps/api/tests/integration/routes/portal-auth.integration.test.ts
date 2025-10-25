@@ -121,6 +121,10 @@ describe("Portal auth routes", () => {
     process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
     process.env.DATABASE_URL_UNPOOLED =
       "postgresql://test:test@localhost:5432/test";
+    process.env.PORTAL_MAGIC_LINK_RATE_LIMIT = "3";
+    process.env.PORTAL_MAGIC_LINK_WINDOW_MS = "1000";
+    process.env.PORTAL_MAGIC_LINK_VERIFY_RATE_LIMIT = "5";
+    process.env.PORTAL_MAGIC_LINK_VERIFY_WINDOW_MS = "1000";
 
     vi.resetModules();
     const containerModule = await import("../../../src/container.js");
@@ -141,6 +145,10 @@ describe("Portal auth routes", () => {
     delete process.env.MAGIC_LINK_TTL_MINUTES;
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_URL_UNPOOLED;
+    delete process.env.PORTAL_MAGIC_LINK_RATE_LIMIT;
+    delete process.env.PORTAL_MAGIC_LINK_WINDOW_MS;
+    delete process.env.PORTAL_MAGIC_LINK_VERIFY_RATE_LIMIT;
+    delete process.env.PORTAL_MAGIC_LINK_VERIFY_WINDOW_MS;
   });
 
   beforeEach(() => {
@@ -274,5 +282,69 @@ describe("Portal auth routes", () => {
     });
 
     expect(response.status).toBe(400);
+  });
+
+  it("aplica rate limiting tras múltiples solicitudes de enlace mágico", async () => {
+    const limit = Number(process.env.PORTAL_MAGIC_LINK_RATE_LIMIT ?? "3");
+    const windowMs = Number(
+      process.env.PORTAL_MAGIC_LINK_WINDOW_MS ?? "900000",
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
+
+    for (let attempt = 0; attempt < limit; attempt += 1) {
+      const response = await app.request("/api/portal/auth/request", {
+        method: "POST",
+        body: JSON.stringify({ email: "client@portal.test" }),
+        headers: { "content-type": "application/json" },
+      });
+      expect(response.status).toBe(200);
+    }
+
+    const blocked = await app.request("/api/portal/auth/request", {
+      method: "POST",
+      body: JSON.stringify({ email: "client@portal.test" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(blocked.status).toBe(429);
+    const body = await jsonResponse<{ error: string }>(blocked);
+    expect(body.error).toMatch(/Demasiadas solicitudes/);
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
+  });
+
+  it("aplica rate limiting tras repetidos intentos de verificación inválidos", async () => {
+    const limit = Number(
+      process.env.PORTAL_MAGIC_LINK_VERIFY_RATE_LIMIT ?? "5",
+    );
+    const windowMs = Number(
+      process.env.PORTAL_MAGIC_LINK_VERIFY_WINDOW_MS ?? "900000",
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
+
+    magicLinkRepositoryMock.findValidByHash.mockResolvedValue(null);
+
+    for (let attempt = 0; attempt < limit; attempt += 1) {
+      const response = await app.request("/api/portal/auth/verify", {
+        method: "POST",
+        body: JSON.stringify({ token: "token-invalido" }),
+        headers: { "content-type": "application/json" },
+      });
+      expect(response.status).toBe(400);
+    }
+
+    const blocked = await app.request("/api/portal/auth/verify", {
+      method: "POST",
+      body: JSON.stringify({ token: "token-invalido" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(blocked.status).toBe(429);
+    const body = await jsonResponse<{ error: string }>(blocked);
+    expect(body.error).toMatch(/Demasiados intentos/);
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
   });
 });

@@ -1,12 +1,19 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CheckoutClient } from "./checkout-client";
 
-vi.mock("@stripe/stripe-js", () => ({
-  loadStripe: vi.fn().mockResolvedValue({
+const stripeModuleMock = vi.hoisted(() => {
+  const loadStripe = vi.fn().mockResolvedValue({
     confirmPayment: vi.fn(),
-  }),
-}));
+  });
+  return {
+    loadStripe,
+    default: loadStripe,
+  };
+});
+
+vi.mock("@stripe/stripe-js", () => stripeModuleMock);
+
+import { CheckoutClient } from "./checkout-client";
 
 const services = [
   {
@@ -20,6 +27,9 @@ const services = [
 
 describe("CheckoutClient", () => {
   beforeEach(() => {
+    stripeModuleMock.loadStripe.mockResolvedValue({
+      confirmPayment: vi.fn(),
+    });
     vi.spyOn(global, "fetch").mockImplementation(async () => {
       return new Response(
         JSON.stringify({

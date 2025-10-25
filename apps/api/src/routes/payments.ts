@@ -4,6 +4,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { logger } from "../lib/logger.js";
 import { getServiceRepository } from "../container.js";
+import { createRateLimiter } from "../lib/rate-limiter.js";
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -30,6 +31,16 @@ const stripeClient = stripeSecret
   : null;
 
 const router = new Hono();
+
+const checkoutIntentRateLimiter = createRateLimiter({
+  limit: Number(process.env.CHECKOUT_PAYMENT_RATE_LIMIT ?? "10"),
+  windowMs: Number(process.env.CHECKOUT_PAYMENT_WINDOW_MS ?? "60000"),
+  errorMessage:
+    "Demasiadas solicitudes de pago. Intenta nuevamente en unos minutos.",
+  identifier: "checkout-payment-intent",
+});
+
+router.use("/stripe/intent", checkoutIntentRateLimiter);
 
 const createIntentSchema = z.object({
   serviceId: z.string().min(1),

@@ -4,13 +4,13 @@
 
 Este documento describe la configuración de alertas para monitoreo proactivo de errores, performance y disponibilidad del sistema.
 
-> **Estado 21-oct-2025:** Slack (`#todo-brisa-cubana`) y correo están activos vía `SLACK_WEBHOOK_URL`; las reglas existentes se actualizan para usar ambos canales.
+> **Estado 23-oct-2025:** Slack (`#alerts-operaciones`) y correo están activos vía `SLACK_WEBHOOK_URL`; todas las reglas deben usar la taxonomía documentada en [`slack-integration.md`](slack-integration.md).
 
 ## Sentry Alerts
 
 ### Configuración de Alertas de Errores
 
-**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar las notificaciones. Verifica en `#todo-brisa-cubana` y correo que se reciba el aviso.
+**Verificación rápida:** Una vez creadas las reglas, ejecuta `SENTRY_AUTH_TOKEN=... pnpm sentry:test-event "Verificación alertas Sentry"` para forzar un evento y confirmar las notificaciones. Verifica en `#alerts-operaciones` y correo que se reciba el aviso.
 
 #### 1. New Issue Alert (Errores Nuevos)
 
@@ -24,7 +24,7 @@ Este documento describe la configuración de alertas para monitoreo proactivo de
    - **When**: "A new issue is created"
    - **Environment**: Production
    - **Then**: Send notification to:
-     - Slack: #brisa-alerts
+     - Slack: #alerts-operaciones
      - Email: operaciones@brisacubanacleanintelligence.com
 
 **Severidad**: 🔴 Alta (responder en <15 minutos)
@@ -42,7 +42,7 @@ Condition:
   - Events: > 10
   - Interval: 5 minutes
 Then:
-  - Slack: #brisa-critical
+  - Slack: #alerts-criticos
   - Email: admin@brisacubanacleanintelligence.com
   - PagerDuty: (opcional)
 ```
@@ -61,7 +61,7 @@ Condition:
   - State: unresolved → regressed
   - Environment: production
 Then:
-  - Slack: #brisa-alerts
+  - Slack: #alerts-operaciones
   - Email: devops@brisacubanacleanintelligence.com
 ```
 
@@ -84,7 +84,7 @@ Metric Alert:
     - Environment: production
   For: 5 minutes
   Then:
-    - Slack: #brisa-performance
+    - Slack: #alerts-performance
     - Email: operaciones@brisacubanacleanintelligence.com
 ```
 
@@ -104,7 +104,7 @@ Metric Alert:
     - Environment: production
   For: 5 minutes
   Then:
-    - Slack: #brisa-critical
+    - Slack: #alerts-criticos
     - Email: admin@brisacubanacleanintelligence.com
 ```
 
@@ -125,7 +125,7 @@ Metric Alert:
     - Environment: production
   For: 10 minutes
   Then:
-    - Slack: #brisa-performance
+    - Slack: #alerts-performance
 ```
 
 **Severidad**: 🟡 Media
@@ -143,7 +143,7 @@ Metric Alert:
   Query: message:"notifications.stream.fallback"
   For: 5 minutes
   Then:
-    - Slack: #brisa-alerts
+    - Slack: #alerts-operaciones
     - Email: operaciones@brisacubanacleanintelligence.com
 ```
 
@@ -161,17 +161,17 @@ Metric Alert:
    ```
 
 2. **Canales Recomendados**:
-   - `#brisa-critical` - Errores críticos, alta frecuencia
-   - `#brisa-alerts` - Nuevos errores, regresiones
-   - `#brisa-performance` - Alertas de performance
-   - `#brisa-deployments` - Notificaciones de deploy
+   - `#alerts-criticos` - Errores críticos, alta frecuencia
+   - `#alerts-operaciones` - Nuevos errores, regresiones y ambiente general
+   - `#alerts-performance` - Alertas de performance
+   - `#alerts-deployments` - Notificaciones de deploy
 
 3. **Configurar en Sentry** _(pendiente hasta tener el webhook)_:
 
 ```
 Settings → Integrations → Slack
 → Add to Slack → Authorize
-→ Configure channels per alert rule (usar #brisa-alerts / #brisa-critical)
+→ Configure channels per alert rule (usar #alerts-operaciones / #alerts-criticos)
 ```
 
 4. **Probar webhook**: `SLACK_WEBHOOK_URL=<url> scripts/test-slack-webhook.sh "🧪 Webhook listo"` (pendiente de crear webhook)

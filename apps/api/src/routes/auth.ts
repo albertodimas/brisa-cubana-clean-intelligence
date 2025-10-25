@@ -1,13 +1,12 @@
-import type { Context } from "hono";
 import { Hono } from "hono";
 import { setCookie, deleteCookie } from "hono/cookie";
 import { z } from "zod";
 import * as bcrypt from "bcryptjs";
-import honoRateLimiter from "hono-rate-limiter";
 import { signAuthToken } from "../lib/jwt.js";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
 import { getUserRepository } from "../container.js";
 import { resolveCookiePolicy } from "../lib/cookies.js";
+import { createRateLimiter } from "../lib/rate-limiter.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -16,37 +15,12 @@ const loginSchema = z.object({
 
 const router = new Hono();
 
-const { rateLimiter } = honoRateLimiter as any;
-
-const loginRateLimiter = rateLimiter({
-  windowMs: Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS ?? "60000"),
+const loginRateLimiter = createRateLimiter({
   limit: Number(process.env.LOGIN_RATE_LIMIT ?? "5"),
-  standardHeaders: "draft-7",
-  keyGenerator: (c: Context) => {
-    const forwarded = c.req.header("x-forwarded-for");
-    if (forwarded) {
-      return forwarded.split(",")[0]?.trim() ?? forwarded;
-    }
-    const realIp =
-      c.req.header("x-real-ip") ??
-      c.req.header("cf-connecting-ip") ??
-      c.req.header("fastly-client-ip");
-    if (realIp) {
-      return realIp;
-    }
-    const fallback =
-      c.req.raw.headers.get("x-forwarded-for") ??
-      c.req.raw.headers.get("x-real-ip") ??
-      c.req.raw.headers.get("cf-connecting-ip") ??
-      c.req.header("user-agent") ??
-      "anonymous";
-    return fallback;
-  },
-  handler: async (ctx: Context) =>
-    ctx.json(
-      { error: "Too many login attempts. Please wait before retrying." },
-      429,
-    ),
+  windowMs: Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS ?? "60000"),
+  errorMessage:
+    "Demasiados intentos de inicio de sesión. Intenta nuevamente en unos minutos.",
+  identifier: "authentication-login",
 });
 
 router.use("/login", loginRateLimiter);

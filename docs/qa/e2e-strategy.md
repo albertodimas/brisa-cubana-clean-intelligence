@@ -263,6 +263,40 @@ Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, p
 
 ---
 
+### Validación de error boundaries del checkout (oct-2025)
+
+**Objetivo:** Asegurar que fallos inesperados en el checkout público (Stripe.js, Payment Element, intent API) no rompan la experiencia y generen telemetría accionable.
+
+**Implementación:**
+
+- `apps/web/app/checkout/error.tsx` captura cualquier excepción de la ruta y muestra un fallback accesible con botones de reintento, contacto por correo/teléfono y detalles técnicos.
+- Logging dual:
+  - Sentry (`captureException` con tags `component=checkout`, `boundary=checkout-error-boundary`).
+  - PostHog (`recordCheckoutEvent` con eventos `checkout_error_boundary_triggered` y `checkout_error_boundary_retry`).
+- Prevención de loops infinitos: máximo 3 reintentos en una ventana de 10s (el botón se deshabilita si se supera).
+- Boundary interno en el Payment Element (`PaymentElementErrorBoundary`) que notifica al boundary principal ante errores de renderizado.
+
+**Unit tests:** `apps/web/app/checkout/error.test.tsx`
+
+- ✅ Render del fallback con mensaje amable y accesible.
+- ✅ Botón "Reintentar carga" llama a `reset()` (hasta 3 veces).
+- ✅ Deshabilita el botón tras exceder el límite.
+- ✅ Verifica logging en Sentry y PostHog mediante mocks.
+
+**Checklist manual posterior a deploy:**
+
+1. **Fallo en intent:** desconectar red antes de “Continuar con pago” → debe mostrarse el fallback y permitir reintentar tras reconectar.
+2. **Stripe bloqueado:** bloquear `js.stripe.com` en DevTools → el boundary debe activarse, registrar error y permitir contacto con soporte.
+3. **Errores persistentes:** intentar reintentar 4 veces seguidas → botón deshabilitado con mensaje “Límite de reintentos alcanzado”.
+4. **Telemetría:** confirmar en Sentry (proyecto web) y PostHog que se registraron los eventos con el digest del error.
+
+**Cobertura en CI:**
+
+- Los unit tests se ejecutan en PR checks y en la pipeline principal (`pnpm --filter @brisa/web test`).
+- No se automatiza en Playwright por la dificultad de simular fallas de Stripe; se documenta checklist manual para QA.
+
+---
+
 ## Integración CI/CD
 
 ### GitHub Actions Workflows Implementados

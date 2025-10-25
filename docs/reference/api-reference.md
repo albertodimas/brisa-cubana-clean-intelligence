@@ -310,7 +310,7 @@ Todas las validaciones están documentadas con:
 
 ```json
 {
-  "error": "Too many requests"
+  "error": "Demasiadas solicitudes. Intenta nuevamente más tarde."
 }
 ```
 

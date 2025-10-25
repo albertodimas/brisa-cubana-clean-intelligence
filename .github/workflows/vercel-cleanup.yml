@@ -1,0 +1,54 @@
+name: Vercel Deployment Cleanup
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"  # Todos los lunes a las 04:00 UTC
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.13.0'
+
+      - name: Clean web deployments (keep latest 3)
+        run: |
+          set -euo pipefail
+          node scripts/clean-vercel-deployments.mjs \
+            --project brisa-cubana-clean-intelligence \
+            --scope brisa-cubana \
+            --token "$VERCEL_TOKEN" \
+            --keep 3
+
+      - name: Clean API deployments (keep latest 3)
+        run: |
+          set -euo pipefail
+          node scripts/clean-vercel-deployments.mjs \
+            --project brisa-cubana-clean-intelligence-api \
+            --scope brisa-cubana \
+            --token "$VERCEL_TOKEN" \
+            --keep 3
+
+      - name: Publish summary
+        run: |
+          {
+            echo "### 🧹 Vercel deployments cleanup"
+            echo "- Web project: brisa-cubana-clean-intelligence (se conservan los 3 más recientes)"
+            echo "- API project: brisa-cubana-clean-intelligence-api (se conservan los 3 más recientes)"
+            echo "- Fecha de ejecución: $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
+          } >> "$GITHUB_STEP_SUMMARY"

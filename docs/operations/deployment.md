@@ -5,8 +5,10 @@ Proceso verificado para promover cambios de Brisa Cubana Clean Intelligence a lo
 ## 1. Pre-requisitos
 
 - Branch `main` en verde (ver GitHub Actions: CI, CodeQL, Nightly si corresponde).
+- Protección de rama activada en GitHub (`Require status checks to pass` con `CI (Main Branch)` y `PR Checks`); verificar en Settings → Branches antes de promover cambios.
 - `CHANGELOG.md` actualizado con los cambios a desplegar.
 - Checklist de regresión ejecutada según [`qa/regression-checklist.md`](../qa/regression-checklist.md); adjuntar resultados en el PR.
+- `vercel.json` (raíz) y `apps/api/vercel.json` versionados con `"git.deploymentEnabled": false` para evitar auto-builds directos desde Vercel.
 
 ## 2. Variables de entorno requeridas
 
@@ -141,22 +143,72 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 | `LOG_DRAIN_VERIFICATION_CODE`                                                                | Verificación del endpoint `/api/logdrain` en CI y creación de drains. |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_COORDINATOR_EMAIL`, `E2E_COORDINATOR_PASSWORD` | Credenciales sembradas para smoke/critical.                           |
 | `PORTAL_MAGIC_LINK_*`                                                                        | Flujos de enlaces mágicos (Nightly).                                  |
-| `PRODUCTION_DATABASE_URL`, `PRODUCTION_DATABASE_URL_UNPOOLED`                                | Workflow `Post-Deploy Seed`.                                          |
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED`                                                      | Workflow `Post-Deploy Seed` (extraídos del entorno `production-api`). |
+
+> ℹ️ Desde el 23-oct-2025 consolidamos los secretos de CI/CD en los entornos de GitHub Actions (`preview-web`, `preview-api`, `production-web`, `production-api`). Los workflows consumen estos secretos mediante `environment:` y ya no dependen de duplicados a nivel de repositorio, lo que evita desalineaciones con Vercel.
 
 ## 4. Despliegue
 
-1. Merge a `main` activa automáticamente los builds en Vercel para `Production`.
-2. Confirma que los pipelines (`CI (Main Branch)`, `CodeQL`) estén en verde antes de aprobar el despliegue.
-3. En Vercel:
-   - API: Tab **Deployments** → verifica que la última build de `main` tenga badge `Ready`.
-   - Web: Mismo procedimiento. Asegúrate de que las build logs no tengan advertencias rojas.
-4. Si se requiere despliegue manual (hotfix):
-   ```bash
-   vercel deploy --prod --scope <team> --confirm
-   ```
-   Usa el scope del equipo configurado (requiere `vercel login`).
+1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` realiza `vercel pull --environment=production`, ejecuta `vercel build --prod` localmente (API y Web) y publica los artefactos generados con `vercel deploy --prebuilt --prod`. El resultado queda documentado en el `GITHUB_STEP_SUMMARY`, junto con una auditoría automática de los últimos deployments generada por `scripts/report-vercel-deployments.sh`.
 
-## 5. Seed y migraciones
+   > Nota (25-oct-2025): añadimos un paso explícito `sudo npm install -g pnpm@10.18.0` en los workflows `ci.yml` y `vercel-preview.yml` para sortear el bug abierto de Vercel CLI 48.x que ejecutaba `vercel build` sin localizar `pnpm` en GitHub Actions (`spawn pnpm ENOENT`, ver issue #75). Mientras Vercel publica fix oficial, mantener el pin a 10.18.0 y ese refuerzo global.
+
+2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
+3. Los pushes a `main` disparan el workflow `ci.yml`, que después de pasar lint/typecheck/tests genera prebuilds locales y usa `vercel deploy --prebuilt --prod` para API y web sin aprobación manual. Los pull requests siguen usando `.github/workflows/vercel-preview.yml`, que ahora replica el mismo esquema (`vercel build` + `vercel deploy --prebuilt`) apuntando al entorno Preview.
+4. Tras el despliegue, el job ejecuta un smoke test automático sobre `https://<deployment>/healthz` (API y web) para detectar problemas inmediatos. Si falla, el workflow se marca en rojo.
+5. Si `SLACK_WEBHOOK_URL` está presente, el workflow publica un resumen del deploy en Slack (web/API, commit, timestamp), lo que permite monitorear releases sin entrar a GitHub.
+
+> **Seguridad:** la rama `main` está protegida (`Settings → Branches`) y exige al menos una revisión aprobatoria antes del merge; de esta forma sólo cambios revisados activan el deploy automático.
+
+4. Para hotfixes manuales puedes disparar el mismo workflow con `workflow_dispatch` pasando el `ref` que quieras validar:
+
+```bash
+gh workflow run vercel-preview.yml --ref fix/posthog-ci -f ref=fix/posthog-ci
+```
+
+(omite `--ref`/`-f` para usar `main`). En caso extremo, ejecuta localmente:
+
+```bash
+vercel deploy --prod --scope brisa-cubana --token "$VERCEL_TOKEN" --yes --force
+```
+
+Recuerda exportar los IDs de proyecto (`VERCEL_PROJECT_ID_*`) antes de ejecutar el comando. 5. Para auditar despliegues recientes desde local o CI, usa `scripts/report-vercel-deployments.sh`:
+
+```bash
+VERCEL_TOKEN=<token> ./scripts/report-vercel-deployments.sh           # Web
+VERCEL_TOKEN=<token> ./scripts/report-vercel-deployments.sh apps/api  # API
+```
+
+El script consulta la API de Vercel y resume los últimos deployments por entorno/autor. Si detectas más de un `production` en la misma ventana, revisa los workflows correspondientes.
+
+## 5. Mantenimiento del historial en Vercel
+
+Los despliegues antiguos pueden acumularse y generar notificaciones de error. Usa el script `scripts/clean-vercel-deployments.mjs` para eliminar en bloque los deployments que no quieras conservar. El workflow programado `.github/workflows/vercel-cleanup.yml` ejecuta esta limpieza cada lunes a las 04:00 UTC (keep=3 para web y API) y puede dispararse manualmente desde la pestaña _Actions_.
+
+```bash
+# Web: conserva únicamente el preview y el deploy productivo actual
+VERCEL_TOKEN=$(jq -r '.token' ~/.vercel/auth.json) \
+VERCEL_ORG_ID=team_GI7iQ5ivPN36nVRB1Y9IJ9UW \
+node scripts/clean-vercel-deployments.mjs \
+  brisa-cubana-clean-intelligence-rh1pzvd6n-brisa-cubana.vercel.app \
+  brisa-cubana-clean-intelligence-l5cb3w50e-brisa-cubana.vercel.app \
+  brisa-cubana-clean-intelligence-3l7xjje4s-brisa-cubana.vercel.app
+
+# API: conserva el preview y el productivo
+VERCEL_TOKEN=$(jq -r '.token' ~/.vercel/auth.json) \
+VERCEL_ORG_ID=team_GI7iQ5ivPN36nVRB1Y9IJ9UW \
+VERCEL_PROJECT_ID=prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j \
+node scripts/clean-vercel-deployments.mjs \
+  brisa-cubana-clean-intelligence-qtcgx6jdc-brisa-cubana.vercel.app \
+  brisa-cubana-clean-intelligence-bdgx8axc2-brisa-cubana.vercel.app
+```
+
+El script acepta un tope de borrado por ejecución (`MAX_DELETE`, por defecto 200). Si aparece un mensaje de _rate limited_, espera unos minutos y vuelve a ejecutarlo.
+
+6. Si el bug del CLI persiste, ejecuta `scripts/manual-vercel-deploy.sh web` / `scripts/manual-vercel-deploy.sh api` desde tu máquina con Vercel autenticado. El script reproduce `vercel pull`, `vercel build` y `vercel deploy --prebuilt` usando la CLI local.
+7. Mantén un ojo en el workflow `vercel-cli-watch.yml`, que abre un issue automático (“Track Vercel CLI x.y.z”) cuando aparece una versión nueva en npm. Una vez verificado un fix, actualiza `ops/vercel-cli.version` y cierra el issue.
+
+## 6. Seed y migraciones
 
 1. Migraciones Prisma se aplican automáticamente vía `prisma generate` + `tsc`. Si cambiaste el schema, sincroniza producción ejecutando las migraciones generadas:
    ```bash

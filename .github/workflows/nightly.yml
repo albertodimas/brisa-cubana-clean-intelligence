@@ -11,10 +11,10 @@ jobs:
     uses: ./.github/workflows/project-pipeline.yml
     secrets: inherit
     with:
+      environment-name: preview-web
       job-name: Nightly full e2e
       run-database-prep: true
       run-e2e-suite: full
-      next-public-api-url: "http://localhost:3001"
       playwright-report-name: playwright-report-full
       playwright-retention-days: 14
       run-lighthouse: false

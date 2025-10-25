@@ -16,11 +16,11 @@ jobs:
     uses: ./.github/workflows/project-pipeline.yml
     secrets: inherit
     with:
+      environment-name: preview-web
       job-name: ${{ github.event_name == 'workflow_dispatch' && 'PR smoke tests (manual)' || 'PR smoke tests' }}
       checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
       run-secret-scan: true
       run-database-prep: true
       run-e2e-suite: smoke
-      next-public-api-url: "http://localhost:3001"
       playwright-report-name: playwright-report-smoke
       upload-playwright-only-on-failure: true

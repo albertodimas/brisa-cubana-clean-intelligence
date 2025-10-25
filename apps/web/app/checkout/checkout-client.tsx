@@ -1,7 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import {
+  Component,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import {
   Elements,
   PaymentElement,
@@ -16,6 +23,7 @@ type CheckoutClientProps = {
     Pick<Service, "id" | "name" | "basePrice" | "durationMin" | "description">
   >;
   publishableKey: string;
+  isTestMode?: boolean;
 };
 
 type CheckoutIntent = {
@@ -39,14 +47,63 @@ const currencyFormatter = new Intl.NumberFormat("es-US", {
   currency: "USD",
 });
 
+class PaymentElementErrorBoundary extends Component<
+  {
+    onError: (error: Error) => void;
+    children: ReactNode;
+  },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    this.props.onError(error);
+  }
+
+  componentDidUpdate(prevProps: Readonly<{ children: ReactNode }>) {
+    if (this.state.hasError && prevProps.children !== this.props.children) {
+      // Reset boundary cuando el intent cambia
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
+
+function getDefaultScheduledISO(offsetMinutes = 1440) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + offsetMinutes);
+  now.setSeconds(0, 0);
+  now.setMilliseconds(0);
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const date = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${date}T${hours}:${minutes}`;
+}
+
 function CheckoutPaymentStep({
   intent,
   onSuccess,
   onFailure,
+  isTestMode,
 }: {
   intent: CheckoutIntent;
   onSuccess: (paymentIntentId: string) => void;
   onFailure: (errorMessage: string) => void;
+  isTestMode: boolean;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -100,8 +157,9 @@ function CheckoutPaymentStep({
           Confirmar pago seguro con Stripe
         </h2>
         <p className="text-sm text-gray-600 dark:text-brisa-300">
-          El monto se autorizará en modo prueba con tu tarjeta demo de Stripe.
-          Se almacenarán los metadatos necesarios para registrar la reserva.
+          {isTestMode
+            ? "El monto se autorizará en modo prueba con tu tarjeta demo de Stripe. Se almacenarán los metadatos necesarios para registrar la reserva."
+            : "El monto se cargará de forma segura usando Stripe. Se almacenarán los metadatos necesarios para registrar y calendarizar la reserva."}
         </p>
       </div>
 
@@ -140,22 +198,42 @@ function CheckoutPaymentStep({
 export function CheckoutClient({
   services,
   publishableKey,
+  isTestMode,
 }: CheckoutClientProps) {
   const [selectedServiceId, setSelectedServiceId] = useState<string>(
     services.at(0)?.id ?? "",
   );
-  const [details, setDetails] = useState<ContactDetails>({
+  const [details, setDetails] = useState<ContactDetails>(() => ({
     fullName: "",
     email: "",
-    scheduledFor: "",
+    scheduledFor: getDefaultScheduledISO(),
     notes: "",
-  });
+  }));
   const [phase, setPhase] = useState<CheckoutPhase>("details");
   const [intent, setIntent] = useState<CheckoutIntent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
+  const [fatalError, setFatalError] = useState<Error | null>(null);
+  const [stripePromise, setStripePromise] =
+    useState<Promise<Stripe | null> | null>(null);
   const sentryModuleRef = useRef<typeof import("@sentry/nextjs") | null>(null);
+  const resolvedTestMode =
+    typeof isTestMode === "boolean"
+      ? isTestMode
+      : publishableKey.startsWith("pk_test_");
+  const [minScheduledFor, setMinScheduledFor] = useState(() =>
+    getDefaultScheduledISO(1440),
+  );
+
+  useEffect(() => {
+    setMinScheduledFor(getDefaultScheduledISO(1440));
+    const interval = setInterval(
+      () => setMinScheduledFor(getDefaultScheduledISO(1440)),
+      60 * 1000,
+    );
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -198,11 +276,48 @@ export function CheckoutClient({
     }
   }, [captureMessage, publishableKey]);
 
-  const stripePromise = useMemo(() => {
+  useEffect(() => {
     if (!publishableKey) {
-      return null;
+      setStripePromise(null);
+      return;
     }
-    return loadStripe(publishableKey);
+
+    let cancelled = false;
+    const promise = loadStripe(publishableKey);
+    if (!promise) {
+      setFatalError(
+        new Error(
+          "No se pudo inicializar Stripe. Verifica la clave pública y la conexión.",
+        ),
+      );
+      return;
+    }
+
+    setStripePromise(promise);
+
+    promise
+      .then((instance) => {
+        if (cancelled) return;
+        if (!instance) {
+          setFatalError(
+            new Error(
+              "No se pudo inicializar Stripe. Verifica la clave pública y la conexión.",
+            ),
+          );
+        }
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setFatalError(
+          error instanceof Error
+            ? error
+            : new Error("Falló la carga de Stripe. Intenta nuevamente."),
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [publishableKey]);
 
   const selectedService = services.find(
@@ -220,6 +335,23 @@ export function CheckoutClient({
       setErrorMessage("Necesitamos un correo para enviar la confirmación.");
       return;
     }
+    if (!details.scheduledFor) {
+      setErrorMessage(
+        "Define una fecha y hora tentativas para coordinar al equipo.",
+      );
+      return;
+    }
+    const scheduledDate = new Date(details.scheduledFor);
+    const earliestAllowed = new Date(minScheduledFor);
+    if (
+      Number.isNaN(scheduledDate.getTime()) ||
+      scheduledDate < earliestAllowed
+    ) {
+      setErrorMessage(
+        "Selecciona una fecha futura para planificar la cuadrilla (mínimo 24 horas de anticipación).",
+      );
+      return;
+    }
     setIsCreatingIntent(true);
     try {
       sentryModuleRef.current?.addBreadcrumb({
@@ -231,7 +363,7 @@ export function CheckoutClient({
           hasSchedule: Boolean(details.scheduledFor),
         },
       });
-      const response = await fetch("/api/checkout/intent", {
+      const response = await fetch("/api/payments/stripe/intent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -269,11 +401,6 @@ export function CheckoutClient({
         currency: payload.data.currency,
       });
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No pudimos crear la intención de pago.",
-      );
       recordCheckoutEvent("checkout_failed", {
         stage: "intent",
         serviceId: selectedService?.id,
@@ -288,6 +415,11 @@ export function CheckoutClient({
           },
         },
       });
+      setFatalError(
+        error instanceof Error
+          ? error
+          : new Error("No pudimos crear la intención de pago."),
+      );
     } finally {
       setIsCreatingIntent(false);
     }
@@ -298,7 +430,18 @@ export function CheckoutClient({
     setPhase("details");
     setSuccessId(null);
     setErrorMessage(null);
+    setFatalError(null);
+    setDetails({
+      fullName: "",
+      email: "",
+      scheduledFor: getDefaultScheduledISO(),
+      notes: "",
+    });
   };
+
+  if (fatalError) {
+    throw fatalError;
+  }
 
   if (!publishableKey) {
     return (
@@ -333,8 +476,10 @@ export function CheckoutClient({
               Selecciona servicio y comparte tus datos
             </h2>
             <p className="text-sm text-gray-600 dark:text-brisa-300">
-              Usa tu correo real para recibir la confirmación. Este flujo opera
-              en modo prueba y no genera cargos reales.
+              Usa tu correo real para recibir la confirmación.
+              {resolvedTestMode
+                ? " Este flujo opera en modo prueba y no genera cargos reales."
+                : " El cargo se realizará una vez confirmemos la disponibilidad del equipo."}
             </p>
           </div>
 
@@ -345,7 +490,7 @@ export function CheckoutClient({
             <select
               value={selectedServiceId}
               onChange={(event) => setSelectedServiceId(event.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
             >
               <option value="">Selecciona un servicio</option>
@@ -377,7 +522,8 @@ export function CheckoutClient({
                 }))
               }
               placeholder="Ej. Laura Pérez"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              autoComplete="name"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
               minLength={2}
             />
@@ -399,7 +545,7 @@ export function CheckoutClient({
               inputMode="email"
               autoComplete="email"
               placeholder="tu-correo@ejemplo.com"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
             />
           </label>
@@ -407,6 +553,10 @@ export function CheckoutClient({
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-gray-900 dark:text-white">
               Fecha y hora deseada
+            </span>
+            <span className="text-xs text-gray-500 dark:text-brisa-400">
+              Horario local Miami (UTC-05:00) con mínimo 24 horas de
+              anticipación.
             </span>
             <input
               type="datetime-local"
@@ -417,7 +567,8 @@ export function CheckoutClient({
                   scheduledFor: event.target.value,
                 }))
               }
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              min={minScheduledFor}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               required
             />
           </label>
@@ -436,7 +587,7 @@ export function CheckoutClient({
               }
               maxLength={500}
               rows={3}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus:ring-red-400"
               placeholder="Comparte instrucciones especiales para el equipo."
             />
           </label>
@@ -501,51 +652,76 @@ export function CheckoutClient({
               },
             }}
           >
-            <CheckoutPaymentStep
-              intent={intent}
-              onSuccess={(paymentIntentId) => {
-                setSuccessId(paymentIntentId);
-                setPhase("completed");
-                captureMessage("checkout.payment.confirmed", "info", {
-                  paymentIntentId,
+            <PaymentElementErrorBoundary
+              key={intent.clientSecret}
+              onError={(boundaryError) => {
+                captureMessage("checkout.payment.element.crashed", "error", {
                   serviceId: selectedService?.id,
+                  message: boundaryError.message,
                 });
-                sentryModuleRef.current?.addBreadcrumb({
-                  category: "checkout",
-                  message: "payment_confirmed",
-                  data: {
-                    paymentIntentId,
-                    serviceId: selectedService?.id,
+                sentryModuleRef.current?.captureException(boundaryError, {
+                  contexts: {
+                    checkout: {
+                      stage: "payment",
+                      serviceId: selectedService?.id,
+                    },
                   },
-                  level: "info",
-                });
-                recordCheckoutEvent("checkout_completed", {
-                  paymentIntentId,
-                  serviceId: selectedService?.id,
-                });
-              }}
-              onFailure={(message) => {
-                setErrorMessage(message);
-                captureMessage("checkout.payment.failed", "warning", {
-                  serviceId: selectedService?.id,
-                  error: message,
-                });
-                sentryModuleRef.current?.addBreadcrumb({
-                  category: "checkout",
-                  message: "payment_failed",
-                  data: {
-                    serviceId: selectedService?.id,
-                    error: message,
-                  },
-                  level: "warning",
                 });
                 recordCheckoutEvent("checkout_failed", {
-                  stage: "payment",
+                  stage: "payment_element",
                   serviceId: selectedService?.id,
-                  error: message,
+                  error: boundaryError.message,
                 });
+                setFatalError(boundaryError);
               }}
-            />
+            >
+              <CheckoutPaymentStep
+                intent={intent}
+                isTestMode={resolvedTestMode}
+                onSuccess={(paymentIntentId) => {
+                  setSuccessId(paymentIntentId);
+                  setPhase("completed");
+                  captureMessage("checkout.payment.confirmed", "info", {
+                    paymentIntentId,
+                    serviceId: selectedService?.id,
+                  });
+                  sentryModuleRef.current?.addBreadcrumb({
+                    category: "checkout",
+                    message: "payment_confirmed",
+                    data: {
+                      paymentIntentId,
+                      serviceId: selectedService?.id,
+                    },
+                    level: "info",
+                  });
+                  recordCheckoutEvent("checkout_completed", {
+                    paymentIntentId,
+                    serviceId: selectedService?.id,
+                  });
+                }}
+                onFailure={(message) => {
+                  setErrorMessage(message);
+                  captureMessage("checkout.payment.failed", "warning", {
+                    serviceId: selectedService?.id,
+                    error: message,
+                  });
+                  sentryModuleRef.current?.addBreadcrumb({
+                    category: "checkout",
+                    message: "payment_failed",
+                    data: {
+                      serviceId: selectedService?.id,
+                      error: message,
+                    },
+                    level: "warning",
+                  });
+                  recordCheckoutEvent("checkout_failed", {
+                    stage: "payment",
+                    serviceId: selectedService?.id,
+                    error: message,
+                  });
+                }}
+              />
+            </PaymentElementErrorBoundary>
           </Elements>
           {errorMessage ? (
             <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">

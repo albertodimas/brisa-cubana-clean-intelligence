@@ -1,6 +1,6 @@
 # Runbook Diario de Monitoreo
 
-**Última actualización:** 19 de octubre de 2025  
+**Última actualización:** 23 de octubre de 2025  
 **Responsables:** Operaciones · Producto · Plataforma
 
 ---
@@ -35,7 +35,11 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
    - Revisar reporte provisional de `@vercel/analytics`: CTA → lead, lead → checkout, portal link verifications.
    - Revisar dashboard PostHog `https://us.i.posthog.com/project/brisa-cubana/dashboards/funnel-fase2` (eventos `checkout_payment_failed`, `portal.booking.action.*`).
    - Si no hay eventos recientes, ejecutar `POSTHOG_API_KEY=<clave_actual> pnpm posthog:test-event checkout_payment_failed` para validar la ingesta y las alertas.
-   - Documentar variaciones relevantes en el canal `#producto`.
+   - Documentar variaciones relevantes en el canal `#alerts-operaciones` y etiquetar a Producto.
+
+6. **Workflow `posthog-monitor`**
+   - GitHub Actions → confirmar que el workflow `posthog-monitor.yml` corrió en los últimos 60 minutos.
+   - Revisar el `GITHUB_STEP_SUMMARY` para anomalías detectadas; si falla, abrir incidencia en `#alerts-operaciones`.
 
 ---
 
@@ -50,7 +54,7 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
 
 3. **Revisión de métricas**
    - KPI acordados (conversiones, porcentaje de autoservicio).
-   - Compartir resumen en `#producto` + actualizar sección 4.4 de `docs/operations/observability.md`.
+   - Compartir resumen en `#alerts-operaciones` + actualizar sección 4.4 de `docs/operations/observability.md`.
 
 4. **Sincronización Onboarding**
    - Repasar cambios recientes en documentación base (README, `docs/overview/status.md`, guías de seeds) y confirmar con el equipo de Onboarding que su checklist refleja las versiones y credenciales vigentes. Registrar confirmación o ajustes pendientes en `#alerts-operaciones`.

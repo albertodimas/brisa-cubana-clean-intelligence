@@ -87,12 +87,32 @@ gh secret set SLACK_WEBHOOK_URL --env production
 
 Repite para `preview` y `development` según necesidad. Asegura consistencia con Vercel.
 
-## 4. Checklist de validación
+## 4. Link Vercel ↔ GitHub Actions
+
+- `VERCEL_PROJECT_ID_WEB` debe apuntar a `prj_n11x8GsVN5qDw0eOFAcQiOfpc0Zg` (Web).
+- `VERCEL_PROJECT_ID_API` debe apuntar a `prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j` (API).
+- `VERCEL_ORG_ID` y `VERCEL_TOKEN` tienen que pertenecer al equipo `brisa-cubana` (consulta en 1Password).
+- Verifica que ambos proyectos tengan GitHub linkeado al repo `albertodimas/brisa-cubana-clean-intelligence` y branch productivo `main`:
+
+```bash
+TOKEN=$(jq -r '.token' ~/.vercel/auth.json) # o exporta $VERCEL_TOKEN desde 1Password
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://api.vercel.com/v9/projects/prj_n11x8GsVN5qDw0eOFAcQiOfpc0Zg?teamId=brisa-cubana" | jq '.link, .targets.production'
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://api.vercel.com/v9/projects/prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j?teamId=brisa-cubana" | jq '.link, .targets.production'
+```
+
+Confirma que `link.productionBranch` sea `main` y que los dominios correspondan a los oficiales (`*.brisacubanacleanintelligence.com`). Si algún ID no coincide, actualiza los secrets en GitHub (`gh secret set ... --env production`) antes de volver a ejecutar la CI.
+
+## 5. Checklist de validación
 
 - [ ] `curl -I https://brisacubanacleanintelligence.com` devuelve HSTS y responde 200.
 - [ ] `curl -I https://api.brisacubanacleanintelligence.com/health` devuelve 200.
 - [ ] `vercel env ls` muestra valores correctos para web y api.
 - [ ] Workflows en GitHub pasan con las variables sincronizadas.
 - [ ] Actualiza `docs/operations/domain-map.md` si hubiera cambios en dominios o integraciones.
+- [ ] Mantén el CLI de Vercel en `48.4.1` hasta que se resuelva el bug `spawn pnpm ENOENT` (ver issue de coordinación con Claude).
+- [ ] Si se modifica el pipeline, conserva el paso `corepack prepare pnpm@10.18.0 --activate`, la copia de `pnpm` a `/usr/bin` y el shim `node_modules/.bin/pnpm` antes de ejecutar `vercel build`.
+- [ ] Si el bug persiste, sigue `docs/operations/manual-vercel-deploy.md` para ejecutar `vercel build`/`vercel deploy` manualmente.
 
 Guarda este documento como referencia antes de cada rotación de claves o alta de nuevos subdominios.

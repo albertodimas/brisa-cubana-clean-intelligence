@@ -110,7 +110,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="es"
-      className={`${inter.variable} dark`}
+      className={`${inter.variable} dark scroll-smooth`}
       suppressHydrationWarning
     >
       <head>

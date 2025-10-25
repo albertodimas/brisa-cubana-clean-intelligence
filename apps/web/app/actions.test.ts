@@ -68,7 +68,10 @@ describe("loginAction", () => {
     Object.assign(error, {
       cause: {
         status: 429,
-        body: { error: "Too many attempts" },
+        body: {
+          error:
+            "Demasiados intentos de inicio de sesión. Intenta nuevamente en unos minutos.",
+        },
       },
     });
     vi.mocked(signIn).mockRejectedValueOnce(error);
@@ -78,7 +81,8 @@ describe("loginAction", () => {
     );
 
     expect(result).toEqual({
-      error: "Too many attempts",
+      error:
+        "Demasiados intentos de inicio de sesión. Intenta nuevamente en unos minutos.",
     });
   });
 

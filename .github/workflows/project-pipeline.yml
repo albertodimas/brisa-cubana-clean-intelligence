@@ -7,6 +7,9 @@ on:
         required: false
         type: string
         default: "Quality checks"
+      environment-name:
+        required: true
+        type: string
       node-version:
         required: false
         type: string
@@ -148,6 +151,8 @@ concurrency:
 jobs:
   pipeline:
     name: ${{ inputs.job-name }}
+    environment:
+      name: ${{ inputs.environment-name }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     services:
@@ -252,7 +257,39 @@ jobs:
         env:
           ENABLE_HSTS: ${{ inputs.run-lighthouse && 'false' || '' }}
           NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
-        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web ${{ inputs.run-e2e-suite != 'none' && '--force' || '' }}
+        run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
+      - name: Verify public metadata endpoints
+        if: ${{ inputs.run-build }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          root_dir="apps/web/.next/server/app"
+          resolve_asset() {
+            local base="$root_dir/$1"
+            # Next.js App Router emite archivos de metadata como archivos de texto o *.body; aceptamos ambos.
+            if [[ -f "$base" ]]; then
+              printf '%s\n' "$base"
+              return 0
+            fi
+            if [[ -f "${base}.body" ]]; then
+              printf '%s\n' "${base}.body"
+              return 0
+            fi
+            return 1
+          }
+          robots_asset="$(resolve_asset "robots.txt")" || {
+            echo "Error: no se encontró robots.txt compilado en ${root_dir}" >&2
+            ls -R "$root_dir" >&2
+            exit 1
+          }
+          sitemap_asset="$(resolve_asset "sitemap.xml")" || {
+            echo "Error: no se encontró sitemap.xml compilado en ${root_dir}" >&2
+            ls -R "$root_dir" >&2
+            exit 1
+          }
+          grep -qi "user-agent" "$robots_asset"
+          grep -qi "<urlset" "$sitemap_asset"
 
       - name: Lighthouse CI
         if: ${{ inputs.run-lighthouse }}
@@ -273,7 +310,6 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           CI: true
-          PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: "si"
         run: |
           case "${{ inputs.run-e2e-suite }}" in
             smoke) pnpm test:e2e:smoke ;;
