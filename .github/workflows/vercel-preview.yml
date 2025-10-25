@@ -58,7 +58,9 @@ jobs:
 
       - name: Ensure pnpm executable (corepack fallback)
         run: |
+          corepack enable
           corepack prepare pnpm@10.18.0 --activate
+          pnpm --version
           which pnpm
 
       - name: Generate Prisma Client
