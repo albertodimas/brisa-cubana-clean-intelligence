@@ -61,8 +61,6 @@ jobs:
 
       - name: Validar pnpm en PATH
         run: |
-          corepack enable
-          corepack prepare pnpm@10.18.0 --activate
           pnpm --version
           command -v pnpm
 
