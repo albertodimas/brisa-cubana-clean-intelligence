@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 22 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 204 unit/integration –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
+**Última revisión:** 25 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 204 unit/integration –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -15,7 +15,7 @@
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Despliegues en Vercel restaurados (21-oct-2025 01:30 UTC). Últimos deployments `Ready`: web `https://brisa-cubana-clean-intelligence-ov83pncfl-...` y API `https://brisa-cubana-clean-intelligence-jjl943a0f-...` (commit `f14d575`). Variables de entorno críticas (Sentry/PostHog/Stripe/HEALTH_CHECK_TOKEN/SLACK_WEBHOOK_URL/LEAD_WEBHOOK_URL) están cargadas en Development/Preview/Production.
+- Despliegues en Vercel: el run `CI (Main Branch)` #18796975592 (25-oct-2025 02:38 UTC) sigue fallando en “Build API (prebuilt)” por el bug `spawn pnpm ENOENT`. Se preparó un ajuste para migrar a despliegues remotos (`vercel deploy --prod`) que evita el problema; falta publicar el commit y reejecutar la pipeline para confirmar el fix. Mientras tanto continúan vigentes los manuales `scripts/manual-vercel-deploy.sh` y monitoreo de Slack/health checks.
 - Observabilidad verificada manualmente el 21-oct-2025: evento Sentry `ec904a19-899c-4e91-9386-8304c02cd724` (via `pnpm sentry:test-event`) y captura PostHog `checkout_payment_failed` (`pnpm posthog:test-event` con distinct `brisa-cli-*`).
 - Sitio público `/` sirve la landing comercial con métricas basadas en datos reales del mercado STR (rotaciones 12-25/año, 81% reviews impactadas por limpieza, 13K listings en Miami) y CTA de checkout/portal. Los placeholders de imagen permanecen a la espera de los activos listados en `docs/marketing/visual-assets-checklist.md`. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
 - Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).

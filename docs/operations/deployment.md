@@ -155,12 +155,12 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 
 ## 4. Despliegue
 
-1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` invoca `vercel deploy --prod` (API y Web) con las credenciales (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID_*`, `VERCEL_ORG_ID`). El resultado queda documentado en el `GITHUB_STEP_SUMMARY`, junto con una auditoría automática de los últimos deployments generada por `scripts/report-vercel-deployments.sh`.
+1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` llama a `vercel pull --environment=production` y a `vercel deploy --prod` (API y Web) con las credenciales (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID_*`, `VERCEL_ORG_ID`). El resultado queda documentado en el `GITHUB_STEP_SUMMARY`, junto con una auditoría automática de los últimos deployments generada por `scripts/report-vercel-deployments.sh`.
 
-   > ⚠️ _Estado al 23-oct-2025_: Vercel CLI `48.6.x` tiene un bug conocido (`spawn pnpm ENOENT`) cuando ejecuta `vercel build` en runners de GitHub Actions. Mientras Vercel entrega un fix, el pipeline fallará en el paso “Build API (prebuilt)”. Usa el script `scripts/manual-vercel-deploy.sh` o ejecuta `vercel deploy --prod` manualmente tras generar el prebuild con `pnpm`. Documenta el incidente en el PR hasta que el job vuelva a verde.
+   > ⚠️ _Estado al 25-oct-2025_: Vercel CLI `48.x` sigue disparando `spawn pnpm ENOENT` cuando se usa `vercel build` local en GitHub Actions. Migramos el pipeline a despliegues remotos (`vercel deploy --prod` sin `--prebuilt`) para evitar el bug mientras Vercel publica un fix. Si necesitas validar artefactos precompilados, usa el script `scripts/manual-vercel-deploy.sh` desde un entorno local donde el build sí funciona y anota el procedimiento en el PR.
 
 2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
-3. Los pushes a `main` disparan el workflow `ci.yml`, que después de pasar lint/typecheck/tests ejecuta `vercel deploy --prebuilt --prod` para API y web sin aprobación manual. Los pull requests siguen usando `.github/workflows/vercel-preview.yml` para entornos Preview.
+3. Los pushes a `main` disparan el workflow `ci.yml`, que después de pasar lint/typecheck/tests ejecuta `vercel deploy --prod` (deploy remoto) para API y web sin aprobación manual. Los pull requests siguen usando `.github/workflows/vercel-preview.yml` para entornos Preview.
 4. Tras el despliegue, el job ejecuta un smoke test automático sobre `https://<deployment>/healthz` (API y web) para detectar problemas inmediatos. Si falla, el workflow se marca en rojo.
 5. Si `SLACK_WEBHOOK_URL` está presente, el workflow publica un resumen del deploy en Slack (web/API, commit, timestamp), lo que permite monitorear releases sin entrar a GitHub.
 

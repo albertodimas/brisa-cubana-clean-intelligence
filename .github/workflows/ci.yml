@@ -40,74 +40,58 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10.18.0
-          run_install: false
-
-      - name: Add pnpm to PATH
-        run: |
-          echo "$PNPM_HOME" >> $GITHUB_PATH
-          sudo ln -sf "$PNPM_HOME/pnpm" /usr/local/bin/pnpm
-          sudo install -m 755 "$PNPM_HOME/pnpm" /usr/bin/pnpm
-
-      - name: Ensure pnpm executable (corepack fallback)
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.18.0 --activate
-          pnpm --version
-          which pnpm
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '22.13.0'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install Vercel CLI
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
+          run_install: false
+
+      - name: Ensure pnpm disponible
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.18.0 --activate
+          pnpm --version
+          command -v pnpm
+
+      - name: Instalar Vercel CLI
         run: pnpm add --global vercel@48.3.0
 
-      - name: Build API (prebuilt)
+      - name: Sincronizar configuración Vercel API
+        working-directory: apps/api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          export PATH="$PNPM_HOME:/usr/local/bin:$PATH"
-          echo "pnpm binary: $(command -v pnpm || echo 'NOT FOUND')"
-          ls -l "$PNPM_HOME" || true
-          pushd apps/api
-          mkdir -p node_modules/.bin
-          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
-          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
-          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
-          popd
+          vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy API to Vercel Production
         id: deploy-api
+        working-directory: apps/api
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy apps/api/.vercel/output --prebuilt --yes --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
+          URL=$(vercel deploy --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo "### 🚀 API Production Deployment"
             echo ""
             echo "- URL: $URL"
           } >> "$GITHUB_STEP_SUMMARY"
-          rm -rf apps/api/.vercel/output
 
-      - name: Build Web (prebuilt)
+      - name: Sincronizar configuración Vercel Web
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          export PATH="$PNPM_HOME:/usr/local/bin:$PATH"
-          echo "pnpm binary: $(command -v pnpm || echo 'NOT FOUND')"
-          mkdir -p node_modules/.bin
-          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
-          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel pull --yes --environment=production --scope brisa-cubana --token="$VERCEL_TOKEN"
-          PATH="$PNPM_HOME:/usr/local/bin:$PATH" vercel build --prod --scope brisa-cubana --token="$VERCEL_TOKEN"
+          vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Production
         id: deploy-web
@@ -115,7 +99,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy .vercel/output --prebuilt --yes --prod --scope brisa-cubana --token="$VERCEL_TOKEN")
+          URL=$(vercel deploy --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo ""
@@ -123,7 +107,6 @@ jobs:
             echo ""
             echo "- URL: $URL"
           } >> "$GITHUB_STEP_SUMMARY"
-          rm -rf .vercel/output
 
       - name: Smoke test production endpoints
         env:
