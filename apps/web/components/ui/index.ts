@@ -21,6 +21,23 @@ export { KPICard, type KPICardProps } from "./kpi-card";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export { Chip } from "./chip";
 export { Table } from "./table";
+export {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "./accordion";
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "./dialog";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
+export { ScrollArea, type ScrollAreaProps } from "./scroll-area";
 
 // Navigation Components
 export {
@@ -28,14 +45,33 @@ export {
   type BreadcrumbsProps,
   type BreadcrumbItem,
 } from "./breadcrumbs";
+export { PageTransition, type PageTransitionProps } from "./page-transition";
 
 // Feedback Components
 export { ToastProvider, useToast } from "./toast";
 export { Tooltip, type TooltipProps } from "./tooltip";
 export { Skeleton, type SkeletonProps } from "./skeleton";
+export { Spinner, type SpinnerProps } from "./spinner";
+export { Alert, type AlertProps } from "./alert";
+export { Progress, type ProgressProps } from "./progress";
+export { EmptyState, type EmptyStateProps } from "./empty-state";
 
 // Data & List Components
 export { FilterChips } from "./filter-chips";
 export { InfiniteList } from "./infinite-list";
 export { SearchBar } from "./search-bar";
 export { Pagination } from "./pagination";
+
+// Overlays & Dropdowns
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuGroup,
+} from "./dropdown-menu";
+
+// Utilities
+export { ThemeToggle } from "./theme-toggle";

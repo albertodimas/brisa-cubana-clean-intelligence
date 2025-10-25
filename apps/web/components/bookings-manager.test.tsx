@@ -3,14 +3,8 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Booking, PaginationInfo, Property, Service } from "@/lib/api";
+import type { QueryParams } from "@/hooks/use-paginated-resource";
 import { BookingsManager } from "./bookings-manager";
-
-type BookingFilterInput = {
-  status: string;
-  from: string;
-  to: string;
-  search: string;
-};
 
 function getFormAction(
   form: HTMLFormElement,
@@ -90,86 +84,47 @@ const pageInfo: PaginationInfo = {
   hasMore: true,
 };
 
-const filters: BookingFilterInput = {
-  status: "ALL",
-  from: "",
-  to: "",
-  search: "",
+const defaultQuery: QueryParams = {};
+
+const defaultProps = {
+  bookings,
+  pageInfo,
+  isLoading: false,
+  isLoadingMore: false,
+  onLoadMore: vi.fn(),
+  onUpdate: vi.fn().mockResolvedValue({ success: "Updated" }),
+  services,
+  properties,
+  formatDateTime: (value: string) => value,
+  currentQuery: defaultQuery,
+  setQuery: vi.fn(),
+  resetQuery: vi.fn(),
+  refresh: vi.fn(),
+  onToast: vi.fn(),
 };
 
 describe("BookingsManager", () => {
   it("renders skeletons while loading", () => {
-    render(
-      <BookingsManager
-        filters={filters}
-        onFiltersChange={vi.fn()}
-        bookings={bookings}
-        pageInfo={pageInfo}
-        isLoading
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onUpdate={vi.fn()}
-        updatingId={null}
-        services={services}
-        properties={properties}
-        formatDateTime={(value) => value}
-      />,
-    );
+    render(<BookingsManager {...defaultProps} isLoading />);
 
     const skeletons = document.querySelectorAll(".animate-pulse");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
-  it("calls filters change handler when status select changes", async () => {
-    const onFiltersChange = vi.fn();
+  it("updates query when status select changes", async () => {
+    const setQuery = vi.fn();
     const user = userEvent.setup();
 
-    render(
-      <BookingsManager
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-        bookings={bookings}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onUpdate={vi.fn()}
-        updatingId={null}
-        services={services}
-        properties={properties}
-        formatDateTime={(value) => value}
-      />,
-    );
+    render(<BookingsManager {...defaultProps} setQuery={setQuery} />);
 
     const statusSelect = screen.getByTestId(
       "booking-status-filter",
     ) as HTMLSelectElement;
     await user.selectOptions(statusSelect, "CONFIRMED");
 
-    expect(onFiltersChange).toHaveBeenCalledWith({ status: "CONFIRMED" });
-  });
-
-  it("disables submit button when booking is updating", () => {
-    render(
-      <BookingsManager
-        filters={filters}
-        onFiltersChange={vi.fn()}
-        bookings={bookings}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onUpdate={vi.fn()}
-        updatingId="book-1"
-        services={services}
-        properties={properties}
-        formatDateTime={(value) => value}
-      />,
-    );
-
-    const form = screen.getByTestId("booking-card");
-    const submit = within(form).getByRole("button", { name: "Guardando..." });
-    expect(submit).toBeDisabled();
+    await waitFor(() => {
+      expect(setQuery).toHaveBeenCalledWith({ status: "CONFIRMED" });
+    });
   });
 
   it("invokes load more callback when button clicked", async () => {
@@ -178,18 +133,9 @@ describe("BookingsManager", () => {
 
     render(
       <BookingsManager
-        filters={filters}
-        onFiltersChange={vi.fn()}
-        bookings={bookings}
-        pageInfo={{ ...pageInfo, hasMore: true }}
-        isLoading={false}
-        isLoadingMore={false}
+        {...defaultProps}
         onLoadMore={onLoadMore}
-        onUpdate={vi.fn()}
-        updatingId={null}
-        services={services}
-        properties={properties}
-        formatDateTime={(value) => value}
+        pageInfo={{ ...pageInfo, hasMore: true }}
       />,
     );
 
@@ -199,26 +145,11 @@ describe("BookingsManager", () => {
     expect(onLoadMore).toHaveBeenCalled();
   });
 
-  it("updates search filter", async () => {
+  it("updates search query", async () => {
     const user = userEvent.setup();
-    const onFiltersChange = vi.fn();
+    const setQuery = vi.fn();
 
-    render(
-      <BookingsManager
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-        bookings={bookings}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
-        onUpdate={vi.fn()}
-        updatingId={null}
-        services={services}
-        properties={properties}
-        formatDateTime={(value) => value}
-      />,
-    );
+    render(<BookingsManager {...defaultProps} setQuery={setQuery} />);
 
     const searchInput = screen.getByPlaceholderText(
       "Buscar por código, cliente o propiedad...",
@@ -227,31 +158,25 @@ describe("BookingsManager", () => {
 
     await waitFor(
       () => {
-        expect(onFiltersChange).toHaveBeenCalledWith({ search: "BRISA" });
+        expect(setQuery).toHaveBeenCalledWith({ search: "BRISA" });
       },
-      { timeout: 500 },
+      { timeout: 1000 },
     );
   });
 
-  it("submits booking update form via action handler", async () => {
+  it("submits booking update form and calls toast on success", async () => {
     const onUpdate = vi
-      .fn<(bookingId: string, formData: FormData) => Promise<void>>()
-      .mockResolvedValue(undefined);
+      .fn()
+      .mockResolvedValue({ success: "Booking updated successfully" });
+    const onToast = vi.fn();
+    const refresh = vi.fn();
 
     render(
       <BookingsManager
-        filters={filters}
-        onFiltersChange={vi.fn()}
-        bookings={bookings}
-        pageInfo={pageInfo}
-        isLoading={false}
-        isLoadingMore={false}
-        onLoadMore={vi.fn()}
+        {...defaultProps}
         onUpdate={onUpdate}
-        updatingId={null}
-        services={services}
-        properties={properties}
-        formatDateTime={(value) => value}
+        onToast={onToast}
+        refresh={refresh}
       />,
     );
 
@@ -266,5 +191,41 @@ describe("BookingsManager", () => {
     });
 
     expect(onUpdate).toHaveBeenCalledWith("book-1", expect.any(FormData));
+    expect(onToast).toHaveBeenCalledWith(
+      "Booking updated successfully",
+      "success",
+    );
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it("submits booking update form and calls toast on error", async () => {
+    const onUpdate = vi
+      .fn()
+      .mockResolvedValue({ error: "Failed to update booking" });
+    const onToast = vi.fn();
+    const refresh = vi.fn();
+
+    render(
+      <BookingsManager
+        {...defaultProps}
+        onUpdate={onUpdate}
+        onToast={onToast}
+        refresh={refresh}
+      />,
+    );
+
+    const form = screen.getByTestId("booking-card") as HTMLFormElement;
+    const action = getFormAction(form);
+    if (!action) throw new Error("Missing booking form action");
+
+    await act(async () => {
+      const data = new FormData();
+      data.set("bookingNotes", "Nueva nota");
+      await action(data);
+    });
+
+    expect(onUpdate).toHaveBeenCalledWith("book-1", expect.any(FormData));
+    expect(onToast).toHaveBeenCalledWith("Failed to update booking", "error");
+    expect(refresh).not.toHaveBeenCalled();
   });
 });

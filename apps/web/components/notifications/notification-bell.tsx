@@ -117,9 +117,9 @@ export function NotificationBell({
       try {
         const result = await markNotificationReadAction(notificationId);
         if (result.error) {
-          showToast(result.error, "error");
+          showToast(result.error, { type: "error" });
         } else if (result.success) {
-          showToast(result.success, "success");
+          showToast(result.success, { type: "success" });
           await refresh(currentQuery);
         }
         return result;
@@ -136,10 +136,12 @@ export function NotificationBell({
     startMarkAll(async () => {
       const result = await markAllNotificationsReadAction();
       if (result.error) {
-        showToast(result.error, "error");
+        showToast(result.error, { type: "error" });
         return;
       }
-      showToast(result.success ?? "Todas las notificaciones leídas", "success");
+      showToast(result.success ?? "Todas las notificaciones leídas", {
+        type: "success",
+      });
       await refresh(currentQuery);
     });
   }, [currentQuery, refresh, showToast, startMarkAll]);
