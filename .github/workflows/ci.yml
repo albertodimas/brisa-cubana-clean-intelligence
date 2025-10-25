@@ -84,6 +84,11 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
+          GLOBAL_PNPM="$(pnpm root -g)/pnpm"
+          if [ -d "$GLOBAL_PNPM" ]; then
+            mkdir -p node_modules
+            ln -snf "$GLOBAL_PNPM" node_modules/pnpm
+          fi
           mkdir -p node_modules/.bin
           ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
           vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
@@ -119,6 +124,11 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
+          GLOBAL_PNPM="$(pnpm root -g)/pnpm"
+          if [ -d "$GLOBAL_PNPM" ]; then
+            mkdir -p node_modules
+            ln -snf "$GLOBAL_PNPM" node_modules/pnpm
+          fi
           mkdir -p node_modules/.bin
           ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
           vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
