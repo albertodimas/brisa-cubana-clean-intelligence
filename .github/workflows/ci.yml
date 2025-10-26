@@ -111,6 +111,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Sincronizar configuración Vercel Web
+        working-directory: apps/web
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -120,12 +121,13 @@ jobs:
 
       - name: Deploy Web to Vercel Production
         id: deploy-web
+        working-directory: apps/web
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
-          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN")
+          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
           WEB_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
           if [ -z "$WEB_URL" ]; then
