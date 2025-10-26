@@ -98,7 +98,10 @@ jobs:
           set -euo pipefail
           DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
-          API_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
+          API_URL=$(echo "$DEPLOY_OUTPUT" | sed -n 's/^.*Production:[[:space:]]*\([^[:space:]]\+\).*/\1/p' | tail -n1)
+          if [ -z "$API_URL" ]; then
+            API_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
+          fi
           if [ -z "$API_URL" ]; then
             echo "No se pudo determinar la URL de producción del API" >&2
             exit 1
@@ -127,7 +130,10 @@ jobs:
           set -euo pipefail
           DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
-          WEB_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
+          WEB_URL=$(echo "$DEPLOY_OUTPUT" | sed -n 's/^.*Production:[[:space:]]*\([^[:space:]]\+\).*/\1/p' | tail -n1)
+          if [ -z "$WEB_URL" ]; then
+            WEB_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
+          fi
           if [ -z "$WEB_URL" ]; then
             echo "No se pudo determinar la URL de producción del sitio web" >&2
             exit 1
@@ -227,7 +233,9 @@ jobs:
               }
             ]
           }')
-          curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+          if ! curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"; then
+            echo "::warning::No se pudo entregar la notificación a Slack (respuesta no exitosa). Continuando sin bloquear el deploy."
+          fi
 
       - name: Audit recent Vercel deployments
         env:

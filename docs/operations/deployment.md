@@ -149,13 +149,13 @@ La propagación global suele completarse en <1 hora (máximo 48 h).
 
 ## 4. Despliegue
 
-1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` realiza `vercel pull --environment=production`, ejecuta `vercel build --prod` localmente (API y Web) y publica los artefactos generados con `vercel deploy --prebuilt --prod`. El resultado queda documentado en el `GITHUB_STEP_SUMMARY`, junto con una auditoría automática de los últimos deployments generada por `scripts/report-vercel-deployments.sh`.
+1. Un push a `main` ejecuta el workflow **CI (Main Branch)**. Tras el job `quality`, el job `deploy` prepara pnpm/Node, sincroniza la configuración (`vercel pull --environment=production`), valida que ambos paquetes compilan con `pnpm turbo run build --filter=@brisa/api --filter=@brisa/web` y finalmente publica con `vercel deploy --prod --yes` para API y Web. Capturamos la URL marcada como `Production:` por la CLI y la publicamos en el `GITHUB_STEP_SUMMARY` junto con el reporte de `scripts/report-vercel-deployments.sh`.
 
-   > Nota (25-oct-2025): añadimos un paso explícito `sudo npm install -g pnpm@10.18.0` en los workflows `ci.yml` y `vercel-preview.yml` para sortear el bug abierto de Vercel CLI 48.x que ejecutaba `vercel build` sin localizar `pnpm` en GitHub Actions (`spawn pnpm ENOENT`, ver issue #75). Mientras Vercel publica fix oficial, mantener el pin a 10.18.0 y ese refuerzo global.
+   > Nota (25-oct-2025): mantenemos el refuerzo `sudo npm install -g pnpm@10.18.0` porque el workflow de previews todavía ejecuta `vercel build`. Hasta que Vercel estabilice la detección de pnpm en runners de GitHub, conserva ese paso y el pin a la versión 10.18.0.
 
 2. Verifica en GitHub Actions que los pasos “Deploy API…” y “Deploy Web…” concluyan con la URL productiva `● Ready`. Si fallan, corrige y vuelve a ejecutar el workflow.
-3. Los pushes a `main` disparan el workflow `ci.yml`, que después de pasar lint/typecheck/tests genera prebuilds locales y usa `vercel deploy --prebuilt --prod` para API y web sin aprobación manual. Los pull requests siguen usando `.github/workflows/vercel-preview.yml`, que ahora replica el mismo esquema (`vercel build` + `vercel deploy --prebuilt`) apuntando al entorno Preview.
-4. Tras el despliegue, el job ejecuta un smoke test automático sobre `https://<deployment>/healthz` (API y web) para detectar problemas inmediatos. Si falla, el workflow se marca en rojo.
+3. Los pull requests usan `.github/workflows/vercel-preview.yml`, que ejecuta lint/type/tests, genera builds locales (`pnpm build`) y utiliza `vercel build` + `vercel deploy --prebuilt --yes` contra el entorno Preview. Los pushes a `main` ya no dependen de `--prebuilt`; dejamos que Vercel haga el build remoto tras validar localmente con Turbo.
+4. Tras el despliegue, el job ejecuta un smoke test automático sobre el alias productivo detectado (`Production:`). Si existe `HEALTH_CHECK_TOKEN`, lo envía como `Authorization: Bearer ...` tanto para `https://<alias-api>/healthz` como `https://<alias-web>/healthz`. Si el dominio personalizado no está configurado o el token no coincide con Vercel, el paso marca el workflow en rojo.
 5. Si `SLACK_WEBHOOK_URL` está presente, el workflow publica un resumen del deploy en Slack (web/API, commit, timestamp), lo que permite monitorear releases sin entrar a GitHub.
 
 > **Seguridad:** la rama `main` está protegida (`Settings → Branches`) y exige al menos una revisión aprobatoria antes del merge; de esta forma sólo cambios revisados activan el deploy automático.
