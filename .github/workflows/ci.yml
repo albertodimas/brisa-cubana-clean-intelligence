@@ -156,7 +156,7 @@ import re
 url = sys.argv[1]
 parts = urlsplit(url)
 host = parts.netloc
-match = re.match(r'^([a-z0-9-]+?)-[a-z0-9]+-[a-z0-9-]+(\.vercel\.app)$', host)
+match = re.match(r'^([a-z0-9-]+)-[a-z0-9]{6,}-[a-z0-9-]+(\.vercel\.app)$', host)
 if match:
     host = f"{match.group(1)}{match.group(2)}"
 normalized = urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment))
