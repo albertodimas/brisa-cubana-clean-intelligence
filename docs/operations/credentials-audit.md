@@ -1,27 +1,25 @@
-# Credentials Audit Report
+# Informe de Auditoría de Credenciales
 
-**Fecha:** 26 de octubre de 2025
-**Auditoría:** Comparación de credenciales documentadas vs estado actual
-**Estado:** ⚠️ 1 credencial crítica pendiente
-
----
-
-## 📊 Resumen Ejecutivo
-
-### ✅ Estado General: MUY BUENO (97% completo)
-
-- **32/33 variables** configuradas correctamente en Vercel (Dev/Preview listas, Prod con un pendiente)
-- **5/5 GitHub Secrets** configurados (incluye POSTHOG_API_KEY)
-- **1 variable crítica aún pendiente en producción**
-- **1 variable correctamente eliminada** (LEAD_WEBHOOK_URL)
+**Fecha:** 26 de octubre de 2025  
+**Alcance:** Comparación entre credenciales documentadas y configuración actual  
+**Estado global:** ⚠️ 1 credencial crítica pendiente
 
 ---
 
-## 🔍 Análisis Detallado
+## 📊 Resumen ejecutivo
 
-### ✅ **CREDENCIALES VERIFICADAS Y CORRECTAS**
+- **32 de 33 variables** configuradas correctamente en Vercel (Dev y Preview completas; Prod con un pendiente)
+- **5 de 5 secretos** activos en GitHub (incluye `POSTHOG_API_KEY`)
+- **1 variable crítica** falta en producción
+- **1 variable** eliminada de forma intencional (`LEAD_WEBHOOK_URL`)
 
-#### **1. Database (Neon PostgreSQL)** ✅
+---
+
+## 🔍 Análisis detallado
+
+### ✅ Credenciales verificadas
+
+#### 1. Base de datos (Neon PostgreSQL)
 
 ```bash
 ✅ DATABASE_URL (Vercel: Dev/Preview/Prod)
@@ -29,16 +27,16 @@
 ✅ NEON_API_KEY (GitHub Secrets)
 ```
 
-**Valores documentados anteriores:**
+Valores documentados anteriormente:
 
-- Pooled: `postgresql://neondb_owner:npg_TNDc5pMA4Rjw@ep-winter-frog-ad2snh37-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require`
-- Direct: `postgresql://neondb_owner:npg_TNDc5pMA4Rjw@ep-winter-frog-ad2snh37.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require`
+- Con pool: `postgresql://neondb_owner:npg_TNDc5pMA4Rjw@ep-winter-frog-ad2snh37-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require`
+- Conexión directa: `postgresql://neondb_owner:npg_TNDc5pMA4Rjw@ep-winter-frog-ad2snh37.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require`
 
-**Estado:** ✅ Configurado correctamente en Vercel (valores encriptados verificados)
+Estado actual: ✅ Configuración correcta en Vercel (valores encriptados comprobados).
 
 ---
 
-#### **2. Authentication & Security** ✅
+#### 2. Autenticación y seguridad
 
 ```bash
 ✅ JWT_SECRET (Vercel: Dev/Preview/Prod)
@@ -47,46 +45,45 @@
 ✅ HEALTH_CHECK_TOKEN (Vercel + GitHub Secrets)
 ```
 
-**Valores documentados anteriores:**
+Valores documentados:
 
 - JWT_SECRET: `mLKjRwKIiSbe/JRohMoTgZWF0BsjVra/tSBAvBDZRwk=`
 - AUTH_SECRET: `tXD6mAQMrstV3BWwgHyGoyLnS0Mv4q4HgXIqkYWCzAY=`
 - API_TOKEN: `OR8W7K5UNNeSuVjKKOlFOGSJDEBenEBWbEKy++7QRp0=`
 - HEALTH_CHECK_TOKEN: `go2ND3P9QtlublWDddDWw-gO0aP_v666`
 
-**Estado:** ✅ Todos configurados y sincronizados entre Vercel y GitHub Secrets
+Estado actual: ✅ Variables sincronizadas entre Vercel y GitHub Secrets.
 
 ---
 
-#### **3. Sentry (Error Tracking)** ✅
+#### 3. Observabilidad (Sentry)
 
 ```bash
-✅ NEXT_PUBLIC_SENTRY_DSN (Vercel: Dev/Preview/Prod)
-✅ SENTRY_DSN (Vercel: Dev/Preview/Prod)
-✅ SENTRY_ORG (Vercel: Dev/Preview/Prod)
-✅ SENTRY_PROJECT (Vercel: Dev/Preview/Prod)
-✅ SENTRY_AUTH_TOKEN (Vercel: Preview/Prod)
-✅ SENTRY_ENVIRONMENT (Vercel: Dev/Preview/Prod)
-✅ SENTRY_TRACES_SAMPLE_RATE (Vercel: Dev/Preview/Prod)
-✅ SENTRY_PROFILES_SAMPLE_RATE (Vercel: Dev/Preview/Prod)
-✅ NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE (Vercel: Dev/Preview/Prod)
-✅ NEXT_PUBLIC_SENTRY_PROFILES_SAMPLE_RATE (Vercel: Dev/Preview/Prod)
-✅ LOG_DRAIN_VERIFICATION_CODE (Vercel: Dev/Preview/Prod)
+✅ NEXT_PUBLIC_SENTRY_DSN
+✅ SENTRY_DSN
+✅ SENTRY_ORG
+✅ SENTRY_PROJECT
+✅ SENTRY_AUTH_TOKEN
+✅ SENTRY_ENVIRONMENT
+✅ SENTRY_TRACES_SAMPLE_RATE
+✅ SENTRY_PROFILES_SAMPLE_RATE
+✅ NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE
+✅ NEXT_PUBLIC_SENTRY_PROFILES_SAMPLE_RATE
+✅ LOG_DRAIN_VERIFICATION_CODE
 ```
 
-**Valores documentados anteriores:**
+Valores de referencia:
 
-- Web DSN: `https://61251c0e4f5553d7febc1d31ab8a9da6@o4509669004541952.ingest.us.sentry.io/4510220183273472`
-- API DSN: `https://61251c0e4f5553d7febc1d31ab8a9da6@o4509669004541952.ingest.us.sentry.io/4510220183273472`
-- Organization: `brisacubana`
-- Projects: `brisa-cubana-web`, `brisa-cubana-api`
-- Log Drain Code: `7f4677dfb49b149c4a67d45e84e0bcaab835ea50`
+- DSN (web y API): `https://61251c0e4f5553d7febc1d31ab8a9da6@o4509669004541952.ingest.us.sentry.io/4510220183273472`
+- Organización: `brisacubana`
+- Proyectos: `brisa-cubana-web`, `brisa-cubana-api`
+- Código de log drain: `7f4677dfb49b149c4a67d45e84e0bcaab835ea50`
 
-**Estado:** ✅ Configuración completa de observabilidad Sentry + Vercel
+Estado actual: ✅ Observabilidad completa enlazada con Vercel.
 
 ---
 
-#### **4. PostHog (Analytics)** ⚠️
+#### 4. PostHog (analítica)
 
 ```bash
 ✅ NEXT_PUBLIC_POSTHOG_KEY (Vercel: Dev/Preview/Prod)
@@ -94,232 +91,209 @@
 ✅ POSTHOG_API_KEY (GitHub Secrets)
 ```
 
-**Valores documentados anteriores:**
+Valores de referencia:
 
-- Project API Key (frontend): `phc_Y9ZpY5DBbJaQl6IACs8r16XyiThgaJ2DOWj4Ru81IQF`
-- Personal API Key (CI/CD): `phx_IP8KY8eyCZMoiGJNN7DONvopGUeCKhI09azbBUs0YSfk23F`
+- Clave de proyecto (frontend): `phc_Y9ZpY5DBbJaQl6IACs8r16XyiThgaJ2DOWj4Ru81IQF`
+- Clave personal (CI/CD): `phx_IP8KY8eyCZMoiGJNN7DONvopGUeCKhI09azbBUs0YSfk23F`
 - Host: `https://us.posthog.com`
-- Project ID: `225064`
+- Id. de proyecto: `225064`
 
-**Impacto:**
-
-- ✅ `posthog-monitor.yml` puede ejecutarse (recomendado reactivarlo)
-- ✅ Frontend analytics sigue operativo (NEXT_PUBLIC_POSTHOG_KEY)
+Impacto: ✅ El flujo `posthog-monitor.yml` puede ejecutarse en cualquier momento.
 
 ---
 
-#### **5. Slack Integration** ✅
+#### 5. Integración Slack
 
 ```bash
 ✅ SLACK_WEBHOOK_URL (Vercel + GitHub Secrets)
 ```
 
-**Valores documentados anteriores:**
+Valores de referencia:
 
 - Webhook: `https://hooks.slack.com/services/...` (redactado)
-- App ID: `A09MF1LE9UK`
+- Id. de aplicación: `A09MF1LE9UK`
 - Canal: `#todo-brisa-cubana`
 
-**Estado:** ✅ Sincronizado entre Vercel y GitHub Secrets, funcionando correctamente
+Estado actual: ✅ Webhook activo y sincronizado.
 
 ---
 
-#### **6. Stripe (Payment Processing)** ⚠️
+#### 6. Stripe (procesamiento de pagos)
 
 ```bash
 ✅ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (Vercel: Dev/Preview/Prod)
 ✅ STRIPE_WEBHOOK_SECRET (Vercel: Dev/Preview/Prod)
-⚠️ STRIPE_SECRET_KEY (Vercel) - Dev/Preview ✅ · Prod ❌
+⚠️ STRIPE_SECRET_KEY (Vercel) — Dev/Preview ✅ · Prod ❌
 ```
 
-**Valores documentados anteriores:**
+Valores de referencia:
 
-- Publishable (test): `pk_test_brisa_demo_20251015`
-- Secret (test): `sk_test_...` (valor exacto no documentado) ⚠️ **FALTANTE**
-- Secret (live): `sk_live_brisa_20251020_prod` (según nota) ⚠️ **FALTANTE**
-- Webhook Secret: `whsec_50609f14a3c3adf76df59159b3d1c177`
+- Publishable (modo prueba): `pk_test_brisa_demo_20251015`
+- Secret (modo prueba): `sk_test_...` (clave actual: `sk_test_redacted`)
+- Secret (modo live, sugerido): `sk_live_brisa_20251020_prod`
+- Webhook secret: `whsec_50609f14a3c3adf76df59159b3d1c177`
 
-**Impacto:**
+Impacto:
 
-- ✅ Checkout en entornos de prueba habilitado (Development/Preview)
-- 🔴 Producción bloqueada hasta cargar `sk_live_...`
-
-**Acción pendiente (producción):**
-
-```bash
-# Production (live mode - SOLO si la cuenta está verificada)
-vercel env add STRIPE_SECRET_KEY production
-# Pega: sk_live_... (obtén la clave en https://dashboard.stripe.com/apikeys)
-
-# Redeploy
-vercel --prod
-```
+- ✅ Checkout operativo en entornos de prueba (Development/Preview)
+- 🔴 Producción permanece bloqueada hasta cargar `sk_live_...`
 
 ---
 
-#### **7. URLs & Configuration** ✅
+#### 7. URLs y configuración general
 
 ```bash
-✅ NEXT_PUBLIC_API_URL (Vercel: Dev/Preview/Prod)
-✅ INTERNAL_API_URL (Vercel: Dev/Preview/Prod)
-✅ NEXT_PUBLIC_BASE_URL (Vercel: Dev/Preview/Prod)
-✅ NEXT_PUBLIC_SITE_URL (Vercel: Dev/Preview/Prod)
-✅ NEXTAUTH_URL (Vercel: Dev/Preview/Prod)
-✅ ALLOWED_ORIGINS (Vercel: Dev/Preview/Prod)
+✅ NEXT_PUBLIC_API_URL
+✅ INTERNAL_API_URL
+✅ NEXT_PUBLIC_BASE_URL
+✅ NEXT_PUBLIC_SITE_URL
+✅ NEXTAUTH_URL
+✅ ALLOWED_ORIGINS
 ```
 
-**Estado:** ✅ URLs configuradas correctamente para todos los ambientes
+Estado actual: ✅ Enlaces alineados en los tres entornos.
 
 ---
 
-#### **8. Rate Limiting** ✅
+#### 8. Rate limiting
 
 ```bash
-✅ LOGIN_RATE_LIMIT (Vercel: Dev/Preview/Prod)
-✅ LOGIN_RATE_LIMIT_WINDOW_MS (Vercel: Dev/Preview/Prod)
+✅ LOGIN_RATE_LIMIT
+✅ LOGIN_RATE_LIMIT_WINDOW_MS
 ```
 
-**Estado:** ✅ Configurado correctamente
+Estado actual: ✅ Protecciones activas en Vercel.
 
 ---
 
-#### **9. Magic Link (Portal Cliente)** ✅
+#### 9. Portal de clientes (Magic Link)
 
 ```bash
 ✅ PORTAL_MAGIC_LINK_EXPOSE_DEBUG (Vercel: Preview/Prod)
 ```
 
-**Estado:** ✅ Configurado para debugging en ambientes no-producción
+Estado actual: ✅ Configuración lista para depuración en ambientes no productivos.
 
 ---
 
-### ✅ **ELIMINACIONES CORRECTAS**
+### 🗑️ Eliminaciones intencionales
 
-#### **LEAD_WEBHOOK_URL** - Eliminado correctamente ✅
+#### `LEAD_WEBHOOK_URL`
 
-**Valor anterior:**
+- Valor anterior: `https://example.com/lead-webhook` (placeholder sin uso)
+- Motivo: migración a captura interna de leads.
+- Cambios asociados:
+  - Leads almacenados en PostgreSQL (`tabla leads`)
+  - Endpoint interno: `POST /api/leads` (Hono API)
+  - Notificaciones ahora mediante `SLACK_WEBHOOK_URL`
 
-- `https://example.com/lead-webhook` (placeholder, no funcional)
-
-**Razón de eliminación:**
-
-- Sistema migrado a captura interna de leads
-- Leads ahora se guardan directamente en PostgreSQL (tabla `leads`)
-- Endpoint nuevo: `POST /api/leads` (Hono API interno)
-- Notificaciones ahora via SLACK_WEBHOOK_URL (más directo)
-
-**Beneficios:**
-
-- ✅ Sin dependencia de webhooks externos (Zapier/Make)
-- ✅ Control total de datos
-- ✅ Dashboard admin disponible (`GET /api/leads`)
-- ✅ Tracking UTM completo en DB
+Beneficios: sin dependencias externas, control total de datos, dashboard administrativo y tracking UTM incluido.
 
 ---
 
-## 📋 Checklist de Acción
+## 📋 Lista de tareas
 
-### 🔴 **CRÍTICO (Bloqueante para pagos en producción)**
+### 🔴 Crítico (bloquea cobros en producción)
 
-- [ ] **Agregar STRIPE_SECRET_KEY (live) en Vercel**
-  - Production: `sk_live_...` (solo si cuenta Stripe verificada)
-  - Redeploy después: `vercel --prod`
+- [ ] Agregar `STRIPE_SECRET_KEY` (modo live) en Vercel
+  - Producción: `sk_live_...` (solo cuando la cuenta de Stripe esté verificada)
+  - Redeploy requerido: `vercel --prod`
 
-### ⚠️ **IMPORTANTE (Seguimiento)**
+### ⚠️ Importante (seguimiento recomendado)
 
-- [ ] Re-activar `posthog-monitor.yml` una vez verificado el secret (opcional)
+- [ ] Reactivar `posthog-monitor.yml` después de validar el secret (opcional pero sugerido).
 
 ---
 
-## 🔐 Valores Pendientes
+## 🔐 Datos pendientes
 
-### **STRIPE_SECRET_KEY (live)**
+### STRIPE_SECRET_KEY (live)
 
-**Cómo obtenerla:**
+Cómo obtenerla:
 
-1. Ir a https://dashboard.stripe.com/apikeys (modo live).
+1. Entrar a https://dashboard.stripe.com/apikeys (modo live).
 2. Revelar la clave secreta (`sk_live_...`).
-3. Agregarla a Vercel: `vercel env add STRIPE_SECRET_KEY production`.
-4. Redeploy: `vercel --prod`.
+3. Agregarla en Vercel: `vercel env add STRIPE_SECRET_KEY production`.
+4. Lanzar un redeploy: `vercel --prod`.
 
-**Estado actual:** Dev/Preview configurados con `sk_test_…`; producción en espera.
-
----
-
-## 📊 Estadísticas
-
-### **Vercel Environment Variables**
-
-- **Total configuradas:** 32 variables (Dev/Preview completos)
-- **Faltantes:** 1 en producción (`STRIPE_SECRET_KEY` live)
-- **Completitud:** ≈97%
-
-### **GitHub Secrets**
-
-- **Total configuradas:** 5 secrets (100%)
-- **Completitud:** 5/5
-
-### **Eliminaciones Intencionales**
-
-- **LEAD_WEBHOOK_URL:** ✅ Correctamente removido (migración a sistema interno)
+Estado actual: Dev/Preview usan `sk_test_…`; producción sigue en espera.
 
 ---
 
-## 🎯 Estado Final
+## 📈 Métricas de configuración
 
-### ✅ **Lo que está funcionando:**
+### Variables de entorno en Vercel
 
-1. ✅ Base de datos (Neon PostgreSQL)
-2. ✅ Autenticación (JWT, NextAuth, Magic Links)
-3. ✅ Observabilidad (Sentry error tracking + log drain)
-4. ✅ Analytics frontend (PostHog write-only)
-5. ✅ Notificaciones (Slack webhooks)
-6. ✅ Sistema de leads (interno con PostgreSQL)
-7. ✅ Rate limiting
-8. ✅ URLs y routing
+- Variables activas: 32
+- Faltantes: 1 (solo en producción)
+- Nivel de completitud: ~97 %
 
-### 🔴 **Lo que NO está funcionando:**
+### Secretos en GitHub
 
-1. 🔴 **Stripe checkout en producción** – falta `STRIPE_SECRET_KEY` live
+- Secretos activos: 5
+- Completitud: 100 %
 
-### ✅ **Lo que se mejoró:**
+### Eliminaciones previstas
 
-1. ✅ Sistema de leads ahora es interno (no depende de webhooks externos)
-2. ✅ Eliminado placeholder de LEAD_WEBHOOK_URL
-3. ✅ Tracking UTM completo en base de datos
+- `LEAD_WEBHOOK_URL`: ✅ retirado tras migrar a sistema interno.
 
 ---
 
-## 📞 Próximos Pasos
+## 🎯 Estado final
 
-### **1. Agregar STRIPE_SECRET_KEY live (cuando toque activar pagos)**
+### ✅ Operativo
+
+1. Base de datos (Neon PostgreSQL)
+2. Autenticación (JWT, NextAuth, Magic Links)
+3. Observabilidad (Sentry + log drain)
+4. Analítica frontend (PostHog write-only)
+5. Notificaciones (Slack webhook)
+6. Sistema interno de leads (PostgreSQL)
+7. Rate limiting
+8. URLs y enrutamiento
+
+### 🔴 Pendiente
+
+1. Stripe checkout en producción (falta `STRIPE_SECRET_KEY` live)
+
+### ✅ Mejoras recientes
+
+1. Migración de leads a backend interno
+2. Eliminación del placeholder `LEAD_WEBHOOK_URL`
+3. Tracking UTM completo en base de datos
+
+---
+
+## 📞 Próximos pasos
+
+### 1. Cargar `STRIPE_SECRET_KEY` (live) cuando se habiliten cobros reales
 
 ```bash
-# Obtener de Stripe Dashboard
+# Obtener la clave desde el dashboard
 open https://dashboard.stripe.com/test/apikeys
 
-# Agregar a Vercel (solo producción)
+# Guardarla en Vercel (producción)
 vercel env add STRIPE_SECRET_KEY production
 
 # Redeploy
 vercel --prod
 ```
 
-### **2. Verificar funcionamiento**
+### 2. Verificar funcionamiento
 
 ```bash
-# Test checkout locally
+# Probar checkout en local
 pnpm dev
-# Ir a http://localhost:3000/checkout
+# Abrir http://localhost:3000/checkout
 
-# Test PostHog monitor
+# Ejecución del monitor de PostHog
 gh workflow run posthog-monitor.yml
 gh run list --workflow=posthog-monitor.yml
 ```
 
 ---
 
-**Documento generado:** 26 de octubre de 2025
-**Auditor:** Claude Code
-**Estado:** ⚠️ 2 credenciales faltantes (1 crítica, 1 importante)
-**Completitud general:** 94% (31/33)
+**Documento generado:** 26 de octubre de 2025  
+**Responsable:** Claude Code  
+**Pendientes detectados:** 2 credenciales (1 crítica, 1 importante)  
+**Progreso total:** 94 % (31 de 33 credenciales)

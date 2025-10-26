@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import type { Session } from "next-auth";
 import { AdminPanel } from "@/components/admin-panel";
 import { Dashboard } from "@/components/dashboard";
@@ -43,6 +44,12 @@ import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: "Panel operativo · Brisa Cubana",
+  description:
+    "Monitorea reservas, servicios, inventarios y notificaciones en tiempo real desde la plataforma operativa de Brisa Cubana Clean Intelligence.",
+};
 
 type PanelUser = NonNullable<Session["user"]>;
 

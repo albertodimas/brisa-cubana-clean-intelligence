@@ -1,10 +1,17 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { fetchServicesPage } from "@/lib/api";
 import { CheckoutClient } from "./checkout-client";
 import { ScrollProgress, ScrollReveal } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: "Checkout de servicios · Brisa Cubana",
+  description:
+    "Reserva servicios premium y confirma pagos seguros con Stripe. Compatible con modo prueba y live, registrando metadatos operativos.",
+};
 
 export default async function CheckoutPage() {
   const servicesPage = await fetchServicesPage({ limit: 50 });

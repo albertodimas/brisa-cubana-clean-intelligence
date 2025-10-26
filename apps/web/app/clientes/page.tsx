@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ScrollReveal,
@@ -7,10 +8,10 @@ import {
   GradientMesh,
 } from "@/components/ui";
 
-export const metadata = {
-  title: "Portal Cliente – Brisa Cubana Clean Intelligence",
+export const metadata: Metadata = {
+  title: "Portal Cliente · Brisa Cubana Clean Intelligence",
   description:
-    "Vista pública en construcción para que clientes consulten sus reservas y gestionen solicitudes.",
+    "Explora la experiencia del portal cliente: reservas, notificaciones y soporte en tiempo real con Brisa Cubana Clean Intelligence.",
 };
 
 const highlights = [

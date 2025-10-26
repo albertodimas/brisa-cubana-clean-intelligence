@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { Route } from "next";
+import type { Metadata, Route } from "next";
 import { loginAction } from "@/app/actions";
 import { LoginForm } from "@/components/login-form";
 import { auth } from "@/auth";
 import { GradientMesh, ScrollReveal } from "@/components/ui";
 
-export const metadata = {
-  title: "Iniciar sesión · Brisa Cubana",
+export const metadata: Metadata = {
+  title: "Iniciar sesión · Brisa Cubana Clean Intelligence",
+  description:
+    "Accede al panel operativo para gestionar servicios, reservas y notificaciones en Brisa Cubana Clean Intelligence.",
 };
 
 export default async function LoginPage() {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { FAQSection } from "@/components/landing/faq-section";
@@ -23,25 +24,36 @@ import {
   testimonials,
 } from "@/lib/marketing-content";
 
+export const metadata: Metadata = {
+  title: "Brisa Cubana Clean Intelligence · Turnovers premium en Miami",
+  description:
+    "Operamos turnovers same-day, deep cleaning y mantenimiento preventivo para propiedades premium en Miami con reportes en menos de 4 horas.",
+  openGraph: {
+    title: "Brisa Cubana Clean Intelligence",
+    description:
+      "Limpieza profesional, evidencia fotográfica y dashboard operativo 24/7 para STR y residencias premium en Miami.",
+  },
+};
+
 const mobileMockups = [
   {
-    title: "Login seguro en segundos",
+    title: "Turnos confirmados desde el móvil",
     description:
-      "Enlace mágico y MFA opcional para administradores y field ops.",
+      "Selecciona propiedad, franja horaria y asigna cuadrillas con dos toques.",
     src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
     placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },
   {
-    title: "Turnos desde el móvil",
+    title: "Solicitudes y resurtidos en vivo",
     description:
-      "Confirma servicios, carga evidencias y cierra turnos in situ.",
+      "Levanta resurtidos críticos, agrega notas y monitorea el estado del inventario.",
     src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
     placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },
   {
-    title: "Reposiciones inteligentes",
+    title: "Alertas y evidencias fotográficas",
     description:
-      "Solicita kits y amenities críticos con trazabilidad por lote.",
+      "Recibe notificaciones push con fotos, checklist firmado y tiempos de entrega.",
     src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
     placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },

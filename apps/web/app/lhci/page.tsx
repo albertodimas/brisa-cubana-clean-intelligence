@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   GradientMesh,
   ScrollReveal,
@@ -5,8 +6,8 @@ import {
   StaggerItem,
 } from "@/components/ui";
 
-export const metadata = {
-  title: "LHCI Snapshot",
+export const metadata: Metadata = {
+  title: "LHCI Snapshot · Brisa Cubana",
   description:
     "Página dedicada para auditorías Lighthouse: sin autenticación y con contenido estático representativo.",
 };

@@ -201,21 +201,21 @@ export const operationsMockups: OperationsMockup[] = [
   {
     title: "Dashboard en tiempo real",
     description:
-      "Alertas críticas, checklists cerrados y estadísticas de satisfacción en un solo panel.",
+      "Panel con KPIs SLA, backlog de incidencias y porcentaje de cumplimiento en vivo.",
     src: "/assets/mockups/16-9/portal-dashboard-1920w.webp",
     placeholder: "/assets/mockups/16-9/portal-dashboard-1280w.webp",
   },
   {
     title: "Gestión de reservas",
     description:
-      "Reasigna turnos, confirma cancelaciones y prioriza incidencias desde un timeline auditable.",
+      "Timeline operativo para reagendar servicios, confirmar cuadrillas y registrar evidencias.",
     src: "/assets/mockups/16-9/portal-bookings-1920w.webp",
     placeholder: "/assets/mockups/16-9/portal-bookings-1280w.webp",
   },
   {
     title: "Servicios y stock",
     description:
-      "Checklist RFID, niveles de amenities y reposiciones automáticas por propiedad.",
+      "Matriz de servicios con inventario RFID, KPIs por propiedad y mantenimiento preventivo.",
     src: "/assets/mockups/16-9/portal-services-1920w.webp",
     placeholder: "/assets/mockups/16-9/portal-services-1280w.webp",
   },

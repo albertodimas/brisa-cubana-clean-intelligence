@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   GradientMesh,
   ScrollReveal,
@@ -7,6 +8,12 @@ import {
 } from "@/components/ui";
 
 export const dynamic = "force-static";
+
+export const metadata: Metadata = {
+  title: "Galería de mockups · Brisa Cubana",
+  description:
+    "Componentes de demostración del portal operativo y flujos móviles para presentaciones y QA visual.",
+};
 
 const bookings = [
   {
