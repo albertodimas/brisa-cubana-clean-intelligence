@@ -6,6 +6,7 @@ import { UserRepository } from "./repositories/user-repository.js";
 import { CustomerRepository } from "./repositories/customer-repository.js";
 import { NotificationRepository } from "./repositories/notification-repository.js";
 import { MagicLinkTokenRepository } from "./repositories/magic-link-token-repository.js";
+import { LeadRepository } from "./repositories/lead-repository.js";
 import { prisma as prismaClient } from "./lib/prisma.js";
 
 /**
@@ -77,6 +78,7 @@ export const ServiceKeys = {
   CUSTOMER_REPOSITORY: "customerRepository",
   NOTIFICATION_REPOSITORY: "notificationRepository",
   MAGIC_LINK_TOKEN_REPOSITORY: "magicLinkTokenRepository",
+  LEAD_REPOSITORY: "leadRepository",
 } as const;
 
 /**
@@ -126,6 +128,11 @@ export function initializeContainer(): void {
     ServiceKeys.MAGIC_LINK_TOKEN_REPOSITORY,
     () => new MagicLinkTokenRepository(prisma),
   );
+
+  container.register(
+    ServiceKeys.LEAD_REPOSITORY,
+    () => new LeadRepository(prisma),
+  );
 }
 
 /**
@@ -171,6 +178,10 @@ export function getMagicLinkTokenRepository(): MagicLinkTokenRepository {
   return container.resolve<MagicLinkTokenRepository>(
     ServiceKeys.MAGIC_LINK_TOKEN_REPOSITORY,
   );
+}
+
+export function getLeadRepository(): LeadRepository {
+  return container.resolve<LeadRepository>(ServiceKeys.LEAD_REPOSITORY);
 }
 
 /**

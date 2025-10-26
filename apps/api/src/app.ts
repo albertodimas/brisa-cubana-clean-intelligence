@@ -16,6 +16,7 @@ import testUtils from "./routes/test-utils.js";
 import payments from "./routes/payments.js";
 import portalAuth from "./routes/portal-auth.js";
 import portalBookings from "./routes/portal-bookings.js";
+import leads from "./routes/leads.js";
 
 // Initialize Dependency Injection Container
 initializeContainer();
@@ -131,6 +132,7 @@ app.route("/api/bookings", bookings);
 app.route("/api/users", users);
 app.route("/api/notifications", notifications);
 app.route("/api/payments", payments);
+app.route("/api/leads", leads);
 app.route("/api/portal/auth", portalAuth);
 app.route("/api/portal/bookings", portalBookings);
 if (process.env.ENABLE_TEST_UTILS === "true") {

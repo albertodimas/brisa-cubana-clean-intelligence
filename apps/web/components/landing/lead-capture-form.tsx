@@ -99,7 +99,8 @@ export function LeadCaptureForm({
         if (utm.term) body.utm_term = utm.term;
       }
 
-      const res = await fetch("/api/leads", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const res = await fetch(`${apiUrl}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

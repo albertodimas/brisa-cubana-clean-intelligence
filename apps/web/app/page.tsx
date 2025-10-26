@@ -1,19 +1,8 @@
-import {
-  ShieldCheckIcon,
-  SparklesIcon,
-  CloudArrowUpIcon,
-  ArrowPathIcon,
-  ChatBubbleLeftRightIcon,
-  ClipboardDocumentCheckIcon,
-  ArrowUpRightIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
-import {
-  PricingTiers,
-  type PricingTier,
-} from "@/components/landing/pricing-tiers";
+import { PricingTiers } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
 import { NightShiftMedia } from "@/components/landing/night-shift-media";
 import {
@@ -25,186 +14,22 @@ import {
   CountUp,
   TiltCard,
 } from "@/components/ui";
-
-const testimonials = [
-  {
-    quote:
-      "Entre 12 y 25 turnovers por propiedad al año es la media del sector STR. Planificamos cuadrillas con capacidad extra para cubrir temporadas altas sin bloqueos.",
-    author: "Fuente: Vacation Rental Cleaning Market Outlook 2024",
-    role: "pmarketresearch.com",
-  },
-  {
-    quote:
-      "El 81 % de los huéspedes prioriza la limpieza al reservar y 78 % deja reseñas positivas cuando todo está impecable; nuestros checklists documentados sostienen ratings altos.",
-    author:
-      "Fuente: Hospitable · Impact of Cleanliness on Guest Reviews (2024)",
-    role: "hospitable.com",
-  },
-  {
-    quote:
-      "El mercado de Miami supera las 13 000 propiedades activas y los stays de 4‑5 noches exigen turnos mismos día. Operamos 24/7 con evidencia fotográfica en cada entrega.",
-    author: "Fuente: Turno · Miami Airbnb Cleaners / STR trend reports 2024",
-    role: "turno.com",
-  },
-];
-
-const differentiators = [
-  {
-    title: "Protocolos cinco estrellas",
-    description:
-      "Adherimos al Airbnb Enhanced Cleaning estándar: checklists de 100+ puntos, sanitización hospitalaria y reportes firmados digitalmente.",
-    icon: SparklesIcon,
-  },
-  {
-    title: "Seguridad y compliance",
-    description:
-      "Cumplimos normativas municipales/estatales, inventario trazable y pólizas activas para evitar sanciones en mercados regulados.",
-    icon: ShieldCheckIcon,
-  },
-  {
-    title: "Integraciones PMS",
-    description:
-      "Sincronizamos Guesty, Hostaway, ResNexus o Breezeway, generamos alertas automáticas y evidencias fotográficas con timestamp.",
-    icon: CloudArrowUpIcon,
-  },
-];
-
-const processSteps = [
-  {
-    title: "Diagnóstico express",
-    description:
-      "Auditamos inventario, tiempos de estancia (media 4‑5 noches) y reseñas para definir SLAs sin bloquear ingresos.",
-    icon: ClipboardDocumentCheckIcon,
-  },
-  {
-    title: "Operación continua",
-    description:
-      "Cuadrillas con suministros estandarizados, lavado propio y checklists firmados in situ para cada turnover.",
-    icon: ArrowPathIcon,
-  },
-  {
-    title: "Visibilidad total",
-    description:
-      "Portal con fotos finales, métricas en tiempo real y alertas automáticas cuando el PMS detecta cambios.",
-    icon: ChatBubbleLeftRightIcon,
-  },
-];
-
-const pricingTiers: PricingTier[] = [
-  {
-    id: "turnover",
-    name: "Turnover Premium Airbnb",
-    headline: "Desde $209 por salida",
-    price: "$209+",
-    priceSuffix: "por salida",
-    description:
-      "Para listados urbanos con 12-25 rotaciones al año. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
-    features: [
-      "Reposición completa de amenities, textiles y welcome kit",
-      "Checklist Airbnb Enhanced Cleaning y control RFID de inventario",
-      "Reporte en portal cliente en menos de 4 horas",
-      "Supervisión on-site en ventanas críticas y lanzamientos",
-    ],
-  },
-  {
-    id: "deep-clean",
-    name: "Deep Clean Brickell Collection",
-    headline: "Desde $289",
-    price: "$289+",
-    priceSuffix: "por servicio",
-    description:
-      "Ideal para residencias y segundas propiedades con stays superiores a 7 noches. Incluye detailing premium y tratamiento antivaho.",
-    features: [
-      "Detallado premium de cocina, baños y textiles de lujo",
-      "Insumos hipoalergénicos certificados EPA",
-      "Control de humedad y mantenimiento preventivo ligero",
-      "Checklist digital con seguimiento de incidencias",
-    ],
-    highlighted: true,
-  },
-  {
-    id: "post-construction",
-    name: "Post-Construcción Boutique",
-    headline: "Desde $349",
-    price: "$349+",
-    priceSuffix: "por servicio",
-    description:
-      "Para entregas de penthouses y villas tras obra o remodelación con requisitos OSHA. Incluye pulido final y staging ejecutivo.",
-    features: [
-      "Pulido de superficies y eliminación de polvo de obra",
-      "Staging final con inspección fotográfica ejecutiva",
-      "Equipo especializado con certificaciones OSHA",
-      "Opcional: Amenity Refresh Express para back-to-back stays",
-    ],
-  },
-];
-
-const socialLinks = [
-  {
-    name: "Instagram",
-    handle: "@BrisaCleanIntelligence",
-    href: "https://instagram.com/BrisaCleanIntelligence",
-    description:
-      "Historias y reels del equipo en acción, antes/después y backstage.",
-  },
-  {
-    name: "Facebook",
-    handle: "Brisa Clean Intelligence",
-    href: "https://facebook.com/BrisaCleanIntelligence",
-    description: "Casos completos, reseñas de clientes y anuncios dirigidos.",
-  },
-  {
-    name: "LinkedIn",
-    handle: "Brisa Clean Intelligence",
-    href: "https://www.linkedin.com/company/brisa-clean-intelligence",
-    description: "Insights operativos, alianzas B2B y noticias corporativas.",
-  },
-  {
-    name: "TikTok",
-    handle: "@BrisaCleanIntelligence",
-    href: "https://www.tiktok.com/@brisacleanintelligence",
-    description: "Timelapses, tips rápidos y retos de limpieza premium.",
-  },
-  {
-    name: "YouTube",
-    handle: "@BrisaCleanIntelligence",
-    href: "https://www.youtube.com/@BrisaCleanIntelligence",
-    description:
-      "Recorridos completos, testimonios extendidos y guías para hosts.",
-  },
-];
-
-const operationsMockups = [
-  {
-    title: "Dashboard en tiempo real",
-    description:
-      "Alertas críticas, checklists cerrados y estadísticas de satisfacción en un solo panel.",
-    src: "/assets/mockups/16-9/portal-dashboard-1920w.webp",
-    placeholder: "/assets/mockups/16-9/portal-dashboard-1280w.webp",
-  },
-  {
-    title: "Gestión de reservas",
-    description:
-      "Reasigna turnos, confirma cancelaciones y prioriza incidencias desde un timeline auditable.",
-    src: "/assets/mockups/16-9/portal-bookings-1920w.webp",
-    placeholder: "/assets/mockups/16-9/portal-bookings-1280w.webp",
-  },
-  {
-    title: "Servicios y stock",
-    description:
-      "Checklist RFID, niveles de amenities y reposiciones automáticas por propiedad.",
-    src: "/assets/mockups/16-9/portal-services-1920w.webp",
-    placeholder: "/assets/mockups/16-9/portal-services-1280w.webp",
-  },
-];
+import {
+  differentiators,
+  operationsMockups,
+  pricingTiers,
+  processSteps,
+  socialLinks,
+  testimonials,
+} from "@/lib/marketing-content";
 
 const mobileMockups = [
   {
     title: "Login seguro en segundos",
     description:
       "Enlace mágico y MFA opcional para administradores y field ops.",
-    src: "/assets/mockups/4-5/portal-mobile-dashboard-1080w.webp",
-    placeholder: "/assets/mockups/4-5/portal-mobile-dashboard-540w.webp",
+    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },
   {
     title: "Turnos desde el móvil",
@@ -217,8 +42,8 @@ const mobileMockups = [
     title: "Reposiciones inteligentes",
     description:
       "Solicita kits y amenities críticos con trazabilidad por lote.",
-    src: "/assets/mockups/4-5/portal-mobile-services-1080w.webp",
-    placeholder: "/assets/mockups/4-5/portal-mobile-services-540w.webp",
+    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },
 ];
 
@@ -356,32 +181,32 @@ export default function LandingPage() {
                 </ul>
                 <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-white p-6 dark:from-brisa-900/60 dark:via-brisa-950">
                   <p className="text-sm font-semibold text-brisa-700 dark:text-brisa-100">
-                    Datos clave
+                    Datos clave (2024-2025)
                   </p>
                   <dl className="grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-brisa-200">
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        12-25
+                        <CountUp end={70} suffix="%" duration={2.2} />
                       </dt>
-                      <dd>rotaciones/año por propiedad</dd>
+                      <dd>ocupación promedio anual</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        81%
+                        <CountUp end={194} prefix="$" duration={2.5} />
                       </dt>
-                      <dd>reviews influidas por la limpieza</dd>
+                      <dd>tarifa diaria media (ADR) en Miami</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        13K+
+                        <CountUp end={7589} duration={2.3} />
                       </dt>
-                      <dd>listados activos en Miami y alrededores</dd>
+                      <dd>listados activos en el mercado STR</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        24/7
+                        6.4M
                       </dt>
-                      <dd>cobertura operativa en temporada alta</dd>
+                      <dd>visitantes internacionales en 2024</dd>
                     </div>
                   </dl>
                 </div>
