@@ -99,6 +99,7 @@ jobs:
           corepack enable pnpm
           mkdir -p node_modules/.bin
           ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
+          export PATH="$(pwd)/node_modules/.bin:$PATH"
           vercel build --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy API to Vercel Production
@@ -142,6 +143,7 @@ jobs:
           corepack enable pnpm
           mkdir -p apps/web/node_modules/.bin
           ln -sf "$(command -v pnpm)" apps/web/node_modules/.bin/pnpm
+          export PATH="$(pwd)/apps/web/node_modules/.bin:$PATH"
           vercel build --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Production
