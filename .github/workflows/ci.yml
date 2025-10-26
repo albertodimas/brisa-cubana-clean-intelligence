@@ -111,7 +111,6 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Sincronizar configuración Vercel Web
-        working-directory: apps/web
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -121,7 +120,6 @@ jobs:
 
       - name: Deploy Web to Vercel Production
         id: deploy-web
-        working-directory: apps/web
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
