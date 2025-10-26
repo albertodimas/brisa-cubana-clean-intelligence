@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Play, X, Volume2, VolumeX } from "lucide-react";
+import { Play, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -135,6 +135,7 @@ export function VideoSection({
                 poster={thumbnailUrl}
                 className="w-full h-full object-cover"
                 loop={loop}
+                autoPlay={autoplay}
                 muted={isMuted}
                 playsInline
                 onPlay={() => setIsPlaying(true)}

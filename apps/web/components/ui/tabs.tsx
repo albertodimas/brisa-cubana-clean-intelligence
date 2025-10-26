@@ -83,6 +83,17 @@ const AnimatedTabsList = React.forwardRef<
   });
 
   const listRef = React.useRef<HTMLDivElement>(null);
+  const handleRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      listRef.current = node;
+      if (typeof ref === "function") {
+        ref(node);
+      } else if (ref) {
+        (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+      }
+    },
+    [ref],
+  );
 
   React.useEffect(() => {
     if (!listRef.current) return;
@@ -104,7 +115,7 @@ const AnimatedTabsList = React.forwardRef<
 
   return (
     <TabsPrimitive.List
-      ref={listRef}
+      ref={handleRef}
       className={cn(
         "relative inline-flex h-10 items-center justify-center rounded-lg",
         "bg-brisa-900/50 p-1 text-brisa-300 backdrop-blur-sm",

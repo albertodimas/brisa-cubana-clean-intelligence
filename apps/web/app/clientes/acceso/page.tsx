@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { recordPortalEvent } from "@/lib/portal-telemetry";
+import { ScrollReveal, GradientMesh, Input, Button } from "@/components/ui";
 
 export default function PortalAccessRequestPage() {
   const [email, setEmail] = useState("");
@@ -80,81 +81,95 @@ export default function PortalAccessRequestPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-brisa-50 to-brisa-100 px-4 py-16 text-gray-900 dark:from-brisa-950 dark:via-brisa-900 dark:to-brisa-950 dark:text-white sm:px-6 md:px-10">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(39,137,255,0.25),transparent_60%)] dark:bg-[radial-gradient(circle_at_top,rgba(39,137,255,0.35),transparent_65%)]" />
-      <div className="relative mx-auto grid max-w-3xl gap-10">
-        <header className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-lg backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/70 dark:text-brisa-200">
-            Acceso portal cliente
-          </span>
-          <h1 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Recibe un enlace mágico en tu correo
-          </h1>
-          <p className="mt-3 max-w-xl text-sm text-gray-600 dark:text-brisa-200 sm:text-base">
-            Ingresa el correo registrado con Brisa Cubana. Enviaremos un enlace
-            válido por 15 minutos para que puedas acceder a tus reservas sin
-            recordar contraseñas.
-          </p>
-        </header>
+      {/* Gradient Mesh Background */}
+      <GradientMesh
+        colors={{
+          primary: "rgba(39, 137, 255, 0.25)",
+          secondary: "rgba(20, 184, 166, 0.2)",
+          accent: "rgba(139, 92, 246, 0.2)",
+        }}
+        opacity={0.3}
+        shimmer
+      />
 
-        <form
-          onSubmit={handleSubmit}
-          aria-busy={isLoading}
-          className="rounded-3xl border border-white/70 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80"
-        >
-          <label className="grid gap-2 text-sm">
-            <span className="font-medium text-gray-900 dark:text-white">
-              Correo electrónico
+      <div className="relative mx-auto grid max-w-3xl gap-10">
+        <ScrollReveal variant="fadeDown" delay={0.1}>
+          <header className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-lg backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/70 dark:text-brisa-200">
+              Acceso portal cliente
             </span>
-            <input
+            <h1 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
+              Recibe un enlace mágico en tu correo
+            </h1>
+            <p className="mt-3 max-w-xl text-sm text-gray-600 dark:text-brisa-200 sm:text-base">
+              Ingresa el correo registrado con Brisa Cubana. Enviaremos un
+              enlace válido por 15 minutos para que puedas acceder a tus
+              reservas sin recordar contraseñas.
+            </p>
+          </header>
+        </ScrollReveal>
+
+        <ScrollReveal variant="fadeUp" delay={0.2}>
+          <form
+            onSubmit={handleSubmit}
+            aria-busy={isLoading}
+            className="rounded-3xl border border-white/70 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80"
+          >
+            <Input
               type="email"
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              label="Correo electrónico"
               placeholder="cliente@brisacubanacleanintelligence.com"
-              className="rounded-full border border-gray-300 px-4 py-3 text-sm focus:border-brisa-500 focus:outline-none focus:ring-2 focus:ring-brisa-400 dark:border-brisa-600 dark:bg-brisa-900 dark:text-white"
+              autoComplete="email"
             />
-          </label>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            aria-disabled={isLoading}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-sm font-semibold tracking-wide text-white shadow-lg shadow-brisa-300/40 transition-transform hover:-translate-y-0.5 hover:bg-brisa-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-brisa-400 dark:text-brisa-900 dark:shadow-brisa-900/30 dark:hover:bg-brisa-300"
-          >
-            {isLoading ? "Enviando enlace…" : "Enviar enlace de acceso"}
-          </button>
-
-          {message ? (
-            <p
-              className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
-                status === "error"
-                  ? "border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200"
-                  : "border-brisa-200 bg-brisa-50 text-brisa-700 dark:border-brisa-600 dark:bg-brisa-900/50 dark:text-brisa-200"
-              }`}
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              disabled={isLoading}
+              isLoading={isLoading}
+              className="mt-6 w-full bg-brisa-600 hover:bg-brisa-700 text-white font-semibold shadow-lg dark:bg-brisa-400 dark:text-brisa-900"
             >
-              {message}
-            </p>
-          ) : null}
+              {isLoading ? "Enviando enlace…" : "Enviar enlace de acceso"}
+            </Button>
 
-          {debugToken ? (
-            <div className="mt-4 rounded-2xl border border-dashed border-brisa-300/60 bg-brisa-50/70 p-4 text-xs text-brisa-700 dark:border-brisa-700/40 dark:bg-brisa-800/40 dark:text-brisa-200">
-              <p className="font-semibold">Token de prueba</p>
-              <p className="mt-2 break-all font-mono">{debugToken}</p>
-              <p className="mt-2 italic">
-                Úsalo en la URL de verificación junto al correo para completar
-                el flujo durante la beta.
+            {message ? (
+              <p
+                className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
+                  status === "error"
+                    ? "border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-200"
+                    : "border-brisa-200 bg-brisa-50 text-brisa-700 dark:border-brisa-600 dark:bg-brisa-900/50 dark:text-brisa-200"
+                }`}
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {message}
               </p>
-            </div>
-          ) : null}
-        </form>
+            ) : null}
 
-        <p className="text-xs text-gray-500 dark:text-brisa-400">
-          ¿No sabes qué correo tienes registrado? Contacta a operaciones para
-          validar tu acceso al portal cliente.
-        </p>
+            {debugToken ? (
+              <div className="mt-4 rounded-2xl border border-dashed border-brisa-300/60 bg-brisa-50/70 p-4 text-xs text-brisa-700 dark:border-brisa-700/40 dark:bg-brisa-800/40 dark:text-brisa-200">
+                <p className="font-semibold">Token de prueba</p>
+                <p className="mt-2 break-all font-mono">{debugToken}</p>
+                <p className="mt-2 italic">
+                  Úsalo en la URL de verificación junto al correo para completar
+                  el flujo durante la beta.
+                </p>
+              </div>
+            ) : null}
+          </form>
+        </ScrollReveal>
+
+        <ScrollReveal variant="fadeIn" delay={0.3}>
+          <p className="text-xs text-gray-500 dark:text-brisa-400">
+            ¿No sabes qué correo tienes registrado? Contacta a operaciones para
+            validar tu acceso al portal cliente.
+          </p>
+        </ScrollReveal>
       </div>
     </main>
   );

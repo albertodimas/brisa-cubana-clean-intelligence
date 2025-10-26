@@ -82,6 +82,7 @@ export function CountUp({
   const springValue = useSpring(motionValue, {
     damping: 60,
     stiffness: 100,
+    mass: Math.max(duration / 2, 0.5),
   });
 
   const [displayValue, setDisplayValue] = React.useState(

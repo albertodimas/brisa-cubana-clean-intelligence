@@ -2,6 +2,24 @@ import "@testing-library/jest-dom/vitest";
 import { createElement, type MouseEvent, type ReactNode } from "react";
 import { vi } from "vitest";
 
+// Polyfill for framer-motion (IntersectionObserver and ResizeObserver)
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  takeRecords() {
+    return [];
+  }
+  unobserve() {}
+} as any;
+
+global.ResizeObserver = class ResizeObserver {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  unobserve() {}
+} as any;
+
 const mockedAuth = vi.fn().mockResolvedValue(null);
 const mockedSignIn = vi.fn();
 const mockedSignOut = vi.fn();
@@ -59,11 +77,18 @@ vi.mock("next/link", () => ({
     children,
     onClick,
     href,
+    prefetch, // omit Next.js-only props to prevent DOM warnings
+    replace,
+    scroll,
+    shallow,
+    passHref,
+    locale,
     ...rest
   }: {
     children: ReactNode;
     onClick?: (event: MouseEvent) => void;
     href?: string;
+    prefetch?: boolean;
   } & Record<string, any>) =>
     createElement(
       "a",

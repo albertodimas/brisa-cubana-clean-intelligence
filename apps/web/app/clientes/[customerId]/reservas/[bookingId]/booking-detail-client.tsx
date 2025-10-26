@@ -18,6 +18,7 @@ import {
 import { recordPortalEvent } from "@/lib/portal-telemetry";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toPortalDatetimeLocalValue } from "@/lib/portal-utils";
+import { ScrollReveal } from "@/components/ui";
 
 type PortalBookingDetailClientProps = PortalBookingDetail & {
   sessionExpiresAt?: string | null;
@@ -161,177 +162,189 @@ export function PortalBookingDetailClient({
   return (
     <div className="space-y-8">
       {actionSuccess ? (
-        <PortalCallout
-          title="Solicitud enviada"
-          description={<p>{actionSuccess}</p>}
-          action={
-            <button
-              type="button"
-              onClick={() => setActionSuccess(null)}
-              className="rounded-full border border-brisa-500/60 px-4 py-2 text-sm font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-            >
-              Ocultar mensaje
-            </button>
-          }
-        />
+        <ScrollReveal variant="fadeDown" delay={0.1}>
+          <PortalCallout
+            title="Solicitud enviada"
+            description={<p>{actionSuccess}</p>}
+            action={
+              <button
+                type="button"
+                onClick={() => setActionSuccess(null)}
+                className="rounded-full border border-brisa-500/60 px-4 py-2 text-sm font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+              >
+                Ocultar mensaje
+              </button>
+            }
+          />
+        </ScrollReveal>
       ) : null}
 
-      <section className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl dark:border-brisa-700/50 dark:bg-brisa-900/80">
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/70 dark:text-brisa-200">
-              Reserva {booking.code}
-            </span>
-            <h1 className="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">
-              {booking.service.name} en {booking.property.label}
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300">
-              Programado para {new Date(booking.scheduledAt).toLocaleString()} ·
-              Duración estimada {booking.durationMin} minutos.
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-2 text-right text-xs text-gray-500 dark:text-brisa-400">
-            <span>
-              Estado actual:
-              <span className="ml-1 rounded-full border border-brisa-200/60 px-3 py-1 text-xs font-semibold text-brisa-600 dark:border-brisa-500/40 dark:text-brisa-200">
-                {booking.status}
+      <ScrollReveal variant="fadeUp" delay={0.2}>
+        <section className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl dark:border-brisa-700/50 dark:bg-brisa-900/80">
+          <header className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/70 dark:text-brisa-200">
+                Reserva {booking.code}
               </span>
-            </span>
-            <span>{sessionStatusLabel}</span>
-          </div>
-        </header>
+              <h1 className="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">
+                {booking.service.name} en {booking.property.label}
+              </h1>
+              <p className="mt-2 text-sm text-gray-600 dark:text-brisa-300">
+                Programado para {new Date(booking.scheduledAt).toLocaleString()}{" "}
+                · Duración estimada {booking.durationMin} minutos.
+              </p>
+            </div>
+            <div className="flex flex-col items-end gap-2 text-right text-xs text-gray-500 dark:text-brisa-400">
+              <span>
+                Estado actual:
+                <span className="ml-1 rounded-full border border-brisa-200/60 px-3 py-1 text-xs font-semibold text-brisa-600 dark:border-brisa-500/40 dark:text-brisa-200">
+                  {booking.status}
+                </span>
+              </span>
+              <span>{sessionStatusLabel}</span>
+            </div>
+          </header>
 
-        <dl className="mt-6 grid gap-4 text-sm text-gray-700 dark:text-brisa-200 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
-              Dirección
-            </dt>
-            <dd>
-              {booking.property.label} · {booking.property.city}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
-              Cliente
-            </dt>
-            <dd>{customer.fullName ?? customer.email}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
-              Monto estimado
-            </dt>
-            <dd>${booking.totalAmount.toFixed(2)}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
-              Código
-            </dt>
-            <dd>{booking.code}</dd>
-          </div>
-        </dl>
+          <dl className="mt-6 grid gap-4 text-sm text-gray-700 dark:text-brisa-200 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
+                Dirección
+              </dt>
+              <dd>
+                {booking.property.label} · {booking.property.city}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
+                Cliente
+              </dt>
+              <dd>{customer.fullName ?? customer.email}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
+                Monto estimado
+              </dt>
+              <dd>${booking.totalAmount.toFixed(2)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase text-gray-500 dark:text-brisa-400">
+                Código
+              </dt>
+              <dd>{booking.code}</dd>
+            </div>
+          </dl>
 
-        {booking.notes ? (
-          <div className="mt-6 rounded-2xl border border-brisa-200/60 bg-brisa-50/70 p-4 text-sm text-gray-700 dark:border-brisa-700/40 dark:bg-brisa-900/60 dark:text-brisa-200">
-            {booking.notes}
+          {booking.notes ? (
+            <div className="mt-6 rounded-2xl border border-brisa-200/60 bg-brisa-50/70 p-4 text-sm text-gray-700 dark:border-brisa-700/40 dark:bg-brisa-900/60 dark:text-brisa-200">
+              {booking.notes}
+            </div>
+          ) : null}
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={openReschedule}
+              disabled={isPending || isSessionExpired}
+              className="inline-flex items-center rounded-full border border-brisa-500/60 px-4 py-2 text-xs font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 disabled:opacity-60 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+            >
+              Reagendar
+            </button>
+            <button
+              type="button"
+              onClick={openCancel}
+              disabled={isPending || isSessionExpired}
+              className="inline-flex items-center rounded-full border border-red-400/60 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/60 dark:text-red-200 dark:hover:bg-red-900/40"
+            >
+              Cancelar
+            </button>
+            <Link
+              href={`/clientes/${customer.id}`}
+              className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/50"
+            >
+              Volver al dashboard
+            </Link>
           </div>
-        ) : null}
+        </section>
+      </ScrollReveal>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={openReschedule}
-            disabled={isPending || isSessionExpired}
-            className="inline-flex items-center rounded-full border border-brisa-500/60 px-4 py-2 text-xs font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 disabled:opacity-60 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-          >
-            Reagendar
-          </button>
-          <button
-            type="button"
-            onClick={openCancel}
-            disabled={isPending || isSessionExpired}
-            className="inline-flex items-center rounded-full border border-red-400/60 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/60 dark:text-red-200 dark:hover:bg-red-900/40"
-          >
-            Cancelar
-          </button>
-          <Link
-            href={`/clientes/${customer.id}`}
-            className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/50"
-          >
-            Volver al dashboard
-          </Link>
-        </div>
-      </section>
+      <ScrollReveal variant="fadeUp" delay={0.25}>
+        <section className="space-y-4 rounded-3xl border border-white/70 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/80">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Timeline de la reserva
+          </h2>
+          <ol className="space-y-4 border-l border-dashed border-brisa-300/60 pl-5 dark:border-brisa-700/50">
+            {timelineItems.map((item, index) => (
+              <PortalTimelineItem
+                key={`${item.status}-${index}`}
+                status={item.status}
+                title={item.title}
+                meta={item.meta}
+              />
+            ))}
+          </ol>
+        </section>
+      </ScrollReveal>
 
-      <section className="space-y-4 rounded-3xl border border-white/70 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/80">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Timeline de la reserva
-        </h2>
-        <ol className="space-y-4 border-l border-dashed border-brisa-300/60 pl-5 dark:border-brisa-700/50">
-          {timelineItems.map((item, index) => (
-            <PortalTimelineItem
-              key={`${item.status}-${index}`}
-              status={item.status}
-              title={item.title}
-              meta={item.meta}
-            />
-          ))}
-        </ol>
-      </section>
-
-      <PortalCallout
-        title="¿Necesitas ayuda?"
-        description={
-          <p>
-            Ponte en contacto con operaciones para coordinar cambios
-            adicionales, dudas o servicios especiales. Recuerda incluir el
-            código {booking.code} en tu mensaje.
-          </p>
-        }
-        action={
-          <Link
-            href={`mailto:${supportEmail}?subject=Soporte%20reserva%20${booking.code}`}
-            className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-          >
-            Escribir a soporte →
-          </Link>
-        }
-      />
-
-      {!hasKnownSession ? (
+      <ScrollReveal variant="fadeIn" delay={0.3}>
         <PortalCallout
-          title="No pudimos validar tu sesión"
+          title="¿Necesitas ayuda?"
           description={
             <p>
-              Si pierdes el acceso, solicita un nuevo enlace mágico desde la
-              página principal del portal para continuar gestionando tus
-              reservas.
+              Ponte en contacto con operaciones para coordinar cambios
+              adicionales, dudas o servicios especiales. Recuerda incluir el
+              código {booking.code} en tu mensaje.
             </p>
           }
           action={
             <Link
-              href="/clientes/acceso"
+              href={`mailto:${supportEmail}?subject=Soporte%20reserva%20${booking.code}`}
               className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
             >
-              Solicitar nuevo enlace →
+              Escribir a soporte →
             </Link>
           }
         />
+      </ScrollReveal>
+
+      {!hasKnownSession ? (
+        <ScrollReveal variant="fadeIn" delay={0.35}>
+          <PortalCallout
+            title="No pudimos validar tu sesión"
+            description={
+              <p>
+                Si pierdes el acceso, solicita un nuevo enlace mágico desde la
+                página principal del portal para continuar gestionando tus
+                reservas.
+              </p>
+            }
+            action={
+              <Link
+                href="/clientes/acceso"
+                className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+              >
+                Solicitar nuevo enlace →
+              </Link>
+            }
+          />
+        </ScrollReveal>
       ) : null}
 
       {actionError ? (
-        <PortalCallout
-          title="No pudimos completar tu solicitud"
-          description={<p>{actionError}</p>}
-          action={
-            <button
-              type="button"
-              onClick={() => setActionError(null)}
-              className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/60"
-            >
-              Entendido
-            </button>
-          }
-        />
+        <ScrollReveal variant="fadeIn" delay={0.4}>
+          <PortalCallout
+            title="No pudimos completar tu solicitud"
+            description={<p>{actionError}</p>}
+            action={
+              <button
+                type="button"
+                onClick={() => setActionError(null)}
+                className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/60"
+              >
+                Entendido
+              </button>
+            }
+          />
+        </ScrollReveal>
       ) : null}
 
       {actionState ? (

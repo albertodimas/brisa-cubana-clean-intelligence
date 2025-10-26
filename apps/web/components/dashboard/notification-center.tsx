@@ -6,9 +6,7 @@ import {
   Bell,
   Check,
   CheckCheck,
-  X,
   Trash2,
-  Filter,
   Info,
   AlertCircle,
   AlertTriangle,
@@ -19,13 +17,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export type NotificationType = "info" | "success" | "warning" | "error";

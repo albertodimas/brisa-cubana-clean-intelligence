@@ -48,33 +48,6 @@ const testimonials = [
   },
 ];
 
-const kpiHighlights = [
-  {
-    label: "Rotaciones por propiedad",
-    value: "12-25/año",
-    description:
-      "Media de turnovers en STR de EE. UU.; planificamos buffers para picos turísticos.",
-  },
-  {
-    label: "Impacto en reseñas",
-    value: "81%",
-    description:
-      "De los viajeros prioriza limpieza; 78% deja reviews positivas cuando está impecable.",
-  },
-  {
-    label: "Programación garantizada",
-    value: "24/7",
-    description:
-      "Calendarios sincronizados con alertas same-day y soporte priorizado.",
-  },
-  {
-    label: "Mercado Miami",
-    value: "13K+ listings",
-    description:
-      "Inventario activo con picos Nov-Mar y 24M de visitantes anuales.",
-  },
-];
-
 const differentiators = [
   {
     title: "Protocolos cinco estrellas",

@@ -61,7 +61,7 @@ export function TiltCard({
   glowEffect = true,
   glowColor = "rgba(126, 231, 196, 0.3)",
   className,
-  springStiffness = 0.1,
+  springStiffness = 1,
 }: TiltCardProps) {
   const [isHovered, setIsHovered] = React.useState(false);
 
@@ -70,7 +70,10 @@ export function TiltCard({
   const y = useMotionValue(0);
 
   // Configuración de spring para suavidad
-  const springConfig = { stiffness: 150, damping: 15 };
+  const springConfig = {
+    stiffness: 150 * springStiffness,
+    damping: 15 + springStiffness * 5,
+  };
 
   // Transformaciones de rotación
   const rotateX = useSpring(

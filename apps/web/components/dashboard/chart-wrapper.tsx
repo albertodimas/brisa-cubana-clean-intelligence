@@ -17,9 +17,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  type TooltipProps,
 } from "recharts";
-import { cn } from "@/lib/cn";
 import {
   Card,
   CardHeader,

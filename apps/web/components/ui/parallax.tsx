@@ -7,6 +7,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
+import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 export interface ParallaxProps {
@@ -90,20 +91,32 @@ export function ParallaxImage({
   speed = 0.5,
   className,
   priority = false,
+  sizes = "100vw",
+  width = 1920,
+  height = 1080,
 }: {
   src: string;
   alt: string;
   speed?: number;
   className?: string;
   priority?: boolean;
+  sizes?: string;
+  width?: number;
+  height?: number;
 }) {
   return (
-    <Parallax speed={speed} className={cn("overflow-hidden", className)}>
-      <img
+    <Parallax
+      speed={speed}
+      className={cn("overflow-hidden relative", className)}
+    >
+      <Image
         src={src}
         alt={alt}
-        className="w-full h-full object-cover"
-        loading={priority ? "eager" : "lazy"}
+        priority={priority}
+        sizes={sizes}
+        width={width}
+        height={height}
+        className="h-full w-full object-cover"
       />
     </Parallax>
   );

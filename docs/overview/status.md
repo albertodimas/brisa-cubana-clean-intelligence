@@ -46,7 +46,7 @@
     - `hooks/use-update-handler.ts`: Hook personalizado para manejar actualizaciones con debounce
     - `hooks/use-paginated-resource.ts`: Hook para paginación cursor-based
   - Componente UI `Pagination` con contador y botón "Cargar más" integrado en paneles de servicios, propiedades, reservas y clientes.
-  - **Design System completo**: 40+ componentes UI/UX, 250+ design tokens, glassmorphism, animaciones Framer Motion (ver [docs/ui-ux-guide.md](../ui-ux-guide.md))
+- **Design System completo**: 40+ componentes UI/UX, 250+ design tokens, glassmorphism, animaciones Framer Motion (ver [docs/ui-ux/guide.md](../ui-ux/guide.md))
 
 - **API (apps/api)**
   - Hono 4.9.12 corriendo en Vercel Node 22.x (builds apuntan a 22.13.0).

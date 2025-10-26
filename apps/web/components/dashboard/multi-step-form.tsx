@@ -169,13 +169,15 @@ export function MultiStepForm({
     }
   };
 
-  // Execute onEnter for initial step
-  // Note: Empty dependency array is intentional - only run on mount
+  const hasInitialized = React.useRef(false);
+
+  // Ensure the initial step executes its onEnter handler once
   React.useEffect(() => {
-    if (currentStepData?.onEnter) {
+    if (!hasInitialized.current && currentStepData?.onEnter) {
       currentStepData.onEnter();
+      hasInitialized.current = true;
     }
-  }, []);
+  }, [currentStepData]);
 
   return (
     <Card className={cn("w-full max-w-3xl mx-auto", className)}>
