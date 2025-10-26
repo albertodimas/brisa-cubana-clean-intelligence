@@ -142,11 +142,21 @@ jobs:
 
       - name: Smoke test production endpoints
         env:
-          API_HEALTH_URL: ${{ steps.deploy-api.outputs.url }}/healthz
-          WEB_HEALTH_URL: ${{ steps.deploy-web.outputs.url }}/healthz
+          API_BASE_URL: ${{ steps.deploy-api.outputs.url }}
+          WEB_BASE_URL: ${{ steps.deploy-web.outputs.url }}
           HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}
         run: |
           set -euo pipefail
+          normalize_vercel_url() {
+            local url="$1"
+            if [[ "$url" =~ ^https://([a-z0-9-]+)-[a-z0-9]+-[a-z0-9-]+(\.vercel\.app)(/.*)?$ ]]; then
+              echo "https://${BASH_REMATCH[1]}${BASH_REMATCH[2]}${BASH_REMATCH[3]}"
+            else
+              echo "$url"
+            fi
+          }
+          API_HEALTH_URL="$(normalize_vercel_url "$API_BASE_URL")/healthz"
+          WEB_HEALTH_URL="$(normalize_vercel_url "$WEB_BASE_URL")/healthz"
           auth_args=()
           if [ -n "${HEALTH_CHECK_TOKEN:-}" ]; then
             auth_args=(--header "Authorization: Bearer ${HEALTH_CHECK_TOKEN}")
