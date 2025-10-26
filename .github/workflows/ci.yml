@@ -88,20 +88,6 @@ jobs:
           export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
-      - name: Construir artefactos API (prebuilt)
-        working-directory: apps/api
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          set -euo pipefail
-          export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
-          corepack enable pnpm
-          mkdir -p node_modules/.bin
-          ln -sf "$(command -v pnpm)" node_modules/.bin/pnpm
-          export PATH="$(pwd)/node_modules/.bin:$PATH"
-          vercel build --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN"
-
       - name: Deploy API to Vercel Production
         id: deploy-api
         working-directory: apps/api
@@ -110,8 +96,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
-          export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
-          DEPLOY_OUTPUT=$(vercel deploy --prod --prebuilt --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
+          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
           API_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
           if [ -z "$API_URL" ]; then
@@ -133,19 +118,6 @@ jobs:
           export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
-      - name: Construir artefactos Web (prebuilt)
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          set -euo pipefail
-          export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
-          corepack enable pnpm
-          mkdir -p apps/web/node_modules/.bin
-          ln -sf "$(command -v pnpm)" apps/web/node_modules/.bin/pnpm
-          export PATH="$(pwd)/apps/web/node_modules/.bin:$PATH"
-          vercel build --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN"
-
       - name: Deploy Web to Vercel Production
         id: deploy-web
         env:
@@ -153,8 +125,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
-          export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
-          DEPLOY_OUTPUT=$(vercel deploy --prod --prebuilt --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN")
+          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
           WEB_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
           if [ -z "$WEB_URL" ]; then
