@@ -148,12 +148,20 @@ jobs:
         run: |
           set -euo pipefail
           normalize_vercel_url() {
-            local url="$1"
-            if [[ "$url" =~ ^https://([a-z0-9-]+)-[a-z0-9]+-[a-z0-9-]+(\.vercel\.app)(/.*)?$ ]]; then
-              echo "https://${BASH_REMATCH[1]}${BASH_REMATCH[2]}${BASH_REMATCH[3]}"
-            else
-              echo "$url"
-            fi
+            python - <<'PY' "$1"
+import sys
+from urllib.parse import urlsplit, urlunsplit
+import re
+
+url = sys.argv[1]
+parts = urlsplit(url)
+host = parts.netloc
+match = re.match(r'^([a-z0-9-]+)-[a-z0-9]+-[a-z0-9-]+(\.vercel\.app)$', host)
+if match:
+    host = f"{match.group(1)}{match.group(2)}"
+normalized = urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment))
+print(normalized, end="")
+PY
           }
           API_HEALTH_URL="$(normalize_vercel_url "$API_BASE_URL")/healthz"
           WEB_HEALTH_URL="$(normalize_vercel_url "$WEB_BASE_URL")/healthz"
