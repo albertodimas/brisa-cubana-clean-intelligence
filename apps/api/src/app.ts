@@ -149,7 +149,13 @@ app.onError((err, c) => {
         request: {
           method: c.req.method,
           url: c.req.url,
-          headers: Object.fromEntries(c.req.raw.headers),
+          headers: (() => {
+            const collected: Record<string, string> = {};
+            c.req.raw.headers.forEach((value, key) => {
+              collected[key] = value;
+            });
+            return collected;
+          })(),
         },
       },
     });
