@@ -163,8 +163,12 @@ normalized = urlunsplit((parts.scheme, host, parts.path, parts.query, parts.frag
 print(normalized, end="")
 PY
           }
-          API_HEALTH_URL="$(normalize_vercel_url "$API_BASE_URL")/healthz"
-          WEB_HEALTH_URL="$(normalize_vercel_url "$WEB_BASE_URL")/healthz"
+          API_CANONICAL_URL="$(normalize_vercel_url "$API_BASE_URL")"
+          WEB_CANONICAL_URL="$(normalize_vercel_url "$WEB_BASE_URL")"
+          echo "ℹ️  API base resolved to $API_CANONICAL_URL"
+          echo "ℹ️  Web base resolved to $WEB_CANONICAL_URL"
+          API_HEALTH_URL="${API_CANONICAL_URL%/}/healthz"
+          WEB_HEALTH_URL="${WEB_CANONICAL_URL%/}/healthz"
           auth_args=()
           if [ -n "${HEALTH_CHECK_TOKEN:-}" ]; then
             auth_args=(--header "Authorization: Bearer ${HEALTH_CHECK_TOKEN}")
