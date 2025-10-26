@@ -69,11 +69,6 @@ jobs:
           pnpm --version
           command -v pnpm
 
-      - name: Sync API lockfiles
-        run: |
-          cp pnpm-lock.yaml apps/api/pnpm-lock.yaml
-          cp .npmrc apps/api/.npmrc
-
       - name: Generate Prisma Client
         run: pnpm exec prisma generate
         working-directory: apps/api
@@ -82,7 +77,7 @@ jobs:
         run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
 
       - name: Instalar Vercel CLI
-        run: pnpm add --global vercel@48.3.0
+        run: pnpm add --global vercel@48.6.0
 
       - name: Sincronizar configuración Vercel API
         working-directory: apps/api
@@ -93,6 +88,16 @@ jobs:
           export PATH="$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
+      - name: Construir artefactos API (prebuilt)
+        working-directory: apps/api
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          vercel build --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN"
+
       - name: Deploy API to Vercel Production
         id: deploy-api
         working-directory: apps/api
@@ -102,7 +107,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
+          DEPLOY_OUTPUT=$(vercel deploy --prod --prebuilt --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
           API_URL=$(echo "$DEPLOY_OUTPUT" | awk '/Production:/ {print $2}' | tail -n1)
           if [ -z "$API_URL" ]; then
@@ -124,6 +129,15 @@ jobs:
           export PATH="$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
+      - name: Construir artefactos Web (prebuilt)
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          vercel build --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN"
+
       - name: Deploy Web to Vercel Production
         id: deploy-web
         env:
@@ -132,9 +146,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          cp pnpm-lock.yaml apps/web/pnpm-lock.yaml
-          cp .npmrc apps/web/.npmrc
-          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN")
+          DEPLOY_OUTPUT=$(vercel deploy --prod --prebuilt --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
           WEB_URL=$(echo "$DEPLOY_OUTPUT" | awk '/Production:/ {print $2}' | tail -n1)
           if [ -z "$WEB_URL" ]; then
