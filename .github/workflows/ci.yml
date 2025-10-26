@@ -148,20 +148,20 @@ jobs:
         run: |
           set -euo pipefail
           normalize_vercel_url() {
-            python3 - <<'PY' "$1"
-import sys
-from urllib.parse import urlsplit, urlunsplit
-import re
-
-url = sys.argv[1]
-parts = urlsplit(url)
-host = parts.netloc
-match = re.match(r'^([a-z0-9-]+)-[a-z0-9]{6,}-[a-z0-9-]+(\.vercel\.app)$', host)
-if match:
-    host = f"{match.group(1)}{match.group(2)}"
-normalized = urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment))
-print(normalized, end="")
-PY
+            local url="$1"
+            local team_suffix="-brisa-cubana.vercel.app"
+            if [[ "$url" =~ ^https://([^/]+)(/.*)?$ ]]; then
+              local host="${BASH_REMATCH[1]}"
+              local rest="${BASH_REMATCH[2]}"
+              if [[ "$host" == *"$team_suffix" ]]; then
+                local base="${host%$team_suffix}"
+                base="${base%-*}"
+                host="${base}.vercel.app"
+              fi
+              echo "https://${host}${rest}"
+            else
+              echo "$url"
+            fi
           }
           API_CANONICAL_URL="$(normalize_vercel_url "$API_BASE_URL")"
           WEB_CANONICAL_URL="$(normalize_vercel_url "$WEB_BASE_URL")"
