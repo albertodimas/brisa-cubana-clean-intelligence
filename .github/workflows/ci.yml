@@ -148,7 +148,7 @@ jobs:
         run: |
           set -euo pipefail
           normalize_vercel_url() {
-            python - <<'PY' "$1"
+            python3 - <<'PY' "$1"
 import sys
 from urllib.parse import urlsplit, urlunsplit
 import re
