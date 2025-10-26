@@ -107,10 +107,9 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          DEPLOY_OUTPUT_FILE="$(mktemp)"
-          vercel deploy --prod --prebuilt --yes --scope brisa-cubana --token "$VERCEL_TOKEN" --json > "$DEPLOY_OUTPUT_FILE"
-          cat "$DEPLOY_OUTPUT_FILE"
-          API_URL=$(node -e "const fs=require('fs');const data=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(data.url||'');" "$DEPLOY_OUTPUT_FILE")
+          DEPLOY_OUTPUT=$(vercel deploy --prod --prebuilt --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "$DEPLOY_OUTPUT"
+          API_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
           if [ -z "$API_URL" ]; then
             echo "No se pudo determinar la URL de producción del API" >&2
             exit 1
@@ -147,10 +146,9 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
-          DEPLOY_OUTPUT_FILE="$(mktemp)"
-          vercel deploy --prod --prebuilt --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN" --json > "$DEPLOY_OUTPUT_FILE"
-          cat "$DEPLOY_OUTPUT_FILE"
-          WEB_URL=$(node -e "const fs=require('fs');const data=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(data.url||'');" "$DEPLOY_OUTPUT_FILE")
+          DEPLOY_OUTPUT=$(vercel deploy --prod --prebuilt --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN")
+          echo "$DEPLOY_OUTPUT"
+          WEB_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
           if [ -z "$WEB_URL" ]; then
             echo "No se pudo determinar la URL de producción del sitio web" >&2
             exit 1
