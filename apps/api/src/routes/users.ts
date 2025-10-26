@@ -10,6 +10,7 @@ import { handlePrismaError } from "../lib/prisma-error-handler.js";
 import type { UpdateUserDto } from "../interfaces/user.interface.js";
 import { getUserRepository } from "../container.js";
 import { parseSearchableQuery } from "../lib/pagination.js";
+import { isParseFailure } from "../lib/parse-result.js";
 
 const router = new Hono();
 
@@ -47,7 +48,7 @@ const userQuerySchema = z.object({
 
 router.get("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
   const queryResult = parseSearchableQuery(c, userQuerySchema);
-  if (!queryResult.success) {
+  if (isParseFailure(queryResult)) {
     return queryResult.response;
   }
 

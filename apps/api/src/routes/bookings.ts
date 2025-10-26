@@ -6,6 +6,7 @@ import { authenticate, requireRoles } from "../middleware/auth.js";
 import { serializeBooking } from "../lib/serializers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
 import { parseSearchableQuery } from "../lib/pagination.js";
+import { isParseFailure } from "../lib/parse-result.js";
 import {
   getBookingRepository,
   getPropertyRepository,
@@ -63,7 +64,7 @@ const updateBookingSchema = z
 
 router.get("/", async (c) => {
   const queryResult = parseSearchableQuery(c, bookingQuerySchema);
-  if (!queryResult.success) {
+  if (isParseFailure(queryResult)) {
     return queryResult.response;
   }
 
