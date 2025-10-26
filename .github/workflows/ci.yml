@@ -96,6 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
+          corepack enable pnpm
           vercel build --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy API to Vercel Production
@@ -136,6 +137,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$PNPM_HOME:$PATH"
+          corepack enable pnpm
           vercel build --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Production
