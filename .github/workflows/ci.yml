@@ -69,6 +69,11 @@ jobs:
           pnpm --version
           command -v pnpm
 
+      - name: Sync API lockfiles
+        run: |
+          cp pnpm-lock.yaml apps/api/pnpm-lock.yaml
+          cp .npmrc apps/api/.npmrc
+
       - name: Generate Prisma Client
         run: pnpm exec prisma generate
         working-directory: apps/api
@@ -88,21 +93,6 @@ jobs:
           export PATH="$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
-      - name: Build API (prebuilt)
-        working-directory: apps/api
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          set -euo pipefail
-          export PATH="$PNPM_HOME:$PATH"
-          export PNPM_BIN="$(command -v pnpm)"
-          mkdir -p node_modules/pnpm/bin node_modules/.bin
-          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
-          chmod +x node_modules/pnpm/bin/pnpm.cjs
-          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
-          vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
-
       - name: Deploy API to Vercel Production
         id: deploy-api
         working-directory: apps/api
@@ -110,14 +100,21 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "$DEPLOY_OUTPUT"
+          API_URL=$(echo "$DEPLOY_OUTPUT" | awk '/Production:/ {print $2}' | tail -n1)
+          if [ -z "$API_URL" ]; then
+            echo "No se pudo determinar la URL de producción del API" >&2
+            exit 1
+          fi
+          echo "url=$API_URL" >> "$GITHUB_OUTPUT"
           {
             echo "### 🚀 API Production Deployment"
             echo ""
-            echo "- URL: $URL"
+            echo "- URL: $API_URL"
           } >> "$GITHUB_STEP_SUMMARY"
-          rm -rf .vercel/output
 
       - name: Sincronizar configuración Vercel Web
         env:
@@ -127,35 +124,30 @@ jobs:
           export PATH="$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
 
-      - name: Build Web (prebuilt)
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          set -euo pipefail
-          export PATH="$PNPM_HOME:$PATH"
-          export PNPM_BIN="$(command -v pnpm)"
-          mkdir -p node_modules/pnpm/bin node_modules/.bin
-          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
-          chmod +x node_modules/pnpm/bin/pnpm.cjs
-          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
-          vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
-
       - name: Deploy Web to Vercel Production
         id: deploy-web
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          cp pnpm-lock.yaml apps/web/pnpm-lock.yaml
+          cp .npmrc apps/web/.npmrc
+          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --cwd apps/web --token "$VERCEL_TOKEN")
+          echo "$DEPLOY_OUTPUT"
+          WEB_URL=$(echo "$DEPLOY_OUTPUT" | awk '/Production:/ {print $2}' | tail -n1)
+          if [ -z "$WEB_URL" ]; then
+            echo "No se pudo determinar la URL de producción del sitio web" >&2
+            exit 1
+          fi
+          echo "url=$WEB_URL" >> "$GITHUB_OUTPUT"
           {
             echo ""
             echo "### 🌐 Web Production Deployment"
             echo ""
-            echo "- URL: $URL"
+            echo "- URL: $WEB_URL"
           } >> "$GITHUB_STEP_SUMMARY"
-          rm -rf .vercel/output
 
       - name: Smoke test production endpoints
         env:
