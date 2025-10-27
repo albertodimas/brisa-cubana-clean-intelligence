@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Suspense } from "react";
 import "./globals.css";
 import "../styles/theme.css";
-import { ToastProvider } from "@/components/ui";
-import { ThemeProvider } from "@/components/theme-provider";
-import { WebVitalsReporter } from "@/components/analytics/web-vitals-reporter";
 import { Inter } from "next/font/google";
-import { SpeedInsightsClient } from "@/components/analytics/speed-insights-client";
-import { PostHogAnalytics } from "@/components/analytics/posthog-analytics";
+import { AppClientShell } from "@/components/layout/app-client-shell";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -123,14 +118,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider>
-          <ToastProvider>{children}</ToastProvider>
-          <WebVitalsReporter />
-        </ThemeProvider>
-        <PostHogAnalytics />
-        <Suspense fallback={null}>
-          <SpeedInsightsClient enabled={enableSpeedInsights} />
-        </Suspense>
+        <AppClientShell enableSpeedInsights={enableSpeedInsights}>
+          {children}
+        </AppClientShell>
       </body>
     </html>
   );

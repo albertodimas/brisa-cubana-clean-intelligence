@@ -1,8 +1,8 @@
 # Brisa Cubana Clean Intelligence – Manual de Documentación
 
-**Última revisión:** 23 de octubre de 2025  
+**Última revisión:** 27 de octubre de 2025  
 Todas las guías descritas aquí reflejan funcionalidades existentes y probadas en `main`.  
-Ejecuta `pnpm docs:verify` para validar la estructura antes de abrir un PR.
+Ejecuta `pnpm docs:verify` para validar la estructura antes de abrir un PR; el flujo `CI (Main Branch)` bloquea merges si la documentación requerida queda obsoleta.
 
 ## Índice por dominio
 
@@ -49,6 +49,14 @@ Ejecuta `pnpm docs:verify` para validar la estructura antes de abrir un PR.
 - Las plantillas de seeds y variables se mantienen en `apps/api/.env.example` y `docs/operations/security.md`.
 - Los reportes generados automáticamente (Playwright, coverage) no deben subirse; consulta `.gitignore`.
 - `scripts/verify-doc-structure.sh` es la autoridad de estructura: actualízalo cuando se agreguen dominios nuevos.
+
+## Guía de mantenimiento continuo
+
+1. **Actualizar `overview/status.md`** cada vez que cambie el estado de una funcionalidad, se despliegue una versión relevante o se cierre un incidente. Incluye fecha, referencia al run de CI/PR y pruebas ejecutadas.
+2. **Registrar decisiones técnicas** significativas mediante un ADR (`docs/decisions/README.md` describe el proceso y la plantilla). Ningún cambio estructural debe entrar sin un ADR asociado.
+3. **Sincronizar playbooks y secretos**: cuando varíen pipelines, variables o credenciales, modifica `docs/operations/*` siguiendo la pauta de redacción segura en `docs/operations/credentials-audit.md`.
+4. **Verificaciones previas al PR**: ejecuta `pnpm docs:verify`, enlaza pruebas/manuales relevantes y cita herramientas externas (dashboards, diagramas).
+5. **Formato consistente**: Markdown simple, tablas para checklists, fechas en formato ISO + texto natural y lenguaje inclusivo. El workflow de CI rechazará PRs con formato inválido.
 
 ---
 

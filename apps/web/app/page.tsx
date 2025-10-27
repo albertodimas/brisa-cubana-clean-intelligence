@@ -5,7 +5,6 @@ import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
 import { PricingTiers } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
-import { NightShiftMedia } from "@/components/landing/night-shift-media";
 import {
   ScrollProgress,
   ScrollReveal,
@@ -601,24 +600,6 @@ export default function LandingPage() {
                   </p>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-center">
-          <NightShiftMedia />
-          <div className="relative aspect-[9/16] w-full overflow-hidden rounded-3xl border border-dashed border-brisa-200 bg-gradient-to-br from-brisa-200 via-white to-brisa-50 text-center shadow-inner dark:border-brisa-700 dark:from-brisa-800 dark:via-brisa-900 dark:to-brisa-950">
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-brisa-500 dark:text-brisa-300">
-              <ArrowUpRightIcon className="h-8 w-8" aria-hidden />
-              <p className="text-sm font-semibold">
-                Inserta video vertical (MP4) + poster estático
-              </p>
-              <p className="text-xs leading-relaxed">
-                El reproductor se configurará con auto-play, loop y captions
-                cuando recibamos el asset final.
-              </p>
             </div>
           </div>
         </div>
