@@ -106,8 +106,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setIsMounted(true);
   }, []);
 
-  const portalTarget =
-    typeof window !== "undefined" ? (document.body ?? null) : null;
+  const portalTarget = React.useMemo(() => {
+    return typeof window !== "undefined" ? (document.body ?? null) : null;
+  }, []);
 
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
