@@ -118,9 +118,17 @@ Estado actual: ✅ Webhook activo y sincronizado.
 
 #### 6. Stripe (procesamiento de pagos)
 
+### Cómo documentar secretos de forma segura
+
+1. **Nunca pegues valores reales** en el repositorio. Usa placeholders (`sk_live_…`, `whsec_************************`) o referencias a la fuente oficial.
+2. **Describe el proceso de rotación**: dónde obtenerlo (p. ej. _Stripe Dashboard → Developers → Webhooks_), quién tiene acceso y qué comandos ejecutar.
+3. **Registra la fecha de la última rotación** en esta auditoría y en el issue/PR asociado.
+4. **Mantén Vercel y GitHub alineados**: cada actualización debe replicarse en ambientes `development`, `preview`, `production` y en los secretos de GitHub Actions correspondientes.
+5. **Confirma en CI** que ninguna cadena filtrada aparece (`pnpm docs:verify` + secret scanning). Si GitHub detecta un secreto expuesto, rómpelo de inmediato y añade un comentario explicando la mitigación.
+
 ```bash
 ✅ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (Vercel: Dev/Preview/Prod)
-✅ STRIPE_WEBHOOK_SECRET (Vercel: Dev/Preview/Prod)
+✅ STRIPE_WEBHOOK_SECRET (Vercel: Dev/Preview/Prod) – Placeholder temporal generado el 2025-10-27. Reemplazar por el valor real desde Stripe antes de probar webhooks en vivo.
 ⚠️ STRIPE_SECRET_KEY (Vercel) — Dev/Preview ✅ · Prod ❌
 ```
 
@@ -129,7 +137,7 @@ Valores de referencia:
 - Publishable (modo prueba): `pk_test_brisa_demo_20251015`
 - Secret (modo prueba): `sk_test_...` (clave actual: `sk_test_redacted`)
 - Secret (modo live, sugerido): `sk_live_brisa_20251020_prod`
-- Webhook secret: `whsec_************************` _(redactado; consulta Vercel → Stripe Webhooks para el valor vigente)_
+- Webhook secret: `whsec_************************` \_(consulta Vercel → Stripe Webhooks para el valor vigente; nunca registrar el valor literal).
 
 Impacto:
 
