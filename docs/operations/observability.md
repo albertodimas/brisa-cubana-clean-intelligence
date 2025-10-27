@@ -73,6 +73,7 @@ Dashboard vivo: `docs/product/analytics-dashboard.md` (ID 607007 en PostHog).
   - Latencia p95 >2 s (`transaction.op = http.server`) → `#alerts-performance`.
 - Procedimiento detallado y variables: `docs/operations/observability-setup.md#sentry---monitoreo-de-errores`.
 - Tabla de implementación y evidencias: `observability-setup.md#registro-de-implementación`.
+- Content Security Policy (CSP): permitir `connect-src` a `https://*.sentry.io`, `https://*.ingest.sentry.io` y `https://*.ingest.us.sentry.io`. La cabecera se define en `apps/web/vercel.json`; tras cambios revisar el modo “Report Only” y, cuando no haya falsos positivos, migrar a modo enforcement.
 
 ### 4.2 PostHog
 

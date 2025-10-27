@@ -27,6 +27,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Docs
 
+- Formalizado el flujo de documentación (docs/README.md) y ADR (`docs/decisions/README.md` + plantilla); `credentials-audit.md` ahora incluye pautas para documentar secretos sin exponerlos.
+- `docs/operations/observability.md` actualiza la guía CSP para habilitar Sentry en producción.
 - `docs/product/phase-2-roadmap.md` y `docs/product/analytics-decision.md` actualizados con el estado de la integración PostHog y el plan de rotación de claves.
 - `docs/operations/observability.md`, `docs/operations/runbook-daily-monitoring.md` y `docs/operations/alerts.md` ahora incluyen los nuevos scripts y pasos de verificación para alertas PostHog/Sentry.
 - `docs/operations/observability-setup.md` documenta la creación de reglas Sentry (correo) y próximos pasos para Slack.

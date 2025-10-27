@@ -59,6 +59,6 @@ export const config = {
      * - robots.txt / sitemap.xml (SEO endpoints)
      * - public files (images, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|lhci|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html|txt|xml)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|lhci|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html|txt|xml|mp4|webm|mov|mp3|wav)$).*)",
   ],
 };
