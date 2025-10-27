@@ -31,7 +31,7 @@ jobs:
 
       - name: Usar Node.js 22
         if: env.SKIP_MONITOR == 'false'
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
 
