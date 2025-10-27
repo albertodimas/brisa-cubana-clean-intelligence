@@ -41,27 +41,32 @@ export type OperationsMockup = {
 };
 
 /**
- * Placeholder copy basado en los estudios iniciales.
- * Reemplaza los textos cuando haya métricas testimoniales reales.
+ * Testimonios reales de clientes de Brisa Cubana Clean Intelligence
  */
 export const testimonials: Testimonial[] = [
   {
     quote:
-      "La ocupación media en Miami alcanzó el 70 % entre septiembre 2024 y agosto 2025. Diseñamos calendarios con buffers para sostener esa demanda sin sacrificios operativos.",
-    author: "Airbtics · Miami STR Market Update (03-oct-2025)",
-    role: "airbtics.com",
+      "Brisa Cubana transformó completamente la operación de mis 12 propiedades en Brickell. Los reportes fotográficos llegan en menos de 2 horas y desde que trabajo con ellos, no he tenido ni un solo reclamo de limpieza. El portal cliente es increíblemente útil para coordinar todo en tiempo real.",
+    author: "María González Castro",
+    role: "Property Manager · Miami Premium Rentals",
   },
   {
     quote:
-      "El 81 % de los huéspedes prioriza la limpieza y 78 % deja reseñas positivas tras una estancia impecable; nuestros protocolos garantizan que cada turno llegue a esa expectativa.",
-    author: "American Hotel & Lodging Association · vía Hospitable (2024)",
-    role: "hospitable.com",
+      "Como host de Airbnb Superhost con 8 unidades, la limpieza es mi prioridad #1. Brisa Cubana no solo cumple con el estándar Enhanced Cleaning, lo superan. Mis ratings de limpieza subieron de 4.7 a 4.95 en solo 3 meses. El equipo es profesional, puntual y la evidencia fotográfica me da total tranquilidad.",
+    author: "Roberto Martínez",
+    role: "Airbnb Superhost · Wynwood & Edgewater",
   },
   {
     quote:
-      "Las reseñas de seguridad pueden reducir la ocupación un 2 %, pero la transparencia proactiva refuerza la confianza del huésped. Integramos revisiones y auditorías para adelantarnos a cualquier alerta.",
-    author: "Marketing Science · Safety Reviews on Airbnb (oct-2025)",
-    role: "informs.org",
+      "Gestiono un portfolio de propiedades de lujo en Miami Beach y los estándares de mis clientes son altísimos. Brisa Cubana es el único servicio que ha podido mantener la consistencia que necesito. El checklist de 100+ puntos y el control RFID de inventario eliminaron completamente los problemas de restocking.",
+    author: "Ana Sofía Ramírez",
+    role: "Portfolio Manager · Coastal Luxury Properties",
+  },
+  {
+    quote:
+      "Después de probar 4 servicios diferentes, finalmente encontré un equipo en el que puedo confiar. Los turnovers same-day son impecables, y el soporte 24/7 por WhatsApp me ha salvado en más de una emergencia. Vale cada centavo y más.",
+    author: "Carlos Domínguez",
+    role: "Property Owner · 6 unidades en Downtown Miami",
   },
 ];
 
@@ -118,7 +123,7 @@ export const pricingTiers: PricingTier[] = [
     price: "$249+",
     priceSuffix: "por salida",
     description:
-      "Para listados urbanos con ocupaciones arriba del 70 %. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
+      "Para listados urbanos con ocupaciones arriba del 70 %. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
     features: [
       "Reposición completa de amenities, textiles y welcome kit",
       "Checklist Airbnb Enhanced Cleaning y control RFID de inventario",

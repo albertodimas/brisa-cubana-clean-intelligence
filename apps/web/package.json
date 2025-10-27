@@ -16,7 +16,7 @@
     "test": "VITE_CJS_IGNORE_WARNING=true vitest run"
   },
   "dependencies": {
-    "@heroicons/react": "^2.1.5",
+    "@heroicons/react": "^2.2.0",
     "@sentry/nextjs": "^10.20.0",
     "@stripe/react-stripe-js": "^5.2.0",
     "@stripe/stripe-js": "^8.1.0",
