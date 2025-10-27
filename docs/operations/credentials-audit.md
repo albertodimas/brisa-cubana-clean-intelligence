@@ -137,7 +137,7 @@ Valores de referencia:
 - Publishable (modo prueba): `pk_test_brisa_demo_20251015`
 - Secret (modo prueba): `sk_test_...` (clave actual: `sk_test_redacted`)
 - Secret (modo live, sugerido): `sk_live_brisa_20251020_prod`
-- Webhook secret: `whsec_************************` \_(consulta Vercel → Stripe Webhooks para el valor vigente; nunca registrar el valor literal).
+- Webhook secret: `whsec_************************` _(consulta Vercel → Stripe Webhooks para el valor vigente; nunca registrar el valor literal)._
 
 Impacto:
 
