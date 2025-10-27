@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 25 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 218 unit/integration (126 API + 92 Web) –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
+**Última revisión:** 27 de octubre de 2025 (validación CI: `CI (Main Branch)` run [#18830072119](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/runs/18830072119) con `pnpm lint`, `pnpm typecheck`, `pnpm test` – 224 unit/integration (126 API + 98 Web) –, `pnpm test:e2e:critical`; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -15,7 +15,7 @@
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Despliegues en Vercel: el run `CI (Main Branch)` #18797700488 (25-oct-2025 03:43 UTC) falló con `spawn pnpm ENOENT` durante `vercel build`. El 25-oct-2025 actualizamos `ci.yml` y `vercel-preview.yml` para reforzar la instalación global de `pnpm@10.18.0` (workaround temporal mientras Vercel corrige el bug 48.x). Tras hacer push de este commit se lanzará un nuevo `workflow_dispatch` para validar el deploy automático; hasta entonces mantenemos operativo el fallback manual (`scripts/manual-vercel-deploy.sh`).
+- Despliegues en Vercel: el run `CI (Main Branch)` #18830072119 (27-oct-2025 08:40 UTC) completó deploys productivos de API/web y el smoke `/healthz` contra los aliases (`api.brisacubanacleanintelligence.com`, `brisacubanacleanintelligence.com`) usando `HEALTH_CHECK_TOKEN` rotado; se mantiene el workaround de instalación global `pnpm@10.18.0` en `ci.yml` mientras Vercel corrige el bug 48.x.
 - Observabilidad verificada manualmente el 21-oct-2025: evento Sentry `ec904a19-899c-4e91-9386-8304c02cd724` (via `pnpm sentry:test-event`) y captura PostHog `checkout_payment_failed` (`pnpm posthog:test-event` con distinct `brisa-cli-*`).
 - Sitio público `/` sirve la landing comercial con métricas basadas en datos reales del mercado STR (rotaciones 12-25/año, 81% reviews impactadas por limpieza, 13K listings en Miami) y CTA de checkout/portal. Los placeholders de imagen permanecen a la espera de los activos listados en `docs/marketing/visual-assets-checklist.md`. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados.
 - Stripe live configurado con credenciales rotadas el 20-oct-2025; los valores exactos viven únicamente en Vercel y GitHub Actions (ver `docs/operations/deployment.md` para el procedimiento).
