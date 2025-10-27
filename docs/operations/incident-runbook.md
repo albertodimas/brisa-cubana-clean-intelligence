@@ -8,14 +8,27 @@ Este documento describe el flujo de respuesta ante incidentes en Brisa Cubana Cl
 
 ## 1. Roles y Responsabilidades
 
-| Rol                | Responsable actual (Oct 2025) | Funciones principales                                         |
-| ------------------ | ----------------------------- | ------------------------------------------------------------- |
-| Incident Commander | Alberto Dimas                 | Coordina la respuesta, decide escalación, comunica al negocio |
-| Comunicaciones     | N/A (asignar)                 | Comunicación con stakeholders y clientes                      |
-| Soporte Técnico    | Equipo Plataforma             | Diagnóstico, mitigación y resolución técnica                  |
-| Producto/Negocio   | N/A (asignar)                 | Análisis de impacto en clientes, decisiones comerciales       |
+| Rol                | Responsable actual (Oct 2025)                                                                  | Funciones principales                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Incident Commander | Alberto Dimas (`@oncall-platform`)                                                             | Coordina la respuesta, decide escalación, comunica al negocio |
+| Comunicaciones     | Equipo Marketing (`marketing@brisacubanacleanintelligence.com`, Slack `@marketing-lead`)       | Comunicación con stakeholders y clientes                      |
+| Soporte Técnico    | Equipo Plataforma (`@oncall-platform`)                                                         | Diagnóstico, mitigación y resolución técnica                  |
+| Producto/Negocio   | Equipo Ventas & Customer Success (`ventas@brisacubanacleanintelligence.com`, Slack `@cs-lead`) | Análisis de impacto en clientes, decisiones comerciales       |
 
-> **Pendiente**: asignar backups/guardias por rol y documentarlos en este cuadro.
+> Última revisión de ownership: 27 de octubre de 2025. Mantener esta tabla sincronizada con la rotación de responsables documentada en la sección 1.1.
+
+### 1.1 Guardias vigentes y canales de escalación
+
+- **Rotación semanal de guardia técnica**
+  - Lunes 08:00 ET → Jueves 20:00 ET: Plataforma (`@oncall-platform`, contacto de relevo `plataforma@brisacubanacleanintelligence.com`).
+  - Jueves 20:00 ET → Lunes 08:00 ET: Operaciones (`@oncall-ops`, contacto de relevo `operaciones@brisacubanacleanintelligence.com`).
+- **Guardia de comunicaciones**
+  - Marketing mantiene un delegado activo (`@marketing-lead`) con handoff diario a las 09:30 ET documentado en `#alerts-operaciones`.
+- **Escalaciones**
+  - SEV0/SEV1: anunciar en `#alerts-criticos`, mencionar a `@leadership` y a los responsables de Comunicaciones y Producto/Negocio.
+  - SEV2/SEV3: coordinar en `#alerts-operaciones` y seguir el flujo normal de acknowledgement.
+- **Registro de guardias**
+  - El calendario `Brisa · Incident Rotation` en Google Workspace contiene los turnos confirmados de las próximas seis semanas. Al actualizar el calendario, reflejar los cambios en este documento y en la descripción del canal `#alerts-operaciones`.
 
 ---
 
@@ -79,6 +92,5 @@ Este documento describe el flujo de respuesta ante incidentes en Brisa Cubana Cl
 
 ## 6. Próximos pasos pendientes
 
-- Configurar canales Slack dedicados (`#alerts-operaciones`, `#alerts-criticos`).
+- Revisar trimestralmente la taxonomía de canales Slack (`#alerts-operaciones`, `#alerts-criticos`, `#alerts-deployments`) y documentar cualquier cambio.
 - Publicar el dashboard KPI en PostHog y enlazarlo en este runbook.
-- Formalizar guardias/on-call y actualizar la tabla de roles.

@@ -27,11 +27,26 @@ if (Number.isNaN(lookbackMinutes) || lookbackMinutes <= 0) {
   process.exit(1);
 }
 
-const hogqlQuery = `SELECT count() AS total FROM events WHERE event = 'checkout_payment_failed' AND timestamp >= now() - INTERVAL ${lookbackMinutes} MINUTE /* ${Date.now()} */`;
+const posthogBaseUrl = `${POSTHOG_HOST.replace(/\/$/, "")}/api/projects/${POSTHOG_PROJECT_ID}`;
 
-async function fetchCheckoutFailures() {
-  const url = `${POSTHOG_HOST.replace(/\/$/, "")}/api/projects/${POSTHOG_PROJECT_ID}/query/`;
- const response = await fetch(url, {
+const queries = [
+  {
+    event: "checkout_payment_failed",
+    label: "Checkout fallido",
+    hogql: `SELECT count() FROM events WHERE event = 'checkout_payment_failed' AND timestamp >= now() - INTERVAL ${lookbackMinutes} MINUTE /* ${Date.now()} */`,
+    dashboardUrl: "https://us.i.posthog.com/project/225064/dashboard/607007",
+  },
+  {
+    event: "stripe.intent.failed",
+    label: "Stripe PaymentIntent fallido",
+    hogql: `SELECT count() FROM events WHERE event = 'stripe.intent.failed' AND timestamp >= now() - INTERVAL ${lookbackMinutes} MINUTE /* ${Date.now()} */`,
+    dashboardUrl: "https://us.i.posthog.com/project/225064/insight/stripe-intent-failed",
+  },
+];
+
+async function fetchCount(hogqlQuery) {
+  const url = `${posthogBaseUrl}/query/`;
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${POSTHOG_API_KEY}`,
@@ -53,13 +68,18 @@ async function fetchCheckoutFailures() {
   }
 
   const data = await response.json();
-  const results = data?.results?.[0]?.[0] ?? 0;
-  return Number(results) || 0;
+  const result = data?.results?.[0]?.[0] ?? 0;
+  return Number(result) || 0;
 }
 
-async function sendSlackAlert(total) {
-  const text = `:rotating_light: *Checkout fallido detectado*\nEventos \`checkout_payment_failed\`: *${total}* en los últimos ${lookbackMinutes} minutos.\nVer dashboard: https://us.i.posthog.com/project/225064/dashboard/607007`;
-
+async function sendSlackAlert(results) {
+  const lines = results
+    .map(
+      ({ label, event, total, dashboardUrl }) =>
+        `• ${label} (\`${event}\`): *${total}* eventos – <${dashboardUrl}|ver detalle>`,
+    )
+    .join("\n");
+  const text = `:rotating_light: *Alertas PostHog en los últimos ${lookbackMinutes} minutos*\n${lines}`;
   const response = await fetch(SLACK_WEBHOOK_URL, {
     method: "POST",
     headers: {
@@ -78,18 +98,27 @@ async function sendSlackAlert(total) {
 
 (async () => {
   try {
-    const total = await fetchCheckoutFailures();
-
-    if (total > 0) {
-      await sendSlackAlert(total);
-      console.log(
-        `🚨 Sent Slack alert: ${total} checkout_payment_failed in last ${lookbackMinutes} minutes.`,
-      );
-    } else {
-      console.log(
-        `✅ No checkout_payment_failed events in last ${lookbackMinutes} minutes.`,
-      );
+    const results = [];
+    for (const query of queries) {
+      const total = await fetchCount(query.hogql);
+      if (total > 0) {
+        results.push({ ...query, total });
+      }
     }
+
+    if (results.length === 0) {
+      console.log(
+        `✅ No se detectaron eventos críticos (checkout o stripe.intent.failed) en los últimos ${lookbackMinutes} minutos.`,
+      );
+      return;
+    }
+
+    await sendSlackAlert(results);
+    console.log(
+      `🚨 Enviada alerta Slack para ${results
+        .map(({ event }) => event)
+        .join(", ")}.`,
+    );
   } catch (error) {
     console.error("❌ monitor failed:", error);
     process.exit(1);

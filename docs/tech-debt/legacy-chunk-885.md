@@ -34,6 +34,19 @@ Las auditorías Lighthouse sobre `https://brisa-cubana-clean-intelligence.vercel
 - El workflow `Monthly Bundle Audit` (`.github/workflows/monthly-bundle.yml`) corre el primer día del mes y adjunta el reporte de `pnpm --filter @brisa/web analyze` como artefacto. Revisa el artefacto y actualiza esta ficha con cualquier cambio en tamaños o presencia del chunk 885.
 - Si la auditoría detecta que el chunk desapareció o se redujo significativamente, programa un PR para actualizar Next.js y cerrar esta deuda técnica.
 
+## Plan operacional (actualizado 27-oct-2025)
+
+1. **Responsable primario:** Equipo Plataforma (`@oncall-platform`). Custodio de respaldo: Equipo Frontend (Slack `@frontend-guild`).
+2. **Cadencia:**
+   - 1er lunes de cada mes, antes de las 12:00 ET, revisar el artefacto `monthly-bundle` y registrar hallazgos en `docs/performance/bundle-analysis.md`.
+   - Incluir el resultado en la reunión de observabilidad (lunes 10:00 ET) cuando se detecten variaciones ≥10 kB en el chunk 885 o cuando Lighthouse siga flaggeando `legacy-javascript`.
+3. **Checklist mensual:**
+   - Descargar artefacto `apps/web/.next/analyze/client.html` del workflow `Monthly Bundle Audit`.
+   - Confirmar tamaño del chunk `885-*.js` y compararlo con el baseline previo (ver tabla en `bundle-analysis.md`).
+   - Ejecutar `pnpm exec lhci autorun --config=.lighthouserc.preview.json` contra el último deploy preview si se observan cambios.
+   - Documentar en este archivo (Fecha, Versión Next.js, Resultado) y abrir issue en caso de regresión.
+4. **Escalación:** Si el chunk supera los 180 kB o Lighthouse degrada la puntuación de Performance < 90, crear ticket urgente en Linear (`prio: high`) y mencionarlo en `#alerts-performance`.
+
 ## Notas
 
 - Esta advertencia no bloquea CI (clasificada como `warn`), pero se monitorea para mantener los budgets de performance alineados a producción.

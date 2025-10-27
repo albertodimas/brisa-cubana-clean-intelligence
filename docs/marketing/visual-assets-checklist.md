@@ -69,6 +69,9 @@
 - [ ] Fotografía profesional en Azure Villa (interior + exterior). _Owner: Marketing (Laura). Deadline sugerido: 25-oct._
 - [ ] Captura de pantalla portal con nueva sección de auditoría RFID. _Owner: Diseño (Marta)._
 - [ ] Video testimonial en inglés (subtítulos español) para LinkedIn Ads. _Owner: Field Ops + Marketing. Grabación a agendar._
+- [x] Reemplazar placeholders de la landing (`apps/web/app/page.tsx`) con assets finales y validar con `pnpm capture:hero`. _(Actualizado 27-oct-2025)_ _Owner: Marketing + Frontend. Deadline sugerido: 30-oct._
+
+> 27-oct-2025: Hero capturado con `pnpm capture:hero`; variantes WebP en `apps/web/public/assets/hero/hero-{768w,1280w,1920w,2400w}.webp`. Mockups móviles finales (`portal-mobile-dashboard`, `portal-mobile`, `portal-mobile-services`) generados y optimizados en `apps/web/public/assets/mockups/4-5/`.
 
 > Mantén actualizado este checklist conforme se produzcan nuevos activos o se cierre material. Guarda versiones finales con naming `YYYYMMDD_asset-descripcion.ext`.
 > **Acción inmediata:** Marketing debe confirmar la entrega de los assets marcados ⚠️ antes del 25-oct para desbloquear el reemplazo de placeholders en la landing (`apps/web/app/page.tsx`) y los reportes Lighthouse.

@@ -1,4 +1,10 @@
 {
   "extends": "./tsconfig.base.json",
-  "include": ["apps/**/*", "tests/**/*", "scripts/**/*", "playwright.config.ts"]
+  "include": [
+    "apps/**/*",
+    "tests/**/*",
+    "scripts/**/*",
+    "playwright.config.ts",
+    "playwright.mobile.config.ts"
+  ]
 }

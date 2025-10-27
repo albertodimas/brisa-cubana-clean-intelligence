@@ -1,5 +1,6 @@
 import { expect, type Page, type TestInfo } from "@playwright/test";
 import { createHash } from "node:crypto";
+import fs from "node:fs/promises";
 
 export const adminEmail =
   process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanacleanintelligence.com";
@@ -26,10 +27,47 @@ export async function loginWithCredentials(
     email,
     password,
     retries = 4,
-  }: { email: string; password: string; retries?: number },
+    useStorageState = true,
+  }: {
+    email: string;
+    password: string;
+    retries?: number;
+    useStorageState?: boolean;
+  },
 ) {
   const ip = ipForTest(testInfo);
   await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
+
+  if (useStorageState && email === adminEmail) {
+    try {
+      const rawState = await fs.readFile(ADMIN_STORAGE_STATE_PATH, "utf8");
+      const state = JSON.parse(rawState) as {
+        cookies?: Array<Parameters<Page["context"]["addCookies"]>[0][number]>;
+      };
+      if (state.cookies && state.cookies.length > 0) {
+        await page.context().addCookies(
+          state.cookies.map((cookie) => ({
+            ...cookie,
+            expires: cookie.expires ?? -1,
+          })),
+        );
+      }
+      await page.goto("/panel", {
+        waitUntil: "domcontentloaded",
+      });
+      const panelHeading = page.getByRole("heading", {
+        name: "Panel operativo",
+      });
+      const panelRoot = page.getByTestId("panel-root").first();
+      await Promise.all([
+        expect(panelHeading).toBeVisible({ timeout: 5_000 }),
+        expect(panelRoot).toBeVisible({ timeout: 5_000 }),
+      ]);
+      return;
+    } catch {
+      // fallback to credential flow below
+    }
+  }
 
   for (let attempt = 0; attempt < retries; attempt++) {
     await page.goto("/login", { waitUntil: "domcontentloaded" });
@@ -126,6 +164,9 @@ export async function loginWithCredentials(
     if (navigationSucceeded) {
       await expect(panelHeading).toBeVisible({ timeout: 10_000 });
       await expect(panelRoot).toBeVisible({ timeout: 15_000 });
+      if (useStorageState && email === adminEmail) {
+        await page.context().storageState({ path: ADMIN_STORAGE_STATE_PATH });
+      }
       return;
     }
 
@@ -143,6 +184,9 @@ export async function loginWithCredentials(
 
     await expect(panelHeading).toBeVisible({ timeout: 10_000 });
     await expect(panelRoot).toBeVisible({ timeout: 15_000 });
+    if (useStorageState && email === adminEmail) {
+      await page.context().storageState({ path: ADMIN_STORAGE_STATE_PATH });
+    }
     return;
   }
 }
@@ -150,12 +194,13 @@ export async function loginWithCredentials(
 export async function loginAsAdmin(
   page: Page,
   testInfo: TestInfo,
-  options: { retries?: number } = {},
+  options: { retries?: number; useStorageState?: boolean } = {},
 ) {
   await loginWithCredentials(page, testInfo, {
     email: adminEmail,
     password: adminPassword,
     retries: options.retries ?? 4,
+    useStorageState: options.useStorageState ?? true,
   });
 }
 

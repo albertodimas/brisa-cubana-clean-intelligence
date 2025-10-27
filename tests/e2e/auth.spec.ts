@@ -11,7 +11,7 @@ test.describe("Autenticación", () => {
   test("permite iniciar sesión y acceder al panel operativo @smoke @critical", async ({
     page,
   }, testInfo) => {
-    await loginAsAdmin(page, testInfo);
+    await loginAsAdmin(page, testInfo, { useStorageState: false });
     await expect(
       page.getByRole("heading", { name: "Panel operativo" }),
     ).toBeVisible();

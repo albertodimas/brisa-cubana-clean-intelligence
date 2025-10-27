@@ -5,6 +5,7 @@ import Stripe from "stripe";
 import { logger } from "../lib/logger.js";
 import { getServiceRepository } from "../container.js";
 import { createRateLimiter } from "../lib/rate-limiter.js";
+import { Sentry } from "../lib/sentry.js";
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -49,6 +50,31 @@ const createIntentSchema = z.object({
   customerFullName: z.string().min(2).max(120).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
 });
+
+type StripeIntentEvent = "created" | "failed" | "skipped";
+
+function captureStripeTelemetry(
+  event: StripeIntentEvent,
+  details: Record<string, unknown>,
+) {
+  if (
+    typeof Sentry.withScope !== "function" ||
+    typeof Sentry.captureMessage !== "function"
+  ) {
+    return;
+  }
+
+  Sentry.withScope((scope) => {
+    scope.setTag("stripe.intent.event", event);
+    Object.entries(details).forEach(([key, value]) => {
+      if (value !== undefined) {
+        scope.setExtra(`stripe.intent.${key}`, value);
+      }
+    });
+    scope.setLevel(event === "failed" ? "warning" : "info");
+    Sentry.captureMessage(`stripe.intent.${event}`);
+  });
+}
 
 router.post("/stripe/webhook", async (c: Context) => {
   if (!stripeClient || !stripeWebhookSecret) {
@@ -105,11 +131,6 @@ router.post("/stripe/webhook", async (c: Context) => {
 });
 
 router.post("/stripe/intent", async (c) => {
-  if (!stripeClient) {
-    logger.error("Intent de Stripe solicitado sin STRIPE_SECRET_KEY definido");
-    return c.json({ error: "Stripe no está configurado" }, 503);
-  }
-
   let json: unknown;
   try {
     json = await c.req.json();
@@ -124,12 +145,50 @@ router.post("/stripe/intent", async (c) => {
 
   const { customerEmail, customerFullName, serviceId, scheduledFor, notes } =
     parsed.data;
+  const intentAuditBase = {
+    serviceId,
+    customerEmail,
+    customerFullName: customerFullName ?? null,
+    scheduledFor: scheduledFor ?? null,
+    hasNotes: Boolean(notes),
+    source: "public-checkout",
+  };
+
+  if (!stripeClient) {
+    logger.error(
+      {
+        ...intentAuditBase,
+        intentStatus: "skipped",
+      },
+      "Intent de Stripe solicitado sin STRIPE_SECRET_KEY definido",
+    );
+    captureStripeTelemetry("skipped", {
+      ...intentAuditBase,
+      reason: "stripe-not-configured",
+    });
+    return c.json({ error: "Stripe no está configurado" }, 503);
+  }
 
   try {
     const serviceRepository = getServiceRepository();
     const service = await serviceRepository.findById(serviceId);
 
     if (!service || !service.active) {
+      logger.warn(
+        {
+          ...intentAuditBase,
+          intentStatus: "rejected",
+          serviceFound: Boolean(service),
+          serviceActive: service?.active ?? null,
+        },
+        "Intent de pago descartado: servicio no disponible",
+      );
+      captureStripeTelemetry("failed", {
+        ...intentAuditBase,
+        reason: "service-not-available",
+        serviceFound: Boolean(service),
+        serviceActive: service?.active ?? null,
+      });
       return c.json(
         { error: "El servicio seleccionado no está disponible" },
         404,
@@ -169,18 +228,38 @@ router.post("/stripe/intent", async (c) => {
         enabled: true,
       },
     });
-
     logger.info(
       {
+        ...intentAuditBase,
         paymentIntentId: paymentIntent.id,
         serviceId: service.id,
         currency: stripeDefaultCurrency,
         amountInCents,
+        intentStatus: "created",
       },
       "PaymentIntent de Stripe creado para checkout público",
     );
+    captureStripeTelemetry("created", {
+      ...intentAuditBase,
+      paymentIntentId: paymentIntent.id,
+      amountInCents,
+      currency: stripeDefaultCurrency,
+    });
 
     if (!paymentIntent.client_secret) {
+      logger.error(
+        {
+          ...intentAuditBase,
+          intentStatus: "failed",
+          paymentIntentId: paymentIntent.id,
+        },
+        "Stripe devolvió un PaymentIntent sin client_secret",
+      );
+      captureStripeTelemetry("failed", {
+        ...intentAuditBase,
+        paymentIntentId: paymentIntent.id,
+        reason: "missing-client-secret",
+      });
       return c.json(
         { error: "No se obtuvo client_secret del PaymentIntent" },
         500,
@@ -197,9 +276,19 @@ router.post("/stripe/intent", async (c) => {
     });
   } catch (error) {
     logger.error(
-      { err: error, serviceId, customerEmail },
+      {
+        err: error,
+        ...intentAuditBase,
+        intentStatus: "failed",
+      },
       "Error creando PaymentIntent de Stripe",
     );
+    captureStripeTelemetry("failed", {
+      ...intentAuditBase,
+      reason: "stripe-error",
+      error:
+        error instanceof Error ? error.message : String(error ?? "unknown"),
+    });
     return c.json({ error: "No fue posible iniciar el pago con Stripe" }, 500);
   }
 });

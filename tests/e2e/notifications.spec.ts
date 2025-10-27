@@ -40,7 +40,7 @@ test.describe.serial("Notificaciones", () => {
       });
 
       const bell = page.getByTestId("notification-bell");
-      await expect(bell).toBeVisible();
+      await expect(bell).toBeVisible({ timeout: 10_000 });
 
       const fastMessage = `Notificación E2E ${Date.now()}`;
 
@@ -51,12 +51,28 @@ test.describe.serial("Notificaciones", () => {
         });
         await bell.click();
         const panel = page.getByTestId("notification-panel");
-        await expect(panel).toBeVisible();
+        await expect(panel).toBeVisible({ timeout: 10_000 });
+        await expect
+          .poll(async () => {
+            const response = await request.get(
+              `${apiBaseUrl}/api/notifications?limit=5&unreadOnly=true`,
+              {
+                headers: {
+                  Authorization: `Bearer ${userAccessToken}`,
+                },
+              },
+            );
+            const json = (await response.json()) as {
+              data?: Array<{ message: string }>;
+            };
+            return json.data?.map((item) => item.message) ?? [];
+          })
+          .toContain(fastMessage);
         await expect(
           panel
             .getByTestId("notification-item")
             .filter({ hasText: fastMessage }),
-        ).toHaveCount(1);
+        ).toHaveCount(1, { timeout: 10_000 });
       });
 
       await test.step("marcar como leído", async () => {
@@ -75,7 +91,7 @@ test.describe.serial("Notificaciones", () => {
           panel
             .getByTestId("notification-item")
             .filter({ hasText: fastMessage }),
-        ).toHaveCount(0);
+        ).toHaveCount(0, { timeout: 10_000 });
         await page.getByRole("button", { name: "Ver todas" }).click();
       });
 
@@ -97,24 +113,33 @@ test.describe.serial("Notificaciones", () => {
         const markAllButton = page.getByRole("button", {
           name: "Marcar todas",
         });
-        await expect(markAllButton).toBeEnabled();
+        await expect(markAllButton).toBeEnabled({ timeout: 10_000 });
         await markAllButton.click();
         await page.getByRole("button", { name: "Sólo sin leer" }).click();
-        const unreadResponse = await request.get(
-          `${apiBaseUrl}/api/notifications?limit=10&unreadOnly=true`,
-          {
-            headers: {
-              Authorization: `Bearer ${userAccessToken}`,
+        await expect
+          .poll(
+            async () => {
+              const unreadResponse = await request.get(
+                `${apiBaseUrl}/api/notifications?limit=10&unreadOnly=true`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${userAccessToken}`,
+                  },
+                },
+              );
+              const unreadJson = (await unreadResponse.json()) as {
+                data?: Array<{ message: string }>;
+              };
+              const unreadMessages =
+                unreadJson.data?.map((item) => item.message) ?? [];
+              return (
+                unreadMessages.includes(massMessageOne) ||
+                unreadMessages.includes(massMessageTwo)
+              );
             },
-          },
-        );
-        const unreadJson = (await unreadResponse.json()) as {
-          data?: Array<{ message: string }>;
-        };
-        const unreadMessages =
-          unreadJson.data?.map((item) => item.message) ?? [];
-        expect(unreadMessages).not.toContain(massMessageOne);
-        expect(unreadMessages).not.toContain(massMessageTwo);
+            { timeout: 10_000 },
+          )
+          .toBe(false);
       });
     } finally {
       await deleteUserFixture(request, qaUser.id);

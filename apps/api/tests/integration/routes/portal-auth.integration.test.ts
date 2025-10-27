@@ -212,9 +212,11 @@ describe("Portal auth routes", () => {
 
     expect(verifyResponse.status).toBe(200);
     const cookies = extractCookies(verifyResponse.headers);
-    expect(cookies.some((value) => value.startsWith("portal_token="))).toBe(
-      true,
+    const portalTokenCookie = cookies.find((value) =>
+      value.startsWith("portal_token="),
     );
+    expect(portalTokenCookie).toBeDefined();
+    expect(portalTokenCookie).toContain("HttpOnly");
     expect(
       cookies.some((value) => value.startsWith("portal_customer_id=")),
     ).toBe(true);
@@ -260,6 +262,51 @@ describe("Portal auth routes", () => {
     expect(response.status).toBe(503);
     const body = await jsonResponse<{ error?: string }>(response);
     expect(body.error).toMatch(/correo de enlaces mágicos/i);
+  });
+
+  it("rechaza usuarios inactivos o sin rol CLIENT", async () => {
+    const windowMs = Number(
+      process.env.PORTAL_MAGIC_LINK_WINDOW_MS ?? "900000",
+    );
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
+
+    userRepositoryMock.findByEmail.mockResolvedValueOnce({
+      id: "user-2",
+      email: "inactive@portal.test",
+      isActive: false,
+      role: "CLIENT",
+    });
+
+    const inactive = await app.request("/api/portal/auth/request", {
+      method: "POST",
+      body: JSON.stringify({ email: "inactive@portal.test" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(inactive.status).toBe(200);
+    const inactiveBody = await jsonResponse<{ message: string }>(inactive);
+    expect(inactiveBody.message).toMatch(/recibirás un enlace/i);
+    expect(magicLinkRepositoryMock.create).not.toHaveBeenCalled();
+
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
+
+    userRepositoryMock.findByEmail.mockResolvedValueOnce({
+      id: "user-3",
+      email: "staff@portal.test",
+      isActive: true,
+      role: "STAFF",
+    });
+
+    const wrongRole = await app.request("/api/portal/auth/request", {
+      method: "POST",
+      body: JSON.stringify({ email: "staff@portal.test" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(wrongRole.status).toBe(200);
+    const wrongRoleBody = await jsonResponse<{ message: string }>(wrongRole);
+    expect(wrongRoleBody.message).toMatch(/recibirás un enlace/i);
+    expect(magicLinkRepositoryMock.create).not.toHaveBeenCalled();
   });
 
   it("rechaza token expirado", async () => {

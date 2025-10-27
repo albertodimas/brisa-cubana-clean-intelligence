@@ -22,6 +22,7 @@ const {
   POSTHOG_PROJECT_ID = "225064",
   POSTHOG_DASHBOARD_ID = "607007",
   POSTHOG_TILE_NAME = "Checkout failures (CI monitor)",
+  POSTHOG_INCLUDE_STRIPE_INTENT = "true",
 } = process.env;
 
 if (!POSTHOG_API_KEY) {
@@ -38,7 +39,7 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-const hogqlQuery = `SELECT
+const checkoutHogql = `SELECT
   toStartOfInterval(timestamp, INTERVAL 1 HOUR) AS hour,
   count() AS checkout_failures
 FROM events
@@ -46,6 +47,37 @@ WHERE event = 'checkout_payment_failed'
   AND timestamp >= now() - INTERVAL 7 DAY
 GROUP BY hour
 ORDER BY hour ASC`;
+
+const stripeIntentHogql = `SELECT
+  toStartOfInterval(timestamp, INTERVAL 1 HOUR) AS hour,
+  count() AS stripe_failures
+FROM events
+WHERE event = 'stripe.intent.failed'
+  AND timestamp >= now() - INTERVAL 7 DAY
+GROUP BY hour
+ORDER BY hour ASC`;
+
+const insightConfigs = [
+  {
+    name: POSTHOG_TILE_NAME,
+    description:
+      "Panorama de checkout_payment_failed consumido por posthog-monitor.yml",
+    query: checkoutHogql,
+    insight: "TRENDS",
+    display: "ActionsLineGraph",
+  },
+];
+
+if (POSTHOG_INCLUDE_STRIPE_INTENT !== "false") {
+  insightConfigs.push({
+    name: "Stripe intents (CI monitor)",
+    description:
+      "Eventos stripe.intent.failed para monitorear errores de PaymentIntent",
+    query: stripeIntentHogql,
+    insight: "TRENDS",
+    display: "ActionsLineGraph",
+  });
+}
 
 async function fetchDashboardWithTiles() {
   const url = `${baseHost}/api/projects/${projectId}/dashboards/${dashboardId}/?include_tiles=true`;
@@ -61,19 +93,18 @@ async function fetchDashboardWithTiles() {
   return response.json();
 }
 
-async function createInsight() {
+async function createInsight(config) {
   const payload = {
-    name: POSTHOG_TILE_NAME,
-    description:
-      "Panorama de checkout_payment_failed consumido por posthog-monitor.yml",
+    name: config.name,
+    description: config.description,
     dash_mode: "last",
     query: {
       kind: "HogQLQuery",
-      query: hogqlQuery,
+      query: config.query,
     },
     filters: {
-      insight: "TRENDS",
-      display: "ActionsLineGraph",
+      insight: config.insight,
+      display: config.display,
     },
     dashboards: [POSTHOG_DASHBOARD_ID],
   };
@@ -96,16 +127,16 @@ async function createInsight() {
   return data;
 }
 
-async function updateInsight(insightId) {
+async function updateInsight(insightId, config) {
   const payload = {
-    name: POSTHOG_TILE_NAME,
+    name: config.name,
     query: {
       kind: "HogQLQuery",
-      query: hogqlQuery,
+      query: config.query,
     },
     filters: {
-      insight: "TRENDS",
-      display: "ActionsLineGraph",
+      insight: config.insight,
+      display: config.display,
     },
   };
 
@@ -128,20 +159,24 @@ async function updateInsight(insightId) {
 
 try {
   const dashboard = await fetchDashboardWithTiles();
-  const existingTile = dashboard.tiles?.find((tile) =>
-    tile?.insight?.name === POSTHOG_TILE_NAME,
-  );
+  const tiles = dashboard.tiles ?? [];
 
-  if (existingTile?.insight?.id) {
-    await updateInsight(existingTile.insight.id);
-    console.log(
-      `✅ Insight actualizado (ID ${existingTile.insight.id}) y ya presente en el dashboard ${POSTHOG_DASHBOARD_ID}.`,
+  for (const config of insightConfigs) {
+    const existingTile = tiles.find(
+      (tile) => tile?.insight?.name === config.name,
     );
-  } else {
-    const insight = await createInsight();
-    console.log(
-      `✅ Insight creado (ID ${insight.id}) y añadido al dashboard ${POSTHOG_DASHBOARD_ID}.`,
-    );
+
+    if (existingTile?.insight?.id) {
+      await updateInsight(existingTile.insight.id, config);
+      console.log(
+        `✅ Insight "${config.name}" actualizado (ID ${existingTile.insight.id}) en el dashboard ${POSTHOG_DASHBOARD_ID}.`,
+      );
+    } else {
+      const insight = await createInsight(config);
+      console.log(
+        `✅ Insight "${config.name}" creado (ID ${insight.id}) y añadido al dashboard ${POSTHOG_DASHBOARD_ID}.`,
+      );
+    }
   }
 } catch (error) {
   console.error("❌ No se pudo sincronizar el panel de PostHog:", error);

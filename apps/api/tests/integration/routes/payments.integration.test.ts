@@ -146,6 +146,64 @@ describe("Stripe webhook", () => {
     repositorySpy.mockRestore();
   });
 
+  it("retorna 404 cuando el servicio no está disponible", async () => {
+    if (!stripeClientInstance) {
+      throw new Error("Stripe client no inicializado en modo test");
+    }
+
+    const paymentIntentSpy = vi.spyOn(
+      stripeClientInstance.paymentIntents,
+      "create",
+    );
+
+    const containerModule = await import("../../../src/container.js");
+    const repositoryMock: Partial<ServiceRepository> = {
+      findById: vi.fn().mockResolvedValue(null),
+    };
+    const repositorySpy = vi
+      .spyOn(containerModule, "getServiceRepository")
+      .mockReturnValue(repositoryMock as ServiceRepository);
+
+    const responseMissing = await app.request("/api/payments/stripe/intent", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        serviceId: "srv_missing",
+        customerEmail: "cliente@example.com",
+      }),
+    });
+
+    expect(responseMissing.status).toBe(404);
+    const missingBody = (await responseMissing.json()) as { error: string };
+    expect(missingBody.error).toMatch(/no está disponible/i);
+    expect(paymentIntentSpy).not.toHaveBeenCalled();
+
+    repositoryMock.findById = vi.fn().mockResolvedValue({
+      id: "srv_inactive",
+      name: "Servicio inactivo",
+      basePrice: 99,
+      durationMin: 60,
+      active: false,
+    });
+
+    const responseInactive = await app.request("/api/payments/stripe/intent", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        serviceId: "srv_inactive",
+        customerEmail: "cliente@example.com",
+      }),
+    });
+
+    expect(responseInactive.status).toBe(404);
+    const inactiveBody = (await responseInactive.json()) as { error: string };
+    expect(inactiveBody.error).toMatch(/no está disponible/i);
+    expect(paymentIntentSpy).not.toHaveBeenCalled();
+
+    paymentIntentSpy.mockRestore();
+    repositorySpy.mockRestore();
+  });
+
   it("aplica rate limiting tras solicitudes consecutivas de intents", async () => {
     if (!stripeClientInstance) {
       throw new Error("Stripe client no inicializado en modo test");
@@ -207,5 +265,61 @@ describe("Stripe webhook", () => {
     repositorySpy.mockRestore();
 
     await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
+  });
+});
+
+describe("Stripe intent sin configuración", () => {
+  let appWithoutStripe: Hono;
+
+  beforeAll(async () => {
+    delete process.env.STRIPE_SECRET_KEY;
+    delete process.env.STRIPE_WEBHOOK_SECRET;
+    process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
+    process.env.DATABASE_URL_UNPOOLED =
+      "postgresql://test:test@localhost:5432/test";
+    process.env.CHECKOUT_PAYMENT_RATE_LIMIT = "3";
+    process.env.CHECKOUT_PAYMENT_WINDOW_MS = "1000";
+    vi.resetModules();
+    appWithoutStripe = (await import("../../../src/app.js")).default;
+  });
+
+  afterAll(() => {
+    delete process.env.DATABASE_URL;
+    delete process.env.DATABASE_URL_UNPOOLED;
+    delete process.env.CHECKOUT_PAYMENT_RATE_LIMIT;
+    delete process.env.CHECKOUT_PAYMENT_WINDOW_MS;
+  });
+
+  it("retorna 503 cuando STRIPE_SECRET_KEY no está definido", async () => {
+    const response = await appWithoutStripe.request(
+      "/api/payments/stripe/intent",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          serviceId: "srv_test",
+          customerEmail: "cliente@example.com",
+        }),
+      },
+    );
+
+    expect(response.status).toBe(503);
+    const body = (await response.json()) as { error: string };
+    expect(body.error).toMatch(/Stripe no está configurado/);
+  });
+
+  it("retorna 503 en el webhook cuando falta configuración", async () => {
+    const response = await appWithoutStripe.request(
+      "/api/payments/stripe/webhook",
+      {
+        method: "POST",
+        body: "{}",
+        headers: { "content-type": "application/json" },
+      },
+    );
+
+    expect(response.status).toBe(503);
+    const body = (await response.json()) as { error: string };
+    expect(body.error).toMatch(/Stripe no está configurado/);
   });
 });

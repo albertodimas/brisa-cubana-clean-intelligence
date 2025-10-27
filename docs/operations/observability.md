@@ -43,15 +43,32 @@
 
 ### 3.2 Flujos críticos instrumentados
 
-| Flujo                               | Señales capturadas                                                                                                                          | Alertas recomendadas                                                           |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Checkout público (`/checkout`)      | Eventos Sentry (`checkout.payment.failed`, `checkout.payment.confirmed`), PostHog (`checkout_payment_failed`), logs Pino (`Stripe intent`). | Issue alert ≥3 fallos/15 min → `#alerts-operaciones`.                          |
-| Portal cliente (SSE / autoservicio) | Breadcrumbs Sentry (`portal.dashboard.refresh`, `notifications.stream.fallback`), logs API (`Portal booking cancellation processed`).       | Issue alert fallback SSE ≥3 eventos/5 min → `#alerts-operaciones`.             |
-| Lead intake (`/api/leads`)          | Slack webhook (`#leads-operaciones`), PostHog (`lead_submitted`), log inbound UTM.                                                          | Revisar tiempo de respuesta semanal en `docs/operations/lead-followup-sop.md`. |
+| Flujo                               | Señales capturadas                                                                                                                                                                                    | Alertas recomendadas                                                           |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Checkout público (`/checkout`)      | Eventos Sentry (`checkout.payment.failed`, `checkout.payment.confirmed`, `stripe.intent.created/failed/skipped`), PostHog (`checkout_payment_failed`), logs Pino (`intentStatus`, `paymentIntentId`). | Issue alert ≥3 fallos/15 min → `#alerts-operaciones`.                          |
+| Portal cliente (SSE / autoservicio) | Breadcrumbs Sentry (`portal.dashboard.refresh`, `notifications.stream.fallback`), logs API (`Portal booking cancellation processed`).                                                                 | Issue alert fallback SSE ≥3 eventos/5 min → `#alerts-operaciones`.             |
+| Lead intake (`/api/leads`)          | Slack webhook (`#leads-operaciones`), PostHog (`lead_submitted`), log inbound UTM.                                                                                                                    | Revisar tiempo de respuesta semanal en `docs/operations/lead-followup-sop.md`. |
 
 > Para ampliar o modificar instrumentación, registrar las decisiones en `docs/product/analytics-events.md` y actualizar las pruebas en `tests/e2e/analytics.spec.ts`.
 
-### 3.3 Métricas de negocio (eventos PostHog)
+### 3.3 Telemetría Stripe PaymentIntent
+
+- **Sentry**
+  - `stripe.intent.created` (nivel `info`): extras `stripe.intent.serviceId`, `stripe.intent.amountInCents`, `stripe.intent.currency`, `stripe.intent.customerEmail`.
+  - `stripe.intent.failed` (nivel `warning`): extras `stripe.intent.reason` (`service-not-available`, `stripe-error`, `missing-client-secret`), `stripe.intent.paymentIntentId` cuando existe.
+  - `stripe.intent.skipped` (nivel `info`): emitido cuando falta configuración (`reason: stripe-not-configured`).
+- **Logging estructurado**
+  - Todos los intents escriben `intentStatus` (`created`, `failed`, `rejected`, `skipped`), `serviceId`, `customerEmail`, `hasNotes`.
+  - Consulta ejemplo (Logtail):
+    ```sql
+    where intentStatus="failed"
+    | select time, serviceId, customerEmail, reason, amountInCents
+    ```
+- **Alertas recomendadas**
+  - Configurar regla Sentry: `stripe.intent.failed` ≥3 eventos en 15 min → Slack `#alerts-operaciones`.
+  - Monitorear `intentStatus="skipped"` para detectar ambientes sin `STRIPE_SECRET_KEY`.
+
+### 3.4 Métricas de negocio (eventos PostHog)
 
 - `checkout_started`, `checkout_payment_failed`, `checkout_payment_confirmed`
 - `portal.booking.action.*` (cancel/reschedule), `portal.session.expired`
@@ -111,23 +128,73 @@ Dashboard vivo: `docs/product/analytics-dashboard.md` (ID 607007 en PostHog).
 
 ---
 
+## 6. Checklist rápido post-release
+
+Ejecutar inmediatamente después de un deploy a producción o de cerrar un incidente SEV1/SEV2:
+
+1. **Verificar ingestión analítica**
+
+   ```bash
+   pnpm posthog:test-event    # Envía evento sintético
+   pnpm posthog:monitor       # Fuerza ejecución del monitor
+   ```
+
+   Confirma en el dashboard PostHog `607007` que el evento `checkout_payment_failed` aparece con timestamp actual.
+
+2. **Validar alertas Sentry**
+
+   ```bash
+   pnpm sentry:test-event
+   ```
+
+   Debe generarse un issue con tag `source=cli-test`; revisa que la notificación llegue a `#alerts-operaciones`.
+
+3. **Smoke E2E**
+
+   ```bash
+   pnpm test:e2e:smoke
+   pnpm test:e2e:critical
+   ```
+
+   Revisa los logs Pino para confirmar que se crean `PaymentIntent` y que el portal cliente responde sin fallback SSE.
+
+4. **Health checks externos**
+   - Ejecuta `curl -I https://brisacubanacleanintelligence.com/healthz`.
+   - Si el monitor `health-monitor.yml` falló en los últimos 15 min, documenta en `incident-runbook.md`.
+
+> Documenta los resultados en el PR o en `docs/overview/status.md` (sección “Observabilidad”) antes de marcar el despliegue como completo.
+
+---
+
 ## 6. KPIs y umbrales de alerta
 
-| Métrica / señal                                  | Umbral                         | Destino Slack                 | Acción sugerida                                              |
-| ------------------------------------------------ | ------------------------------ | ----------------------------- | ------------------------------------------------------------ |
-| `checkout.payment.failed` (PostHog/Sentry)       | ≥3 eventos en 15 min           | `#alerts-operaciones`         | Revisar estado Stripe, reintentar pago, notificar Marketing. |
-| SSE fallback (`notifications.stream.fallback`)   | ≥3 eventos en 5 min            | `#alerts-operaciones`         | Verificar conectividad Vercel / proxies, reiniciar stream.   |
-| Error rate global Sentry                         | >10 % en 5 min                 | `#alerts-criticos`            | Escalar a on-call, evaluar rollback.                         |
-| Latencia p95 `/api/portal/bookings`              | >500 ms sostenido 10 min       | `#alerts-performance`         | Revisar consultas Prisma, indices Neon.                      |
-| Tiempo de respuesta leads (`#leads-operaciones`) | >120 min (promedio semanal)    | `#leads-operaciones`          | Coordinar follow-up con Marketing/Comercial.                 |
-| Fuga `Magic link email failed` (logs API)        | ≥1 evento                      | `#alerts-operaciones`         | Validar credenciales SMTP / SendGrid.                        |
-| Health check `/healthz`                          | Código ≠200 o `status != pass` | Monitor externo (BetterStack) | Reintentar despliegue o investigar dependencia caída.        |
+| Métrica / señal                                  | Umbral                         | Destino Slack                 | Acción sugerida                                                                    |
+| ------------------------------------------------ | ------------------------------ | ----------------------------- | ---------------------------------------------------------------------------------- |
+| `checkout.payment.failed` (PostHog/Sentry)       | ≥3 eventos en 15 min           | `#alerts-operaciones`         | Revisar estado Stripe, reintentar pago, notificar Marketing.                       |
+| `stripe.intent.failed` (Sentry)                  | ≥3 eventos en 15 min           | `#alerts-operaciones`         | Verificar catálogo de servicios, credenciales Stripe, revisar logs `intentStatus`. |
+| SSE fallback (`notifications.stream.fallback`)   | ≥3 eventos en 5 min            | `#alerts-operaciones`         | Verificar conectividad Vercel / proxies, reiniciar stream.                         |
+| Error rate global Sentry                         | >10 % en 5 min                 | `#alerts-criticos`            | Escalar a on-call, evaluar rollback.                                               |
+| Latencia p95 `/api/portal/bookings`              | >500 ms sostenido 10 min       | `#alerts-performance`         | Revisar consultas Prisma, indices Neon.                                            |
+| Tiempo de respuesta leads (`#leads-operaciones`) | >120 min (promedio semanal)    | `#leads-operaciones`          | Coordinar follow-up con Marketing/Comercial.                                       |
+| Fuga `Magic link email failed` (logs API)        | ≥1 evento                      | `#alerts-operaciones`         | Validar credenciales SMTP / SendGrid.                                              |
+| Health check `/healthz`                          | Código ≠200 o `status != pass` | Monitor externo (BetterStack) | Reintentar despliegue o investigar dependencia caída.                              |
 
 Actualiza esta tabla cuando se modifiquen los umbrales en Sentry/PostHog o se introduzcan nuevos flujos críticos.
 
 ---
 
-## 7. Documentos relacionados
+## 7. Revisión coordinada de alertas
+
+- **Cadencia:** lunes 10:00 ET (30 minutos) vía Google Meet `Brisa · Observability Standup`.
+- **Participantes mínimos:** Plataforma (`@oncall-platform`), Producto (`@cs-lead`), Marketing (`@marketing-lead`).
+- **Agenda fija:**
+  1. Repaso de incidencias Sentry de severidad alta registradas desde la última sesión.
+  2. Revisión de métricas PostHog destacadas y anomalías reportadas por `posthog-monitor.yml`.
+  3. Confirmación de que el webhook `SLACK_WEBHOOK_URL` recibió el resumen semanal (lunes 09:00 ET) ejecutado por el job GitHub Actions `posthog-monitor.yml` (`schedule: 0 13 * * 1`).
+  4. Identificación de acciones correctivas y asignación de responsables en Linear.
+- **Seguimiento:** publicar en `#alerts-operaciones` un resumen con: incidencias cerradas, alertas nuevas, compromisos para la semana y enlace al registro en Linear.
+
+## 8. Documentos relacionados
 
 - `docs/operations/observability-setup.md` – Procedimiento técnico detallado (Sentry, PostHog, Neon, Slack).
 - `docs/operations/slack-integration.md` – Webhooks, taxonomía de canales y verificación.

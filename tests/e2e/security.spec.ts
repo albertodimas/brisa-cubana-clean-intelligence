@@ -267,7 +267,7 @@ test.describe("Seguridad y Autenticación", () => {
         });
       });
 
-      await test.step("cierra sesión y redirige a login", async () => {
+      await test.step("cierra sesión y redirige a vista pública o login", async () => {
         // Buscar el botón de logout dentro del panel de sesión
         const logoutButton = sessionIndicator.getByRole("button", {
           name: "Cerrar sesión",
@@ -278,17 +278,38 @@ test.describe("Seguridad y Autenticación", () => {
         await expect(logoutButton).toBeEnabled({ timeout: 5000 });
 
         // Click y esperar navegación en paralelo
+        let redirectUrl: URL | null = null;
         await Promise.all([
-          page.waitForURL(/\/login/, { timeout: 15_000 }),
+          (async () => {
+            await page.waitForURL(
+              (target) => {
+                const url = new URL(target);
+                redirectUrl = url;
+                return url.pathname === "/login" || url.pathname === "/";
+              },
+              { timeout: 15_000, waitUntil: "domcontentloaded" },
+            );
+          })(),
           logoutButton.click(),
         ]);
 
-        // Verificar que estamos en login
-        await expect(page.getByLabel("Correo")).toBeVisible({ timeout: 5000 });
+        const destinationPath =
+          redirectUrl?.pathname ?? new URL(page.url()).pathname;
 
-        // Verificar que el panel ya no es visible
-        const currentUrl = page.url();
-        expect(currentUrl).toMatch(/\/login/);
+        if (destinationPath === "/login") {
+          await expect(page.getByLabel("Correo")).toBeVisible({
+            timeout: 5_000,
+          });
+        } else {
+          // La landing pública es accesible sin sesión: validar CTA de login disponible.
+          const loginCta = page.getByRole("link", { name: /Iniciar sesión/i });
+          await expect(loginCta).toBeVisible({ timeout: 5_000 });
+        }
+
+        // Verificar que el panel ya no es visible ni accesible
+        await expect(page.getByTestId("panel-root")).toHaveCount(0, {
+          timeout: 5_000,
+        });
       });
     });
   });

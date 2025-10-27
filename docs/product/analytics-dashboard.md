@@ -91,6 +91,7 @@ Todos los insights han sido creados programáticamente y están listos para aña
 | 5   | Portal Cliente - Engagement          | 3767285 | Trends         | [Ver](https://us.i.posthog.com/project/225064/insights/3767285)  |
 | 6   | Marketing - CTAs y Leads             | 3767286 | Trends         | [Ver](https://us.i.posthog.com/project/225064/insights/3767286)  |
 | 7   | Marketing - Fuentes UTM              | 3767287 | Trends (Pie)   | [Ver](https://us.i.posthog.com/project/225064/insights/3767287)  |
+| 8   | Stripe intents (CI monitor)          | _auto_  | Trends         | Generado con `pnpm posthog:sync-dashboard`                       |
 
 ### Añadir al Dashboard
 
@@ -110,8 +111,9 @@ Para añadir cada insight al dashboard:
 
 ## Próximos pasos
 
-- [ ] Añadir los 7 insights al dashboard manualmente (instrucciones arriba)
+- [ ] Añadir los 8 insights al dashboard manualmente (instrucciones arriba)
+- [x] Ejecutar `pnpm posthog:sync-dashboard` para crear/actualizar el insight “Stripe intents (CI monitor)” y colocarlo en el dashboard 607007.
 - [x] Configurar alertas en PostHog para `checkout_payment_failed` → Slack (`#alerts-operaciones`) — ahora automatizadas vía workflow `posthog-monitor.yml` (ver GitHub Actions).
 - [x] Añadir panel de métricas del workflow `posthog-monitor` al dashboard (due 05-nov-2025). _Se creó el insight "Checkout failures (CI monitor)" (ID 3796012, short_id TeiTTbEz) con `pnpm posthog:sync-dashboard`; consulta https://us.i.posthog.com/project/225064/insights/TeiTTbEz._
-- [ ] Configurar automatización de reportes semanales (Insights → Share → Schedule) hacia el mismo webhook una vez haya datos reales.
+- [x] Configurar automatización de reportes semanales (Insights → Share → Schedule) hacia el mismo webhook. El workflow `posthog-monitor.yml` ejecuta un resumen consolidado cada lunes a las 09:00 ET (`schedule: 0 13 * * 1`) y lo publica en `#alerts-operaciones`.
 - [ ] Validar que los eventos estén emitiendo datos en producción

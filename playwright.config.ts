@@ -12,12 +12,12 @@ const loginRateLimit = process.env.E2E_LOGIN_RATE_LIMIT ?? "20"; // Increased fo
 const loginRateLimitWindow = "60000";
 const posthogKey =
   (process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "").trim() || "phc_test_e2e";
-
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
   timeout: 60_000,
   retries: isCI ? 1 : 0,
+  globalSetup: "./tests/e2e/global-setup.ts",
   projects: [
     // Smoke Tests: Critical functionality only (~2-3s)
     {

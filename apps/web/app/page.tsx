@@ -34,15 +34,25 @@ export const metadata: Metadata = {
   },
 };
 
-const mobileMockups = [
+type MobileMockup = {
+  id: string;
+  title: string;
+  description: string;
+  src: string;
+  placeholder: string;
+};
+
+const mobileMockups: MobileMockup[] = [
   {
+    id: "portal-mobile-dashboard",
     title: "Turnos confirmados desde el móvil",
     description:
       "Selecciona propiedad, franja horaria y asigna cuadrillas con dos toques.",
-    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
-    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
+    src: "/assets/mockups/4-5/portal-mobile-dashboard-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-dashboard-540w.webp",
   },
   {
+    id: "portal-mobile",
     title: "Solicitudes y resurtidos en vivo",
     description:
       "Levanta resurtidos críticos, agrega notas y monitorea el estado del inventario.",
@@ -50,11 +60,12 @@ const mobileMockups = [
     placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },
   {
+    id: "portal-mobile-services",
     title: "Alertas y evidencias fotográficas",
     description:
       "Recibe notificaciones push con fotos, checklist firmado y tiempos de entrega.",
-    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
-    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
+    src: "/assets/mockups/4-5/portal-mobile-services-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-services-540w.webp",
   },
 ];
 
@@ -434,7 +445,7 @@ export default function LandingPage() {
           </article>
           <div className="relative mx-auto max-w-xs overflow-hidden rounded-[2rem] border border-brisa-200/60 shadow-2xl dark:border-brisa-700">
             <Image
-              src="/assets/mockups/4-5/portal-mobile-1080w.webp"
+              src="/assets/mockups/4-5/portal-mobile-dashboard-1080w.webp"
               alt="Vista móvil del portal cliente mostrando acciones rápidas"
               width={1080}
               height={1342}
@@ -622,6 +633,7 @@ export default function LandingPage() {
               <div
                 key={mockup.title}
                 className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
+                data-mobile-mockup={mockup.id}
               >
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
                   <Image

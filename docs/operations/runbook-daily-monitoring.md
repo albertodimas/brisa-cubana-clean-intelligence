@@ -61,7 +61,19 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
 
 ---
 
-## 4. Respuesta ante incidentes
+## 4. Checklist Mensual (primer lunes)
+
+1. **Auditoría de bundles**
+   - Descargar el artefacto del workflow `Monthly Bundle Audit` y actualizar `docs/performance/bundle-analysis.md` con los tamaños vigentes.
+   - Verificar específicamente el chunk `/_next/static/chunks/885-*.js` y registrar hallazgos en `docs/tech-debt/legacy-chunk-885.md`.
+2. **Rotación de credenciales observabilidad**
+   - Confirmar vigencia de `SENTRY_AUTH_TOKEN`, `POSTHOG_API_KEY` y `SLACK_WEBHOOK_URL`; coordinar rotación si restan ≤30 días para expirar.
+3. **Calendario de guardias**
+   - Revisar el calendario `Brisa · Incident Rotation` y actualizar la sección 1.1 de `docs/operations/incident-runbook.md` si cambia la rotación.
+
+---
+
+## 5. Respuesta ante incidentes
 
 1. Notifica en Slack `#alerts-operaciones` (menciona `@oncall-platform`).
 2. Abre issue en GitHub `incident/<YYYY-MM-DD>-<slug>` con plantilla (ver `docs/operations/incident-template.md`).
@@ -70,7 +82,7 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
 
 ---
 
-## 5. Recursos
+## 6. Recursos
 
 - `docs/operations/deployment.md`
 - `docs/operations/observability.md`
