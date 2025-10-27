@@ -53,6 +53,7 @@ export function useToast() {
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
+  const [isMounted, setIsMounted] = React.useState(false);
 
   const hideToast = React.useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -101,13 +102,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [hideToast],
   );
 
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const portalTarget =
+    typeof window !== "undefined" ? (document.body ?? null) : null;
+
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
       {children}
-      {typeof window !== "undefined" &&
+      {isMounted &&
+        portalTarget &&
         createPortal(
           <ToastContainer toasts={toasts} onClose={hideToast} />,
-          document.body,
+          portalTarget,
         )}
     </ToastContext.Provider>
   );
