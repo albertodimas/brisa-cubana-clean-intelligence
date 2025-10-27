@@ -60,7 +60,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 ### 2.2 Crear Servicio (ADMIN/COORDINATOR)
 
 - [ ] POST `/api/services` crea servicio con datos válidos
-- [ ] Requiere autenticación (JWT o API_TOKEN)
+- [ ] Requiere autenticación (Bearer JWT válido)
 - [ ] Requiere rol ADMIN o COORDINATOR
 - [ ] Valida que `name` no esté vacío
 - [ ] Valida que `basePrice` sea numérico positivo

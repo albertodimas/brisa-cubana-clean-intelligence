@@ -62,71 +62,76 @@ const updateBookingSchema = z
     message: "Debe enviar al menos un campo para actualizar",
   });
 
-router.get("/", async (c) => {
-  const queryResult = parseSearchableQuery(c, bookingQuerySchema);
-  if (isParseFailure(queryResult)) {
-    return queryResult.response;
-  }
+router.get(
+  "/",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
+  async (c) => {
+    const queryResult = parseSearchableQuery(c, bookingQuerySchema);
+    if (isParseFailure(queryResult)) {
+      return queryResult.response;
+    }
 
-  const {
-    search,
-    from,
-    to,
-    status,
-    propertyId,
-    serviceId,
-    customerId,
-    limit,
-    cursor,
-  } = queryResult.data;
-
-  const filters: BookingFilters = {};
-
-  if (from) {
-    filters.from = from;
-  }
-  if (to) {
-    filters.to = to;
-  }
-  if (status) {
-    filters.status = status;
-  }
-  if (propertyId) {
-    filters.propertyId = propertyId;
-  }
-  if (serviceId) {
-    filters.serviceId = serviceId;
-  }
-  if (customerId) {
-    filters.customerId = customerId;
-  }
-  if (search) {
-    filters.search = search;
-  }
-
-  const repository = getBookingRepository();
-  const result = await repository.findManyPaginated(
-    limit,
-    cursor,
-    filters,
-    true,
-    {
-      orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
-    },
-  );
-
-  const serialized = result.data.map((booking) => serializeBooking(booking));
-
-  return c.json({
-    data: serialized,
-    pagination: {
+    const {
+      search,
+      from,
+      to,
+      status,
+      propertyId,
+      serviceId,
+      customerId,
       limit,
-      cursor: cursor ?? null,
-      nextCursor: result.nextCursor ?? null,
-      hasMore: result.hasMore,
-    },
-  });
-});
+      cursor,
+    } = queryResult.data;
+
+    const filters: BookingFilters = {};
+
+    if (from) {
+      filters.from = from;
+    }
+    if (to) {
+      filters.to = to;
+    }
+    if (status) {
+      filters.status = status;
+    }
+    if (propertyId) {
+      filters.propertyId = propertyId;
+    }
+    if (serviceId) {
+      filters.serviceId = serviceId;
+    }
+    if (customerId) {
+      filters.customerId = customerId;
+    }
+    if (search) {
+      filters.search = search;
+    }
+
+    const repository = getBookingRepository();
+    const result = await repository.findManyPaginated(
+      limit,
+      cursor,
+      filters,
+      true,
+      {
+        orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
+      },
+    );
+
+    const serialized = result.data.map((booking) => serializeBooking(booking));
+
+    return c.json({
+      data: serialized,
+      pagination: {
+        limit,
+        cursor: cursor ?? null,
+        nextCursor: result.nextCursor ?? null,
+        hasMore: result.hasMore,
+      },
+    });
+  },
+);
 
 router.post(
   "/",

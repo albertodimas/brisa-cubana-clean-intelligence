@@ -2,6 +2,11 @@ import type { NextRequest } from "next/server";
 import { logger } from "@/lib/logger";
 import { auth } from "@/auth";
 
+const proxyAllowedOrigins = (process.env.PROXY_ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 function resolveApiBaseUrl(): string {
   const value = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL;
   if (!value) {
@@ -21,6 +26,20 @@ function buildTargetUrl(request: NextRequest, segments: string[]) {
   const currentUrl = new URL(request.url);
   upstreamUrl.search = currentUrl.search;
   return upstreamUrl;
+}
+
+function resolveAllowedOrigin(request: NextRequest): string | null {
+  const headerOrigin = request.headers.get("origin");
+  if (!headerOrigin) {
+    return null;
+  }
+
+  if (proxyAllowedOrigins.length > 0) {
+    return proxyAllowedOrigins.includes(headerOrigin) ? headerOrigin : null;
+  }
+
+  const requestOrigin = request.nextUrl.origin;
+  return headerOrigin === requestOrigin ? headerOrigin : null;
 }
 
 async function proxy(
@@ -92,10 +111,13 @@ async function proxy(
   });
   const responseHeaders = new Headers(upstream.headers);
 
-  responseHeaders.set(
-    "Access-Control-Allow-Origin",
-    request.headers.get("origin") ?? "*",
-  );
+  const allowedOrigin = resolveAllowedOrigin(request);
+  if (allowedOrigin) {
+    responseHeaders.set("Access-Control-Allow-Origin", allowedOrigin);
+  } else {
+    responseHeaders.delete("Access-Control-Allow-Origin");
+    responseHeaders.delete("Access-Control-Allow-Credentials");
+  }
   responseHeaders.delete("content-length");
   responseHeaders.delete("content-encoding");
 
@@ -106,11 +128,17 @@ async function proxy(
   });
 }
 
-export function OPTIONS() {
+export function OPTIONS(request: NextRequest) {
+  const allowedOrigin = resolveAllowedOrigin(request);
+  const defaultOrigin = process.env.NEXT_PUBLIC_BASE_URL ?? null;
   return new Response(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      ...(allowedOrigin
+        ? { "Access-Control-Allow-Origin": allowedOrigin }
+        : defaultOrigin
+          ? { "Access-Control-Allow-Origin": defaultOrigin }
+          : {}),
       "Access-Control-Allow-Headers": "Authorization, Content-Type",
       "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
     },

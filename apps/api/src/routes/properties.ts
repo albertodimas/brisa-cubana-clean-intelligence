@@ -35,16 +35,21 @@ const propertyQuerySchema = z.object({
 
 const router = new Hono();
 
-router.get("/", async (c) => {
-  const queryResult = parseSearchableQuery(c, propertyQuerySchema);
-  if (isParseFailure(queryResult)) {
-    return queryResult.response;
-  }
+router.get(
+  "/",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
+  async (c) => {
+    const queryResult = parseSearchableQuery(c, propertyQuerySchema);
+    if (isParseFailure(queryResult)) {
+      return queryResult.response;
+    }
 
-  const repository = getPropertyRepository();
-  const result = await repository.findManyWithSearch(queryResult.data);
-  return c.json(result);
-});
+    const repository = getPropertyRepository();
+    const result = await repository.findManyWithSearch(queryResult.data);
+    return c.json(result);
+  },
+);
 
 router.post(
   "/",

@@ -53,7 +53,7 @@
   - Rutas modulares:
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`, `users.ts`: CRUD con autorización por rol.
-  - Middleware `authenticate` y `requireRoles` (JWT/`API_TOKEN`).
+  - Middleware `authenticate` y `requireRoles` (Bearer JWT).
   - Prisma Client 6.17.1 (PostgreSQL 17). Seed (`prisma/seed.ts`) crea datos funcionales.
   - **Shared utilities**:
     - `lib/pagination.ts`: Lógica de paginación cursor-based reutilizable
@@ -102,7 +102,7 @@
 - Clientes: listar (roles ADMIN/COORDINATOR).
 - Reservas: listar con filtros (público), crear/actualizar (roles ADMIN/COORDINATOR). Genera códigos BRISA-xxxx y copia precio/duración.
 - Usuarios: listar (rol ADMIN) y actualizar rol/contraseña desde `/api/users`.
-- Middleware soporta Bearer `JWT` o `API_TOKEN` para integraciones.
+- Middleware soporta Bearer JWT para integraciones servidor-servidor.
 
 ---
 
@@ -112,10 +112,10 @@
 | ------------------------------------------------------ | --- | --- | -------------------------------------------------------------------- |
 | `NEXT_PUBLIC_API_URL`                                  | ✅  | –   | Endpoint público (fallback).                                         |
 | `INTERNAL_API_URL`                                     | ✅  | –   | URL privada de la API usada por el proxy.                            |
+| `PROXY_ALLOWED_ORIGINS`                                | ✅  | –   | Lista de orígenes permitidos para el proxy `/api/*`.                 |
 | `AUTH_SECRET`                                          | ✅  | –   | Requerido por Auth.js.                                               |
 | `DATABASE_URL` / `_UNPOOLED`                           | –   | ✅  | Conexión PostgreSQL (prod/local).                                    |
 | `JWT_SECRET`                                           | ✅  | ✅  | Firma/verificación JWT.                                              |
-| `API_TOKEN`                                            | ✅  | ✅  | Token para integraciones servidor-servidor.                          |
 | `ALLOWED_ORIGINS`                                      | ✅  | ✅  | CORS para Hono/WS.                                                   |
 | `LOGIN_RATE_LIMIT` (+ `_WINDOW_MS`)                    | ✅  | ✅  | Configura rate limiting del login.                                   |
 | `PORTAL_MAGIC_LINK_RATE_LIMIT` (+ `_WINDOW_MS`)        | –   | ✅  | Limita solicitudes de enlaces mágicos (3/15 min por defecto).        |

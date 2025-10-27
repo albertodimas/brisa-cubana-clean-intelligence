@@ -2,6 +2,8 @@ import type { Context, MiddlewareHandler } from "hono";
 import honoRateLimiter from "hono-rate-limiter";
 import { rateLimitLogger } from "./logger.js";
 
+const INTERNAL_REMOTE_ADDR_HEADER = "x-internal-remote-address";
+
 type RateLimiterOptions = {
   limit: number;
   windowMs: number;
@@ -10,26 +12,88 @@ type RateLimiterOptions = {
   keyGenerator?: (c: Context) => string;
 };
 
-function extractClientIdentifier(c: Context): string {
-  const forwarded = c.req.header("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0]?.trim() ?? forwarded;
+function normalizeIp(ip: string): string {
+  return ip.replace(/^::ffff:/i, "").trim();
+}
+
+function isPrivateIp(ip: string): boolean {
+  if (ip === "127.0.0.1" || ip === "::1") return true;
+  if (ip.startsWith("10.")) return true;
+  if (ip.startsWith("192.168.")) return true;
+  if (ip.startsWith("172.")) {
+    const secondOctet = Number.parseInt(ip.split(".")[1] ?? "0", 10);
+    if (secondOctet >= 16 && secondOctet <= 31) {
+      return true;
+    }
+  }
+  if (ip.startsWith("fc") || ip.startsWith("fd")) {
+    return true;
+  }
+  return false;
+}
+
+function firstForwardedAddress(
+  header: string | null | undefined,
+): string | null {
+  if (!header) return null;
+  const [first] = header.split(",");
+  const trimmed = first?.trim();
+  return trimmed ? normalizeIp(trimmed) : null;
+}
+
+function extractClientIdentifier(c: Context, identifier?: string): string {
+  const internalAddress = firstForwardedAddress(
+    c.req.header(INTERNAL_REMOTE_ADDR_HEADER),
+  );
+
+  if (internalAddress) {
+    if (!isPrivateIp(internalAddress)) {
+      return internalAddress;
+    }
+
+    const trustedForwarded = firstForwardedAddress(
+      c.req.header("x-forwarded-for") ??
+        c.req.raw.headers.get("x-forwarded-for"),
+    );
+
+    if (trustedForwarded) {
+      rateLimitLogger.debug(
+        {
+          clientId: trustedForwarded,
+          proxyIp: internalAddress,
+        },
+        "Using forwarded client IP behind trusted proxy",
+      );
+      return trustedForwarded;
+    }
+
+    return internalAddress;
   }
 
-  const realIp =
+  const forwarded = firstForwardedAddress(c.req.header("x-forwarded-for"));
+  if (forwarded) {
+    rateLimitLogger.warn(
+      {
+        endpoint: identifier ?? "unknown",
+        forwarded,
+      },
+      "Falling back to x-forwarded-for header for rate limiting",
+    );
+    return forwarded;
+  }
+
+  const realIp = firstForwardedAddress(
     c.req.header("x-real-ip") ??
-    c.req.header("cf-connecting-ip") ??
-    c.req.header("fastly-client-ip");
+      c.req.header("cf-connecting-ip") ??
+      c.req.header("fastly-client-ip") ??
+      c.req.raw.headers.get("x-real-ip") ??
+      c.req.raw.headers.get("cf-connecting-ip"),
+  );
   if (realIp) {
     return realIp;
   }
 
-  const fallback =
-    c.req.raw.headers.get("x-forwarded-for") ??
-    c.req.raw.headers.get("x-real-ip") ??
-    c.req.raw.headers.get("cf-connecting-ip");
-
-  return fallback ?? "anonymous";
+  return "anonymous";
 }
 
 export function createRateLimiter({
@@ -49,7 +113,9 @@ export function createRateLimiter({
     }) => MiddlewareHandler;
   };
 
-  const resolveKey = keyGenerator ?? extractClientIdentifier;
+  const resolveKey =
+    keyGenerator ??
+    ((ctx: Context) => extractClientIdentifier(ctx, identifier));
 
   return rateLimiter({
     windowMs,

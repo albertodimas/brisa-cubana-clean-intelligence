@@ -111,12 +111,12 @@ pnpm build       # Compila Next.js y API
 
 ## Problemas comunes
 
-| Síntoma                       | Causa                                        | Solución                                                             |
-| ----------------------------- | -------------------------------------------- | -------------------------------------------------------------------- |
-| `API_TOKEN is not configured` | Estás usando integraciones sin definir token | Define `API_TOKEN` si realmente lo necesitas o elimina la referencia |
-| `Auth secret is required`     | Falta `AUTH_SECRET` para Auth.js             | Exporta `AUTH_SECRET` en tu `.env` o shell                           |
-| `DATABASE_URL` inválido       | Puerto 5433 en uso                           | Ajusta `docker-compose.yml` o usa `DATABASE_URL` con otro puerto     |
-| Error al crear reserva        | Cliente/propiedad no seleccionados           | Asegúrate de escoger valores en los desplegables                     |
+| Síntoma                        | Causa                              | Solución                                                                        |
+| ------------------------------ | ---------------------------------- | ------------------------------------------------------------------------------- |
+| `Authorization header missing` | La integración no envía JWT válido | Genera un token JWT desde `/api/authentication/login` e inclúyelo como `Bearer` |
+| `Auth secret is required`      | Falta `AUTH_SECRET` para Auth.js   | Exporta `AUTH_SECRET` en tu `.env` o shell                                      |
+| `DATABASE_URL` inválido        | Puerto 5433 en uso                 | Ajusta `docker-compose.yml` o usa `DATABASE_URL` con otro puerto                |
+| Error al crear reserva         | Cliente/propiedad no seleccionados | Asegúrate de escoger valores en los desplegables                                |
 
 ## Limpieza
 

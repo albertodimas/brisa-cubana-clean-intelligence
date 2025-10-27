@@ -6,7 +6,6 @@ Estos secretos se definen en **Settings → Secrets and variables → Actions** 
 | ------------------------------------ | ------------------------------------------------------------------------------ | --------------------------------------------------------- |
 | `PRODUCTION_DATABASE_URL`            | Cadena de conexión principal (pool) usada por Prisma (`db push` y seed).       | `postgresql://user:password@host:5432/db?sslmode=require` |
 | `PRODUCTION_DATABASE_URL_UNPOOLED`\* | (Opcional) Cadena directa sin pool. Si no se define, se reutiliza la anterior. | `postgresql://user:password@host:5432/db?sslmode=require` |
-| `API_TOKEN`                          | Token de autenticación para integraciones servidor-servidor.                   | `brisa_prod_token_xxxxx`                                  |
 | `JWT_SECRET`                         | Secreto para firmar y verificar JWT.                                           | Cadena aleatoria de 32+ caracteres                        |
 | `AUTH_SECRET`                        | Secreto usado por Auth.js en la aplicación web.                                | Cadena aleatoria de 32+ caracteres                        |
 
@@ -22,7 +21,6 @@ gh auth login --web
 secrets=(
   PRODUCTION_DATABASE_URL
   PRODUCTION_DATABASE_URL_UNPOOLED
-  API_TOKEN
   JWT_SECRET
   AUTH_SECRET
 )
@@ -42,7 +40,7 @@ done
 gh secret list
 
 # Mostrar sólo los relacionados al workflow
-gh secret list | grep -E "(PRODUCTION_DATABASE_URL|API_TOKEN|JWT_SECRET|AUTH_SECRET)"
+gh secret list | grep -E "(PRODUCTION_DATABASE_URL|JWT_SECRET|AUTH_SECRET)"
 ```
 
 Una vez configurados, el workflow `post-deploy-seed.yml` aparecerá como job adicional cada vez que `CI (Main Branch)` finalice en verde. Si alguno falta, el job fallará en el paso “Validate production database secret”.

@@ -1,6 +1,6 @@
 # Informe de Auditoría de Credenciales
 
-**Fecha:** 26 de octubre de 2025  
+**Fecha:** 27 de octubre de 2025  
 **Alcance:** Comparación entre credenciales documentadas y configuración actual  
 **Estado global:** ⚠️ 1 credencial crítica pendiente
 
@@ -8,10 +8,10 @@
 
 ## 📊 Resumen ejecutivo
 
-- **32 de 33 variables** configuradas correctamente en Vercel (Dev y Preview completas; Prod con un pendiente)
-- **5 de 5 secretos** activos en GitHub (incluye `POSTHOG_API_KEY`)
-- **1 variable crítica** falta en producción
-- **1 variable** eliminada de forma intencional (`LEAD_WEBHOOK_URL`)
+- Variables críticas revisadas en Vercel (Dev y Preview completas; Prod con un pendiente)
+- Secretos activos en GitHub (incluye `POSTHOG_API_KEY`)
+- Se eliminó el uso de `API_TOKEN`; integraciones deben autenticarse con JWT emitidos por la API
+- `LEAD_WEBHOOK_URL` sigue omitida intencionalmente
 
 ---
 
@@ -41,7 +41,6 @@ Estado actual: ✅ Configuración correcta en Vercel (valores encriptados compro
 ```bash
 ✅ JWT_SECRET (Vercel: Dev/Preview/Prod)
 ✅ AUTH_SECRET (Vercel: Dev/Preview/Prod)
-✅ API_TOKEN (Vercel: Dev/Preview/Prod)
 ✅ HEALTH_CHECK_TOKEN (Vercel + GitHub Secrets)
 ```
 
@@ -49,10 +48,9 @@ Valores documentados:
 
 - JWT_SECRET: `mLKjRwKIiSbe/JRohMoTgZWF0BsjVra/tSBAvBDZRwk=`
 - AUTH_SECRET: `tXD6mAQMrstV3BWwgHyGoyLnS0Mv4q4HgXIqkYWCzAY=`
-- API_TOKEN: `OR8W7K5UNNeSuVjKKOlFOGSJDEBenEBWbEKy++7QRp0=`
 - HEALTH_CHECK_TOKEN: `go2ND3P9QtlublWDddDWw-gO0aP_v666`
 
-Estado actual: ✅ Variables sincronizadas entre Vercel y GitHub Secrets.
+Estado actual: ✅ Variables sincronizadas entre Vercel y GitHub Secrets. Se retiró `API_TOKEN` como mecanismo de autenticación; todas las integraciones deben usar JWT.
 
 ---
 

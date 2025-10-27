@@ -3,7 +3,6 @@ import OpenAPIResponseValidator from "openapi-response-validator";
 import { openApiSpec } from "../../src/lib/openapi-spec.js";
 
 process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
-process.env.API_TOKEN = "test-service-token";
 process.env.JWT_SECRET = "test-secret";
 process.env.LOGIN_RATE_LIMIT = "3";
 process.env.LOGIN_RATE_LIMIT_WINDOW_MS = "1000";
@@ -1162,7 +1161,9 @@ describe("app", () => {
   });
 
   it("paginates properties with default limit", async () => {
-    const res = await app.request("/api/properties");
+    const res = await app.request("/api/properties", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
 
@@ -1173,7 +1174,9 @@ describe("app", () => {
   });
 
   it("paginates properties with custom limit", async () => {
-    const res = await app.request("/api/properties?limit=1");
+    const res = await app.request("/api/properties?limit=1", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
 
@@ -1184,6 +1187,7 @@ describe("app", () => {
   it("filters properties by search and type", async () => {
     const res = await app.request(
       "/api/properties?search=biscayne&type=VACATION_RENTAL",
+      { headers: authorizedHeaders },
     );
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -1193,7 +1197,9 @@ describe("app", () => {
   });
 
   it("navigates properties pagination with cursor", async () => {
-    const firstPage = await app.request("/api/properties?limit=1");
+    const firstPage = await app.request("/api/properties?limit=1", {
+      headers: authorizedHeaders,
+    });
     const firstJson = await firstPage.json();
 
     expect(firstJson.pagination.hasMore).toBe(true);
@@ -1201,6 +1207,7 @@ describe("app", () => {
 
     const secondPage = await app.request(
       `/api/properties?limit=1&cursor=${firstJson.pagination.nextCursor}`,
+      { headers: authorizedHeaders },
     );
     const secondJson = await secondPage.json();
 
@@ -1208,15 +1215,21 @@ describe("app", () => {
   });
 
   it("validates properties pagination boundaries", async () => {
-    const invalidLimit = await app.request("/api/properties?limit=0");
+    const invalidLimit = await app.request("/api/properties?limit=0", {
+      headers: authorizedHeaders,
+    });
     expect(invalidLimit.status).toBe(400);
 
-    const tooHighLimit = await app.request("/api/properties?limit=101");
+    const tooHighLimit = await app.request("/api/properties?limit=101", {
+      headers: authorizedHeaders,
+    });
     expect(tooHighLimit.status).toBe(400);
   });
 
   it("lists bookings", async () => {
-    const res = await app.request("/api/bookings");
+    const res = await app.request("/api/bookings", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data).toBeDefined();
@@ -1226,7 +1239,9 @@ describe("app", () => {
     const repository = getBookingRepository();
     const spy = vi.spyOn(repository, "findManyPaginated");
 
-    const res = await app.request("/api/bookings");
+    const res = await app.request("/api/bookings", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     expect(spy).toHaveBeenCalledWith(20, undefined, {}, true, {
       orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
@@ -1240,6 +1255,7 @@ describe("app", () => {
     const to = new Date("2025-10-23T23:59:59Z").toISOString();
     const res = await app.request(
       `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+      { headers: authorizedHeaders },
     );
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -1247,7 +1263,9 @@ describe("app", () => {
   });
 
   it("searches bookings by code", async () => {
-    const res = await app.request("/api/bookings?search=BRISA-0001");
+    const res = await app.request("/api/bookings?search=BRISA-0001", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data).toHaveLength(1);
@@ -1255,7 +1273,9 @@ describe("app", () => {
   });
 
   it("returns empty bookings when search mismatches", async () => {
-    const res = await app.request("/api/bookings?search=NO_MATCH_123");
+    const res = await app.request("/api/bookings?search=NO_MATCH_123", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data).toHaveLength(0);
@@ -1305,7 +1325,9 @@ describe("app", () => {
     const json = await res.json();
     expect(json.message).toBe("Booking deleted successfully");
 
-    const list = await app.request("/api/bookings");
+    const list = await app.request("/api/bookings", {
+      headers: authorizedHeaders,
+    });
     const listJson = await list.json();
     expect(
       listJson.data.some((booking: any) => booking.id === created.data.id),
@@ -1345,7 +1367,9 @@ describe("app", () => {
       });
     }
 
-    const res = await app.request("/api/bookings");
+    const res = await app.request("/api/bookings", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
 
@@ -1358,7 +1382,9 @@ describe("app", () => {
   });
 
   it("paginates bookings with custom limit", async () => {
-    const res = await app.request("/api/bookings?limit=5");
+    const res = await app.request("/api/bookings?limit=5", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
 
@@ -1368,7 +1394,9 @@ describe("app", () => {
 
   it("paginates bookings with cursor", async () => {
     // First page
-    const res1 = await app.request("/api/bookings?limit=5");
+    const res1 = await app.request("/api/bookings?limit=5", {
+      headers: authorizedHeaders,
+    });
     expect(res1.status).toBe(200);
     const json1 = await res1.json();
 
@@ -1381,6 +1409,7 @@ describe("app", () => {
       // Second page using cursor
       const res2 = await app.request(
         `/api/bookings?limit=5&cursor=${json1.pagination.nextCursor}`,
+        { headers: authorizedHeaders },
       );
       expect(res2.status).toBe(200);
       const json2 = await res2.json();
@@ -1395,20 +1424,28 @@ describe("app", () => {
 
   it("validates pagination limit boundaries", async () => {
     // limit too small
-    const res1 = await app.request("/api/bookings?limit=0");
+    const res1 = await app.request("/api/bookings?limit=0", {
+      headers: authorizedHeaders,
+    });
     expect(res1.status).toBe(400);
 
     // limit too large
-    const res2 = await app.request("/api/bookings?limit=101");
+    const res2 = await app.request("/api/bookings?limit=101", {
+      headers: authorizedHeaders,
+    });
     expect(res2.status).toBe(400);
 
     // valid limit
-    const res3 = await app.request("/api/bookings?limit=50");
+    const res3 = await app.request("/api/bookings?limit=50", {
+      headers: authorizedHeaders,
+    });
     expect(res3.status).toBe(200);
   });
 
   it("lists properties", async () => {
-    const res = await app.request("/api/properties");
+    const res = await app.request("/api/properties", {
+      headers: authorizedHeaders,
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data.length).toBeGreaterThan(0);
@@ -1480,7 +1517,9 @@ describe("app", () => {
     const json = await res.json();
     expect(json.message).toBe("Property deleted successfully");
 
-    const list = await app.request("/api/properties");
+    const list = await app.request("/api/properties", {
+      headers: authorizedHeaders,
+    });
     const listJson = await list.json();
     expect(
       listJson.data.some((property: any) => property.id === created.data.id),
@@ -1917,7 +1956,9 @@ describe("app", () => {
     });
 
     it("GET /api/bookings matches documented schema", async () => {
-      const response = await app.request("/api/bookings");
+      const response = await app.request("/api/bookings", {
+        headers: authorizedHeaders,
+      });
       expect(response.status).toBe(200);
       const json = await response.json();
       assertConforms({
