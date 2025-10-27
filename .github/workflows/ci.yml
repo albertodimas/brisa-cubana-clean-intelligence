@@ -151,6 +151,8 @@ jobs:
           API_BASE_URL: ${{ steps.deploy-api.outputs.url }}
           WEB_BASE_URL: ${{ steps.deploy-web.outputs.url }}
           HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}
+          API_ALIAS: https://api.brisacubanacleanintelligence.com
+          WEB_ALIAS: https://brisacubanacleanintelligence.com
         run: |
           set -euo pipefail
           normalize_vercel_url() {
@@ -171,6 +173,12 @@ jobs:
           }
           API_CANONICAL_URL="$(normalize_vercel_url "$API_BASE_URL")"
           WEB_CANONICAL_URL="$(normalize_vercel_url "$WEB_BASE_URL")"
+          if [[ -n "${API_ALIAS:-}" ]]; then
+            API_CANONICAL_URL="${API_ALIAS%/}"
+          fi
+          if [[ -n "${WEB_ALIAS:-}" ]]; then
+            WEB_CANONICAL_URL="${WEB_ALIAS%/}"
+          fi
           echo "ℹ️  API base resolved to $API_CANONICAL_URL"
           echo "ℹ️  Web base resolved to $WEB_CANONICAL_URL"
           API_HEALTH_URL="${API_CANONICAL_URL%/}/healthz"
