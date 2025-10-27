@@ -33,7 +33,7 @@
   "dependencies": {
     "@hono/node-server": "^1.11.5",
     "@hono/swagger-ui": "^0.5.2",
-    "@prisma/client": "6.17.1",
+    "@prisma/client": "6.18.0",
     "@scalar/hono-api-reference": "^0.9.22",
     "@sentry/node": "^10.20.0",
     "@sentry/profiling-node": "^10.20.0",
