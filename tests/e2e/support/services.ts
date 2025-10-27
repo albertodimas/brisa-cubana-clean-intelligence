@@ -2,32 +2,59 @@ import type { APIRequestContext } from "@playwright/test";
 import { adminEmail, adminPassword } from "./auth";
 
 const apiBaseUrl = process.env.E2E_API_URL || "http://localhost:3001";
+let cachedAdminToken: { value: string; issuedAt: number } | null = null;
+const TOKEN_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 export async function getAdminAccessToken(
   request: APIRequestContext,
 ): Promise<string> {
-  const response = await request.post(
-    `${apiBaseUrl}/api/authentication/login`,
-    {
-      data: {
-        email: adminEmail,
-        password: adminPassword,
-      },
-    },
-  );
+  if (
+    cachedAdminToken &&
+    Date.now() - cachedAdminToken.issuedAt < TOKEN_TTL_MS
+  ) {
+    return cachedAdminToken.value;
+  }
 
-  if (!response.ok()) {
-    throw new Error(
-      `No se pudo autenticar al administrador: ${response.status()} ${response.statusText()}`,
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const response = await request.post(
+      `${apiBaseUrl}/api/authentication/login`,
+      {
+        data: {
+          email: adminEmail,
+          password: adminPassword,
+        },
+      },
+    );
+
+    if (response.ok()) {
+      const json = (await response.json()) as { token?: string };
+      if (!json.token) {
+        throw new Error("Respuesta de autenticación sin token de acceso");
+      }
+      cachedAdminToken = { value: json.token, issuedAt: Date.now() };
+      return json.token;
+    }
+
+    const status = response.status();
+    const shouldRetry =
+      status === 429 || status === 403 || status === 503 || status === 500;
+    lastError = new Error(
+      `No se pudo autenticar al administrador: ${status} ${response.statusText()}`,
+    );
+    if (!shouldRetry || attempt === 3) {
+      break;
+    }
+    await new Promise((resolve) =>
+      setTimeout(resolve, 300 * Math.pow(2, attempt)),
     );
   }
 
-  const json = (await response.json()) as { token?: string };
-  if (!json.token) {
-    throw new Error("Respuesta de autenticación sin token de acceso");
-  }
-
-  return json.token;
+  cachedAdminToken = null;
+  throw (
+    lastError ??
+    new Error("No se pudo autenticar al administrador tras múltiples intentos")
+  );
 }
 
 type ServicePayload = {

@@ -25,7 +25,7 @@ test.describe.serial("Búsquedas y filtros", () => {
 
     await loginAsAdmin(page, testInfo);
 
-    const searchInput = page.getByPlaceholder("Buscar servicios...");
+    const searchInput = page.getByPlaceholder("Buscar servicios...").first();
     const responsePromise = page.waitForResponse((response) => {
       const url = response.url();
       return (
@@ -63,7 +63,13 @@ test.describe.serial("Búsquedas y filtros", () => {
   }, testInfo) => {
     await loginAsAdmin(page, testInfo);
 
-    const roleSelect = page.getByLabel("Filtrar por rol");
+    const usersSection = page
+      .locator("section")
+      .filter({
+        has: page.getByRole("heading", { name: "Gestión de usuarios" }),
+      })
+      .first();
+    const roleSelect = usersSection.getByLabel("Filtrar por rol");
     const responsePromise = page.waitForResponse((response) => {
       const url = response.url();
       return (
@@ -73,19 +79,31 @@ test.describe.serial("Búsquedas y filtros", () => {
       );
     });
     await roleSelect.selectOption("COORDINATOR");
-    await responsePromise;
+    const response = await responsePromise;
+    const responseJson = (await response.json()) as {
+      data?: Array<{ id: string; email: string; role: string }>;
+    };
+    const expectedCount = responseJson.data?.length ?? 0;
 
-    const rows = page.locator("table tbody tr");
-    const totalRows = await rows.count();
-    expect(totalRows).toBeGreaterThan(0);
-    const coordinatorRows = await rows
-      .filter({ hasText: "COORDINATOR" })
-      .count();
-    expect(coordinatorRows).toBe(totalRows);
+    const rows = usersSection.locator("table tbody tr");
+    await expect.poll(async () => rows.count()).toBeGreaterThan(0);
+    await expect.poll(async () => rows.count()).toBe(expectedCount);
+    await expect
+      .poll(async () =>
+        rows.evaluateAll((elements) =>
+          elements.map(
+            (row) =>
+              row.querySelector("td:nth-child(3)")?.textContent?.trim() ?? "",
+          ),
+        ),
+      )
+      .toEqual(Array(expectedCount).fill("COORDINATOR"));
     await expect(
       rows.first().getByText("operaciones@brisacubanacleanintelligence.com"),
     ).toBeVisible();
-    await expect(page.getByText("Rol: COORDINATOR")).toBeVisible();
+    await expect(
+      usersSection.getByText("Rol: COORDINATOR", { exact: true }),
+    ).toBeVisible();
   });
 
   test("combina búsqueda y estado en reservas mostrando los filtros activos @critical", async ({
@@ -98,7 +116,13 @@ test.describe.serial("Búsquedas y filtros", () => {
 
     await loginAsAdmin(page, testInfo);
 
-    const bookingSearch = page.getByPlaceholder(
+    const bookingsSection = page
+      .locator("section")
+      .filter({
+        has: page.getByRole("heading", { name: "Reservas programadas" }),
+      })
+      .first();
+    const bookingSearch = bookingsSection.getByPlaceholder(
       "Buscar por código, cliente o propiedad...",
     );
     const statusSelect = page.getByTestId("booking-status-filter");
@@ -139,13 +163,21 @@ test.describe.serial("Búsquedas y filtros", () => {
       page.getByText(`Búsqueda: ${booking.code}`, { exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Estado: CONFIRMED")).toBeVisible();
-    const bookingCards = page.getByTestId("booking-card");
+    const bookingCards = bookingsSection.getByTestId("booking-card");
     await expect(bookingCards.first()).toBeVisible();
     if (filteredCode) {
       await expect(bookingCards.first()).toContainText(filteredCode);
     } else {
       await expect(bookingCards.first()).toContainText(booking.code);
     }
+    await expect
+      .poll(async () =>
+        bookingCards
+          .first()
+          .getByLabel("Estado")
+          .evaluate((element) => element.selectedOptions[0]?.textContent ?? ""),
+      )
+      .toContain("Confirmada");
   });
 
   test("muestra mensaje amigable cuando no hay coincidencias en servicios @critical", async ({
@@ -153,7 +185,13 @@ test.describe.serial("Búsquedas y filtros", () => {
   }, testInfo) => {
     await loginAsAdmin(page, testInfo);
 
-    const searchInput = page.getByPlaceholder("Buscar servicios...");
+    const servicesSection = page
+      .locator("section")
+      .filter({
+        has: page.getByRole("heading", { name: "Gestionar servicios" }),
+      })
+      .first();
+    const searchInput = servicesSection.getByPlaceholder("Buscar servicios...");
     const responsePromise = page.waitForResponse((response) => {
       const url = response.url();
       return (
@@ -166,7 +204,7 @@ test.describe.serial("Búsquedas y filtros", () => {
     await responsePromise;
 
     await expect(
-      page.getByText(
+      servicesSection.getByText(
         "No se encontraron servicios para los filtros seleccionados.",
       ),
     ).toBeVisible();
@@ -177,9 +215,15 @@ test.describe.serial("Búsquedas y filtros", () => {
   }, testInfo) => {
     await loginAsAdmin(page, testInfo);
 
-    const searchInput = page.getByPlaceholder("Buscar usuarios...");
-    const roleSelect = page.getByLabel("Filtrar por rol");
-    const statusSelect = page.getByLabel("Filtrar por estado");
+    const usersSection = page
+      .locator("section")
+      .filter({
+        has: page.getByRole("heading", { name: "Gestión de usuarios" }),
+      })
+      .first();
+    const searchInput = usersSection.getByPlaceholder("Buscar usuarios...");
+    const roleSelect = usersSection.getByLabel("Filtrar por rol");
+    const statusSelect = usersSection.getByLabel("Filtrar por estado");
 
     const searchResponse = page.waitForResponse((response) => {
       const url = response.url();
@@ -213,10 +257,6 @@ test.describe.serial("Búsquedas y filtros", () => {
     });
     await statusSelect.selectOption("ACTIVE");
     await statusResponse;
-
-    const usersSection = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Gestión de usuarios" }),
-    });
 
     await expect(
       usersSection.getByText("Búsqueda: ops", { exact: true }),

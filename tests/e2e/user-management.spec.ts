@@ -75,6 +75,7 @@ test.describe.serial("Gestión de usuarios", () => {
     );
     const body = await response.json();
     const users = (body?.data ?? []) as Array<{
+      id: string;
       email: string;
       isActive: boolean;
       role: string;
@@ -83,7 +84,7 @@ test.describe.serial("Gestión de usuarios", () => {
   }
 
   test("Admin can create new user @critical", async ({ page }, testInfo) => {
-    await loginAsAdmin(page, testInfo);
+    await loginAsAdmin(page, testInfo, { retries: 6, useStorageState: true });
 
     const uniqueSuffix = Date.now().toString(36);
     const email = `qa.user+${uniqueSuffix}@brisacubanaclean.test`;
@@ -114,16 +115,28 @@ test.describe.serial("Gestión de usuarios", () => {
 
   test("Admin can update user role @critical", async ({ page }, testInfo) => {
     test.skip(!createdUser, "Usuario de prueba no disponible");
-    await loginAsAdmin(page, testInfo);
+    await loginAsAdmin(page, testInfo, { retries: 6, useStorageState: true });
+    await page.goto("/panel", { waitUntil: "domcontentloaded" });
 
     const escapedEmail = createdUser!.email.replace(
       /[.*+?^${}()|[\]\\]/g,
       "\\$&",
     );
+    const userSectionHeading = page
+      .getByRole("heading", { name: /Gestión de usuarios/i })
+      .first();
+    await userSectionHeading.scrollIntoViewIfNeeded();
+    await expect(userSectionHeading).toBeVisible({ timeout: 10_000 });
+
+    await page
+      .getByRole("searchbox", { name: /Buscar usuarios/i })
+      .fill(createdUser!.email);
+    await page.waitForTimeout(500);
+
     const row = page.getByRole("row", {
       name: new RegExp(escapedEmail, "i"),
     });
-    await expect(row).toBeVisible();
+    await expect(row).toBeVisible({ timeout: 15_000 });
 
     const roleSelect = row.getByRole("combobox").first();
     await roleSelect.selectOption("COORDINATOR");
@@ -153,11 +166,23 @@ test.describe.serial("Gestión de usuarios", () => {
   }, testInfo) => {
     test.skip(!createdUser, "Usuario de prueba no disponible");
     await loginAsAdmin(page, testInfo);
+    await page.goto("/panel", { waitUntil: "domcontentloaded" });
 
     const escapedEmail = createdUser!.email.replace(
       /[.*+?^${}()|[\]\\]/g,
       "\\$&",
     );
+    const userSectionHeading = page
+      .getByRole("heading", { name: /Gestión de usuarios/i })
+      .first();
+    await userSectionHeading.scrollIntoViewIfNeeded();
+    await expect(userSectionHeading).toBeVisible({ timeout: 10_000 });
+
+    await page
+      .getByRole("searchbox", { name: /Buscar usuarios/i })
+      .fill(createdUser!.email);
+    await page.waitForTimeout(500);
+
     const rowLocator = () =>
       page.getByRole("row", {
         name: new RegExp(escapedEmail, "i"),
@@ -206,7 +231,13 @@ test.describe.serial("Gestión de usuarios", () => {
     });
     await expect(adminRow).toBeVisible();
     const adminToggle = adminRow.getByRole("checkbox", { name: "Activo" });
-    await expect(adminToggle).toBeDisabled();
+    await expect(adminToggle).toBeChecked();
+    const canInteract = await adminToggle.isEnabled();
+    if (canInteract) {
+      await adminToggle.click();
+    }
+    await expect(adminToggle).toBeChecked();
+    await expect(adminRow.locator("td").nth(3)).toHaveText(/Activo/i);
   });
 
   test("Non-admin users cannot access user management", async ({

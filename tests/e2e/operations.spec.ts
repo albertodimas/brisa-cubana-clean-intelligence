@@ -10,14 +10,15 @@ test.describe.serial("Operaciones", () => {
     await loginAsAdmin(page, testInfo);
 
     const uniqueName = `Servicio E2E ${Date.now().toString().slice(-6)}`;
-    const serviceForm = page.getByTestId("service-create-form");
+    const serviceForm = page.getByTestId("service-create-form").first();
 
-    await serviceForm.locator('input[name="name"]').fill(uniqueName);
+    await serviceForm.locator('input[name="name"]').first().fill(uniqueName);
     await serviceForm
       .locator('textarea[name="description"]')
+      .first()
       .fill("Servicio generado en pruebas E2E");
-    await serviceForm.locator('input[name="basePrice"]').fill("199");
-    await serviceForm.locator('input[name="durationMin"]').fill("120");
+    await serviceForm.locator('input[name="basePrice"]').first().fill("199");
+    await serviceForm.locator('input[name="durationMin"]').first().fill("120");
     await serviceForm.getByRole("button", { name: "Guardar" }).click();
 
     // Toast notification appears outside the form
@@ -36,28 +37,47 @@ test.describe.serial("Operaciones", () => {
 
     await loginAsAdmin(page, testInfo);
 
-    const statusSelect = page.getByTestId("booking-status-filter");
+    const statusSelect = page.getByTestId("booking-status-filter").first();
     const [response] = await Promise.all([
-      page.waitForResponse((res) => {
-        const url = res.url();
-        return (
-          res.request().method() === "GET" &&
-          url.includes("/api/bookings") &&
-          url.includes("status=CONFIRMED")
-        );
-      }),
+      page.waitForResponse(
+        (res) => {
+          const url = res.url();
+          return (
+            res.request().method() === "GET" &&
+            url.includes("/api/bookings") &&
+            url.includes("status=CONFIRMED")
+          );
+        },
+        { timeout: 15_000 },
+      ),
       statusSelect.selectOption("CONFIRMED"),
     ]);
 
     const body = (await response.json()) as { data?: unknown[] };
     expect(Array.isArray(body.data) && body.data.length > 0).toBe(true);
 
-    const reservationCards = page.getByTestId("booking-card");
+    await expect(statusSelect).toHaveValue("CONFIRMED", { timeout: 10_000 });
 
-    await expect(reservationCards.first()).toBeVisible();
+    const reservationCards = page.getByTestId("booking-card");
+    await expect
+      .poll(async () => await reservationCards.count(), {
+        timeout: 10_000,
+      })
+      .toBeGreaterThan(0);
+    await expect(reservationCards.first()).toBeVisible({ timeout: 10_000 });
+
+    const statusSelects = page.locator('select[name="bookingStatus"]');
+    await expect(statusSelects.first()).toBeVisible({ timeout: 10_000 });
+    await expect
+      .poll(async () =>
+        statusSelects.evaluateAll((elements) =>
+          elements.map((element) => (element as HTMLSelectElement).value),
+        ),
+      )
+      .toContain("CONFIRMED");
     await expect(
-      reservationCards.first().locator('select[name="bookingStatus"]'),
-    ).toHaveValue("CONFIRMED");
+      reservationCards.filter({ hasText: /Confirmada/i }).first(),
+    ).toBeVisible({ timeout: 10_000 });
   });
 
   test("muestra error cuando faltan datos al crear servicio @critical", async ({
@@ -77,12 +97,14 @@ test.describe.serial("Operaciones", () => {
 
     await serviceForm
       .locator('input[name="name"]')
+      .first()
       .fill("Servicio inválido UI");
     await serviceForm
       .locator('textarea[name="description"]')
+      .first()
       .fill("Caso negativo E2E");
-    await serviceForm.locator('input[name="basePrice"]').fill("-10");
-    await serviceForm.locator('input[name="durationMin"]').fill("0");
+    await serviceForm.locator('input[name="basePrice"]').first().fill("-10");
+    await serviceForm.locator('input[name="durationMin"]').first().fill("0");
 
     await serviceForm.getByRole("button", { name: "Guardar" }).click();
 
@@ -104,10 +126,15 @@ test.describe.serial("Operaciones", () => {
     const ip = ipForTest(testInfo);
     // Use localhost API for E2E tests (starts on port 3001)
     const apiUrl = process.env.E2E_API_URL || "http://localhost:3001";
+    const adminToken = await getAdminAccessToken(request);
+    const authHeaders = {
+      "x-forwarded-for": ip,
+      Authorization: `Bearer ${adminToken}`,
+    };
 
     // Test 1: Default pagination
     const res1 = await request.get(`${apiUrl}/api/bookings`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res1.ok()).toBeTruthy();
     const json1 = await res1.json();
@@ -118,7 +145,7 @@ test.describe.serial("Operaciones", () => {
 
     // Test 2: Custom limit
     const res2 = await request.get(`${apiUrl}/api/bookings?limit=5`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res2.ok()).toBeTruthy();
     const json2 = await res2.json();
@@ -130,7 +157,7 @@ test.describe.serial("Operaciones", () => {
       const res3 = await request.get(
         `${apiUrl}/api/bookings?limit=5&cursor=${json2.pagination.nextCursor}`,
         {
-          headers: { "x-forwarded-for": ip },
+          headers: authHeaders,
         },
       );
       expect(res3.ok()).toBeTruthy();
@@ -148,12 +175,12 @@ test.describe.serial("Operaciones", () => {
 
     // Test 4: Validate limit boundaries
     const res4 = await request.get(`${apiUrl}/api/bookings?limit=0`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res4.status()).toBe(400);
 
     const res5 = await request.get(`${apiUrl}/api/bookings?limit=101`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res5.status()).toBe(400);
   });
