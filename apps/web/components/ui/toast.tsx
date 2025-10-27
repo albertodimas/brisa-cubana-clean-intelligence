@@ -1,59 +1,94 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  type ReactNode,
-} from "react";
+import * as React from "react";
 import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+} from "lucide-react";
+import { cn } from "@/lib/cn";
 
 type ToastType = "success" | "error" | "warning" | "info";
+
+type ToastAction = {
+  label: string;
+  onClick: () => void;
+};
 
 type Toast = {
   id: string;
   type: ToastType;
   message: string;
   duration?: number;
+  action?: ToastAction;
+  showProgress?: boolean;
 };
 
 type ToastContextValue = {
-  showToast: (message: string, type?: ToastType, duration?: number) => void;
+  showToast: (
+    message: string,
+    options?: {
+      type?: ToastType;
+      duration?: number;
+      action?: ToastAction;
+      showProgress?: boolean;
+    },
+  ) => void;
   hideToast: (id: string) => void;
 };
 
-const ToastContext = createContext<ToastContextValue | null>(null);
+const ToastContext = React.createContext<ToastContextValue | null>(null);
 
 export function useToast() {
-  const context = useContext(ToastContext);
+  const context = React.useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within ToastProvider");
   }
   return context;
 }
 
-export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [toasts, setToasts] = React.useState<Toast[]>([]);
 
-  const hideToast = useCallback((id: string) => {
+  const hideToast = React.useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const showToast = useCallback(
-    (message: string, type: ToastType = "info", duration?: number) => {
+  const showToast = React.useCallback(
+    (
+      message: string,
+      options: {
+        type?: ToastType;
+        duration?: number;
+        action?: ToastAction;
+        showProgress?: boolean;
+      } = {},
+    ) => {
+      const { type = "info", duration, action, showProgress = true } = options;
+
       const id = crypto.randomUUID();
 
       // Smart duration based on toast type if not explicitly provided
       const defaultDurations: Record<ToastType, number> = {
-        success: 3000, // Quick confirmation - no need to linger
-        info: 4000, // Informational - medium time
-        warning: 5000, // Important - needs attention
-        error: 6000, // Critical - user needs time to read and act
+        success: 3000,
+        info: 4000,
+        warning: 5000,
+        error: 6000,
       };
 
       const finalDuration = duration ?? defaultDurations[type];
-      const toast: Toast = { id, type, message, duration: finalDuration };
+      const toast: Toast = {
+        id,
+        type,
+        message,
+        duration: finalDuration,
+        action,
+        showProgress,
+      };
 
       setToasts((prev) => [...prev, toast]);
 
@@ -85,8 +120,6 @@ function ToastContainer({
   toasts: Toast[];
   onClose: (id: string) => void;
 }) {
-  if (toasts.length === 0) return null;
-
   return (
     <div
       className="fixed top-4 right-4 left-4 sm:left-auto sm:max-w-md z-50 flex flex-col gap-2 pointer-events-none"
@@ -94,12 +127,35 @@ function ToastContainer({
       aria-live="polite"
       aria-label="Notificaciones"
     >
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} onClose={onClose} />
-      ))}
+      <AnimatePresence mode="popLayout">
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} onClose={onClose} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
+
+const toastIcons = {
+  success: CheckCircle2,
+  error: AlertCircle,
+  warning: AlertTriangle,
+  info: Info,
+};
+
+const toastStyles = {
+  success: "bg-emerald-950/90 border-emerald-500/50 text-emerald-50",
+  error: "bg-red-950/90 border-red-500/50 text-red-50",
+  warning: "bg-amber-950/90 border-amber-500/50 text-amber-50",
+  info: "bg-brisa-900/90 border-brisa-500/50 text-brisa-50",
+};
+
+const progressBarColors = {
+  success: "bg-emerald-500",
+  error: "bg-red-500",
+  warning: "bg-amber-500",
+  info: "bg-brisa-500",
+};
 
 function ToastItem({
   toast,
@@ -108,103 +164,77 @@ function ToastItem({
   toast: Toast;
   onClose: (id: string) => void;
 }) {
-  const typeStyles = {
-    success: "bg-green-900/90 border-green-500 text-green-50",
-    error: "bg-red-900/90 border-red-500 text-red-50",
-    warning: "bg-yellow-900/90 border-yellow-500 text-yellow-50",
-    info: "bg-brisa-800/90 border-brisa-500 text-brisa-50",
-  };
+  const Icon = toastIcons[toast.type];
+  const [progress, setProgress] = React.useState(100);
 
-  const icons = {
-    success: (
-      <svg
-        className="w-5 h-5 flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M5 13l4 4L19 7"
-        />
-      </svg>
-    ),
-    error: (
-      <svg
-        className="w-5 h-5 flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-    ),
-    warning: (
-      <svg
-        className="w-5 h-5 flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-        />
-      </svg>
-    ),
-    info: (
-      <svg
-        className="w-5 h-5 flex-shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
-  };
+  React.useEffect(() => {
+    if (!toast.showProgress || !toast.duration || toast.duration <= 0) return;
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const decrement = (100 / toast.duration!) * 50; // Update every 50ms
+        const newProgress = prev - decrement;
+        return newProgress <= 0 ? 0 : newProgress;
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [toast.duration, toast.showProgress]);
 
   return (
-    <div
-      className={`flex items-start gap-3 w-full sm:min-w-[320px] sm:max-w-md p-4 rounded-lg border shadow-lg backdrop-blur-sm animate-in slide-in-from-right-full duration-300 pointer-events-auto ${typeStyles[toast.type]}`}
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: 300, scale: 0.95 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 300, scale: 0.95 }}
+      transition={{
+        type: "spring",
+        stiffness: 500,
+        damping: 30,
+      }}
+      className={cn(
+        "relative flex flex-col w-full sm:min-w-[320px] sm:max-w-md rounded-lg border shadow-xl backdrop-blur-md pointer-events-auto overflow-hidden",
+        toastStyles[toast.type],
+      )}
       role="alert"
     >
-      {icons[toast.type]}
-      <p className="flex-1 text-sm font-medium m-0">{toast.message}</p>
-      <button
-        type="button"
-        onClick={() => onClose(toast.id)}
-        className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-white rounded"
-        aria-label="Cerrar notificación"
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+      <div className="flex items-start gap-3 p-4">
+        <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-relaxed">{toast.message}</p>
+          {toast.action && (
+            <button
+              type="button"
+              onClick={() => {
+                toast.action!.onClick();
+                onClose(toast.id);
+              }}
+              className="mt-2 text-sm font-semibold underline underline-offset-2 hover:opacity-80 transition-opacity"
+            >
+              {toast.action.label}
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => onClose(toast.id)}
+          className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-white rounded p-0.5"
+          aria-label="Cerrar notificación"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      {toast.showProgress && toast.duration && toast.duration > 0 && (
+        <div className="h-1 bg-black/20">
+          <motion.div
+            className={cn("h-full", progressBarColors[toast.type])}
+            initial={{ width: "100%" }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.05, ease: "linear" }}
           />
-        </svg>
-      </button>
-    </div>
+        </div>
+      )}
+    </motion.div>
   );
 }

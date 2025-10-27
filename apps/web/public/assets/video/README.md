@@ -10,6 +10,8 @@
 | `night-shift-poster.jpg`     | Imagen 1080×1920, < 300 KB, compresión sRGB         |
 | `night-shift-transcript.vtt` | Opcional, subtítulos WebVTT para accesibilidad      |
 
+> **Clip actual (26-oct-2025):** `night-shift.mp4` es un loop de 60 s generado internamente con gradientes animados y copy premium. Úsalo como base hasta recibir el B-roll definitivo.
+
 ## Flujo de trabajo
 
 1. Copiar los archivos finales al directorio actual (`apps/web/public/assets/video/`).
@@ -17,7 +19,7 @@
 3. Verificar que el video reproduce en mobile/desktop y que inicia de forma silenciosa (`muted`, `playsInline`).
 4. Confirmar Lighthouse Performance ≥ 90 y que no aparece el placeholder.
 5. Subir los archivos a la carpeta compartida de marketing usando la convención `BrisaCubana_<Asset>_V###_YYYYMMDD.ext` para trazabilidad.
-6. Reemplazar el placeholder temporal (`night-shift.mp4` / `night-shift-poster.jpg`) antes del release público; eliminar cualquier marca “Placeholder” del footage definitivo.
+6. Cuando recibas material final, sobrescribe `night-shift.mp4` y `night-shift-poster.jpg` conservando los nombres; evita marcas de agua y asegúrate de que el footage cumpla con el estándar anterior.
 
 ## Optimización recomendada
 

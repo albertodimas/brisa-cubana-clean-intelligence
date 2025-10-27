@@ -77,7 +77,7 @@ jobs:
         run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
 
       - name: Instalar Vercel CLI
-        run: pnpm add --global vercel@48.3.0
+        run: pnpm add --global vercel@48.6.0
 
       - name: Sincronizar configuración Vercel API
         working-directory: apps/api
@@ -85,23 +85,8 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          export PATH="$PNPM_HOME:$PATH"
+          export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
-
-      - name: Build API (prebuilt)
-        working-directory: apps/api
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          set -euo pipefail
-          export PATH="$PNPM_HOME:$PATH"
-          export PNPM_BIN="$(command -v pnpm)"
-          mkdir -p node_modules/pnpm/bin node_modules/.bin
-          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
-          chmod +x node_modules/pnpm/bin/pnpm.cjs
-          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
-          vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy API to Vercel Production
         id: deploy-api
@@ -110,36 +95,31 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "$DEPLOY_OUTPUT"
+          API_URL=$(echo "$DEPLOY_OUTPUT" | sed -n 's/^.*Production:[[:space:]]*\([^[:space:]]\+\).*/\1/p' | tail -n1)
+          if [ -z "$API_URL" ]; then
+            API_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
+          fi
+          if [ -z "$API_URL" ]; then
+            echo "No se pudo determinar la URL de producción del API" >&2
+            exit 1
+          fi
+          echo "url=$API_URL" >> "$GITHUB_OUTPUT"
           {
             echo "### 🚀 API Production Deployment"
             echo ""
-            echo "- URL: $URL"
+            echo "- URL: $API_URL"
           } >> "$GITHUB_STEP_SUMMARY"
-          rm -rf .vercel/output
 
       - name: Sincronizar configuración Vercel Web
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          export PATH="$PNPM_HOME:$PATH"
+          export PATH="/usr/local/bin:$PNPM_HOME:$PATH"
           vercel pull --yes --environment=production --scope brisa-cubana --token "$VERCEL_TOKEN"
-
-      - name: Build Web (prebuilt)
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          set -euo pipefail
-          export PATH="$PNPM_HOME:$PATH"
-          export PNPM_BIN="$(command -v pnpm)"
-          mkdir -p node_modules/pnpm/bin node_modules/.bin
-          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
-          chmod +x node_modules/pnpm/bin/pnpm.cjs
-          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
-          vercel build --prod --scope brisa-cubana --token "$VERCEL_TOKEN"
 
       - name: Deploy Web to Vercel Production
         id: deploy-web
@@ -147,23 +127,62 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          URL=$(vercel deploy --prebuilt --yes --prod --scope brisa-cubana --token "$VERCEL_TOKEN")
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
+          echo "$DEPLOY_OUTPUT"
+          WEB_URL=$(echo "$DEPLOY_OUTPUT" | sed -n 's/^.*Production:[[:space:]]*\([^[:space:]]\+\).*/\1/p' | tail -n1)
+          if [ -z "$WEB_URL" ]; then
+            WEB_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' | tail -n1)
+          fi
+          if [ -z "$WEB_URL" ]; then
+            echo "No se pudo determinar la URL de producción del sitio web" >&2
+            exit 1
+          fi
+          echo "url=$WEB_URL" >> "$GITHUB_OUTPUT"
           {
             echo ""
             echo "### 🌐 Web Production Deployment"
             echo ""
-            echo "- URL: $URL"
+            echo "- URL: $WEB_URL"
           } >> "$GITHUB_STEP_SUMMARY"
-          rm -rf .vercel/output
 
       - name: Smoke test production endpoints
         env:
-          API_HEALTH_URL: ${{ steps.deploy-api.outputs.url }}/healthz
-          WEB_HEALTH_URL: ${{ steps.deploy-web.outputs.url }}/healthz
+          API_BASE_URL: ${{ steps.deploy-api.outputs.url }}
+          WEB_BASE_URL: ${{ steps.deploy-web.outputs.url }}
           HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}
+          API_ALIAS: https://api.brisacubanacleanintelligence.com
+          WEB_ALIAS: https://brisacubanacleanintelligence.com
         run: |
           set -euo pipefail
+          normalize_vercel_url() {
+            local url="$1"
+            local team_suffix="-brisa-cubana.vercel.app"
+            if [[ "$url" =~ ^https://([^/]+)(/.*)?$ ]]; then
+              local host="${BASH_REMATCH[1]}"
+              local rest="${BASH_REMATCH[2]}"
+              if [[ "$host" == *"$team_suffix" ]]; then
+                local base="${host%$team_suffix}"
+                base="${base%-*}"
+                host="${base}.vercel.app"
+              fi
+              echo "https://${host}${rest}"
+            else
+              echo "$url"
+            fi
+          }
+          API_CANONICAL_URL="$(normalize_vercel_url "$API_BASE_URL")"
+          WEB_CANONICAL_URL="$(normalize_vercel_url "$WEB_BASE_URL")"
+          if [[ -n "${API_ALIAS:-}" ]]; then
+            API_CANONICAL_URL="${API_ALIAS%/}"
+          fi
+          if [[ -n "${WEB_ALIAS:-}" ]]; then
+            WEB_CANONICAL_URL="${WEB_ALIAS%/}"
+          fi
+          echo "ℹ️  API base resolved to $API_CANONICAL_URL"
+          echo "ℹ️  Web base resolved to $WEB_CANONICAL_URL"
+          API_HEALTH_URL="${API_CANONICAL_URL%/}/healthz"
+          WEB_HEALTH_URL="${WEB_CANONICAL_URL%/}/healthz"
           auth_args=()
           if [ -n "${HEALTH_CHECK_TOKEN:-}" ]; then
             auth_args=(--header "Authorization: Bearer ${HEALTH_CHECK_TOKEN}")
@@ -222,7 +241,9 @@ jobs:
               }
             ]
           }')
-          curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+          if ! curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"; then
+            echo "::warning::No se pudo entregar la notificación a Slack (respuesta no exitosa). Continuando sin bloquear el deploy."
+          fi
 
       - name: Audit recent Vercel deployments
         env:

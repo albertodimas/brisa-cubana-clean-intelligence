@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import type { Session } from "next-auth";
 import type {
   Booking,
@@ -14,7 +14,13 @@ import type {
 } from "@/lib/api";
 import { usePaginatedResource } from "@/hooks/use-paginated-resource";
 import { Button } from "./ui/button";
-import { Card } from "./ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "./ui/card";
 import { Chip } from "./ui/chip";
 import { Skeleton } from "./ui/skeleton";
 import { useToast } from "./ui/toast";
@@ -30,13 +36,6 @@ type ActionResult = {
   error?: string;
 };
 
-type BookingFilterState = {
-  status: string;
-  from: string;
-  to: string;
-  search: string;
-};
-
 type AdminPanelProps = {
   currentUser: Session["user"] | null;
   services: PaginatedResult<Service>;
@@ -44,7 +43,7 @@ type AdminPanelProps = {
   bookings: PaginatedResult<Booking>;
   customers: PaginatedResult<Customer>;
   initialBookingFilters: {
-    status: string;
+    status?: string;
     from?: string;
     to?: string;
   };
@@ -96,6 +95,11 @@ export function AdminPanel({
   const router = useRouter();
   const { showToast } = useToast();
 
+  // Adapter para compatibilidad con la API vieja de toast en child components
+  const handleToast = (message: string, type: "success" | "error") => {
+    showToast(message, { type });
+  };
+
   const {
     items: serviceItems,
     pageInfo: servicePageInfo,
@@ -145,35 +149,22 @@ export function AdminPanel({
 
   const BOOKINGS_PAGE_SIZE = 10;
 
-  const buildBookingQuery = useCallback(
-    (filters: BookingFilterState) => ({
+  const initialBookingQuery = useMemo(() => {
+    const query: Record<string, string | number> = {
       limit: BOOKINGS_PAGE_SIZE,
-      status: filters.status !== "ALL" ? filters.status : "",
-      from: filters.from || "",
-      to: filters.to || "",
-      search: filters.search || "",
-    }),
-    [BOOKINGS_PAGE_SIZE],
-  );
+    };
+    if (initialBookingFilters.status) {
+      query.status = initialBookingFilters.status;
+    }
+    if (initialBookingFilters.from) {
+      query.from = initialBookingFilters.from.slice(0, 10);
+    }
+    if (initialBookingFilters.to) {
+      query.to = initialBookingFilters.to.slice(0, 10);
+    }
+    return query;
+  }, [initialBookingFilters]);
 
-  const initialBookingFormFilters: BookingFilterState = useMemo(
-    () => ({
-      status: initialBookingFilters.status ?? "ALL",
-      from: initialBookingFilters.from
-        ? initialBookingFilters.from.slice(0, 10)
-        : "",
-      to: initialBookingFilters.to ? initialBookingFilters.to.slice(0, 10) : "",
-      search: "",
-    }),
-    [initialBookingFilters],
-  );
-
-  const [bookingUpdatingId, setBookingUpdatingId] = useState<string | null>(
-    null,
-  );
-  const [bookingFilters, setBookingFilters] = useState<BookingFilterState>(
-    initialBookingFormFilters,
-  );
   const [isLoggingOut, setLoggingOut] = useState(false);
   const [isBookingPending, startBookingAction] = useTransition();
 
@@ -183,11 +174,14 @@ export function AdminPanel({
     isLoading: isBookingsRefreshing,
     isLoadingMore: isLoadingMoreBookings,
     loadMore: loadMoreBookings,
+    refresh: refreshBookings,
+    currentQuery: bookingQuery,
     setQuery: setBookingQuery,
+    resetQuery: resetBookingQuery,
   } = usePaginatedResource<Booking>({
     initial: bookings,
     endpoint: "/api/bookings",
-    initialQuery: buildBookingQuery(initialBookingFormFilters),
+    initialQuery: initialBookingQuery,
   });
 
   const {
@@ -206,57 +200,56 @@ export function AdminPanel({
     initialQuery: { limit: users.pageInfo.limit },
   });
 
-  const applyBookingFilters = useCallback(
-    async (next: Partial<BookingFilterState>) => {
-      const merged: BookingFilterState = {
-        ...bookingFilters,
-        ...next,
-      };
-      setBookingFilters(merged);
-      await setBookingQuery(buildBookingQuery(merged));
-    },
-    [bookingFilters, buildBookingQuery, setBookingQuery],
-  );
-
   if (isLoading) {
     const sessionEmail = currentUser?.email ?? "cargando...";
     const sessionRole = currentUser?.role ? ` · Rol ${currentUser.role}` : "";
 
     return (
       <section className="ui-stack ui-stack--lg mt-12" data-testid="panel-root">
-        <Card
-          title="Panel operativo"
-          description="Gestiona servicios, propiedades, reservas y usuarios desde un mismo panel."
-        >
-          <div className="ui-stack">
-            <div
-              className="flex flex-wrap items-center justify-between gap-3"
-              data-testid="panel-session"
-            >
-              <Chip>
-                Sesión: {sessionEmail}
-                {sessionRole}
-              </Chip>
-              <Skeleton className="h-10 w-28" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Panel operativo</CardTitle>
+            <CardDescription>
+              Gestiona servicios, propiedades, reservas y usuarios desde un
+              mismo panel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="ui-stack">
+              <div
+                className="flex flex-wrap items-center justify-between gap-3"
+                data-testid="panel-session"
+              >
+                <Chip>
+                  Sesión: {sessionEmail}
+                  {sessionRole}
+                </Chip>
+                <Skeleton className="h-10 w-28" />
+              </div>
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-10 w-40" />
             </div>
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-10 w-40" />
-          </div>
+          </CardContent>
         </Card>
 
-        <Card
-          title="Crear servicio"
-          description="Define nuevas ofertas con precio base y duración estandarizada."
-        >
-          <div className="grid gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-24 w-full" />
-            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Crear servicio</CardTitle>
+            <CardDescription>
+              Define nuevas ofertas con precio base y duración estandarizada.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
               <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <Skeleton className="h-10 w-32" />
             </div>
-            <Skeleton className="h-10 w-32" />
-          </div>
+          </CardContent>
         </Card>
 
         <div className="grid gap-4">
@@ -292,36 +285,53 @@ export function AdminPanel({
     );
   }
 
-  async function handleBookingUpdate(bookingId: string, formData: FormData) {
-    setBookingUpdatingId(bookingId);
-    const result = await updateBooking(bookingId, formData);
-    setBookingUpdatingId(null);
-    if (result.error) {
-      showToast(result.error, "error");
-    } else if (result.success) {
-      showToast(result.success, "success");
-      await setBookingQuery(buildBookingQuery(bookingFilters));
-    }
-  }
-
   return (
     <section className="ui-stack ui-stack--lg mt-12" data-testid="panel-root">
-      <Card
-        title="Panel operativo"
-        description="Gestiona servicios, propiedades, reservas y usuarios desde un mismo panel."
-      >
-        <div className="flex flex-col gap-4">
-          {currentUser ? (
-            <div
-              className="flex flex-wrap items-center justify-between gap-3"
-              data-testid="panel-session"
-            >
-              <Chip>
-                Sesión: {currentUser.email ?? "usuario sin correo"}
-                {currentUser.role ? ` · Rol ${currentUser.role}` : null}
-              </Chip>
-              <div className="flex items-center gap-3">
-                <NotificationBell initialNotifications={notifications} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Panel operativo</CardTitle>
+          <CardDescription>
+            Gestiona servicios, propiedades, reservas y usuarios desde un mismo
+            panel.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4">
+            {currentUser ? (
+              <div
+                className="flex flex-wrap items-center justify-between gap-3"
+                data-testid="panel-session"
+              >
+                <Chip>
+                  Sesión: {currentUser.email ?? "usuario sin correo"}
+                  {currentUser.role ? ` · Rol ${currentUser.role}` : null}
+                </Chip>
+                <div className="flex items-center gap-3">
+                  <NotificationBell initialNotifications={notifications} />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    isLoading={isLoggingOut}
+                    onClick={async () => {
+                      setLoggingOut(true);
+                      const result = await logout();
+                      setLoggingOut(false);
+                      if (result.error) {
+                        showToast(result.error, { type: "error" });
+                      } else if (result.success) {
+                        showToast(result.success, { type: "success" });
+                        router.replace("/login");
+                        router.refresh();
+                      }
+                    }}
+                    className="max-w-fit"
+                  >
+                    Cerrar sesión
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex justify-end" data-testid="panel-session">
                 <Button
                   type="button"
                   variant="ghost"
@@ -331,9 +341,9 @@ export function AdminPanel({
                     const result = await logout();
                     setLoggingOut(false);
                     if (result.error) {
-                      showToast(result.error, "error");
+                      showToast(result.error, { type: "error" });
                     } else if (result.success) {
-                      showToast(result.success, "success");
+                      showToast(result.success, { type: "success" });
                       router.replace("/login");
                       router.refresh();
                     }
@@ -343,32 +353,9 @@ export function AdminPanel({
                   Cerrar sesión
                 </Button>
               </div>
-            </div>
-          ) : (
-            <div className="flex justify-end" data-testid="panel-session">
-              <Button
-                type="button"
-                variant="ghost"
-                isLoading={isLoggingOut}
-                onClick={async () => {
-                  setLoggingOut(true);
-                  const result = await logout();
-                  setLoggingOut(false);
-                  if (result.error) {
-                    showToast(result.error, "error");
-                  } else if (result.success) {
-                    showToast(result.success, "success");
-                    router.replace("/login");
-                    router.refresh();
-                  }
-                }}
-                className="max-w-fit"
-              >
-                Cerrar sesión
-              </Button>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </CardContent>
       </Card>
 
       <ServicesManager
@@ -376,7 +363,7 @@ export function AdminPanel({
         createService={createService}
         updateService={updateService}
         toggleService={toggleService}
-        onToast={showToast}
+        onToast={handleToast}
         pageInfo={servicePageInfo}
         isLoading={isServicesRefreshing}
         isLoadingMore={isLoadingMoreServices}
@@ -388,18 +375,20 @@ export function AdminPanel({
       />
 
       <BookingsManager
-        filters={bookingFilters}
-        onFiltersChange={applyBookingFilters}
         bookings={bookingItems}
         pageInfo={bookingPageInfo}
         isLoading={isBookingsRefreshing}
         isLoadingMore={isLoadingMoreBookings}
         onLoadMore={loadMoreBookings}
-        onUpdate={handleBookingUpdate}
-        updatingId={bookingUpdatingId}
+        onUpdate={updateBooking}
         services={serviceItems}
         properties={propertyItems}
         formatDateTime={formatDateTimeLocal}
+        currentQuery={bookingQuery}
+        setQuery={setBookingQuery}
+        resetQuery={resetBookingQuery}
+        refresh={refreshBookings}
+        onToast={handleToast}
       />
       <CustomersManager
         customers={customerItems}
@@ -417,7 +406,7 @@ export function AdminPanel({
         customers={customerItems}
         createProperty={createProperty}
         updateProperty={updateProperty}
-        onToast={showToast}
+        onToast={handleToast}
         pageInfo={propertyPageInfo}
         isLoading={isPropertiesRefreshing}
         isLoadingMore={isLoadingMoreProperties}
@@ -442,7 +431,7 @@ export function AdminPanel({
           onUpdate={updateUser}
           onToggleActive={toggleUserActive}
           currentUserId={currentUser?.id ?? null}
-          onToast={showToast}
+          onToast={handleToast}
         />
       ) : null}
 
@@ -452,9 +441,9 @@ export function AdminPanel({
           startBookingAction(async () => {
             const result = await createBooking(formData);
             if (result.error) {
-              showToast(result.error, "error");
+              showToast(result.error, { type: "error" });
             } else if (result.success) {
-              showToast(result.success, "success");
+              showToast(result.success, { type: "success" });
             }
           })
         }

@@ -91,16 +91,15 @@ router.post("/request", async (c) => {
     expiresAt,
   });
 
-  logger.info(
-    {
-      email,
-      expiresAt,
-      delivery: delivery.delivered ? "sent" : delivery.reason,
-    },
-    "Magic link solicitado para cliente",
-  );
-
   if (!delivery.delivered) {
+    logger.warn(
+      {
+        email,
+        expiresAt,
+        delivery: delivery.reason,
+      },
+      "Magic link email no enviado",
+    );
     const status = delivery.reason === "not-configured" ? 503 : 500;
     return c.json(
       {
@@ -112,6 +111,15 @@ router.post("/request", async (c) => {
       status,
     );
   }
+
+  logger.info(
+    {
+      email,
+      expiresAt,
+      delivery: "sent",
+    },
+    "Magic link solicitado para cliente",
+  );
 
   const responsePayload: Record<string, unknown> = {
     message: "Enlace de acceso enviado.",

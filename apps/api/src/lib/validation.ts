@@ -4,6 +4,7 @@
 
 import type { Context } from "hono";
 import type { z } from "zod";
+import type { ParseResult } from "./parse-result.js";
 
 /**
  * Validate request data against a Zod schema
@@ -16,7 +17,7 @@ export function validateRequest<T>(
   schema: z.ZodSchema<T>,
   data: unknown,
   c: Context,
-): { success: true; data: T } | { success: false; response: Response } {
+): ParseResult<T> {
   const parsed = schema.safeParse(data);
   if (!parsed.success) {
     return {

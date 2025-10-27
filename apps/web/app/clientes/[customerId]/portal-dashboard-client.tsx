@@ -27,6 +27,7 @@ import {
 } from "@/lib/portal-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toPortalDatetimeLocalValue } from "@/lib/portal-utils";
+import { ScrollReveal } from "@/components/ui";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, {
@@ -309,73 +310,75 @@ export function PortalDashboardClient({ initialData }: Props) {
 
   return (
     <div className="relative mx-auto grid max-w-5xl gap-12">
-      <header className="flex flex-col gap-6 rounded-3xl border border-white/60 bg-white/90 p-8 shadow-lg backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80">
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/70 dark:text-brisa-200">
-            Portal cliente
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-brisa-200 bg-white px-3 py-1 text-xs font-semibold text-brisa-500 shadow-sm dark:border-brisa-600 dark:bg-brisa-900 dark:text-brisa-100">
-            ID {customer.id.slice(0, 6).toUpperCase()}
-          </span>
-        </div>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              ¡Hola {displayName}! Estas son tus reservas con Brisa Cubana
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm text-gray-600 dark:text-brisa-200 sm:text-base">
-              Revisa detalles, estados y acciones disponibles. La versión beta
-              se actualiza automáticamente y pronto integrará formularios de
-              cambios y descargas de comprobantes.
-            </p>
+      <ScrollReveal variant="fadeDown" delay={0.1}>
+        <header className="flex flex-col gap-6 rounded-3xl border border-white/60 bg-white/90 p-8 shadow-lg backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/70 dark:text-brisa-200">
+              Portal cliente
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-200 bg-white px-3 py-1 text-xs font-semibold text-brisa-500 shadow-sm dark:border-brisa-600 dark:bg-brisa-900 dark:text-brisa-100">
+              ID {customer.id.slice(0, 6).toUpperCase()}
+            </span>
           </div>
-          <div className="flex flex-col gap-3 sm:items-end">
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="inline-flex items-center gap-2 rounded-full border border-brisa-500/40 px-4 py-2 text-xs font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/40 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-            >
-              <ArrowPathIcon
-                className={`h-4 w-4 ${isValidating ? "animate-spin" : ""}`}
-                aria-hidden="true"
-              />
-              Actualizar
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="inline-flex items-center gap-2 rounded-full border border-red-400/60 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-70 dark:border-red-500/50 dark:text-red-200 dark:hover:bg-red-900/30"
-            >
-              <ArrowRightOnRectangleIcon className="h-4 w-4" />
-              {isLoggingOut ? "Cerrando sesión…" : "Cerrar sesión"}
-            </button>
-            {logoutError ? (
-              <p className="text-xs text-red-500">{logoutError}</p>
-            ) : null}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                ¡Hola {displayName}! Estas son tus reservas con Brisa Cubana
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm text-gray-600 dark:text-brisa-200 sm:text-base">
+                Revisa detalles, estados y acciones disponibles. La versión beta
+                se actualiza automáticamente y pronto integrará formularios de
+                cambios y descargas de comprobantes.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:items-end">
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className="inline-flex items-center gap-2 rounded-full border border-brisa-500/40 px-4 py-2 text-xs font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/40 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+              >
+                <ArrowPathIcon
+                  className={`h-4 w-4 ${isValidating ? "animate-spin" : ""}`}
+                  aria-hidden="true"
+                />
+                Actualizar
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="inline-flex items-center gap-2 rounded-full border border-red-400/60 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-70 dark:border-red-500/50 dark:text-red-200 dark:hover:bg-red-900/30"
+              >
+                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                {isLoggingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+              </button>
+              {logoutError ? (
+                <p className="text-xs text-red-500">{logoutError}</p>
+              ) : null}
+            </div>
           </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <PortalStatCard
-            title="Próximos servicios"
-            value={totals.upcoming}
-            helper={
-              isValidating ? "Actualizando…" : "Confirmados en el calendario"
-            }
-            variant="primary"
-          />
-          <PortalStatCard
-            title="Historial"
-            value={totals.history}
-            helper="Servicios completados"
-          />
-          <PortalStatCard
-            title="Confirmados"
-            value={totals.confirmed}
-            helper="Listos para ejecutarse"
-          />
-        </div>
-      </header>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <PortalStatCard
+              title="Próximos servicios"
+              value={totals.upcoming}
+              helper={
+                isValidating ? "Actualizando…" : "Confirmados en el calendario"
+              }
+              variant="primary"
+            />
+            <PortalStatCard
+              title="Historial"
+              value={totals.history}
+              helper="Servicios completados"
+            />
+            <PortalStatCard
+              title="Confirmados"
+              value={totals.confirmed}
+              helper="Listos para ejecutarse"
+            />
+          </div>
+        </header>
+      </ScrollReveal>
 
       {actionSuccess ? (
         <PortalCallout
@@ -415,180 +418,189 @@ export function PortalDashboardClient({ initialData }: Props) {
         />
       ) : null}
 
-      <section className="space-y-5 rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/80">
-        <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Próximas reservas
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-brisa-300">
-              Visualiza tus servicios confirmados y en progreso.
-            </p>
-          </div>
-          <Link
-            href="/checkout"
-            prefetch={false}
-            className="inline-flex items-center gap-2 text-sm text-brisa-600 underline-offset-4 transition-colors hover:underline dark:text-brisa-300"
-          >
-            Solicitar un nuevo servicio →
-          </Link>
-        </header>
-
-        {upcoming.length === 0 ? (
-          showRefreshingSkeleton ? (
-            <PortalBookingsSkeleton />
-          ) : (
-            <div className="space-y-3 rounded-xl border border-dashed border-brisa-300/60 bg-brisa-50/70 p-5 text-sm text-gray-700 dark:border-brisa-700/40 dark:bg-brisa-800/40 dark:text-brisa-100">
-              <p>No encontramos reservas próximas en tu cuenta.</p>
-              <p>
-                Si necesitas agendar un servicio urgente, escribe a{" "}
-                <a
-                  className="font-semibold underline underline-offset-4"
-                  href="mailto:soporte@brisacubanacleanintelligence.com"
-                >
-                  soporte@brisacubanacleanintelligence.com
-                </a>{" "}
-                o utiliza el checkout público.
+      <ScrollReveal variant="fadeUp" delay={0.2}>
+        <section className="space-y-5 rounded-3xl border border-white/60 bg-white/90 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/80">
+          <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Próximas reservas
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-brisa-300">
+                Visualiza tus servicios confirmados y en progreso.
               </p>
             </div>
-          )
-        ) : (
-          <ul className="grid gap-4">
-            {upcoming.map((booking) => {
-              const isImmutable =
-                booking.status === "IN_PROGRESS" ||
-                booking.status === "COMPLETED" ||
-                booking.status === "CANCELLED";
-              return (
-                <PortalBookingCard
-                  key={booking.id}
-                  booking={booking}
-                  scheduledLabel={formatMeta(booking.scheduledAt)}
-                  actions={
-                    isImmutable ? null : (
-                      <>
-                        <button
-                          type="button"
-                          disabled={isActionsDisabled}
-                          onClick={() => openRescheduleModal(booking)}
-                          className="inline-flex items-center rounded-full border border-brisa-500/60 px-4 py-2 text-xs font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 disabled:opacity-60 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-                        >
-                          Reagendar
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isActionsDisabled}
-                          onClick={() => openCancelModal(booking)}
-                          className="inline-flex items-center rounded-full border border-red-400/60 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/60 dark:text-red-200 dark:hover:bg-red-900/30"
-                        >
-                          Cancelar
-                        </button>
-                        <Link
-                          href={
-                            `/clientes/${customer.id}/reservas/${booking.id}` as Route
-                          }
-                          className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/60"
-                        >
-                          Ver detalle
-                        </Link>
-                      </>
-                    )
-                  }
-                />
-              );
-            })}
-          </ul>
-        )}
-      </section>
+            <Link
+              href="/checkout"
+              prefetch={false}
+              className="inline-flex items-center gap-2 text-sm text-brisa-600 underline-offset-4 transition-colors hover:underline dark:text-brisa-300"
+            >
+              Solicitar un nuevo servicio →
+            </Link>
+          </header>
 
-      <section className="space-y-4 rounded-3xl border border-white/70 bg-white/85 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80">
-        <header className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Historial reciente
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-brisa-300">
-            Mantén el registro de limpiezas anteriores y descargas futuras.
-          </p>
-        </header>
-        {history.length === 0 ? (
-          showRefreshingSkeleton ? (
-            <PortalBookingsSkeleton count={2} />
+          {upcoming.length === 0 ? (
+            showRefreshingSkeleton ? (
+              <PortalBookingsSkeleton />
+            ) : (
+              <div className="space-y-3 rounded-xl border border-dashed border-brisa-300/60 bg-brisa-50/70 p-5 text-sm text-gray-700 dark:border-brisa-700/40 dark:bg-brisa-800/40 dark:text-brisa-100">
+                <p>No encontramos reservas próximas en tu cuenta.</p>
+                <p>
+                  Si necesitas agendar un servicio urgente, escribe a{" "}
+                  <a
+                    className="font-semibold underline underline-offset-4"
+                    href="mailto:soporte@brisacubanacleanintelligence.com"
+                  >
+                    soporte@brisacubanacleanintelligence.com
+                  </a>{" "}
+                  o utiliza el checkout público.
+                </p>
+              </div>
+            )
           ) : (
+            <ul className="grid gap-4">
+              {upcoming.map((booking) => {
+                const isImmutable =
+                  booking.status === "IN_PROGRESS" ||
+                  booking.status === "COMPLETED" ||
+                  booking.status === "CANCELLED";
+                return (
+                  <PortalBookingCard
+                    key={booking.id}
+                    booking={booking}
+                    scheduledLabel={formatMeta(booking.scheduledAt)}
+                    actions={
+                      isImmutable ? null : (
+                        <>
+                          <button
+                            type="button"
+                            disabled={isActionsDisabled}
+                            onClick={() => openRescheduleModal(booking)}
+                            className="inline-flex items-center rounded-full border border-brisa-500/60 px-4 py-2 text-xs font-semibold text-brisa-600 transition-colors hover:bg-brisa-100 disabled:opacity-60 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+                          >
+                            Reagendar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isActionsDisabled}
+                            onClick={() => openCancelModal(booking)}
+                            className="inline-flex items-center rounded-full border border-red-400/60 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-500/60 dark:text-red-200 dark:hover:bg-red-900/30"
+                          >
+                            Cancelar
+                          </button>
+                          <Link
+                            href={
+                              `/clientes/${customer.id}/reservas/${booking.id}` as Route
+                            }
+                            className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:border-brisa-700 dark:text-brisa-300 dark:hover:bg-brisa-800/60"
+                          >
+                            Ver detalle
+                          </Link>
+                        </>
+                      )
+                    }
+                  />
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal variant="fadeUp" delay={0.25}>
+        <section className="space-y-4 rounded-3xl border border-white/70 bg-white/85 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/50 dark:bg-brisa-900/80">
+          <header className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Historial reciente
+            </h2>
             <p className="text-sm text-gray-600 dark:text-brisa-300">
-              Aún no hay historial disponible. Aquí verás tus servicios
-              completados y podrás descargar comprobantes en futuras versiones.
+              Mantén el registro de limpiezas anteriores y descargas futuras.
             </p>
-          )
-        ) : (
-          <ol className="space-y-4 border-l border-dashed border-brisa-300/60 pl-5 dark:border-brisa-700/50">
-            {history.map((booking) => (
-              <PortalTimelineItem
-                key={booking.id}
-                status={booking.status}
-                title={`${booking.service.name} · ${booking.property.label}`}
-                meta={formatMeta(booking.scheduledAt)}
-              />
-            ))}
-          </ol>
-        )}
-      </section>
-
-      <PortalCallout
-        title={sessionStatusTitle}
-        description={
-          hasKnownSession ? (
-            <p>
-              {isSessionExpired ? (
-                <>
-                  Tu sesión ya expiró. Solicita un nuevo enlace para continuar
-                  usando el portal y actualizar esta vista.
-                </>
-              ) : (
-                <>
-                  Tu sesión vence en{" "}
-                  <span className="font-semibold">{sessionCountdown}</span>.
-                  Solicita un nuevo enlace si necesitas más tiempo o refresca
-                  esta vista después de renovarlo.
-                </>
-              )}
-            </p>
+          </header>
+          {history.length === 0 ? (
+            showRefreshingSkeleton ? (
+              <PortalBookingsSkeleton count={2} />
+            ) : (
+              <p className="text-sm text-gray-600 dark:text-brisa-300">
+                Aún no hay historial disponible. Aquí verás tus servicios
+                completados y podrás descargar comprobantes en futuras
+                versiones.
+              </p>
+            )
           ) : (
-            <p>
-              No pudimos determinar la expiración de tu sesión. Si pierdes el
-              acceso, vuelve a solicitar un enlace desde la página de acceso.
-            </p>
-          )
-        }
-        icon={<ClockIcon className="h-10 w-10" />}
-        action={
-          <Link
-            className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-            href="/clientes/acceso"
-          >
-            Solicitar nuevo enlace →
-          </Link>
-        }
-      />
+            <ol className="space-y-4 border-l border-dashed border-brisa-300/60 pl-5 dark:border-brisa-700/50">
+              {history.map((booking) => (
+                <PortalTimelineItem
+                  key={booking.id}
+                  status={booking.status}
+                  title={`${booking.service.name} · ${booking.property.label}`}
+                  meta={formatMeta(booking.scheduledAt)}
+                />
+              ))}
+            </ol>
+          )}
+        </section>
+      </ScrollReveal>
 
-      <PortalCallout
-        title="¿Necesitas ajustar algo?"
-        description={
-          <p>
-            Estamos finalizando el formulario de autoservicio. Mientras tanto,
-            puedes solicitar cambios desde la línea de soporte o respondiendo
-            los correos de confirmación.
-          </p>
-        }
-        icon={<ArrowPathIcon className="h-10 w-10" />}
-        action={
-          <Link
-            className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-            href="mailto:soporte@brisacubanacleanintelligence.com"
-          >
-            Escribir a soporte →
-          </Link>
-        }
-      />
+      <ScrollReveal variant="fadeIn" delay={0.3}>
+        <PortalCallout
+          title={sessionStatusTitle}
+          description={
+            hasKnownSession ? (
+              <p>
+                {isSessionExpired ? (
+                  <>
+                    Tu sesión ya expiró. Solicita un nuevo enlace para continuar
+                    usando el portal y actualizar esta vista.
+                  </>
+                ) : (
+                  <>
+                    Tu sesión vence en{" "}
+                    <span className="font-semibold">{sessionCountdown}</span>.
+                    Solicita un nuevo enlace si necesitas más tiempo o refresca
+                    esta vista después de renovarlo.
+                  </>
+                )}
+              </p>
+            ) : (
+              <p>
+                No pudimos determinar la expiración de tu sesión. Si pierdes el
+                acceso, vuelve a solicitar un enlace desde la página de acceso.
+              </p>
+            )
+          }
+          icon={<ClockIcon className="h-10 w-10" />}
+          action={
+            <Link
+              className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+              href="/clientes/acceso"
+            >
+              Solicitar nuevo enlace →
+            </Link>
+          }
+        />
+      </ScrollReveal>
+
+      <ScrollReveal variant="fadeIn" delay={0.35}>
+        <PortalCallout
+          title="¿Necesitas ajustar algo?"
+          description={
+            <p>
+              Estamos finalizando el formulario de autoservicio. Mientras tanto,
+              puedes solicitar cambios desde la línea de soporte o respondiendo
+              los correos de confirmación.
+            </p>
+          }
+          icon={<ArrowPathIcon className="h-10 w-10" />}
+          action={
+            <Link
+              className="inline-flex items-center justify-center rounded-full border border-brisa-500/60 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/60 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
+              href="mailto:soporte@brisacubanacleanintelligence.com"
+            >
+              Escribir a soporte →
+            </Link>
+          }
+        />
+      </ScrollReveal>
 
       {error ? (
         <p className="text-xs text-red-500">

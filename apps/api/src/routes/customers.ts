@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { authenticate, requireRoles } from "../middleware/auth.js";
 import { parseSearchableQuery } from "../lib/pagination.js";
+import { isParseFailure } from "../lib/parse-result.js";
 import { getCustomerRepository } from "../container.js";
 
 const router = new Hono();
@@ -11,7 +12,7 @@ router.get(
   requireRoles(["ADMIN", "COORDINATOR"]),
   async (c) => {
     const queryResult = parseSearchableQuery(c);
-    if (!queryResult.success) {
+    if (isParseFailure(queryResult)) {
       return queryResult.response;
     }
 

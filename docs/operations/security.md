@@ -190,7 +190,6 @@ pnpm test  # Usa variables del código, no necesita .env
 1. **Rotar INMEDIATAMENTE** todas las credenciales expuestas:
    - `JWT_SECRET`
    - `AUTH_SECRET`
-   - `API_TOKEN`
    - `DATABASE_URL` (regenerar password en Neon)
 
 2. **Eliminar del historial de Git:**

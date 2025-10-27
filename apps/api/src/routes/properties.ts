@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { authenticate, requireRoles } from "../middleware/auth.js";
 import { parseSearchableQuery } from "../lib/pagination.js";
+import { isParseFailure } from "../lib/parse-result.js";
 import { validateRequest } from "../lib/validation.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
 import { getPropertyRepository } from "../container.js";
@@ -34,16 +35,21 @@ const propertyQuerySchema = z.object({
 
 const router = new Hono();
 
-router.get("/", async (c) => {
-  const queryResult = parseSearchableQuery(c, propertyQuerySchema);
-  if (!queryResult.success) {
-    return queryResult.response;
-  }
+router.get(
+  "/",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
+  async (c) => {
+    const queryResult = parseSearchableQuery(c, propertyQuerySchema);
+    if (isParseFailure(queryResult)) {
+      return queryResult.response;
+    }
 
-  const repository = getPropertyRepository();
-  const result = await repository.findManyWithSearch(queryResult.data);
-  return c.json(result);
-});
+    const repository = getPropertyRepository();
+    const result = await repository.findManyWithSearch(queryResult.data);
+    return c.json(result);
+  },
+);
 
 router.post(
   "/",
@@ -51,7 +57,7 @@ router.post(
   requireRoles(["ADMIN", "COORDINATOR"]),
   async (c) => {
     const validation = validateRequest(propertySchema, await c.req.json(), c);
-    if (!validation.success) {
+    if (isParseFailure(validation)) {
       return validation.response;
     }
 
@@ -80,7 +86,7 @@ router.patch(
       await c.req.json(),
       c,
     );
-    if (!validation.success) {
+    if (isParseFailure(validation)) {
       return validation.response;
     }
 

@@ -69,7 +69,10 @@ export function shouldExposeDebugToken(): boolean {
     return true;
   }
 
-  if (process.env.PORTAL_MAGIC_LINK_EXPOSE_DEBUG === "false") {
+  const explicitlyEnabled =
+    process.env.PORTAL_MAGIC_LINK_EXPOSE_DEBUG === "true";
+
+  if (!explicitlyEnabled) {
     return false;
   }
 

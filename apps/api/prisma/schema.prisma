@@ -37,6 +37,14 @@ enum NotificationType {
   SERVICE_UPDATED
 }
 
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -138,4 +146,27 @@ model MagicLinkToken {
 
   @@index([email, expiresAt])
   @@index([consumedAt])
+}
+
+model Lead {
+  id              String     @id @default(cuid())
+  name            String
+  email           String
+  phone           String?
+  company         String?
+  propertyCount   String?
+  serviceInterest String?
+  notes           String?
+  status          LeadStatus @default(NEW)
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmContent      String?
+  utmTerm         String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([email])
 }

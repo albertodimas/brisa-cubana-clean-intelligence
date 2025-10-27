@@ -1,23 +1,79 @@
 :root {
+  /* Surface colors */
   --surface-primary: rgba(13, 25, 30, 0.6);
   --surface-secondary: rgba(11, 23, 28, 0.6);
   --surface-elevated: rgba(18, 34, 40, 0.6);
+  --surface-glass: rgba(255, 255, 255, 0.05);
+  --surface-glass-strong: rgba(255, 255, 255, 0.1);
+
+  /* Border colors */
   --border-muted: rgba(126, 231, 196, 0.2);
   --border-strong: rgba(126, 231, 196, 0.3);
+  --border-glass: rgba(255, 255, 255, 0.1);
+
+  /* Text colors */
   --text-primary: #d5f6eb;
   --text-secondary: #a7dcd0;
   --text-accent: #7ee7c4;
+  --text-muted: #7a9991;
+
+  /* Semantic colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Brand gradients */
   --brand-gradient: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(15, 118, 110, 0.2) 100%);
+  --shimmer-gradient: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+
+  /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
-  --radius-lg: 1rem;
-  --radius-md: 0.75rem;
+
+  /* Border radius */
+  --radius-xs: 0.25rem;
   --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --shadow-soft: 0 12px 30px rgba(10, 25, 30, 0.35);
+  --shadow-glow: 0 0 20px rgba(126, 231, 196, 0.3);
+
+  /* Spacing */
   --spacing-xs: 0.35rem;
   --spacing-sm: 0.75rem;
   --spacing-md: 1.25rem;
   --spacing-lg: 1.75rem;
+  --spacing-xl: 2.5rem;
+  --spacing-2xl: 4rem;
+
+  /* Transitions */
   --transition-base: 160ms ease;
+  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-elastic: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Backdrop blur */
+  --blur-sm: 4px;
+  --blur-md: 12px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
+
+  /* Z-index scale */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-modal-backdrop: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
 }
 
 .ui-card {

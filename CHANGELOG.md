@@ -320,6 +320,23 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Duplicate workflow steps for pnpm setup, Prisma generation, environment variable exporting, and repeated build commands in individual workflows.
 
+## [Unreleased]
+
+### Added
+
+- Documento `docs/operations/env-sync.md` con los comandos para alinear `PROXY_ALLOWED_ORIGINS`, retirar `API_TOKEN` y controlar la bandera de debug de enlaces mágicos en todos los entornos.
+- Guía `docs/qa/portal-magic-link-testing.md` para QA segura del portal usando SMTP sandbox o flags locales controladas.
+
+### Changed
+
+- Endurecido el middleware de autenticación y las rutas críticas (`/api/bookings`, `/api/properties`, proxy `/app/api/*`) para requerir JWT y restringir CORS, actualizando los tests de integración correspondientes.
+- Restaurado `apps/api/pnpm-lock.yaml` y ajustado `apps/api/vercel.json` para que Vercel construya la API usando `pnpm install --frozen-lockfile` + `pnpm run build` desde el workspace.
+- Desplegada nuevamente la API (`brisa-cubana-clean-intelligence-pypq2bql1`) y reasignado `api.brisacubanacleanintelligence.com` al nuevo deployment tras validar `/health`.
+
+### Removed
+
+- Variable `API_TOKEN` y dependencias asociadas en Vercel, GitHub Actions y documentación; las integraciones deben autenticarse solo con JWT emitidos por la API.
+
 ## [0.2.0] - 2025-10-09
 
 - Refer to repository history for the previous release baseline.

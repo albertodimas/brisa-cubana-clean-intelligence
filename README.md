@@ -5,8 +5,8 @@
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/albertodimas/brisa-cubana-clean-intelligence/codeql.yml?label=CodeQL&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/codeql.yml)
 [![Release](https://img.shields.io/github/v/tag/albertodimas/brisa-cubana-clean-intelligence?color=0EA5E9&label=release&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/tags)
 
-Monorepo verificado para la plataforma operativa de **Brisa Cubana Clean Intelligence**.  
-Al día **22 de octubre de 2025**, la serie `v0.4.x` está totalmente documentada, con **253 pruebas automatizadas** (204 unit/integration + 49 E2E) pasando en CI y despliegues productivos estables.
+Monorepo verificado para la plataforma operativa de **Brisa Cubana Clean Intelligence**.
+Al día **25 de octubre de 2025**, la serie `v0.4.x` está totalmente documentada, con **218 pruebas automatizadas** (126 API + 92 Web unit/integration) pasando en CI y despliegues productivos estables.
 
 ---
 

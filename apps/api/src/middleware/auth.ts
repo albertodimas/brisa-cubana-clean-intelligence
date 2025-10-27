@@ -3,8 +3,6 @@ import { getCookie } from "hono/cookie";
 import type { UserRole } from "@prisma/client";
 import { verifyAuthToken, verifyPortalToken } from "../lib/jwt.js";
 
-const API_TOKEN = process.env.API_TOKEN ?? null;
-
 type AuthInfo = {
   id: string;
   email: string;
@@ -38,17 +36,6 @@ export const authenticate: MiddlewareHandler = async (c, next) => {
   const headerToken = extractBearerToken(c.req.header("authorization"));
   const cookieToken = getCookie(c, "auth_token");
   const token = headerToken ?? cookieToken ?? null;
-
-  if (token && API_TOKEN && token === API_TOKEN) {
-    c.set("authUser", {
-      id: "service-account",
-      email: "no-reply@brisacubanacleanintelligence.com",
-      role: "ADMIN",
-      kind: "service",
-    });
-    await next();
-    return;
-  }
 
   if (!token) {
     return c.json({ error: "Unauthorized" }, 401);

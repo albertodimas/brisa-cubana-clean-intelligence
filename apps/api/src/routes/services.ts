@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { authenticate, requireRoles } from "../middleware/auth.js";
 import { parseSearchableQuery } from "../lib/pagination.js";
+import { isParseFailure } from "../lib/parse-result.js";
 import { validateRequest } from "../lib/validation.js";
 import { serializeService } from "../lib/serializers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
@@ -26,7 +27,7 @@ const router = new Hono();
 
 router.get("/", async (c) => {
   const queryResult = parseSearchableQuery(c, serviceQuerySchema);
-  if (!queryResult.success) {
+  if (isParseFailure(queryResult)) {
     return queryResult.response;
   }
 
@@ -59,7 +60,7 @@ router.post(
   requireRoles(["ADMIN", "COORDINATOR"]),
   async (c) => {
     const validation = validateRequest(serviceSchema, await c.req.json(), c);
-    if (!validation.success) {
+    if (isParseFailure(validation)) {
       return validation.response;
     }
 
@@ -87,7 +88,7 @@ router.patch(
       await c.req.json(),
       c,
     );
-    if (!validation.success) {
+    if (isParseFailure(validation)) {
       return validation.response;
     }
 

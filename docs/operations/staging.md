@@ -16,13 +16,14 @@
 
 ## 2. Variables de entorno
 
-| Variable                                 | Valor sugerido                                       | Comentario                                |
-| ---------------------------------------- | ---------------------------------------------------- | ----------------------------------------- |
-| `DATABASE_URL` / `_UNPOOLED`             | Cadena Neon branch `staging`                         | No reutilizar credenciales de producción. |
-| `AUTH_SECRET`, `JWT_SECRET`, `API_TOKEN` | Generar nuevos                                       | Documentar en vault.                      |
-| `STRIPE_*`                               | `pk_test_...`, `sk_test_...`, `whsec_...` exclusivos | Permite probar checkout y webhooks.       |
-| `PORTAL_MAGIC_LINK_*`                    | SMTP sandbox (Mailtrap/Resend)                       | Validar flujo portal sin clientes reales. |
-| `ENABLE_TEST_UTILS`                      | `true`                                               | Mantener debug token para QA manual.      |
+| Variable                     | Valor sugerido                                       | Comentario                                |
+| ---------------------------- | ---------------------------------------------------- | ----------------------------------------- |
+| `DATABASE_URL` / `_UNPOOLED` | Cadena Neon branch `staging`                         | No reutilizar credenciales de producción. |
+| `AUTH_SECRET`, `JWT_SECRET`  | Generar nuevos                                       | Documentar en vault.                      |
+| `STRIPE_*`                   | `pk_test_...`, `sk_test_...`, `whsec_...` exclusivos | Permite probar checkout y webhooks.       |
+| `PORTAL_MAGIC_LINK_*`        | SMTP sandbox (Mailtrap/Resend)                       | Validar flujo portal sin clientes reales. |
+| `PROXY_ALLOWED_ORIGINS`      | `https://staging.brisacubanacleanintelligence.com`   | Incluye panel/portal autorizados.         |
+| `ENABLE_TEST_UTILS`          | `false`                                              | Actívalo solo en QA local controlado.     |
 
 ## 3. Pipeline de despliegue
 

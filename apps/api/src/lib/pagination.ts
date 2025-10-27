@@ -4,6 +4,7 @@
 
 import type { Context } from "hono";
 import { z } from "zod";
+import { type ParseResult } from "./parse-result.js";
 
 /**
  * Standard pagination query schema
@@ -56,11 +57,7 @@ export type PaginatedResponse<T> = {
  * @param c - Hono context
  * @returns Parsed pagination query or error response
  */
-export function parsePaginationQuery(
-  c: Context,
-):
-  | { success: true; data: PaginationQuery }
-  | { success: false; response: Response } {
+export function parsePaginationQuery(c: Context): ParseResult<PaginationQuery> {
   const url = new URL(c.req.url, "http://localhost");
   const parsed = paginationQuerySchema.safeParse(
     Object.fromEntries(url.searchParams.entries()),
@@ -85,12 +82,7 @@ export function parsePaginationQuery(
 export function parseSearchableQuery<T extends z.ZodObject<any>>(
   c: Context,
   filterSchema?: T,
-):
-  | {
-      success: true;
-      data: SearchableQuery<T>;
-    }
-  | { success: false; response: Response } {
+): ParseResult<SearchableQuery<T>> {
   const url = new URL(c.req.url, "http://localhost");
   const entries = Object.fromEntries(url.searchParams.entries());
 

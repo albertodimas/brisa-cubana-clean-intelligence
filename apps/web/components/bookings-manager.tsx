@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import type { QueryParams } from "@/hooks/use-paginated-resource";
 import { Button } from "./ui/button";
 import { FilterChips, type FilterChip } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
@@ -7,64 +9,187 @@ import { SearchBar } from "./ui/search-bar";
 import { Skeleton } from "./ui/skeleton";
 import type { Booking, PaginationInfo, Property, Service } from "@/lib/api";
 
-type BookingFilterInput = {
-  status: string;
-  from: string;
-  to: string;
-  search: string;
+type ActionResult = {
+  success?: string;
+  error?: string;
 };
 
+type StatusFilter =
+  | "ALL"
+  | "PENDING"
+  | "CONFIRMED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED";
+
 type BookingsManagerProps = {
-  filters: BookingFilterInput;
-  onFiltersChange: (next: Partial<BookingFilterInput>) => Promise<void> | void;
   bookings: Booking[];
   pageInfo: PaginationInfo;
   isLoading: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => Promise<void> | void;
-  onUpdate: (bookingId: string, formData: FormData) => Promise<void>;
-  updatingId: string | null;
+  onUpdate: (bookingId: string, formData: FormData) => Promise<ActionResult>;
   services: Service[];
   properties: Property[];
   formatDateTime: (iso: string) => string;
+  currentQuery: QueryParams;
+  setQuery: (query: QueryParams) => Promise<void>;
+  resetQuery: () => Promise<void>;
+  refresh: () => Promise<void>;
+  onToast: (message: string, type: "success" | "error") => void;
 };
 
 export function BookingsManager({
-  filters,
-  onFiltersChange,
   bookings,
   pageInfo,
   isLoading,
   isLoadingMore,
   onLoadMore,
   onUpdate,
-  updatingId,
   services,
   properties,
   formatDateTime,
+  currentQuery,
+  setQuery,
+  resetQuery,
+  refresh,
+  onToast,
 }: BookingsManagerProps) {
-  const hasBookings = bookings.length > 0;
-  const filterChips: FilterChip[] = [];
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>(
+    typeof currentQuery.search === "string" ? String(currentQuery.search) : "",
+  );
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    typeof currentQuery.status === "string" &&
+      [
+        "PENDING",
+        "CONFIRMED",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "CANCELLED",
+      ].includes(currentQuery.status)
+      ? (currentQuery.status as StatusFilter)
+      : "ALL",
+  );
+  const [fromDate, setFromDate] = useState<string>(
+    typeof currentQuery.from === "string" ? String(currentQuery.from) : "",
+  );
+  const [toDate, setToDate] = useState<string>(
+    typeof currentQuery.to === "string" ? String(currentQuery.to) : "",
+  );
 
-  if (filters.search.trim()) {
-    filterChips.push({
-      key: "search",
-      label: "Búsqueda",
-      value: filters.search.trim(),
-    });
-  }
-  if (filters.status !== "ALL") {
-    filterChips.push({
-      key: "status",
-      label: "Estado",
-      value: filters.status,
-    });
-  }
-  if (filters.from) {
-    filterChips.push({ key: "from", label: "Desde", value: filters.from });
-  }
-  if (filters.to) {
-    filterChips.push({ key: "to", label: "Hasta", value: filters.to });
+  // Sync internal state with currentQuery
+  useEffect(() => {
+    const nextSearch =
+      typeof currentQuery.search === "string"
+        ? String(currentQuery.search)
+        : "";
+    setSearchTerm((prev) => (prev === nextSearch ? prev : nextSearch));
+  }, [currentQuery.search]);
+
+  useEffect(() => {
+    const nextStatus =
+      typeof currentQuery.status === "string" &&
+      [
+        "PENDING",
+        "CONFIRMED",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "CANCELLED",
+      ].includes(currentQuery.status)
+        ? (currentQuery.status as StatusFilter)
+        : "ALL";
+    setStatusFilter((prev) => (prev === nextStatus ? prev : nextStatus));
+  }, [currentQuery.status]);
+
+  useEffect(() => {
+    const nextFrom =
+      typeof currentQuery.from === "string" ? String(currentQuery.from) : "";
+    setFromDate((prev) => (prev === nextFrom ? prev : nextFrom));
+  }, [currentQuery.from]);
+
+  useEffect(() => {
+    const nextTo =
+      typeof currentQuery.to === "string" ? String(currentQuery.to) : "";
+    setToDate((prev) => (prev === nextTo ? prev : nextTo));
+  }, [currentQuery.to]);
+
+  // Update query when filters change
+  useEffect(() => {
+    const query: QueryParams = {};
+    if (searchTerm.trim()) {
+      query.search = searchTerm.trim();
+    }
+    if (statusFilter !== "ALL") {
+      query.status = statusFilter;
+    }
+    if (fromDate) {
+      query.from = fromDate;
+    }
+    if (toDate) {
+      query.to = toDate;
+    }
+    void setQuery(query);
+  }, [searchTerm, statusFilter, fromDate, toDate, setQuery]);
+
+  const hasBookings = bookings.length > 0;
+
+  const filterChips = useMemo<FilterChip[]>(() => {
+    const chips: FilterChip[] = [];
+
+    if (searchTerm.trim()) {
+      chips.push({
+        key: "search",
+        label: "Búsqueda",
+        value: searchTerm.trim(),
+      });
+    }
+    if (statusFilter !== "ALL") {
+      chips.push({
+        key: "status",
+        label: "Estado",
+        value: statusFilter,
+      });
+    }
+    if (fromDate) {
+      chips.push({ key: "from", label: "Desde", value: fromDate });
+    }
+    if (toDate) {
+      chips.push({ key: "to", label: "Hasta", value: toDate });
+    }
+    return chips;
+  }, [searchTerm, statusFilter, fromDate, toDate]);
+
+  const handleRemoveFilter = (key: string) => {
+    if (key === "search") {
+      setSearchTerm("");
+    } else if (key === "status") {
+      setStatusFilter("ALL");
+    } else if (key === "from") {
+      setFromDate("");
+    } else if (key === "to") {
+      setToDate("");
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("ALL");
+    setFromDate("");
+    setToDate("");
+    void resetQuery();
+  };
+
+  async function handleBookingUpdate(bookingId: string, formData: FormData) {
+    setUpdatingId(bookingId);
+    const result = await onUpdate(bookingId, formData);
+    setUpdatingId(null);
+    if (result.error) {
+      onToast(result.error, "error");
+    } else if (result.success) {
+      onToast(result.success, "success");
+      await refresh();
+    }
   }
 
   return (
@@ -73,10 +198,8 @@ export function BookingsManager({
       <div className="flex flex-col gap-3">
         <div className="w-full sm:max-w-xs">
           <SearchBar
-            value={filters.search}
-            onChange={async (value) => {
-              await onFiltersChange({ search: value });
-            }}
+            value={searchTerm}
+            onChange={setSearchTerm}
             placeholder="Buscar por código, cliente o propiedad..."
             isLoading={isLoading}
           />
@@ -86,10 +209,10 @@ export function BookingsManager({
             <span className="ui-field__label">Estado</span>
             <select
               data-testid="booking-status-filter"
-              value={filters.status}
-              onChange={async (event) => {
-                await onFiltersChange({ status: event.target.value });
-              }}
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as StatusFilter)
+              }
               className="ui-input"
             >
               <option value="ALL">Todos</option>
@@ -105,10 +228,8 @@ export function BookingsManager({
             <span className="ui-field__label">Desde</span>
             <input
               type="date"
-              value={filters.from}
-              onChange={async (event) => {
-                await onFiltersChange({ from: event.target.value });
-              }}
+              value={fromDate}
+              onChange={(event) => setFromDate(event.target.value)}
               className="ui-input"
             />
           </label>
@@ -117,36 +238,16 @@ export function BookingsManager({
             <span className="ui-field__label">Hasta</span>
             <input
               type="date"
-              value={filters.to}
-              onChange={async (event) => {
-                await onFiltersChange({ to: event.target.value });
-              }}
+              value={toDate}
+              onChange={(event) => setToDate(event.target.value)}
               className="ui-input"
             />
           </label>
         </div>
         <FilterChips
           filters={filterChips}
-          onRemove={async (key) => {
-            const next: Partial<BookingFilterInput> = {};
-            if (key === "search") next.search = "";
-            if (key === "status") next.status = "ALL";
-            if (key === "from") next.from = "";
-            if (key === "to") next.to = "";
-            await onFiltersChange(next);
-          }}
-          onClearAll={
-            filterChips.length > 1
-              ? async () => {
-                  await onFiltersChange({
-                    search: "",
-                    status: "ALL",
-                    from: "",
-                    to: "",
-                  });
-                }
-              : undefined
-          }
+          onRemove={handleRemoveFilter}
+          onClearAll={filterChips.length > 1 ? handleClearFilters : undefined}
         />
       </div>
 
@@ -174,7 +275,7 @@ export function BookingsManager({
               data-testid="booking-card"
               className="ui-panel-surface ui-panel-surface--muted grid gap-4"
               action={async (formData) => {
-                await onUpdate(booking.id, formData);
+                await handleBookingUpdate(booking.id, formData);
               }}
             >
               <div className="flex flex-wrap justify-between gap-3">

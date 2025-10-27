@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 25 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 204 unit/integration –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
+**Última revisión:** 25 de octubre de 2025 (validación local: `pnpm lint`, `pnpm typecheck`, `pnpm test` – 218 unit/integration (126 API + 92 Web) –, `pnpm test:e2e:smoke`; Node.js 22.13.0 como estándar)
 
 ---
 
@@ -36,19 +36,24 @@
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
   - Diseño declarativo en `app/page.tsx` (landing) y `app/panel/page.tsx` (panel operativo autenticado).
+  - **Patrón de Manager Components** (ver [docs/architecture/manager-pattern.md](../architecture/manager-pattern.md)):
+    - Arquitectura consistente en 5 managers: BookingsManager, ServicesManager, UsersManager, PropertiesManager, CustomersManager
+    - API unificado: `currentQuery`/`setQuery`/`resetQuery`, `ActionResult`, `onToast`, estado interno de loading
+    - 24 tests unitarios cubriendo el patrón (6 BookingsManager, 5 ServicesManager, 5 UsersManager, 5 PropertiesManager, 3 CustomersManager)
   - **Shared utilities**:
     - `lib/types.ts`: Tipos TypeScript compartidos (PaginatedResult, User, Service, etc.)
     - `lib/api-client.ts`: Cliente HTTP reutilizable con manejo de errores
     - `hooks/use-update-handler.ts`: Hook personalizado para manejar actualizaciones con debounce
     - `hooks/use-paginated-resource.ts`: Hook para paginación cursor-based
-  - Componente UI `Pagination` con contador y botón “Cargar más” integrado en paneles de servicios, propiedades, reservas y clientes.
+  - Componente UI `Pagination` con contador y botón "Cargar más" integrado en paneles de servicios, propiedades, reservas y clientes.
+- **Design System completo**: 40+ componentes UI/UX, 250+ design tokens, glassmorphism, animaciones Framer Motion (ver [docs/ui-ux/guide.md](../ui-ux/guide.md))
 
 - **API (apps/api)**
   - Hono 4.9.12 corriendo en Vercel Node 22.x (builds apuntan a 22.13.0).
   - Rutas modulares:
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`, `users.ts`: CRUD con autorización por rol.
-  - Middleware `authenticate` y `requireRoles` (JWT/`API_TOKEN`).
+  - Middleware `authenticate` y `requireRoles` (Bearer JWT).
   - Prisma Client 6.17.1 (PostgreSQL 17). Seed (`prisma/seed.ts`) crea datos funcionales.
   - **Shared utilities**:
     - `lib/pagination.ts`: Lógica de paginación cursor-based reutilizable
@@ -97,7 +102,7 @@
 - Clientes: listar (roles ADMIN/COORDINATOR).
 - Reservas: listar con filtros (público), crear/actualizar (roles ADMIN/COORDINATOR). Genera códigos BRISA-xxxx y copia precio/duración.
 - Usuarios: listar (rol ADMIN) y actualizar rol/contraseña desde `/api/users`.
-- Middleware soporta Bearer `JWT` o `API_TOKEN` para integraciones.
+- Middleware soporta Bearer JWT para integraciones servidor-servidor.
 
 ---
 
@@ -107,10 +112,10 @@
 | ------------------------------------------------------ | --- | --- | -------------------------------------------------------------------- |
 | `NEXT_PUBLIC_API_URL`                                  | ✅  | –   | Endpoint público (fallback).                                         |
 | `INTERNAL_API_URL`                                     | ✅  | –   | URL privada de la API usada por el proxy.                            |
+| `PROXY_ALLOWED_ORIGINS`                                | ✅  | –   | Lista de orígenes permitidos para el proxy `/api/*`.                 |
 | `AUTH_SECRET`                                          | ✅  | –   | Requerido por Auth.js.                                               |
 | `DATABASE_URL` / `_UNPOOLED`                           | –   | ✅  | Conexión PostgreSQL (prod/local).                                    |
 | `JWT_SECRET`                                           | ✅  | ✅  | Firma/verificación JWT.                                              |
-| `API_TOKEN`                                            | ✅  | ✅  | Token para integraciones servidor-servidor.                          |
 | `ALLOWED_ORIGINS`                                      | ✅  | ✅  | CORS para Hono/WS.                                                   |
 | `LOGIN_RATE_LIMIT` (+ `_WINDOW_MS`)                    | ✅  | ✅  | Configura rate limiting del login.                                   |
 | `PORTAL_MAGIC_LINK_RATE_LIMIT` (+ `_WINDOW_MS`)        | –   | ✅  | Limita solicitudes de enlaces mágicos (3/15 min por defecto).        |

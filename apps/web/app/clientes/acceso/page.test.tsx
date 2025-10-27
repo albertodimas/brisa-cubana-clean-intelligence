@@ -7,7 +7,7 @@ vi.mock("@/lib/portal-telemetry", () => ({
 }));
 
 import { recordPortalEvent } from "@/lib/portal-telemetry";
-import PortalAccessRequestPage from "./page";
+import { PortalAccessRequestScreen } from "./access-request-screen";
 
 const recordPortalEventMock = vi.mocked(recordPortalEvent);
 
@@ -26,7 +26,7 @@ describe("PortalAccessRequestPage", () => {
     } as Response);
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    render(<PortalAccessRequestPage />);
+    render(<PortalAccessRequestScreen />);
 
     const emailField = screen.getByPlaceholderText(
       "cliente@brisacubanacleanintelligence.com",
@@ -55,7 +55,7 @@ describe("PortalAccessRequestPage", () => {
     } as Response);
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    render(<PortalAccessRequestPage />);
+    render(<PortalAccessRequestScreen />);
 
     const emailField = screen.getByPlaceholderText(
       "cliente@brisacubanacleanintelligence.com",

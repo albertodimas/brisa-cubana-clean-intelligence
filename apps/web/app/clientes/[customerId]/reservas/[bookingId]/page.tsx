@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchPortalBookingDetail } from "@/lib/api";
 import { PortalBookingDetailClient } from "./booking-detail-client";
+import { GradientMesh } from "@/components/ui";
 
 type PageParams = {
   customerId: string;
@@ -49,7 +50,17 @@ export default async function PortalBookingDetailPage({
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-brisa-50 to-brisa-100 px-4 py-16 text-gray-900 dark:from-brisa-950 dark:via-brisa-900 dark:to-brisa-950 dark:text-white sm:px-6 md:px-10">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(39,137,255,0.25),transparent_60%)] dark:bg-[radial-gradient(circle_at_top,rgba(39,137,255,0.35),transparent_65%)]" />
+      {/* Gradient Mesh Background - Replace radial gradient */}
+      <GradientMesh
+        colors={{
+          primary: "rgba(39, 137, 255, 0.25)",
+          secondary: "rgba(20, 184, 166, 0.2)",
+          accent: "rgba(139, 92, 246, 0.2)",
+        }}
+        opacity={0.3}
+        shimmer
+      />
+
       <div className="relative mx-auto grid max-w-4xl gap-10">
         <PortalBookingDetailClient
           booking={detail.booking}

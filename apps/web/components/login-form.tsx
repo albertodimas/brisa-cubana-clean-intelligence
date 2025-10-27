@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import type { loginAction } from "@/app/actions";
+import { Input, Button } from "@/components/ui";
 
 type LoginAction = typeof loginAction;
 
@@ -15,21 +16,15 @@ type Props = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button
+    <Button
       type="submit"
-      style={{
-        width: "100%",
-        padding: "0.8rem",
-        borderRadius: "0.75rem",
-        background: pending ? "rgba(126,231,196,0.3)" : "#14b8a6",
-        color: "#041318",
-        fontWeight: 600,
-        cursor: pending ? "wait" : "pointer",
-      }}
-      disabled={pending}
+      variant="primary"
+      size="lg"
+      isLoading={pending}
+      className="w-full bg-brisa-500 hover:bg-brisa-600 text-white font-semibold shadow-lg"
     >
       {pending ? "Ingresando..." : "Ingresar"}
-    </button>
+    </Button>
   );
 }
 
@@ -48,56 +43,36 @@ export function LoginForm({ action }: Props) {
   }
 
   return (
-    <form
-      action={handleSubmit}
-      style={{ display: "grid", gap: "1rem", width: "100%", maxWidth: "360px" }}
-    >
-      <div>
-        <label style={labelStyle} htmlFor="email">
-          Correo
-        </label>
-        <input
+    <div className="w-full rounded-3xl glass-strong p-6 sm:p-8 shadow-xl">
+      <form action={handleSubmit} className="space-y-5">
+        <Input
           id="email"
           name="email"
           type="email"
-          required
+          label="Correo"
           placeholder="admin@brisacubanacleanintelligence.com"
-          style={inputStyle}
+          required
+          autoComplete="email"
         />
-      </div>
-      <div>
-        <label style={labelStyle} htmlFor="password">
-          Contraseña
-        </label>
-        <input
+
+        <Input
           id="password"
           name="password"
           type="password"
-          required
+          label="Contraseña"
           placeholder="Brisa123!"
-          style={inputStyle}
+          required
+          autoComplete="current-password"
         />
-      </div>
-      {message ? (
-        <p style={{ color: "#fda4af", margin: 0 }}>{message}</p>
-      ) : null}
-      <SubmitButton />
-    </form>
+
+        {message && (
+          <div className="rounded-lg bg-red-950/40 border border-red-800/50 p-3 text-sm text-red-300">
+            {message}
+          </div>
+        )}
+
+        <SubmitButton />
+      </form>
+    </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "0.75rem",
-  borderRadius: "0.75rem",
-  border: "1px solid rgba(126,231,196,0.3)",
-  background: "rgba(5,12,16,0.9)",
-  color: "#d5f6eb",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  marginBottom: "0.35rem",
-  color: "#a7dcd0",
-  fontSize: "0.9rem",
-};

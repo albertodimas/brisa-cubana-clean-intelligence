@@ -1,242 +1,61 @@
-import {
-  ShieldCheckIcon,
-  SparklesIcon,
-  CloudArrowUpIcon,
-  ArrowPathIcon,
-  ChatBubbleLeftRightIcon,
-  ClipboardDocumentCheckIcon,
-  ArrowUpRightIcon,
-} from "@heroicons/react/24/outline";
+import type { Metadata } from "next";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
-import {
-  PricingTiers,
-  type PricingTier,
-} from "@/components/landing/pricing-tiers";
+import { PricingTiers } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
 import { NightShiftMedia } from "@/components/landing/night-shift-media";
+import {
+  ScrollProgress,
+  ScrollReveal,
+  StaggerContainer,
+  StaggerItem,
+  GradientMesh,
+  CountUp,
+  TiltCard,
+} from "@/components/ui";
+import {
+  differentiators,
+  operationsMockups,
+  pricingTiers,
+  processSteps,
+  socialLinks,
+  testimonials,
+} from "@/lib/marketing-content";
 
-const testimonials = [
-  {
-    quote:
-      "Entre 12 y 25 turnovers por propiedad al año es la media del sector STR. Planificamos cuadrillas con capacidad extra para cubrir temporadas altas sin bloqueos.",
-    author: "Fuente: Vacation Rental Cleaning Market Outlook 2024",
-    role: "pmarketresearch.com",
-  },
-  {
-    quote:
-      "El 81 % de los huéspedes prioriza la limpieza al reservar y 78 % deja reseñas positivas cuando todo está impecable; nuestros checklists documentados sostienen ratings altos.",
-    author:
-      "Fuente: Hospitable · Impact of Cleanliness on Guest Reviews (2024)",
-    role: "hospitable.com",
-  },
-  {
-    quote:
-      "El mercado de Miami supera las 13 000 propiedades activas y los stays de 4‑5 noches exigen turnos mismos día. Operamos 24/7 con evidencia fotográfica en cada entrega.",
-    author: "Fuente: Turno · Miami Airbnb Cleaners / STR trend reports 2024",
-    role: "turno.com",
-  },
-];
-
-const kpiHighlights = [
-  {
-    label: "Rotaciones por propiedad",
-    value: "12-25/año",
+export const metadata: Metadata = {
+  title: "Brisa Cubana Clean Intelligence · Turnovers premium en Miami",
+  description:
+    "Operamos turnovers same-day, deep cleaning y mantenimiento preventivo para propiedades premium en Miami con reportes en menos de 4 horas.",
+  openGraph: {
+    title: "Brisa Cubana Clean Intelligence",
     description:
-      "Media de turnovers en STR de EE. UU.; planificamos buffers para picos turísticos.",
+      "Limpieza profesional, evidencia fotográfica y dashboard operativo 24/7 para STR y residencias premium en Miami.",
   },
-  {
-    label: "Impacto en reseñas",
-    value: "81%",
-    description:
-      "De los viajeros prioriza limpieza; 78% deja reviews positivas cuando está impecable.",
-  },
-  {
-    label: "Programación garantizada",
-    value: "24/7",
-    description:
-      "Calendarios sincronizados con alertas same-day y soporte priorizado.",
-  },
-  {
-    label: "Mercado Miami",
-    value: "13K+ listings",
-    description:
-      "Inventario activo con picos Nov-Mar y 24M de visitantes anuales.",
-  },
-];
-
-const differentiators = [
-  {
-    title: "Protocolos cinco estrellas",
-    description:
-      "Adherimos al Airbnb Enhanced Cleaning estándar: checklists de 100+ puntos, sanitización hospitalaria y reportes firmados digitalmente.",
-    icon: SparklesIcon,
-  },
-  {
-    title: "Seguridad y compliance",
-    description:
-      "Cumplimos normativas municipales/estatales, inventario trazable y pólizas activas para evitar sanciones en mercados regulados.",
-    icon: ShieldCheckIcon,
-  },
-  {
-    title: "Integraciones PMS",
-    description:
-      "Sincronizamos Guesty, Hostaway, ResNexus o Breezeway, generamos alertas automáticas y evidencias fotográficas con timestamp.",
-    icon: CloudArrowUpIcon,
-  },
-];
-
-const processSteps = [
-  {
-    title: "Diagnóstico express",
-    description:
-      "Auditamos inventario, tiempos de estancia (media 4‑5 noches) y reseñas para definir SLAs sin bloquear ingresos.",
-    icon: ClipboardDocumentCheckIcon,
-  },
-  {
-    title: "Operación continua",
-    description:
-      "Cuadrillas con suministros estandarizados, lavado propio y checklists firmados in situ para cada turnover.",
-    icon: ArrowPathIcon,
-  },
-  {
-    title: "Visibilidad total",
-    description:
-      "Portal con fotos finales, métricas en tiempo real y alertas automáticas cuando el PMS detecta cambios.",
-    icon: ChatBubbleLeftRightIcon,
-  },
-];
-
-const pricingTiers: PricingTier[] = [
-  {
-    id: "turnover",
-    name: "Turnover Premium Airbnb",
-    headline: "Desde $209 por salida",
-    price: "$209+",
-    priceSuffix: "por salida",
-    description:
-      "Para listados urbanos con 12-25 rotaciones al año. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
-    features: [
-      "Reposición completa de amenities, textiles y welcome kit",
-      "Checklist Airbnb Enhanced Cleaning y control RFID de inventario",
-      "Reporte en portal cliente en menos de 4 horas",
-      "Supervisión on-site en ventanas críticas y lanzamientos",
-    ],
-  },
-  {
-    id: "deep-clean",
-    name: "Deep Clean Brickell Collection",
-    headline: "Desde $289",
-    price: "$289+",
-    priceSuffix: "por servicio",
-    description:
-      "Ideal para residencias y segundas propiedades con stays superiores a 7 noches. Incluye detailing premium y tratamiento antivaho.",
-    features: [
-      "Detallado premium de cocina, baños y textiles de lujo",
-      "Insumos hipoalergénicos certificados EPA",
-      "Control de humedad y mantenimiento preventivo ligero",
-      "Checklist digital con seguimiento de incidencias",
-    ],
-    highlighted: true,
-  },
-  {
-    id: "post-construction",
-    name: "Post-Construcción Boutique",
-    headline: "Desde $349",
-    price: "$349+",
-    priceSuffix: "por servicio",
-    description:
-      "Para entregas de penthouses y villas tras obra o remodelación con requisitos OSHA. Incluye pulido final y staging ejecutivo.",
-    features: [
-      "Pulido de superficies y eliminación de polvo de obra",
-      "Staging final con inspección fotográfica ejecutiva",
-      "Equipo especializado con certificaciones OSHA",
-      "Opcional: Amenity Refresh Express para back-to-back stays",
-    ],
-  },
-];
-
-const socialLinks = [
-  {
-    name: "Instagram",
-    handle: "@BrisaCleanIntelligence",
-    href: "https://instagram.com/BrisaCleanIntelligence",
-    description:
-      "Historias y reels del equipo en acción, antes/después y backstage.",
-  },
-  {
-    name: "Facebook",
-    handle: "Brisa Clean Intelligence",
-    href: "https://facebook.com/BrisaCleanIntelligence",
-    description: "Casos completos, reseñas de clientes y anuncios dirigidos.",
-  },
-  {
-    name: "LinkedIn",
-    handle: "Brisa Clean Intelligence",
-    href: "https://www.linkedin.com/company/brisa-clean-intelligence",
-    description: "Insights operativos, alianzas B2B y noticias corporativas.",
-  },
-  {
-    name: "TikTok",
-    handle: "@BrisaCleanIntelligence",
-    href: "https://www.tiktok.com/@brisacleanintelligence",
-    description: "Timelapses, tips rápidos y retos de limpieza premium.",
-  },
-  {
-    name: "YouTube",
-    handle: "@BrisaCleanIntelligence",
-    href: "https://www.youtube.com/@BrisaCleanIntelligence",
-    description:
-      "Recorridos completos, testimonios extendidos y guías para hosts.",
-  },
-];
-
-const operationsMockups = [
-  {
-    title: "Dashboard en tiempo real",
-    description:
-      "Alertas críticas, checklists cerrados y estadísticas de satisfacción en un solo panel.",
-    src: "/assets/mockups/16-9/portal-dashboard-1920w.webp",
-    placeholder: "/assets/mockups/16-9/portal-dashboard-1280w.webp",
-  },
-  {
-    title: "Gestión de reservas",
-    description:
-      "Reasigna turnos, confirma cancelaciones y prioriza incidencias desde un timeline auditable.",
-    src: "/assets/mockups/16-9/portal-bookings-1920w.webp",
-    placeholder: "/assets/mockups/16-9/portal-bookings-1280w.webp",
-  },
-  {
-    title: "Servicios y stock",
-    description:
-      "Checklist RFID, niveles de amenities y reposiciones automáticas por propiedad.",
-    src: "/assets/mockups/16-9/portal-services-1920w.webp",
-    placeholder: "/assets/mockups/16-9/portal-services-1280w.webp",
-  },
-];
+};
 
 const mobileMockups = [
   {
-    title: "Login seguro en segundos",
+    title: "Turnos confirmados desde el móvil",
     description:
-      "Enlace mágico y MFA opcional para administradores y field ops.",
-    src: "/assets/mockups/4-5/portal-mobile-dashboard-1080w.webp",
-    placeholder: "/assets/mockups/4-5/portal-mobile-dashboard-540w.webp",
-  },
-  {
-    title: "Turnos desde el móvil",
-    description:
-      "Confirma servicios, carga evidencias y cierra turnos in situ.",
+      "Selecciona propiedad, franja horaria y asigna cuadrillas con dos toques.",
     src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
     placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },
   {
-    title: "Reposiciones inteligentes",
+    title: "Solicitudes y resurtidos en vivo",
     description:
-      "Solicita kits y amenities críticos con trazabilidad por lote.",
-    src: "/assets/mockups/4-5/portal-mobile-services-1080w.webp",
-    placeholder: "/assets/mockups/4-5/portal-mobile-services-540w.webp",
+      "Levanta resurtidos críticos, agrega notas y monitorea el estado del inventario.",
+    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
+  },
+  {
+    title: "Alertas y evidencias fotográficas",
+    description:
+      "Recibe notificaciones push con fotos, checklist firmado y tiempos de entrega.",
+    src: "/assets/mockups/4-5/portal-mobile-1080w.webp",
+    placeholder: "/assets/mockups/4-5/portal-mobile-540w.webp",
   },
 ];
 
@@ -263,41 +82,66 @@ export const revalidate = 3600;
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white dark:bg-brisa-950 text-gray-900 dark:text-brisa-50">
+      {/* Scroll Progress Bar */}
+      <ScrollProgress position="top" thickness={3} glow />
+
       <div className="relative overflow-hidden bg-gradient-to-br from-brisa-100 via-white to-white dark:from-brisa-900/60 dark:via-brisa-950 dark:to-brisa-950">
+        {/* Gradient Mesh Background - Premium Effect */}
+        <GradientMesh
+          colors={{
+            primary: "rgba(20, 184, 166, 0.3)",
+            secondary: "rgba(139, 92, 246, 0.25)",
+            accent: "rgba(6, 182, 212, 0.3)",
+          }}
+          opacity={0.4}
+          shimmer
+        />
+
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
           <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] items-center">
             <div className="flex flex-col gap-6 lg:gap-8">
-              <span className="text-xs tracking-[0.45em] uppercase text-brisa-600 dark:text-brisa-300">
-                Brisa Cubana Clean Intelligence
-              </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] max-w-3xl">
-                Limpieza profesional y documentada para propiedades premium en
-                Miami.
-              </h1>
-              <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 dark:text-brisa-200 max-w-2xl">
-                Turnovers same-day con checklists de más de 100 puntos, deep
-                cleaning y mantenimiento preventivo con reportes en menos de 4
-                horas.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <MarketingLink
-                  href="#contacto"
-                  eventName="cta_request_proposal"
-                  metadata={{ placement: "hero", target: "contact_form" }}
-                  className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 transition-colors"
-                  prefetch={false}
-                >
-                  Solicitar cotización
-                </MarketingLink>
-                <MarketingLink
-                  href="/clientes"
-                  eventName="cta_portal_demo"
-                  metadata={{ placement: "hero" }}
-                  className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
-                >
-                  Explora el portal cliente
-                </MarketingLink>
-              </div>
+              <ScrollReveal variant="fadeDown" delay={0.1}>
+                <span className="text-xs tracking-[0.45em] uppercase text-brisa-600 dark:text-brisa-300">
+                  Brisa Cubana Clean Intelligence
+                </span>
+              </ScrollReveal>
+
+              <ScrollReveal variant="fadeUp" delay={0.2}>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] max-w-3xl">
+                  Limpieza profesional y documentada para propiedades premium en
+                  Miami.
+                </h1>
+              </ScrollReveal>
+
+              <ScrollReveal variant="fadeUp" delay={0.3}>
+                <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 dark:text-brisa-200 max-w-2xl">
+                  Turnovers same-day con checklists de más de 100 puntos, deep
+                  cleaning y mantenimiento preventivo con reportes en menos de 4
+                  horas.
+                </p>
+              </ScrollReveal>
+
+              <ScrollReveal variant="fadeUp" delay={0.4}>
+                <div className="flex flex-wrap gap-4">
+                  <MarketingLink
+                    href="#contacto"
+                    eventName="cta_request_proposal"
+                    metadata={{ placement: "hero", target: "contact_form" }}
+                    className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 hover:shadow-xl transition-all hover:-translate-y-0.5"
+                    prefetch={false}
+                  >
+                    Solicitar cotización
+                  </MarketingLink>
+                  <MarketingLink
+                    href="/clientes"
+                    eventName="cta_portal_demo"
+                    metadata={{ placement: "hero" }}
+                    className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-all hover:-translate-y-0.5"
+                  >
+                    Explora el portal cliente
+                  </MarketingLink>
+                </div>
+              </ScrollReveal>
             </div>
             <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950">
               <div className="space-y-6">
@@ -349,32 +193,32 @@ export default function LandingPage() {
                 </ul>
                 <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-white p-6 dark:from-brisa-900/60 dark:via-brisa-950">
                   <p className="text-sm font-semibold text-brisa-700 dark:text-brisa-100">
-                    Datos clave
+                    Datos clave (2024-2025)
                   </p>
                   <dl className="grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-brisa-200">
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        12-25
+                        <CountUp end={70} suffix="%" duration={2.2} />
                       </dt>
-                      <dd>rotaciones/año por propiedad</dd>
+                      <dd>ocupación promedio anual</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        81%
+                        <CountUp end={194} prefix="$" duration={2.5} />
                       </dt>
-                      <dd>reviews influidas por la limpieza</dd>
+                      <dd>tarifa diaria media (ADR) en Miami</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        13K+
+                        <CountUp end={7589} duration={2.3} />
                       </dt>
-                      <dd>listados activos en Miami y alrededores</dd>
+                      <dd>listados activos en el mercado STR</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        24/7
+                        6.4M
                       </dt>
-                      <dd>cobertura operativa en temporada alta</dd>
+                      <dd>visitantes internacionales en 2024</dd>
                     </div>
                   </dl>
                 </div>
@@ -386,21 +230,78 @@ export default function LandingPage() {
 
       <section className="relative -mt-12 sm:-mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 rounded-3xl border border-white/70 bg-white/90 p-6 shadow-xl backdrop-blur dark:border-brisa-800/60 dark:bg-brisa-950/80 dark:shadow-brisa-900/50">
-            {kpiHighlights.map((item) => (
-              <div key={item.label} className="flex flex-col gap-1">
-                <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
-                  {item.label}
-                </span>
-                <span className="text-3xl font-semibold text-brisa-700 dark:text-white">
-                  {item.value}
-                </span>
-                <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <ScrollReveal variant="scale" delay={0.2}>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 rounded-3xl border border-white/70 glass-strong p-6 shadow-xl">
+              <StaggerContainer staggerDelay={0.15}>
+                {/* Rotaciones por propiedad */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Rotaciones por propiedad
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
+                      <CountUp end={12} duration={2} />-
+                      <CountUp end={25} duration={2.2} />
+                      /año
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      Media de turnovers en STR de EE. UU.; planificamos buffers
+                      para picos turísticos.
+                    </p>
+                  </div>
+                </StaggerItem>
+
+                {/* Impacto en reseñas */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Impacto en reseñas
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
+                      <CountUp end={81} suffix="%" duration={2.5} />
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      De los viajeros prioriza limpieza; 78% deja reviews
+                      positivas cuando está impecable.
+                    </p>
+                  </div>
+                </StaggerItem>
+
+                {/* Programación 24/7 */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Programación garantizada
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white">
+                      24/7
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      Calendarios sincronizados con alertas same-day y soporte
+                      priorizado.
+                    </p>
+                  </div>
+                </StaggerItem>
+
+                {/* Mercado Miami */}
+                <StaggerItem>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
+                      Mercado Miami
+                    </span>
+                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
+                      <CountUp end={13} duration={2} />
+                      K+ listings
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
+                      Inventario activo con picos Nov-Mar y 24M de visitantes
+                      anuales.
+                    </p>
+                  </div>
+                </StaggerItem>
+              </StaggerContainer>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -644,24 +545,32 @@ export default function LandingPage() {
       </section>
 
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <div className="grid gap-8 lg:grid-cols-3">
+        <StaggerContainer
+          className="grid gap-8 lg:grid-cols-3"
+          staggerDelay={0.2}
+        >
           {differentiators.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950"
-            >
-              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brisa-100 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
-                <item.icon className="h-6 w-6" aria-hidden />
-              </div>
-              <h3 className="text-xl font-semibold text-brisa-700 dark:text-white">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-brisa-200">
-                {item.description}
-              </p>
-            </div>
+            <StaggerItem key={item.title}>
+              <TiltCard
+                maxTilt={8}
+                glowEffect
+                glowColor="rgba(126, 231, 196, 0.2)"
+              >
+                <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-brisa-800 dark:bg-brisa-950 h-full">
+                  <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brisa-100 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
+                    <item.icon className="h-6 w-6" aria-hidden />
+                  </div>
+                  <h3 className="text-xl font-semibold text-brisa-700 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-brisa-200">
+                    {item.description}
+                  </p>
+                </div>
+              </TiltCard>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </section>
 
       <section className="bg-gradient-to-br from-brisa-600 via-brisa-500 to-brisa-400 text-white">
