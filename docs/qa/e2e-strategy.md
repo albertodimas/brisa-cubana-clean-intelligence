@@ -96,6 +96,7 @@
 - Las pruebas que validan telemetría (ej. `analytics.spec.ts`) deben seguir comprobando el flag `data-brisa-posthog="ready"` en lugar de esperar el envío real de eventos.
 - En entornos productivos/preview con navegadores “reales” seguimos capturando eventos; el fallback solo se activa para entornos automatizados.
 - El preset remoto `tmp/playwright-preview.config.ts` ahora expone proyectos `smoke` y `critical`. Para ejecutar `critical` contra entornos desplegados se requiere un dataset semilla y tokens/bypass equivalentes a los usados en CI (headers `x-lhci-bypass`, cuentas QA, etc.). Sin estos permisos, las pruebas que crean/actualizan recursos (notificaciones, usuarios, portal cliente) fallarán al apuntar a producción.
+- En local, exporta `E2E_LOGIN_RATE_LIMIT=50` (o mayor) antes de `pnpm test:e2e:critical` para evitar rate limits 429 generados por los múltiples logins automáticos. El `playwright.config.ts` propagará el valor tanto al API (`LOGIN_RATE_LIMIT`) como a las cabeceras de bypass.
 
 ---
 
