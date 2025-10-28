@@ -30,13 +30,34 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
   : ["http://localhost:3000"];
 
+const isOriginAllowed = (origin: string | undefined) => {
+  if (!origin) {
+    return false;
+  }
+
+  if (allowedOrigins.includes("*")) {
+    return true;
+  }
+
+  return allowedOrigins.some((allowed) => {
+    if (!allowed) {
+      return false;
+    }
+    if (allowed.startsWith("*.")) {
+      const suffix = allowed.slice(1);
+      return origin.endsWith(suffix);
+    }
+    return origin === allowed;
+  });
+};
+
 // Logging middleware global
 app.use("*", loggingMiddleware);
 
 app.use(
   "*",
   cors({
-    origin: allowedOrigins,
+    origin: (origin) => (isOriginAllowed(origin) ? origin : null),
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
