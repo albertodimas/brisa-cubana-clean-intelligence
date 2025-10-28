@@ -29,6 +29,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Suites E2E (`tests/e2e/operations.spec.ts`) reutilizan token administrativo entre pruebas, añaden cabeceras autorizadas a los requests y validan respuestas negativas sin propagar `null` cuando el API responde con errores.
 - Dependencias Sentry del monorepo alineadas en `^10.22.0` (`@sentry/nextjs`, `@sentry/node`, `@sentry/profiling-node`); se sincronizaron los overrides de pnpm entre la raíz y los paquetes (`apps/api`, `apps/web`) para asegurar builds consistentes en Vercel.
 - Pipeline `vercel-preview` ahora construye API y Web con `vercel build --prebuilt` antes de desplegar, evitando reinstalaciones `pnpm install --frozen-lockfile` en los entornos de Vercel Preview.
+- Monitor productivo corrige el payload de Slack en caso de fallo (`health-monitor.yml`) y se realineó el `HEALTH_CHECK_TOKEN` para que `/healthz` vuelva a responder 200 en los checks programados.
 
 ### Docs
 
