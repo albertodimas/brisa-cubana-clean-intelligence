@@ -5,6 +5,57 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 // Force rebuild to invalidate Turbo cache after env var configuration fix
 const enableHsts = process.env.ENABLE_HSTS !== "false";
 
+const derivePreviewApiBase = () => {
+  if (process.env.VERCEL_ENV !== "preview") {
+    return null;
+  }
+
+  const branchUrl = process.env.VERCEL_BRANCH_URL;
+  if (!branchUrl) {
+    return null;
+  }
+
+  if (!branchUrl.includes("brisa-cubana-clean-intelligence")) {
+    return null;
+  }
+
+  return branchUrl.replace(
+    "brisa-cubana-clean-intelligence",
+    "brisa-cubana-clean-intelligence-api",
+  );
+};
+
+const ensureApiEnvValues = () => {
+  let apiBase =
+    process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? null;
+
+  if (!apiBase) {
+    const previewBase = derivePreviewApiBase();
+    if (previewBase) {
+      apiBase = previewBase;
+    }
+  }
+
+  if (!apiBase) {
+    apiBase =
+      process.env.NODE_ENV === "production"
+        ? "https://api.brisacubanacleanintelligence.com"
+        : "http://localhost:3001";
+  }
+
+  if (!process.env.NEXT_PUBLIC_API_URL) {
+    process.env.NEXT_PUBLIC_API_URL = apiBase;
+  }
+
+  if (!process.env.INTERNAL_API_URL) {
+    process.env.INTERNAL_API_URL = apiBase;
+  }
+
+  return apiBase.endsWith("/") ? apiBase.slice(0, -1) : apiBase;
+};
+
+const normalizedApiBase = ensureApiEnvValues();
+
 const securityHeaders = [
   {
     key: "X-DNS-Prefetch-Control",
@@ -43,6 +94,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
   webpack: (config, { isServer }) => {
     // Suprimir warnings conocidos de OpenTelemetry (Sentry)
     if (isServer) {
@@ -78,13 +132,6 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    const apiBase =
-      process.env.INTERNAL_API_URL ??
-      "https://api.brisacubanacleanintelligence.com";
-    const normalizedApiBase = apiBase.endsWith("/")
-      ? apiBase.slice(0, -1)
-      : apiBase;
-
     return [
       {
         source: "/healthz",
