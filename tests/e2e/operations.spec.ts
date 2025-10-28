@@ -4,6 +4,12 @@ import { ipForTest, loginAsAdmin } from "./support/auth";
 import { createBookingFixture, getAdminAccessToken } from "./support/services";
 
 test.describe.serial("Operaciones", () => {
+  let adminToken: string;
+
+  test.beforeAll(async ({ request }) => {
+    adminToken = await getAdminAccessToken(request);
+  });
+
   test("permite crear un nuevo servicio @smoke @critical", async ({
     page,
   }, testInfo) => {
@@ -31,7 +37,6 @@ test.describe.serial("Operaciones", () => {
     page,
     request,
   }, testInfo) => {
-    const adminToken = await getAdminAccessToken(request);
     await createBookingFixture(request, adminToken, { status: "CONFIRMED" });
 
     await loginAsAdmin(page, testInfo);
@@ -67,7 +72,12 @@ test.describe.serial("Operaciones", () => {
     await loginAsAdmin(page, testInfo);
 
     const apiUrl = process.env.E2E_API_URL || "http://localhost:3001";
-    const initialResponse = await request.get(`${apiUrl}/api/services`);
+    const initialResponse = await request.get(`${apiUrl}/api/services`, {
+      headers: {
+        "x-forwarded-for": ipForTest(testInfo),
+        Authorization: `Bearer ${adminToken}`,
+      },
+    });
     const initialJson = (await initialResponse.json()) as {
       data?: Array<{ id: string }>;
     };
@@ -90,6 +100,9 @@ test.describe.serial("Operaciones", () => {
       .poll(
         async () => {
           const snapshot = await request.get(`${apiUrl}/api/services`);
+          if (!snapshot.ok()) {
+            return -1;
+          }
           const snapshotJson = (await snapshot.json()) as {
             data?: Array<{ id: string }>;
           };
@@ -106,8 +119,13 @@ test.describe.serial("Operaciones", () => {
     const apiUrl = process.env.E2E_API_URL || "http://localhost:3001";
 
     // Test 1: Default pagination
+    const authHeaders = {
+      "x-forwarded-for": ip,
+      Authorization: `Bearer ${adminToken}`,
+    } as const;
+
     const res1 = await request.get(`${apiUrl}/api/bookings`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res1.ok()).toBeTruthy();
     const json1 = await res1.json();
@@ -118,7 +136,7 @@ test.describe.serial("Operaciones", () => {
 
     // Test 2: Custom limit
     const res2 = await request.get(`${apiUrl}/api/bookings?limit=5`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res2.ok()).toBeTruthy();
     const json2 = await res2.json();
@@ -129,9 +147,7 @@ test.describe.serial("Operaciones", () => {
     if (json2.pagination.hasMore && json2.pagination.nextCursor) {
       const res3 = await request.get(
         `${apiUrl}/api/bookings?limit=5&cursor=${json2.pagination.nextCursor}`,
-        {
-          headers: { "x-forwarded-for": ip },
-        },
+        { headers: authHeaders },
       );
       expect(res3.ok()).toBeTruthy();
       const json3 = await res3.json();
@@ -148,12 +164,12 @@ test.describe.serial("Operaciones", () => {
 
     // Test 4: Validate limit boundaries
     const res4 = await request.get(`${apiUrl}/api/bookings?limit=0`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res4.status()).toBe(400);
 
     const res5 = await request.get(`${apiUrl}/api/bookings?limit=101`, {
-      headers: { "x-forwarded-for": ip },
+      headers: authHeaders,
     });
     expect(res5.status()).toBe(400);
   });

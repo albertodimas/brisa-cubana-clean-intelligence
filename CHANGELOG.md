@@ -16,7 +16,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- Middleware público ahora permite acceder a `/` sin autenticación para exponer la landing en producción (`apps/web/middleware.ts`).
+- Middleware público migra a `proxy.ts` (Next.js 16) y mantiene acceso abierto a landing/seo mientras aplica redirecciones autenticadas (`apps/web/proxy.ts`).
 - Configuración Playwright propaga `NEXT_PUBLIC_POSTHOG_KEY`/`HOST` por defecto en entornos de prueba.
 - Suite Playwright crítica ahora usa builds de producción (`pnpm build && pnpm start`) para API y web, con puertos configurables (`API_PORT`, `WEB_PORT`) y `PLAYWRIGHT_BASE_URL` definido.
 - Test de seguridad `gestiona sesión (persistencia y logout)` refactorizado con selectores específicos, timeouts explícitos y sincronización `Promise.all`, eliminando cuelgues en CI (`tests/e2e/security.spec.ts`).
@@ -24,6 +24,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - `apps/web` integra `@sentry/nextjs` (`sentry.*.config.ts` y `withSentryConfig`) con tasas de muestreo configurables desde entorno.
 - Cliente analítico migra a `posthog-js-lite`, deshabilitando carga en entornos Lighthouse y exponiendo `window.__brisaPostHogPromise` compartido (`apps/web/components/analytics/posthog-analytics.tsx`, `apps/web/lib/marketing-telemetry.ts`).
 - Middleware permite acceso público a `robots.txt`/`sitemap.xml` y el pipeline principal levanta `next start` para validarlos tras el build.
+- Frontend web actualizado a Next.js 16.0.0 + React 19.2.0 y toolchain asociado (`eslint-config-next@16`, `@next/bundle-analyzer@16`, `typescript@5.9.3`); se ajustó la configuración `tsconfig.json` para typed routes y la nueva importación generada en `next-env.d.ts`.
+- Suites E2E (`tests/e2e/operations.spec.ts`) reutilizan token administrativo entre pruebas, añaden cabeceras autorizadas a los requests y validan respuestas negativas sin propagar `null` cuando el API responde con errores.
 
 ### Docs
 

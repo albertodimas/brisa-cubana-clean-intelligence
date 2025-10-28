@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 
 const AUTH_SECRET = process.env.AUTH_SECRET;
 
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = await getToken({ req, secret: AUTH_SECRET });
   const isLoggedIn = !!token;
