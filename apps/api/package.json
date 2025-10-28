@@ -35,8 +35,8 @@
     "@hono/swagger-ui": "^0.5.2",
     "@prisma/client": "6.17.1",
     "@scalar/hono-api-reference": "^0.9.22",
-    "@sentry/node": "^10.20.0",
-    "@sentry/profiling-node": "^10.20.0",
+    "@sentry/node": "^10.22.0",
+    "@sentry/profiling-node": "^10.22.0",
     "bcryptjs": "^3.0.2",
     "date-fns": "^4.1.0",
     "hono": "4.10.3",
@@ -59,12 +59,5 @@
     "tsx": "^4.20.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
-  },
-  "pnpm": {
-    "overrides": {
-      "esbuild": "^0.25.10",
-      "tmp": "^0.2.4",
-      "vite": "7.1.11"
-    }
   }
 }
