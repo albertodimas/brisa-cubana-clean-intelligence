@@ -27,7 +27,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Middleware permite acceso público a `robots.txt`/`sitemap.xml` y el pipeline principal levanta `next start` para validarlos tras el build.
 - Frontend web actualizado a Next.js 16.0.0 + React 19.2.0 y toolchain asociado (`eslint-config-next@16`, `@next/bundle-analyzer@16`, `typescript@5.9.3`); se ajustó la configuración `tsconfig.json` para typed routes y la nueva importación generada en `next-env.d.ts`.
 - Suites E2E (`tests/e2e/operations.spec.ts`) reutilizan token administrativo entre pruebas, añaden cabeceras autorizadas a los requests y validan respuestas negativas sin propagar `null` cuando el API responde con errores.
-- Dependencias Sentry del monorepo alineadas en `^10.22.0` (`@sentry/nextjs`, `@sentry/node`, `@sentry/profiling-node`) y overrides duplicados de pnpm eliminados en los paquetes para mantener la resolución centralizada.
+- Dependencias Sentry del monorepo alineadas en `^10.22.0` (`@sentry/nextjs`, `@sentry/node`, `@sentry/profiling-node`); se sincronizaron los overrides de pnpm entre la raíz y los paquetes (`apps/api`, `apps/web`) para asegurar builds consistentes en Vercel.
 
 ### Docs
 
