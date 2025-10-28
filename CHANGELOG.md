@@ -16,6 +16,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
+- Cliente de analítica en `apps/web/components/analytics/posthog-analytics.tsx` ahora inicializa un cliente _noop_ cuando el navegador se ejecuta en modo headless o automatizado, marcando `document.documentElement.dataset.brisaPosthog = "ready"` para estabilizar las suites smoke/critical en preview y producción.
 - Middleware público migra a `proxy.ts` (Next.js 16) y mantiene acceso abierto a landing/seo mientras aplica redirecciones autenticadas (`apps/web/proxy.ts`).
 - Configuración Playwright propaga `NEXT_PUBLIC_POSTHOG_KEY`/`HOST` por defecto en entornos de prueba.
 - Suite Playwright crítica ahora usa builds de producción (`pnpm build && pnpm start`) para API y web, con puertos configurables (`API_PORT`, `WEB_PORT`) y `PLAYWRIGHT_BASE_URL` definido.
@@ -29,6 +30,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Docs
 
+- `docs/qa/e2e-strategy.md` documenta el fallback de PostHog en navegadores headless (`__brisaPostHogClient` + flag `data-brisa-posthog="ready"`) y las implicaciones para Playwright.
 - Formalizado el flujo de documentación (docs/README.md) y ADR (`docs/decisions/README.md` + plantilla); `credentials-audit.md` ahora incluye pautas para documentar secretos sin exponerlos.
 - `docs/operations/observability.md` actualiza la guía CSP para habilitar Sentry en producción.
 - `docs/product/phase-2-roadmap.md` y `docs/product/analytics-decision.md` actualizados con el estado de la integración PostHog y el plan de rotación de claves.
