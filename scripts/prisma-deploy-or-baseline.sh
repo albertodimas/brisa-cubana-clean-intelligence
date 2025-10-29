@@ -21,6 +21,9 @@ fi
 if grep -q "P3018" "$log_file" || grep -q "P3009" "$log_file"; then
   failing_migration="$(grep -m1 'Migration name:' "$log_file" | awk '{print $3}')"
   if [ -z "$failing_migration" ]; then
+    failing_migration="$(grep -m1 -oE 'The `[A-Za-z0-9_]+` migration started' "$log_file" | sed -E \"s/The \\\`([A-Za-z0-9_]+)\\\` migration started/\\1/\")"
+  fi
+  if [ -z "$failing_migration" ]; then
     echo "::error::Prisma migrate deploy failed with P3018/P3009 but migration name could not be determined."
     exit 1
   fi
