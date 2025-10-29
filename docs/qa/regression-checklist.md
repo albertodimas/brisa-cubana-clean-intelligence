@@ -164,6 +164,9 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] FAQ interactiva abre/cierra acordeones correctamente
 - [ ] Formulario “¿Listo para recibir tu propuesta?” valida campos obligatorios y muestra feedback (éxito/error)
 - [ ] CTA hero no mostrados para usuarios autenticados mantienen sesión activa (chip en panel tras login)
+- [ ] Bloque “Datos clave actualizados” muestra valores, tooltips con fuente y no cae en fallback “Dato en actualización”
+- [ ] Ruta `/en` se renderiza en inglés, mantiene enlaces `canonical`/`hreflang` y CTA apunta al formulario principal
+- [ ] Encabezado y navegación muestran el nuevo logotipo vectorial (`BrandLogo`) y mantienen contraste adecuado en modo scrolled/no scrolled
 
 ### 6.2 Panel Operativo
 
@@ -196,6 +199,9 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] `LEAD_WEBHOOK_URL` configurado en entorno (revisar Vercel/GitHub Secrets)
 - [ ] Enviar formulario público (`/`, sección contacto) produce 200 y dispara evento en destino (Slack/CRM) con payload esperado (puedes validar manualmente con `scripts/test-lead-webhook.sh` apuntando a la URL de webhook)
 - [ ] CTA hero y pricing generan eventos `cta_request_proposal` y `cta_portal_demo` visibles en la plataforma de analítica (Vercel/PostHog/GA4)
+- [ ] CTA de planes agregan `plan`/`inventory` a la URL y el formulario refleja el mensaje de interés + select precargado
+- [ ] Error 4xx/5xx de `/api/leads` muestra fallback “Escríbenos a … o agenda por WhatsApp” y se registra `lead_form_failed`
+- [ ] Widget flotante de WhatsApp abre el chat en `wa.me` y emite evento `whatsapp_chat_start`
 - [ ] Checkout público registra eventos `checkout_started` y `checkout_completed` (ver logs Sentry o analítica) al completar pago de prueba
 
 ---
@@ -230,7 +236,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Stripe rechaza pago (`pm_card_chargeDeclined`) y UI muestra mensaje `Pago rechazado`.
 - [ ] El booking permanece en estado `PENDING` y se registra `lastPaymentError`.
 - [ ] Retry desde la UI reutiliza la misma Intent y concluye exitosamente tras usar tarjeta válida.
-- [ ] Modalidad fallback (Stripe no configurado) muestra instrucción “Configura Stripe…” y bloquea avance.
+- [ ] Modalidad fallback (Stripe no configurado o Intent fallida) muestra instrucción “Configura Stripe…”, referencia de seguimiento y CTA de reintento/correo.
 
 ### 8.4 Observabilidad y entorno
 

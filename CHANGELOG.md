@@ -14,6 +14,10 @@ All notable changes to this project are documented here. The format follows [Kee
 - Archivo `.browserslistrc` para forzar targets modernos en la app web.
 - Verificación automatizada de `robots.txt`/`sitemap.xml` en el workflow compuesto (`.github/workflows/project-pipeline.yml`).
 - Script `scripts/verify-lhci-warnings.sh` para controlar el allowlist de advertencias Lighthouse dentro de CI.
+- Hook `useMarketStats`, dataset `apps/web/data/marketStats.json` y componentes `MarketStatsSnapshot`/`MarketHighlightsGrid` que unifican las métricas del landing.
+- Variante `/en` de la landing con layout compartido y etiquetas `hreflang`/canónica actualizadas.
+- Workflow `market-stats-watchdog.yml`, script `scripts/check-market-stats-staleness.mjs` y comando `pnpm monitor:market-stats` para abrir issues automáticos cuando las métricas superan 120 días.
+- Activos oficiales de branding (`apps/web/public/branding`) y componente `BrandLogo` reutilizable para encabezados y materiales promocionales.
 
 ### Changed
 
@@ -32,6 +36,9 @@ All notable changes to this project are documented here. The format follows [Kee
 - Dependencias Sentry del monorepo alineadas en `^10.22.0` (`@sentry/nextjs`, `@sentry/node`, `@sentry/profiling-node`); se sincronizaron los overrides de pnpm entre la raíz y los paquetes (`apps/api`, `apps/web`) para asegurar builds consistentes en Vercel.
 - Pipeline `vercel-preview` ahora construye API y Web con `vercel build --prebuilt` antes de desplegar, evitando reinstalaciones `pnpm install --frozen-lockfile` en los entornos de Vercel Preview.
 - Monitor productivo corrige el payload de Slack en caso de fallo (`health-monitor.yml`) y se realineó el `HEALTH_CHECK_TOKEN` (rotación 29-oct-2025, sincronizado en Vercel + GitHub) para que `/healthz` vuelva a responder 200 en los checks programados.
+- Formulario de leads precarga `planCode`/inventario desde los CTA, persiste UTM, delega en `/api/leads` y muestra fallback amigable (correo + WhatsApp) cuando la API falla.
+- Checkout público captura errores de Intent con referencia humana y CTA de reintento/correo; el portal cliente advierte cuando Stripe se encuentra en modo demo y publica el roadmap Beta GA.
+- Encabezados `MainHeader`/`MainHeaderSimple` y botones del módulo UI adoptan el nuevo sistema visual (gradientes, logotipo vectorial, wordmark actualizado).
 
 ### Docs
 
@@ -47,6 +54,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/overview/status.md` registra la verificación del 27-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.
 - `docs/operations/incident-2025-10-20-vercel-deployment-failure.md` documenta el incidente con Vercel (`temporary_failure` en `patchBuild`) y su resolución (21-oct-2025 01:30 UTC, despliegues Ready de web y API).
+- `docs/overview/status.md` refleja la fuente única de métricas, la nueva landing en inglés y el watchdog automático; `docs/qa/regression-checklist.md` añade casos para `plan`/`inventory` en CTA, fallback de leads, `whatsapp_chat_start` y referencia de checkout.
+- `docs/qa/regression-checklist.md` incorpora validaciones del logotipo y la navegación re-estilizada.
 
 ## [0.4.1] - 2025-10-18
 
@@ -130,6 +139,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - `pnpm --filter @brisa/web test` (66 pruebas) ✅
 - `pnpm --filter @brisa/api test` (95 pruebas) ✅
+- Cobertura adicional en Vitest para `LeadCaptureForm` (precarga de plan/inventario, fallback de error) y `CheckoutClient` (Intent fallida con referencia).
 
 ## [0.3.1] - 2025-10-17
 
