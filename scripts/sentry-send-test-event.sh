@@ -21,8 +21,8 @@ pnpm exec sentry-cli send-event \
   --env "$ENVIRONMENT" \
   --level error \
   --release "$RELEASE" \
-  --tag source=cli-test \
-  --tag trigger=runbook \
-  --tag environment="$ENVIRONMENT"
+  --tag source:cli-test \
+  --tag trigger:runbook \
+  --tag environment:"$ENVIRONMENT"
 
 echo "✅ Evento enviado. Verifica la alerta correspondiente en Slack/Email."
