@@ -96,6 +96,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
+          export VERCEL_INSTALL_COMMAND="pnpm install --no-frozen-lockfile"
           DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
           API_URL=$(echo "$DEPLOY_OUTPUT" | sed -n 's/^.*Production:[[:space:]]*\([^[:space:]]\+\).*/\1/p' | tail -n1)
@@ -128,6 +129,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
+          export VERCEL_INSTALL_COMMAND="pnpm install --no-frozen-lockfile"
           DEPLOY_OUTPUT=$(vercel deploy --prod --yes --scope brisa-cubana --token "$VERCEL_TOKEN")
           echo "$DEPLOY_OUTPUT"
           WEB_URL=$(echo "$DEPLOY_OUTPUT" | sed -n 's/^.*Production:[[:space:]]*\([^[:space:]]\+\).*/\1/p' | tail -n1)
