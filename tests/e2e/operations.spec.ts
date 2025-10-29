@@ -6,7 +6,7 @@ import { createBookingFixture, getAdminAccessToken } from "./support/services";
 test.describe.serial("Operaciones", () => {
   let adminToken: string;
 
-  test.beforeAll(async ({ request }) => {
+  test.beforeEach(async ({ request }) => {
     adminToken = await getAdminAccessToken(request);
   });
 
