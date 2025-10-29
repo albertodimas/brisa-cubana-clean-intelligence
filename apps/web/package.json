@@ -50,12 +50,5 @@
     "tailwindcss": "^4.1.15",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
-  },
-  "pnpm": {
-    "overrides": {
-      "esbuild": "^0.25.10",
-      "tmp": "^0.2.4",
-      "vite": "7.1.11"
-    }
   }
 }
