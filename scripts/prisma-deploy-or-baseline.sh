@@ -7,8 +7,11 @@ log_file="$(mktemp)"
 trap 'rm -f "$log_file"' EXIT
 
 run_migrate() {
+  echo "::group::Running pnpm --filter @brisa/api db:deploy"
   pnpm --filter @brisa/api db:deploy 2>&1 | tee "$log_file"
-  return ${PIPESTATUS[0]}
+  local exit_code=${PIPESTATUS[0]}
+  echo "::endgroup::"
+  return "$exit_code"
 }
 
 mark_migration_as_applied() {
@@ -26,6 +29,9 @@ latest_migration="$(ls apps/api/prisma/migrations | sort | tail -n1)"
 if [ -n "$latest_migration" ]; then
   echo "::warning::Prisma migrate deploy failed. Marking latest migration '$latest_migration' as applied before retrying..."
   mark_migration_as_applied "$latest_migration" || echo "::warning::Failed to mark '$latest_migration' as applied on first attempt."
+else
+  echo "::error::Prisma migrate deploy failed and no migrations were found to mark as applied."
+  exit 1
 fi
 
 if run_migrate; then
