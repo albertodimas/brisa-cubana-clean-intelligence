@@ -23,6 +23,8 @@ permissions:
 jobs:
   preview-deployment:
     name: Deploy to Vercel Preview
+    # Evita fallas por credenciales inexistentes en PRs automáticos de Dependabot.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
