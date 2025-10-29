@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Migración Prisma `20251029041632_add_core_entities` que formaliza tablas `Notification`/`Lead`, enums `NotificationType` y `LeadStatus`, y la columna `User.isActive` en la historia de migraciones.
 - Hero comercial con imagen aprobada por marketing y sección portal actualizada con assets finales (`apps/web/app/page.tsx`, `public/images/landing/*`).
 - Prueba Playwright `analytics.spec.ts` que verifica la inicialización de PostHog desde la landing pública.
 - Scripts de verificación `pnpm posthog:test-event` y `pnpm sentry:test-event` para validar ingestión y alertas desde la CLI.
@@ -29,7 +30,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Suites E2E (`tests/e2e/operations.spec.ts`) reutilizan token administrativo entre pruebas, añaden cabeceras autorizadas a los requests y validan respuestas negativas sin propagar `null` cuando el API responde con errores.
 - Dependencias Sentry del monorepo alineadas en `^10.22.0` (`@sentry/nextjs`, `@sentry/node`, `@sentry/profiling-node`); se sincronizaron los overrides de pnpm entre la raíz y los paquetes (`apps/api`, `apps/web`) para asegurar builds consistentes en Vercel.
 - Pipeline `vercel-preview` ahora construye API y Web con `vercel build --prebuilt` antes de desplegar, evitando reinstalaciones `pnpm install --frozen-lockfile` en los entornos de Vercel Preview.
-- Monitor productivo corrige el payload de Slack en caso de fallo (`health-monitor.yml`) y se realineó el `HEALTH_CHECK_TOKEN` para que `/healthz` vuelva a responder 200 en los checks programados.
+- Monitor productivo corrige el payload de Slack en caso de fallo (`health-monitor.yml`) y se realineó el `HEALTH_CHECK_TOKEN` (rotación 29-oct-2025, sincronizado en Vercel + GitHub) para que `/healthz` vuelva a responder 200 en los checks programados.
 
 ### Docs
 
@@ -40,6 +41,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/operations/observability.md`, `docs/operations/runbook-daily-monitoring.md` y `docs/operations/alerts.md` ahora incluyen los nuevos scripts y pasos de verificación para alertas PostHog/Sentry.
 - `docs/operations/observability-setup.md` documenta la creación de reglas Sentry (correo) y próximos pasos para Slack.
 - `docs/qa/e2e-strategy.md` documenta el uso de builds de producción y las variables `API_PORT`/`WEB_PORT`/`PLAYWRIGHT_BASE_URL` para entornos locales y CI.
+- `docs/operations/credentials-audit.md` y `docs/overview/status.md` actualizan la rotación del token `/healthz` (29-oct-2025) y la reactivación de Sentry (`SENTRY_AUTH_TOKEN` rotado + evento `4f0dc4dd-681e-43d0-8ce4-3f15a21fede5`).
 - `docs/overview/status.md` registra la verificación del 27-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.
 - `docs/operations/incident-2025-10-20-vercel-deployment-failure.md` documenta el incidente con Vercel (`temporary_failure` en `patchBuild`) y su resolución (21-oct-2025 01:30 UTC, despliegues Ready de web y API).

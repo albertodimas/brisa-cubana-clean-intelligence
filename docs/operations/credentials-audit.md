@@ -48,7 +48,7 @@ Valores documentados:
 
 - JWT_SECRET: `mLKjRwKIiSbe/JRohMoTgZWF0BsjVra/tSBAvBDZRwk=`
 - AUTH_SECRET: `tXD6mAQMrstV3BWwgHyGoyLnS0Mv4q4HgXIqkYWCzAY=`
-- HEALTH_CHECK_TOKEN: `go2ND3P9QtlublWDddDWw-gO0aP_v666`
+- HEALTH_CHECK_TOKEN: `8c75d341231a71267cd13a1694f20d7f975d95cb115bfdb4831754cd81cae1f2`
 
 Estado actual: ✅ Variables sincronizadas entre Vercel y GitHub Secrets. Se retiró `API_TOKEN` como mecanismo de autenticación; todas las integraciones deben usar JWT.
 
@@ -61,7 +61,7 @@ Estado actual: ✅ Variables sincronizadas entre Vercel y GitHub Secrets. Se ret
 ✅ SENTRY_DSN
 ✅ SENTRY_ORG
 ✅ SENTRY_PROJECT
-✅ SENTRY_AUTH_TOKEN
+✅ SENTRY_AUTH_TOKEN (rotado 29-oct-2025; sincronizado en Vercel Dev/Preview/Prod y GitHub Secrets)
 ✅ SENTRY_ENVIRONMENT
 ✅ SENTRY_TRACES_SAMPLE_RATE
 ✅ SENTRY_PROFILES_SAMPLE_RATE
@@ -77,7 +77,7 @@ Valores de referencia:
 - Proyectos: `brisa-cubana-web`, `brisa-cubana-api`
 - Código de log drain: `7f4677dfb49b149c4a67d45e84e0bcaab835ea50`
 
-Estado actual: ✅ Observabilidad completa enlazada con Vercel.
+Estado actual: ✅ Observabilidad completa enlazada con Vercel y GitHub (evento de prueba `4f0dc4dd-681e-43d0-8ce4-3f15a21fede5` enviado el 29-oct-2025).
 
 ---
 
