@@ -19,17 +19,14 @@ if ! grep -q "P3005" "$log_file" && ! grep -q "P3018" "$log_file" && ! grep -q "
 fi
 
 if grep -q "P3018" "$log_file" || grep -q "P3009" "$log_file"; then
-  failing_migration="$(grep -m1 'Migration name:' "$log_file" | awk '{print $3}')"
-  if [ -z "$failing_migration" ]; then
-    failing_migration="$(grep -m1 -oE 'The `[A-Za-z0-9_]+` migration started' "$log_file" | sed -E \"s/The \\\`([A-Za-z0-9_]+)\\\` migration started/\\1/\")"
-  fi
-  if [ -z "$failing_migration" ]; then
-    echo "::error::Prisma migrate deploy failed with P3018/P3009 but migration name could not be determined."
+  latest_migration="$(ls apps/api/prisma/migrations | sort | tail -n1)"
+  if [ -z "$latest_migration" ]; then
+    echo "::error::Prisma migrate deploy failed with P3018/P3009 but no migrations were found."
     exit 1
   fi
-  echo "::warning::Detected Prisma $(grep -q \"P3018\" \"$log_file\" && echo P3018 || echo P3009). Marking '$failing_migration' as applied before retrying..."
-  if ! pnpm --filter @brisa/api exec -- prisma migrate resolve --applied "$failing_migration" >/dev/null 2>&1; then
-    echo "::error::Failed to mark migration '$failing_migration' as applied."
+  echo "::warning::Detected Prisma $(grep -q \"P3018\" \"$log_file\" && echo P3018 || echo P3009). Marking '$latest_migration' as applied before retrying..."
+  if ! pnpm --filter @brisa/api exec -- prisma migrate resolve --applied "$latest_migration" >/dev/null 2>&1; then
+    echo "::error::Failed to mark migration '$latest_migration' as applied."
     exit 1
   fi
   pnpm --filter @brisa/api db:deploy
