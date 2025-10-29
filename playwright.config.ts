@@ -80,6 +80,7 @@ export default defineConfig({
               process.env.NEXT_PUBLIC_POSTHOG_HOST ??
               "https://us.i.posthog.com",
             NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
+            NEXT_PUBLIC_PORTAL_LOGIN_ENABLED: "true",
             NEXTAUTH_URL:
               process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             PORT: process.env.WEB_PORT ?? "3000",
@@ -129,6 +130,7 @@ export default defineConfig({
               process.env.NEXT_PUBLIC_POSTHOG_HOST ??
               "https://us.i.posthog.com",
             NEXT_PUBLIC_POSTHOG_FORCE_ENABLE: "true",
+            NEXT_PUBLIC_PORTAL_LOGIN_ENABLED: "true",
             NEXTAUTH_URL:
               process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
             PORT: process.env.WEB_PORT ?? "3000",
