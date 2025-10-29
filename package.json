@@ -30,6 +30,7 @@
     "format": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
     "clean": "rm -rf node_modules .turbo",
     "clean:workspace": "bash scripts/cleanup-local-env.sh",
+    "monitor:market-stats": "node scripts/check-market-stats-staleness.mjs --json tmp/market-stats-report.json --markdown tmp/market-stats-report.md",
     "prepare": "husky",
     "stripe:listen": "stripe listen --forward-to http://localhost:3001/api/payments/stripe/webhook",
     "posthog:test-event": "node scripts/posthog-send-test-event.mjs",

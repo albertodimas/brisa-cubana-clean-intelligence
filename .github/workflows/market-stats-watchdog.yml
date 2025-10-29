@@ -1,0 +1,80 @@
+name: market-stats-watchdog
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check market stats staleness
+        id: check
+        run: |
+          mkdir -p tmp
+          node scripts/check-market-stats-staleness.mjs \
+            --threshold 120 \
+            --json tmp/market-stats-report.json \
+            --markdown tmp/market-stats-report.md
+
+      - name: Create issue for stale metrics
+        if: steps.check.outputs.stale_count != '0'
+        uses: actions/github-script@v7
+        env:
+          REPORT_PATH: ${{ steps.check.outputs.report_markdown }}
+          STALE_COUNT: ${{ steps.check.outputs.stale_count }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const core = require('@actions/core');
+
+            const reportPath = process.env.REPORT_PATH || path.join(process.env.GITHUB_WORKSPACE, 'tmp/market-stats-report.md');
+            const staleCount = Number.parseInt(process.env.STALE_COUNT ?? '0', 10);
+            if (!fs.existsSync(reportPath)) {
+              core.setFailed(`No se encontró el reporte de métricas en ${reportPath}`);
+              return;
+            }
+
+            const body = fs.readFileSync(reportPath, 'utf8');
+            const today = new Date().toISOString().slice(0, 10);
+            const title = `Actualizar métricas de mercado (${today})`;
+
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'market-stats',
+              state: 'open',
+              per_page: 100,
+            });
+
+            const duplicate = openIssues.find((issue) =>
+              issue.title.startsWith('Actualizar métricas de mercado'),
+            );
+
+            if (duplicate) {
+              core.info(`Issue existente detectado (#${duplicate.number}), omitiendo creación.`);
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['market-stats', 'automation'],
+            });
