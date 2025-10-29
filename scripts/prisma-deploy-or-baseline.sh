@@ -6,7 +6,10 @@ export DATABASE_URL_UNPOOLED="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
 log_file="$(mktemp)"
 trap 'rm -f "$log_file"' EXIT
 
-if pnpm --filter @brisa/api db:deploy 2>&1 | tee "$log_file"; then
+pnpm --filter @brisa/api db:deploy 2>&1 | tee "$log_file"
+status=${PIPESTATUS[0]}
+
+if [ "$status" -eq 0 ]; then
   exit 0
 fi
 
