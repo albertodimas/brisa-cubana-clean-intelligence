@@ -92,10 +92,10 @@ export function CountUp({
   React.useEffect(() => {
     if (isInView) {
       motionValue.set(end);
-    } else {
+    } else if (!once) {
       motionValue.set(start);
     }
-  }, [isInView, end, start, motionValue]);
+  }, [isInView, end, start, motionValue, once]);
 
   React.useEffect(() => {
     const unsubscribe = springValue.on("change", (latest) => {

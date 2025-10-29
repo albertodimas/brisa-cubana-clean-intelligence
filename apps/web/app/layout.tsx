@@ -14,10 +14,32 @@ const inter = Inter({
 const SITE_DESCRIPTION =
   "Servicios profesionales de limpieza premium en Miami con logística inteligente y soporte 24/7 para hogares, alquileres vacacionales y negocios.";
 const DEFAULT_SITE_URL = "https://brisacubanacleanintelligence.com";
-const SITE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.NEXTAUTH_URL ??
-  DEFAULT_SITE_URL;
+function resolveSiteUrl() {
+  const candidates = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.NEXT_PUBLIC_BASE_URL,
+    process.env.NEXTAUTH_URL,
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const trimmed = candidate.trim();
+    if (!trimmed) continue;
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.hostname.endsWith("vercel.app")) {
+        continue;
+      }
+      return parsed.origin;
+    } catch {
+      // Ignore invalid URLs and continue
+    }
+  }
+
+  return DEFAULT_SITE_URL;
+}
+
+const SITE_URL = resolveSiteUrl();
 const BUSINESS_PHONE = "+1 786-436-7132";
 const BUSINESS_STREET = "511 SW 4th Ave";
 const BUSINESS_CITY = "Miami";

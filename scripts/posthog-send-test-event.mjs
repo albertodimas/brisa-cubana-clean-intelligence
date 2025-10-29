@@ -18,12 +18,13 @@ const projectApiKey =
 const personalApiKey =
   process.env.POSTHOG_PERSONAL_API_KEY ??
   (projectApiKey?.startsWith("phx_") ? projectApiKey : undefined);
-const host = (process.env.POSTHOG_HOST ??
+const host = (
+  process.env.POSTHOG_HOST ??
   process.env.NEXT_PUBLIC_POSTHOG_HOST ??
-  "https://us.i.posthog.com").replace(
-  /\/$/,
-  "",
-);
+  "https://us.i.posthog.com"
+)
+  .trim()
+  .replace(/\/$/, "");
 const eventName = process.argv[2] ?? "checkout_payment_failed";
 const distinctId = process.argv[3] ?? `brisa-cli-${randomUUID()}`;
 

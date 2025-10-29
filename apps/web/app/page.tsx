@@ -136,7 +136,7 @@ export default function LandingPage() {
                     href="/?plan=turnover&inventory=6-15%20unidades#contacto"
                     eventName="cta_request_proposal"
                     metadata={{ placement: "hero", target: "contact_form" }}
-                    className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 hover:shadow-xl transition-all hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center rounded-full bg-[#0d2944] px-6 py-3 text-base font-semibold text-white shadow-lg shadow-[#0d294433] hover:bg-[#11466d] hover:shadow-xl hover:shadow-[#0d29444d] transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1ecad3]"
                     prefetch={false}
                   >
                     Solicitar cotización
@@ -145,9 +145,9 @@ export default function LandingPage() {
                     href="/clientes"
                     eventName="cta_portal_demo"
                     metadata={{ placement: "hero" }}
-                    className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-6 py-3 text-base font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-all hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center rounded-full border border-transparent px-4 py-3 text-base font-semibold text-[#0f8c94] hover:text-[#0a4750] hover:bg-[#ecfcff] dark:text-[#7adfe9] dark:hover:text-white dark:hover:bg-[#0c6870]/40 transition-all"
                   >
-                    Explora el portal cliente
+                    Conoce el portal (beta privada)
                   </MarketingLink>
                 </div>
               </ScrollReveal>
@@ -213,7 +213,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+      <section
+        id="servicios"
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-mt-24"
+      >
         <div className="space-y-10">
           <div className="max-w-3xl">
             <h2 className="text-3xl sm:text-4xl font-semibold">
@@ -255,7 +258,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+      <section
+        id="precios"
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-mt-24"
+      >
         <div className="grid gap-8 lg:grid-cols-2">
           <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-brisa-800 dark:bg-brisa-950">
             <div className="space-y-4">
@@ -355,7 +361,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-gray-50 dark:bg-brisa-900/40">
+      <section
+        id="portal"
+        className="bg-gray-50 dark:bg-brisa-900/40 scroll-mt-24"
+      >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-center">
             <div className="space-y-6">
@@ -452,7 +461,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+      <section
+        id="faq"
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-mt-24"
+      >
         <StaggerContainer
           className="grid gap-8 lg:grid-cols-3"
           staggerDelay={0.2}

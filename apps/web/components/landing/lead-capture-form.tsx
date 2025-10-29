@@ -322,10 +322,16 @@ export function LeadCaptureForm({
                 value={propertyCount}
                 onChange={(event) => {
                   setPropertyCount(event.target.value);
-                  setPropertySelectTouched(true);
+                  setPropertySelectTouched(false);
                 }}
                 onBlur={() => setPropertySelectTouched(true)}
                 required
+                aria-invalid={showPropertyCountError}
+                aria-describedby={
+                  showPropertyCountError
+                    ? `${formId}-propertyCount-error`
+                    : undefined
+                }
                 className={`rounded-xl border px-4 py-3 text-sm sm:text-base focus-visible:outline-none focus-visible:ring-2 bg-white text-gray-900 dark:bg-brisa-900 dark:text-brisa-50 ${
                   showPropertyCountError
                     ? "border-red-300 focus-visible:ring-red-400 dark:border-red-400/70"
@@ -342,7 +348,10 @@ export function LeadCaptureForm({
                 ))}
               </select>
               {showPropertyCountError ? (
-                <span className="text-xs text-red-600 dark:text-red-300">
+                <span
+                  id={`${formId}-propertyCount-error`}
+                  className="text-xs text-red-600 dark:text-red-300"
+                >
                   Selecciona el rango que mejor describe tu inventario.
                 </span>
               ) : null}
@@ -380,6 +389,7 @@ export function LeadCaptureForm({
             <p
               id={`${formId}-status`}
               role="status"
+              aria-live="polite"
               className={`text-sm text-center ${
                 status === "success"
                   ? "text-green-600 dark:text-green-400"

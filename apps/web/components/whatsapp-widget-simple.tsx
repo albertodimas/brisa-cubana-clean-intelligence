@@ -63,7 +63,7 @@ export function WhatsAppWidgetSimple() {
             </div>
             <button
               onClick={handleWhatsAppClick}
-              className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white font-semibold py-2.5 px-4 rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg"
+              className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white font-semibold py-2.5 px-4 rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg border border-white/70"
             >
               <svg
                 className="h-5 w-5"
@@ -84,7 +84,7 @@ export function WhatsAppWidgetSimple() {
         {/* Main Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="group relative h-14 w-14 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white shadow-2xl transition-all hover:scale-110 active:scale-95 flex items-center justify-center"
+          className="group relative h-14 w-14 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white shadow-2xl transition-all hover:scale-110 active:scale-95 flex items-center justify-center border border-white/80 dark:border-white/40"
           aria-label="Abrir chat de WhatsApp"
         >
           {isOpen ? (

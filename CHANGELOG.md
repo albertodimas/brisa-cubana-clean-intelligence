@@ -39,6 +39,9 @@ All notable changes to this project are documented here. The format follows [Kee
 - Formulario de leads precarga `planCode`/inventario desde los CTA, persiste UTM, delega en `/api/leads` y muestra fallback amigable (correo + WhatsApp) cuando la API falla.
 - Checkout público captura errores de Intent con referencia humana y CTA de reintento/correo; el portal cliente advierte cuando Stripe se encuentra en modo demo y publica el roadmap Beta GA.
 - Encabezados `MainHeader`/`MainHeaderSimple` y botones del módulo UI adoptan el nuevo sistema visual (gradientes, logotipo vectorial, wordmark actualizado).
+- Landing: se añadieron anclas `/#servicios`, `/#precios`, `/#faq` con `scroll-mt` para navegación móvil, los KPI muestran fuente/fecha verificables y el CTA primario “Solicitar cotización” destaca sobre enlaces secundarios.
+- Captura de leads operativa en producción tras recrear la tabla `Lead` en Neon y marcar migraciones como aplicadas; el formulario ahora expone mensajes accesibles (`aria-live`, errores por campo) y evita estados inválidos iniciales en el combo de inventario.
+- Checkout público requiere `NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT`; en producción sólo muestra información demo cuando el publishable key es de prueba. También se normalizaron `NEXT_PUBLIC_SITE_URL`/`BASE_URL` para usar el dominio oficial en metadatos.
 - Sistema de marca actualizado con ícono de olas en formato SVG, paleta aqua/navy refinada en Tailwind y componentes (`BrandLogo`, headers, botones) alineados a las directrices de identidad.
 
 ### Docs

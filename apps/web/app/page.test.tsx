@@ -11,7 +11,7 @@ describe("LandingPage", () => {
       "Limpieza profesional y documentada para propiedades premium en Miami.",
     );
     expect(markup).toContain("Solicitar cotización");
-    expect(markup).toContain("Explora el portal cliente");
+    expect(markup).toContain("Conoce el portal (beta privada)");
   });
 
   it("detalla beneficios clave", async () => {

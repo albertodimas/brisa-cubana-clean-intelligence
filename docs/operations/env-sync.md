@@ -34,7 +34,23 @@ Pasos para alinear los valores de entorno propios del proxy web y del portal cli
    echo "true" | vercel env add PORTAL_MAGIC_LINK_EXPOSE_DEBUG development
    ```
 
-3. Si no se usa la CLI, repetir los mismos valores desde **Settings → Environment Variables** en el panel de Vercel.
+3. Ajustar las URL públicas y la telemetría para evitar redirecciones a `vercel.app`:
+
+   ```bash
+   # URL canónica (sin trailing slash ni espacios)
+   echo "https://brisacubanacleanintelligence.com" | vercel env add NEXT_PUBLIC_SITE_URL production --force
+   echo "https://brisacubanacleanintelligence.com" | vercel env add NEXT_PUBLIC_BASE_URL production --force
+
+   # Host de PostHog (evita cambiar a us.posthog.com)
+   echo "https://us.i.posthog.com" | vercel env add NEXT_PUBLIC_POSTHOG_HOST production --force
+
+   # Habilitar el checkout sólo cuando esté listo comercialmente
+   echo "false" | vercel env add NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT production --force
+   ```
+
+   Repite el procedimiento para los entornos preview/development según corresponda (por ejemplo, dejar `NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT` en `true` sólo en staging controlado).
+
+4. Si no se usa la CLI, repetir los mismos valores desde **Settings → Environment Variables** en el panel de Vercel.
 
 ## 2. GitHub Actions
 

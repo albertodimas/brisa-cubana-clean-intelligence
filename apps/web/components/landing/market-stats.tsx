@@ -125,9 +125,22 @@ function MetricTooltipContent({ stat }: { stat?: ResolvedMarketStat }) {
     return <span>Fuente no disponible</span>;
   }
 
+  const sourceNode = stat.sourceUrl ? (
+    <a
+      href={stat.sourceUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="underline underline-offset-2 text-teal-100"
+    >
+      {stat.source}
+    </a>
+  ) : (
+    <span>{stat.source}</span>
+  );
+
   return (
     <div className="max-w-[240px] space-y-1">
-      <p className="text-xs font-semibold text-white/90">{stat.source}</p>
+      <p className="text-xs font-semibold text-white/90">{sourceNode}</p>
       {stat.period ? (
         <p className="text-[11px] text-white/70">Periodo: {stat.period}</p>
       ) : null}
@@ -177,6 +190,35 @@ export function MarketStatsSnapshot() {
             <dd className="text-xs leading-snug text-gray-600 dark:text-brisa-400">
               {stat?.label ?? descriptor.description}
             </dd>
+            {stat ? (
+              <p className="text-[11px] text-gray-500 dark:text-brisa-500">
+                {stat.sourceUrl ? (
+                  <a
+                    href={stat.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline underline-offset-2 text-[#0f8c94] dark:text-[#7adfe9]"
+                  >
+                    {stat.source}
+                  </a>
+                ) : (
+                  <span>{stat.source}</span>
+                )}
+                {stat.lastUpdated ? (
+                  <>
+                    {" "}
+                    ·{" "}
+                    <time dateTime={stat.lastUpdated}>
+                      {formatLastUpdated(stat.lastUpdated)}
+                    </time>
+                  </>
+                ) : null}
+              </p>
+            ) : (
+              <p className="text-[11px] text-gray-400 dark:text-brisa-500">
+                Actualización pendiente
+              </p>
+            )}
           </div>
         ))}
       </dl>
@@ -226,6 +268,35 @@ export function MarketHighlightsGrid() {
                 <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
                   {item.body}
                 </p>
+                {item.stat ? (
+                  <p className="text-[11px] text-gray-500 dark:text-brisa-500">
+                    {item.stat.sourceUrl ? (
+                      <a
+                        href={item.stat.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-2 text-[#0f8c94] dark:text-[#7adfe9]"
+                      >
+                        {item.stat.source}
+                      </a>
+                    ) : (
+                      <span>{item.stat.source}</span>
+                    )}
+                    {item.stat.lastUpdated ? (
+                      <>
+                        {" "}
+                        ·{" "}
+                        <time dateTime={item.stat.lastUpdated}>
+                          {formatLastUpdated(item.stat.lastUpdated)}
+                        </time>
+                      </>
+                    ) : null}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-gray-400 dark:text-brisa-500">
+                    Actualización pendiente
+                  </p>
+                )}
               </div>
             </StaggerItem>
           ))}
