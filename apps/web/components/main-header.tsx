@@ -80,9 +80,9 @@ export function MainHeader() {
             <Link
               key={item.name}
               href={item.href}
-              className={`text-sm font-semibold leading-6 transition-colors hover:text-brisa-600 dark:hover:text-brisa-400 ${
+              className={`text-sm font-semibold leading-6 transition-colors hover:text-[#1ecad3] dark:hover:text-[#7adfe9] ${
                 scrolled
-                  ? "text-gray-900 dark:text-white"
+                  ? "text-[#0d2944] dark:text-white"
                   : "text-white dark:text-white"
               }`}
             >
@@ -96,15 +96,15 @@ export function MainHeader() {
             href="/login"
             className={`text-sm font-semibold leading-6 transition-colors ${
               scrolled
-                ? "text-gray-900 dark:text-white hover:text-brisa-600 dark:hover:text-brisa-400"
-                : "text-white hover:text-brisa-200"
+                ? "text-[#0d2944] dark:text-white hover:text-[#1ecad3] dark:hover:text-[#7adfe9]"
+                : "text-white hover:text-[#a8f5f8]"
             }`}
           >
             Iniciar sesión <span aria-hidden="true">&rarr;</span>
           </Link>
           <Link
             href={{ pathname: "/", hash: "contacto" }}
-            className="rounded-full bg-brisa-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 hover:shadow-xl hover:shadow-brisa-600/30 transition-all"
+            className="rounded-full bg-[#0d2944] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#0d294433] hover:bg-[#11466d] hover:shadow-xl hover:shadow-[#0d29444d] transition-all"
           >
             Solicitar cotización
           </Link>
@@ -125,10 +125,10 @@ export function MainHeader() {
               key={item.name}
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
-              className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 transition-colors hover:bg-brisa-50 dark:hover:bg-brisa-900 ${
+              className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 transition-colors hover:bg-[#ecfcff] dark:hover:bg-[#0d1a2d] ${
                 scrolled
-                  ? "text-gray-900 dark:text-white"
-                  : "text-gray-900 dark:text-white bg-white/10 backdrop-blur-sm"
+                  ? "text-[#0d2944] dark:text-white"
+                  : "text-[#0d2944] dark:text-white bg-white/10 backdrop-blur-sm"
               }`}
             >
               {item.name}
@@ -138,10 +138,10 @@ export function MainHeader() {
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 transition-colors hover:bg-brisa-50 dark:hover:bg-brisa-900 ${
+              className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 transition-colors hover:bg-[#ecfcff] dark:hover:bg-[#0d1a2d] ${
                 scrolled
-                  ? "text-gray-900 dark:text-white"
-                  : "text-gray-900 dark:text-white bg-white/10 backdrop-blur-sm"
+                  ? "text-[#0d2944] dark:text-white"
+                  : "text-[#0d2944] dark:text-white bg-white/10 backdrop-blur-sm"
               }`}
             >
               Iniciar sesión
@@ -149,7 +149,7 @@ export function MainHeader() {
             <Link
               href={{ pathname: "/", hash: "contacto" }}
               onClick={() => setMobileMenuOpen(false)}
-              className="block rounded-full bg-brisa-600 px-4 py-2.5 text-center text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700"
+              className="block rounded-full bg-[#0d2944] px-4 py-2.5 text-center text-base font-semibold text-white shadow-lg shadow-[#0d294433] hover:bg-[#11466d]"
             >
               Solicitar cotización
             </Link>

@@ -33,38 +33,45 @@ export function BrandLogo({
     <span
       className={cn(
         "inline-flex items-center gap-2 rounded-full px-2 py-1 transition-colors",
-        invert ? "text-white" : "text-gray-900 dark:text-white",
+        invert ? "text-white" : "text-[#0d2944]",
         contentClassName,
       )}
     >
       <span
-        className={cn(
-          "inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#1e40af] to-[#3b82f6] shadow-lg shadow-[#1e40af33]",
-          {
-            "h-8 w-8": size === "sm",
-            "h-10 w-10": size === "md",
-            "h-12 w-12": size === "lg",
-          },
-        )}
+        className={cn("inline-flex items-center justify-center", {
+          "h-8 w-8": size === "sm",
+          "h-10 w-10": size === "md",
+          "h-12 w-12": size === "lg",
+        })}
       >
         <Image
           src="/branding/logo-icon.svg"
           alt="Brisa Cubana icono"
           width={iconSize}
           height={iconSize}
-          className="h-6 w-6 sm:h-7 sm:w-7"
+          className={cn(
+            "h-full w-full",
+            invert ? "brightness-110 contrast-110" : "brightness-100",
+          )}
           priority={size === "lg"}
         />
       </span>
       {showWordmark ? (
-        <span
-          className={cn(
-            "flex flex-col leading-none",
-            invert ? "text-white" : "text-gray-900 dark:text-white",
-          )}
-        >
-          <span className="font-semibold tracking-tight">Brisa Cubana</span>
-          <span className="text-[11px] uppercase tracking-[0.36em] text-gray-500 dark:text-brisa-300">
+        <span className="flex flex-col leading-none">
+          <span
+            className={cn(
+              "font-semibold tracking-tight",
+              invert ? "text-white" : "text-[#0d2944]",
+            )}
+          >
+            Brisa Cubana
+          </span>
+          <span
+            className={cn(
+              "text-[11px] uppercase tracking-[0.36em]",
+              invert ? "text-[#7ee7ea]" : "text-[#1ecad3]",
+            )}
+          >
             Clean Intelligence
           </span>
         </span>

@@ -39,6 +39,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Formulario de leads precarga `planCode`/inventario desde los CTA, persiste UTM, delega en `/api/leads` y muestra fallback amigable (correo + WhatsApp) cuando la API falla.
 - Checkout público captura errores de Intent con referencia humana y CTA de reintento/correo; el portal cliente advierte cuando Stripe se encuentra en modo demo y publica el roadmap Beta GA.
 - Encabezados `MainHeader`/`MainHeaderSimple` y botones del módulo UI adoptan el nuevo sistema visual (gradientes, logotipo vectorial, wordmark actualizado).
+- Sistema de marca actualizado con ícono de olas en formato SVG, paleta aqua/navy refinada en Tailwind y componentes (`BrandLogo`, headers, botones) alineados a las directrices de identidad.
 
 ### Docs
 

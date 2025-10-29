@@ -56,9 +56,9 @@ export function MainHeaderSimple() {
             <Link
               key={item.name}
               href={item.href}
-              className={`text-sm font-semibold leading-6 transition-colors hover:text-brisa-600 dark:hover:text-brisa-400 ${
+              className={`text-sm font-semibold leading-6 transition-colors hover:text-[#1ecad3] dark:hover:text-[#7adfe9] ${
                 scrolled
-                  ? "text-gray-900 dark:text-white"
+                  ? "text-[#0d2944] dark:text-white"
                   : "text-white dark:text-white"
               }`}
             >
@@ -72,15 +72,15 @@ export function MainHeaderSimple() {
             href="/login"
             className={`text-sm font-semibold leading-6 transition-colors ${
               scrolled
-                ? "text-gray-900 dark:text-white hover:text-brisa-600 dark:hover:text-brisa-400"
-                : "text-white hover:text-brisa-200"
+                ? "text-[#0d2944] dark:text-white hover:text-[#1ecad3] dark:hover:text-[#7adfe9]"
+                : "text-white hover:text-[#a8f5f8]"
             }`}
           >
             Iniciar sesión <span aria-hidden="true">&rarr;</span>
           </Link>
           <Link
             href={{ pathname: "/", hash: "contacto" }}
-            className="rounded-full bg-brisa-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 hover:shadow-xl hover:shadow-brisa-600/30 transition-all"
+            className="rounded-full bg-[#0d2944] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#0d294433] hover:bg-[#11466d] hover:shadow-xl hover:shadow-[#0d29444d] transition-all"
           >
             Solicitar cotización
           </Link>

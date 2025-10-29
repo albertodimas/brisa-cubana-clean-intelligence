@@ -167,6 +167,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Bloque “Datos clave actualizados” muestra valores, tooltips con fuente y no cae en fallback “Dato en actualización”
 - [ ] Ruta `/en` se renderiza en inglés, mantiene enlaces `canonical`/`hreflang` y CTA apunta al formulario principal
 - [ ] Encabezado y navegación muestran el nuevo logotipo vectorial (`BrandLogo`) y mantienen contraste adecuado en modo scrolled/no scrolled
+- [ ] Paleta aqua/navy aplicada (CTA principal, links hover, botones) corresponde al manual de marca y mantiene contraste AA
 
 ### 6.2 Panel Operativo
 
