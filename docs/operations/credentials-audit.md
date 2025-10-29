@@ -108,11 +108,11 @@ Impacto: ✅ El flujo `posthog-monitor.yml` puede ejecutarse en cualquier moment
 
 Valores de referencia:
 
-- Webhook: `https://hooks.slack.com/services/...` (redactado)
+- Webhook: `T09HYNJJY4X/B09NW578JTH/...7Sx` (guardar el valor completo en 1Password)
 - Id. de aplicación: `A09MF1LE9UK`
 - Canal: `#todo-brisa-cubana`
 
-Estado actual: ✅ Webhook activo y sincronizado.
+Estado actual: ✅ Webhook rotado el 29-oct-2025 y sincronizado (mensaje de prueba: `Hello, World!`).
 
 ---
 

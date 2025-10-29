@@ -42,6 +42,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/operations/observability-setup.md` documenta la creación de reglas Sentry (correo) y próximos pasos para Slack.
 - `docs/qa/e2e-strategy.md` documenta el uso de builds de producción y las variables `API_PORT`/`WEB_PORT`/`PLAYWRIGHT_BASE_URL` para entornos locales y CI.
 - `docs/operations/credentials-audit.md` y `docs/overview/status.md` actualizan la rotación del token `/healthz` (29-oct-2025) y la reactivación de Sentry (`SENTRY_AUTH_TOKEN` rotado + evento `4f0dc4dd-681e-43d0-8ce4-3f15a21fede5`).
+- `docs/operations/credentials-audit.md` registra la rotación del webhook Slack (`B09NW578JTH`, 29-oct-2025) y la prueba “Hello, World!”.
 - `docs/overview/status.md` registra la verificación del 27-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.
 - `docs/operations/incident-2025-10-20-vercel-deployment-failure.md` documenta el incidente con Vercel (`temporary_failure` en `patchBuild`) y su resolución (21-oct-2025 01:30 UTC, despliegues Ready de web y API).
