@@ -214,7 +214,19 @@ export function CheckoutClient({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
-  const [fatalError, setFatalError] = useState<Error | null>(null);
+  const [fatalError, setFatalError] = useState<{
+    error: Error;
+    referenceId: string;
+  } | null>(null);
+
+  const registerFatalError = useCallback((error: Error) => {
+    const referenceId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `checkout-${Date.now()}`;
+    setFatalError({ error, referenceId });
+    return referenceId;
+  }, []);
   const [stripePromise, setStripePromise] =
     useState<Promise<Stripe | null> | null>(null);
   const sentryModuleRef = useRef<typeof import("@sentry/nextjs") | null>(null);
@@ -285,7 +297,7 @@ export function CheckoutClient({
     let cancelled = false;
     const promise = loadStripe(publishableKey);
     if (!promise) {
-      setFatalError(
+      registerFatalError(
         new Error(
           "No se pudo inicializar Stripe. Verifica la clave pública y la conexión.",
         ),
@@ -299,7 +311,7 @@ export function CheckoutClient({
       .then((instance) => {
         if (cancelled) return;
         if (!instance) {
-          setFatalError(
+          registerFatalError(
             new Error(
               "No se pudo inicializar Stripe. Verifica la clave pública y la conexión.",
             ),
@@ -308,7 +320,7 @@ export function CheckoutClient({
       })
       .catch((error) => {
         if (cancelled) return;
-        setFatalError(
+        registerFatalError(
           error instanceof Error
             ? error
             : new Error("Falló la carga de Stripe. Intenta nuevamente."),
@@ -363,7 +375,7 @@ export function CheckoutClient({
           hasSchedule: Boolean(details.scheduledFor),
         },
       });
-      const response = await fetch("/api/payments/stripe/intent", {
+      const response = await fetch("/api/checkout/intent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -401,25 +413,27 @@ export function CheckoutClient({
         currency: payload.data.currency,
       });
     } catch (error) {
+      const errorInstance =
+        error instanceof Error
+          ? error
+          : new Error("No pudimos crear la intención de pago.");
+      const referenceId = registerFatalError(errorInstance);
       recordCheckoutEvent("checkout_failed", {
         stage: "intent",
         serviceId: selectedService?.id,
-        error: error instanceof Error ? error.message : "unknown_intent_error",
+        error: errorInstance.message,
+        referenceId,
       });
-      sentryModuleRef.current?.captureException(error, {
+      sentryModuleRef.current?.captureException(errorInstance, {
         contexts: {
           checkout: {
             stage: "intent:create",
             serviceId: selectedService.id,
             email: details.email,
+            referenceId,
           },
         },
       });
-      setFatalError(
-        error instanceof Error
-          ? error
-          : new Error("No pudimos crear la intención de pago."),
-      );
     } finally {
       setIsCreatingIntent(false);
     }
@@ -440,7 +454,35 @@ export function CheckoutClient({
   };
 
   if (fatalError) {
-    throw fatalError;
+    return (
+      <section className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-200">
+        <h2 className="text-lg font-semibold text-red-800 dark:text-red-200">
+          Checkout temporalmente inactivo
+        </h2>
+        <p className="mt-2">
+          No pudimos preparar el pago seguro en Stripe. Reintenta en unos
+          minutos o comparte tus datos con el equipo para agendarte manualmente.
+        </p>
+        <p className="mt-3 text-xs text-red-600 dark:text-red-300">
+          Referencia de error: <code>{fatalError.referenceId}</code>
+        </p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={resetFlow}
+            className="inline-flex items-center justify-center rounded-lg border border-red-600 px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-600 hover:text-white dark:border-red-400 dark:text-red-200 dark:hover:bg-red-400 dark:hover:text-red-950"
+          >
+            Reintentar ahora
+          </button>
+          <a
+            className="text-xs text-red-600 underline-offset-4 hover:underline dark:text-red-300"
+            href={`mailto:${details.email || "operaciones@brisacubanacleanintelligence.com"}?subject=Reserva%20manual&body=Referencia%3A%20${fatalError.referenceId}`}
+          >
+            Enviar mis datos por email
+          </a>
+        </div>
+      </section>
+    );
   }
 
   if (!publishableKey) {
@@ -655,15 +697,18 @@ export function CheckoutClient({
             <PaymentElementErrorBoundary
               key={intent.clientSecret}
               onError={(boundaryError) => {
+                const referenceId = registerFatalError(boundaryError);
                 captureMessage("checkout.payment.element.crashed", "error", {
                   serviceId: selectedService?.id,
                   message: boundaryError.message,
+                  referenceId,
                 });
                 sentryModuleRef.current?.captureException(boundaryError, {
                   contexts: {
                     checkout: {
                       stage: "payment",
                       serviceId: selectedService?.id,
+                      referenceId,
                     },
                   },
                 });
@@ -671,8 +716,8 @@ export function CheckoutClient({
                   stage: "payment_element",
                   serviceId: selectedService?.id,
                   error: boundaryError.message,
+                  referenceId,
                 });
-                setFatalError(boundaryError);
               }}
             >
               <CheckoutPaymentStep

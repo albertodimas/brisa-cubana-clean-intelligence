@@ -9,9 +9,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-brisa-500 text-white hover:bg-brisa-600 active:bg-brisa-700 shadow-sm hover:shadow-md",
+          "bg-gradient-to-br from-[#1e40af] via-[#2563eb] to-[#38bdf8] text-white shadow-lg shadow-[#1e40af33] hover:shadow-[#1e40af4d] hover:scale-[1.01] active:scale-[0.98]",
         secondary:
-          "bg-brisa-800/80 text-brisa-50 hover:bg-brisa-700 active:bg-brisa-900 border border-brisa-600/50 backdrop-blur-sm",
+          "bg-white/10 text-white backdrop-blur border border-white/20 hover:bg-white/20 hover:text-white dark:bg-brisa-900/70 dark:border-brisa-700/60 dark:hover:bg-brisa-900/90",
         danger:
           "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm hover:shadow-md",
         success:

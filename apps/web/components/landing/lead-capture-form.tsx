@@ -30,9 +30,17 @@ type LeadPayload = {
   propertyCount: string;
   notes: string;
   serviceInterest?: string;
+  planCode?: string;
 };
 
 type PlanId = "turnover" | "deep-clean" | "post-construction";
+
+const PROPERTY_COUNT_OPTIONS = [
+  "1-5 unidades",
+  "6-15 unidades",
+  "16-40 unidades",
+  "41+ unidades",
+] as const;
 
 function isPlanId(value: string): value is PlanId {
   return (
@@ -52,8 +60,16 @@ export function LeadCaptureForm({
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [serviceInterest, setServiceInterest] = useState<string>("");
+  const [planCode, setPlanCode] = useState<string | null>(null);
+  const [propertyCount, setPropertyCount] = useState<string>("");
+  const [propertySelectTouched, setPropertySelectTouched] =
+    useState<boolean>(false);
   const [utmParams, setUtmParams] = useState<UtmParams | null>(null);
   const searchParams = useSearchParams();
+  const fallbackEmail =
+    process.env.NEXT_PUBLIC_CONTACT_EMAIL ??
+    "operaciones@brisacubanacleanintelligence.com";
+  const showPropertyCountError = propertySelectTouched && !propertyCount;
 
   const planInterestMap = useMemo<Record<PlanId, string>>(
     () => ({
@@ -68,6 +84,7 @@ export function LeadCaptureForm({
     const planFromQuery = searchParams?.get("plan");
     if (!planFromQuery) {
       setServiceInterest("");
+      setPlanCode(null);
       return;
     }
     if (isPlanId(planFromQuery)) {
@@ -75,7 +92,24 @@ export function LeadCaptureForm({
     } else {
       setServiceInterest(`Interés en ${planFromQuery}`);
     }
+    setPlanCode(planFromQuery);
   }, [planInterestMap, searchParams]);
+
+  useEffect(() => {
+    const inventoryFromQuery = searchParams?.get("inventory");
+    if (!inventoryFromQuery) {
+      return;
+    }
+    const decodedValue = decodeURIComponent(inventoryFromQuery);
+    if (
+      PROPERTY_COUNT_OPTIONS.includes(
+        decodedValue as (typeof PROPERTY_COUNT_OPTIONS)[number],
+      )
+    ) {
+      setPropertyCount(decodedValue);
+      setPropertySelectTouched(false);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -87,7 +121,10 @@ export function LeadCaptureForm({
     }
   }, []);
 
-  async function submitLead(values: LeadPayload, utm: UtmParams | null) {
+  async function submitLead(
+    values: LeadPayload,
+    utm: UtmParams | null,
+  ): Promise<void> {
     try {
       const body: Record<string, unknown> = { ...values };
 
@@ -99,8 +136,7 @@ export function LeadCaptureForm({
         if (utm.term) body.utm_term = utm.term;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-      const res = await fetch(`${apiUrl}/api/leads`, {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -133,12 +169,14 @@ export function LeadCaptureForm({
       name: (formData.get("name") ?? "").toString().trim(),
       email: (formData.get("email") ?? "").toString().trim(),
       company: (formData.get("company") ?? "").toString().trim(),
-      propertyCount: (formData.get("propertyCount") ?? "").toString().trim(),
+      propertyCount: propertyCount.trim(),
       notes: (formData.get("notes") ?? "").toString().trim(),
       serviceInterest: serviceInterest.trim() || undefined,
+      planCode: planCode ?? undefined,
     };
 
     if (!payload.name || !payload.email || !payload.propertyCount) {
+      setPropertySelectTouched(true);
       setStatus("error");
       setErrorMessage("Completa los campos obligatorios.");
       return;
@@ -151,6 +189,8 @@ export function LeadCaptureForm({
         await submitLead(payload, resolvedUtm ?? null);
         form.reset();
         setStatus("success");
+        setPropertyCount("");
+        setPropertySelectTouched(false);
         recordMarketingEvent("cta_request_proposal", {
           propertyCount: payload.propertyCount,
           serviceInterest: payload.serviceInterest,
@@ -171,7 +211,9 @@ export function LeadCaptureForm({
             ? error.message
             : "No pudimos registrar tu solicitud.";
         setStatus("error");
-        setErrorMessage(message);
+        setErrorMessage(
+          `${message} Escríbenos a ${fallbackEmail} o agenda por WhatsApp.`,
+        );
         recordMarketingEvent("lead_form_failed", {
           reason: message,
           serviceInterest: payload.serviceInterest,
@@ -211,6 +253,7 @@ export function LeadCaptureForm({
               ajustar la información si necesitas otro servicio.
             </p>
           ) : null}
+          <input type="hidden" name="planCode" value={planCode ?? ""} />
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -276,18 +319,33 @@ export function LeadCaptureForm({
               <select
                 id={`${formId}-propertyCount`}
                 name="propertyCount"
-                defaultValue=""
+                value={propertyCount}
+                onChange={(event) => {
+                  setPropertyCount(event.target.value);
+                  setPropertySelectTouched(true);
+                }}
+                onBlur={() => setPropertySelectTouched(true)}
                 required
-                className="rounded-xl border border-gray-300 dark:border-brisa-700 bg-white dark:bg-brisa-900 px-4 py-3 text-sm sm:text-base text-gray-900 dark:text-brisa-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brisa-500 invalid:border-red-400 invalid:ring-1 invalid:ring-red-200 invalid:focus-visible:ring-red-400"
+                className={`rounded-xl border px-4 py-3 text-sm sm:text-base focus-visible:outline-none focus-visible:ring-2 bg-white text-gray-900 dark:bg-brisa-900 dark:text-brisa-50 ${
+                  showPropertyCountError
+                    ? "border-red-300 focus-visible:ring-red-400 dark:border-red-400/70"
+                    : "border-gray-300 focus-visible:ring-brisa-500 dark:border-brisa-700"
+                }`}
               >
                 <option value="" disabled>
                   Selecciona una opción
                 </option>
-                <option value="1-5 unidades">1-5 unidades</option>
-                <option value="6-15 unidades">6-15 unidades</option>
-                <option value="16-40 unidades">16-40 unidades</option>
-                <option value="41+ unidades">41+ unidades</option>
+                {PROPERTY_COUNT_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
+              {showPropertyCountError ? (
+                <span className="text-xs text-red-600 dark:text-red-300">
+                  Selecciona el rango que mejor describe tu inventario.
+                </span>
+              ) : null}
             </div>
           </div>
 
@@ -331,10 +389,29 @@ export function LeadCaptureForm({
               }`}
             >
               {status === "success"
-                ? "Gracias, agenda en proceso. Te escribiremos muy pronto."
+                ? `Gracias, agenda en proceso. Te escribiremos muy pronto desde ${fallbackEmail}.`
                 : status === "error"
                   ? (errorMessage ?? "Completa los campos obligatorios.")
                   : " "}
+            </p>
+            <p className="text-xs text-gray-400 dark:text-brisa-500 text-center">
+              ¿Prefieres contactarnos directo?{" "}
+              <a
+                className="underline underline-offset-2 text-brisa-600 dark:text-brisa-300"
+                href={`mailto:${fallbackEmail}?subject=Solicitud%20de%20limpieza`}
+              >
+                Escríbenos por email
+              </a>{" "}
+              o{" "}
+              <a
+                className="underline underline-offset-2 text-brisa-600 dark:text-brisa-300"
+                href="https://api.whatsapp.com/send/?phone=17864367132&text=Hola%20Brisa%20Cubana,%20quiero%20coordinar%20limpieza"
+                target="_blank"
+                rel="noreferrer"
+              >
+                abre WhatsApp
+              </a>
+              .
             </p>
           </div>
         </form>

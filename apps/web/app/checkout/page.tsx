@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "Checkout de servicios · Brisa Cubana",
   description:
     "Reserva servicios premium y confirma pagos seguros con Stripe. Compatible con modo prueba y live, registrando metadatos operativos.",
+  alternates: {
+    canonical: "/checkout",
+  },
 };
 
 export default async function CheckoutPage() {

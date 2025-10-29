@@ -38,6 +38,11 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: "/branding/logo-icon.svg",
+    shortcut: "/branding/logo-icon.svg",
+    apple: "/branding/logo-icon.svg",
+  },
   keywords: [
     "limpieza miami",
     "cleaning service",
@@ -80,7 +85,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+type BaseLayoutProps = {
+  children: ReactNode;
+  lang: "es" | "en";
+};
+
+export function BaseLayout({ children, lang }: BaseLayoutProps) {
   const enableSpeedInsights =
     process.env.NEXT_PUBLIC_ENABLE_SPEED_INSIGHTS === "true" ||
     process.env.VERCEL === "1";
@@ -99,12 +109,28 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       postalCode: BUSINESS_POSTAL_CODE,
       addressCountry: "US",
     },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ],
+        opens: "00:00",
+        closes: "23:59",
+      },
+    ],
     sameAs: SOCIAL_LINKS,
   };
 
   return (
     <html
-      lang="es"
+      lang={lang}
       className={`${inter.variable} dark scroll-smooth`}
       suppressHydrationWarning
     >
@@ -124,4 +150,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </body>
     </html>
   );
+}
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return <BaseLayout lang="es">{children}</BaseLayout>;
 }

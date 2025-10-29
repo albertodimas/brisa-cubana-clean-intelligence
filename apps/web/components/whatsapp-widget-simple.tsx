@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { recordMarketingEvent } from "@/lib/marketing-telemetry";
 
 const WHATSAPP_NUMBER = "17864367132"; // +1 786-436-7132
 const DEFAULT_MESSAGE = encodeURIComponent(
@@ -11,6 +12,10 @@ export function WhatsAppWidgetSimple() {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleWhatsAppClick = () => {
+    recordMarketingEvent("whatsapp_chat_start", {
+      placement: "floating_widget",
+      channel: "whatsapp",
+    });
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${DEFAULT_MESSAGE}`;
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
     setIsOpen(false);
@@ -29,7 +34,11 @@ export function WhatsAppWidgetSimple() {
                   ¿Necesitas ayuda?
                 </h3>
                 <p className="text-xs text-gray-600 dark:text-brisa-300 mt-1">
-                  Habla con nuestro equipo de operaciones
+                  Habla con nuestro equipo de operaciones (24/7).
+                </p>
+                <p className="text-[11px] text-gray-500 dark:text-brisa-400 mt-1">
+                  Al abrir WhatsApp aceptas nuestra política de privacidad y el
+                  uso de tu número para seguimiento del servicio.
                 </p>
               </div>
               <button

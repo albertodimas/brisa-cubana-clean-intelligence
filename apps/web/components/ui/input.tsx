@@ -85,7 +85,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           >
             {label}
             {props.required && (
-              <span className="text-red-400 ml-1" aria-label="requerido">
+              <span className="text-red-400 ml-1" aria-hidden="true">
                 *
               </span>
             )}

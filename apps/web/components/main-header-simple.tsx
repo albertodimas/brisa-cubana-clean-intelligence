@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import { BrandLogo } from "@/components/branding/logo";
 
 type NavigationItem = {
   name: string;
@@ -33,49 +34,23 @@ export function MainHeaderSimple() {
     <header
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         scrolled
-          ? "bg-white/95 dark:bg-brisa-950/95 backdrop-blur-md shadow-lg"
-          : "bg-transparent"
+          ? "bg-white/90 dark:bg-brisa-950/95 backdrop-blur-md shadow-lg shadow-brisa-800/10"
+          : "bg-gradient-to-b from-black/10 via-black/0 to-transparent"
       }`}
     >
       <nav
         className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-4"
         aria-label="Global"
       >
-        {/* Logo */}
         <div className="flex lg:flex-1">
-          <Link href="/" className="-m-1.5 p-1.5 group">
-            <span className="sr-only">Brisa Cubana Clean Intelligence</span>
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brisa-600 to-brisa-400 flex items-center justify-center shadow-lg shadow-brisa-600/20 group-hover:shadow-xl group-hover:shadow-brisa-600/30 transition-shadow">
-                <svg
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                  />
-                </svg>
-              </div>
-              <span
-                className={`font-semibold text-lg transition-colors ${
-                  scrolled
-                    ? "text-gray-900 dark:text-white"
-                    : "text-white dark:text-white"
-                }`}
-              >
-                Brisa Cubana
-              </span>
-            </div>
-          </Link>
+          <BrandLogo
+            showWordmark
+            invert={!scrolled}
+            className="-m-1.5 p-1.5 pl-0"
+            contentClassName="group"
+          />
         </div>
 
-        {/* Desktop navigation */}
         <div className="hidden lg:flex lg:gap-x-8">
           {navigation.map((item) => (
             <Link
@@ -92,7 +67,6 @@ export function MainHeaderSimple() {
           ))}
         </div>
 
-        {/* CTA Buttons */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
           <Link
             href="/login"

@@ -7,9 +7,11 @@ const utmTrackingMock = vi.hoisted(() => ({
   loadStoredUtm: vi.fn(),
 }));
 
+const searchParamsGetMock = vi.fn();
+
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({
-    get: vi.fn(),
+    get: searchParamsGetMock,
   }),
 }));
 
@@ -29,6 +31,7 @@ describe("LeadCaptureForm", () => {
   beforeEach(() => {
     resolveAndStoreUtm.mockReset();
     loadStoredUtm.mockReset();
+    searchParamsGetMock.mockImplementation(() => null);
     vi.spyOn(window, "fetch").mockResolvedValue({
       ok: true,
       json: vi.fn(),
@@ -114,6 +117,70 @@ describe("LeadCaptureForm", () => {
     expect(body).toMatchObject({
       utm_source: "email",
       utm_medium: "newsletter",
+    });
+  });
+
+  it("precarga plan, inventario y mensajes cuando llegan por querystring", async () => {
+    searchParamsGetMock.mockImplementation((key: string) => {
+      if (key === "plan") return "turnover";
+      if (key === "inventory") return "6-15 unidades";
+      return null;
+    });
+    resolveAndStoreUtm.mockReturnValue(null);
+    loadStoredUtm.mockReturnValue(null);
+
+    render(<LeadCaptureForm />);
+
+    expect(
+      screen.getByText("Interés en Turnover Premium Airbnb"),
+    ).toBeInTheDocument();
+
+    const inventorySelect = screen.getByLabelText(
+      /Inventario aproximado/i,
+    ) as HTMLSelectElement;
+    expect(inventorySelect.value).toBe("6-15 unidades");
+
+    const hiddenPlanInput = document.querySelector(
+      'input[name="planCode"]',
+    ) as HTMLInputElement | null;
+    expect(hiddenPlanInput?.value).toBe("turnover");
+  });
+
+  it("muestra fallback amigable cuando la API responde con error", async () => {
+    const user = userEvent.setup();
+    searchParamsGetMock.mockImplementation((key: string) => {
+      if (key === "plan") return "deep-clean";
+      return null;
+    });
+
+    resolveAndStoreUtm.mockReturnValue(null);
+    loadStoredUtm.mockReturnValue(null);
+
+    vi.spyOn(window, "fetch").mockResolvedValue({
+      ok: false,
+      json: vi.fn().mockResolvedValue({ error: "API en mantenimiento" }),
+    } as unknown as Response);
+
+    render(<LeadCaptureForm />);
+
+    await user.type(screen.getByLabelText(/Nombre completo/i), "Lucía Error");
+    await user.type(
+      screen.getByLabelText(/Email corporativo/i),
+      "lucia@example.com",
+    );
+    await user.selectOptions(
+      screen.getByLabelText(/Inventario aproximado/i),
+      "1-5 unidades",
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Recibir propuesta personalizada" }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "API en mantenimiento Escríbenos a operaciones@brisacubanacleanintelligence.com o agenda por WhatsApp.",
+      );
     });
   });
 });

@@ -11,7 +11,6 @@ import {
   StaggerContainer,
   StaggerItem,
   GradientMesh,
-  CountUp,
   TiltCard,
 } from "@/components/ui";
 import {
@@ -22,6 +21,10 @@ import {
   socialLinks,
   testimonials,
 } from "@/lib/marketing-content";
+import {
+  MarketHighlightsGrid,
+  MarketStatsSnapshot,
+} from "@/components/landing/market-stats";
 
 export const metadata: Metadata = {
   title: "Brisa Cubana Clean Intelligence · Turnovers premium en Miami",
@@ -31,6 +34,13 @@ export const metadata: Metadata = {
     title: "Brisa Cubana Clean Intelligence",
     description:
       "Limpieza profesional, evidencia fotográfica y dashboard operativo 24/7 para STR y residencias premium en Miami.",
+  },
+  alternates: {
+    canonical: "/",
+    languages: {
+      es: "/",
+      en: "/en",
+    },
   },
 };
 
@@ -123,7 +133,7 @@ export default function LandingPage() {
               <ScrollReveal variant="fadeUp" delay={0.4}>
                 <div className="flex flex-wrap gap-4">
                   <MarketingLink
-                    href="#contacto"
+                    href="/?plan=turnover&inventory=6-15%20unidades#contacto"
                     eventName="cta_request_proposal"
                     metadata={{ placement: "hero", target: "contact_form" }}
                     className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-600/20 hover:bg-brisa-700 hover:shadow-xl transition-all hover:-translate-y-0.5"
@@ -190,37 +200,7 @@ export default function LandingPage() {
                     para responder reseñas.
                   </li>
                 </ul>
-                <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-white p-6 dark:from-brisa-900/60 dark:via-brisa-950">
-                  <p className="text-sm font-semibold text-brisa-700 dark:text-brisa-100">
-                    Datos clave (2024-2025)
-                  </p>
-                  <dl className="grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-brisa-200">
-                    <div>
-                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        <CountUp end={70} suffix="%" duration={2.2} />
-                      </dt>
-                      <dd>ocupación promedio anual</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        <CountUp end={194} prefix="$" duration={2.5} />
-                      </dt>
-                      <dd>tarifa diaria media (ADR) en Miami</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        <CountUp end={7589} duration={2.3} />
-                      </dt>
-                      <dd>listados activos en el mercado STR</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-brisa-600 dark:text-brisa-300">
-                        6.4M
-                      </dt>
-                      <dd>visitantes internacionales en 2024</dd>
-                    </div>
-                  </dl>
-                </div>
+                <MarketStatsSnapshot />
               </div>
             </div>
           </header>
@@ -229,78 +209,7 @@ export default function LandingPage() {
 
       <section className="relative -mt-12 sm:-mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal variant="scale" delay={0.2}>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 rounded-3xl border border-white/70 glass-strong p-6 shadow-xl">
-              <StaggerContainer staggerDelay={0.15}>
-                {/* Rotaciones por propiedad */}
-                <StaggerItem>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
-                      Rotaciones por propiedad
-                    </span>
-                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
-                      <CountUp end={12} duration={2} />-
-                      <CountUp end={25} duration={2.2} />
-                      /año
-                    </span>
-                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
-                      Media de turnovers en STR de EE. UU.; planificamos buffers
-                      para picos turísticos.
-                    </p>
-                  </div>
-                </StaggerItem>
-
-                {/* Impacto en reseñas */}
-                <StaggerItem>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
-                      Impacto en reseñas
-                    </span>
-                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
-                      <CountUp end={81} suffix="%" duration={2.5} />
-                    </span>
-                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
-                      De los viajeros prioriza limpieza; 78% deja reviews
-                      positivas cuando está impecable.
-                    </p>
-                  </div>
-                </StaggerItem>
-
-                {/* Programación 24/7 */}
-                <StaggerItem>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
-                      Programación garantizada
-                    </span>
-                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white">
-                      24/7
-                    </span>
-                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
-                      Calendarios sincronizados con alertas same-day y soporte
-                      priorizado.
-                    </p>
-                  </div>
-                </StaggerItem>
-
-                {/* Mercado Miami */}
-                <StaggerItem>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm uppercase tracking-[0.2em] text-brisa-500 dark:text-brisa-300">
-                      Mercado Miami
-                    </span>
-                    <span className="text-3xl font-semibold text-brisa-700 dark:text-white tabular-nums">
-                      <CountUp end={13} duration={2} />
-                      K+ listings
-                    </span>
-                    <p className="text-sm text-gray-600 dark:text-brisa-300 leading-snug">
-                      Inventario activo con picos Nov-Mar y 24M de visitantes
-                      anuales.
-                    </p>
-                  </div>
-                </StaggerItem>
-              </StaggerContainer>
-            </div>
-          </ScrollReveal>
+          <MarketHighlightsGrid />
         </div>
       </section>
 
@@ -681,21 +590,33 @@ export default function LandingPage() {
 
       <PricingTiers
         tiers={pricingTiers}
-        renderCTA={(tier) => (
-          <MarketingLink
-            href={`/?plan=${tier.id}#contacto`}
-            eventName="cta_request_proposal"
-            metadata={{
-              placement: "pricing",
-              tierId: tier.id,
-              target: "contact_form",
-            }}
-            className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-4 py-2 text-sm font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
-            prefetch={false}
-          >
-            Solicitar onboarding
-          </MarketingLink>
-        )}
+        renderCTA={(tier) => {
+          const inventoryMap: Record<string, string> = {
+            turnover: "6-15 unidades",
+            "deep-clean": "16-40 unidades",
+            "post-construction": "41+ unidades",
+          };
+          const inventory = inventoryMap[tier.id];
+          const inventoryQuery = inventory
+            ? `&inventory=${encodeURIComponent(inventory)}`
+            : "";
+
+          return (
+            <MarketingLink
+              href={`/?plan=${tier.id}${inventoryQuery}#contacto`}
+              eventName="cta_request_proposal"
+              metadata={{
+                placement: "pricing",
+                tierId: tier.id,
+                target: "contact_form",
+              }}
+              className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-4 py-2 text-sm font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
+              prefetch={false}
+            >
+              Solicitar onboarding
+            </MarketingLink>
+          );
+        }}
       />
 
       <section className="py-16 sm:py-20 bg-brisa-50 dark:bg-brisa-950/60">

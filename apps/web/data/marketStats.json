@@ -1,0 +1,103 @@
+[
+  {
+    "metricId": "occupancy_rate",
+    "label": "Ocupación promedio anual",
+    "value": 72,
+    "unit": "percentage",
+    "presentation": {
+      "suffix": "%",
+      "decimals": 0
+    },
+    "period": "Sep 2024 - Ago 2025",
+    "source": "AirDNA · Greater Miami STR Report",
+    "sourceUrl": "https://www.airdna.co/market-data/app/us/fl/miami",
+    "lastUpdated": "2025-08-31"
+  },
+  {
+    "metricId": "adr_miami",
+    "label": "Tarifa diaria media (ADR) en Miami",
+    "value": 215,
+    "unit": "currency_usd",
+    "presentation": {
+      "prefix": "$",
+      "decimals": 0
+    },
+    "period": "Sep 2024 - Ago 2025",
+    "source": "AirDNA · Greater Miami STR Report",
+    "sourceUrl": "https://www.airdna.co/market-data/app/us/fl/miami",
+    "lastUpdated": "2025-08-31"
+  },
+  {
+    "metricId": "active_listings",
+    "label": "Listados activos en el mercado STR",
+    "value": 13.8,
+    "unit": "thousands",
+    "presentation": {
+      "suffix": "K+",
+      "decimals": 1
+    },
+    "period": "Sep 2025",
+    "source": "Miami-Dade Short-Term Rental Compliance Report",
+    "sourceUrl": "https://www.miamidade.gov/global/housing/short-term-rentals/reports.page",
+    "lastUpdated": "2025-09-20"
+  },
+  {
+    "metricId": "international_visitors",
+    "label": "Visitantes internacionales en 2024",
+    "value": 6.4,
+    "unit": "millions",
+    "presentation": {
+      "suffix": "M",
+      "decimals": 1
+    },
+    "period": "Año calendario 2024",
+    "source": "Greater Miami Convention & Visitors Bureau",
+    "sourceUrl": "https://www.gmcvb.com/research-and-statistics/",
+    "lastUpdated": "2025-07-15"
+  },
+  {
+    "metricId": "turnovers_per_property",
+    "label": "Rotaciones por propiedad al año",
+    "value": 12,
+    "valueMax": 26,
+    "unit": "per_year",
+    "presentation": {
+      "suffix": "/año",
+      "decimals": 0,
+      "format": "range"
+    },
+    "period": "Promedio STR EEUU 2024",
+    "source": "Transparent Intelligence · STR Benchmark",
+    "sourceUrl": "https://www.seetransparent.com/market-data",
+    "lastUpdated": "2025-08-05"
+  },
+  {
+    "metricId": "review_impact_cleaning",
+    "label": "Viajeros que priorizan limpieza en reviews",
+    "value": 81,
+    "unit": "percentage",
+    "presentation": {
+      "suffix": "%",
+      "decimals": 0
+    },
+    "period": "Encuesta Expedia · Jun 2025",
+    "source": "Expedia Traveler Value Index",
+    "sourceUrl": "https://info.expediagroup.com/traveler-value-index",
+    "lastUpdated": "2025-06-30"
+  },
+  {
+    "metricId": "total_visitors",
+    "label": "Visitantes totales en 2024",
+    "value": 24,
+    "unit": "millions",
+    "presentation": {
+      "suffix": "M",
+      "decimals": 0
+    },
+    "period": "Año calendario 2024",
+    "source": "Greater Miami Convention & Visitors Bureau",
+    "sourceUrl": "https://www.gmcvb.com/research-and-statistics/",
+    "lastUpdated": "2025-07-15",
+    "notes": "Incluye visitantes nacionales e internacionales reportados."
+  }
+]

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- Background rounded square with gradient -->
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="240" height="240" rx="45" fill="url(#iconGradient)"/>
+  
+  <!-- Wave lines centered and scaled for icon -->
+  <g transform="translate(45, 90)">
+    <!-- Top wave - White -->
+    <path d="M 20,30 Q 50,18 80,30 T 140,30" 
+          stroke="white" 
+          stroke-width="5" 
+          fill="none" 
+          stroke-linecap="round"/>
+    
+    <!-- Dots on top wave -->
+    <circle cx="50" cy="30" r="5" fill="white"/>
+    <circle cx="80" cy="30" r="5" fill="white"/>
+    <circle cx="110" cy="30" r="5" fill="white"/>
+    
+    <!-- Middle wave -->
+    <path d="M 20,48 Q 50,36 80,48 T 140,48" 
+          stroke="white" 
+          stroke-width="4" 
+          fill="none" 
+          stroke-linecap="round"
+          opacity="0.6"/>
+    
+    <!-- Bottom wave -->
+    <path d="M 20,66 Q 50,54 80,66 T 140,66" 
+          stroke="white" 
+          stroke-width="3.5" 
+          fill="none" 
+          stroke-linecap="round"
+          opacity="0.3"/>
+  </g>
+</svg>

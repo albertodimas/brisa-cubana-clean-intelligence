@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ScrollReveal,
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
   title: "Portal Cliente · Brisa Cubana Clean Intelligence",
   description:
     "Explora la experiencia del portal cliente: reservas, notificaciones y soporte en tiempo real con Brisa Cubana Clean Intelligence.",
+  alternates: {
+    canonical: "/clientes",
+  },
 };
 
 const highlights = [
@@ -29,7 +33,52 @@ const highlights = [
   },
 ];
 
+const betaAccessFormUrl = "https://forms.gle/BrisaPortalBetaAccess2025";
+
+const roadmapTimeline = [
+  {
+    title: "Beta privada",
+    period: "Diciembre 2025",
+    description:
+      "Onboarding de los 5 clientes piloto actuales con seguimiento semanal y dashboards compartidos.",
+  },
+  {
+    title: "Piloto ampliado",
+    period: "Enero 2026",
+    description:
+      "Invitaremos hasta 15 cuentas de alto volumen para validar integraciones PMS y automatizaciones de QA.",
+  },
+  {
+    title: "General Availability",
+    period: "Q1 2026",
+    description:
+      "Portal abierto mediante magic links, soporte 24/7 y facturación automática para reservas confirmadas.",
+  },
+];
+
+const accessModes = [
+  {
+    label: "Demo guiada",
+    description:
+      "Sesión en vivo con nuestro equipo. Mostramos flujos principales y resolvemos dudas en 30 minutos.",
+  },
+  {
+    label: "Piloto controlado",
+    description:
+      "Activamos el portal para tu operación real durante 4 semanas con soporte dedicado y reportes semanales.",
+  },
+  {
+    label: "Beta privada",
+    description:
+      "Acceso continuo con roadmap compartido, canal de feedback y priorización de features críticos.",
+  },
+];
+
 export default function PortalClientePage() {
+  const checkoutPublishableKey =
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+  const isCheckoutReady = checkoutPublishableKey.length > 0;
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-brisa-50 via-white to-brisa-100 px-4 py-16 text-gray-900 dark:from-brisa-950 dark:via-brisa-900 dark:to-brisa-950 dark:text-white sm:px-6 md:px-10">
       {/* Gradient Mesh Background - Replace radial gradient */}
@@ -46,6 +95,15 @@ export default function PortalClientePage() {
       <div className="relative mx-auto grid max-w-4xl gap-12">
         <ScrollReveal variant="fadeDown" delay={0.1}>
           <header className="rounded-3xl border border-white/60 bg-white/80 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/70">
+            <div className="pointer-events-none absolute -top-8 -right-4 hidden w-32 sm:block md:-top-10 md:-right-6 md:w-40">
+              <Image
+                src="/branding/logo-vertical.svg"
+                alt="Brisa Cubana Clean Intelligence"
+                width={160}
+                height={180}
+                className="h-auto w-full drop-shadow-lg"
+              />
+            </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
               Portal cliente · fase 2
             </span>
@@ -74,6 +132,16 @@ export default function PortalClientePage() {
                 Coordinar piloto con operaciones →
               </Link>
             </div>
+            {!isCheckoutReady ? (
+              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900 dark:border-amber-600/40 dark:bg-amber-900/40 dark:text-amber-100">
+                <p className="font-semibold">Checkout en modo demo</p>
+                <p className="mt-1 text-xs text-amber-800/80 dark:text-amber-100/80">
+                  Mientras integramos Stripe en producción confirmaremos los
+                  pagos a través del equipo de operaciones. Agenda tu demo y
+                  procesaremos el cobro manualmente.
+                </p>
+              </div>
+            ) : null}
           </header>
         </ScrollReveal>
 
@@ -123,6 +191,59 @@ export default function PortalClientePage() {
           </StaggerItem>
         </StaggerContainer>
 
+        <ScrollReveal variant="fadeUp" delay={0.15}>
+          <section className="rounded-3xl border border-white/60 bg-white/80 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/70">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Hitos del lanzamiento
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-brisa-200">
+              Compartimos el roadmap público para que planifiques tus
+              integraciones y definas cuándo migrar flujos críticos al portal.
+            </p>
+            <ol className="mt-6 space-y-4">
+              {roadmapTimeline.map((item) => (
+                <li
+                  key={item.title}
+                  className="relative rounded-2xl border border-brisa-100/80 bg-white/90 p-4 shadow-sm dark:border-brisa-700/40 dark:bg-brisa-900/70"
+                >
+                  <span className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                    {item.period}
+                  </span>
+                  <h3 className="mt-2 text-lg font-semibold text-gray-900 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-brisa-200">
+                    {item.description}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </ScrollReveal>
+
+        <ScrollReveal variant="fadeUp" delay={0.2}>
+          <section className="rounded-3xl border border-white/60 bg-white/80 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/70">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Cómo funciona cada acceso
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              {accessModes.map((mode) => (
+                <div
+                  key={mode.label}
+                  className="rounded-2xl border border-brisa-100/80 bg-white/90 p-4 text-sm text-gray-700 shadow-sm dark:border-brisa-700/50 dark:bg-brisa-900/70 dark:text-brisa-200"
+                >
+                  <h3 className="text-base font-semibold text-brisa-600 dark:text-brisa-200">
+                    {mode.label}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed">
+                    {mode.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
+
         <ScrollReveal variant="fadeUp" delay={0.2}>
           <section className="rounded-3xl border border-white/60 bg-white/80 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/70">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -135,7 +256,7 @@ export default function PortalClientePage() {
             </p>
             <a
               className="mt-5 inline-flex items-center justify-center rounded-full border border-brisa-500/50 px-5 py-2.5 text-sm font-semibold tracking-wide text-brisa-600 transition-colors hover:bg-brisa-100 dark:border-brisa-400/50 dark:text-brisa-200 dark:hover:bg-brisa-800/60"
-              href="https://forms.gle/uAcbBetaPortal"
+              href={betaAccessFormUrl}
               target="_blank"
               rel="noreferrer"
             >
