@@ -9,6 +9,7 @@ export type CreateLeadInput = {
   company?: string;
   propertyCount?: string;
   serviceInterest?: string;
+  planCode?: string;
   notes?: string;
   status?: LeadStatus;
   utmSource?: string;

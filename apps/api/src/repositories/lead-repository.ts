@@ -17,6 +17,7 @@ export class LeadRepository implements ILeadRepository {
         company: input.company,
         propertyCount: input.propertyCount,
         serviceInterest: input.serviceInterest,
+        planCode: input.planCode,
         notes: input.notes,
         status: input.status ?? "NEW",
         utmSource: input.utmSource,

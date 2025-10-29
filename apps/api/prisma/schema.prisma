@@ -156,6 +156,7 @@ model Lead {
   company         String?
   propertyCount   String?
   serviceInterest String?
+  planCode        String?
   notes           String?
   status          LeadStatus @default(NEW)
   utmSource       String?

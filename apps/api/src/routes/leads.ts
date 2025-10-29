@@ -12,6 +12,7 @@ const createLeadSchema = z.object({
   company: z.string().optional(),
   propertyCount: z.string().optional(),
   serviceInterest: z.string().optional(),
+  planCode: z.string().max(64).optional(),
   notes: z.string().optional(),
   utm_source: z.string().optional(),
   utm_medium: z.string().optional(),
@@ -43,6 +44,7 @@ router.post("/", async (c) => {
       company: data.company,
       propertyCount: data.propertyCount,
       serviceInterest: data.serviceInterest,
+      planCode: data.planCode,
       notes: data.notes,
       utmSource: data.utm_source,
       utmMedium: data.utm_medium,
@@ -70,6 +72,7 @@ router.post("/", async (c) => {
         `*Email*: ${data.email}`,
         data.phone ? `*Teléfono*: ${data.phone}` : null,
         data.serviceInterest ? `*Servicio*: ${data.serviceInterest}` : null,
+        data.planCode ? `*Plan*: ${data.planCode}` : null,
         data.propertyCount ? `*Unidades*: ${data.propertyCount}` : null,
         utmLines || null,
       ].filter(Boolean);
