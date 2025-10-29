@@ -90,6 +90,14 @@
 
 **Objetivo de tiempo:** < 60 segundos (boot + 17 pruebas)
 
+##### PostHog en navegadores headless
+
+- Desde el 28-oct-2025 `PostHogAnalytics` crea un cliente _noop_ cuando detecta `navigator.webdriver` o user-agents de Lighthouse/Playwright. Esto marca `document.documentElement.dataset.brisaPosthog = "ready"` y resuelve `window.__brisaPostHogPromise`, incluso si no se envían eventos reales.
+- Las pruebas que validan telemetría (ej. `analytics.spec.ts`) deben seguir comprobando el flag `data-brisa-posthog="ready"` en lugar de esperar el envío real de eventos.
+- En entornos productivos/preview con navegadores “reales” seguimos capturando eventos; el fallback solo se activa para entornos automatizados.
+- El preset remoto `tmp/playwright-preview.config.ts` ahora expone proyectos `smoke` y `critical`. Para ejecutar `critical` contra entornos desplegados se requiere un dataset semilla y tokens/bypass equivalentes a los usados en CI (headers `x-lhci-bypass`, cuentas QA, etc.). Sin estos permisos, las pruebas que crean/actualizan recursos (notificaciones, usuarios, portal cliente) fallarán al apuntar a producción.
+- En local, exporta `E2E_LOGIN_RATE_LIMIT=50` (o mayor) antes de `pnpm test:e2e:critical` para evitar rate limits 429 generados por los múltiples logins automáticos. El `playwright.config.ts` propagará el valor tanto al API (`LOGIN_RATE_LIMIT`) como a las cabeceras de bypass.
+
 ---
 
 #### 3. **Full Suite** (~90-100s)

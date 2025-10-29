@@ -92,21 +92,6 @@ jobs:
           export PATH="$PNPM_HOME:$PATH"
           vercel pull --yes --environment=preview --scope brisa-cubana --token "$VERCEL_TOKEN"
 
-      - name: Build API (prebuilt preview)
-        working-directory: apps/api
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          set -euo pipefail
-          export PATH="$PNPM_HOME:$PATH"
-          export PNPM_BIN="$(command -v pnpm)"
-          mkdir -p node_modules/pnpm/bin node_modules/.bin
-          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
-          chmod +x node_modules/pnpm/bin/pnpm.cjs
-          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
-          vercel build --scope brisa-cubana --token "$VERCEL_TOKEN"
-
       - name: Sincronizar configuración Vercel Web
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -119,6 +104,21 @@ jobs:
       - name: Build Web (prebuilt preview)
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          export PATH="$PNPM_HOME:$PATH"
+          export PNPM_BIN="$(command -v pnpm)"
+          mkdir -p node_modules/pnpm/bin node_modules/.bin
+          cp "$GITHUB_WORKSPACE/scripts/pnpm-shim.cjs" node_modules/pnpm/bin/pnpm.cjs
+          chmod +x node_modules/pnpm/bin/pnpm.cjs
+          ln -sf "$PNPM_BIN" node_modules/.bin/pnpm
+          vercel build --scope brisa-cubana --token "$VERCEL_TOKEN"
+
+      - name: Build API (prebuilt preview)
+        working-directory: apps/api
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail

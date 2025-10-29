@@ -86,7 +86,15 @@ export function PostHogAnalytics() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (isPostHogInitialized || shouldSkipAnalytics()) {
+    if (isPostHogInitialized) {
+      return;
+    }
+
+    if (shouldSkipAnalytics()) {
+      const noopClient = createNoopClient();
+      posthogClientPromise = Promise.resolve(noopClient);
+      markPosthogReady(noopClient);
+      isPostHogInitialized = true;
       return;
     }
 

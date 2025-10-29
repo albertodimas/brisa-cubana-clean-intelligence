@@ -13,24 +13,44 @@
 
 import { randomUUID } from "node:crypto";
 
-const apiKey =
+const projectApiKey =
   process.env.POSTHOG_API_KEY ?? process.env.NEXT_PUBLIC_POSTHOG_KEY;
-const host = (process.env.POSTHOG_HOST ?? "https://us.i.posthog.com").replace(
+const personalApiKey =
+  process.env.POSTHOG_PERSONAL_API_KEY ??
+  (projectApiKey?.startsWith("phx_") ? projectApiKey : undefined);
+const host = (process.env.POSTHOG_HOST ??
+  process.env.NEXT_PUBLIC_POSTHOG_HOST ??
+  "https://us.i.posthog.com").replace(
   /\/$/,
   "",
 );
 const eventName = process.argv[2] ?? "checkout_payment_failed";
 const distinctId = process.argv[3] ?? `brisa-cli-${randomUUID()}`;
 
-if (!apiKey) {
+if (!projectApiKey) {
   console.error(
     "❌ Debes definir POSTHOG_API_KEY (o NEXT_PUBLIC_POSTHOG_KEY) antes de ejecutar este script.",
   );
   process.exit(1);
 }
 
+const headers = {
+  "Content-Type": "application/json",
+};
+
+if (personalApiKey && personalApiKey.startsWith("phx_")) {
+  headers.Authorization = `Bearer ${personalApiKey}`;
+}
+
+if (!headers.Authorization && projectApiKey.startsWith("phx_")) {
+  console.error(
+    "❌ Detecté una clave personal (prefijo phx_) pero no se proporcionó POSTHOG_PERSONAL_API_KEY con formato válido.",
+  );
+  process.exit(1);
+}
+
 const payload = {
-  api_key: apiKey,
+  api_key: projectApiKey,
   event: eventName,
   distinct_id: distinctId,
   properties: {
@@ -43,9 +63,7 @@ const payload = {
 try {
   const response = await fetch(`${host}/capture/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 

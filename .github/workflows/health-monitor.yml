@@ -66,10 +66,10 @@ jobs:
             text: "⚠️ Falla en health-check",
             blocks: [
               {"type": "section", "text": {"type": "mrkdwn", "text": "*⚠️ Falla en health-check*"}},
-              {"type": "section", "text": {"type": "mrkdwn", "text": "`" + $issues + "`"}},
+              {"type": "section", "text": {"type": "mrkdwn", "text": ("`" + $issues + "`")}},
               {"type": "context", "elements": [
-                {"type": "mrkdwn", "text": "Web: <" + $web + "|healthz> · API: <" + $api + "|healthz>"},
-                {"type": "mrkdwn", "text": "Hora (UTC): " + $time}
+                {"type": "mrkdwn", "text": ("Web: <" + $web + "|healthz> · API: <" + $api + "|healthz>")},
+                {"type": "mrkdwn", "text": ("Hora (UTC): " + $time)}
               ]}
             ]
           }')

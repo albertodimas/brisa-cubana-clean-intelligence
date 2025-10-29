@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Migración Prisma `20251029041632_add_core_entities` que formaliza tablas `Notification`/`Lead`, enums `NotificationType` y `LeadStatus`, y la columna `User.isActive` en la historia de migraciones.
 - Hero comercial con imagen aprobada por marketing y sección portal actualizada con assets finales (`apps/web/app/page.tsx`, `public/images/landing/*`).
 - Prueba Playwright `analytics.spec.ts` que verifica la inicialización de PostHog desde la landing pública.
 - Scripts de verificación `pnpm posthog:test-event` y `pnpm sentry:test-event` para validar ingestión y alertas desde la CLI.
@@ -16,7 +17,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- Middleware público ahora permite acceder a `/` sin autenticación para exponer la landing en producción (`apps/web/middleware.ts`).
+- Cliente de analítica en `apps/web/components/analytics/posthog-analytics.tsx` ahora inicializa un cliente _noop_ cuando el navegador se ejecuta en modo headless o automatizado, marcando `document.documentElement.dataset.brisaPosthog = "ready"` para estabilizar las suites smoke/critical en preview y producción.
+- Middleware público migra a `proxy.ts` (Next.js 16) y mantiene acceso abierto a landing/seo mientras aplica redirecciones autenticadas (`apps/web/proxy.ts`).
 - Configuración Playwright propaga `NEXT_PUBLIC_POSTHOG_KEY`/`HOST` por defecto en entornos de prueba.
 - Suite Playwright crítica ahora usa builds de producción (`pnpm build && pnpm start`) para API y web, con puertos configurables (`API_PORT`, `WEB_PORT`) y `PLAYWRIGHT_BASE_URL` definido.
 - Test de seguridad `gestiona sesión (persistencia y logout)` refactorizado con selectores específicos, timeouts explícitos y sincronización `Promise.all`, eliminando cuelgues en CI (`tests/e2e/security.spec.ts`).
@@ -24,15 +26,23 @@ All notable changes to this project are documented here. The format follows [Kee
 - `apps/web` integra `@sentry/nextjs` (`sentry.*.config.ts` y `withSentryConfig`) con tasas de muestreo configurables desde entorno.
 - Cliente analítico migra a `posthog-js-lite`, deshabilitando carga en entornos Lighthouse y exponiendo `window.__brisaPostHogPromise` compartido (`apps/web/components/analytics/posthog-analytics.tsx`, `apps/web/lib/marketing-telemetry.ts`).
 - Middleware permite acceso público a `robots.txt`/`sitemap.xml` y el pipeline principal levanta `next start` para validarlos tras el build.
+- Frontend web actualizado a Next.js 16.0.0 + React 19.2.0 y toolchain asociado (`eslint-config-next@16`, `@next/bundle-analyzer@16`, `typescript@5.9.3`); se ajustó la configuración `tsconfig.json` para typed routes y la nueva importación generada en `next-env.d.ts`.
+- Suites E2E (`tests/e2e/operations.spec.ts`) reutilizan token administrativo entre pruebas, añaden cabeceras autorizadas a los requests y validan respuestas negativas sin propagar `null` cuando el API responde con errores.
+- Dependencias Sentry del monorepo alineadas en `^10.22.0` (`@sentry/nextjs`, `@sentry/node`, `@sentry/profiling-node`); se sincronizaron los overrides de pnpm entre la raíz y los paquetes (`apps/api`, `apps/web`) para asegurar builds consistentes en Vercel.
+- Pipeline `vercel-preview` ahora construye API y Web con `vercel build --prebuilt` antes de desplegar, evitando reinstalaciones `pnpm install --frozen-lockfile` en los entornos de Vercel Preview.
+- Monitor productivo corrige el payload de Slack en caso de fallo (`health-monitor.yml`) y se realineó el `HEALTH_CHECK_TOKEN` (rotación 29-oct-2025, sincronizado en Vercel + GitHub) para que `/healthz` vuelva a responder 200 en los checks programados.
 
 ### Docs
 
+- `docs/qa/e2e-strategy.md` documenta el fallback de PostHog en navegadores headless (`__brisaPostHogClient` + flag `data-brisa-posthog="ready"`) y las implicaciones para Playwright.
 - Formalizado el flujo de documentación (docs/README.md) y ADR (`docs/decisions/README.md` + plantilla); `credentials-audit.md` ahora incluye pautas para documentar secretos sin exponerlos.
 - `docs/operations/observability.md` actualiza la guía CSP para habilitar Sentry en producción.
 - `docs/product/phase-2-roadmap.md` y `docs/product/analytics-decision.md` actualizados con el estado de la integración PostHog y el plan de rotación de claves.
 - `docs/operations/observability.md`, `docs/operations/runbook-daily-monitoring.md` y `docs/operations/alerts.md` ahora incluyen los nuevos scripts y pasos de verificación para alertas PostHog/Sentry.
 - `docs/operations/observability-setup.md` documenta la creación de reglas Sentry (correo) y próximos pasos para Slack.
 - `docs/qa/e2e-strategy.md` documenta el uso de builds de producción y las variables `API_PORT`/`WEB_PORT`/`PLAYWRIGHT_BASE_URL` para entornos locales y CI.
+- `docs/operations/credentials-audit.md` y `docs/overview/status.md` actualizan la rotación del token `/healthz` (29-oct-2025) y la reactivación de Sentry (`SENTRY_AUTH_TOKEN` rotado + evento `4f0dc4dd-681e-43d0-8ce4-3f15a21fede5`).
+- `docs/operations/credentials-audit.md` registra la rotación del webhook Slack (`B09NW578JTH`, 29-oct-2025) y la prueba “Hello, World!”.
 - `docs/overview/status.md` registra la verificación del 27-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.
 - `docs/operations/incident-2025-10-20-vercel-deployment-failure.md` documenta el incidente con Vercel (`temporary_failure` en `patchBuild`) y su resolución (21-oct-2025 01:30 UTC, despliegues Ready de web y API).
