@@ -24,6 +24,7 @@ import {
   updateUserAction,
   toggleUserActiveAction,
   logoutAction,
+  updateLeadAction,
 } from "@/app/actions";
 import {
   fetchServicesPage,
@@ -32,6 +33,7 @@ import {
   fetchCustomersPage,
   fetchUsersPage,
   fetchNotificationsPage,
+  fetchLeadsPage,
   type PaginatedResult,
   type Service,
   type Booking,
@@ -39,6 +41,7 @@ import {
   type Property,
   type User,
   type Notification,
+  type Lead,
 } from "@/lib/api";
 import { auth } from "@/auth";
 
@@ -95,6 +98,7 @@ async function PanelContent({ user, bookingWindow }: PanelContentProps) {
   const emptyUsersPage: PaginatedResult<User> = makeEmptyPage<User>(50);
   const emptyNotificationsPage: PaginatedResult<Notification> =
     makeEmptyPage<Notification>(10);
+  const emptyLeadsPage: PaginatedResult<Lead> = makeEmptyPage<Lead>(50);
 
   const usersPage =
     user.role === "ADMIN"
@@ -104,6 +108,11 @@ async function PanelContent({ user, bookingWindow }: PanelContentProps) {
   const notificationsPage = await fetchNotificationsPage({ limit: 10 }).catch(
     () => emptyNotificationsPage,
   );
+
+  const leadsPage =
+    user.role === "ADMIN" || user.role === "COORDINATOR"
+      ? await fetchLeadsPage()
+      : emptyLeadsPage;
 
   return (
     <>
@@ -135,6 +144,8 @@ async function PanelContent({ user, bookingWindow }: PanelContentProps) {
           updateUser={updateUserAction}
           toggleUserActive={toggleUserActiveAction}
           logout={logoutAction}
+          leads={leadsPage}
+          updateLead={updateLeadAction}
         />
       </section>
     </>
@@ -155,6 +166,7 @@ function PanelContentFallback({ user, bookingWindow }: PanelContentProps) {
   const emptyCustomers = makeEmptyPage<Customer>(50);
   const emptyUsers = makeEmptyPage<User>(50);
   const emptyNotifications = makeEmptyPage<Notification>(10);
+  const emptyLeads = makeEmptyPage<Lead>(50);
 
   return (
     <>
@@ -191,6 +203,8 @@ function PanelContentFallback({ user, bookingWindow }: PanelContentProps) {
           updateUser={updateUserAction}
           toggleUserActive={toggleUserActiveAction}
           logout={logoutAction}
+          leads={emptyLeads}
+          updateLead={updateLeadAction}
           isLoading
         />
       </section>

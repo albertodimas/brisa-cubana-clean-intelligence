@@ -19,8 +19,21 @@ export type CreateLeadInput = {
   utmTerm?: string;
 };
 
+export type UpdateLeadInput = {
+  name?: string;
+  email?: string;
+  phone?: string | null;
+  company?: string | null;
+  propertyCount?: string | null;
+  serviceInterest?: string | null;
+  planCode?: string | null;
+  notes?: string | null;
+  status?: LeadStatus;
+};
+
 export interface ILeadRepository {
   create(input: CreateLeadInput): Promise<LeadResponse>;
   findMany(): Promise<LeadResponse[]>;
   findById(id: string): Promise<LeadResponse | null>;
+  update(id: string, input: UpdateLeadInput): Promise<LeadResponse>;
 }

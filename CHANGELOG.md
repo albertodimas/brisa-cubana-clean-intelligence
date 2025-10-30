@@ -22,6 +22,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Variante `/en` de la landing con layout compartido y etiquetas `hreflang`/canónica actualizadas.
 - Workflow `market-stats-watchdog.yml`, script `scripts/check-market-stats-staleness.mjs` y comando `pnpm monitor:market-stats` para abrir issues automáticos cuando las métricas superan 120 días.
 - Activos oficiales de branding (`apps/web/public/branding`) y componente `BrandLogo` reutilizable para encabezados y materiales promocionales.
+- Módulo "Leads comerciales" en el panel operativo permite actualizar estado, notas internas y métricas desde `/panel`.
 
 ### Changed
 
@@ -67,6 +68,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/operations/incident-2025-10-20-vercel-deployment-failure.md` documenta el incidente con Vercel (`temporary_failure` en `patchBuild`) y su resolución (21-oct-2025 01:30 UTC, despliegues Ready de web y API).
 - `docs/overview/status.md` refleja la fuente única de métricas, la nueva landing en inglés y el watchdog automático; `docs/qa/regression-checklist.md` añade casos para `plan`/`inventory` en CTA, fallback de leads, `whatsapp_chat_start`, referencia de checkout, validaciones del logotipo, navegación re-estilizada y las nuevas secciones “Oferta de valor”, “Funcionalidades clave del portal” y “QA & Garantía”.
 - `docs/business/launch-plan.md` amplía los pilares de valor y QA del piloto, alineando copy y métricas con la landing.
+- `docs/operations/lead-followup-sop.md` documenta el módulo de leads del panel operativo y cómo registrar estado/notas sin salir de la plataforma.
 
 ## [0.4.1] - 2025-10-18
 

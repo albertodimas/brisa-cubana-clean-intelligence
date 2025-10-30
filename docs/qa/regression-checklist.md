@@ -180,6 +180,7 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] Formularios muestran mensajes de éxito/error
 - [ ] Filtros de reservas funcionan (selector de estado, rango de fechas)
 - [ ] Lista de reservas se actualiza después de crear/actualizar
+- [ ] Módulo “Leads comerciales” lista los leads ordenados por fecha y permite actualizar estado y notas (verifica persistencia y refresco)
 
 ### 6.3 Formularios
 

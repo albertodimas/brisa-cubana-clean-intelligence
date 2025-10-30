@@ -10,6 +10,7 @@ import type {
   Service,
   User,
   Notification,
+  Lead,
   PaginatedResult,
 } from "@/lib/api";
 import { usePaginatedResource } from "@/hooks/use-paginated-resource";
@@ -30,6 +31,7 @@ import { ServicesManager } from "./services-manager";
 import { PropertiesManager } from "./properties-manager";
 import { CustomersManager } from "./customers-manager";
 import { UsersManager } from "./users-manager";
+import { LeadsManager } from "./leads-manager";
 
 type ActionResult = {
   success?: string;
@@ -68,6 +70,8 @@ type AdminPanelProps = {
   updateUser: (userId: string, formData: FormData) => Promise<ActionResult>;
   toggleUserActive: (userId: string, active: boolean) => Promise<ActionResult>;
   logout: () => Promise<ActionResult>;
+  leads: PaginatedResult<Lead>;
+  updateLead: (leadId: string, formData: FormData) => Promise<ActionResult>;
   isLoading?: boolean;
 };
 
@@ -90,6 +94,8 @@ export function AdminPanel({
   updateUser,
   toggleUserActive,
   logout,
+  leads,
+  updateLead,
   isLoading = false,
 }: AdminPanelProps) {
   const router = useRouter();
@@ -198,6 +204,18 @@ export function AdminPanel({
     initial: users,
     endpoint: "/api/users",
     initialQuery: { limit: users.pageInfo.limit },
+  });
+
+  const {
+    items: leadItems,
+    pageInfo: leadPageInfo,
+    isLoading: isLeadsRefreshing,
+    isLoadingMore: isLoadingMoreLeads,
+    loadMore: loadMoreLeads,
+    refresh: refreshLeads,
+  } = usePaginatedResource<Lead>({
+    initial: leads,
+    endpoint: "/api/leads",
   });
 
   if (isLoading) {
@@ -373,6 +391,19 @@ export function AdminPanel({
         setQuery={setServiceQuery}
         resetQuery={resetServiceQuery}
       />
+
+      {currentUser?.role === "ADMIN" || currentUser?.role === "COORDINATOR" ? (
+        <LeadsManager
+          leads={leadItems}
+          pageInfo={leadPageInfo}
+          isLoading={isLoading || isLeadsRefreshing}
+          isLoadingMore={isLoadingMoreLeads}
+          onLoadMore={loadMoreLeads}
+          refresh={refreshLeads}
+          onUpdateLead={updateLead}
+          onToast={handleToast}
+        />
+      ) : null}
 
       <BookingsManager
         bookings={bookingItems}

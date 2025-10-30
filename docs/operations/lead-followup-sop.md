@@ -1,6 +1,6 @@
 # SOP · Gestión de Leads Marketing → Operaciones
 
-**Última actualización:** 23 de octubre de 2025
+**Última actualización:** 30 de octubre de 2025
 
 ## Objetivo
 
@@ -22,6 +22,13 @@ Garantizar que cada lead captado desde campañas digitales reciba seguimiento en
 6. MKT OPS revisa semanalmente métricas de conversión y tiempos de respuesta.
 
 ## Detalle paso a paso
+
+### Panel operativo de seguimiento
+
+- El módulo `Panel → Leads comerciales` muestra todos los leads ordenados por fecha de ingreso.
+- Desde esta vista se puede actualizar el estado (`Nuevo`, `Contactado`, `Calificado`, `Ganado`, `Perdido`) y registrar notas internas.
+- Cada cambio queda guardado en la base de datos y sincroniza automáticamente con Slack (vía `SLACK_WEBHOOK_URL`).
+- Usa esta vista para documentar contacto inicial, diagnóstico y resultado sin depender de la hoja de cálculo.
 
 ### 1. Recepción y asignación
 

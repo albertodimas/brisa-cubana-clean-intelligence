@@ -198,6 +198,43 @@ export async function toggleServiceActiveAction(
   }
 }
 
+export async function updateLeadAction(
+  leadId: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  const status = formData.get("leadStatus")?.toString() ?? undefined;
+  const notes = coerceOptionalString(formData.get("leadNotes"));
+
+  const payload: Record<string, unknown> = {};
+  if (status) {
+    payload.status = status;
+  }
+  if (notes !== undefined) {
+    payload.notes = notes;
+  }
+
+  if (Object.keys(payload).length === 0) {
+    return { error: "No hay cambios para guardar" };
+  }
+
+  const result = await authenticatedFetch(
+    `/api/leads/${leadId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+    "No se pudo actualizar el lead",
+    "Lead actualizado",
+    false,
+  );
+
+  if (result.success) {
+    revalidatePath("/panel");
+  }
+
+  return result;
+}
+
 export async function updateServiceAction(
   serviceId: string,
   formData: FormData,

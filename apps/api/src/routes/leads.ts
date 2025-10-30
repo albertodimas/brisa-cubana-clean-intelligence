@@ -1,3 +1,4 @@
+import { LeadStatus } from "@prisma/client";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getLeadRepository } from "../container.js";
@@ -20,6 +21,23 @@ const createLeadSchema = z.object({
   utm_content: z.string().optional(),
   utm_term: z.string().optional(),
 });
+
+const updateLeadSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    email: z.string().email("Invalid email").optional(),
+    phone: z.string().nullable().optional(),
+    company: z.string().nullable().optional(),
+    propertyCount: z.string().nullable().optional(),
+    serviceInterest: z.string().nullable().optional(),
+    planCode: z.string().max(64).nullable().optional(),
+    notes: z.string().max(2000).nullable().optional(),
+    status: z.nativeEnum(LeadStatus).optional(),
+  })
+  .refine(
+    (data) => Object.keys(data).length > 0,
+    "Proporciona al menos un campo para actualizar",
+  );
 
 // Public endpoint - no authentication required
 router.post("/", async (c) => {
@@ -125,6 +143,93 @@ router.get(
     const repository = getLeadRepository();
     const leads = await repository.findMany();
     return c.json({ data: leads });
+  },
+);
+
+router.patch(
+  "/:leadId",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR"]),
+  async (c) => {
+    const leadId = c.req.param("leadId");
+    if (!leadId) {
+      return c.json({ error: "Lead ID requerido" }, 400);
+    }
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json(
+        { error: "Solicitud inválida. Envía un cuerpo JSON." },
+        400,
+      );
+    }
+
+    const validation = updateLeadSchema.safeParse(body);
+    if (!validation.success) {
+      return c.json(
+        { error: "Datos inválidos", details: validation.error.issues },
+        400,
+      );
+    }
+
+    const repository = getLeadRepository();
+    const existing = await repository.findById(leadId);
+    if (!existing) {
+      return c.json({ error: "Lead no encontrado" }, 404);
+    }
+
+    const payload = validation.data;
+
+    try {
+      const updated = await repository.update(leadId, {
+        name: payload.name ?? undefined,
+        email: payload.email ?? undefined,
+        phone:
+          payload.phone === undefined
+            ? undefined
+            : payload.phone && payload.phone.trim()
+              ? payload.phone
+              : null,
+        company:
+          payload.company === undefined
+            ? undefined
+            : payload.company && payload.company.trim()
+              ? payload.company
+              : null,
+        propertyCount:
+          payload.propertyCount === undefined
+            ? undefined
+            : payload.propertyCount && payload.propertyCount.trim()
+              ? payload.propertyCount
+              : null,
+        serviceInterest:
+          payload.serviceInterest === undefined
+            ? undefined
+            : payload.serviceInterest && payload.serviceInterest.trim()
+              ? payload.serviceInterest
+              : null,
+        planCode:
+          payload.planCode === undefined
+            ? undefined
+            : payload.planCode && payload.planCode.trim()
+              ? payload.planCode
+              : null,
+        notes:
+          payload.notes === undefined
+            ? undefined
+            : payload.notes && payload.notes.trim()
+              ? payload.notes
+              : null,
+        status: payload.status ?? undefined,
+      });
+
+      return c.json({ data: updated });
+    } catch (error) {
+      console.error("[leads] update error", error);
+      return c.json({ error: "No se pudo actualizar el lead" }, 500);
+    }
   },
 );
 

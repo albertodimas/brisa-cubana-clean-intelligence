@@ -68,6 +68,26 @@ export type Notification = {
   createdAt: string;
 };
 
+export type Lead = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  company?: string | null;
+  propertyCount?: string | null;
+  serviceInterest?: string | null;
+  planCode?: string | null;
+  notes?: string | null;
+  status: string;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmContent?: string | null;
+  utmTerm?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export type PaginationInfo = {
@@ -410,6 +430,17 @@ export async function fetchNotificationsPage(
   );
   if (!response) {
     return { items: [], pageInfo: normalizePagination(undefined) };
+  }
+  return toPaginatedResult(response);
+}
+
+export async function fetchLeadsPage(): Promise<PaginatedResult<Lead>> {
+  const response = await safeFetch<Lead[]>("/api/leads");
+  if (!response) {
+    return {
+      items: [],
+      pageInfo: normalizePagination(undefined),
+    };
   }
   return toPaginatedResult(response);
 }
