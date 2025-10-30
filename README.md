@@ -17,6 +17,7 @@ Al día **30 de octubre de 2025**, la release activa es `v0.4.2`, con **224 prue
 - **Persistencia**: Prisma Client 6.17.1 → PostgreSQL 17 (Neon en producción) / PostgreSQL 16 en Docker local con soft delete en todos los modelos.
 - **Observabilidad**: Pino + Sentry (web/API), Speed Insights, métricas `/health`, logs estructurados y monitoreo E2E nocturno.
 - **Tooling**: pnpm 10.18 · Turborepo 2.5 · TypeScript 5.9 · Vitest 3.2 · Playwright 1.56 · Husky + lint-staged.
+- **Modelo de negocio y lanzamiento piloto**: ver [Plan de Lanzamiento Piloto](docs/business/launch-plan.md) y [Estado del Proyecto](docs/overview/status.md) para estrategia comercial, roadmap y métricas objetivo.
 
 ---
 
