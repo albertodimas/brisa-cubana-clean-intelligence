@@ -818,7 +818,10 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="overflow-x-auto rounded-3xl border border-gray-200 dark:border-brisa-800 bg-white dark:bg-brisa-950 shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-brisa-800 text-sm">
+            <table
+              className="min-w-full divide-y divide-gray-200 dark:divide-brisa-800 text-sm"
+              data-testid="service-comparison-table"
+            >
               <thead className="bg-brisa-50/70 dark:bg-brisa-900/40 text-left">
                 <tr className="text-xs uppercase tracking-[0.25em] text-brisa-500 dark:text-brisa-300">
                   <th scope="col" className="px-6 py-4 font-semibold">
@@ -875,6 +878,7 @@ export default function LandingPage() {
                         eventName="cta_plan_compare"
                         metadata={{ placement: "comparison", plan: service.id }}
                         className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-4 py-2 text-xs font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
+                        data-testid={`plan-cta-${service.id}`}
                         prefetch={false}
                       >
                         Cotizar paquete

@@ -86,6 +86,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Helper Playwright asegura que los flujos de login redirigen correctamente al panel (`tests/e2e/support/auth.ts`).
 - Suite landing (`apps/web/app/page.test.tsx`) actualizada con asserts para la nueva experiencia de marketing y enlaces de seguimiento.
+- Playwright smoke (`tests/e2e/marketing.spec.ts`) valida la tabla comparativa de paquetes y la instrumentación de los CTAs `cta_plan_compare`.
 
 ### Docs
 
