@@ -36,22 +36,13 @@ jobs:
         if: steps.versions.outputs.needs-update == 'true'
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.VERCEL_CLI_WATCH_TOKEN }}
           script: |
             const latest = core.getInput('latest');
             const current = core.getInput('current');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const title = `Track Vercel CLI ${latest}`;
-
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner,
-              repo,
-              state: 'open',
-              labels: 'infra',
-              per_page: 100,
-            });
-
-            const existing = issues.find(issue => issue.title === title);
 
             const body = [
               `Detected new Vercel CLI version **${latest}** (current tracked: ${current}).`,
@@ -64,23 +55,44 @@ jobs:
               '_Este issue fue creado automáticamente por `vercel-cli-watch.yml`._'
             ].join('\n');
 
-            if (existing) {
-              core.info(`Issue already exists: ${existing.html_url}`);
-              await github.rest.issues.createComment({
+            try {
+              const { data: issues } = await github.rest.issues.listForRepo({
                 owner,
                 repo,
-                issue_number: existing.number,
-                body: `Nueva detección automática: ${body}`,
+                state: 'open',
+                labels: 'infra',
+                per_page: 100,
               });
-            } else {
-              const { data: issue } = await github.rest.issues.create({
-                owner,
-                repo,
-                title,
-                body,
-                labels: ['infra'],
-              });
-              core.info(`Created issue: ${issue.html_url}`);
+
+              const existing = issues.find(issue => issue.title === title);
+
+              if (existing) {
+                core.info(`Issue already exists: ${existing.html_url}`);
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  body: `Nueva detección automática: ${body}`,
+                });
+              } else {
+                const { data: issue } = await github.rest.issues.create({
+                  owner,
+                  repo,
+                  title,
+                  body,
+                  labels: ['infra'],
+                });
+                core.info(`Created issue: ${issue.html_url}`);
+              }
+            } catch (error) {
+              const status = error?.status;
+              const message = error?.message ?? String(error);
+              if (status === 403 || status === 404) {
+                core.warning(`No se pudo crear/actualizar el issue automático (status ${status}). Detalle: ${message}`);
+                core.notice('Revisa los permisos del token o crea el issue manualmente si es necesario.');
+                return;
+              }
+              throw error;
             }
         env:
           latest: ${{ steps.versions.outputs.latest }}
