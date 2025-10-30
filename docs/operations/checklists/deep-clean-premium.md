@@ -1,68 +1,70 @@
-# Checklist Deep Clean Premium (Residencial)
+# Checklist Deep Clean Brickell Collection
 
-**Objetivo:** Ejecutar limpieza residencial profunda en ≤150 minutos, destacando alto nivel de detalle y upsells de organización. Ideal para clientes recurrentes (mensual/trimestral).
+**Objetivo:** Ejecutar limpieza residencial profunda estilo hotel boutique en ≤210 minutos, priorizando detalle, control de humedad y presentación premium. Ideal para estancias largas y servicios trimestrales.
 
-## 0. Preparación
+## 0. Preparación (15 min)
 
-- ☐ Confirmar alcance con el cliente (habitaciones, áreas extra, pet-friendly).
-- ☐ Revisar nota de salud (alergias, productos preferidos) y autorizaciones de acceso.
-- ☐ Preparar kit de limpieza profunda: desengrasante, limpiador multiusos neutro, productos de acero inoxidable, paños de microfibra, aspiradora con filtros limpios, escobillas de detalle, escalera plegable.
-- ☐ Tomar fotos iniciales (vista general de cada área).
+- ☐ Confirmar alcance exacto con el cliente (habitaciones, áreas adicionales, autorizaciones especiales).
+- ☐ Revisar notas de salud: alergias, preferencias de aromatizantes y productos permitidos.
+- ☐ Preparar kit de limpieza: desengrasante profesional, multipropósito neutro, productos acero inoxidable, paños microfibra diferenciados por color, aspiradora HEPA, vaporizador portátil, cepillos de detalle, escalera plegable, medidor de humedad.
+- ☐ Tomar fotografías iniciales de cada área para comparativo antes/después.
 
-## 1. Zona social (30 min)
+## 1. Área social (35 min)
 
-- ☐ Quitar polvo de superficies altas (lámparas, cuadros, topes de puertas) con paño seco.
-- ☐ Aspirar tapicería (sofás, sillas), remover cojines y limpiar debajo.
-- ☐ Limpiar persianas/ventanas (marcos, rieles, vidrio) con producto adecuado.
-- ☐ Desinfectar superficies de alto contacto con neutro (controles, interruptores).
-- ☐ Trapear suelos con patrón en ocho, cambio de agua cada 20 m².
-- ☐ Fotografiar “antes/después” de área social.
+- ☐ Desempolvar superficies altas (cornisas, luminarias, marcos) con paño seco y aspiradora HEPA.
+- ☐ Aspirar tapicería en tres fases: superficie, bajo cojines y base del mueble.
+- ☐ Limpiar persianas/ventanas (vidrio interior, marcos, rieles) con producto adecuado y paño sin pelusa.
+- ☐ Desinfectar puntos de contacto (controles, interruptores, manijas) con solución neutra.
+- ☐ Trapear con patrón en ocho cambiando agua cada 20 m²; aplicar acondicionador de pisos si procede.
+- ☐ Registrar fotos “antes/después” y anotar incidencias (manchas, daños).
 
-## 2. Cocina (30 min)
+## 2. Cocina (40 min)
 
-- ☐ Desengrasar campana y filtros (si extraíbles).
-- ☐ Limpiar interior de horno/microondas (producto específico, enjuagar bien).
-- ☐ Vaciar y limpiar cajones principales (con autorización); reorganizar según estándar.
-- ☐ Limpiar backsplash, encimeras, tiradores de gabinetes.
-- ☐ Revisar y limpiar el interior de la nevera (retirar items caducados) si está incluido.
-- ☐ Reposición básica (bolsas, paños, aromatizantes) y foto final.
+- ☐ Desengrasar campana y filtros (remojo + cepillado) y secar completamente.
+- ☐ Limpiar interior de horno/microondas con producto desincrustante; enjuagar y ventilar.
+- ☐ Vaciar y limpiar gavetas principales; reorganizar según estándar hotelero (cubiertos, utensilios, textiles).
+- ☐ Limpiar backsplash, encimeras, tiradores y sellos de puertas.
+- ☐ (Opcional/up-sell) Interior de nevera: retirar productos caducos, limpiar bandejas y sellos, reorganizar.
+- ☐ Reponer paños, bolsas y aromatizantes; fotografiar resultado final.
 
 ## 3. Baños (25 min por baño)
 
-- ☐ Aplicar desincrustante en duchas/azulejos; dejar actuar y enjuagar.
-- ☐ Abrillantar grifería con microfibra y producto sin abrasivos.
-- ☐ Desinfectar y pulir lavamanos, inodoro, bidet.
-- ☐ Limpiar espejos y cristales (sin marcas), repasar juntas con cepillo.
-- ☐ Reponer amenities y doblar toallas estilo hotel.
-- ☐ Foto final (panorámica + detalle de amenities).
+- ☐ Aplicar desincrustante en duchas, juntas y grifería; cepillar y enjuagar con agua caliente.
+- ☐ Pulir lavamanos, encimeras y espejos con paño de microfibra; eliminar marcas de agua.
+- ☐ Desinfectar inodoros/bidets (interior, asiento, base) y pulir cromo con paño seco.
+- ☐ Limpiar cristales de duchas y mamparas con limpiavidrios antiempañante.
+- ☐ Reponer amenities: toallas (hand/body/mat), albornoz si aplica, sets de cortesía; doblado hotelero.
+- ☐ Tomar foto panorámica + detalle de amenities repuestos.
 
 ## 4. Habitaciones (20 min por habitación)
 
-- ☐ Levantar y aspirar debajo de camas y muebles.
-- ☐ Limpiar ventiladores de techo o luminarias con paño seco y húmedo.
-- ☐ Desempolvar baseboards, marcos de puertas, repisas.
-- ☐ Cambiar ropa de cama y alinear decoración.
-- ☐ Organización ligera (cómodas, mesas de noche) si está incluido.
-- ☐ Foto final de cama y closet.
+- ☐ Retirar ropa de cama y aspirar colchón / base / debajo de cama.
+- ☐ Limpiar ventiladores, cortinas y persianas (paño seco + húmedo según material).
+- ☐ Desempolvar baseboards, marcos, repisas y objetos decorativos.
+- ☐ Colocar ropa de cama con triple sheeting; almohadas alineadas y cojines decorativos según staging.
+- ☐ Organización ligera de mesas de noche y escritorios; revisar closets y perfumar con sachets.
+- ☐ Fotografiar cama y closet listos.
 
-## 5. Detalle y acabados (20 min)
+## 5. Detalle y acabados (25 min)
 
-- ☐ Revisar y limpiar puertas, manijas, interruptores, termostatos.
-- ☐ Aromatizar con spray suave (o difusor) según preferencia del cliente.
-- ☐ Revisar áreas olvidadas (lavadero, despensa, balcones).
-- ☐ Documentar upsells ejecutados (organización, limpieza de electrodomésticos adicionales).
+- ☐ Limpiar puertas, manijas, interruptores, termostatos y rejillas de aire.
+- ☐ Aromatizar con difusor (fragancia aprobada) y ajustar termostato a 72 °F salvo indicación.
+- ☐ Revisar áreas auxiliares: lavandería, despensa, balcones (barrer, quitar polvo, revisar drenajes).
+- ☐ Documentar upsells ejecutados (organización, limpieza de electrodomésticos adicionales, anti-humedad).
 
-## 6. QA y entrega (15 min)
+## 6. Control de humedad y QA (15 min)
 
-- ☐ Completar checklist `qa-inspection.md` con evidencias.
-- ☐ Registrar incidencias (daños preexistentes, fallas de equipos) en portal.
-- ☐ Compartir resumen en Slack `#operaciones-brisa` y marcar servicio como finalizado.
+- ☐ Medir humedad relativa (objetivo <60 %). Registrar en portal.
+- ☐ Completar checklist `qa-inspection.md` con fotos de respaldo.
+- ☐ Registrar incidencias o daños observados en el portal y en Slack `#operaciones` (tag coordinadora).
+- ☐ Confirmar que lavandería queda programada o completada según alcance.
 
 ## Upsells recomendados
 
-- Organización de closet/cajones (+$60).
-- Limpieza profunda de refrigerador/horno (+$40 c/u).
-- Aromaterapia premium (difusor, velas, esencias personalizadas).
-- Servicio “eco-friendly” (productos biodegradables certificados).
+- Organización de closet/cajones (+USD 60).
+- Limpieza profunda de refrigerador y/o horno (+USD 40 cada uno).
+- Tratamiento anti-moho / anti-humedad focalizado (+USD 45 por baño o área).
+- Aromaterapia premium (difusor eléctrico + esencias personalizadas).
+- Kit eco-friendly completo (productos biodegradables certificados).
 
-> **Tip:** Durante la visita, documenta el consumo real de productos para ajustar el presupuesto mensual y anticipar reabastecimientos.
+> **Nota:** Registrar consumo real de insumos en el portal para ajustar el plan de reabastecimiento y costeo mensual.

@@ -6,10 +6,12 @@ Este módulo reúne las listas de verificación que utiliza el equipo operativo 
 
 ## Índice
 
-| Checklist                                        | Descripción                                                                                                     |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| [`turnover-express.md`](turnover-express.md)     | Flujo completo de la limpieza entre huéspedes (Airbnb/Vrbo), con tiempos objetivo e inspecciones de inventario. |
-| [`deep-clean-premium.md`](deep-clean-premium.md) | Detalle de la limpieza residencial profunda, incluyendo tareas de alto valor y upsells asociados.               |
-| [`qa-inspection.md`](qa-inspection.md)           | Revisión post-servicio para supervisores: evidencias fotográficas, SLA y checklist de satisfacción del cliente. |
+| Checklist                                                        | Descripción                                                                                               |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [`turnover-express.md`](turnover-express.md)                     | Turnover Premium Airbnb (<160 min) replicando estándares hoteleros y evidencias en portal.                |
+| [`deep-clean-premium.md`](deep-clean-premium.md)                 | Deep Clean Brickell Collection con foco en detalle, control de humedad y upsells.                         |
+| [`amenity-refresh-express.md`](amenity-refresh-express.md)       | Reposición y staging ligero entre estancias con verificación de dispositivos smart.                       |
+| [`post-construction-boutique.md`](post-construction-boutique.md) | Limpieza post-obra para handover ejecutivo y sesiones fotográficas.                                       |
+| [`qa-inspection.md`](qa-inspection.md)                           | Revisión post-servicio: doble firma (cuadrilla + QA), evidencias fotográficas y comunicación con cliente. |
 
 > Las cuadrillas deben confirmar cada tarea en la app interna o mediante la planilla de seguimiento. Ante cualquier desviación, registrar notas y evidencias en el portal para facilitar la trazabilidad y la facturación.

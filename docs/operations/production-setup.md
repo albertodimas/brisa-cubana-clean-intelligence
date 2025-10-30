@@ -125,6 +125,33 @@ enum LeadStatus {
 
 ---
 
+## 💸 Cobros manuales (Zelle / transferencias bancarias)
+
+Mientras Stripe Billing pasa a modo live, los servicios se cobran manualmente a través de Zelle o transferencias ACH.
+
+### 1. Datos de cobro
+
+- **Cuenta Zelle:** `payments@brisacubanacleanintelligence.com`
+- **Titular:** Brisa Cubana Clean Intelligence LLC
+- **Referencia sugerida:** `Servicio-{propiedad}-{fecha}`
+
+### 2. Flujo operativo
+
+1. Al cerrar un turno en el panel, generar el reporte PDF/Markdown y adjuntar evidencias.
+2. Enviar correo “Resumen de servicio” con el reporte y datos de pago (plantilla en `docs/operations/templates/email-post-service.md`).
+3. Registrar en el panel (campo notas) la fecha de cobro y método (`Zelle`, `ACH`, etc.).
+4. Actualizar el dashboard financiero semanal (ver `docs/operations/backup-log.md`) con monto, cliente y status (`pendiente`, `pagado`).
+
+### 3. Facturación / recibos
+
+- Usar la plantilla `docs/operations/templates/invoice-manual.docx` (personalizar con EIN al obtenerlo).
+- Condiciones estándar: _pago neto 7 días_, mora 1.5 % mensual.
+- Al recibir el pago, enviar confirmación rápida por correo y marcar el turno como “Pagado” en el panel.
+
+Cuando Stripe esteja listo, se actualizará este documento para reflejar Checkout/Billing y automatizar recibos.
+
+---
+
 ## 🎨 Active Data Refresh
 
 Proceso para actualizar contenido, métricas y assets en producción.

@@ -1,6 +1,6 @@
-# Checklist Turnover Express (Airbnb / Mid-Term)
+# Checklist Turnover Premium Airbnb
 
-**Objetivo:** Dejar la propiedad lista para el siguiente huésped en ≤120 minutos, garantizando inventario completo, limpieza de alto contacto y evidencias fotográficas en el portal.
+**Objetivo:** Dejar la propiedad lista para el siguiente huésped en ≤160 minutos, replicando estándares hoteleros (Airbnb Enhanced Cleaning), con inventario completo y evidencias fotográficas cargadas en el portal en menos de 4 horas.
 
 ## 0. Preparación (previa al ingreso)
 
@@ -9,15 +9,16 @@
 - ☐ Verificar kit de limpieza y reabastecimiento (amenities, consumibles, blancos).
 - ☐ Tomar foto del estado inicial de la entrada.
 
-## 1. Áreas comunes (20 min)
+## 1. Áreas comunes (25 min)
 
 - ☐ Ventilar espacios (abrir ventanas/balcones si aplica).
 - ☐ Recoger basura general y separar reciclaje.
 - ☐ Barrer/aspirar suelos, trapear con desinfectante neutro.
 - ☐ Limpiar superficies de alto contacto (mesas, controles remotos, interruptores) con desinfectante.
 - ☐ Ordenar mobiliario según staging aprobado (ver fotos de referencia en portal).
+- ☐ Revisar ambientador/difusor y reponer cápsulas según estándar.
 
-## 2. Cocina (20 min)
+## 2. Cocina (25 min)
 
 - ☐ Lavar y guardar vajilla / utensilios (lavavajillas si disponible).
 - ☐ Desinfectar encimeras, backsplash, electrodomésticos exteriores.
@@ -33,7 +34,7 @@
 - ☐ Vaciar basura y colocar bolsa nueva.
 - ☐ Registrar foto panorámica y de amenities repuestos.
 
-## 4. Habitaciones (15 min por habitación)
+## 4. Habitaciones (18 min por habitación)
 
 - ☐ Retirar sábanas usadas y colocar ropa limpia (estándar hotelero: esquinas tensas, almohadas alineadas).
 - ☐ Aspirar suelos/alfombras, quitar polvo de muebles y pantallas.
@@ -61,4 +62,4 @@
 - ☐ Reportar daños o consumo excesivo al anfitrión con evidencia.
 - ☐ Si el tiempo excedió SLA, documentar causa (limpieza profunda, incidentes, mantenimiento).
 
-> **Recordatorio:** Cada cuadrilla debe completar el checklist digital antes de abandonar la propiedad. Cualquier incidencia crítica debe escalarse al coordinador en menos de 15 minutos.
+> **Recordatorio:** Cada cuadrilla debe completar el checklist digital antes de abandonar la propiedad. Cualquier incidencia crítica debe escalarse al coordinador en menos de 15 minutos. Mantener el estándar hotelero implica “triple sheeting”, amenities doblados y evidencias fotográficas con buena iluminación.
