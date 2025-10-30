@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -116,6 +117,42 @@ async function PanelContent({ user, bookingWindow }: PanelContentProps) {
 
   return (
     <>
+      <section className="relative mb-10 overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-6 shadow-xl shadow-brisa-900/10 dark:border-brisa-700/40 dark:bg-brisa-900/80">
+        <div className="absolute inset-0 bg-pattern-waves opacity-30 dark:opacity-15" />
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
+              Panel operativo · visión general
+            </span>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white sm:text-3xl">
+              Hola, {user.name ?? user.email}. Todo listo para coordinar turnos
+              premium en tiempo real.
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-brisa-200 sm:text-base">
+              Revisa reservas, servicios y leads; firma checklists QA y envía
+              reportes con evidencia fotográfica. Brisa Cubana consolida la
+              operación hotelera de tu portafolio en un solo lugar.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-brisa-300">
+              <span>✓ Checklists hoteleros digitalizados</span>
+              <span>✓ Portal cliente con evidencia</span>
+              <span>✓ SLA menores a 4 horas en turnovers</span>
+            </div>
+          </div>
+          <div className="relative">
+            <div className="absolute -inset-3 rounded-[2rem] bg-pattern-tile opacity-40 dark:opacity-25" />
+            <Image
+              src="/branding/portal-tech-modern.webp"
+              alt="Dashboard operativo Brisa Cubana"
+              width={1920}
+              height={1280}
+              className="relative h-auto w-full rounded-[2rem] border border-white/90 shadow-2xl shadow-brisa-900/20 dark:border-brisa-700/50"
+              priority={false}
+            />
+          </div>
+        </div>
+      </section>
+
       <section>
         <Dashboard
           bookings={bookingsPage.items}

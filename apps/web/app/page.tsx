@@ -159,11 +159,23 @@ export default function LandingPage() {
             <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950">
               <div className="space-y-6">
                 <div className="relative overflow-hidden rounded-2xl">
+                  <div className="pointer-events-none absolute top-4 left-4 z-10 flex items-center gap-3 rounded-full bg-white/85 px-3 py-2 shadow-lg shadow-brisa-900/10 backdrop-blur-sm dark:bg-brisa-900/80 dark:shadow-brisa-900/40">
+                    <Image
+                      src="/branding/brand-ai-concept.webp"
+                      alt="Logotipo Brisa Cubana"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div className="text-xs font-semibold uppercase tracking-[0.32em] text-brisa-600 dark:text-brisa-200">
+                      Brisa Cubana
+                    </div>
+                  </div>
                   <Image
-                    src="/assets/hero/hero-2400w.webp"
-                    alt="Brisa Cubana Clean Intelligence - Professional Cleaning Services Landing Page"
-                    width={2400}
-                    height={1600}
+                    src="/branding/hero-turnover-luxury.webp"
+                    alt="Suite de lujo lista después de servicio de limpieza premium - Brisa Cubana Clean Intelligence"
+                    width={1920}
+                    height={1440}
                     priority
                     className="h-auto w-full rounded-xl shadow-lg ring-1 ring-brisa-100/60 dark:ring-brisa-800/60"
                     sizes="(max-width: 1024px) 100vw, 420px"
@@ -214,6 +226,200 @@ export default function LandingPage() {
       <section className="relative -mt-12 sm:-mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <MarketHighlightsGrid />
+        </div>
+      </section>
+
+      <section className="relative mt-24 px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-pattern-waves opacity-40 dark:opacity-20" />
+        <div className="relative mx-auto grid max-w-6xl gap-8 lg:grid-cols-2">
+          <article className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-xl shadow-brisa-900/10 dark:border-brisa-700/40 dark:bg-brisa-900/80">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
+              Before / After · Cocina
+            </span>
+            <h2 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">
+              Documentamos mejoras con evidencia comparable
+            </h2>
+            <p className="mt-3 text-sm text-gray-600 dark:text-brisa-200">
+              Cada servicio incluye fotos “antes y después” y checklist firmado
+              digitalmente. Tus propietarios reciben un reporte que muestra el
+              impacto real del Turnover Premium y los upsells ejecutados.
+            </p>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-md dark:border-brisa-800/50 dark:bg-brisa-900/60">
+                <Image
+                  src="/branding/kitchen-before.webp"
+                  alt="Cocina antes del servicio Brisa Cubana"
+                  width={1500}
+                  height={899}
+                  className="h-auto w-full object-cover"
+                />
+                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-300">
+                  Antes
+                </figcaption>
+              </figure>
+              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-lg shadow-brisa-900/10 dark:border-brisa-700/60 dark:bg-brisa-900/60">
+                <Image
+                  src="/branding/kitchen-after.webp"
+                  alt="Cocina impecable tras Turnover Premium"
+                  width={1500}
+                  height={1000}
+                  className="h-auto w-full object-cover"
+                />
+                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-200">
+                  Después
+                </figcaption>
+              </figure>
+            </div>
+          </article>
+          <article className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-xl shadow-brisa-900/10 dark:border-brisa-700/40 dark:bg-brisa-900/80">
+            <span className="inline-flex items-center gap-2 rounded-full border border-rose-300/40 bg-rose-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-rose-500 dark:border-rose-500/40 dark:bg-rose-950/30 dark:text-rose-200">
+              Before / After · Baño
+            </span>
+            <h2 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">
+              Estándar hotelero desde griferías hasta amenities
+            </h2>
+            <p className="mt-3 text-sm text-gray-600 dark:text-brisa-200">
+              El protocolo Deep Clean Brickell Collection incluye saneamiento de
+              juntas, pulido de superficies delicadas y aromatización. El
+              reporte QA muestra cada mejora para sostener reseñas 5 ⭐.
+            </p>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-md dark:border-brisa-800/50 dark:bg-brisa-900/60">
+                <Image
+                  src="/branding/bathroom-before.webp"
+                  alt="Baño antes de la limpieza profunda"
+                  width={1500}
+                  height={1000}
+                  className="h-auto w-full object-cover"
+                />
+                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-300">
+                  Antes
+                </figcaption>
+              </figure>
+              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-lg shadow-brisa-900/10 dark:border-brisa-700/60 dark:bg-brisa-900/60">
+                <Image
+                  src="/branding/bathroom-after.webp"
+                  alt="Baño premium después de Deep Clean"
+                  width={1500}
+                  height={2249}
+                  className="h-auto w-full object-cover"
+                />
+                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-200">
+                  Después
+                </figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="equipo" className="mt-24 px-4 sm:px-6 lg:px-8 scroll-mt-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
+          <div className="space-y-5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
+              Equipo hotelero · 24/7
+            </span>
+            <h2 className="text-3xl font-semibold text-gray-900 dark:text-white sm:text-4xl">
+              Ex housekeepers de hotel cinco estrellas al mando de tu operación
+            </h2>
+            <p className="text-base text-gray-600 dark:text-brisa-200">
+              Daniela, Lucía y el equipo vienen de liderar housekeeping en
+              hoteles de Brickell. Hoy aplican ese mismo rigor a cada propiedad
+              STR: protocolos escritos, auditorías semanales y comunicación con
+              tus huéspedes en tiempo real.
+            </p>
+            <ul className="space-y-3 text-sm text-gray-600 dark:text-brisa-200">
+              <li className="flex items-start gap-2">
+                <span aria-hidden className="mt-0.5 text-brisa-500">
+                  •
+                </span>
+                97&nbsp;% de satisfacción en pilotos Brickell/Edgewater (Q3
+                2025) documentado en portal.
+              </li>
+              <li className="flex items-start gap-2">
+                <span aria-hidden className="mt-0.5 text-brisa-500">
+                  •
+                </span>
+                Supervisión QA con doble firma (cuadrilla + inspector) y fotos
+                obligatorias.
+              </li>
+              <li className="flex items-start gap-2">
+                <span aria-hidden className="mt-0.5 text-brisa-500">
+                  •
+                </span>
+                Equipo bilingüe para coordinar accesos, reportes y upsells con
+                propietarios e inquilinos.
+              </li>
+            </ul>
+          </div>
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-[2.5rem] bg-pattern-tile opacity-40 dark:opacity-30" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-2xl shadow-brisa-900/20 dark:border-brisa-700/40 dark:bg-brisa-900/70">
+              <Image
+                src="/branding/team-cleaning-action.webp"
+                alt="Equipo Brisa Cubana realizando un servicio premium"
+                width={1920}
+                height={1280}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="amenidades"
+        className="mt-24 px-4 sm:px-6 lg:px-8 scroll-mt-24"
+      >
+        <div className="mx-auto max-w-6xl space-y-8">
+          <div className="flex flex-col gap-4 text-center">
+            <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
+              Amenidades premium · staging
+            </span>
+            <h2 className="text-3xl font-semibold text-gray-900 dark:text-white sm:text-4xl">
+              Kits de bienvenida y staging con estándar hotelero
+            </h2>
+            <p className="mx-auto max-w-3xl text-sm text-gray-600 dark:text-brisa-200">
+              Toallas spa, difusores Pura, snack bar curado y reposición de
+              essentials se registran en el portal con fotos y responsables. Así
+              evitas reclamos y elevas la experiencia de cada huésped.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                src: "/branding/amenities-kit.webp",
+                alt: "Kit de amenidades premium listo para huéspedes",
+                title: "Kit completo de amenidades",
+              },
+              {
+                src: "/branding/amenities-detail.webp",
+                alt: "Detalle de amenidades spa con toallas y difusor",
+                title: "Detalle spa & aromas integrados",
+              },
+              {
+                src: "/branding/amenities-towels.webp",
+                alt: "Toallas spa dobladas con amenities hoteleros",
+                title: "Textiles hoteleros siempre listos",
+              },
+            ].map((item) => (
+              <figure
+                key={item.title}
+                className="group overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-lg shadow-brisa-900/10 transition hover:-translate-y-1 hover:shadow-2xl dark:border-brisa-700/40 dark:bg-brisa-900/80"
+              >
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  width={1500}
+                  height={1125}
+                  className="h-auto w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <figcaption className="px-4 py-4 text-center text-sm font-semibold text-gray-800 dark:text-brisa-100">
+                  {item.title}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </section>
 

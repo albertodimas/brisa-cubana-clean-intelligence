@@ -20,3 +20,17 @@
     @apply flex-1;
   }
 }
+
+@layer utilities {
+  .bg-pattern-waves {
+    background-image: url("/branding/pattern-waves.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .bg-pattern-tile {
+    background-image: url("/branding/pattern-tile.svg");
+    background-repeat: repeat;
+    background-size: 400px 400px;
+  }
+}

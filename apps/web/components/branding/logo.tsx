@@ -45,13 +45,13 @@ export function BrandLogo({
         })}
       >
         <Image
-          src="/branding/logo-icon.svg"
-          alt="Brisa Cubana icono"
+          src="/branding/brand-ai-concept.webp"
+          alt="Logotipo Brisa Cubana"
           width={iconSize}
           height={iconSize}
           className={cn(
-            "h-full w-full",
-            invert ? "brightness-110 contrast-110" : "brightness-100",
+            "h-full w-full rounded-full",
+            invert ? "brightness-110 contrast-125" : "brightness-100",
           )}
           priority={size === "lg"}
         />

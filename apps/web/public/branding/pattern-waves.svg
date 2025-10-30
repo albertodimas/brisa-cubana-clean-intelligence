@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:0.05"/>
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:0.02"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo blanco -->
+  <rect width="1200" height="800" fill="#ffffff"/>
+
+  <!-- Olas sutiles - capa 1 -->
+  <path d="M 0 200 Q 150 180, 300 200 T 600 200 T 900 200 T 1200 200 L 1200 800 L 0 800 Z"
+        fill="url(#waveGradient)" opacity="0.3"/>
+
+  <!-- Olas sutiles - capa 2 -->
+  <path d="M 0 350 Q 200 320, 400 350 T 800 350 T 1200 350 L 1200 800 L 0 800 Z"
+        fill="url(#waveGradient)" opacity="0.2"/>
+
+  <!-- Olas sutiles - capa 3 -->
+  <path d="M 0 500 Q 250 460, 500 500 T 1000 500 T 1500 500 L 1200 800 L 0 800 Z"
+        fill="url(#waveGradient)" opacity="0.15"/>
+
+  <!-- Detalles de burbujas sutiles -->
+  <circle cx="150" cy="120" r="4" fill="#0EA5E9" opacity="0.1"/>
+  <circle cx="450" cy="280" r="6" fill="#06B6D4" opacity="0.08"/>
+  <circle cx="850" cy="160" r="5" fill="#0EA5E9" opacity="0.09"/>
+  <circle cx="1050" cy="320" r="4" fill="#06B6D4" opacity="0.07"/>
+  <circle cx="280" cy="400" r="3" fill="#0EA5E9" opacity="0.06"/>
+  <circle cx="680" cy="220" r="5" fill="#06B6D4" opacity="0.08"/>
+</svg>

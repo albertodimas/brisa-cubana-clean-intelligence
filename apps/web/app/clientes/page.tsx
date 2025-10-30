@@ -97,11 +97,11 @@ export default function PortalClientePage() {
           <header className="rounded-3xl border border-white/60 bg-white/80 p-8 shadow-xl backdrop-blur-md dark:border-brisa-700/40 dark:bg-brisa-900/70">
             <div className="pointer-events-none absolute -top-8 -right-4 hidden w-32 sm:block md:-top-10 md:-right-6 md:w-40">
               <Image
-                src="/branding/logo-vertical.svg"
-                alt="Brisa Cubana Clean Intelligence"
+                src="/branding/brand-ai-concept.webp"
+                alt="Logotipo Brisa Cubana Clean Intelligence"
                 width={160}
-                height={180}
-                className="h-auto w-full drop-shadow-lg"
+                height={160}
+                className="h-auto w-full rounded-full drop-shadow-lg"
               />
             </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">

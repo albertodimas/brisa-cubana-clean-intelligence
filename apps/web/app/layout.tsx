@@ -61,9 +61,9 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   metadataBase: new URL(SITE_URL),
   icons: {
-    icon: "/branding/logo-icon.svg",
-    shortcut: "/branding/logo-icon.svg",
-    apple: "/branding/logo-icon.svg",
+    icon: "/branding/brand-ai-concept-512.png",
+    shortcut: "/branding/brand-ai-concept-512.png",
+    apple: "/branding/brand-ai-concept-512.png",
   },
   keywords: [
     "limpieza miami",

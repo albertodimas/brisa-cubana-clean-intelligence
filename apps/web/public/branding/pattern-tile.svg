@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <defs>
+    <!-- Pattern de olas sutiles repetible -->
+    <pattern id="waveTile" x="0" y="0" width="400" height="400" patternUnits="userSpaceOnUse">
+      <!-- Olas diagonales sutiles -->
+      <path d="M 0 100 Q 50 80, 100 100 T 200 100 T 300 100 T 400 100"
+            stroke="#0EA5E9" stroke-width="1" fill="none" opacity="0.1"/>
+      <path d="M 0 200 Q 50 180, 100 200 T 200 200 T 300 200 T 400 200"
+            stroke="#06B6D4" stroke-width="1" fill="none" opacity="0.08"/>
+      <path d="M 0 300 Q 50 280, 100 300 T 200 300 T 300 300 T 400 300"
+            stroke="#0EA5E9" stroke-width="1" fill="none" opacity="0.06"/>
+
+      <!-- Burbujas decorativas -->
+      <circle cx="80" cy="60" r="2" fill="#0EA5E9" opacity="0.08"/>
+      <circle cx="220" cy="150" r="3" fill="#06B6D4" opacity="0.06"/>
+      <circle cx="340" cy="260" r="2" fill="#0EA5E9" opacity="0.07"/>
+      <circle cx="120" cy="320" r="2.5" fill="#06B6D4" opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <!-- Aplicar el pattern -->
+  <rect width="400" height="400" fill="url(#waveTile)"/>
+</svg>
