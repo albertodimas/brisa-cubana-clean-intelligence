@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/tag/albertodimas/brisa-cubana-clean-intelligence?color=0EA5E9&label=release&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/tags)
 
 Monorepo verificado para la plataforma operativa de **Brisa Cubana Clean Intelligence**.
-Al día **30 de octubre de 2025**, la release activa es `v0.4.2`, con **224 pruebas automatizadas** (126 API + 98 Web unit/integration) pasando en CI (`CI (Main Branch)` run [#18930562247](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/runs/18930562247)) y despliegues productivos validados tras la recuperación de Vercel.
+Al día **30 de octubre de 2025**, la release activa es `v0.4.2`, con **230 pruebas automatizadas** (126 API + 104 Web unit/integration) pasando en CI (`CI (Main Branch)` run [#18937670385](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/runs/18937670385)) y despliegues productivos validados tras la recuperación de Vercel.
 
 ---
 

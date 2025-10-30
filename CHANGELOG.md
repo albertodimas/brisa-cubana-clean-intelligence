@@ -4,7 +4,9 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
-- _Sin cambios desde la release `v0.4.2`._
+### Changed
+
+- Alineados precios comerciales ($249 / $369 / $489) entre landing, seeds Prisma, pruebas de integración y documentación operativa/marketing para el lanzamiento piloto.
 
 ## [0.4.2] - 2025-10-30
 
@@ -122,7 +124,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- README y `docs/overview/status.md` actualizados a la release `v0.4.2`, incluyendo el run CI `18930562247`, la recuperación de despliegues en Vercel y el plan operativo del piloto comercial.
+- README y `docs/overview/status.md` actualizados a la release `v0.4.2`, incluyendo el run CI `18937670385`, la recuperación de despliegues en Vercel y el plan operativo del piloto comercial.
 - `scripts/verify-doc-structure.sh` exige `SECURITY.md` y la nueva documentación de producto para mantener la verificación.
 - Workflow `nightly.yml` ahora ejecuta Lighthouse CI sobre la URL de Vercel, alineado con `.lighthouserc.preview.json` y los budgets documentados.
 - Eliminada la ruta `/api/authentication/verify` del OpenAPI para reflejar la implementación actual.
