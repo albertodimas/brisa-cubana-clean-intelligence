@@ -39,9 +39,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const path = require('path');
-            const core = require('@actions/core');
+            const fs = require('node:fs');
+            const path = require('node:path');
 
             const reportPath = process.env.REPORT_PATH || path.join(process.env.GITHUB_WORKSPACE, 'tmp/market-stats-report.md');
             const staleCount = Number.parseInt(process.env.STALE_COUNT ?? '0', 10);
