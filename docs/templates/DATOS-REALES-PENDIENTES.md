@@ -19,19 +19,23 @@
 - Guía de testimonios
 - 19 assets visuales optimizados
 
-❌ **PENDIENTE (Datos Reales del Negocio):**
+🟡 **PENDIENTE (Datos reales por personalizar):**
 
-- Información legal y fiscal de Brisa Cubana
-- Datos de clientes piloto
-- Agenda de servicios inicial
-- Testimonios reales con permisos
-- Fotografías del equipo real
-- Precios finales y tarifas
-- Información bancaria y pagos
+- Información legal y fiscal de Brisa Cubana (sustituir placeholders con datos oficiales).
+- Datos de clientes piloto y contratos firmados.
+- Agenda de servicios inicial con fechas reales.
+- Testimonios reales con permisos y evidencia visual.
+- Fotografías del equipo real y propiedades piloto.
+- Precios finales y tarifas confirmadas con clientes.
+- Información bancaria y métodos de pago activos.
+
+> Referencia base para llenar cada campo: consulta `docs/templates/DATOS-OPERATIVOS-MIAMI.md` (investigación actualizada al 30/10/2025) y traslada los valores definitivos a estos formularios cuando tengas la evidencia documental.
 
 ---
 
 ## 1. INFORMACIÓN LEGAL Y FISCAL DE BRISA CUBANA
+
+> 🔎 Referencia: Ver `docs/templates/DATOS-OPERATIVOS-MIAMI.md#1-información-legal-y-corporativa` y `#2-seguros-insurance---florida` para costos y requisitos actualizados.
 
 ### ❌ Datos Corporativos Básicos
 
@@ -126,6 +130,8 @@
 
 ## 2. INFORMACIÓN BANCARIA Y MÉTODOS DE PAGO
 
+> 🔎 Referencia: Datos de bancos, políticas de cobro y tarifas en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#5-información-bancaria-y-pagos`.
+
 ### ❌ Cuenta Bancaria Principal
 
 ```
@@ -172,6 +178,8 @@
 ---
 
 ## 3. PRECIOS Y TARIFAS FINALES
+
+> 🔎 Referencia: Tarifas investigadas en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#3-precios-de-mercado---miami-2025` y estructura de descuentos en `#12-marketing---lanzamiento` (subsección "Políticas").
 
 ### ❌ Estructura de Precios por Servicio
 
@@ -226,6 +234,8 @@
 ---
 
 ## 4. CLIENTES PILOTO (1-3 CLIENTES)
+
+> 🔎 Referencia: Perfiles recomendados y guiones de prospección en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#6-clientes-piloto---targets-ideales`.
 
 ### ❌ Cliente Piloto #1
 
@@ -304,6 +314,8 @@
 
 ## 5. AGENDA INICIAL - PRIMEROS SERVICIOS
 
+> 🔎 Referencia: Cronograma de 4 semanas en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#7-agenda-inicial---primeras-4-semanas`.
+
 ### ❌ Semana 1
 
 ```
@@ -350,6 +362,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 
 ## 6. PERSONAL / EQUIPO
 
+> 🔎 Referencia: Roles sugeridos, salarios y capacitación inicial en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#8-personal-y-equipo`.
+
 ### ❌ Información del Personal
 
 ```
@@ -393,6 +407,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 ---
 
 ## 7. SUMINISTROS Y EQUIPOS
+
+> 🔎 Referencia: Listado detallado de inventario en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#9-suministros-equipos-y-químicos`.
 
 ### ❌ Químicos y Productos
 
@@ -442,6 +458,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 ---
 
 ## 8. TESTIMONIOS Y CONTENIDO
+
+> 🔎 Referencia: Guía completa en `docs/templates/testimonials-guide.md` y roadmap de marketing en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#12-marketing---lanzamiento`.
 
 ### ❌ Testimonios Reales
 
@@ -515,6 +533,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 
 ## 9. TECNOLOGÍA Y HERRAMIENTAS
 
+> 🔎 Referencia: Stack recomendado en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#11-tecnología-y-sistemas`.
+
 ### ❌ Plataforma / Sistema Operativo
 
 ```
@@ -573,6 +593,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 
 ## 10. MARKETING Y COMUNICACIÓN
 
+> 🔎 Referencia: Plan de identidad y materiales en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#12-marketing---lanzamiento` y activos en `apps/web/public/branding/README.md`.
+
 ### ❌ Redes Sociales
 
 ```
@@ -624,6 +646,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 
 ## 11. LEGAL Y COMPLIANCE
 
+> 🔎 Referencia: Licencias, seguros y protocolos en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#1-información-legal-y-corporativa`, `#2-seguros-insurance---florida` y `#10-capacitación-y-certificaciones`.
+
 ### ❌ Contratos Finalizados
 
 ```
@@ -666,6 +690,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 
 ## 12. INTEGRACIÓN CON CLIENTES
 
+> 🔎 Referencia: Flujos de onboarding en `docs/templates/pilot-client-intake.md` y agendas en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#7-agenda-inicial---primeras-4-semanas`.
+
 ### ❌ Calendarios de Airbnb/VRBO
 
 ```
@@ -698,6 +724,8 @@ Meta: Al menos 10-15 servicios en primeras 4 semanas
 ---
 
 ## 13. CAPACITACIÓN INICIAL
+
+> 🔎 Referencia: Programas sugeridos y costos en `docs/templates/DATOS-OPERATIVOS-MIAMI.md#10-capacitación-y-certificaciones` y `docs/templates/safety-protocols.md`.
 
 ### ❌ Capacitación del Equipo
 
