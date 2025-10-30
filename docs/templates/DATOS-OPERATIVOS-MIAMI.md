@@ -56,8 +56,8 @@ Dirección Fiscal Sugerida:
 Miami, FL 33[XXX]
 United States
 
-Teléfono Principal: +1 (305) XXX-XXXX
-Teléfono Emergencias 24/7: +1 (305) XXX-XXXX (línea separada)
+Teléfono Principal: +1 (786) 436-7131
+Teléfono Emergencias 24/7: +1 (786) 436-7131 (desvío configurado a supervisor)
 Email: admin@brisacubanaclean.com
 Website: https://brisacubana.com (registrar dominio)
 ```
@@ -1133,7 +1133,7 @@ UPGRADE (Premium amenities): +$30-50
 **3. Comunicaciones Internas**
 
 - WhatsApp Business: GRATIS
-- Número: +1 (305) XXX-XXXX
+  - Número: +1 (786) 436-7131
 - Para: Coordinación con equipo, clientes urgentes
 - Configurar: Auto-replies, quick replies, labels
 
@@ -1186,7 +1186,7 @@ Front:
   - "Professional Airbnb Cleaning | Miami"
 
 Back:
-  - Phone: +1 (305) XXX-XXXX
+  - Phone: +1 (786) 436-7131
   - Email: admin@brisacubana.com
   - Web: brisacubana.com
   - QR code → website
@@ -1246,7 +1246,7 @@ Info:
 - Category: Cleaning Service, House Cleaning Service
 - Address: [Tu dirección o service area]
 - Service area: Miami, Miami Beach, Coral Gables, Brickell, etc.
-- Phone: +1 (305) XXX-XXXX
+  - Phone: +1 (786) 436-7131
 - Website: brisacubana.com
 - Hours: Monday-Saturday 8 AM - 7 PM
 - Photos: Upload 10-20 (properties, team, before/after)

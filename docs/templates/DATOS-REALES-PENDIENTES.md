@@ -62,12 +62,12 @@
 ☐ Dirección Operativa (si es diferente)
    Usar en: Comunicaciones, visitas de clientes
 
-☐ Teléfono de Contacto Principal
-   Ejemplo: +52 1 998 123 4567
+☑ Teléfono de Contacto Principal
+   +1 (786) 436-7131 (WhatsApp Business activo)
    Usar en: Contratos, web, tarjetas
 
-☐ Teléfono de Emergencias 24/7
-   Para: Incidentes, emergencias en propiedades
+☑ Teléfono de Emergencias 24/7
+   +1 (786) 436-7131 (desvío a supervisor de guardia)
    Usar en: Contratos, protocolos de seguridad
 
 ☐ Email Oficial
