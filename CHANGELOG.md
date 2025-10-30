@@ -48,6 +48,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Captura de leads operativa en producción tras recrear la tabla `Lead` en Neon y marcar migraciones como aplicadas; el formulario ahora expone mensajes accesibles (`aria-live`, errores por campo) y evita estados inválidos iniciales en el combo de inventario.
 - Checkout público requiere `NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT`; en producción sólo muestra información demo cuando el publishable key es de prueba. También se normalizaron `NEXT_PUBLIC_SITE_URL`/`BASE_URL` para usar el dominio oficial en metadatos.
 - Sistema de marca actualizado con ícono de olas en formato SVG, paleta aqua/navy refinada en Tailwind y componentes (`BrandLogo`, headers, botones) alineados a las directrices de identidad.
+- Landing comercial añade secciones “Oferta de valor”, “Funcionalidades clave del portal” y “QA & Garantía”, con nuevos datasets (`valuePillars`, `portalCapabilities`, `qaHighlights`) y pruebas asociadas para comunicar la propuesta del piloto.
 
 ### Docs
 
@@ -64,8 +65,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - `docs/overview/status.md` registra la verificación del 27-oct-2025 y la resiliencia del cliente PostHog.
 - `docs/operations/deployment.md` amplía la verificación post-deploy con Lighthouse y robots, y `docs/operations/observability.md` documenta el bypass `/?lhci=1` más el playbook de alertas PostHog.
 - `docs/operations/incident-2025-10-20-vercel-deployment-failure.md` documenta el incidente con Vercel (`temporary_failure` en `patchBuild`) y su resolución (21-oct-2025 01:30 UTC, despliegues Ready de web y API).
-- `docs/overview/status.md` refleja la fuente única de métricas, la nueva landing en inglés y el watchdog automático; `docs/qa/regression-checklist.md` añade casos para `plan`/`inventory` en CTA, fallback de leads, `whatsapp_chat_start` y referencia de checkout.
-- `docs/qa/regression-checklist.md` incorpora validaciones del logotipo y la navegación re-estilizada.
+- `docs/overview/status.md` refleja la fuente única de métricas, la nueva landing en inglés y el watchdog automático; `docs/qa/regression-checklist.md` añade casos para `plan`/`inventory` en CTA, fallback de leads, `whatsapp_chat_start`, referencia de checkout, validaciones del logotipo, navegación re-estilizada y las nuevas secciones “Oferta de valor”, “Funcionalidades clave del portal” y “QA & Garantía”.
+- `docs/business/launch-plan.md` amplía los pilares de valor y QA del piloto, alineando copy y métricas con la landing.
 
 ## [0.4.1] - 2025-10-18
 

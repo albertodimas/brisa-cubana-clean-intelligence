@@ -43,6 +43,12 @@
 4. **Experiencia de cliente**
    - NPS >4.7, programa de referidos, welcome kit y seguimiento post-servicio dentro de 24 h.
 
+### Pilares reforzados para el piloto
+
+- **Respuesta garantizada (<120 min):** cuadrillas on-call por zonas, kits de amenities prearmados y coordinación 24/7 (reflejado en la nueva sección “Oferta de valor” del landing).
+- **Visibilidad total:** dashboard en vivo, timeline de evidencias y alertas automáticas (`Funcionalidades clave del portal`).
+- **Operación sin fricción:** portal + WhatsApp Business integrados, soporte bilingüe y reposiciones trazables.
+
 ---
 
 ## 4. Pricing y paquetes piloto
@@ -69,6 +75,12 @@
   - Checklist digital por tipo de servicio.
   - Protocolos de QA y evidencia fotográfica.
   - Guía de comunicación al cliente (confirmación, post-servicio, soporte).
+
+### QA y garantía de servicio
+
+- Doble firma digital (cuadrilla + supervisor remoto) registrada en el portal.
+- Auditoría semanal de muestras aleatorias con reporte publicado en Slack (`#operaciones-brisa`) y en el portal.
+- Escalamiento en ≤15 min ante incidencias críticas, incluyendo plan de acción.
 
 ---
 
@@ -133,6 +145,7 @@ Al cumplirse estos hitos:
    - Reemplazar `STRIPE_SECRET_KEY` en producción cuando se active cobro real.
    - Validar `STRIPE_SECRET_KEY` antes del lanzamiento comercial.
    - Mantener `VERCEL_CLEANUP_ENABLED=false` hasta rediseñar script de limpieza.
+   - Instrumentar eventos (`cta_value_pillars`, `cta_qa_playbook`) para medir interacción con las nuevas secciones de landing.
 2. **Comercial**
    - Montar campaña piloto (Google LSA + contenido redes).
    - Preparar materiales de venta (brochure, cotizador rápido, propuesta para property managers).

@@ -1,10 +1,13 @@
 import {
   differentiators,
   operationsMockups,
+  portalCapabilities,
   pricingTiers,
   processSteps,
+  qaHighlights,
   socialLinks,
   testimonials,
+  valuePillars,
 } from "./marketing-content";
 
 describe("marketing content", () => {
@@ -14,6 +17,32 @@ describe("marketing content", () => {
       expect(testimonial.quote).toBeTruthy();
       expect(testimonial.author).toBeTruthy();
       expect(testimonial.role).toBeTruthy();
+    }
+  });
+
+  it("describe la oferta de valor y pilares", () => {
+    expect(valuePillars.length).toBeGreaterThan(0);
+    for (const pillar of valuePillars) {
+      expect(pillar.title).toBeTruthy();
+      expect(pillar.headline).toBeTruthy();
+      expect(["function", "object"]).toContain(typeof pillar.icon);
+    }
+  });
+
+  it("expone capacidades del portal con métricas", () => {
+    expect(portalCapabilities.length).toBeGreaterThan(0);
+    for (const capability of portalCapabilities) {
+      expect(capability.title).toBeTruthy();
+      expect(capability.statLabel).toBeTruthy();
+      expect(capability.statValue).toBeTruthy();
+    }
+  });
+
+  it("documenta los guardrails de QA", () => {
+    expect(qaHighlights.length).toBeGreaterThan(0);
+    for (const qa of qaHighlights) {
+      expect(qa.title).toBeTruthy();
+      expect(qa.proof).toBeTruthy();
     }
   });
 

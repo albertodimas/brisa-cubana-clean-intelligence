@@ -18,11 +18,13 @@ describe("LandingPage", () => {
     const { default: LandingPage } = await import("./page");
     const markup = renderToStaticMarkup(<LandingPage />);
 
-    expect(markup).toContain("Portal cliente y operaciones conectadas");
     expect(markup).toContain(
-      "Alertas automáticas al detectar cambios de agenda o incidencias.",
+      "Unimos operación premium, datos en vivo y soporte humano 24/7.",
     );
-    expect(markup).toContain("KPI en el dashboard");
+    expect(markup).toContain("Funcionalidades clave del portal");
+    expect(markup).toContain(
+      "Calidad supervisada en cada turno, lista para auditar.",
+    );
   });
 
   it("presenta pricing, FAQ y formulario de contacto", async () => {

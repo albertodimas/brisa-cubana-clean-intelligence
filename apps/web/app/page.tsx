@@ -16,10 +16,13 @@ import {
 import {
   differentiators,
   operationsMockups,
+  portalCapabilities,
   pricingTiers,
   processSteps,
+  qaHighlights,
   socialLinks,
   testimonials,
+  valuePillars,
 } from "@/lib/marketing-content";
 import {
   MarketHighlightsGrid,
@@ -214,6 +217,56 @@ export default function LandingPage() {
       </section>
 
       <section
+        id="oferta"
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-mt-24"
+      >
+        <div className="space-y-10">
+          <div className="max-w-3xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+              Oferta de valor
+            </p>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-semibold">
+              Unimos operación premium, datos en vivo y soporte humano 24/7.
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-brisa-300 leading-relaxed">
+              Diseñamos el piloto para hosts y property managers que necesitan
+              SLA estrictos, evidencia trazable y comunicación inmediata. Cada
+              pilar combina procesos, tecnología y talento capacitado.
+            </p>
+          </div>
+          <StaggerContainer className="grid gap-6 lg:grid-cols-3">
+            {valuePillars.map((pillar) => (
+              <StaggerItem key={pillar.title}>
+                <TiltCard
+                  maxTilt={6}
+                  glowEffect
+                  glowColor="rgba(14,165,233,0.15)"
+                >
+                  <div className="flex h-full flex-col rounded-3xl border border-gray-200 bg-white p-8 dark:border-brisa-800 dark:bg-brisa-950">
+                    <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brisa-100 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
+                      <pillar.icon className="h-6 w-6" aria-hidden />
+                    </div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brisa-500 dark:text-brisa-300">
+                      {pillar.title}
+                    </p>
+                    <h3 className="mt-3 text-2xl font-semibold text-brisa-700 dark:text-white leading-tight">
+                      {pillar.headline}
+                    </h3>
+                    <p className="mt-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-brisa-200 flex-1">
+                      {pillar.description}
+                    </p>
+                    <span className="mt-6 inline-flex items-center justify-center rounded-full bg-brisa-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
+                      {pillar.proof}
+                    </span>
+                  </div>
+                </TiltCard>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </div>
+      </section>
+
+      <section
         id="servicios"
         className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-mt-24"
       >
@@ -254,6 +307,44 @@ export default function LandingPage() {
                 </p>
               </div>
             ))}
+          </div>
+          <div className="pt-12 border-t border-gray-200 dark:border-brisa-800 space-y-8">
+            <div className="max-w-3xl">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-brisa-700 dark:text-white">
+                Funcionalidades clave del portal
+              </h3>
+              <p className="mt-3 text-sm sm:text-base text-gray-600 dark:text-brisa-300 leading-relaxed">
+                Todo el ciclo de servicio vive en un mismo lugar: desde la
+                verificación de checklist hasta la reposición de amenities y
+                alertas proactivas.
+              </p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {portalCapabilities.map((capability) => (
+                <div
+                  key={capability.title}
+                  className="flex h-full flex-col rounded-3xl border border-gray-200 bg-gradient-to-br from-white via-white to-brisa-50 p-6 shadow-sm dark:border-brisa-800 dark:from-brisa-900/70 dark:via-brisa-950 dark:to-brisa-950"
+                >
+                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-brisa-100 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-200">
+                    <capability.icon className="h-6 w-6" aria-hidden />
+                  </div>
+                  <h4 className="text-lg font-semibold text-brisa-700 dark:text-white">
+                    {capability.title}
+                  </h4>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-brisa-200 flex-1">
+                    {capability.description}
+                  </p>
+                  <dl className="mt-5">
+                    <dt className="text-xs uppercase tracking-[0.25em] text-brisa-500 dark:text-brisa-300">
+                      {capability.statLabel}
+                    </dt>
+                    <dd className="text-base font-semibold text-brisa-700 dark:text-brisa-100">
+                      {capability.statValue}
+                    </dd>
+                  </dl>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -456,6 +547,66 @@ export default function LandingPage() {
                   </dd>
                 </div>
               </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="qa" className="bg-[#0d2944] text-white scroll-mt-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-start">
+            <div className="space-y-6">
+              <p className="text-xs uppercase tracking-[0.3em] text-teal-200/80">
+                QA & Garantía
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-semibold">
+                Calidad supervisada en cada turno, lista para auditar.
+              </h2>
+              <p className="text-base sm:text-lg text-white/80 leading-relaxed">
+                Documentamos cada paso: checklist digital, fotos, firmas y
+                escalamiento. Operaciones puede comprobar la calidad de forma
+                remota mientras el cliente recibe reportes claros.
+              </p>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {qaHighlights.map((qa) => (
+                  <div
+                    key={qa.title}
+                    className="flex h-full flex-col rounded-3xl border border-white/20 bg-white/5 p-6 backdrop-blur"
+                  >
+                    <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white">
+                      <qa.icon className="h-6 w-6" aria-hidden />
+                    </div>
+                    <h3 className="text-xl font-semibold">{qa.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-white/80 flex-1">
+                      {qa.description}
+                    </p>
+                    <span className="mt-5 inline-flex items-center rounded-full border border-white/30 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white/90">
+                      {qa.proof}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-3xl border border-white/20 bg-white/5 p-6 backdrop-blur">
+              <h3 className="text-lg font-semibold">
+                Qué auditamos cada semana
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm text-white/80 leading-relaxed">
+                <li>
+                  ✔ Sampling aleatorio de servicios por tipo (Turnover, Deep
+                  Clean).
+                </li>
+                <li>
+                  ✔ Verificación contra evidencias fotográficas y checklist QA.
+                </li>
+                <li>
+                  ✔ Seguimiento de incidencias hasta cierre con plan de acción.
+                </li>
+                <li>
+                  ✔ Consolidado publicado en el portal y Slack
+                  `#operaciones-brisa`.
+                </li>
+              </ul>
             </div>
           </div>
         </div>

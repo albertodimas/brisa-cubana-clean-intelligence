@@ -5,6 +5,11 @@ import {
   ArrowPathIcon,
   ChatBubbleLeftRightIcon,
   ClipboardDocumentCheckIcon,
+  BoltIcon,
+  ChartBarSquareIcon,
+  ClipboardDocumentListIcon,
+  BellAlertIcon,
+  CpuChipIcon,
 } from "@heroicons/react/24/outline";
 import type { PricingTier } from "@/components/landing/pricing-tiers";
 
@@ -38,6 +43,29 @@ export type OperationsMockup = {
   description: string;
   src: string;
   placeholder: string;
+};
+
+export type ValuePillar = {
+  title: string;
+  headline: string;
+  description: string;
+  proof: string;
+  icon: typeof SparklesIcon;
+};
+
+export type PortalCapability = {
+  title: string;
+  description: string;
+  statLabel: string;
+  statValue: string;
+  icon: typeof SparklesIcon;
+};
+
+export type QaHighlight = {
+  title: string;
+  description: string;
+  proof: string;
+  icon: typeof SparklesIcon;
 };
 
 /**
@@ -88,6 +116,84 @@ export const differentiators: Differentiator[] = [
     description:
       "Sincronizamos Guesty, Hostaway, ResNexus o Breezeway, generamos alertas automáticas y evidencias fotográficas con timestamp.",
     icon: CloudArrowUpIcon,
+  },
+];
+
+export const valuePillars: ValuePillar[] = [
+  {
+    title: "Respuesta garantizada",
+    headline: "Turnovers same-day en <120 min",
+    description:
+      "Cuadrillas on-call 24/7, inventario pre-empaquetado y rutas por zonas para cubrir emergencias sin sacrificar calidad.",
+    proof: "97 % de turnos entregados a tiempo (Q3 2025)",
+    icon: BoltIcon,
+  },
+  {
+    title: "Visibilidad total",
+    headline: "Dashboard en vivo + alertas automáticas",
+    description:
+      "Checklists digitales, evidencias fotográficas y KPI se actualizan en segundos para que cada anfitrión tenga datos de primera mano.",
+    proof: "Reportes firmados en menos de 4 h",
+    icon: ChartBarSquareIcon,
+  },
+  {
+    title: "Operación sin fricción",
+    headline: "Portal cliente + WhatsApp Business integrado",
+    description:
+      "Resuelve reagendos, restocks o incidencias desde un mismo lugar, con soporte humano en español e inglés.",
+    proof: "CSAT 4.9 ⭐ en pilotos Brickell/Wynwood",
+    icon: ClipboardDocumentListIcon,
+  },
+];
+
+export const portalCapabilities: PortalCapability[] = [
+  {
+    title: "Timeline de servicio",
+    description:
+      "Cada turno incluye fotos before/after, checklist firmado y notas operativas para auditar en segundos.",
+    statLabel: "Checklist completado",
+    statValue: "100 puntos",
+    icon: CpuChipIcon,
+  },
+  {
+    title: "Alertas inteligentes",
+    description:
+      "Recibe pings por Slack/SMS cuando un PMS cambia la reserva, hay un restock pendiente o una cuadrilla reporta daño.",
+    statLabel: "Notificaciones",
+    statValue: "Tiempo real",
+    icon: BellAlertIcon,
+  },
+  {
+    title: "Control de inventario",
+    description:
+      "RFID y conteos rápidos para amenities y blancos; genera tickets de reposición con un toque.",
+    statLabel: "Reposición promedio",
+    statValue: "<18 h",
+    icon: ClipboardDocumentCheckIcon,
+  },
+];
+
+export const qaHighlights: QaHighlight[] = [
+  {
+    title: "Doble verificación QA",
+    description:
+      "Cada servicio se cierra con firma de cuadrilla y supervisor remoto, respaldado por evidencias fotográficas.",
+    proof: "Checklist Turnover/Deep Clean + QA digital",
+    icon: ShieldCheckIcon,
+  },
+  {
+    title: "Auditorías semanales",
+    description:
+      "Sampling aleatorio de servicios, scoring de consistencia y playbooks correctivos documentados.",
+    proof: "Informe en portal + Slack #operaciones-brisa",
+    icon: ClipboardDocumentListIcon,
+  },
+  {
+    title: "Escalamiento en 15 minutos",
+    description:
+      "Incidencias críticas se reportan a operaciones y cliente en menos de 15 minutos con plan de acción.",
+    proof: "SLA alertas críticas ≤15 min",
+    icon: BoltIcon,
   },
 ];
 

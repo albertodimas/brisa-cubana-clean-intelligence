@@ -1,6 +1,6 @@
 # Checklist de Regresiones
 
-**Última actualización:** 15 de octubre de 2025
+**Última actualización:** 30 de octubre de 2025
 
 Este documento define los escenarios críticos que deben verificarse antes de cada despliegue a producción para prevenir regresiones.
 
@@ -160,7 +160,10 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 ### 6.1 Landing Page
 
 - [ ] Página principal (`/`) muestra hero con copy actualizado y CTA dobles (“Solicita una propuesta”, “Explora el portal cliente”)
-- [ ] Secciones “Por qué nos eligen”, “Proceso”, “Historias de clientes” y “Planes y precios” cargan sin errores
+- [ ] Sección “Oferta de valor” renderiza los tres pilares (respuesta garantizada, visibilidad total, operación sin fricción) y métricas (<120 min, reportes <4 h, CSAT 4.9)
+- [ ] Bloque “Funcionalidades clave del portal” muestra timeline, alertas y control de inventario con sus métricas
+- [ ] Bloque “QA & Garantía” presenta tres highlights y checklist semanal
+- [ ] Secciones “Proceso”, “Historias de clientes” y “Planes y precios” cargan sin errores
 - [ ] FAQ interactiva abre/cierra acordeones correctamente
 - [ ] Formulario “¿Listo para recibir tu propuesta?” valida campos obligatorios y muestra feedback (éxito/error)
 - [ ] CTA hero no mostrados para usuarios autenticados mantienen sesión activa (chip en panel tras login)
