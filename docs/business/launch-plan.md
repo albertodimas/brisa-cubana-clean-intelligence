@@ -112,7 +112,7 @@ Al cumplirse estos hitos:
 | Accidentes laborales / daño propiedad   | Contratos con divulgación de responsabilidad, cobertura de seguro temporal o riders, protocolos de QA y uso de productos aprobados.              |
 | Quejas de vecinos por operación en casa | Limitar carga/descarga, usar bodegas externas si crece logística.                                                                                |
 | Fuga de leads sin conversión            | Pipeline centralizado (portal), seguimiento 24 h, CRM simple.                                                                                    |
-| Slack/Stripe no configurados            | Mantener checklist de credenciales (auditoría 30-oct) y ejecutar pendientes (webhook Slack, `STRIPE_SECRET_KEY`).                                |
+| Stripe no configurado                   | Mantener checklist de credenciales (auditoría 30-oct) y cargar `STRIPE_SECRET_KEY` cuando se habiliten cobros en vivo.                           |
 
 ---
 
@@ -131,7 +131,7 @@ Al cumplirse estos hitos:
 
 1. **Tecnología**
    - Reemplazar `STRIPE_SECRET_KEY` en producción cuando se active cobro real.
-   - Validar webhook Slack (`curl` + run `health-monitor.yml`).
+   - Validar `STRIPE_SECRET_KEY` antes del lanzamiento comercial.
    - Mantener `VERCEL_CLEANUP_ENABLED=false` hasta rediseñar script de limpieza.
 2. **Comercial**
    - Montar campaña piloto (Google LSA + contenido redes).

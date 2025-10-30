@@ -112,7 +112,7 @@ Valores de referencia:
 - Id. de aplicación: `A09MF1LE9UK`
 - Canal: `#todo-brisa-cubana`
 
-Estado actual: ⚠️ El webhook respondió 4xx en `CI (Main Branch)` #18930562247 (30-oct-2025). El secreto es válido, pero se requiere recalibrar permisos o URL antes del siguiente despliegue automático (ver tarea en la sección de pendientes).
+Estado actual: ✅ Webhook verificado el 30-oct-2025 (mensaje `🧪 Verificación webhook Brisa`) y confirmado en `Production Health Monitor` run [#18931627032](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/runs/18931627032). Mantener la rotación trimestral documentada en `slack-integration.md`.
 
 ---
 
@@ -305,20 +305,7 @@ vercel env add STRIPE_SECRET_KEY production
 vercel --prod
 ```
 
-### 2. Restaurar entrega del webhook de Slack
-
-1. Revisar la URL actual en 1Password (`Slack – Incoming Webhook Brisa Cubana`).
-2. Confirmar que el canal `#todo-brisa-cubana` acepta mensajes entrantes.
-3. Reenviar un payload de prueba:
-   ```bash
-   curl -fsS -X POST \
-     -H "Content-type: application/json" \
-     --data '{"text":"[QA] Verificación webhook Brisa Cubana"}' \
-     "$SLACK_WEBHOOK_URL"
-   ```
-4. Relanzar `gh workflow run health-monitor.yml` y validar que no aparezca el warning “No se pudo entregar la notificación a Slack”.
-
-### 3. Verificar funcionamiento
+### 2. Verificar funcionamiento
 
 ```bash
 # Probar checkout en local
@@ -334,5 +321,5 @@ gh run list --workflow=posthog-monitor.yml
 
 **Documento generado:** 30 de octubre de 2025  
 **Responsable:** Claude Code (actualización post-incidente)  
-**Pendientes detectados:** 2 credenciales/acciones (1 crítica: `STRIPE_SECRET_KEY` Prod · 1 importante: restablecer webhook Slack)  
-**Progreso total:** 93 % (31 de 33 credenciales/acciones)
+**Pendientes detectados:** 1 credencial crítica (`STRIPE_SECRET_KEY` Prod)  
+**Progreso total:** 94 % (32 de 34 elementos)
