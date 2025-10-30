@@ -7,12 +7,8 @@ on:
 
 jobs:
   cleanup:
-    if: ${{ secrets.VERCEL_TOKEN != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -28,7 +24,52 @@ jobs:
         with:
           node-version: '22.13.0'
 
-      - name: Verify Vercel credentials
+      - name: Validate secrets
+        id: validate
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "missing-token=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "${VERCEL_ORG_ID:-}" ]; then
+            echo "missing-org=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "${VERCEL_PROJECT_WEB:-}" ] || [ -z "${VERCEL_PROJECT_API:-}" ]; then
+            echo "missing-projects=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "missing-token=false" >> "$GITHUB_OUTPUT"
+          echo "missing-org=false" >> "$GITHUB_OUTPUT"
+          echo "missing-projects=false" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_WEB: ${{ secrets.VERCEL_PROJECT_WEB }}
+          VERCEL_PROJECT_API: ${{ secrets.VERCEL_PROJECT_API }}
+
+      - name: Report missing secrets
+        if: steps.validate.outputs.missing-token == 'true' || steps.validate.outputs.missing-org == 'true' || steps.validate.outputs.missing-projects == 'true'
+        run: |
+          {
+            echo "### ⚠️ Vercel cleanup omitido"
+            if [ "${{ steps.validate.outputs.missing-token }}" = 'true' ]; then
+              echo "- Falta configurar \`VERCEL_TOKEN\` en los secrets del repositorio."
+            fi
+            if [ "${{ steps.validate.outputs.missing-org }}" = 'true' ]; then
+              echo "- Falta configurar \`VERCEL_ORG_ID\` en los secrets del repositorio."
+            fi
+            if [ "${{ steps.validate.outputs.missing-projects }}" = 'true' ]; then
+              echo "- Falta configurar \`VERCEL_PROJECT_WEB\` y/o \`VERCEL_PROJECT_API\` en los secrets del repositorio."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify Vercel credential lengths
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false'
         run: |
           set -euo pipefail
           echo "VERCEL_ORG_ID length: ${#VERCEL_ORG_ID}"
@@ -40,6 +81,7 @@ jobs:
           VERCEL_PROJECT_API: ${{ secrets.VERCEL_PROJECT_API }}
 
       - name: Clean web deployments (keep latest 3)
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -53,6 +95,7 @@ jobs:
             --keep 3
 
       - name: Clean API deployments (keep latest 3)
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -66,21 +109,11 @@ jobs:
             --keep 3
 
       - name: Publish summary
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false'
         run: |
           {
             echo "### 🧹 Vercel deployments cleanup"
             echo "- Web project: brisa-cubana-clean-intelligence (se conservan los 3 más recientes)"
             echo "- API project: brisa-cubana-clean-intelligence-api (se conservan los 3 más recientes)"
             echo "- Fecha de ejecución: $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  missing-token:
-    if: ${{ secrets.VERCEL_TOKEN == '' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Report missing token
-        run: |
-          {
-            echo "### ⚠️ Vercel cleanup omitido"
-            echo "No se proporcionó \`VERCEL_TOKEN\` en los secrets del repositorio, por lo que no se ejecutó la limpieza automática."
           } >> "$GITHUB_STEP_SUMMARY"
