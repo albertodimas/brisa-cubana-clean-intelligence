@@ -48,7 +48,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Captura de leads operativa en producción tras recrear la tabla `Lead` en Neon y marcar migraciones como aplicadas; el formulario ahora expone mensajes accesibles (`aria-live`, errores por campo) y evita estados inválidos iniciales en el combo de inventario.
 - Checkout público requiere `NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT`; en producción sólo muestra información demo cuando el publishable key es de prueba. También se normalizaron `NEXT_PUBLIC_SITE_URL`/`BASE_URL` para usar el dominio oficial en metadatos.
 - Sistema de marca actualizado con ícono de olas en formato SVG, paleta aqua/navy refinada en Tailwind y componentes (`BrandLogo`, headers, botones) alineados a las directrices de identidad.
-- Landing comercial añade secciones “Oferta de valor”, “Funcionalidades clave del portal” y “QA & Garantía”, con nuevos datasets (`valuePillars`, `portalCapabilities`, `qaHighlights`), CTAs instrumentados (`cta_value_pillars`, `cta_qa_playbook`) y pruebas asociadas para comunicar la propuesta del piloto.
+- Landing comercial añade secciones “Oferta de valor”, “Funcionalidades clave del portal” y “QA & Garantía”, con nuevos datasets (`valuePillars`, `portalCapabilities`, `qaHighlights`, `serviceComparisons`), CTAs instrumentados (`cta_value_pillars`, `cta_qa_playbook`, `cta_plan_compare`) y pruebas asociadas para comunicar la propuesta del piloto.
 
 ### Docs
 

@@ -5,6 +5,7 @@ import {
   pricingTiers,
   processSteps,
   qaHighlights,
+  serviceComparisons,
   socialLinks,
   testimonials,
   valuePillars,
@@ -43,6 +44,15 @@ describe("marketing content", () => {
     for (const qa of qaHighlights) {
       expect(qa.title).toBeTruthy();
       expect(qa.proof).toBeTruthy();
+    }
+  });
+
+  it("estructura la comparativa de servicios", () => {
+    expect(serviceComparisons.length).toBeGreaterThan(0);
+    for (const comparison of serviceComparisons) {
+      expect(comparison.id).toBeTruthy();
+      expect(comparison.deliverables.length).toBeGreaterThan(0);
+      expect(comparison.sla).toBeTruthy();
     }
   });
 

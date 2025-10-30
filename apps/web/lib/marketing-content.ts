@@ -68,6 +68,16 @@ export type QaHighlight = {
   icon: typeof SparklesIcon;
 };
 
+export type ServiceComparison = {
+  id: PricingTier["id"];
+  name: string;
+  idealFor: string;
+  sla: string;
+  crew: string;
+  deliverables: string[];
+  addOns: string;
+};
+
 /**
  * Testimonios reales de clientes de Brisa Cubana Clean Intelligence
  */
@@ -194,6 +204,48 @@ export const qaHighlights: QaHighlight[] = [
       "Incidencias críticas se reportan a operaciones y cliente en menos de 15 minutos con plan de acción.",
     proof: "SLA alertas críticas ≤15 min",
     icon: BoltIcon,
+  },
+];
+
+export const serviceComparisons: ServiceComparison[] = [
+  {
+    id: "turnover",
+    name: "Turnover Premium",
+    idealFor: "Airbnb / STR 6-20 unidades",
+    sla: "<120 min same-day",
+    crew: "2 personas (líder + auxiliar)",
+    deliverables: [
+      "Checklists 100 puntos + evidencia fotográfica",
+      "Restock amenities + textiles RFID",
+      "Reporte portal en <4 h",
+    ],
+    addOns: "Lavandería express · restock premium · staging ligero",
+  },
+  {
+    id: "deep-clean",
+    name: "Deep Clean Premium",
+    idealFor: "Residencial recurrente / Luxury",
+    sla: "Programación 24 h",
+    crew: "2-3 personas (detalle + soporte)",
+    deliverables: [
+      "Detallado cocina/baños + aromaterapia",
+      "Control humedad y saneamiento HVAC",
+      "Informe QA + upsells sugeridos",
+    ],
+    addOns: "Organización closets · electrodomésticos · eco-kit",
+  },
+  {
+    id: "post-construction",
+    name: "Post-Construcción Boutique",
+    idealFor: "Penthouses · handover proyectos",
+    sla: "Programación 48 h",
+    crew: "Equipo 3-4 con certificación OSHA",
+    deliverables: [
+      "Remoción polvo fino + pulido",
+      "Staging final fotos + walk-through",
+      "Checklist incidentes y punch list",
+    ],
+    addOns: "Amenity refresh · inventario amenidades · night shift",
   },
 ];
 

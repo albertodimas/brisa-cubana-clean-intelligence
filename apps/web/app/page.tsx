@@ -20,6 +20,7 @@ import {
   pricingTiers,
   processSteps,
   qaHighlights,
+  serviceComparisons,
   socialLinks,
   testimonials,
   valuePillars,
@@ -804,6 +805,88 @@ export default function LandingPage() {
           );
         }}
       />
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="space-y-8">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl font-semibold">
+              ¿Qué diferencia a cada paquete?
+            </h2>
+            <p className="mt-3 text-base sm:text-lg text-gray-600 dark:text-brisa-300 leading-relaxed">
+              Resume entregables clave, SLAs y add-ons para decidir el paquete
+              ideal.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-3xl border border-gray-200 dark:border-brisa-800 bg-white dark:bg-brisa-950 shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-brisa-800 text-sm">
+              <thead className="bg-brisa-50/70 dark:bg-brisa-900/40 text-left">
+                <tr className="text-xs uppercase tracking-[0.25em] text-brisa-500 dark:text-brisa-300">
+                  <th scope="col" className="px-6 py-4 font-semibold">
+                    Paquete
+                  </th>
+                  <th scope="col" className="px-6 py-4 font-semibold">
+                    Ideal para
+                  </th>
+                  <th scope="col" className="px-6 py-4 font-semibold">
+                    SLA
+                  </th>
+                  <th scope="col" className="px-6 py-4 font-semibold">
+                    Cuadrilla
+                  </th>
+                  <th scope="col" className="px-6 py-4 font-semibold">
+                    Entregables
+                  </th>
+                  <th scope="col" className="px-6 py-4 font-semibold">
+                    Add-ons
+                  </th>
+                  <th scope="col" className="px-6 py-4 font-semibold sr-only">
+                    CTA
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-brisa-800">
+                {serviceComparisons.map((service) => (
+                  <tr key={service.id} className="align-top">
+                    <td className="px-6 py-6 font-semibold text-brisa-700 dark:text-white">
+                      {service.name}
+                    </td>
+                    <td className="px-6 py-6 text-gray-700 dark:text-brisa-200">
+                      {service.idealFor}
+                    </td>
+                    <td className="px-6 py-6 text-gray-700 dark:text-brisa-200">
+                      {service.sla}
+                    </td>
+                    <td className="px-6 py-6 text-gray-700 dark:text-brisa-200">
+                      {service.crew}
+                    </td>
+                    <td className="px-6 py-6 text-gray-700 dark:text-brisa-200">
+                      <ul className="space-y-2 list-disc pl-5">
+                        {service.deliverables.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className="px-6 py-6 text-gray-700 dark:text-brisa-200">
+                      {service.addOns}
+                    </td>
+                    <td className="px-6 py-6">
+                      <MarketingLink
+                        href={`/?plan=${service.id}#contacto`}
+                        eventName="cta_plan_compare"
+                        metadata={{ placement: "comparison", plan: service.id }}
+                        className="inline-flex items-center justify-center rounded-full border border-brisa-600 px-4 py-2 text-xs font-semibold text-brisa-600 hover:bg-brisa-50 dark:border-brisa-300 dark:text-brisa-200 dark:hover:bg-brisa-900 transition-colors"
+                        prefetch={false}
+                      >
+                        Cotizar paquete
+                      </MarketingLink>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       <section className="py-16 sm:py-20 bg-brisa-50 dark:bg-brisa-950/60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

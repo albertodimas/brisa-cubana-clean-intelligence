@@ -27,6 +27,7 @@ describe("LandingPage", () => {
     );
     expect(markup).toContain("Agenda diagnóstico express");
     expect(markup).toContain("Solicitar playbook QA completo");
+    expect(markup).toContain("¿Qué diferencia a cada paquete?");
   });
 
   it("presenta pricing, FAQ y formulario de contacto", async () => {
