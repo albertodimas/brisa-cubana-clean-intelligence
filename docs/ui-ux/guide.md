@@ -466,7 +466,7 @@ showToast("Guardado exitoso", {
 ```tsx
 <PricingCard3D
   name="Plan Premium"
-  price="$209"
+  price="$249"
   priceSuffix="/servicio"
   features={["Feature 1", "Feature 2"]}
   highlighted

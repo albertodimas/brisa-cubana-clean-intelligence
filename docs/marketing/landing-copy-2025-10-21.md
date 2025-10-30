@@ -28,9 +28,9 @@
 
 ## Sección Planes y precios (desde)
 
-1. **Turnover Premium Airbnb** – Desde $209 por salida. Restocking completo, lavandería express y reporte fotográfico en <4 horas.
-2. **Deep Clean Brickell Collection** – Desde $289. Detailing premium, tratamiento antivaho y control de inventario.
-3. **Post-Construcción Boutique** – Desde $349. Limpieza fina tras remodelación con pulido de superficies y staging final.
+1. **Turnover Premium Airbnb** – $249 por salida confirmada. Restocking completo, lavandería express y reporte fotográfico en <4 horas.
+2. **Deep Clean Brickell Collection** – $369 por servicio programado. Detailing premium, tratamiento antivaho y control de inventario.
+3. **Post-Construcción Boutique** – $489 por servicio de handover. Limpieza fina tras remodelación con pulido de superficies y staging final.
 
 ## Historias / Insights
 

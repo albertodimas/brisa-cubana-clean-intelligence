@@ -806,7 +806,7 @@ describe("app", () => {
         name: "Turnover Premium Airbnb",
         description:
           "Cambio integral entre huéspedes con restocking completo y reporte fotográfico en menos de 4 horas.",
-        basePrice: 209,
+        basePrice: 249,
         durationMin: 160,
         active: true,
         createdAt: new Date(),
@@ -818,7 +818,7 @@ describe("app", () => {
         name: "Deep Clean Brickell Collection",
         description:
           "Limpieza profunda con detailing premium y tratamiento antivaho.",
-        basePrice: 289,
+        basePrice: 369,
         durationMin: 210,
         active: true,
         createdAt: new Date(),
@@ -830,7 +830,7 @@ describe("app", () => {
         name: "Post-Construcción Boutique",
         description:
           "Limpieza fina post obra con pulido de superficies y staging final.",
-        basePrice: 349,
+        basePrice: 489,
         durationMin: 240,
         active: false,
         createdAt: new Date(),
@@ -938,7 +938,7 @@ describe("app", () => {
         notes:
           "Stock de amenities ‘Signature Citrus’. Revisar sensor de humedad en master bedroom.",
         status: "CONFIRMED",
-        totalAmount: 209,
+        totalAmount: 249,
         customerId: usersFixture[0].id,
         propertyId: propertiesFixture[0].id,
         serviceId: servicesFixture[0].id,

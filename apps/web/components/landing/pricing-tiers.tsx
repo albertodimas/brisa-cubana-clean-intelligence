@@ -31,11 +31,11 @@ export function PricingTiers({ tiers, renderCTA }: PricingTiersProps) {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
         {tiers.map((tier) => (
           <article
             key={tier.id}
-            className={`rounded-3xl border shadow-sm p-8 flex flex-col gap-6 ${
+            className={`rounded-3xl border shadow-sm p-7 sm:p-8 flex flex-col gap-6 ${
               tier.highlighted
                 ? "border-brisa-500 bg-white dark:bg-brisa-900/70 dark:border-brisa-400"
                 : "border-gray-200 dark:border-brisa-800 bg-white dark:bg-brisa-950/80"
@@ -45,7 +45,7 @@ export function PricingTiers({ tiers, renderCTA }: PricingTiersProps) {
               <p className="text-sm font-medium uppercase tracking-wide text-brisa-600 dark:text-brisa-300">
                 {tier.name}
               </p>
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-brisa-50">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-brisa-50">
                 {tier.headline}
               </h3>
               <p className="text-sm text-gray-600 dark:text-brisa-300">
@@ -53,12 +53,11 @@ export function PricingTiers({ tiers, renderCTA }: PricingTiersProps) {
               </p>
             </div>
 
-            <div>
+            <div className="flex items-baseline gap-2">
               <span className="text-4xl font-semibold text-gray-900 dark:text-brisa-50">
                 {tier.price}
               </span>
-              <span className="text-sm text-gray-600 dark:text-brisa-300">
-                {" "}
+              <span className="text-sm sm:text-base text-gray-600 dark:text-brisa-300">
                 {tier.priceSuffix}
               </span>
             </div>

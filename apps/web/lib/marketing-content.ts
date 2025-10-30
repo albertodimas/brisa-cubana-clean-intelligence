@@ -277,24 +277,24 @@ export const pricingTiers: PricingTier[] = [
   {
     id: "turnover",
     name: "Turnover Premium Airbnb",
-    headline: "Desde $249 por salida",
-    price: "$249+",
-    priceSuffix: "por salida",
+    headline: "Turnos garantizados < 120 min",
+    price: "$249",
+    priceSuffix: "por salida confirmada",
     description:
-      "Para listados urbanos con ocupaciones arriba del 70 %. Incluye restocking completo, lavandería express y evidencia fotográfica en <4 h.",
+      "Para portfolios urbanos con ocupaciones >70 %. Incluye restocking completo, lavandería express y reporte fotográfico en menos de 4 horas.",
     features: [
-      "Reposición completa de amenities, textiles y welcome kit",
-      "Checklist Airbnb Enhanced Cleaning y control RFID de inventario",
-      "Reporte en portal cliente en menos de 4 horas",
+      "Reposición completa de amenities, textiles y welcome kit premium",
+      "Checklist Airbnb Enhanced Cleaning + control RFID de inventario",
+      "Reporte en portal cliente con fotos y firmas en <4 horas",
       "Supervisión on-site en ventanas críticas y lanzamientos",
     ],
   },
   {
     id: "deep-clean",
     name: "Deep Clean Brickell Collection",
-    headline: "Desde $329",
-    price: "$329+",
-    priceSuffix: "por servicio",
+    headline: "Detallado premium trimestral",
+    price: "$369",
+    priceSuffix: "por servicio programado",
     description:
       "Ideal para residencias y estancias largas (>28 noches). Incluye detailing premium, tratamiento antivaho y saneamiento de HVAC.",
     features: [
@@ -308,9 +308,9 @@ export const pricingTiers: PricingTier[] = [
   {
     id: "post-construction",
     name: "Post-Construcción Boutique",
-    headline: "Desde $399",
-    price: "$399+",
-    priceSuffix: "por servicio",
+    headline: "Entrega impecable tras obra",
+    price: "$489",
+    priceSuffix: "por servicio de handover",
     description:
       "Para entregas de penthouses y villas tras obra o remodelación con requisitos OSHA. Incluye pulido final y staging ejecutivo.",
     features: [

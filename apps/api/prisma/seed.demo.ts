@@ -38,7 +38,7 @@ async function seedDemo() {
         name: "Turnover Premium Airbnb",
         description:
           "Cambio integral entre huéspedes con restocking completo, lavandería express y reporte fotográfico en menos de 4 horas.",
-        basePrice: 209.0,
+        basePrice: 249.0,
         durationMin: 160,
       },
     }),
@@ -49,7 +49,7 @@ async function seedDemo() {
         name: "Deep Clean Brickell Collection",
         description:
           "Limpieza profunda trimestral con detailing premium, tratamiento antivaho y control de inventario.",
-        basePrice: 289.0,
+        basePrice: 369.0,
         durationMin: 210,
       },
     }),
@@ -60,7 +60,7 @@ async function seedDemo() {
         name: "Post-Construcción Boutique",
         description:
           "Limpieza fina tras remodelaciones: pulido de superficies, remoción de residuos y staging final para entrega premium.",
-        basePrice: 349.0,
+        basePrice: 489.0,
         durationMin: 240,
       },
     }),

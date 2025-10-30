@@ -214,8 +214,8 @@ const pricingTiers: PricingTier[] = [
   {
     id: "turnover",
     name: "Turnover Premium Airbnb",
-    headline: "Desde $209 por salida", // ← CAMBIAR AQUÍ
-    price: "$209+", // ← CAMBIAR AQUÍ
+    headline: "Turnos garantizados < 120 min", // sincronizado con landing
+    price: "$249", // precio base por salida confirmada
     priceSuffix: "por salida",
     description: "Para listados urbanos con 12-25 rotaciones al año...",
     features: [
@@ -226,8 +226,8 @@ const pricingTiers: PricingTier[] = [
   {
     id: "deep-clean",
     name: "Deep Clean Brickell Collection",
-    headline: "Desde $289", // ← CAMBIAR AQUÍ
-    price: "$289+", // ← CAMBIAR AQUÍ
+    headline: "Detallado premium trimestral", // sincronizado con landing
+    price: "$369", // precio base por servicio programado
     // ...
   },
   // ...
