@@ -66,6 +66,8 @@ Título: Azure Villa Key Biscayne reduce 30% tiempos muertos
 
 ## 7. Library de activos (WIP)
 
+- `apps/web/public/branding/brand-ai-concept.webp` → logomarca oficial (usar en hero, headers, materiales impresos).
+- `apps/web/public/branding/brand-ai-concept-512.png` → ícono/favicom y Apple Touch Icon.
 - `docs/assets/social/` → hero, timelapses, mockups portal (pendiente curar).
 - Crear carpeta por campaña con naming `YYYYMMdd_nombre-campaña`.
 

@@ -49,6 +49,7 @@
 - **¿Operan 24/7?** Sí, especialmente en temporada alta (noviembre-marzo). Guardias same-day para emergencias.
 - **¿Usan productos ecológicos?** EPA Safer Choice + insumos hipoalergénicos.
 - **¿Cómo funciona el portal?** Enlace mágico válido 12 h con gestión integral y descargas de evidencia.
+- **¿Cómo pagan los clientes?** Mientras activamos Stripe Billing aceptamos Zelle o transferencias a `payments@brisacubanacleanintelligence.com` (referencia: propiedad + fecha).
 
 ## Assets
 
