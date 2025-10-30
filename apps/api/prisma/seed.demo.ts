@@ -199,6 +199,88 @@ async function seedDemo() {
       skipDuplicates: true,
     });
   }
+
+  await prisma.lead.createMany({
+    data: [
+      {
+        name: "Mariana López",
+        email: "mariana@brickellbnb.com",
+        phone: "+1 305-555-8120",
+        company: "Brickell BNB Collective",
+        propertyCount: "12",
+        serviceInterest: "Turnover Premium Airbnb",
+        planCode: "turnover",
+        status: "CONTACTED",
+        notes:
+          "Demo agendada para 2 de noviembre. Solicita integración con Guesty.",
+        utmSource: "google",
+        utmMedium: "cpc",
+        utmCampaign: "turnover-miami-q4",
+        utmContent: "headline_a",
+        utmTerm: "airbnb cleaning miami",
+      },
+      {
+        name: "Andrés Torres",
+        email: "atorres@luxstaymiami.com",
+        phone: "+1 786-555-4421",
+        company: "LuxStay Miami",
+        propertyCount: "28",
+        serviceInterest: "Deep Clean Brickell Collection",
+        planCode: "deep-clean",
+        status: "QUALIFIED",
+        notes:
+          "Busca proveedor recurrente para tres penthouses en Brickell. Pide SLA de 3h post-checkout.",
+        utmSource: "linkedin",
+        utmMedium: "inmail",
+        utmCampaign: "luxury-host-outreach",
+      },
+      {
+        name: "Claudia Fernández",
+        email: "claudia@keybiscayneescapes.com",
+        phone: "+1 954-555-7770",
+        company: "Key Biscayne Escapes",
+        propertyCount: "6",
+        serviceInterest: "Amenity Refresh Express",
+        planCode: "post-construction",
+        status: "NEW",
+        notes: "Solicita cotización piloto para fin de semana largo (5-7 dic).",
+        utmSource: "instagram",
+        utmMedium: "organic",
+        utmCampaign: "october-before-after",
+      },
+      {
+        name: "Alexander Ruiz",
+        email: "aruiz@sunsetstays.co",
+        phone: "+1 786-555-9910",
+        company: "Sunset Stays Co.",
+        propertyCount: "18",
+        serviceInterest: "Turnover Premium Airbnb",
+        planCode: "turnover",
+        status: "CONVERTED",
+        notes:
+          "Contrato piloto firmado (4 propiedades). Arrancan el 4-nov. Requiere reporte semanal KPI.",
+        utmSource: "referral",
+        utmMedium: "partner",
+        utmCampaign: "partner-2025",
+      },
+      {
+        name: "Patricia Vega",
+        email: "patricia@miamiboutiquerentals.com",
+        phone: "+1 305-555-3345",
+        company: "Miami Boutique Rentals",
+        propertyCount: "10",
+        serviceInterest: "Deep Clean Brickell Collection",
+        planCode: "deep-clean",
+        status: "LOST",
+        notes:
+          "Decidió esperar hasta enero 2026 por presupuesto. Mantener en nurture trimestral.",
+        utmSource: "newsletter",
+        utmMedium: "email",
+        utmCampaign: "oct-2025-product-launch",
+      },
+    ],
+    skipDuplicates: true,
+  });
 }
 
 seedDemo()
