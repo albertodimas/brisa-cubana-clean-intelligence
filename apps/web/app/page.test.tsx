@@ -25,6 +25,8 @@ describe("LandingPage", () => {
     expect(markup).toContain(
       "Calidad supervisada en cada turno, lista para auditar.",
     );
+    expect(markup).toContain("Agenda diagnóstico express");
+    expect(markup).toContain("Solicitar playbook QA completo");
   });
 
   it("presenta pricing, FAQ y formulario de contacto", async () => {

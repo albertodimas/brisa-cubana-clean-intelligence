@@ -122,10 +122,10 @@ export const differentiators: Differentiator[] = [
 export const valuePillars: ValuePillar[] = [
   {
     title: "Respuesta garantizada",
-    headline: "Turnovers same-day en <120 min",
+    headline: "Turnovers same-day en <120 min",
     description:
       "Cuadrillas on-call 24/7, inventario pre-empaquetado y rutas por zonas para cubrir emergencias sin sacrificar calidad.",
-    proof: "97 % de turnos entregados a tiempo (Q3 2025)",
+    proof: "97 % de turnos entregados a tiempo (Q3 2025)",
     icon: BoltIcon,
   },
   {
@@ -133,7 +133,7 @@ export const valuePillars: ValuePillar[] = [
     headline: "Dashboard en vivo + alertas automáticas",
     description:
       "Checklists digitales, evidencias fotográficas y KPI se actualizan en segundos para que cada anfitrión tenga datos de primera mano.",
-    proof: "Reportes firmados en menos de 4 h",
+    proof: "Reportes firmados en menos de 4 h",
     icon: ChartBarSquareIcon,
   },
   {
@@ -152,7 +152,7 @@ export const portalCapabilities: PortalCapability[] = [
     description:
       "Cada turno incluye fotos before/after, checklist firmado y notas operativas para auditar en segundos.",
     statLabel: "Checklist completado",
-    statValue: "100 puntos",
+    statValue: "100 puntos",
     icon: CpuChipIcon,
   },
   {
@@ -168,7 +168,7 @@ export const portalCapabilities: PortalCapability[] = [
     description:
       "RFID y conteos rápidos para amenities y blancos; genera tickets de reposición con un toque.",
     statLabel: "Reposición promedio",
-    statValue: "<18 h",
+    statValue: "<18 h",
     icon: ClipboardDocumentCheckIcon,
   },
 ];
@@ -192,7 +192,7 @@ export const qaHighlights: QaHighlight[] = [
     title: "Escalamiento en 15 minutos",
     description:
       "Incidencias críticas se reportan a operaciones y cliente en menos de 15 minutos con plan de acción.",
-    proof: "SLA alertas críticas ≤15 min",
+    proof: "SLA alertas críticas ≤15 min",
     icon: BoltIcon,
   },
 ];

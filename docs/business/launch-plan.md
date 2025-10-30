@@ -145,7 +145,7 @@ Al cumplirse estos hitos:
    - Reemplazar `STRIPE_SECRET_KEY` en producción cuando se active cobro real.
    - Validar `STRIPE_SECRET_KEY` antes del lanzamiento comercial.
    - Mantener `VERCEL_CLEANUP_ENABLED=false` hasta rediseñar script de limpieza.
-   - Instrumentar eventos (`cta_value_pillars`, `cta_qa_playbook`) para medir interacción con las nuevas secciones de landing.
+   - Eventos `cta_value_pillars` y `cta_qa_playbook` activos para medir interacción con las nuevas secciones de landing.
 2. **Comercial**
    - Montar campaña piloto (Google LSA + contenido redes).
    - Preparar materiales de venta (brochure, cotizador rápido, propuesta para property managers).

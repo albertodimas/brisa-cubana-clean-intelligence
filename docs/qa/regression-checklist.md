@@ -203,6 +203,8 @@ Este documento define los escenarios críticos que deben verificarse antes de ca
 - [ ] `LEAD_WEBHOOK_URL` configurado en entorno (revisar Vercel/GitHub Secrets)
 - [ ] Enviar formulario público (`/`, sección contacto) produce 200 y dispara evento en destino (Slack/CRM) con payload esperado (puedes validar manualmente con `scripts/test-lead-webhook.sh` apuntando a la URL de webhook)
 - [ ] CTA hero y pricing generan eventos `cta_request_proposal` y `cta_portal_demo` visibles en la plataforma de analítica (Vercel/PostHog/GA4)
+- [ ] CTA “Agenda diagnóstico express” registra evento `cta_value_pillars` con metadata `plan=turnover`
+- [ ] CTA “Solicitar playbook QA completo” registra evento `cta_qa_playbook`
 - [ ] CTA de planes agregan `plan`/`inventory` a la URL y el formulario refleja el mensaje de interés + select precargado
 - [ ] Error 4xx/5xx de `/api/leads` muestra fallback “Escríbenos a … o agenda por WhatsApp” y se registra `lead_form_failed`
 - [ ] Widget flotante de WhatsApp abre el chat en `wa.me` y emite evento `whatsapp_chat_start`

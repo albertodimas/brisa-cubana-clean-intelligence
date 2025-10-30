@@ -263,6 +263,20 @@ export default function LandingPage() {
               </StaggerItem>
             ))}
           </StaggerContainer>
+          <div className="flex flex-wrap items-center gap-4">
+            <MarketingLink
+              href="/?plan=turnover&inventory=6-15%20unidades#contacto"
+              eventName="cta_value_pillars"
+              metadata={{ placement: "value-pillar", plan: "turnover" }}
+              className="inline-flex items-center justify-center rounded-full bg-brisa-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-500/40 transition hover:-translate-y-0.5 hover:bg-brisa-700 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brisa-400"
+              prefetch={false}
+            >
+              Agenda diagnóstico express
+            </MarketingLink>
+            <span className="text-sm text-gray-600 dark:text-brisa-300">
+              Confirma disponibilidad y recibe checklist personalizado en 24 h.
+            </span>
+          </div>
         </div>
       </section>
 
@@ -607,6 +621,15 @@ export default function LandingPage() {
                   `#operaciones-brisa`.
                 </li>
               </ul>
+              <MarketingLink
+                href="/?plan=deep-clean&inventory=16-40%20unidades#contacto"
+                eventName="cta_qa_playbook"
+                metadata={{ placement: "qa-guardrails" }}
+                className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-white/40 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                prefetch={false}
+              >
+                Solicitar playbook QA completo
+              </MarketingLink>
             </div>
           </div>
         </div>
