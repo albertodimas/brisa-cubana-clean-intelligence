@@ -9,6 +9,8 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      CLEANUP_ENABLED: ${{ vars.VERCEL_CLEANUP_ENABLED }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -81,7 +83,7 @@ jobs:
           VERCEL_PROJECT_API: ${{ secrets.VERCEL_PROJECT_API }}
 
       - name: Clean web deployments (keep latest 3)
-        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false'
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false' && env.CLEANUP_ENABLED == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -95,7 +97,7 @@ jobs:
             --keep 3
 
       - name: Clean API deployments (keep latest 3)
-        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false'
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false' && env.CLEANUP_ENABLED == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -109,11 +111,19 @@ jobs:
             --keep 3
 
       - name: Publish summary
-        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false'
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false' && env.CLEANUP_ENABLED == 'true'
         run: |
           {
             echo "### 🧹 Vercel deployments cleanup"
             echo "- Web project: brisa-cubana-clean-intelligence (se conservan los 3 más recientes)"
             echo "- API project: brisa-cubana-clean-intelligence-api (se conservan los 3 más recientes)"
             echo "- Fecha de ejecución: $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cleanup deshabilitado
+        if: steps.validate.outputs.missing-token == 'false' && steps.validate.outputs.missing-org == 'false' && steps.validate.outputs.missing-projects == 'false' && env.CLEANUP_ENABLED != 'true'
+        run: |
+          {
+            echo "### ℹ️ Limpieza omitida"
+            echo "El job fue deshabilitado vía \`VERCEL_CLEANUP_ENABLED\`. No se eliminaron deployments."
           } >> "$GITHUB_STEP_SUMMARY"
