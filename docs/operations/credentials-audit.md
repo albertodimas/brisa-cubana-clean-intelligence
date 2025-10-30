@@ -1,8 +1,8 @@
 # Informe de Auditoría de Credenciales
 
-**Fecha:** 27 de octubre de 2025  
-**Alcance:** Comparación entre credenciales documentadas y configuración actual  
-**Estado global:** ⚠️ 1 credencial crítica pendiente
+**Fecha:** 30 de octubre de 2025  
+**Alcance:** Comparación entre credenciales documentadas y configuración actual (post-incidente de limpieza en Vercel)  
+**Estado global:** ⚠️ 1 credencial crítica pendiente (`STRIPE_SECRET_KEY` en producción)
 
 ---
 
@@ -112,11 +112,31 @@ Valores de referencia:
 - Id. de aplicación: `A09MF1LE9UK`
 - Canal: `#todo-brisa-cubana`
 
-Estado actual: ✅ Webhook rotado el 29-oct-2025 y sincronizado (mensaje de prueba: `Hello, World!`).
+Estado actual: ⚠️ El webhook respondió 4xx en `CI (Main Branch)` #18930562247 (30-oct-2025). El secreto es válido, pero se requiere recalibrar permisos o URL antes del siguiente despliegue automático (ver tarea en la sección de pendientes).
 
 ---
 
-#### 6. Stripe (procesamiento de pagos)
+#### 6. Automatizaciones Vercel (CLI y limpieza)
+
+```bash
+✅ VERCEL_TOKEN (GitHub Secrets + CLI local)
+✅ VERCEL_ORG_ID (GitHub Secrets)
+✅ VERCEL_PROJECT_WEB (GitHub Secrets)
+✅ VERCEL_PROJECT_API (GitHub Secrets) — `prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j`
+✅ VERCEL_CLI_WATCH_TOKEN (GitHub Secrets) — nuevo 30-oct-2025
+✅ VERCEL_PROJECT_WEB / VERCEL_PROJECT_API replicados en variables del repositorio
+✅ VERCEL_CLEANUP_ENABLED (Repository variable) — **setear en `true` sólo cuando se supervise la limpieza**
+```
+
+Contexto:
+
+- `vercel-cli-watch.yml` fallaba por permisos 403; se añadió `VERCEL_CLI_WATCH_TOKEN` con scope `repo`/`issues:write`.
+- `vercel-cleanup.yml` eliminó despliegues productivos el 30-oct; ahora respeta `VERCEL_CLEANUP_ENABLED` y se deja desactivado hasta terminar el rediseño del script (`scripts/clean-vercel-deployments.mjs`).
+- Los proyectos temporales `api` y `output` fueron eliminados; sólo deben usarse `brisa-cubana-clean-intelligence` y `brisa-cubana-clean-intelligence-api`.
+
+---
+
+#### 7. Stripe (procesamiento de pagos)
 
 ### Cómo documentar secretos de forma segura
 
@@ -146,7 +166,7 @@ Impacto:
 
 ---
 
-#### 7. URLs y configuración general
+#### 8. URLs y configuración general
 
 ```bash
 ✅ NEXT_PUBLIC_API_URL
@@ -161,7 +181,7 @@ Estado actual: ✅ Enlaces alineados en los tres entornos.
 
 ---
 
-#### 8. Rate limiting
+#### 9. Rate limiting
 
 ```bash
 ✅ LOGIN_RATE_LIMIT
@@ -172,7 +192,7 @@ Estado actual: ✅ Protecciones activas en Vercel.
 
 ---
 
-#### 9. Portal de clientes (Magic Link)
+#### 10. Portal de clientes (Magic Link)
 
 ```bash
 ✅ PORTAL_MAGIC_LINK_EXPOSE_DEBUG (Vercel: Preview/Prod)
@@ -285,7 +305,20 @@ vercel env add STRIPE_SECRET_KEY production
 vercel --prod
 ```
 
-### 2. Verificar funcionamiento
+### 2. Restaurar entrega del webhook de Slack
+
+1. Revisar la URL actual en 1Password (`Slack – Incoming Webhook Brisa Cubana`).
+2. Confirmar que el canal `#todo-brisa-cubana` acepta mensajes entrantes.
+3. Reenviar un payload de prueba:
+   ```bash
+   curl -fsS -X POST \
+     -H "Content-type: application/json" \
+     --data '{"text":"[QA] Verificación webhook Brisa Cubana"}' \
+     "$SLACK_WEBHOOK_URL"
+   ```
+4. Relanzar `gh workflow run health-monitor.yml` y validar que no aparezca el warning “No se pudo entregar la notificación a Slack”.
+
+### 3. Verificar funcionamiento
 
 ```bash
 # Probar checkout en local
@@ -299,7 +332,7 @@ gh run list --workflow=posthog-monitor.yml
 
 ---
 
-**Documento generado:** 26 de octubre de 2025  
-**Responsable:** Claude Code  
-**Pendientes detectados:** 2 credenciales (1 crítica, 1 importante)  
-**Progreso total:** 94 % (31 de 33 credenciales)
+**Documento generado:** 30 de octubre de 2025  
+**Responsable:** Claude Code (actualización post-incidente)  
+**Pendientes detectados:** 2 credenciales/acciones (1 crítica: `STRIPE_SECRET_KEY` Prod · 1 importante: restablecer webhook Slack)  
+**Progreso total:** 93 % (31 de 33 credenciales/acciones)

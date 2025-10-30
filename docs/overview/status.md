@@ -1,25 +1,26 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última revisión:** 29 de octubre de 2025 (verificaciones locales: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm docs:verify`, `pnpm test:e2e:smoke`; CI `CI (Main Branch)` run [#18830072119](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/runs/18830072119) continua como base de comparación; estándar Node.js 22.13.0). Nuevo watchdog `market-stats-watchdog.yml` corre a diario y abre issue automático si las métricas superan 120 días sin actualizar.
+**Última revisión:** 30 de octubre de 2025 (verificaciones locales: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm docs:verify`, `pnpm test:e2e:smoke`; CI `CI (Main Branch)` run [#18930562247](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/runs/18930562247) ejecutado a las 05:24 UTC, con despliegues productivos y smoke `/healthz` exitosos). Tras la limpieza agresiva de las 04:35 UTC, se restauraron los alias productivos, se eliminó la reconfiguración accidental de proyectos y se incorporó la bandera `VERCEL_CLEANUP_ENABLED` (por defecto `false`) para evitar que el job de limpieza borre despliegues sin supervisión.
 
 ---
 
 ## 1. Resumen ejecutivo
 
-- Plataforma verificada con frontend Next.js 15.5.6 + Auth.js y API Hono 4.9.12 + Prisma 6.17.1.
-- Versionado actual: `@brisa/api` 0.4.1 · `@brisa/web` 0.4.1 (tag `v0.4.1`, 19-oct-2025).
-- Entorno estándar: Node.js 22.13.0 (Active LTS). Evaluaremos Node.js 24 cuando entre a ciclo LTS el 28-oct-2025 y tras validar CI/CD completo.
-- Validaciones locales 28-29-oct-2025: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm docs:verify`, `pnpm test:e2e:smoke`, `pnpm test:e2e:critical` y `pnpm test:e2e:full` (DB `brisa_cubana_e2e` reseteada y seeds aplicados) en rama `feat/next16-migration`.
+- Plataforma verificada con frontend Next.js 16.0.0 + Auth.js y API Hono 4.10.3 + Prisma 6.17.1.
+- Versionado actual: `@brisa/api` 0.4.2 · `@brisa/web` 0.4.2 (tag `v0.4.2`, 30-oct-2025).
+- Entorno estándar: Node.js 22.13.0 (Active LTS). Node 24 se evaluará cuando pase a LTS y CI completo permanezca estable.
+- Validaciones locales continuas (28-30-oct-2025): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm docs:verify`, `pnpm test:e2e:smoke`, `pnpm test:e2e:critical` y `pnpm test:e2e:full` (DB `brisa_cubana_e2e` reseteada y seeds aplicados) en `feat/next16-migration`.
 - Login operativo en producción (`/api/authentication/login`) con roles y JWT en cookie HttpOnly.
 - Panel operativo funcional: creación/edición de servicios, propiedades y reservas; búsqueda con debounce y chips de filtros activos; mensajes de feedback.
 - Gestión de usuarios desde la UI (rol ADMIN) para cambio de roles y rotación de contraseñas.
 - Proxy serverless en Next reexpone `/api/*` hacia la API Hono usando `INTERNAL_API_URL` sin exponer secretos.
 - Endpoint de salud público `/healthz` protegido opcionalmente con `HEALTH_CHECK_TOKEN`; disponible vía rewrites desde el sitio web.
 - Base de datos sembrada (Neon en producción) con usuarios, servicios, propiedad y reservas demo; índices revisados para soportar búsquedas case-insensitive.
-- Despliegues en Vercel: el run `CI (Main Branch)` #18830072119 (27-oct-2025 08:40 UTC) completó deploys productivos de API/web y el smoke `/healthz` contra los aliases (`api.brisacubanacleanintelligence.com`, `brisacubanacleanintelligence.com`); el 29-oct-2025 se rotó nuevamente `HEALTH_CHECK_TOKEN` (`8c75d34…cae1f2`) y se validaron manualmente las respuestas `200` con `curl` autenticado, manteniendo el workaround de instalación global `pnpm@10.18.0` en `ci.yml` mientras Vercel corrige el bug 48.x.
-- Observabilidad verificada manualmente el 21-oct-2025 (evento Sentry `ec904a19-899c-4e91-9386-8304c02cd724`, PostHog `checkout_payment_failed`) y revalidada el 29-oct-2025 con `pnpm sentry:test-event` (eventos `4f0dc4dd-681e-43d0-8ce4-3f15a21fede5`, `837b733d-aa58-4974-ac09-5b4afd80c2d7`, `71a42c56-14ef-4729-80e1-7e59523c779b`) y `pnpm posthog:test-event` (distinct `brisa-cli-fbefa632-7836-472f-a047-427472b85e94`, `brisa-cli-634200d5-de6f-4463-9666-7ab34611eba3`) tras sanitizar hosts.
+- Despliegues en Vercel: el run `CI (Main Branch)` #18930562247 (30-oct-2025 05:24 UTC) redeployó API y web, reasignó `brisacubanacleanintelligence.com` / `api.brisacubanacleanintelligence.com` y dejó `vercel-cleanup.yml` condicionado a `VERCEL_CLEANUP_ENABLED`.
+- Secretos/variables claves sincronizados el 30-oct: `VERCEL_TOKEN`, `VERCEL_PROJECT_WEB`, `VERCEL_PROJECT_API`, `VERCEL_ORG_ID` y el nuevo `VERCEL_CLI_WATCH_TOKEN` (utilizado por `vercel-cli-watch.yml`, ahora tolerante a 403). `HEALTH_CHECK_TOKEN` conservó el valor `8c75d34…cae1f2`.
+- Observabilidad verificada manualmente el 30-oct-2025 vía smoke `/healthz` autenticado y ejecución de `Production Health Monitor`; Slack devolvió respuesta 4xx en la notificación automática y se agendó corrección del webhook antes del 31-oct.
 - Captación de leads restablecida tras reconstruir la tabla `Lead` en Neon; `/api/leads` responde `201` y el formulario de landing muestra mensajes accesibles. Registrar nuevas migraciones con `pnpm --filter @brisa/api db:deploy` antes de seed.
-- Observabilidad verificada manualmente el 21-oct-2025 (evento Sentry `ec904a19-899c-4e91-9386-8304c02cd724`, PostHog `checkout_payment_failed`) y revalidada el 29-oct-2025 con `pnpm sentry:test-event` (eventos `837b733d-aa58-4974-ac09-5b4afd80c2d7`, `71a42c56-14ef-4729-80e1-7e59523c779b`) y `pnpm posthog:test-event` (distinct `brisa-cli-fbefa632-7836-472f-a047-427472b85e94`, `brisa-cli-634200d5-de6f-4463-9666-7ab34611eba3`) tras sanitizar hosts.
+- Observabilidad: histórico de verificación manual 21-oct-2025 (evento Sentry `ec904a19-899c-4e91-9386-8304c02cd724`, PostHog `checkout_payment_failed`), revalidación automatizada 29-oct mediante `pnpm sentry:test-event` y `pnpm posthog:test-event`, y smoke `/healthz` autenticado el 30-oct tras el redeploy.
 - Sitio público `/` sirve la landing comercial con métricas leídas desde `apps/web/data/marketStats.json`; el hook `useMarketStats` gobierna fallbacks “Dato en actualización” cuando exceden 120 días y alimenta el nuevo bloque `MarketStatsSnapshot` (fuente y fecha visibles en desktop/mobile). Existe variante `/en` con contenido resumido en inglés y etiquetas `hreflang`/canónica actualizadas. Todos los CTA disparan telemetría `@vercel/analytics` (`cta_request_proposal`, `cta_portal_demo`, `whatsapp_chat_start`) y el panel operativo vive en `/panel` expuesto solo a roles autenticados. El encabezado se re-estilizó con el nuevo `BrandLogo`, derivado de los SVG oficiales ubicados en `public/branding/` y botones principales adoptan la paleta aqua/navy. En navegación móvil los anchors `/#servicios`, `/#precios`, `/#faq` funcionan con `scroll-mt-24`.
 - El formulario de contacto precarga el plan seleccionado (`planCode`) e inventario desde los CTA, persiste UTM y cae en proxy `/api/leads` con fallback amigable (mail + WhatsApp) ante errores. `Lead.planCode` quedó disponible en la API/Slack y la nueva migración `20251029153023_add_lead_plan_code` ya se aplicó en local; ejecutar `pnpm db:deploy` en Neon antes de seeds.
 - Checkout público `/checkout` queda condicionado a `NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT`; en producción se muestra mensaje de demo y se redirecciona a contacto mientras el modo test permanezca activo. El portal cliente `/clientes` muestra roadmap Beta (dic 2025 – GA Q1 2026), clarifica Demo/Piloto/Beta y alerta cuando Stripe está en modo demo.
@@ -27,7 +28,7 @@
 - SMTP productivo configurado con SendGrid (`smtp.sendgrid.net`, puerto 465) y validado vía Nightly `full` sin `ENABLE_TEST_UTILS`.
 - Checkout público `/checkout` habilitado con Stripe Payment Element, formulario multipaso y endpoint `POST /api/payments/stripe/intent`; flujo cubierto por pruebas E2E `checkout.spec.ts`.
 - Portal cliente `/clientes` exhibe landing beta moderna y CTA doble (demo + contacto) y dashboard `/clientes/[customerId]` con métricas, timeline, callout de expiración y acciones para reagendar o cancelar reservas (feedback inline + telemetría), disparando notificaciones operativas a roles ADMIN/COORDINATOR; la vista de detalle `/clientes/[customerId]/reservas/[bookingId]` amplía información, timeline y CTA de soporte. Accesibilidad validada (WCAG 2.2 AA) con fixes `aria-live` y `aria-hidden` implementados (commit `ce37e09`, 17-oct-2025). Funcionalidades de autoservicio adicionales (PDF exports, SSE push) siguen planificadas para Fase 2.1/2.2 (ver [RFC §8](../product/rfc-public-components.md#8-portal-cliente)) y se documentan en la guía operativa [docs/guides/portal-client.md](../guides/portal-client.md).
-- Release etiquetado `v0.4.1` (19-oct-2025) consolida landing comercial, formulario de leads con webhook documentado, telemetría de marketing y la reubicación del panel operativo en `/panel`; el roadmap Fase 2 continúa en `product/phase-2-roadmap.md`. El 17-oct-2025 se ejecutó la migración a Tailwind CSS 4.1.0 (Issue #40) adoptando `@tailwindcss/postcss` y configuración híbrida.
+- Release etiquetado `v0.4.2` (30-oct-2025) incorpora Next.js 16/Hono 4.10, revalida CI completo tras la recuperación de Vercel, documenta la bandera `VERCEL_CLEANUP_ENABLED` y sincroniza secretos (`VERCEL_TOKEN`, `VERCEL_PROJECT_*`, `VERCEL_CLI_WATCH_TOKEN`). La versión previa `v0.4.1` (19-oct-2025) consolidó la landing comercial, el formulario de leads y la reubicación del panel operativo en `/panel`; el roadmap Fase 2 continúa en `product/phase-2-roadmap.md`.
 
 [Ver Quickstart local](../guides/quickstart.md) para puesta en marcha.
 
@@ -36,7 +37,7 @@
 ## 2. Arquitectura y componentes
 
 - **Frontend (apps/web)**
-  - Next.js 15.5.6 + React 19.
+  - Next.js 16.0.0 + React 19.
   - Autenticación con Auth.js (NextAuth v5) y session strategy `jwt`.
   - Server actions (`app/actions.ts`) para CRUD y revalidaciones.
   - Proxy en `app/api/[...route]/route.ts` → todas las llamadas `/api/*` se enrutan al backend (`INTERNAL_API_URL`), limpiando cabeceras sensibles y preservando querystring.
@@ -54,7 +55,7 @@
 - **Design System completo**: 40+ componentes UI/UX, 250+ design tokens, glassmorphism, animaciones Framer Motion (ver [docs/ui-ux/guide.md](../ui-ux/guide.md))
 
 - **API (apps/api)**
-  - Hono 4.9.12 corriendo en Vercel Node 22.x (builds apuntan a 22.13.0).
+  - Hono 4.10.3 corriendo en Vercel Node 22.x (builds apuntan a 22.13.0).
   - Rutas modulares:
     - `routes/auth.ts` (`/api/authentication/*`): login/logout/me + rate limiting.
     - `routes/services.ts`, `properties.ts`, `customers.ts`, `bookings.ts`, `users.ts`: CRUD con autorización por rol.

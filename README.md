@@ -6,14 +6,14 @@
 [![Release](https://img.shields.io/github/v/tag/albertodimas/brisa-cubana-clean-intelligence?color=0EA5E9&label=release&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/tags)
 
 Monorepo verificado para la plataforma operativa de **Brisa Cubana Clean Intelligence**.
-Al día **27 de octubre de 2025**, la serie `v0.4.x` está totalmente documentada, con **224 pruebas automatizadas** (126 API + 98 Web unit/integration) pasando en CI y despliegues productivos estables.
+Al día **30 de octubre de 2025**, la release activa es `v0.4.2`, con **224 pruebas automatizadas** (126 API + 98 Web unit/integration) pasando en CI (`CI (Main Branch)` run [#18930562247](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/runs/18930562247)) y despliegues productivos validados tras la recuperación de Vercel.
 
 ---
 
 ## 🧭 Visión general
 
-- **Frontend (`apps/web`)**: Next.js 15.5.6 + React 19.2.0, Auth.js (NextAuth v5), server actions y proxy interno `/api/*`.
-- **API (`apps/api`)**: Hono 4.9.12 sobre Node.js 22, RBAC por middleware, repositorios Prisma, rate limiting y webhook de leads.
+- **Frontend (`apps/web`)**: Next.js 16.0.0 + React 19.2.0, Auth.js (NextAuth v5), server actions y proxy interno `/api/*`.
+- **API (`apps/api`)**: Hono 4.10.3 sobre Node.js 22, RBAC por middleware, repositorios Prisma, rate limiting y webhook de leads.
 - **Persistencia**: Prisma Client 6.17.1 → PostgreSQL 17 (Neon en producción) / PostgreSQL 16 en Docker local con soft delete en todos los modelos.
 - **Observabilidad**: Pino + Sentry (web/API), Speed Insights, métricas `/health`, logs estructurados y monitoreo E2E nocturno.
 - **Tooling**: pnpm 10.18 · Turborepo 2.5 · TypeScript 5.9 · Vitest 3.2 · Playwright 1.56 · Husky + lint-staged.
