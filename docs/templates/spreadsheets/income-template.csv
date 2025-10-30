@@ -1,0 +1,3 @@
+ID Factura,Fecha Servicio,Fecha Factura,Fecha Pago,Cliente,Propiedad,Tipo Servicio,Descripción,Subtotal,IVA/Taxes,Total,Método Pago,Status,Días Pago,Notas
+INV-001,2025-10-15,2025-10-15,2025-10-17,Brickell Luxe Stays,Skyline Loft Brickell,Turnover,Turnover 2BR + lavandería,800.00,128.00,928.00,Zelle,Pagado,2,Incluye restock premium
+INV-002,2025-10-16,2025-10-16,,Seaside Retreats,Azure Villa Key Biscayne,Deep Clean,Deep clean 4BR,1500.00,240.00,1740.00,Transferencia,Pendiente,15,Programada re-limpieza 18 oct
