@@ -21,12 +21,12 @@
 
 ## 2. Hoja de ruta comercial
 
-| Fase                   | Periodo     | Objetivos clave                                                                          | Entregables                                                                             |
-| ---------------------- | ----------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Fase 0 – Setup         | Semana 0    | Alistar equipo, portal y kit operativo                                                   | Cuadrillas contratadas, portal con cuentas STAFF, checklists digitales, Slack integrado |
-| Fase 1 – Piloto soft   | Semanas 1‑4 | 5 hosts + 5 residenciales, recopilar feedback continuo                                   | Servicios documentados, testimonios iniciales, métricas básicas (tiempo, satisfacción)  |
-| Fase 2 – Validación    | Meses 2‑3   | Suscripciones mensuales, alianzas con property managers, marketing digital geolocalizado | Paquetes recurrentes activos, pipeline de referidos, costos unitarios realistas         |
-| Fase 3 – Formalización | Post‑piloto | Constituir LLC, seguros, Stripe live, contabilidad                                       | CU/BTR, pólizas, procesos administrativos y contratos formales                          |
+| Fase                   | Periodo     | Objetivos clave                                                                          | Entregables                                                                                                                   |
+| ---------------------- | ----------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Fase 0 – Setup         | Semana 0    | Alistar equipo, portal y kit operativo                                                   | Cuadrillas contratadas, portal con cuentas STAFF, [checklists digitales](../operations/checklists/README.md), Slack integrado |
+| Fase 1 – Piloto soft   | Semanas 1‑4 | 5 hosts + 5 residenciales, recopilar feedback continuo                                   | Servicios documentados, testimonios iniciales, métricas básicas (tiempo, satisfacción)                                        |
+| Fase 2 – Validación    | Meses 2‑3   | Suscripciones mensuales, alianzas con property managers, marketing digital geolocalizado | Paquetes recurrentes activos, pipeline de referidos, costos unitarios realistas                                               |
+| Fase 3 – Formalización | Post‑piloto | Constituir LLC, seguros, Stripe live, contabilidad                                       | CU/BTR, pólizas, procesos administrativos y contratos formales                                                                |
 
 ---
 
@@ -82,7 +82,7 @@
 - **Promoción inicial**
   - Descuento 15 % primer mes o limpieza gratuita si no cumple estándar.
   - Welcome kit (vela aromática, tarjeta personalizada) para primeros 20 clientes.
-- **Métricas a rastrear**
+- **Métricas a rastrear** (usa la [plantilla CSV](pilot-metrics-template.csv) para documentarlas)
   - CAC, tasa de conversión, valor del ticket promedio, churn mensual, utilización de cuadrillas, satisfacción vía NPS.
 
 ---
@@ -141,6 +141,36 @@ Al cumplirse estos hitos:
    - Reclutar y entrenar cuadrillas con SOPs.
    - Definir políticas de precio, cancelaciones y QA.
    - Llevar contabilidad básica en Google Sheets/Notion.
+
+---
+
+## 11. Unit economics piloto (escenario base)
+
+| Métrica                            | Turnover Express | Deep Clean Premium | Bono Horas Corporativo |
+| ---------------------------------- | ---------------- | ------------------ | ---------------------- |
+| Precio piloto (USD)                | 120              | 150                | 55 (por hora)          |
+| Horas promedio por servicio        | 2.0              | 2.5                | 1.0                    |
+| Costo cuadrilla (USD/h)            | 20               | 22                 | 20                     |
+| Costos directos por servicio (USD) | 40               | 55                 | 20                     |
+| Consumibles/amenities (USD)        | 15               | 20                 | 5                      |
+| Transporte/logística (USD)         | 10               | 12                 | 5                      |
+| Margen bruto por servicio (USD)    | 55               | 63                 | 25                     |
+| Margen bruto %                     | 46 %             | 42 %               | 45 %                   |
+
+### Supuestos operativos
+
+- Cuadrillas contratadas por servicio (modelo 1099) con tarifa entre USD 20‑22/hora.
+- Upsells promedio por Turnover Express: USD 20, incrementando margen a 62 %. Upsells en Deep Clean: +USD 30 (organización) → margen 50 %.
+- Tasa de cancelación 10 % mensual incluida en los costos logísticos (tiempo muerto).
+- Costos fijos piloto (marketing, seguros temporales, herramientas) estimados en USD 1 100/mes; punto de equilibrio → 18 servicios Turnover + 8 Deep Clean.
+- Hoja `pilot-metrics-template.csv` permite ajustar valores reales semana a semana y recalcular margen acumulado.
+
+### Acciones para optimizar márgenes
+
+1. Calendarizar rutas por zonas para reducir transporte (meta ≤8 % del ingreso).
+2. Negociar compras al por mayor de amenities (descuento 12‑15 % frente a retail).
+3. Empaquetar upsells (lavandería + restock premium) como add-on fijo USD 45.
+4. Automatizar recordatorios post-servicio para impulsar referidos (busca CAC < USD 35).
 
 ---
 
