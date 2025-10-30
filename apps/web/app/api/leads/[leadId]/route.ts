@@ -6,9 +6,9 @@ const API_URL =
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { leadId: string } },
+  context: { params: Promise<{ leadId: string }> },
 ) {
-  const leadId = params.leadId;
+  const { leadId } = await context.params;
 
   if (!leadId) {
     return NextResponse.json(
