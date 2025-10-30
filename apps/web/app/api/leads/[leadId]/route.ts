@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 const API_URL =
   process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { leadId: string } },
 ) {
   const leadId = params.leadId;

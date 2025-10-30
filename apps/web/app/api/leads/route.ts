@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 const API_URL =
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(_request: NextRequest) {
   if (!API_URL) {
     return NextResponse.json(
       { error: "API interna no configurada" },
