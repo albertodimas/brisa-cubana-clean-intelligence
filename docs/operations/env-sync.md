@@ -1,6 +1,8 @@
 # Sincronización de Variables de Entorno
 
-> ✅ Referencia rápida: ejecuta `pnpm env:status` para validar que `.env.local` cumple con el manifest central (`config/env.manifest.json`). Actualiza el manifest cuando añadas o elimines claves para evitar duplicados entre Vercel, GitHub Actions y desarrollo.
+> ✅ Referencia rápida: ejecuta `pnpm env:status` para validar que `.env.local` cumple con el manifest central (`config/env.manifest.json`). Si quieres que el comando devuelva código de error cuando falte alguna variable (por ejemplo en CI), usa `pnpm env:status --strict`. Actualiza el manifest cuando añadas o elimines claves para evitar duplicados entre Vercel, GitHub Actions y desarrollo.
+
+La plataforma ejecuta automáticamente esta verificación todos los lunes a las 06:00 UTC mediante el workflow `Env Manifest Audit`. Si aparece en rojo, revisa los pasos inferiores y corrige los entornos antes de volver a ejecutar manualmente el job (`Actions → Env Manifest Audit → Run workflow`).
 
 Pasos para alinear los valores de entorno propios del proxy web y del portal cliente después de retirar `API_TOKEN`.
 

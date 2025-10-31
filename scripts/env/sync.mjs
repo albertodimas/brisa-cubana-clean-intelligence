@@ -18,6 +18,7 @@ import process from "node:process";
 const repoRoot = path.join(process.cwd());
 const manifestPath = path.join(repoRoot, "config", "env.manifest.json");
 const envLocalPath = path.join(repoRoot, ".env.local");
+const strictMode = process.argv.includes("--strict");
 
 function readManifest() {
   if (!fs.existsSync(manifestPath)) {
@@ -75,6 +76,9 @@ function main() {
       console.log(
         `   - ${variable.key} (${variable.scopes?.join(", ") ?? "general"}): ${variable.description}`,
       );
+    }
+    if (strictMode) {
+      process.exitCode = 1;
     }
   }
 

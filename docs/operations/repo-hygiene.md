@@ -32,7 +32,7 @@
 - El primer lunes del mes, repasa ramas remotas con `git fetch --prune` y borra las que ya estén fusionadas.
 - Recorre `docs/` buscando guías desactualizadas (`git grep TODO docs`) y registra acciones correctivas en `docs/overview/status.md`.
 - Programa `pnpm test:e2e:full` y la verificación Lighthouse (`pnpm docs:verify && pnpm test:e2e:full && pnpm exec playwright show-report`) para confirmar que producción se mantiene saludable.
-- Valida configuraciones protegidas en GitHub: `main` debe exigir los checks `PR Checks` y `CI (Main Branch)`.
+- Valida configuraciones protegidas en GitHub: `main` debe exigir los checks `PR Checks`, `Lint`, `Typecheck`, `Unit tests`, `Docs verify`, `Build`, `E2E critical`, `Storybook build` y `CI (Main Branch)` (el job `deploy` hereda de ellos).
 
 ## Observabilidad del repositorio
 
