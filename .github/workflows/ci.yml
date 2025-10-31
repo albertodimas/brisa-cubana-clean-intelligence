@@ -89,7 +89,7 @@ jobs:
       run-lint: false
       run-typecheck: false
       run-unit-tests: false
-      run-build: false
+      run-build: true
       run-e2e-suite: none
       run-database-prep: false
 
