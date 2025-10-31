@@ -1,42 +1,13 @@
-# CODEOWNERS for Brisa Cubana Clean Intelligence
-# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
-
-# Default owner for everything in the repo
+# Default owner
 * @albertodimas
 
-# Frontend - Next.js Web App
-/apps/web/ @albertodimas
-/apps/web/app/ @albertodimas
-/apps/web/components/ @albertodimas
+# Apps
+/apps/web/** @albertodimas
+/apps/api/** @albertodimas
 
-# Backend - Hono API
-/apps/api/ @albertodimas
-/apps/api/src/routes/ @albertodimas
-/apps/api/prisma/ @albertodimas
+# Tests & scripts
+/tests/** @albertodimas
+/scripts/** @albertodimas
 
-# Documentation
-/docs/ @albertodimas
-*.md @albertodimas
-
-# Infrastructure & DevOps
-/.github/ @albertodimas
-/.github/workflows/ @albertodimas
-
-# Configuration Files (require careful review)
-/package.json @albertodimas
-/pnpm-lock.yaml @albertodimas
-/pnpm-workspace.yaml @albertodimas
-/turbo.json @albertodimas
-/.env.example @albertodimas
-
-# Security & Compliance
-/.github/dependabot.yml @albertodimas
-
-# Database Schema (critical changes)
-/apps/api/prisma/schema.prisma @albertodimas
-/apps/api/prisma/migrations/ @albertodimas
-
-# CI/CD Workflows
-/.github/workflows/ci.yml @albertodimas
-/.github/workflows/pr-checks.yml @albertodimas
-/.github/workflows/nightly.yml @albertodimas
+# Documentación
+/docs/** @albertodimas

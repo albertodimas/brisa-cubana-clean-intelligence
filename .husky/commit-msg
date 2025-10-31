@@ -1,0 +1,3 @@
+#!/bin/sh
+# Verifica que los mensajes sigan Conventional Commits.
+node scripts/git/check-commit-message.mjs "$1"

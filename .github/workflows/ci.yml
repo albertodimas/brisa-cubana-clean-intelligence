@@ -12,14 +12,105 @@ on:
         default: "main"
 
 jobs:
-  quality:
+  lint:
     uses: ./.github/workflows/project-pipeline.yml
     secrets: inherit
     with:
       environment-name: preview-web
-      job-name: Main branch safety checks
+      job-name: Lint
       checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
       run-secret-scan: true
+      run-typecheck: false
+      run-unit-tests: false
+      run-build: false
+      run-docs-verify: false
+      run-e2e-suite: none
+      run-database-prep: false
+
+  typecheck:
+    needs: lint
+    uses: ./.github/workflows/project-pipeline.yml
+    secrets: inherit
+    with:
+      environment-name: preview-web
+      job-name: Typecheck
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
+      run-lint: false
+      run-unit-tests: false
+      run-build: false
+      run-docs-verify: false
+      run-e2e-suite: none
+      run-database-prep: false
+
+  unit-tests:
+    needs:
+      - lint
+      - typecheck
+    uses: ./.github/workflows/project-pipeline.yml
+    secrets: inherit
+    with:
+      environment-name: preview-web
+      job-name: Unit tests
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
+      run-lint: false
+      run-typecheck: false
+      run-build: false
+      run-docs-verify: false
+      run-e2e-suite: none
+      run-database-prep: false
+
+  build:
+    needs:
+      - lint
+      - typecheck
+    uses: ./.github/workflows/project-pipeline.yml
+    secrets: inherit
+    with:
+      environment-name: preview-web
+      job-name: Build
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
+      run-lint: false
+      run-typecheck: false
+      run-unit-tests: false
+      run-docs-verify: false
+      run-e2e-suite: none
+      run-database-prep: false
+
+  docs:
+    needs:
+      - lint
+      - typecheck
+    uses: ./.github/workflows/project-pipeline.yml
+    secrets: inherit
+    with:
+      environment-name: preview-web
+      job-name: Docs verify
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
+      run-lint: false
+      run-typecheck: false
+      run-unit-tests: false
+      run-build: false
+      run-e2e-suite: none
+      run-database-prep: false
+
+  e2e-critical:
+    needs:
+      - lint
+      - typecheck
+      - unit-tests
+      - build
+      - docs
+    uses: ./.github/workflows/project-pipeline.yml
+    secrets: inherit
+    with:
+      environment-name: preview-web
+      job-name: E2E critical
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
+      run-lint: false
+      run-typecheck: false
+      run-unit-tests: false
+      run-build: false
+      run-docs-verify: false
       run-database-prep: true
       run-e2e-suite: critical
       next-public-api-url: "http://localhost:3001"
@@ -29,7 +120,13 @@ jobs:
 
   deploy:
     if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
-    needs: quality
+    needs:
+      - lint
+      - typecheck
+      - unit-tests
+      - build
+      - docs
+      - e2e-critical
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:

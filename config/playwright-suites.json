@@ -1,0 +1,20 @@
+[
+  {
+    "project": "smoke",
+    "label": "Smoke",
+    "duration": "~1min",
+    "command": "`pnpm test:e2e:smoke`"
+  },
+  {
+    "project": "critical",
+    "label": "Critical",
+    "duration": "~6min",
+    "command": "`pnpm test:e2e:critical`"
+  },
+  {
+    "project": "full",
+    "label": "Full",
+    "duration": "~10min",
+    "command": "`pnpm test:e2e:full`"
+  }
+]

@@ -21,7 +21,7 @@ fi
 required_files=(
   "SECURITY.md"
   "docs/README.md"
-  "docs/guides/quickstart.md"
+  "docs/development/guides/quickstart.md"
   "docs/overview/status.md"
   "docs/reference/api-reference.md"
   "docs/reference/openapi.yaml"
@@ -36,14 +36,9 @@ required_files=(
   "docs/operations/incident-template.md"
   "docs/operations/slack-integration.md"
   "docs/operations/repo-hygiene.md"
-  "docs/qa/e2e-strategy.md"
-  "docs/qa/regression-checklist.md"
-  "docs/qa/performance-budgets.md"
-  "docs/product/user-management.md"
-  "docs/product/pagination.md"
-  "docs/product/phase-2-roadmap.md"
-  "docs/product/rfc-public-components.md"
-  "docs/product/analytics-dashboard.md"
+  "docs/development/qa/e2e-strategy.md"
+  "docs/development/qa/regression-checklist.md"
+  "docs/development/qa/performance-budgets.md"
   "docs/archive/2025-10-08-session-log.md"
 )
 
@@ -85,6 +80,10 @@ for pattern in "${forbidden_patterns[@]}"; do
     violations=1
   fi
 done
+
+if ! node scripts/qa/update-playwright-docs.mjs --check; then
+  violations=1
+fi
 
 if [[ ${violations} -ne 0 ]]; then
   echo ""

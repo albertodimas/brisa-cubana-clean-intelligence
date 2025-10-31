@@ -11,3 +11,11 @@ fi
 if command -v pnpm >/dev/null 2>&1; then
   pnpm exec lint-staged
 fi
+
+# Validar documentación cuando existan cambios en docs/
+if command -v pnpm >/dev/null 2>&1; then
+  if git diff --cached --name-only | grep -q '^docs/'; then
+    echo "📚 Validando documentación..."
+    pnpm docs:verify
+  fi
+fi

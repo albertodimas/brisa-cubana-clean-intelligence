@@ -34,7 +34,11 @@
     "prepare": "husky",
     "stripe:listen": "stripe listen --forward-to http://localhost:3001/api/payments/stripe/webhook",
     "posthog:test-event": "node scripts/posthog-send-test-event.mjs",
-    "sentry:test-event": "bash scripts/sentry-send-test-event.sh"
+    "sentry:test-event": "bash scripts/sentry-send-test-event.sh",
+    "env:status": "node scripts/env/sync.mjs",
+    "status:update": "node scripts/status/generate.mjs",
+    "storybook": "pnpm --filter @brisa/web storybook",
+    "storybook:build": "pnpm --filter @brisa/web storybook:build"
   },
   "devDependencies": {
     "@cspell/dict-es-es": "^3.0.8",
