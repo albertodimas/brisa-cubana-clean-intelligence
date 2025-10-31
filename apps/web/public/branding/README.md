@@ -1,7 +1,7 @@
 # Brisa Cubana Clean Intelligence - Assets Visuales
 
-**Fecha de actualización:** 2025-10-30
-**Versión:** 1.0
+**Fecha de actualización:** 2025-10-31
+**Versión:** 1.1
 
 ---
 
@@ -34,6 +34,40 @@
 ---
 
 ### 👥 Equipo y Profesionales
+
+#### Equipo Profesional – Nueva Serie Pexels (2025-10-31)
+
+- **Archivo:** `team-professional-cleaning-1.webp`
+  - **Dimensiones:** 1920x2880 px
+  - **Peso:** 339 KB
+  - **Uso:** Sección “Nuestro equipo”, confianza, storytelling humano
+  - **Descripción:** Housekeeper sonriendo con utensilios en lobby de lujo
+  - **Fuente:** Pexels – Tima Miroshnichenko
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `team-professional-cleaning-2.webp`
+  - **Dimensiones:** 1920x1280 px
+  - **Peso:** 84 KB
+  - **Uso:** Flujos operativos, capacitaciones, decks internos
+  - **Descripción:** Equipo preparando habitación premium con detalles dorados
+  - **Fuente:** Pexels – Tima Miroshnichenko
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `team-professional-cleaning-3.webp`
+  - **Dimensiones:** 1920x2880 px
+  - **Peso:** 189 KB
+  - **Uso:** Storytelling en campañas de retención / RRHH
+  - **Descripción:** Housekeeper sosteniendo toallas frescas en suite moderna
+  - **Fuente:** Pexels – Tima Miroshnichenko
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `team-kitchen-cleaning.webp`
+  - **Dimensiones:** 1920x1280 px
+  - **Peso:** 71 KB
+  - **Uso:** Casos de éxito, preparación pre-check-in, newsletters operativos
+  - **Descripción:** Profesional de limpieza preparando kit de toallas en cocina minimalista
+  - **Fuente:** Pexels – Tima Miroshnichenko
+  - **Licencia:** Pexels Free License
 
 #### Team in Action
 
@@ -138,7 +172,69 @@
 
 ---
 
+### 🏨 Propiedades Luxury (Pexels 2025-10-31)
+
+- **Archivo:** `property-luxury-kitchen.webp`
+  - **Dimensiones:** 1920x1280 px
+  - **Peso:** 145 KB
+  - **Uso:** Sección de portafolio, hero secundarios, onboarding hosts
+  - **Descripción:** Cocina moderna con isla iluminada y acabados premium
+  - **Fuente:** Pexels – Max Rahubovskiy
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `property-luxury-living-1.webp`
+  - **Dimensiones:** 1920x2399 px
+  - **Peso:** 305 KB
+  - **Uso:** Carruseles de redes, comparativas antes/después, materiales impresos
+  - **Descripción:** Sala contemporánea con mobiliario de lujo y luz natural
+  - **Fuente:** Pexels – Max Rahubovskiy
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `property-luxury-living-2.webp`
+  - **Dimensiones:** 1920x1165 px
+  - **Peso:** 166 KB
+  - **Uso:** Mockups del portal cliente, ads display, landing secundarias
+  - **Descripción:** Sala con ventanales y vista panorámica al mar
+  - **Fuente:** Pexels – Max Rahubovskiy
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `property-luxury-modern.webp`
+  - **Dimensiones:** 1920x3413 px
+  - **Peso:** 274 KB
+  - **Uso:** Fondos editoriales, backdrops en presentaciones, posters físicos
+  - **Descripción:** Interior minimalista con tonos neutros y detalles premium
+  - **Fuente:** Pexels – Max Rahubovskiy
+  - **Licencia:** Pexels Free License
+
+---
+
 ### 🏢 Tech & Portal
+
+#### Serie Analytics (Pexels)
+
+- **Archivo:** `dashboard-analytics-1.webp`
+  - **Dimensiones:** 1920x1272 px
+  - **Peso:** 345 KB
+  - **Uso:** Sección de tecnología, dashboards, casos de reporting manual
+  - **Descripción:** Laptop con visualizaciones de métricas en coworking premium
+  - **Fuente:** Pexels – Mikael Blomkvist
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `dashboard-analytics-2.webp`
+  - **Dimensiones:** 1920x1280 px
+  - **Peso:** 233 KB
+  - **Uso:** Slide decks comerciales, blog sobre analítica operativa
+  - **Descripción:** Reporte impreso con analítica avanzada en escritorio profesional
+  - **Fuente:** Pexels – Mikael Blomkvist
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `dashboard-analytics-3.webp`
+  - **Dimensiones:** 1920x1271 px
+  - **Peso:** 165 KB
+  - **Uso:** Material social, destacando insights de clientes y propiedades
+  - **Descripción:** Tablet con visualización de datos y métricas clave
+  - **Fuente:** Pexels – Mikael Blomkvist
+  - **Licencia:** Pexels Free License
 
 #### Portal Tech Modern
 
