@@ -179,7 +179,7 @@ jobs:
           node-version: ${{ inputs.node-version }}
           pnpm-version: ${{ inputs.pnpm-version }}
           install-playwright: ${{ inputs.run-e2e-suite != 'none' }}
-          run-prisma-generate: ${{ inputs.run-database-prep || inputs.run-e2e-suite != 'none' }}
+          run-prisma-generate: ${{ inputs.run-database-prep || inputs.run-e2e-suite != 'none' || inputs.run-typecheck || inputs.run-unit-tests || inputs.run-build }}
           database-url: ${{ inputs.database-url }}
           database-url-unpooled: ${{ inputs.database-url-unpooled }}
           next-public-api-url: ${{ inputs.next-public-api-url }}
