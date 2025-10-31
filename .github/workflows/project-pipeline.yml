@@ -34,6 +34,10 @@ on:
         required: false
         type: boolean
         default: true
+      run-storybook-build:
+        required: false
+        type: boolean
+        default: false
       run-lighthouse:
         required: false
         type: boolean
@@ -258,6 +262,11 @@ jobs:
           ENABLE_HSTS: ${{ inputs.run-lighthouse && 'false' || '' }}
           NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
         run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
+
+      - name: Storybook build
+        if: ${{ inputs.run-storybook-build }}
+        shell: bash
+        run: pnpm --filter @brisa/web storybook:build
 
       - name: Verify public metadata endpoints
         if: ${{ inputs.run-build }}

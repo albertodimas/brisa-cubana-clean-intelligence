@@ -22,10 +22,21 @@ jobs:
           run-prisma-generate: false
           install-playwright: false
 
-      - name: Build web bundle with analyzer
+      - name: Build analyzer reports (HTML)
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
         run: pnpm --filter @brisa/web analyze
+
+      - name: Build analyzer reports (JSON)
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          ANALYZE_MODE: json
+        run: pnpm --filter @brisa/web analyze -- --webpack
+
+      - name: Generate bundle summary
+        run: |
+          node scripts/performance/generate-bundle-summary.mjs > bundle-summary.json
+          node scripts/performance/generate-bundle-summary.mjs --markdown >> "$GITHUB_STEP_SUMMARY"
 
       - name: Package analyzer reports
         run: |
@@ -38,6 +49,13 @@ jobs:
           path: bundle-analyze.tar.gz
           retention-days: 30
 
+      - name: Upload bundle summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-bundle-summary
+          path: bundle-summary.json
+          retention-days: 30
+
       - name: Post summary
         run: |
           TOTAL_SIZE=$(du -sh apps/web/.next/analyze 2>/dev/null | cut -f1 || echo "n/a")
@@ -45,3 +63,4 @@ jobs:
           echo "- Report path: apps/web/.next/analyze" >> $GITHUB_STEP_SUMMARY
           echo "- Approx size: ${TOTAL_SIZE}" >> $GITHUB_STEP_SUMMARY
           echo "- Artifact: monthly-bundle-analyze" >> $GITHUB_STEP_SUMMARY
+          echo "- Summary JSON: monthly-bundle-summary" >> $GITHUB_STEP_SUMMARY

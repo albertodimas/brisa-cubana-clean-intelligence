@@ -118,6 +118,27 @@ jobs:
       playwright-retention-days: 7
       upload-playwright-only-on-failure: true
 
+  storybook:
+    needs:
+      - lint
+      - typecheck
+      - unit-tests
+      - build
+      - docs
+    uses: ./.github/workflows/project-pipeline.yml
+    secrets: inherit
+    with:
+      environment-name: preview-web
+      job-name: Storybook build
+      checkout-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
+      run-lint: false
+      run-typecheck: false
+      run-unit-tests: false
+      run-build: false
+      run-docs-verify: false
+      run-database-prep: false
+      run-storybook-build: true
+
   deploy:
     if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     needs:

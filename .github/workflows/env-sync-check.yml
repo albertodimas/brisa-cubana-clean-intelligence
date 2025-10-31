@@ -1,0 +1,16 @@
+name: Env Manifest Audit
+
+on:
+  schedule:
+    - cron: "0 6 * * MON"
+  workflow_dispatch:
+
+jobs:
+  env-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Validate env manifest alignment
+        run: pnpm env:status --strict
