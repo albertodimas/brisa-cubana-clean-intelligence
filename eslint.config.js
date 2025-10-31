@@ -22,6 +22,7 @@ export default [
       parser: tsParser,
       parserOptions: {
         projectService: true,
+        allowDefaultProject: true,
       },
     },
     plugins: {
