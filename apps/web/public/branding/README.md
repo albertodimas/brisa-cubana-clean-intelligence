@@ -1,7 +1,7 @@
 # Brisa Cubana Clean Intelligence - Assets Visuales
 
 **Fecha de actualización:** 2025-10-31
-**Versión:** 1.1
+**Versión:** 1.2
 
 ---
 
@@ -95,6 +95,28 @@
 
 ### 🔄 Before/After Comparisons
 
+#### Dormitorio Suite (Pexels 2025-10-31)
+
+**Before:**
+
+- **Archivo:** `bedroom-before.webp`
+- **Dimensiones:** 1920x2560 px
+- **Peso:** 118 KB
+- **Descripción:** Cama antes del servicio, ropa de cama sin acomodar
+- **Uso:** Comparativas en carrusel, anuncios “antes/después” para hosts
+- **Fuente:** Pexels – Max Rahubovskiy
+- **Licencia:** Pexels Free License
+
+**After:**
+
+- **Archivo:** `bedroom-after.webp`
+- **Dimensiones:** 1920x2560 px
+- **Peso:** 125 KB
+- **Descripción:** Cama perfectamente hecha con ambientación premium
+- **Uso:** Resaltar calidad del servicio de turnovers, landing “Guest Ready”
+- **Fuente:** Pexels – Max Rahubovskiy
+- **Licencia:** Pexels Free License
+
 #### Cocina (Kitchen)
 
 **Before:**
@@ -138,6 +160,32 @@
 ---
 
 ### ✨ Amenities y Detalles
+
+#### Deep Cleaning Details (Pexels 2025-10-31)
+
+- **Archivo:** `cleaning-detail-counter.webp`
+  - **Dimensiones:** 1920x1280 px
+  - **Peso:** 55 KB
+  - **Uso:** Landing “Deep Clean”, sección procesos, redes sociales
+  - **Descripción:** Primer plano de encimera siendo desinfectada con guantes azules
+  - **Fuente:** Pexels – RDNE Stock project
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `cleaning-detail-glass.webp`
+  - **Dimensiones:** 1920x2880 px
+  - **Peso:** 262 KB
+  - **Uso:** Mockups de checklist, posts de calidad y estándares, reels slow motion
+  - **Descripción:** Limpieza de cristal con squeegee, gotas suspendidas
+  - **Fuente:** Pexels – RDNE Stock project
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `cleaning-detail-faucet.webp`
+  - **Dimensiones:** 1920x1280 px
+  - **Peso:** 57 KB
+  - **Uso:** Email marketing, slides de procedimientos, infografías
+  - **Descripción:** Spray en grifería cromada, enfoque en brillo y gotas
+  - **Fuente:** Pexels – RDNE Stock project
+  - **Licencia:** Pexels Free License
 
 #### Amenities Kit
 
@@ -259,6 +307,58 @@
 ---
 
 ### 🎨 Identidad Visual y Patterns
+
+### 👥 Propietarios y Clientes (Pexels 2025-10-31)
+
+- **Archivo:** `client-tablet-workspace.webp`
+  - **Dimensiones:** 1920x2727 px
+  - **Peso:** 414 KB
+  - **Uso:** Secciones de portal cliente, campañas B2B, pitch decks para hosts
+  - **Descripción:** Propietario revisando métricas en tablet desde workspace minimalista
+  - **Fuente:** Pexels – Cottonbro Studio
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `client-property-inspection.webp`
+  - **Dimensiones:** 1920x1280 px
+  - **Peso:** 124 KB
+  - **Uso:** Materiales operativos, artículos sobre inspecciones, capacitaciones
+  - **Descripción:** Clienta realizando inspección de propiedad con clipboard y checklists
+  - **Fuente:** Pexels – Cottonbro Studio
+  - **Licencia:** Pexels Free License
+
+### 📱 Vertical Social Media (Stories/Reels)
+
+- **Archivo:** `vertical-housekeeper-sheets.webp`
+  - **Dimensiones:** 1280x1920 px
+  - **Peso:** 76 KB
+  - **Uso:** Historias Instagram, reels sobre procesos, anuncios verticales
+  - **Descripción:** Housekeeper ajustando sábanas con postura profesional
+  - **Fuente:** Pexels – RDNE Stock project
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `vertical-housekeeper-bed.webp`
+  - **Dimensiones:** 1280x1920 px
+  - **Peso:** 104 KB
+  - **Uso:** Contenidos de tik tok/reels destacando detalle en camas
+  - **Descripción:** Profesional acomodando cama desde perspectiva lateral
+  - **Fuente:** Pexels – RDNE Stock project
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `vertical-bathroom-modern.webp`
+  - **Dimensiones:** 1281x1920 px
+  - **Peso:** 308 KB
+  - **Uso:** Historias “Guest Ready”, highlights de baño premium, anuncios 9:16
+  - **Descripción:** Baño moderno con iluminación cálida y amenities
+  - **Fuente:** Pexels – Max Rahubovskiy
+  - **Licencia:** Pexels Free License
+
+- **Archivo:** `vertical-hotel-corridor.webp`
+  - **Dimensiones:** 1282x1920 px
+  - **Peso:** 400 KB
+  - **Uso:** Transiciones en reels, intros/outros para clips de equipo nocturno
+  - **Descripción:** Pasillo de hotel con iluminación dramática y luces cálidas
+  - **Fuente:** Pexels – Max Rahubovskiy
+  - **Licencia:** Pexels Free License
 
 #### Logo/Brand Concept
 
