@@ -242,7 +242,7 @@ if (result.success) {
 
 - ✅ `docs/operations/backup-recovery.md` (588 líneas)
 - ✅ `docs/operations/observability.md` (530 líneas)
-- ✅ `docs/qa/regression-checklist.md` (650 líneas)
+- ✅ `docs/development/qa/regression-checklist.md` (650 líneas)
 - ✅ `docs/archive/2025-10-08-session-log.md` (este archivo)
 
 ### Scripts (2 nuevos)

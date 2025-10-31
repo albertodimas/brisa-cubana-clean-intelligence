@@ -47,11 +47,11 @@
 
 ## 5. Accesos
 
-| Perfil     | Responsable       | Acceso                                                                                  |
-| ---------- | ----------------- | --------------------------------------------------------------------------------------- |
-| Ingeniería | Equipo plataforma | Deploy, Prisma migrations, seeds.                                                       |
-| QA         | Equipo QA         | Validaciones portal/checkout, registrar hallazgos en `docs/qa/regression-checklist.md`. |
-| Producto   | PO                | Validar UI pública antes de lanzamiento.                                                |
+| Perfil     | Responsable       | Acceso                                                                                                                                           |
+| ---------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Ingeniería | Equipo plataforma | Deploy, Prisma migrations, seeds.                                                                                                                |
+| QA         | Equipo QA         | Validaciones portal/checkout, registrar hallazgos en [`docs/development/qa/regression-checklist.md`](../development/qa/regression-checklist.md). |
+| Producto   | PO                | Validar UI pública antes de lanzamiento.                                                                                                         |
 
 ## 6. Checklist previo a release
 

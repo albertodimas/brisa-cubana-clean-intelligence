@@ -442,7 +442,7 @@ curl -X POST YOUR_SLACK_WEBHOOK_URL \
 - [x] API Key obtenida y almacenada en 1Password
 - [x] Variables de entorno configuradas en Vercel/GitHub
 - [x] Webhooks configurados (Slack `#alerts-operaciones`)
-- [x] Eventos clave definidos (ver `docs/product/analytics-events.md`)
+- [x] Eventos clave definidos (ver `docs/archive/product/analytics-events.md`)
 
 ### Slack ✅
 
@@ -457,7 +457,7 @@ curl -X POST YOUR_SLACK_WEBHOOK_URL \
 ## Próximos Pasos
 
 1. Revisar y, si es necesario, ajustar umbrales de Sentry/PostHog el 30-oct-2025; registrar cualquier cambio adicional en la tabla de implementación.
-2. (Completo 23-oct-2025) Añadir panel de seguimiento del workflow `posthog-monitor.yml` al dashboard PostHog ejecutando `POSTHOG_API_KEY=<clave> pnpm posthog:sync-dashboard`; el insight generado (ID 3796012) quedó documentado en `docs/product/analytics-dashboard.md`.
+2. (Completo 23-oct-2025) Añadir panel de seguimiento del workflow `posthog-monitor.yml` al dashboard PostHog ejecutando `POSTHOG_API_KEY=<clave> pnpm posthog:sync-dashboard`; el insight generado (ID 3796012) quedó documentado en `docs/archive/product/analytics-dashboard.md` (legacy).
 3. Revisar retención de datos en PostHog (plan Starter) antes del 30-nov-2025.
 
 ---

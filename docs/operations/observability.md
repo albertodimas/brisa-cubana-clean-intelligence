@@ -1,33 +1,34 @@
 # Observabilidad y Monitoreo
 
-**Última actualización:** 23 de octubre de 2025  
-**Estado actual:** ✅ Logging estructurado en API y web · ✅ Alertas Sentry/PostHog entregadas a `#alerts-operaciones` · ✅ Health checks expuestos (`/healthz`) · ✅ Tableros PostHog y Lighthouse en operación
+**Última actualización:** 31 de octubre de 2025  
+**Estado actual:** ⚠️ En seguimiento – logging y alertas operativas, pero faltan dashboards actualizados para portal y validación de SSE/PostHog tras el plan de recuperación.
 
 ---
 
 ## 1. Resumen ejecutivo
 
 - **Objetivo:** detectar y responder a incidentes en <15 min (SEV1) y monitorizar la salud comercial (checkout, portal cliente, leads).
-- **Alcance:** API (Hono), frontend (Next.js), pipelines CI/CD, eventos de negocio (checkout, portal) y señales externas (Neon, Stripe, Slack).
+- **Alcance:** API (Hono), frontend (Next.js 16), pipelines CI/CD, eventos de negocio (checkout, portal) y señales externas (Neon, Stripe, Slack).
 - **Runbook diario:** ver `docs/operations/runbook-daily-monitoring.md`.
 - **Setup técnico completo:** `docs/operations/observability-setup.md`.
+- **Pendientes actuales:** instrumentar métricas nuevas de portal (SSE fallback) y actualizar dashboards PostHog + Lighthouse.
 - **Integración Slack:** `docs/operations/slack-integration.md`.
 
 ---
 
 ## 2. Componentes y responsables
 
-| Componente                  | Cobertura                                                                               | Responsable principal    | Documentación fuente                                                           |
-| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------ |
-| Logging estructurado (Pino) | API (`apps/api`) + proxy Next.js                                                        | Plataforma               | `apps/api/src/lib/logger.ts`, `apps/api/src/middleware/logging.ts`             |
-| Instrumentación frontend    | Next.js (Sentry, Web Vitals, PostHog, `@vercel/analytics`)                              | Producto                 | `apps/web/instrumentation.ts`, `apps/web/lib/web-vitals.ts`                    |
-| Sentry                      | Issues + performance web/API                                                            | Plataforma               | `docs/operations/observability-setup.md#sentry---monitoreo-de-errores`         |
-| PostHog                     | Funnel comercial + portal cliente                                                       | Producto                 | `docs/product/analytics-dashboard.md`, `docs/product/analytics-events.md`      |
-| Slack alerting              | `#alerts-operaciones`, `#alerts-criticos`, `#alerts-performance`, `#alerts-deployments` | Plataforma / Operaciones | `docs/operations/slack-integration.md`, `docs/operations/alerts.md`            |
-| Vercel logs/analytics       | Despliegues web/API, Web Vitals                                                         | Operaciones              | `docs/operations/deployment.md`, `docs/operations/runbook-daily-monitoring.md` |
-| GitHub Health Monitor       | Workflow `health-monitor.yml` (cada 15 min). SMS/Slack cuando `/healthz` falla.         | Operaciones              | `docs/operations/deployment.md#4-despliegue`                                   |
-| Neon monitoreo              | Performance base de datos                                                               | Plataforma               | `docs/operations/observability-setup.md#3-prisma-query-logs`                   |
-| Dashboards de negocio       | PostHog Funnel + Lighthouse                                                             | Producto                 | `docs/product/analytics-dashboard.md`, `docs/performance/bundle-analysis.md`   |
+| Componente                  | Cobertura                                                                               | Responsable principal    | Documentación fuente                                                                             |
+| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| Logging estructurado (Pino) | API (`apps/api`) + proxy Next.js                                                        | Plataforma               | `apps/api/src/lib/logger.ts`, `apps/api/src/middleware/logging.ts`                               |
+| Instrumentación frontend    | Next.js (Sentry, Web Vitals, PostHog, `@vercel/analytics`)                              | Producto                 | `apps/web/instrumentation.ts`, `apps/web/lib/web-vitals.ts`                                      |
+| Sentry                      | Issues + performance web/API                                                            | Plataforma               | `docs/operations/observability-setup.md#sentry---monitoreo-de-errores`                           |
+| PostHog                     | Funnel comercial + portal cliente                                                       | Producto                 | `docs/archive/product/analytics-dashboard.md`, `docs/archive/product/analytics-events.md`        |
+| Slack alerting              | `#alerts-operaciones`, `#alerts-criticos`, `#alerts-performance`, `#alerts-deployments` | Plataforma / Operaciones | `docs/operations/slack-integration.md`, `docs/operations/alerts.md`                              |
+| Vercel logs/analytics       | Despliegues web/API, Web Vitals                                                         | Operaciones              | `docs/operations/deployment.md`, `docs/operations/runbook-daily-monitoring.md`                   |
+| GitHub Health Monitor       | Workflow `health-monitor.yml` (cada 15 min). SMS/Slack cuando `/healthz` falla.         | Operaciones              | `docs/operations/deployment.md#4-despliegue`                                                     |
+| Neon monitoreo              | Performance base de datos                                                               | Plataforma               | `docs/operations/observability-setup.md#3-prisma-query-logs`                                     |
+| Dashboards de negocio       | PostHog Funnel + Lighthouse                                                             | Producto                 | `docs/archive/product/analytics-dashboard.md`, `docs/development/performance/bundle-analysis.md` |
 
 ---
 
@@ -49,7 +50,7 @@
 | Portal cliente (SSE / autoservicio) | Breadcrumbs Sentry (`portal.dashboard.refresh`, `notifications.stream.fallback`), logs API (`Portal booking cancellation processed`).       | Issue alert fallback SSE ≥3 eventos/5 min → `#alerts-operaciones`.             |
 | Lead intake (`/api/leads`)          | Slack webhook (`#leads-operaciones`), PostHog (`lead_submitted`), log inbound UTM.                                                          | Revisar tiempo de respuesta semanal en `docs/operations/lead-followup-sop.md`. |
 
-> Para ampliar o modificar instrumentación, registrar las decisiones en `docs/product/analytics-events.md` y actualizar las pruebas en `tests/e2e/analytics.spec.ts`.
+> Para ampliar o modificar instrumentación, registrar las decisiones en `docs/archive/product/analytics-events.md` (hasta sustituirlas por una versión actualizada) y actualizar las pruebas en `tests/e2e/analytics.spec.ts`.
 
 ### 3.3 Métricas de negocio (eventos PostHog)
 
@@ -57,8 +58,8 @@
 - `portal.booking.action.*` (cancel/reschedule), `portal.session.expired`
 - `cta_request_proposal`, `cta_portal_demo`, `lead_submitted`
 
-Definiciones y owners: `docs/product/analytics-events.md`.  
-Dashboard vivo: `docs/product/analytics-dashboard.md` (ID 607007 en PostHog).
+Definiciones y owners: `docs/archive/product/analytics-events.md` (legacy).  
+Dashboard vivo: `docs/archive/product/analytics-dashboard.md` (ID 607007 en PostHog).
 
 ---
 
@@ -81,7 +82,7 @@ Dashboard vivo: `docs/product/analytics-dashboard.md` (ID 607007 en PostHog).
 - Automatizaciones → Slack `#alerts-operaciones` (checkout fallido) y `#alerts-performance` (anomalías SSE).
 - Workflow `posthog-monitor.yml` ejecuta `pnpm posthog:monitor` cada 10 minutos (GitHub Actions) y publica anomalías en `#alerts-operaciones`.
 - Métricas de conversión y acciones portal: dashboard `Brisa Cubana · Funnel Comercial`.
-- Configuración y tareas pendientes: `docs/product/analytics-dashboard.md` y `docs/product/analytics-decision.md`.
+- Configuración y tareas pendientes: `docs/archive/product/analytics-dashboard.md` y `docs/archive/product/analytics-decision.md`.
 
 ### 4.3 Slack
 
@@ -100,14 +101,14 @@ Dashboard vivo: `docs/product/analytics-dashboard.md` (ID 607007 en PostHog).
 
 ## 5. Procedimientos operativos
 
-| Frecuencia | Paso                                                                                 | Evidencia                                                |
-| ---------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------- |
-| Diario     | Revisar alertas Sentry/PostHog (`#alerts-operaciones`, `#alerts-criticos`).          | Checklist en `runbook-daily-monitoring.md` §2.           |
-| Diario     | Validar collector del log drain Vercel (`/api/logdrain`).                            | `docs/operations/deployment.md#22-log-drains-en-vercel`. |
-| Semanal    | Descargar artefactos de `Nightly Full E2E` y Lighthouse.                             | `runbook-daily-monitoring.md` §3.                        |
-| Semanal    | Revisar dashboard comercial PostHog y compartir resumen en `#alerts-operaciones`.    | `analytics-dashboard.md`.                                |
-| Mensual    | Ejecutar `pnpm analyze:web` y actualizar `docs/performance/bundle-analysis.md`.      | Workflow `monthly-bundle.yml`.                           |
-| Trimestral | Rotar `SLACK_WEBHOOK_URL`, validar `SENTRY_AUTH_TOKEN`, revisar retención PITR Neon. | `slack-integration.md` §5, `backup-recovery.md`.         |
+| Frecuencia | Paso                                                                                 | Evidencia                                                     |
+| ---------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| Diario     | Revisar alertas Sentry/PostHog (`#alerts-operaciones`, `#alerts-criticos`).          | Checklist en `runbook-daily-monitoring.md` §2.                |
+| Diario     | Validar collector del log drain Vercel (`/api/logdrain`).                            | `docs/operations/deployment.md#22-log-drains-en-vercel`.      |
+| Semanal    | Descargar artefactos de `Nightly Full E2E` y Lighthouse.                             | `runbook-daily-monitoring.md` §3.                             |
+| Semanal    | Revisar dashboard comercial PostHog y compartir resumen en `#alerts-operaciones`.    | `analytics-dashboard.md` (archivo en `docs/archive/product`). |
+| Mensual    | Ejecutar `pnpm analyze:web` y actualizar `docs/performance/bundle-analysis.md`.      | Workflow `monthly-bundle.yml`.                                |
+| Trimestral | Rotar `SLACK_WEBHOOK_URL`, validar `SENTRY_AUTH_TOKEN`, revisar retención PITR Neon. | `slack-integration.md` §5, `backup-recovery.md`.              |
 
 ---
 
@@ -133,8 +134,8 @@ Actualiza esta tabla cuando se modifiquen los umbrales en Sentry/PostHog o se in
 - `docs/operations/slack-integration.md` – Webhooks, taxonomía de canales y verificación.
 - `docs/operations/alerts.md` – Regla por severidad con pasos de configuración.
 - `docs/operations/runbook-daily-monitoring.md` – Checklist diario/semanal.
-- `docs/product/analytics-dashboard.md` – Dashboards PostHog.
-- `docs/product/analytics-events.md` – Diccionario de eventos y ownership.
+- `docs/archive/product/analytics-dashboard.md` – Dashboards PostHog (legacy, actualizar tras definir nuevo roadmap).
+- `docs/archive/product/analytics-events.md` – Diccionario de eventos y ownership (legacy).
 - `docs/performance/bundle-analysis.md` – Historial de análisis de bundles.
 - `docs/operations/incident-runbook.md` – Flujo completo de manejo de incidentes.
 

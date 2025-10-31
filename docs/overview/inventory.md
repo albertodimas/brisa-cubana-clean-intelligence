@@ -1,16 +1,17 @@
 # Inventario de Código y Herramientas
 
-**Última actualización:** 15 de octubre de 2025  
-**Responsables:** Plataforma · Producto · QA
+**Última actualización:** 31 de octubre de 2025  
+**Responsables:** Plataforma · Producto · QA  
+**Estado:** ⚠️ En recuperación (ver [recovery-plan.md](recovery-plan.md))
 
 Este inventario resume los artefactos activos del monorepo para acelerar handoffs y auditorías.
 
 ## 1. Aplicaciones
 
-| Ruta       | Stack clave                         | Descripción                                                                                    | Build                                      |
-| ---------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `apps/web` | Next.js 15.5.6, React 19, Auth.js 5 | Frontend operativo + futuras páginas públicas (landing, checkout, portal cliente).             | `pnpm turbo run build --filter=@brisa/web` |
-| `apps/api` | Hono 4.9.12, Prisma 6.17.1, Stripe  | API REST + webhooks (`/api/payments/stripe/webhook`), seeds operativos/demo, OpenAPI expuesto. | `pnpm --filter @brisa/api build`           |
+| Ruta       | Stack clave                              | Descripción                                                                                    | Build                            |
+| ---------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------- |
+| `apps/web` | Next.js 16.0.0, React 19, Auth.js 5 beta | Frontend (landing, checkout, portal cliente, panel operativo).                                 | `pnpm --filter @brisa/web build` |
+| `apps/api` | Hono 4.10.3, Prisma 6.17.1, Stripe       | API REST + webhooks (`/api/payments/stripe/webhook`), seeds operativos/demo, OpenAPI expuesto. | `pnpm --filter @brisa/api build` |
 
 ## 2. Librerías y utilidades compartidas
 
@@ -29,14 +30,14 @@ Este inventario resume los artefactos activos del monorepo para acelerar handoff
 
 ## 4. QA y pruebas
 
-- **Vitest Web:** `apps/web` (81 tests) ejecutados con `pnpm --filter @brisa/web test`.
-- **Vitest API:** unit (`vitest.unit.config.ts`) + integración (`vitest.integration.config.ts`) – 123 tests totales
+- **Vitest Web:** `apps/web` (104 tests) ejecutados con `pnpm --filter @brisa/web test`.
+- **Vitest API:** unit (`vitest.unit.config.ts`) + integración (`vitest.integration.config.ts`) – 126 tests totales
   - Comandos: `pnpm --filter @brisa/api test:unit`, `pnpm --filter @brisa/api test:integration`
   - Ubicación integration: `apps/api/tests/integration/**`
-- **Playwright:** suites en `tests/e2e/*.spec.ts` (smoke, critical, full) con soporte en `tests/e2e/support`.
+- **Playwright:** suites en `tests/e2e/*.spec.ts` (smoke, critical, full) con soporte en `tests/e2e/support`. Incluye verificación de métricas de landing y flujo portal cliente.
 - **Stripe tests:** `apps/api/tests/integration/routes/payments.integration.test.ts` usa `Stripe.webhooks.generateTestHeaderString`.
 - **LHCI:** nightly (`.lighthouserc.preview.json`) sobre despliegue Vercel.
-- **Checklist manual:** `docs/qa/regression-checklist.md` (actualizada con escenarios Stripe).
+- **Checklist manual:** [`docs/development/qa/regression-checklist.md`](../development/qa/regression-checklist.md) (actualizada con escenarios Stripe).
 
 ## 5. Operaciones y despliegue
 
@@ -59,15 +60,16 @@ Este inventario resume los artefactos activos del monorepo para acelerar handoff
 ## 7. Documentación de referencia
 
 - `docs/overview/status.md`: estado del proyecto y health checks.
-- `docs/guides/quickstart.md`: setup local, seeds, Stripe CLI.
+- `docs/development/guides/quickstart.md`: setup local, seeds, Stripe CLI.
 - `docs/operations/deployment.md` y `docs/operations/security.md`: deploy y manejo de secrets.
-- `docs/product/phase-2-roadmap.md`: roadmap comercial.
-- `docs/product/rfc-public-components.md`: arquitectura pública Fase 2.
+- `docs/archive/product/phase-2-roadmap.md`: roadmap histórico de producto (referencia legacy).
+- `docs/archive/product/rfc-public-components.md`: arquitectura pública Fase 2 (archivada).
 
 ## 8. Scripts y utilidades
 
 - `scripts/verify-versions.mjs`: mantiene coherencia de dependencias entre apps.
 - `scripts/verify-doc-structure.sh`: valida índice de documentación.
+- `scripts/env/sync.mjs`: verifica `.env.local` frente al manifest y sirve como base para sincronización con Vercel/GitHub.
 - `scripts/prisma-deploy-or-baseline.sh`: encapsula `pnpm --filter @brisa/api db:deploy` con fallback `P3005` para automatizar baselines en producción.
 - `pnpm stripe:listen`: wrapper CLI Stripe apuntando a webhook local.
 

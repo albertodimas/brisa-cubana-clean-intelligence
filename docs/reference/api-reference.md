@@ -1,6 +1,6 @@
 # API Documentation - OpenAPI/Swagger
 
-**Última actualización:** 15 de octubre de 2025
+**Última actualización:** 31 de octubre de 2025
 
 ---
 
@@ -41,16 +41,18 @@ Misma interfaz que producción, con datos locales.
 
 **URL:** https://brisa-cubana-clean-intelligence-api.vercel.app/api/openapi.json
 
-Especificación completa en formato JSON, útil para:
-
-- Importar en Postman/Insomnia
-- Generación de clientes automáticos (OpenAPI Generator, Swagger Codegen)
-- Integración con herramientas CI/CD
-- Validación de contratos
-
 ### Desarrollo Local
 
 **URL:** http://localhost:3001/api/openapi.json
+
+> Mantén este archivo (`openapi.yaml`) sincronizado exportando la especificación desde el ambiente correspondiente y formateándola antes de commitear.
+
+```bash
+# Exporta desde un entorno local en ejecución
+curl http://localhost:3001/api/openapi.json | npx openapi-format --outfile docs/reference/openapi.yaml
+```
+
+Incluye este paso cuando actualices endpoints o cambie la estructura de Prisma; si la especificación difiere, `pnpm docs:verify` debe fallar (añadir verificación en CI en la siguiente iteración).
 
 ---
 

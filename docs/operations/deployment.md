@@ -7,8 +7,8 @@ Proceso verificado para promover cambios de Brisa Cubana Clean Intelligence a lo
 - Branch `main` en verde (ver GitHub Actions: CI, CodeQL, Nightly si corresponde).
 - Protección de rama activada en GitHub (`Require status checks to pass` con `CI (Main Branch)` y `PR Checks`); verificar en Settings → Branches antes de promover cambios.
 - `CHANGELOG.md` actualizado con los cambios a desplegar.
-- Checklist de regresión ejecutada según [`qa/regression-checklist.md`](../qa/regression-checklist.md); adjuntar resultados en el PR.
-- Variables críticas sincronizadas conforme a [`env-sync.md`](env-sync.md) antes del release.
+- Checklist de regresión ejecutada según [`development/qa/regression-checklist.md`](../development/qa/regression-checklist.md); adjuntar resultados en el PR.
+- Variables críticas sincronizadas conforme a [`env-sync.md`](env-sync.md) antes del release (`pnpm env:status` debe indicar que no faltan claves).
 - `vercel.json` (raíz) y `apps/api/vercel.json` versionados con `"git.deploymentEnabled": false` para evitar auto-builds directos desde Vercel.
 
 ## 2. Variables de entorno requeridas

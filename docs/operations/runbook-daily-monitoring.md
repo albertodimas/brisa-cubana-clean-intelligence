@@ -74,5 +74,5 @@ Asegurar que la plataforma se mantiene operativa tras el lanzamiento comercial: 
 
 - `docs/operations/deployment.md`
 - `docs/operations/observability.md`
-- `docs/product/phase-2-roadmap.md`
+- `docs/archive/product/phase-2-roadmap.md`
 - Canal Slack `#alerts-operaciones`
