@@ -26,7 +26,14 @@ test.describe("Seguridad y Autenticación", () => {
 
       await expect(page).toHaveURL(/\/login/);
       await expect(
-        page.getByRole("heading", { name: "Bienvenido" }),
+        page.getByRole("heading", {
+          name: "Panel operativo Brisa Cubana",
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          /Credenciales inválidas|No se pudo iniciar sesión|Error inesperado/i,
+        ),
       ).toBeVisible();
     });
 

@@ -36,3 +36,32 @@ test("@smoke @critical muestra tabla comparativa y CTAs instrumentados", async (
     );
   }
 });
+
+test("@critical muestra métricas de mercado con datos reales", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const snapshotSection = page.getByText("Datos clave actualizados");
+  await expect(snapshotSection).toBeVisible();
+
+  const expectations = [
+    { label: "Ocupación promedio anual", value: "72%" },
+    { label: "Tarifa diaria media (ADR) en Miami", value: "$215" },
+    { label: "Listados activos en el mercado STR", value: "13.8K+" },
+    { label: "Visitantes totales en 2024", value: "24M" },
+  ];
+
+  for (const { label, value } of expectations) {
+    const container = page
+      .getByText(label, { exact: false })
+      .locator("..")
+      .first();
+    await expect(container.getByText(value)).toBeVisible();
+  }
+
+  const snapshotList = page.locator("dl").first();
+  await expect(
+    snapshotList.getByText("Dato en actualización", { exact: false }),
+  ).toHaveCount(0);
+});

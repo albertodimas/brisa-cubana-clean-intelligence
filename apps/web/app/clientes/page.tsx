@@ -182,7 +182,7 @@ export default function PortalClientePage() {
               </p>
               <Link
                 className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brisa-700 transition-colors hover:text-brisa-900 dark:text-brisa-200 dark:hover:text-brisa-100"
-                href="https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/product/rfc-public-components.md#81-portal-cliente"
+                href="https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/archive/product/rfc-public-components.md#81-portal-cliente"
                 prefetch={false}
               >
                 Ver RFC actualizado →

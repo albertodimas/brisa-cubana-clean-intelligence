@@ -108,7 +108,7 @@ export default async function CheckoutPage() {
                 Guía de despliegue
               </Link>
               <Link
-                href="https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/product/rfc-public-components.md"
+                href="https://github.com/albertodimas/brisa-cubana-clean-intelligence/blob/main/docs/archive/product/rfc-public-components.md"
                 className="text-brisa-600 underline-offset-4 transition-colors hover:underline dark:text-brisa-300"
                 prefetch={false}
               >

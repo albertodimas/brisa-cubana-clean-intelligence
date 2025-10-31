@@ -97,17 +97,6 @@ export async function loginWithCredentials(
     });
     const panelRoot = page.getByTestId("panel-root").first();
 
-    try {
-      const { pathname } = new URL(page.url());
-      if (pathname !== "/panel") {
-        await page.goto("/panel", {
-          waitUntil: "domcontentloaded",
-        });
-        navigationSucceeded = true;
-      }
-    } catch {
-      // ignore URL parsing errors and fall back to existing visibility checks
-    }
     const stillOnLogin = (() => {
       try {
         return new URL(page.url()).pathname === "/login";
@@ -115,6 +104,9 @@ export async function loginWithCredentials(
         return false;
       }
     })();
+    if (navigationSucceeded && stillOnLogin) {
+      navigationSucceeded = false;
+    }
     if (
       stillOnLogin &&
       attempt < retries - 1 &&

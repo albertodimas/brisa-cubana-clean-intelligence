@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import type { TestInfo } from "@playwright/test";
+import { ipForTest } from "./support/auth";
 
 const CUSTOMER_EMAIL = "cliente@brisacubanacleanintelligence.com";
 
@@ -19,12 +21,16 @@ function escapeRegExp(value: string): string {
 test.describe("@critical portal cliente – flujo completo", () => {
   test("@critical valida enlace mágico, navega dashboard y ejecuta acciones", async ({
     page,
-  }) => {
+  }, testInfo: TestInfo) => {
+    const clientIp = ipForTest(testInfo);
     // Solicita enlace mágico y obtiene token de depuración
     const requestResponse = await page.request.post(
       "/api/portal/auth/request",
       {
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": clientIp,
+        },
         data: { email: CUSTOMER_EMAIL },
       },
     );
@@ -130,7 +136,9 @@ test.describe("@critical portal cliente – flujo completo", () => {
     ).toBeVisible();
 
     // Cerrar sesión
-    await page.request.post("/api/portal/logout");
+    await page.request.post("/api/portal/logout", {
+      headers: { "x-forwarded-for": clientIp },
+    });
     await page.goto("/clientes/acceso");
     await expect(
       page.getByRole("heading", {

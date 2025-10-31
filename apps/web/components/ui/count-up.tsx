@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from "framer-motion";
 import { cn } from "@/lib/cn";
 
 export interface CountUpProps {
@@ -46,6 +52,11 @@ export interface CountUpProps {
    * @default true
    */
   once?: boolean;
+  /**
+   * Permite desactivar la animación (SSR consistente)
+   * @default true
+   */
+  animate?: boolean;
 }
 
 /**
@@ -74,11 +85,13 @@ export function CountUp({
   decimals = 0,
   className,
   once = true,
+  animate = true,
 }: CountUpProps) {
   const ref = React.useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once, margin: "-100px" });
+  const prefersReducedMotion = useReducedMotion();
 
-  const motionValue = useMotionValue(start);
+  const motionValue = useMotionValue(end);
   const springValue = useSpring(motionValue, {
     damping: 60,
     stiffness: 100,
@@ -86,16 +99,27 @@ export function CountUp({
   });
 
   const [displayValue, setDisplayValue] = React.useState(
-    formatNumber(start, separator, decimals),
+    formatNumber(end, separator, decimals),
   );
 
+  const shouldAnimate = animate && !prefersReducedMotion && (isInView || !once);
+
   React.useEffect(() => {
-    if (isInView) {
+    if (!shouldAnimate) {
       motionValue.set(end);
-    } else if (!once) {
-      motionValue.set(start);
+      setDisplayValue(formatNumber(end, separator, decimals));
+      return;
     }
-  }, [isInView, end, start, motionValue, once]);
+
+    motionValue.set(start);
+    const frameId = window.requestAnimationFrame(() => {
+      motionValue.set(end);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [shouldAnimate, motionValue, start, end, separator, decimals]);
 
   React.useEffect(() => {
     const unsubscribe = springValue.on("change", (latest) => {
