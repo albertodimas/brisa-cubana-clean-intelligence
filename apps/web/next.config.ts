@@ -150,8 +150,13 @@ const sentryWebpackPluginOptions = {
   hideSourceMaps: true,
 };
 
+const analyzeMode = process.env.ANALYZE_MODE === "json" ? "json" : "static"; // allow generating JSON stats without opening viewer
+
 const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
+  enabled:
+    process.env.ANALYZE === "true" || process.env.ANALYZE_MODE === "json",
+  analyzerMode: analyzeMode,
+  openAnalyzer: false,
 });
 
 export default withBundleAnalyzer(

@@ -3,7 +3,7 @@ const { spawn } = require("node:child_process");
 
 const passthroughArgs = process.argv
   .slice(2)
-  .filter((arg) => !arg.startsWith("--filter="));
+  .filter((arg) => arg !== "--" && !arg.startsWith("--filter="));
 
 const child = spawn("next", ["build", ...passthroughArgs], {
   stdio: "inherit",
