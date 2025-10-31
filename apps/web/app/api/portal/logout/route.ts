@@ -1,18 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import {
-  extractSessionToken,
-  validateSessionToken,
-} from "@/lib/auth/session-token";
+import { hasPortalAccess } from "@/lib/auth/session-token";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 const isProduction = process.env.NODE_ENV === "production";
 
 export async function POST() {
-  const cookieStore = await cookies();
-  const sessionToken = extractSessionToken(cookieStore);
-  if (!sessionToken || !(await validateSessionToken(sessionToken))) {
+  const cookieStore = cookies();
+  if (!(await hasPortalAccess(cookieStore))) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 

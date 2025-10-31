@@ -14,6 +14,8 @@ type CookieJar = {
   get(name: string): { value: string } | undefined;
 };
 
+type MaybePromise<T> = T | Promise<T>;
+
 /**
  * Obtiene el token de sesión emitido por NextAuth desde las cookies del request.
  */
@@ -43,4 +45,21 @@ export const validateSessionToken = async (token: string): Promise<boolean> => {
   } catch {
     return false;
   }
+};
+
+export const hasPortalAccess = async (
+  cookiesOrPromise: MaybePromise<CookieJar>,
+): Promise<boolean> => {
+  const cookies = await cookiesOrPromise;
+  const portalToken = cookies.get("portal_token")?.value;
+  if (portalToken) {
+    return true;
+  }
+
+  const sessionToken = extractSessionToken(cookies);
+  if (!sessionToken) {
+    return false;
+  }
+
+  return validateSessionToken(sessionToken);
 };
