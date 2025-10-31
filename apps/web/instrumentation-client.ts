@@ -1,8 +1,6 @@
+import * as Sentry from "@sentry/nextjs";
+
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN ?? process.env.SENTRY_DSN;
-const enabled =
-  typeof window !== "undefined" &&
-  Boolean(dsn) &&
-  process.env.NODE_ENV !== "test";
 const environment =
   process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
   process.env.SENTRY_ENVIRONMENT ??
@@ -15,8 +13,18 @@ const tracesSampleRate = Number(
     (process.env.NODE_ENV === "production" ? "0.1" : "1.0"),
 );
 
-async function bootstrapSentry() {
-  const Sentry = await import("@sentry/nextjs");
+const shouldEnable =
+  typeof window !== "undefined" &&
+  Boolean(dsn) &&
+  process.env.NODE_ENV !== "test";
+
+let initialized = false;
+
+const initializeSentry = () => {
+  if (initialized) {
+    return;
+  }
+
   Sentry.init({
     dsn: dsn || undefined,
     enabled: true,
@@ -25,15 +33,19 @@ async function bootstrapSentry() {
     profilesSampleRate: 0,
     debug: process.env.NODE_ENV === "development",
   });
-}
 
-if (enabled) {
+  initialized = true;
+};
+
+if (shouldEnable) {
   const load = () => {
-    bootstrapSentry().catch((error) => {
+    try {
+      initializeSentry();
+    } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.warn("[Sentry] failed to initialize", error);
       }
-    });
+    }
   };
 
   const idle = (
@@ -43,10 +55,11 @@ if (enabled) {
   ).requestIdleCallback;
 
   if (typeof idle === "function") {
-    idle(() => load());
+    idle(load);
   } else {
     setTimeout(load, 0);
   }
 }
 
-export {};
+export const onRouterTransitionStart =
+  Sentry.captureRouterTransitionStart ?? (() => {});
