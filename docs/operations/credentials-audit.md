@@ -67,6 +67,12 @@ Estado actual: ✅ Variables sincronizadas entre Vercel y GitHub Secrets. Se ret
 ✅ SENTRY_PROFILES_SAMPLE_RATE
 ✅ NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE
 ✅ NEXT_PUBLIC_SENTRY_PROFILES_SAMPLE_RATE
+✅ SENTRY_REPLAY_ENABLED
+✅ SENTRY_REPLAYS_SESSION_SAMPLE_RATE
+✅ SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE
+✅ NEXT_PUBLIC_SENTRY_REPLAY_ENABLED
+✅ NEXT_PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE
+✅ NEXT_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE
 ✅ LOG_DRAIN_VERIFICATION_CODE
 ```
 
@@ -76,6 +82,7 @@ Valores de referencia:
 - Organización: `brisacubana`
 - Proyectos: `brisa-cubana-web`, `brisa-cubana-api`
 - Código de log drain: `7f4677dfb49b149c4a67d45e84e0bcaab835ea50`
+- Replay: producción/desarrollo en `false` (0 / 0.1). **Preview** habilitado con muestreo `0.05` (sesiones) / `0.5` (errores) para observabilidad controlada.
 
 Estado actual: ✅ Observabilidad completa enlazada con Vercel y GitHub (evento de prueba `4f0dc4dd-681e-43d0-8ce4-3f15a21fede5` enviado el 29-oct-2025).
 

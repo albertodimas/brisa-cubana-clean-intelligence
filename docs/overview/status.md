@@ -217,7 +217,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
   - Coverage thresholds: 85% lines, 65% functions, 50% branches
 - **`apps/web`**: 81 pruebas Vitest (hooks, server actions y componentes UI como SearchBar, FilterChips, UsersManager)
   - Coverage threshold: 70%
-- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->234<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->30<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
+- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->236<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->32<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
 - **Coverage**: Configurado con V8 provider, thresholds automáticos
 
 ### 7.2 Tests E2E - Estrategia Piramidal
@@ -228,7 +228,7 @@ En Vercel: proyecto web sólo ejecuta `pnpm turbo run build --filter=@brisa/web`
 | -------- | ----- | -------- | ------------------------ |
 | Smoke    | 4     | ~1min    | `pnpm test:e2e:smoke`    |
 | Critical | 20    | ~6min    | `pnpm test:e2e:critical` |
-| Full     | 30    | ~10min   | `pnpm test:e2e:full`     |
+| Full     | 32    | ~10min   | `pnpm test:e2e:full`     |
 
 <!-- PLAYWRIGHT_SUITE_TABLE:end -->
 

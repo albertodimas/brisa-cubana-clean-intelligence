@@ -1,7 +1,7 @@
 "use client";
 
 import { track } from "@vercel/analytics";
-import * as Sentry from "@sentry/nextjs";
+import { loadSentry } from "./sentry/lazy";
 
 type TelemetryPrimitive = string | number | boolean | null;
 type TelemetryData = Record<string, TelemetryPrimitive>;
@@ -17,14 +17,18 @@ export function recordPortalEvent(event: string, data?: TelemetryData) {
     // noop when analytics is unavailable
   }
 
-  try {
-    Sentry.addBreadcrumb({
-      category: "portal",
-      message: event,
-      data,
-      level: "info",
+  void loadSentry()
+    .then((sentry) => {
+      if (typeof sentry.addBreadcrumb === "function") {
+        sentry.addBreadcrumb({
+          category: "portal",
+          message: event,
+          data,
+          level: "info",
+        });
+      }
+    })
+    .catch(() => {
+      // noop when Sentry is not configured
     });
-  } catch {
-    // noop when Sentry is not configured
-  }
 }

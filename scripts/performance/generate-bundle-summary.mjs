@@ -91,12 +91,23 @@ const sentryChunk = clientStatsRaw.find((node) =>
 );
 
 const middlewareStats = (() => {
-  const buffer = readFileSync(join(nextDir, "server", "middleware.js"));
-  return {
-    file: "server/middleware.js",
-    bytes: buffer.length,
-    gzipBytes: gzipSync(buffer).length,
-  };
+  try {
+    const buffer = readFileSync(join(nextDir, "server", "middleware.js"));
+    return {
+      file: "server/middleware.js",
+      bytes: buffer.length,
+      gzipBytes: gzipSync(buffer).length,
+    };
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      return {
+        file: "server/middleware.js",
+        bytes: 0,
+        gzipBytes: 0,
+      };
+    }
+    throw error;
+  }
 })();
 
 const formatEntry = (entry) => ({

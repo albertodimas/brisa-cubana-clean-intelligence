@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useReportWebVitals } from "next/web-vitals";
-import * as Sentry from "@sentry/nextjs";
+import { getSentryIfLoaded, loadSentry } from "../../lib/sentry/lazy";
+
+type SentryModule = typeof import("@sentry/nextjs");
 
 type WebVitalName = "CLS" | "FCP" | "FID" | "INP" | "LCP" | "TTFB";
 
@@ -19,12 +22,33 @@ const METRIC_UNITS: Partial<Record<WebVitalName, string>> = {
 };
 
 export function WebVitalsReporter() {
+  const metricsRef = useRef<SentryModule["metrics"] | null>(
+    getSentryIfLoaded()?.metrics ?? null,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadSentry()
+      .then((sentry) => {
+        if (!cancelled) {
+          metricsRef.current = sentry.metrics ?? null;
+        }
+      })
+      .catch(() => {
+        // Sentry opcional
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useReportWebVitals((metric) => {
     if (!TRACKED_METRICS.has(metric.name as WebVitalName)) {
       return;
     }
 
-    const metricsApi = Sentry.metrics;
+    const metricsApi = metricsRef.current ?? getSentryIfLoaded()?.metrics;
     if (!metricsApi || typeof metricsApi.distribution !== "function") {
       return;
     }

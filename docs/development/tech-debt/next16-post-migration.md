@@ -19,9 +19,10 @@ La migración a **Next.js 16.0.0** (con React 19.2.0) ya se integró en `main`. 
    - Publicar Storybook (preview) y vincularlo al tablero de recuperación.
 
 2. **Bundler & Performance**
-   - Generar baseline con `pnpm --filter @brisa/web analyze -- --webpack` y derivar métricas vía `node scripts/performance/generate-bundle-summary.mjs`.
+   - Generar baseline con `pnpm --filter @brisa/web analyze` y derivar métricas vía `node scripts/performance/generate-bundle-summary.mjs`.
    - Actualizar `docs/development/performance/bundle-analysis.md` y registrar cambios en `Monthly Bundle Audit`.
-   - Reducir el tamaño del middleware (`server/middleware.js` → 1.63 MB gzip) segmentando middlewares y revisando dependencias de Auth.js.
+   - ✅ Middleware edge eliminado (`server/middleware.js` queda en 0 kB). Los guardas se manejan en los handlers (`app/api/portal/**`) y en los layouts/páginas (`auth()`), por lo que sólo queda vigilar regresiones.
+   - Validar el impacto del lazy load de Sentry Replay (implementado el 31-oct-2025). Para reactivar Replay en casos puntuales, usa `NEXT_PUBLIC_SENTRY_REPLAY_ENABLED=true` + sampleos (`SENTRY_REPLAYS_*`).
 
 3. **Auth.js / NextAuth**
    - Verificar compatibilidad de releases posteriores (cuando se publique soporte oficial Next 16).
@@ -43,7 +44,7 @@ La migración a **Next.js 16.0.0** (con React 19.2.0) ya se integró en `main`. 
 - [x] `pnpm docs:verify`.
 - [x] Deploy preview verificado.
 - [ ] Storybook build estable en CI.
-- [ ] Baseline de bundle actualizado.
+- [x] Baseline de bundle actualizado.
 - [ ] Documentación UI/UX y overview sincronizadas.
 
 ## Acciones sugeridas

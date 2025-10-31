@@ -1,10 +1,21 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import {
+  extractSessionToken,
+  validateSessionToken,
+} from "@/lib/auth/session-token";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 const isProduction = process.env.NODE_ENV === "production";
 
 export async function POST() {
+  const cookieStore = await cookies();
+  const sessionToken = extractSessionToken(cookieStore);
+  if (!sessionToken || !(await validateSessionToken(sessionToken))) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   const upstreamResponse = await fetch(`${API_URL}/api/portal/auth/logout`, {
     method: "POST",
     headers: {

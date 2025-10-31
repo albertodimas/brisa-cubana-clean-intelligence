@@ -56,6 +56,12 @@ echo "$WEB_DSN" | vercel env add NEXT_PUBLIC_SENTRY_DSN preview
 echo "Adding NEXT_PUBLIC_SENTRY_DSN to development..."
 echo "$WEB_DSN" | vercel env add NEXT_PUBLIC_SENTRY_DSN development
 
+# Opt-out Replay by default (opcional: cambiar a true cuando se necesite)
+for env in production preview development; do
+  echo "Setting NEXT_PUBLIC_SENTRY_REPLAY_ENABLED=false in $env..."
+  echo "false" | vercel env add NEXT_PUBLIC_SENTRY_REPLAY_ENABLED "$env"
+done
+
 # Add SENTRY_DSN (api)
 echo "Adding SENTRY_DSN to production..."
 echo "$API_DSN" | vercel env add SENTRY_DSN production
@@ -65,6 +71,13 @@ echo "$API_DSN" | vercel env add SENTRY_DSN preview
 
 echo "Adding SENTRY_DSN to development..."
 echo "$API_DSN" | vercel env add SENTRY_DSN development
+
+for env in production preview development; do
+  echo "Setting SENTRY_REPLAY_ENABLED=false in $env..."
+  echo "false" | vercel env add SENTRY_REPLAY_ENABLED "$env"
+  echo "0" | vercel env add SENTRY_REPLAYS_SESSION_SAMPLE_RATE "$env"
+  echo "0.1" | vercel env add SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE "$env"
+done
 
 echo ""
 echo "✅ Sentry DSN configured successfully!"

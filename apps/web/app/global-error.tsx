@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import * as Sentry from "@sentry/nextjs";
+import { loadSentry } from "../lib/sentry/lazy";
 
 type GlobalErrorProps = {
   error: Error & { digest?: string };
@@ -11,7 +11,15 @@ type GlobalErrorProps = {
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    Sentry.captureException(error);
+    void loadSentry()
+      .then((sentry) => {
+        if (typeof sentry.captureException === "function") {
+          sentry.captureException(error);
+        }
+      })
+      .catch(() => {
+        // Sentry opcional
+      });
   }, [error]);
 
   return (

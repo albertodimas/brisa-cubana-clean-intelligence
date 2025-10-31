@@ -48,7 +48,7 @@ Se han creado **dos proyectos** en Sentry para separar errores de frontend y bac
 - **Sample rates**
   - `tracesSampleRate`: 0.1 en producción, 1.0 en otros entornos.
   - `profilesSampleRate`: 0.1 en producción (API) / 0.0 en el cliente (configurable).
-  - `replaysSessionSampleRate`: 0.1 (configurado en las plantillas de Next.js).
+  - `replaysSessionSampleRate`: mantenlo en `0` para producción y development. En preview lo elevamos a `0.05` para observar la experiencia antes del GA.
 
 - **Alertas**: ver `docs/operations/alerts.md` y la tabla 5.7 más abajo para responsables/asignaciones.
 
@@ -70,13 +70,22 @@ SENTRY_TRACES_SAMPLE_RATE=0.1
 SENTRY_PROFILES_SAMPLE_RATE=0.1
 NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=0.1
 NEXT_PUBLIC_SENTRY_PROFILES_SAMPLE_RATE=0
+# Replay (producción/desarrollo => false/0; preview => true/0.05/0.5)
+SENTRY_REPLAY_ENABLED=false
+SENTRY_REPLAYS_SESSION_SAMPLE_RATE=0
+SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE=0.1
+NEXT_PUBLIC_SENTRY_REPLAY_ENABLED=false
+NEXT_PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE=0
+NEXT_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE=0.1
 ```
 
 Archivos relevantes (`apps/web`):
 
-- `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`: inicializan Sentry de forma condicional según el DSN.
+- `instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`: inicializan Sentry de forma condicional según el DSN y las banderas de Replay.
 - `sentry.config.ts`: referencia `org`, `project` y utiliza el token de entorno cuando se ejecuta la CLI (source maps, releases).
 - `next.config.ts`: envuelto con `withSentryConfig` para generar artefactos compatibles con Sentry y ocultar source maps del build público.
+
+> ℹ️ **Preview con Replay habilitado.** En Vercel `preview` configuramos `SENTRY_REPLAY_ENABLED=true`, `SENTRY_REPLAYS_SESSION_SAMPLE_RATE=0.05`, `SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE=0.5` (y equivalentes `NEXT_PUBLIC_*`). Mantén producción/desarrollo en `false/0` salvo campañas aprobadas.
 
 #### **Para apps/api (Hono + Node.js)**
 
@@ -233,42 +242,38 @@ pnpm add @sentry/nextjs
 npx @sentry/wizard@latest -i nextjs
 ```
 
-Esto creará automáticamente:
+El repositorio ya incluye la configuración lista para usar:
 
-- `sentry.client.config.ts`
-- `sentry.server.config.ts`
-- `sentry.edge.config.ts`
+- `apps/web/instrumentation-client.ts` controla la inicialización en el cliente y carga `Replay` de forma perezosa.
+- `apps/web/sentry.server.config.ts` y `apps/web/sentry.edge.config.ts` inicializan Sentry en runtime server/edge.
 
-#### Configuración recomendada (`sentry.client.config.ts`):
+Para ajustar la instrumentación cliente, edita `instrumentation-client.ts`. Fragmento relevante:
 
 ```typescript
-import * as Sentry from "@sentry/nextjs";
+import { getSentryIfLoaded, loadSentry } from "./lib/sentry/lazy";
 
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+const enableReplay =
+  process.env.NEXT_PUBLIC_SENTRY_REPLAY_ENABLED === "true" ||
+  process.env.SENTRY_REPLAY_ENABLED === "true";
 
-  // Ajustar según ambiente
-  environment: process.env.NODE_ENV,
-
-  // Sample rate para performance monitoring
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-
-  // Filtrar información sensible
-  beforeSend(event, hint) {
-    // No enviar errores con datos sensibles
-    if (event.request?.headers?.["authorization"]) {
-      delete event.request.headers["authorization"];
-    }
-    return event;
-  },
-
-  // Ignorar errores conocidos
-  ignoreErrors: [
-    "ResizeObserver loop limit exceeded",
-    "Non-Error promise rejection captured",
-  ],
-});
+const initializeSentry = async () => {
+  const Sentry = await loadSentry();
+  Sentry.init({
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    environment: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ?? "development",
+    tracesSampleRate: 0.1,
+    profilesSampleRate: 0,
+    integrations: (integrations) =>
+      enableReplay
+        ? integrations
+        : integrations.filter((integration) => integration.name !== "Replay"),
+    replaysSessionSampleRate: enableReplay ? 0 : 0,
+    replaysOnErrorSampleRate: enableReplay ? 0.1 : 0,
+  });
+};
 ```
+
+> Nota: deja `NEXT_PUBLIC_SENTRY_REPLAY_ENABLED=false` en producción salvo que exista una campaña aprobada; habilitar Replay vuelve a incluir el chunk pesado `static/chunks/7151…js`.
 
 ### 2. Hono API (apps/api)
 

@@ -130,6 +130,25 @@ test.describe("Seguridad y Autenticación", () => {
       const saveButtons = page.getByRole("button", { name: "Guardar" });
       expect(await saveButtons.count()).toBe(0);
     });
+
+    test("responde 401 en endpoints del portal sin sesión", async ({
+      request,
+    }) => {
+      const response = await request.get("/api/portal/bookings");
+      expect(response.status()).toBe(401);
+    });
+  });
+
+  test.describe("Flujos autenticados", () => {
+    test("redirige /login al panel cuando ya hay sesión", async ({
+      page,
+    }, testInfo) => {
+      await loginAsAdmin(page, testInfo);
+      await page.goto("/login");
+      await page.waitForLoadState("networkidle");
+      const pathname = new URL(page.url()).pathname;
+      expect(["/", "", "/panel"]).toContain(pathname);
+    });
   });
 
   test.describe("Permisos y roles", () => {

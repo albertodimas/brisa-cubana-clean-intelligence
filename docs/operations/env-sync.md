@@ -50,6 +50,24 @@ Pasos para alinear los valores de entorno propios del proxy web y del portal cli
 
    # Habilitar el checkout sólo cuando esté listo comercialmente
    echo "false" | vercel env add NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT production --force
+
+   # Replay de Sentry: mantener desactivado salvo campañas aprobadas
+   for env in production development; do
+     echo "false" | vercel env add SENTRY_REPLAY_ENABLED "$env" --force
+     echo "false" | vercel env add NEXT_PUBLIC_SENTRY_REPLAY_ENABLED "$env" --force
+     echo "0" | vercel env add SENTRY_REPLAYS_SESSION_SAMPLE_RATE "$env" --force
+     echo "0.1" | vercel env add SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE "$env" --force
+     echo "0" | vercel env add NEXT_PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE "$env" --force
+     echo "0.1" | vercel env add NEXT_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE "$env" --force
+   done
+
+   # Preview habilita Replay con muestreo controlado (5% sesiones, 50% errores)
+   echo "true" | vercel env add SENTRY_REPLAY_ENABLED preview --force
+   echo "0.05" | vercel env add SENTRY_REPLAYS_SESSION_SAMPLE_RATE preview --force
+   echo "0.5" | vercel env add SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE preview --force
+   echo "true" | vercel env add NEXT_PUBLIC_SENTRY_REPLAY_ENABLED preview --force
+   echo "0.05" | vercel env add NEXT_PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE preview --force
+   echo "0.5" | vercel env add NEXT_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE preview --force
    ```
 
    Repite el procedimiento para los entornos preview/development según corresponda (por ejemplo, dejar `NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT` en `true` sólo en staging controlado).
@@ -71,6 +89,8 @@ Pasos para alinear los valores de entorno propios del proxy web y del portal cli
    gh secret list --env production-web | grep -E "(JWT_SECRET|AUTH_SECRET)"
    gh secret list --env production-api | grep -E "(JWT_SECRET|AUTH_SECRET)"
    ```
+
+> ℹ️ Si quieres reflejar los valores de Replay en GitHub Actions por entorno (`preview-web`, etc.), crea primero las environments en Settings → Environments y luego repite `gh secret set ... --env <nombre>` con los mismos valores (`true/0.05/0.5` para preview, `false/0/0.1` para el resto).
 
 ## 3. Smoke test posterior
 

@@ -18,7 +18,12 @@ Ejecuta `pnpm docs:verify` antes de abrir un PR; el flujo `CI (Main Branch)` blo
 
 > Para navegar rápidamente desde la raíz: `pnpm docs:verify` garantiza que los archivos críticos permanezcan disponibles y que no existan referencias obsoletas.
 
+## Documentos raíz obligatorios
+
+- [`../CHANGELOG.md`](../CHANGELOG.md) — cronología de cambios en producción. Actualízalo en cada PR que afecte al usuario final o al plan de recuperación.
+- [`../SECURITY.md`](../SECURITY.md) — políticas de divulgación responsable y guías de hardening. Refiérete a este archivo antes de abrir issues públicos o comunicar incidentes.
+
 ## Scripts de mantenimiento
 
 - `node scripts/qa/update-playwright-docs.mjs --write` sincroniza automáticamente la tabla de suites Playwright en `docs/overview/status.md` y los conteos de `docs/development/qa/regression-checklist.md`. El chequeo se ejecuta en `pnpm docs:verify`, por lo que los PR deben correr este script si agregan o mueven tests E2E.
-- `pnpm --filter @brisa/web analyze -- --webpack` seguido de `ANALYZE_MODE=json pnpm --filter @brisa/web analyze -- --webpack` genera los artefactos requeridos por `node scripts/performance/update-bundle-doc.mjs --write`, que inyecta los tamaños reales del bundle en `docs/development/performance/bundle-analysis.md`.
+- `pnpm --filter @brisa/web analyze` seguido de `ANALYZE_MODE=json pnpm --filter @brisa/web analyze` genera los artefactos requeridos por `node scripts/performance/update-bundle-doc.mjs --write`, que inyecta los tamaños reales del bundle en `docs/development/performance/bundle-analysis.md`.

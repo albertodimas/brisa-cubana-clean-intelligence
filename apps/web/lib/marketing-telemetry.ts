@@ -1,7 +1,7 @@
 "use client";
 
 import { track } from "@vercel/analytics";
-import * as Sentry from "@sentry/nextjs";
+import { loadSentry } from "./sentry/lazy";
 type PosthogClient = {
   capture: (event: string, properties?: Record<string, unknown>) => void;
 };
@@ -83,16 +83,20 @@ function recordAnalyticsEvent(
 
   captureWithPosthog(event, posthogProperties);
 
-  try {
-    Sentry.addBreadcrumb({
-      category,
-      message: event,
-      data: payload,
-      level: "info",
+  void loadSentry()
+    .then((sentry) => {
+      if (typeof sentry.addBreadcrumb === "function") {
+        sentry.addBreadcrumb({
+          category,
+          message: event,
+          data: payload,
+          level: "info",
+        });
+      }
+    })
+    .catch(() => {
+      // sentry optional
     });
-  } catch {
-    // sentry optional
-  }
 }
 
 export function recordMarketingEvent(event: string, data?: EventData) {

@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getSentryIfLoaded, loadSentry } from "../lib/sentry/lazy";
+
+type SentryModule = typeof import("@sentry/nextjs");
 
 type StreamEventName =
   | "init"
@@ -45,21 +48,24 @@ export function useNotificationStream({
   const refreshDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const isUnmountedRef = useRef(false);
-  const sentryModuleRef = useRef<typeof import("@sentry/nextjs") | null>(null);
+  const sentryModuleRef = useRef<SentryModule | null>(getSentryIfLoaded());
 
   useEffect(() => {
-    let cancelled = false;
-    if (!sentryModuleRef.current) {
-      import("@sentry/nextjs")
-        .then((mod) => {
-          if (!cancelled) {
-            sentryModuleRef.current = mod;
-          }
-        })
-        .catch(() => {
-          // Evitar fallos en entornos que deshabilitan Sentry
-        });
+    if (sentryModuleRef.current) {
+      return;
     }
+
+    let cancelled = false;
+    void loadSentry()
+      .then((mod) => {
+        if (!cancelled) {
+          sentryModuleRef.current = mod;
+        }
+      })
+      .catch(() => {
+        // Evitar fallos en entornos que deshabilitan Sentry
+      });
+
     return () => {
       cancelled = true;
     };
