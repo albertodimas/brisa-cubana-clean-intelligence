@@ -97,6 +97,7 @@ router.post("/request", async (c) => {
         email,
         expiresAt,
         delivery: delivery.reason,
+        ...(delivery.error ? { errorDetail: delivery.error } : {}),
       },
       "Magic link email no enviado",
     );
@@ -107,6 +108,7 @@ router.post("/request", async (c) => {
           delivery.reason === "not-configured"
             ? "No está configurado el correo de enlaces mágicos. Contacta al equipo de operaciones."
             : "No pudimos enviar el enlace mágico. Intenta más tarde.",
+        ...(delivery.error ? { detail: delivery.error } : {}),
       },
       status,
     );
