@@ -27,7 +27,7 @@ jobs:
 
       - name: Checkout
         if: env.SKIP_MONITOR == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Usar Node.js 22
         if: env.SKIP_MONITOR == 'false'
