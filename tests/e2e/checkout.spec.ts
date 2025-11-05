@@ -16,7 +16,7 @@ test.describe("Checkout público", () => {
         page.getByRole("link", { name: /formulario de contacto/i }),
       ).toBeVisible();
       await expect(
-        page.getByText(/agenda tu diagnóstico operativo/i),
+        page.getByText(/agenda tu diagnóstico operativo/i).first(),
       ).toBeVisible();
       return;
     }

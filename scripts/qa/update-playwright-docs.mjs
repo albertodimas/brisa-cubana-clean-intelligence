@@ -10,8 +10,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = resolve(new URL("..", import.meta.url).pathname, "..");
+const scriptDir = fileURLToPath(new URL(".", import.meta.url));
+const repoRoot = resolve(scriptDir, "..", "..");
 const configPath = resolve(repoRoot, "config/playwright-suites.json");
 const suitesConfig = JSON.parse(readFileSync(configPath, "utf8"));
 

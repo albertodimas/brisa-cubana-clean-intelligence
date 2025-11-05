@@ -127,3 +127,7 @@ infra/kubernetes/**/*secret*.yaml
 sentry-debug.log
 
 .lighthouseci/
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

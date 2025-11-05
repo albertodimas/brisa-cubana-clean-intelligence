@@ -62,7 +62,18 @@
       "esbuild": "^0.25.10",
       "tmp": "^0.2.4",
       "vite": "7.1.11"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "@sentry-internal/node-cpu-profiler",
+      "@sentry/cli",
+      "@vercel/speed-insights",
+      "esbuild",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
