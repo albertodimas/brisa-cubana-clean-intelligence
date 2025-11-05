@@ -1,5 +1,13 @@
 import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from "vitest";
 import type { PaginatedResult, PaginationInfo } from "@/lib/api";
 import { usePaginatedResource } from "./use-paginated-resource";
 
@@ -34,7 +42,7 @@ function mockFetchResponse<T>(data: T[], pagination?: Partial<PaginationInfo>) {
 
 describe("usePaginatedResource", () => {
   const originalFetch = global.fetch;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: MockInstance<typeof console.error>;
 
   beforeEach(() => {
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
