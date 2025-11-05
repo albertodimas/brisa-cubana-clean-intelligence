@@ -44,7 +44,6 @@ export async function POST(request: Request) {
     typeof data.data === "object"
   ) {
     const portalToken = data.data.portalToken;
-    const customerId = data.data.customerId;
     const expiresAtIso = data.data.expiresAt;
     if (typeof portalToken === "string") {
       const expiresAt = expiresAtIso ? new Date(expiresAtIso) : null;

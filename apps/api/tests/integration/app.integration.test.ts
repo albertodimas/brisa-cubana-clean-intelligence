@@ -1005,16 +1005,56 @@ describe("app", () => {
   });
 
   it("exposes health", async () => {
-    const res = await app.request("/health");
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.status).toBe("pass");
-    expect(body.checks.database.status).toBe("ok");
-    expect(body.checks.stripe.status).toBe("disabled");
-    expect(body.checks.email.status).toBe("disabled");
-    expect(body.checks.sentry.status).toBe("disabled");
-    expect(body.timestamp).toBeDefined();
-    expect(mockPrisma.$queryRaw).toHaveBeenCalled();
+    const previousStripeSecret = process.env.STRIPE_SECRET_KEY;
+    const previousStripeWebhook = process.env.STRIPE_WEBHOOK_SECRET;
+    const mailerKeys = [
+      "PORTAL_MAGIC_LINK_SMTP_HOST",
+      "PORTAL_MAGIC_LINK_SMTP_PORT",
+      "PORTAL_MAGIC_LINK_SMTP_USER",
+      "PORTAL_MAGIC_LINK_SMTP_PASSWORD",
+      "PORTAL_MAGIC_LINK_SMTP_SECURE",
+      "PORTAL_MAGIC_LINK_FROM",
+    ] as const;
+
+    const previousMailer = mailerKeys.reduce<
+      Record<string, string | undefined>
+    >((acc, key) => {
+      acc[key] = process.env[key];
+      return acc;
+    }, {});
+
+    delete process.env.STRIPE_SECRET_KEY;
+    delete process.env.STRIPE_WEBHOOK_SECRET;
+    mailerKeys.forEach((key) => {
+      delete process.env[key];
+    });
+
+    try {
+      const res = await app.request("/health");
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.status).toBe("pass");
+      expect(body.checks.database.status).toBe("ok");
+      expect(body.checks.stripe.status).toBe("disabled");
+      expect(body.checks.email.status).toBe("disabled");
+      expect(body.checks.sentry.status).toBe("disabled");
+      expect(body.timestamp).toBeDefined();
+      expect(mockPrisma.$queryRaw).toHaveBeenCalled();
+    } finally {
+      const restoreEnv = (key: string, value: string | undefined) => {
+        if (value !== undefined) {
+          process.env[key] = value;
+        } else {
+          delete process.env[key];
+        }
+      };
+
+      restoreEnv("STRIPE_SECRET_KEY", previousStripeSecret);
+      restoreEnv("STRIPE_WEBHOOK_SECRET", previousStripeWebhook);
+      mailerKeys.forEach((key) => {
+        restoreEnv(key, previousMailer[key]);
+      });
+    }
   });
 
   it("returns failure when database is down", async () => {
