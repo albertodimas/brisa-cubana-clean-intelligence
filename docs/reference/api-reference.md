@@ -1,12 +1,20 @@
 # API Documentation - OpenAPI/Swagger
 
-**Última actualización:** 31 de octubre de 2025
+**Última actualización:** 6 de noviembre de 2025
 
 ---
 
 ## Overview
 
 La API de Brisa Cubana Clean Intelligence está completamente documentada con **OpenAPI 3.1** specification. Toda la documentación interactiva está disponible a través de **Scalar API Reference**, una interfaz moderna y funcional para explorar y probar los endpoints.
+
+> **Actualización 5/nov/2025 (Sprint 2 & 3):**
+>
+> - Nuevos endpoints: GET /api/bookings/:id, PATCH /api/bookings/:id/assign-staff, endpoints completos de /api/invoices
+> - Nuevos filtros en bookings: `assignedStaffId` (filtrar por staff asignado), `code` (buscar por código de reserva)
+> - Validaciones mejoradas: scheduledAt no puede ser en el pasado, rangos de fechas validados (from <= to)
+> - Rate limiting en endpoints de invoices
+> - Serialización mejorada: bookings incluyen datos de `assignedStaff`
 
 > **Actualización 15/oct/2025:** Los endpoints de servicios, propiedades, reservas, clientes y usuarios soportan parámetros `search` y filtros complementarios (`status`, `city`, `type`, `active`, etc.) con paginación cursor-based. Consulta la especificación o el handbook de producto para ejemplos concretos.
 
@@ -87,8 +95,11 @@ servers:
 - **Users**: Gestión de usuarios (ADMIN only)
 - **Services**: Catálogo de servicios de limpieza
 - **Properties**: Gestión de propiedades
-- **Bookings**: Reservas de servicios
+- **Bookings**: Reservas de servicios y asignación de staff
+- **Payments**: Integraciones con Stripe (intent + webhook)
+- **Invoices**: Facturación y conciliación de pagos
 - **Customers**: Clientes del sistema
+- **Portal**: Autenticación y acciones del portal cliente
 - **Health**: Health checks y monitoreo
 
 ### 4. Seguridad
@@ -158,13 +169,38 @@ security:
 ### Bookings
 
 - `GET /api/bookings` - Listar reservas (con filtros)
+- `GET /api/bookings/{bookingId}` - Obtener reserva con relaciones completas (servicio, propiedad, cliente, staff asignado)
 - `POST /api/bookings` - Crear reserva (ADMIN/COORDINATOR)
 - `PATCH /api/bookings/{bookingId}` - Actualizar reserva
+- `PATCH /api/bookings/{bookingId}/assign-staff` - Asignar o liberar miembro de staff (ADMIN/COORDINATOR)
 - `DELETE /api/bookings/{bookingId}` - Desactivar reserva (ADMIN/COORDINATOR, soft delete)
 
 ### Customers
 
 - `GET /api/customers` - Listar clientes (ADMIN/COORDINATOR)
+
+### Payments
+
+- `POST /api/payments/stripe/intent` - Crear PaymentIntent para checkout público (rate limited)
+- `POST /api/payments/stripe/webhook` - Webhook Stripe firmado (`checkout.session.completed` → reserva confirmada)
+
+### Invoices
+
+- `GET /api/invoices` - Listar invoices filtrando por `status`, `bookingId` o `stripePaymentIntentId`
+- `GET /api/invoices/{invoiceId}` - Obtener invoice con relaciones (booking, cliente, propiedad, servicio)
+- `POST /api/invoices` - Crear invoice manual (ADMIN/COORDINATOR)
+- `PATCH /api/invoices/{invoiceId}` - Actualizar monto, estado o metadata (`metadata` acepta JSON arbitrario)
+- `DELETE /api/invoices/{invoiceId}` - Eliminar invoice (ADMIN)
+
+### Portal (Clientes)
+
+- `POST /api/portal/auth/request` - Solicitar enlace mágico (rate limited)
+- `POST /api/portal/auth/verify` - Validar token y emitir sesión (`portal_token` + `portal_customer_id`)
+- `POST /api/portal/auth/logout` - Cerrar sesión portal
+- `GET /api/portal/bookings` - Listar reservas del cliente autenticado
+- `GET /api/portal/bookings/{bookingId}` - Detalle de reserva (sólo si pertenece al cliente)
+- `POST /api/portal/bookings/{bookingId}/cancel` - Solicitar cancelación (restricciones por estado/ventana)
+- `POST /api/portal/bookings/{bookingId}/reschedule` - Solicitar reagendo (valida solapamientos)
 
 ---
 
@@ -250,8 +286,10 @@ Todos los schemas están completamente documentados en la especificación OpenAP
 - **User**: Usuario del sistema con roles (ADMIN, COORDINATOR, STAFF, CLIENT)
 - **Service**: Servicio de limpieza con precio y duración
 - **Property**: Propiedad inmobiliaria (RESIDENTIAL, VACATION_RENTAL, OFFICE)
-- **Booking**: Reserva de servicio con estados (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED)
+- **Booking**: Reserva de servicio con estados (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED) y campos `assignedStaffId`/`assignedStaff`
 - **Customer**: Cliente del sistema
+- **Invoice**: Factura ligada a un booking (`status`: PENDING/PAID/FAILED/REFUNDED, `metadata` JSON opcional)
+- **StripeWebhookEvent**: Registro idempotente de eventos webhook procesados (status `processed`, `error`, detalles de reintentos)
 
 ### Validaciones
 

@@ -4,72 +4,65 @@
 [![Nightly E2E](https://img.shields.io/github/actions/workflow/status/albertodimas/brisa-cubana-clean-intelligence/nightly.yml?label=Nightly%20E2E&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/nightly.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/albertodimas/brisa-cubana-clean-intelligence/codeql.yml?label=CodeQL&logo=github&style=for-the-badge)](https://github.com/albertodimas/brisa-cubana-clean-intelligence/actions/workflows/codeql.yml)
 
-Monorepo (pnpm + Turborepo) para la plataforma operativa de **Brisa Cubana Clean Intelligence**: API en Hono + Prisma y frontend en Next.js 16.
+Monorepo (pnpm + Turborepo) para la plataforma operativa de **Brisa Cubana Clean Intelligence**: API Hono + Prisma y frontend Next.js 16.
 
-> ⚠️ Estamos en fase de recuperación. La UI/UX aún presenta inconsistencias visuales/performance y parte de la documentación histórica está desactualizada. Consulta el plan antes de confiar en cualquier afirmación de “Production Ready”.
-
----
-
-## Instantánea (31-oct-2025)
-
-- Release etiquetada: `v0.4.2`.
-- CI/CD en verde (ver acciones recientes en GitHub → Actions).
-- Producción: Vercel (`apps/web`) + Neon (PostgreSQL 17) + API pública en `https://api.brisacubanacleanintelligence.com`.
-- Foco del equipo: [Plan de recuperación](docs/overview/recovery-plan.md) con tres frentes activos (UI/UX, performance/observabilidad y limpieza documental).
+> Seguimos en plan de recuperación. Antes de desplegar o comunicar estado “production ready”, revisa el [resumen vigente](docs/overview/status.md) y el [plan de recuperación](docs/overview/recovery-plan.md).
 
 ---
 
-## Cómo levantar el stack
+## Estado actual
+
+- Release estable: `v0.4.2`.
+- Deploys automatizados en Vercel (web) y API pública `https://api.brisacubanacleanintelligence.com`.
+- Salud, riesgos y suites en verde: ver [`docs/overview/status.md`](docs/overview/status.md).
+- Historial previo (octubre 2025) archivado en [`docs/archive/2025-10-status.md`](docs/archive/2025-10-status.md).
+
+---
+
+## Arranque rápido
 
 ```bash
 pnpm install
 docker compose up -d
 pnpm db:push && pnpm db:seed
 pnpm dev          # web:3000, api:3001
-pnpm lint && pnpm typecheck && pnpm test:e2e:smoke
 ```
 
-- Variables: usa `.env.local` en la raíz (ver `docs/operations/env-sync.md`).
 - Usuarios demo: `admin@brisacubanacleanintelligence.com / Brisa123!`, `operaciones@… / Brisa123!`, `cliente@… / Brisa123!`.
+- Variantes, scripts y troubleshooting: [Guía completa](docs/development/guides/quickstart.md).
+- Sincronización de variables: [docs/operations/env-sync.md](docs/operations/env-sync.md).
 
 ---
 
-## Trabajo en curso
+## Documentación activa
 
-- **UI/UX Refresh** – Storybook + design tokens + componentes productivos (ver issues `ui-refresh`).
-- **Performance & Observabilidad** – Métricas reales en la landing (CountUp/market stats), tests Playwright que validen datos, Lighthouse en CI.
-- **Docs & Procesos** – Depurar docs duplicados, automatizar estado del proyecto, unificar variables de entorno y workflows.
+- Manual central: [`docs/README.md`](docs/README.md).
+- Estado operativo: [`docs/overview/status.md`](docs/overview/status.md).
+- Portal cliente y enlaces mágicos: [`docs/development/guides/portal-client.md`](docs/development/guides/portal-client.md).
+- Seguridad/entornos: [`docs/operations/security.md`](docs/operations/security.md) + [`SECURITY.md`](SECURITY.md).
+- Referencia API (OpenAPI): [`docs/reference/api-reference.md`](docs/reference/api-reference.md).
 
-Participa revisando los issues etiquetados como `recovery-plan` o mediante el tablero del proyecto.
+> **Política:** No se acepta código sin documentación actualizada. Cada PR debe incluir notas relevantes y pasar `pnpm docs:verify`.
 
 ---
 
-## Directorio rápido
+## Contribuciones
 
-```
-apps/
-  api/     # Hono + Prisma
-  web/     # Next.js + Auth.js + componentes UI
-docs/      # Runbooks, guías y decisiones (ver secciones marcadas como “⚠️ actualizar”)
-scripts/   # utilidades (Prisma, verificación de docs, seeds)
-tests/     # Playwright (smoke/critical/full)
-```
+1. Vincula tu trabajo a un hito del plan (`recovery-plan`, `ui-refresh`, etc.).
+2. Corre la batería mínima: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e:critical`.
+3. Actualiza docs y ejecuta `pnpm docs:verify`.
+4. Resume en el PR qué documentación tocaste y cómo validar.
 
-Referencias clave:
-
-- [Quickstart detallado](docs/guides/quickstart.md)
-- [Portal cliente](docs/guides/portal-client.md)
-- [Sincronización de entornos](docs/operations/env-sync.md)
-- [Plan de recuperación](docs/overview/recovery-plan.md)
+Guías QA/regresión: [`docs/development/qa/e2e-strategy.md`](docs/development/qa/e2e-strategy.md) y [`docs/development/qa/regression-checklist.md`](docs/development/qa/regression-checklist.md).
 
 ---
 
 ## Seguridad y soporte
 
-- Política: [`SECURITY.md`](SECURITY.md)
+- Política de divulgación: [`SECURITY.md`](SECURITY.md)
 - Reportes urgentes: `seguridad@brisacubanacleanintelligence.com`
-- Contacto operativo: `operaciones@brisacubanacleanintelligence.com`
+- Operaciones: `operaciones@brisacubanacleanintelligence.com`
 
 ---
 
-Hecho en Miami. Mantén CI verde, evita regresiones y actualiza la documentación cuando cambies procesos. 💚
+Hecho en Miami. Mantén CI verde, evita regresiones y documenta cada cambio. 💚

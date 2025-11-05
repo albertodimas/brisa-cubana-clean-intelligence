@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
+- API: se añadió `assignedStaffId` a `Booking` (nuevo endpoint `GET /api/bookings/:id`, `PATCH /api/bookings/:id/assign-staff`, filtros `assignedStaffId`/`code`) y serialización de staff en responses.
+- API: módulo de facturación (`/api/invoices`) con rate limiting configurable y repositorio registrado en el contenedor.
+- App: health check amplía validaciones (Stripe/SMTP/Sentry) y `app.ts` expone `/api/invoices`.
 - Web: Sentry ahora se inicializa con lazy loading y Replay deshabilitado por defecto; variables `SENTRY_REPLAY_*` / `NEXT_PUBLIC_SENTRY_REPLAY_*` documentadas y aplicadas en CLI y templates de entorno.
 - Middleware del panel y endpoints del portal ahora validan JWT de sesión con helpers ligeros (`lib/auth/session-token`), eliminando el match global del middleware y delegando `/api/portal/*` a guards por ruta.
 - Habilitamos Sentry Replay en Vercel preview (`session=0.05`, `on_error=0.5`) para evaluaciones controladas; producción/desarrollo permanecen en `false/0`.

@@ -6,6 +6,8 @@
 - **Alternativa:** abrir un reporte privado en GitHub Security Advisories (Security → Report a vulnerability).
 - **Clave PGP (opcional):** solicitar fingerprint en el correo primario para intercambio cifrado.
 
+> Consulta también [`docs/operations/security.md`](docs/operations/security.md) para el hardening operativo (variables obligatorias, rotación de secrets, procedimientos de despliegue seguro).
+
 ## Alcance
 
 - API (`apps/api`) desplegada en Vercel / Render.

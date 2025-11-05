@@ -59,6 +59,7 @@ model User {
   properties    Property[]
   bookings      Booking[]      @relation("BookingCustomer")
   notifications Notification[]
+  assignedBookings Booking[] @relation("BookingAssignedStaff")
 
   @@index([deletedAt])
 }
@@ -116,11 +117,15 @@ model Booking {
   property    Property      @relation(fields: [propertyId], references: [id])
   serviceId   String
   service     Service       @relation(fields: [serviceId], references: [id])
+  assignedStaffId String?
+  assignedStaff   User?         @relation("BookingAssignedStaff", fields: [assignedStaffId], references: [id])
+  invoices    Invoice[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   deletedAt   DateTime?
 
   @@index([deletedAt])
+  @@index([assignedStaffId])
 }
 
 model Notification {
@@ -185,4 +190,29 @@ model StripeWebhookEvent {
   @@index([stripeEventId])
   @@index([eventType, processed])
   @@index([createdAt])
+}
+
+model Invoice {
+  id                   String        @id @default(cuid())
+  bookingId            String
+  booking              Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  stripePaymentIntentId String?      @unique
+  amount               Decimal       @db.Decimal(10, 2)
+  status               InvoiceStatus @default(PENDING)
+  paidAt               DateTime?
+  metadata             Json?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([stripePaymentIntentId])
+  @@index([createdAt])
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }
