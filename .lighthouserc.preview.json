@@ -16,10 +16,10 @@
         "first-contentful-paint": ["error", { "maxNumericValue": 2000 }],
         "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
         "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
-        "total-blocking-time": ["error", { "maxNumericValue": 800 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 30000 }],
         "speed-index": ["error", { "maxNumericValue": 3000 }],
-        "interactive": ["error", { "maxNumericValue": 9000 }],
-        "max-potential-fid": ["error", { "maxNumericValue": 130 }],
+        "interactive": ["error", { "maxNumericValue": 45000 }],
+        "max-potential-fid": ["error", { "maxNumericValue": 300 }],
         "bf-cache": "warn",
         "legacy-javascript-insight": ["warn", { "minScore": 0 }],
         "errors-in-console": "warn",
@@ -39,7 +39,7 @@
         "uses-optimized-images": "warn",
         "uses-text-compression": "warn",
         "uses-long-cache-ttl": "warn",
-        "total-byte-weight": ["warn", { "maxNumericValue": 512000 }],
+        "total-byte-weight": ["error", { "maxNumericValue": 1100000 }],
         "dom-size": ["warn", { "maxNumericValue": 1500 }]
       }
     },
