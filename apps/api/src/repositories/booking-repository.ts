@@ -23,6 +23,7 @@ export type BookingCreateInput = {
   propertyId: string;
   customerId: string;
   notes?: string;
+  assignedStaffId?: string | null;
 };
 
 export type BookingUpdateInput = Partial<
@@ -35,6 +36,13 @@ export type BookingWithRelations = Booking & {
   service?: any;
   property?: any;
   customer?: any;
+  assignedStaff?: {
+    id: string;
+    email: string;
+    fullName: string | null;
+    role: string;
+    isActive: boolean;
+  } | null;
 };
 
 export interface BookingFilters {
@@ -42,6 +50,8 @@ export interface BookingFilters {
   propertyId?: string;
   serviceId?: string;
   customerId?: string;
+  assignedStaffId?: string;
+  code?: string;
   from?: Date;
   to?: Date;
   search?: string;
@@ -70,6 +80,15 @@ export class BookingRepository
         service: true,
         property: true,
         customer: true,
+        assignedStaff: {
+          select: {
+            id: true,
+            email: true,
+            fullName: true,
+            role: true,
+            isActive: true,
+          },
+        },
       },
     });
   }
@@ -115,6 +134,15 @@ export class BookingRepository
           service: true,
           property: true,
           customer: true,
+          assignedStaff: {
+            select: {
+              id: true,
+              email: true,
+              fullName: true,
+              role: true,
+              isActive: true,
+            },
+          },
         },
       }),
       orderBy: orderBy ?? { scheduledAt: "desc" },
@@ -299,6 +327,14 @@ export class BookingRepository
 
     if (filters.customerId) {
       where.customerId = filters.customerId;
+    }
+
+    if (filters.assignedStaffId) {
+      where.assignedStaffId = filters.assignedStaffId;
+    }
+
+    if (filters.code) {
+      where.code = filters.code;
     }
 
     if (filters.from || filters.to) {

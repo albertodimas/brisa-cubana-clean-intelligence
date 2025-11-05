@@ -8,6 +8,7 @@ import { NotificationRepository } from "./repositories/notification-repository.j
 import { MagicLinkTokenRepository } from "./repositories/magic-link-token-repository.js";
 import { LeadRepository } from "./repositories/lead-repository.js";
 import { StripeWebhookEventRepository } from "./repositories/stripe-webhook-event-repository.js";
+import { InvoiceRepository } from "./repositories/invoice-repository.js";
 import { prisma as prismaClient } from "./lib/prisma.js";
 import { env } from "./lib/env.js";
 
@@ -82,6 +83,7 @@ export const ServiceKeys = {
   MAGIC_LINK_TOKEN_REPOSITORY: "magicLinkTokenRepository",
   LEAD_REPOSITORY: "leadRepository",
   STRIPE_WEBHOOK_EVENT_REPOSITORY: "stripeWebhookEventRepository",
+  INVOICE_REPOSITORY: "invoiceRepository",
 } as const;
 
 /**
@@ -141,6 +143,11 @@ export function initializeContainer(): void {
     ServiceKeys.STRIPE_WEBHOOK_EVENT_REPOSITORY,
     () => new StripeWebhookEventRepository(prisma),
   );
+
+  container.register(
+    ServiceKeys.INVOICE_REPOSITORY,
+    () => new InvoiceRepository(prisma),
+  );
 }
 
 /**
@@ -196,6 +203,10 @@ export function getStripeWebhookEventRepository(): StripeWebhookEventRepository 
   return container.resolve<StripeWebhookEventRepository>(
     ServiceKeys.STRIPE_WEBHOOK_EVENT_REPOSITORY,
   );
+}
+
+export function getInvoiceRepository(): InvoiceRepository {
+  return container.resolve<InvoiceRepository>(ServiceKeys.INVOICE_REPOSITORY);
 }
 
 /**

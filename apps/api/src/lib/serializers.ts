@@ -9,6 +9,13 @@ type ServiceLike = {
 type BookingLike = {
   totalAmount: Prisma.Decimal | number;
   service?: ServiceLike | null;
+  assignedStaff?: {
+    id: string;
+    email: string;
+    fullName: string | null;
+    role: string;
+    isActive: boolean;
+  } | null;
 };
 
 function decimalToNumber(value: Prisma.Decimal | number): number {
@@ -27,8 +34,15 @@ export function serializeBooking<T extends BookingLike>(
 ): Omit<T, "totalAmount" | "service"> & {
   totalAmount: number;
   service?: (ServiceLike & { basePrice: number }) | null;
+  assignedStaff?: {
+    id: string;
+    email: string;
+    fullName: string | null;
+    role: string;
+    isActive: boolean;
+  } | null;
 } {
-  const { service, totalAmount, ...rest } = booking;
+  const { service, totalAmount, assignedStaff, ...rest } = booking;
 
   return {
     ...rest,
@@ -43,8 +57,20 @@ export function serializeBooking<T extends BookingLike>(
             : service,
         }
       : {}),
+    ...(assignedStaff !== undefined
+      ? {
+          assignedStaff,
+        }
+      : {}),
   } as Omit<T, "totalAmount" | "service"> & {
     totalAmount: number;
     service?: (ServiceLike & { basePrice: number }) | null;
+    assignedStaff?: {
+      id: string;
+      email: string;
+      fullName: string | null;
+      role: string;
+      isActive: boolean;
+    } | null;
   };
 }

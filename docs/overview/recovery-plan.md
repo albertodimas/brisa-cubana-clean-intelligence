@@ -1,6 +1,6 @@
-# Plan de recuperación – Octubre 2025
+# Plan de recuperación – Q4 2025
 
-> Última edición: 31 de octubre de 2025  
+> Última edición: 6 de noviembre de 2025  
 > Responsables iniciales: Plataforma & Engineering  
 > Objetivo: estabilizar la plataforma (UI/UX, performance, documentación y configuración) sin introducir duplicidades ni desviaciones de entorno.
 
@@ -8,10 +8,10 @@
 
 ## 1. Objetivos generales
 
-1. **Experiencia consistente**: corregir la UI/UX inacabada y mejorar la performance percibida (landing, panel operativo, portal cliente).
-2. **Fuente única de verdad**: reducir documentación redundante, marcar artefactos obsoletos y automatizar resúmenes de estado.
-3. **Process enablement**: habilitar tablero de trabajo y pipeline claro (issues → PR → deploy) con criterios de aceptación verificables.
-4. **Configuración segura**: consolidar variables de entorno y sincronizarlas entre Vercel, GitHub Actions y desarrolladores sin drift.
+1. **Experiencia consistente**: completar el refresh UI/UX (landing, panel operativo, portal cliente) con Storybook y accesibilidad.
+2. **Fuente única de verdad**: documentación viva, sin duplicados; automatizar resúmenes de estado y archivar el histórico.
+3. **Procesos sólidos**: tablero + pipeline claro (issue → PR → deploy) con criterios de aceptación verificables y suites verdes.
+4. **Configuración segura**: consolidar variables (env manifest), sincronización automatizada y auditoría periódica de secrets.
 
 ---
 
@@ -19,71 +19,69 @@
 
 ### 2.1 UI/UX Refresh
 
-- Montar Storybook (`apps/web`) + Chromatic o alternativa visual.
-- Migrar componentes críticos (`button`, `card`, `market-stats`, `login-form`) y eliminar placeholders.
-- Rediseñar landing y panel operativo basados en design tokens validados (Figma).
-- Revisar accesibilidad (WCAG 2.1+), `prefers-reduced-motion` y performance (Lighthouse ≥ 85).
+- Montar Storybook (`apps/web`) y habilitar preview visual (Chromatic o alternativa).
+- Migrar componentes críticos (`button`, `card`, `market-stats`, `login-form`).
+- Rediseñar landing/panel con design tokens validados y WCAG 2.1 AA.
+- Ejecutar Lighthouse ≥85 en nightly.
 
 ### 2.2 Performance & Observabilidad
 
-- Ajustar `CountUp`/`useMarketStats` para SSR seguro (no mostrar “0” inicial).
-- Añadir pruebas Playwright que verifiquen métricas reales en la landing.
-- Automatizar auditoría Lighthouse / AXE en CI (Nightly Full E2E).
-- Documentar flujos de logging y tracing (Sentry, PostHog) con pasos para reproducir eventos de prueba.
+- Ajustar `useMarketStats`/`CountUp` para SSR seguro.
+- Añadir pruebas Playwright que verifiquen métricas reales en landing/panel.
+- Automatizar Lighthouse / AXE en CI nocturno.
+- Documentar flujos de logging/tracing (Sentry, PostHog) con pasos reproducibles.
 
 ### 2.3 Documentación & Procesos
 
-- Simplificar README (hecho) y etiquetar secciones caducas (`⚠️ actualizar`) en docs.
-- Generar script que compile estado actual (CI runs, deploys, issues) → `docs/overview/status.md`.
-- Unificar checklist de PRs con Storybook + pruebas requeridas.
-- Establecer cadencia: daily 15 min, weekly review con entregables definidos.
+- README raíz + `docs/README.md` alineados (hecho); mantener política de documentación.
+- Script de estado (`docs/overview/status.md`) integrado en rutina semanal.
+- Checklist de PR único con cobertura de docs/tests.
+- Cadencia: daily async (`#plataforma-brisa`), weekly review con entregables.
 
 ### 2.4 Configuración / Entornos
 
-- Introducir `config/env.manifest.json` como fuente única de variables críticas.
-- Crear script `pnpm env:sync` que exporte/import Vercel + GitHub Secrets + `.env.local`.
-- Registrar auditoría mensual de secrets (quién cambió qué).
-- Documentar estrategia de rollback y fixtures de DB en `docs/operations/env-sync.md`.
+- Definir `config/env.manifest.json` como fuente única.
+- Implementar `pnpm env:sync` (Vercel ↔ GitHub Secrets ↔ `.env.local`).
+- Auditoría mensual de secrets (responsable y fecha).
+- Documentar rollback + fixtures de DB en `docs/operations/env-sync.md`.
 
 ---
 
-## 3. Próximos hitos
+## 3. Hitos activos
 
-| Hito     | Descripción                                      | Responsable(s)      | ETA         |
-| -------- | ------------------------------------------------ | ------------------- | ----------- |
-| `UI-01`  | Storybook con al menos 5 componentes productivos | Frontend            | 04-nov-2025 |
-| `UX-02`  | Rediseño de landing + métricas reales con SSR    | Frontend + Producto | 08-nov-2025 |
-| `DOC-01` | Script de estado automático + README alineado    | Plataforma          | 05-nov-2025 |
-| `CFG-01` | Manifest de env y comando `pnpm env:sync`        | DevOps              | 06-nov-2025 |
+| Hito     | Descripción                                | Responsable(s)      | ETA         | Estado                      |
+| -------- | ------------------------------------------ | ------------------- | ----------- | --------------------------- |
+| `UI-01`  | Storybook con ≥5 componentes productivos   | Frontend            | 07-nov-2025 | 🔄 En curso                 |
+| `UX-02`  | Rediseño landing + métricas reales SSR     | Frontend + Producto | 12-nov-2025 | ⏳ Planificado              |
+| `DOC-01` | Script estado automático + README alineado | Plataforma          | 05-nov-2025 | ✅ Completado (05-nov-2025) |
+| `CFG-01` | Manifest/env sync (`pnpm env:sync`)        | DevOps              | 08-nov-2025 | 🔄 En curso (script draft)  |
+| `SEC-01` | Definir refresh tokens Auth.js             | Plataforma          | 15-nov-2025 | ⏳ Planificado              |
 
-Actualiza esta tabla al menos dos veces por semana. Los issues deben enlazar a estos códigos (`UI-01`, etc.).
+Actualiza la tabla dos veces por semana. Los issues deben enlazar al código del hito.
 
 ---
 
 ## 4. Checklist base por PR
 
-- [ ] Issue vinculado al plan (etiqueta `recovery-plan`).
-- [ ] `pnpm lint && pnpm typecheck && pnpm test` y la suite E2E necesaria.
-- [ ] Storybook actualizado y capturas si la UI cambia.
-- [ ] Documentación tocada o marcada como `⚠️ actualizar` cuando aplique.
-- [ ] `pnpm docs:verify` en verde.
-- [ ] Actualización del tablero (estado “En revisión” / “Done”).
+- [ ] Issue vinculado al plan (`recovery-plan`, `ui-refresh`, etc.).
+- [ ] `pnpm lint && pnpm typecheck && pnpm test` + suite E2E correspondiente.
+- [ ] `pnpm docs:verify` en verde (adjuntar salida en el PR).
+- [ ] Documentación actualizada o marcada como `⚠️ actualizar`.
+- [ ] Tablero actualizado (En revisión/Done) y nota de pruebas manuales si aplica.
 
 ---
 
 ## 5. Comunicación
 
-- Tablero central (GitHub Projects) con columnas: Backlog, En progreso, En revisión, Listo.
-- Daily (async) en Slack `#plataforma-brisa` con progreso de cada swimlane.
-- Weekly demo (jueves) con evidencia (Storybook deploy, métricas, screenshots).
-- Incidentes → seguir `docs/operations/runbooks/incident-response.md`.
+- Tablero GitHub Projects (Backlog → En progreso → En revisión → Listo).
+- Daily async en Slack `#plataforma-brisa`.
+- Weekly demo (jueves) con evidencia: Storybook, métricas, screenshots.
+- Incidentes: seguir `docs/operations/runbooks/incident-response.md`.
 
 ---
 
 ## 6. Seguimiento
 
-- Mantén este documento como resumen vivo.
-- Cuando se complete el plan, mover secciones históricas a `docs/archive/2025-q4-recovery.md` y actualizar README con estado real.
-- Cualquier cambio mayor debe anunciarse por PR y quedar trazado en issues.
-
-Vamos paso a paso. Sin álgebra imaginaria: CI verde, UI usable y documentación honesta. 💚
+- Mantén este documento como resumen vivo; archiva lo completado en `docs/archive/` cuando cierre el plan.
+- Cambios mayores se notifican vía PR y quedan trazados en issues.
+- Sin álgebra imaginaria: CI verde, UI usable, documentación honesta. 💚
