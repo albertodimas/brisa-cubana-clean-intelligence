@@ -15,9 +15,6 @@ const config: StorybookConfig = {
     name: "@storybook/react-vite",
     options: {},
   },
-  docs: {
-    autodocs: "tag",
-  },
   viteFinal: async (config) => {
     const aliases = [
       { find: "@", replacement: path.resolve(__dirname, "..") },
