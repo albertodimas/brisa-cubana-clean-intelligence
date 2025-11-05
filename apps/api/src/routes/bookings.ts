@@ -166,11 +166,30 @@ router.post(
       return c.json({ error: "Property not found" }, 404);
     }
 
+    // SECURITY: Validar conflicto de horario antes de crear la reserva
+    const finalDuration = durationMin ?? service.durationMin;
+    const hasConflict = await bookingRepository.hasTimeConflict(
+      propertyId,
+      rest.scheduledAt,
+      finalDuration,
+    );
+
+    if (hasConflict) {
+      return c.json(
+        {
+          error:
+            "Conflicto de horario: La propiedad ya tiene una reserva activa en ese rango de tiempo",
+          code: "BOOKING_TIME_CONFLICT",
+        },
+        409,
+      );
+    }
+
     try {
       const createPayload: BookingCreateInput = {
         code: `BRISA-${randomUUID().slice(0, 8)}`,
         scheduledAt: rest.scheduledAt,
-        durationMin: durationMin ?? service.durationMin,
+        durationMin: finalDuration,
         status: "PENDING" as BookingStatus,
         totalAmount: Number(service.basePrice),
         serviceId,
@@ -225,6 +244,39 @@ router.patch(
       const property = await propertyRepository.findById(propertyId);
       if (!property) {
         return c.json({ error: "Property not found" }, 404);
+      }
+    }
+
+    // SECURITY: Si se cambia horario o propiedad, validar conflicto
+    if (rest.scheduledAt || rest.durationMin !== undefined || propertyId) {
+      const existingBooking = await bookingRepository.findById(id);
+      if (!existingBooking) {
+        return c.json({ error: "Reserva no encontrada" }, 404);
+      }
+
+      const targetPropertyId = propertyId ?? existingBooking.propertyId;
+      const targetScheduledAt = rest.scheduledAt ?? existingBooking.scheduledAt;
+      const targetDuration =
+        rest.durationMin !== undefined
+          ? rest.durationMin
+          : existingBooking.durationMin;
+
+      const hasConflict = await bookingRepository.hasTimeConflict(
+        targetPropertyId,
+        targetScheduledAt,
+        targetDuration,
+        id, // Excluir el booking actual
+      );
+
+      if (hasConflict) {
+        return c.json(
+          {
+            error:
+              "Conflicto de horario: La propiedad ya tiene una reserva activa en ese rango de tiempo",
+            code: "BOOKING_TIME_CONFLICT",
+          },
+          409,
+        );
       }
     }
 

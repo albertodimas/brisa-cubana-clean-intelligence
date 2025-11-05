@@ -118,6 +118,21 @@ export class PropertyRepository implements IPropertyRepository {
     return toPropertyResponse(property as PrismaPropertyWithOwner);
   }
 
+  async findByOwner(ownerId: string): Promise<PropertyResponse[]> {
+    const properties = await this.prisma.property.findMany({
+      where: {
+        ownerId,
+        deletedAt: null,
+      },
+      orderBy: [{ createdAt: "desc" }],
+      include: { owner: { select: ownerSelect } },
+    });
+
+    return properties.map((property) =>
+      toPropertyResponse(property as PrismaPropertyWithOwner),
+    );
+  }
+
   async findManyWithSearch({
     search,
     city,

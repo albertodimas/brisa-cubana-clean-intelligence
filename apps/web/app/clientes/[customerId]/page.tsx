@@ -33,14 +33,9 @@ export default async function ClienteDashboardPage({
 
   const cookieStore = await cookies();
   const portalToken = cookieStore.get("portal_token")?.value ?? null;
-  const portalCustomerId = cookieStore.get("portal_customer_id")?.value ?? null;
 
   if (!portalToken) {
     redirect("/clientes/acceso");
-  }
-
-  if (portalCustomerId && portalCustomerId !== customerId) {
-    redirect(`/clientes/${portalCustomerId}`);
   }
 
   const portalData = await fetchPortalBookings({ limit: 50 });

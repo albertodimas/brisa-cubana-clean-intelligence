@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import app from "./app.js";
 import { logServerStart } from "./lib/logger.js";
+import "./lib/unhandled.js";
 
 const port = Number.parseInt(process.env.PORT ?? "3001", 10);
 

@@ -7,7 +7,9 @@ import { CustomerRepository } from "./repositories/customer-repository.js";
 import { NotificationRepository } from "./repositories/notification-repository.js";
 import { MagicLinkTokenRepository } from "./repositories/magic-link-token-repository.js";
 import { LeadRepository } from "./repositories/lead-repository.js";
+import { StripeWebhookEventRepository } from "./repositories/stripe-webhook-event-repository.js";
 import { prisma as prismaClient } from "./lib/prisma.js";
+import { env } from "./lib/env.js";
 
 /**
  * Dependency Injection Container
@@ -79,6 +81,7 @@ export const ServiceKeys = {
   NOTIFICATION_REPOSITORY: "notificationRepository",
   MAGIC_LINK_TOKEN_REPOSITORY: "magicLinkTokenRepository",
   LEAD_REPOSITORY: "leadRepository",
+  STRIPE_WEBHOOK_EVENT_REPOSITORY: "stripeWebhookEventRepository",
 } as const;
 
 /**
@@ -89,7 +92,7 @@ export function initializeContainer(): void {
   container.register(ServiceKeys.PRISMA, () => prismaClient);
 
   // Registrar Database URL (para casos edge donde se necesita la URL directa)
-  container.register(ServiceKeys.DATABASE_URL, () => process.env.DATABASE_URL);
+  container.register(ServiceKeys.DATABASE_URL, () => env.DATABASE_URL);
 
   // Registrar Repositorios
   const prisma = container.resolve<PrismaClient>(ServiceKeys.PRISMA);
@@ -132,6 +135,11 @@ export function initializeContainer(): void {
   container.register(
     ServiceKeys.LEAD_REPOSITORY,
     () => new LeadRepository(prisma),
+  );
+
+  container.register(
+    ServiceKeys.STRIPE_WEBHOOK_EVENT_REPOSITORY,
+    () => new StripeWebhookEventRepository(prisma),
   );
 }
 
@@ -182,6 +190,12 @@ export function getMagicLinkTokenRepository(): MagicLinkTokenRepository {
 
 export function getLeadRepository(): LeadRepository {
   return container.resolve<LeadRepository>(ServiceKeys.LEAD_REPOSITORY);
+}
+
+export function getStripeWebhookEventRepository(): StripeWebhookEventRepository {
+  return container.resolve<StripeWebhookEventRepository>(
+    ServiceKeys.STRIPE_WEBHOOK_EVENT_REPOSITORY,
+  );
 }
 
 /**

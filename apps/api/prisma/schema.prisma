@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
@@ -56,8 +56,8 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  properties   Property[]
-  bookings     Booking[] @relation("BookingCustomer")
+  properties    Property[]
+  bookings      Booking[]      @relation("BookingCustomer")
   notifications Notification[]
 
   @@index([deletedAt])
@@ -68,7 +68,7 @@ model Property {
   label       String       @unique
   addressLine String
   city        String
-  state       String @default("FL")
+  state       String       @default("FL")
   zipCode     String
   type        PropertyType
   notes       String?
@@ -81,23 +81,23 @@ model Property {
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
 
-  bookings    Booking[]
+  bookings Booking[]
 
   @@index([deletedAt])
 }
 
 model Service {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String    @id @default(cuid())
+  name        String    @unique
   description String?
-  basePrice   Decimal  @db.Decimal(10, 2)
+  basePrice   Decimal   @db.Decimal(10, 2)
   durationMin Int
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  bookings    Booking[]
+  bookings Booking[]
 
   @@index([deletedAt])
 }
@@ -124,25 +124,25 @@ model Booking {
 }
 
 model Notification {
-  id          String            @id @default(cuid())
-  userId      String
-  user        User              @relation(fields: [userId], references: [id])
-  type        NotificationType
-  message     String
-  readAt      DateTime?
-  createdAt   DateTime          @default(now())
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  message   String
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
 
   @@index([userId, readAt])
   @@index([createdAt])
 }
 
 model MagicLinkToken {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   email      String
-  tokenHash  String   @unique
+  tokenHash  String    @unique
   expiresAt  DateTime
   consumedAt DateTime?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
 
   @@index([email, expiresAt])
   @@index([consumedAt])
@@ -170,4 +170,19 @@ model Lead {
   @@index([status])
   @@index([createdAt])
   @@index([email])
+}
+
+model StripeWebhookEvent {
+  id            String    @id @default(cuid())
+  stripeEventId String    @unique
+  eventType     String
+  processed     Boolean   @default(false)
+  processedAt   DateTime?
+  metadata      Json?
+  errorMessage  String?
+  createdAt     DateTime  @default(now())
+
+  @@index([stripeEventId])
+  @@index([eventType, processed])
+  @@index([createdAt])
 }

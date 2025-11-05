@@ -61,22 +61,9 @@ export async function POST(request: Request) {
         path: "/",
         ...(expiresAt ? { expires: expiresAt } : { maxAge }),
       });
-
-      if (typeof customerId === "string") {
-        nextResponse.cookies.set({
-          name: "portal_customer_id",
-          value: customerId,
-          httpOnly: false,
-          secure: isProduction,
-          sameSite: "lax",
-          path: "/",
-          ...(expiresAt ? { expires: expiresAt } : { maxAge }),
-        });
-      }
     }
   } else {
     nextResponse.cookies.delete("portal_token");
-    nextResponse.cookies.delete("portal_customer_id");
   }
 
   return nextResponse;

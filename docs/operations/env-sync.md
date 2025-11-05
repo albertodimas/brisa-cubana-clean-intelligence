@@ -2,6 +2,8 @@
 
 > ✅ Referencia rápida: ejecuta `pnpm env:status` para validar que `.env.local` cumple con el manifest central (`config/env.manifest.json`). Si quieres que el comando devuelva código de error cuando falte alguna variable (por ejemplo en CI), usa `pnpm env:status --strict`. Actualiza el manifest cuando añadas o elimines claves para evitar duplicados entre Vercel, GitHub Actions y desarrollo.
 
+> ⚠️ La API ya no arranca si falta `ALLOWED_ORIGINS`. Asegúrate de que el proyecto **brisa-cubana-clean-intelligence-api** en Vercel tenga ese valor definido en `development`, `preview` y `production` antes de desplegar.
+
 La plataforma ejecuta automáticamente esta verificación todos los lunes a las 06:00 UTC mediante el workflow `Env Manifest Audit`. Si aparece en rojo, revisa los pasos inferiores y corrige los entornos antes de volver a ejecutar manualmente el job (`Actions → Env Manifest Audit → Run workflow`).
 
 Pasos para alinear los valores de entorno propios del proxy web y del portal cliente después de retirar `API_TOKEN`.
@@ -74,7 +76,46 @@ Pasos para alinear los valores de entorno propios del proxy web y del portal cli
 
 4. Si no se usa la CLI, repetir los mismos valores desde **Settings → Environment Variables** en el panel de Vercel.
 
-## 2. GitHub Actions
+## 2. Vercel – Proyecto API (`brisa-cubana-clean-intelligence-api`)
+
+La API valida las env vars en tiempo de arranque. Si falta alguna crítica, el deployment falla antes de exponer el endpoint. Al menos deben existir:
+
+| Variable                | Entornos             | Notas                                                                                    |
+| ----------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
+| `ALLOWED_ORIGINS`       | dev / preview / prod | Lista separada por comas. Debe incluir panel, portal y cualquier dominio de integración. |
+| `DATABASE_URL`          | dev / preview / prod | Cadena de conexión (Neon/Vercel Postgres).                                               |
+| `DATABASE_URL_UNPOOLED` | dev / preview / prod | Igual que la anterior pero para conexiones directas (Prisma `directUrl`).                |
+| `JWT_SECRET`            | dev / preview / prod | Cadena aleatoria >= 32 chars. La API se detiene si falta.                                |
+| `HEALTH_CHECK_TOKEN`    | opcional             | Token para proteger `/healthz` público.                                                  |
+
+Pasos sugeridos:
+
+1. Linkear el proyecto si aún no existe la carpeta `.vercel/` en `apps/api`:
+   ```bash
+   cd apps/api
+   vercel link --yes
+   ```
+2. Añadir/actualizar las env vars con la CLI:
+
+   ```bash
+   # ALLOWED_ORIGINS
+   echo "https://brisacubanacleanintelligence.com,https://portal.brisacubanacleanintelligence.com" | \
+     vercel env add ALLOWED_ORIGINS production
+   echo "https://preview.brisacubanacleanintelligence.com" | vercel env add ALLOWED_ORIGINS preview
+   echo "http://localhost:3000" | vercel env add ALLOWED_ORIGINS development
+
+   # DATABASE_URL / DATABASE_URL_UNPOOLED / JWT_SECRET
+   vercel env add DATABASE_URL production
+   vercel env add DATABASE_URL_UNPOOLED production
+   vercel env add JWT_SECRET production
+
+   # Repetir para preview/development según aplique
+   ```
+
+3. Confirmar con `vercel env ls` (desde `apps/api`) que los valores aparecen en los tres entornos.
+4. Repetir el procedimiento vía panel de Vercel si se prefiere interfaz web.
+
+## 3. GitHub Actions
 
 1. Eliminar cualquier rastro del secreto `API_TOKEN`:
    ```bash

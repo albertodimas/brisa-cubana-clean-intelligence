@@ -1,23 +1,16 @@
 import * as jwt from "jsonwebtoken";
 import type { Secret, SignOptions } from "jsonwebtoken";
 import type { UserRole } from "@prisma/client";
+import { env } from "./env.js";
 
 let cachedSecret: Secret | null = null;
 
-function resolveSecret(): Secret | null {
+function resolveSecret(): Secret {
   if (cachedSecret) {
     return cachedSecret;
   }
 
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    console.warn(
-      "[auth] JWT_SECRET is not defined. Auth endpoints will reject requests.",
-    );
-    return null;
-  }
-
-  cachedSecret = secret as Secret;
+  cachedSecret = env.JWT_SECRET as Secret;
   return cachedSecret;
 }
 
@@ -40,9 +33,6 @@ export function signAuthToken(
   expiresIn: SignOptions["expiresIn"] = "1d",
 ): string {
   const secret = resolveSecret();
-  if (!secret) {
-    throw new Error("JWT secret not configured");
-  }
 
   const namespace = jwt as unknown as {
     sign?: typeof jwt.sign;
@@ -60,9 +50,6 @@ export function signAuthToken(
 
 export function verifyAuthToken(token: string): AuthPayload | null {
   const secret = resolveSecret();
-  if (!secret) {
-    return null;
-  }
 
   const namespace = jwt as unknown as {
     verify?: typeof jwt.verify;
@@ -83,9 +70,6 @@ export function verifyAuthToken(token: string): AuthPayload | null {
 
 export function verifyPortalToken(token: string): PortalAuthPayload | null {
   const secret = resolveSecret();
-  if (!secret) {
-    return null;
-  }
 
   const namespace = jwt as unknown as {
     verify?: typeof jwt.verify;

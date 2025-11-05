@@ -43,7 +43,6 @@ export async function POST() {
     });
   } else {
     response.cookies.delete("portal_token");
-    response.cookies.delete("portal_customer_id");
   }
 
   if (upstreamResponse.ok) {

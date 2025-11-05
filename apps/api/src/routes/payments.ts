@@ -1,9 +1,20 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
 import { z } from "zod";
+import { randomUUID } from "node:crypto";
 import Stripe from "stripe";
+import type { BookingStatus } from "@prisma/client";
 import { logger } from "../lib/logger.js";
-import { getServiceRepository } from "../container.js";
+import {
+  getServiceRepository,
+  getBookingRepository,
+  getUserRepository,
+  getPropertyRepository,
+  getStripeWebhookEventRepository,
+  getNotificationRepository,
+} from "../container.js";
+import type { BookingCreateInput } from "../repositories/booking-repository.js";
+import { NotificationType } from "@prisma/client";
 import { createRateLimiter } from "../lib/rate-limiter.js";
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
@@ -82,27 +93,271 @@ router.post("/stripe/webhook", async (c: Context) => {
     return c.json({ error: "Firma inválida" }, 400);
   }
 
-  switch (event.type) {
-    case "checkout.session.completed":
-      logger.info(
-        {
-          eventId: event.id,
-          type: event.type,
-          sessionId: (event.data?.object as Stripe.Checkout.Session)?.id,
-        },
-        "Checkout completado recibido desde Stripe",
-      );
-      break;
-    default:
-      logger.info(
-        { eventId: event.id, type: event.type },
-        "Webhook Stripe no manejado explícitamente",
-      );
-      break;
+  // SECURITY: Prevenir procesamiento duplicado
+  const webhookEventRepo = getStripeWebhookEventRepository();
+  const wasAlreadyProcessed = await webhookEventRepo.wasProcessed(event.id);
+
+  if (wasAlreadyProcessed) {
+    logger.info(
+      {
+        eventId: event.id,
+        type: event.type,
+      },
+      "Webhook de Stripe ya fue procesado anteriormente (reintento detectado)",
+    );
+    return c.json({ received: true, status: "already_processed" });
   }
 
-  return c.json({ received: true });
+  // Registrar el evento
+  await webhookEventRepo.recordEvent(event.id, event.type);
+
+  try {
+    switch (event.type) {
+      case "checkout.session.completed":
+        await handleCheckoutSessionCompleted(event);
+        break;
+      default:
+        logger.info(
+          { eventId: event.id, type: event.type },
+          "Webhook Stripe no manejado explícitamente",
+        );
+        break;
+    }
+
+    // Marcar como procesado exitosamente
+    await webhookEventRepo.markAsProcessed(event.id);
+
+    return c.json({ received: true, status: "processed" });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    await webhookEventRepo.markAsError(event.id, errorMessage);
+    logger.error(
+      {
+        eventId: event.id,
+        type: event.type,
+        err: error,
+      },
+      "Error procesando webhook de Stripe",
+    );
+    // Retornar 200 para evitar reintentos de Stripe si el error es de datos
+    return c.json({ received: true, status: "error", error: errorMessage });
+  }
 });
+
+/**
+ * Procesa el evento checkout.session.completed de Stripe
+ * Crea o actualiza un booking basado en el PaymentIntent metadata
+ */
+async function handleCheckoutSessionCompleted(
+  event: Stripe.Event,
+): Promise<void> {
+  const session = event.data.object as Stripe.Checkout.Session;
+
+  logger.info(
+    {
+      eventId: event.id,
+      sessionId: session.id,
+      paymentStatus: session.payment_status,
+      metadata: session.metadata,
+    },
+    "Procesando checkout.session.completed",
+  );
+
+  // Validar que el pago fue exitoso
+  if (session.payment_status !== "paid") {
+    logger.warn(
+      {
+        eventId: event.id,
+        sessionId: session.id,
+        paymentStatus: session.payment_status,
+      },
+      "Checkout session no tiene payment_status=paid, saltando creación de booking",
+    );
+    return;
+  }
+
+  // Extraer metadata del PaymentIntent
+  const paymentIntentId = session.payment_intent as string | null;
+  if (!paymentIntentId) {
+    logger.error(
+      {
+        eventId: event.id,
+        sessionId: session.id,
+      },
+      "Checkout session no tiene payment_intent, no se puede crear booking",
+    );
+    return;
+  }
+
+  // Obtener el PaymentIntent para acceder a su metadata
+  const stripeClientInstance = stripeClient;
+  if (!stripeClientInstance) {
+    throw new Error("Stripe client no está configurado");
+  }
+
+  const paymentIntent =
+    await stripeClientInstance.paymentIntents.retrieve(paymentIntentId);
+  const metadata = paymentIntent.metadata;
+
+  logger.info(
+    {
+      eventId: event.id,
+      paymentIntentId,
+      metadata,
+    },
+    "PaymentIntent metadata recuperado",
+  );
+
+  // Validar metadata requerido
+  const serviceId = metadata.serviceId;
+  const customerEmail =
+    metadata.customerEmail || session.customer_details?.email;
+  const customerFullName =
+    metadata.customerFullName || session.customer_details?.name;
+  const scheduledFor = metadata.scheduledFor;
+
+  if (!serviceId) {
+    logger.error(
+      {
+        eventId: event.id,
+        paymentIntentId,
+        metadata,
+      },
+      "Metadata.serviceId faltante, no se puede crear booking",
+    );
+    return;
+  }
+
+  if (!customerEmail) {
+    logger.error(
+      {
+        eventId: event.id,
+        paymentIntentId,
+        metadata,
+      },
+      "customerEmail faltante, no se puede crear booking",
+    );
+    return;
+  }
+
+  // Buscar o crear cliente
+  const userRepo = getUserRepository();
+  let customer = await userRepo.findByEmail(customerEmail);
+
+  if (!customer) {
+    // Crear cliente nuevo
+    const bcrypt = await import("bcryptjs");
+    const tempPassword = randomUUID();
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+    customer = await userRepo.create({
+      email: customerEmail,
+      fullName: customerFullName || customerEmail.split("@")[0] || "Cliente",
+      role: "CLIENT",
+      passwordHash,
+      isActive: true,
+    });
+
+    logger.info(
+      {
+        customerId: customer.id,
+        email: customerEmail,
+        fullName: customerFullName,
+      },
+      "Cliente creado automáticamente desde Stripe checkout",
+    );
+  }
+
+  // Verificar que el servicio existe
+  const serviceRepo = getServiceRepository();
+  const service = await serviceRepo.findById(serviceId);
+
+  if (!service) {
+    logger.error(
+      {
+        eventId: event.id,
+        serviceId,
+      },
+      "Service no encontrado, no se puede crear booking",
+    );
+    return;
+  }
+
+  // Obtener la primera propiedad del cliente o usar una por defecto
+  const propertyRepo = getPropertyRepository();
+  const properties = await propertyRepo.findByOwner(customer.id);
+  let propertyId = properties[0]?.id;
+
+  // Si el cliente no tiene propiedades, crear una temporal
+  if (!propertyId) {
+    const tempProperty = await propertyRepo.create({
+      label: `Propiedad de ${customer.fullName}`,
+      addressLine: "Dirección pendiente",
+      city: "Miami",
+      state: "FL",
+      zipCode: "33101",
+      type: "RESIDENTIAL",
+      ownerId: customer.id,
+    });
+    propertyId = tempProperty.id;
+
+    logger.info(
+      {
+        propertyId: tempProperty.id,
+        customerId: customer.id,
+      },
+      "Propiedad temporal creada para booking de Stripe",
+    );
+  }
+
+  // Crear el booking
+  const bookingRepo = getBookingRepository();
+  const scheduledAt = scheduledFor
+    ? new Date(scheduledFor)
+    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default: 1 semana después
+
+  const bookingPayload: BookingCreateInput = {
+    code: `BRISA-${randomUUID().slice(0, 8)}`,
+    scheduledAt,
+    durationMin: service.durationMin,
+    status: "CONFIRMED" as BookingStatus,
+    totalAmount: Number(service.basePrice),
+    serviceId: service.id,
+    propertyId,
+    customerId: customer.id,
+    ...(metadata.notes ? { notes: metadata.notes } : {}),
+  };
+
+  const booking = await bookingRepo.create(bookingPayload);
+
+  logger.info(
+    {
+      bookingId: booking.id,
+      bookingCode: booking.code,
+      customerId: customer.id,
+      propertyId,
+      serviceId: service.id,
+      paymentIntentId,
+    },
+    "Booking creado exitosamente desde Stripe checkout",
+  );
+
+  // Notificar al equipo de operaciones
+  const notificationRepo = getNotificationRepository();
+  const coordinators = await userRepo.findActiveByRoles([
+    "ADMIN",
+    "COORDINATOR",
+  ]);
+
+  for (const coordinator of coordinators) {
+    await notificationRepo.createNotification({
+      userId: coordinator.id,
+      type: NotificationType.BOOKING_CREATED,
+      message: `Nueva reserva confirmada desde pago Stripe: ${booking.code} - ${service.name} para ${customer.fullName}`,
+    });
+  }
+}
 
 router.post("/stripe/intent", async (c) => {
   if (!stripeClient) {

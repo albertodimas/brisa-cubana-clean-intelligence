@@ -349,6 +349,7 @@ const mockPrisma = {
           };
         },
       ),
+    findFirst: vi.fn().mockResolvedValue(null), // Para hasTimeConflict - no conflictos por defecto
   },
   user: {
     findUnique: vi
@@ -1008,6 +1009,11 @@ describe("app", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.status).toBe("pass");
+    expect(body.checks.database.status).toBe("ok");
+    expect(body.checks.stripe.status).toBe("disabled");
+    expect(body.checks.email.status).toBe("disabled");
+    expect(body.checks.sentry.status).toBe("disabled");
+    expect(body.timestamp).toBeDefined();
     expect(mockPrisma.$queryRaw).toHaveBeenCalled();
   });
 
@@ -1018,6 +1024,7 @@ describe("app", () => {
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body.status).toBe("fail");
+    expect(body.checks.database.status).toBe("error");
   });
 
   it("lists services", async () => {

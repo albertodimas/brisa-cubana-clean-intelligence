@@ -37,10 +37,12 @@ const ensureApiEnvValues = () => {
   }
 
   if (!apiBase) {
-    apiBase =
-      process.env.NODE_ENV === "production"
-        ? "https://api.brisacubanacleanintelligence.com"
-        : "http://localhost:3001";
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "NEXT_PUBLIC_API_URL or INTERNAL_API_URL must be defined in production environments.",
+      );
+    }
+    apiBase = "http://localhost:3001";
   }
 
   if (!process.env.NEXT_PUBLIC_API_URL) {

@@ -204,6 +204,78 @@ export class BookingRepository
   }
 
   /**
+   * Detecta conflictos de horario para una propiedad
+   * Verifica si existe una reserva activa en el mismo rango de tiempo
+   *
+   * @param propertyId - ID de la propiedad
+   * @param scheduledAt - Fecha y hora de inicio propuesta
+   * @param durationMin - Duración en minutos
+   * @param excludeBookingId - ID opcional de booking a excluir (para updates)
+   * @returns true si hay conflicto, false si está disponible
+   */
+  async hasTimeConflict(
+    propertyId: string,
+    scheduledAt: Date,
+    durationMin: number,
+    excludeBookingId?: string,
+  ): Promise<boolean> {
+    const endTime = new Date(scheduledAt.getTime() + durationMin * 60 * 1000);
+
+    // Buscar reservas activas que se solapen con el rango propuesto
+    const conflictingBooking = await this.prisma.booking.findFirst({
+      where: {
+        propertyId,
+        deletedAt: null,
+        // Solo considerar reservas que no están canceladas
+        status: {
+          notIn: ["CANCELLED"],
+        },
+        // Excluir el booking actual si es un update
+        ...(excludeBookingId ? { id: { not: excludeBookingId } } : {}),
+        // Detectar solapamiento: el nuevo booking se solapa si:
+        // - Su inicio está antes del final de una reserva existente
+        // - Y su final está después del inicio de esa reserva existente
+        AND: [
+          {
+            scheduledAt: {
+              lt: endTime,
+            },
+          },
+          {
+            // Calcular el final de la reserva existente
+            scheduledAt: {
+              gte: new Date(scheduledAt.getTime() - 24 * 60 * 60 * 1000), // Solo buscar en ventana de ±24h para performance
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        scheduledAt: true,
+        durationMin: true,
+      },
+    });
+
+    if (!conflictingBooking) {
+      return false;
+    }
+
+    // Verificar solapamiento preciso con la duración
+    const existingEnd = new Date(
+      conflictingBooking.scheduledAt.getTime() +
+        conflictingBooking.durationMin * 60 * 1000,
+    );
+
+    // Hay conflicto si:
+    // - El nuevo inicio está antes del final del existente Y
+    // - El nuevo final está después del inicio del existente
+    const hasConflict =
+      scheduledAt < existingEnd && endTime > conflictingBooking.scheduledAt;
+
+    return hasConflict;
+  }
+
+  /**
    * Construye la cláusula WHERE para filtros
    */
   private buildWhereClause(

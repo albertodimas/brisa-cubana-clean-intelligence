@@ -8,10 +8,19 @@ const TEST_WEBHOOK_SECRET = "whsec_testsecret";
 
 let app: Hono;
 let stripeClientInstance: Stripe | null = null;
+let getStripeWebhookEventRepositorySpy: ReturnType<typeof vi.spyOn>;
 
 const stripe = new Stripe(TEST_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
+
+const webhookEventRepositoryMock = {
+  wasProcessed: vi.fn(),
+  recordEvent: vi.fn(),
+  markAsProcessed: vi.fn(),
+  markAsError: vi.fn(),
+  findByStripeEventId: vi.fn(),
+};
 
 describe("Stripe webhook", () => {
   beforeAll(async () => {
@@ -23,12 +32,43 @@ describe("Stripe webhook", () => {
     process.env.CHECKOUT_PAYMENT_RATE_LIMIT = "3";
     process.env.CHECKOUT_PAYMENT_WINDOW_MS = "1000";
     vi.resetModules();
+
+    // Mock del repositorio de webhook events
+    const containerModule = await import("../../../src/container.js");
+    getStripeWebhookEventRepositorySpy = vi
+      .spyOn(containerModule, "getStripeWebhookEventRepository")
+      .mockReturnValue(webhookEventRepositoryMock as any);
+
+    // Configurar mocks por defecto
+    webhookEventRepositoryMock.wasProcessed.mockResolvedValue(false);
+    webhookEventRepositoryMock.recordEvent.mockResolvedValue({
+      id: "wh-1",
+      stripeEventId: "evt_test_123",
+      eventType: "checkout.session.completed",
+      processed: false,
+      processedAt: null,
+      metadata: null,
+      errorMessage: null,
+      createdAt: new Date(),
+    });
+    webhookEventRepositoryMock.markAsProcessed.mockResolvedValue({
+      id: "wh-1",
+      stripeEventId: "evt_test_123",
+      eventType: "checkout.session.completed",
+      processed: true,
+      processedAt: new Date(),
+      metadata: null,
+      errorMessage: null,
+      createdAt: new Date(),
+    });
+
     app = (await import("../../../src/app.js")).default;
     const paymentsModule = await import("../../../src/routes/payments.js");
     stripeClientInstance = paymentsModule.__testing.stripeClient;
   });
 
   afterAll(() => {
+    getStripeWebhookEventRepositorySpy.mockRestore();
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.DATABASE_URL;
@@ -64,7 +104,17 @@ describe("Stripe webhook", () => {
 
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json).toEqual({ received: true });
+    expect(json).toEqual({ received: true, status: "processed" });
+    expect(webhookEventRepositoryMock.wasProcessed).toHaveBeenCalledWith(
+      "evt_test_123",
+    );
+    expect(webhookEventRepositoryMock.recordEvent).toHaveBeenCalledWith(
+      "evt_test_123",
+      "checkout.session.completed",
+    );
+    expect(webhookEventRepositoryMock.markAsProcessed).toHaveBeenCalledWith(
+      "evt_test_123",
+    );
   });
 
   it("rechaza eventos con firma inválida", async () => {

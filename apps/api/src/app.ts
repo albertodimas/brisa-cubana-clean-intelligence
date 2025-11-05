@@ -72,32 +72,147 @@ const rootHandler = (c: Context) =>
     timestamp: new Date().toISOString(),
   });
 
-const healthHandler = async (c: Context) => {
+type ServiceCheck =
+  | { status: "ok"; details?: Record<string, unknown> }
+  | { status: "warning"; message: string }
+  | { status: "error"; message: string }
+  | { status: "disabled"; message: string };
+
+const stripeHealthTimeoutMs = Number(
+  process.env.HEALTH_STRIPE_TIMEOUT_MS ?? "3000",
+);
+
+async function checkDatabase(): Promise<ServiceCheck> {
   try {
     await getPrisma().$queryRaw`SELECT 1`;
-    return c.json({
-      checks: {
-        uptime: Math.floor(process.uptime()),
-        environment: process.env.NODE_ENV ?? "development",
-        database: "ok",
-      },
-      status: "pass",
-    });
+    return { status: "ok" };
   } catch (error) {
-    c.status(500);
-    return c.json({
+    const message =
+      error instanceof Error ? error.message : "Unknown database error";
+    return {
+      status: "error",
+      message,
+    };
+  }
+}
+
+async function checkStripe(): Promise<ServiceCheck> {
+  const secret = process.env.STRIPE_SECRET_KEY;
+  if (!secret) {
+    return {
+      status: "disabled",
+      message: "STRIPE_SECRET_KEY not configured",
+    };
+  }
+
+  const { default: Stripe } = await import("stripe");
+  const runtimeApiVersion = process.env.STRIPE_API_VERSION ?? "2023-10-16";
+
+  try {
+    const client = new Stripe(secret, { apiVersion: runtimeApiVersion as any });
+    await Promise.race([
+      client.balance.retrieve(),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Stripe health check timed out")),
+          stripeHealthTimeoutMs,
+        ),
+      ),
+    ]);
+    return { status: "ok" };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown Stripe error";
+    return {
+      status: "warning",
+      message,
+    };
+  }
+}
+
+function checkEmail(): ServiceCheck {
+  const host = process.env.PORTAL_MAGIC_LINK_SMTP_HOST;
+  const port = process.env.PORTAL_MAGIC_LINK_SMTP_PORT;
+  const user = process.env.PORTAL_MAGIC_LINK_SMTP_USER;
+  const pass = process.env.PORTAL_MAGIC_LINK_SMTP_PASSWORD;
+  const from = process.env.PORTAL_MAGIC_LINK_FROM;
+
+  if (!host || !port || !user || !pass || !from) {
+    return {
+      status: "disabled",
+      message: "SMTP credentials not fully configured",
+    };
+  }
+
+  return { status: "ok" };
+}
+
+function checkSentry(): ServiceCheck {
+  const dsn = process.env.SENTRY_DSN;
+  if (!dsn) {
+    return {
+      status: "disabled",
+      message: "SENTRY_DSN not configured",
+    };
+  }
+
+  const client = (Sentry as any).getCurrentHub?.()?.getClient?.() ?? null;
+  if (!client) {
+    return {
+      status: "warning",
+      message: "Sentry client not initialized",
+    };
+  }
+
+  return { status: "ok" };
+}
+
+function calculateOverallStatus(checks: Record<string, ServiceCheck>): {
+  overall: "pass" | "warn" | "fail";
+  httpStatus: number;
+} {
+  const statuses = Object.values(checks).map((check) => check.status);
+
+  if (statuses.includes("error")) {
+    return { overall: "fail", httpStatus: 500 };
+  }
+
+  if (statuses.includes("warning")) {
+    return { overall: "warn", httpStatus: 200 };
+  }
+
+  return { overall: "pass", httpStatus: 200 };
+}
+
+const healthHandler = async (c: Context) => {
+  const [database, stripe] = await Promise.all([
+    checkDatabase(),
+    checkStripe(),
+  ]);
+  const email = checkEmail();
+  const sentry = checkSentry();
+
+  const checks: Record<string, ServiceCheck> = {
+    database,
+    stripe,
+    email,
+    sentry,
+  };
+
+  const { overall, httpStatus } = calculateOverallStatus(checks);
+
+  return c.json(
+    {
+      status: overall,
       checks: {
         uptime: Math.floor(process.uptime()),
         environment: process.env.NODE_ENV ?? "development",
-        database: "error",
+        ...checks,
       },
-      status: "fail",
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown database connectivity issue",
-    });
-  }
+      timestamp: new Date().toISOString(),
+    },
+    { status: httpStatus as any },
+  );
 };
 
 const publicHealthHandler = async (c: Context) => {
