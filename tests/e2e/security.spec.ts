@@ -145,9 +145,9 @@ test.describe("Seguridad y Autenticación", () => {
     }, testInfo) => {
       await loginAsAdmin(page, testInfo);
       await page.goto("/login");
-      await page.waitForLoadState("networkidle");
-      const pathname = new URL(page.url()).pathname;
-      expect(["/", "", "/panel"]).toContain(pathname);
+      await expect
+        .poll(() => new URL(page.url()).pathname)
+        .toMatch(/^\/(?:panel)?$/);
     });
   });
 
