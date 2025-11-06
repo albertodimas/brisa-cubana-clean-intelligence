@@ -6,6 +6,7 @@ let ServiceKeys: (typeof import("./container.js"))["ServiceKeys"];
 
 beforeAll(async () => {
   process.env.DATABASE_URL ??= "postgresql://user:pass@localhost:5432/test_db";
+  process.env.JWT_SECRET ??= "test-secret";
   containerModule = await import("./container.js");
   ({ container, ServiceKeys } = containerModule);
 });
