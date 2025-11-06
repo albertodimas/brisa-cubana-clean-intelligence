@@ -29,6 +29,7 @@ describe("Stripe webhook", () => {
     process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
     process.env.DATABASE_URL_UNPOOLED =
       "postgresql://test:test@localhost:5432/test";
+    process.env.JWT_SECRET = process.env.JWT_SECRET ?? "test-secret";
     process.env.CHECKOUT_PAYMENT_RATE_LIMIT = "3";
     process.env.CHECKOUT_PAYMENT_WINDOW_MS = "1000";
     vi.resetModules();
@@ -73,6 +74,7 @@ describe("Stripe webhook", () => {
     delete process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_URL_UNPOOLED;
+    delete process.env.JWT_SECRET;
     delete process.env.CHECKOUT_PAYMENT_RATE_LIMIT;
     delete process.env.CHECKOUT_PAYMENT_WINDOW_MS;
   });
