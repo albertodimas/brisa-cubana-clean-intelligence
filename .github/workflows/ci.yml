@@ -154,6 +154,8 @@ jobs:
       name: production-web
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      NEXT_PUBLIC_API_URL: https://api.brisacubanacleanintelligence.com
+      INTERNAL_API_URL: https://api.brisacubanacleanintelligence.com
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
