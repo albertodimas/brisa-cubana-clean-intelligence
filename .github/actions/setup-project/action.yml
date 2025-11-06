@@ -117,6 +117,14 @@ inputs:
     description: Verification code returned in x-vercel-verify for log drain validation.
     required: false
     default: "local-log-drain-verification-code"
+  allowed-origins:
+    description: Comma-separated list of origins allowed by the API CORS layer.
+    required: false
+    default: ""
+  proxy-allowed-origins:
+    description: Comma-separated list of origins permitted by the Next.js proxy routes.
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -164,6 +172,8 @@ runs:
         log_drain_verification_code="${{ inputs.log_drain_verification_code }}"
         next_public_posthog_key="${{ inputs.next-public-posthog-key }}"
         next_public_posthog_host="${{ inputs.next-public-posthog-host }}"
+        allowed_origins="${{ inputs.allowed-origins }}"
+        proxy_allowed_origins="${{ inputs.proxy-allowed-origins }}"
 
         if [ -z "$api_token" ]; then api_token="test-api-token"; fi
         if [ -z "$jwt_secret" ]; then jwt_secret="test-jwt-secret-for-ci-only"; fi
@@ -182,6 +192,8 @@ runs:
         if [ -z "$portal_magic_link_confirmation_path" ]; then portal_magic_link_confirmation_path="/clientes/acceso/confirmar"; fi
         if [ -z "$portal_magic_link_expose_debug" ]; then portal_magic_link_expose_debug="true"; fi
         if [ -z "$log_drain_verification_code" ]; then log_drain_verification_code="local-log-drain-verification-code"; fi
+        if [ -z "$allowed_origins" ]; then allowed_origins="http://localhost:3000,http://127.0.0.1:3000"; fi
+        if [ -z "$proxy_allowed_origins" ]; then proxy_allowed_origins="$allowed_origins"; fi
 
         {
           echo "API_TOKEN=$api_token"
@@ -200,6 +212,8 @@ runs:
           echo "PORTAL_MAGIC_LINK_BASE_URL=$portal_magic_link_base_url"
           echo "PORTAL_MAGIC_LINK_CONFIRMATION_PATH=$portal_magic_link_confirmation_path"
           echo "PORTAL_MAGIC_LINK_EXPOSE_DEBUG=$portal_magic_link_expose_debug"
+          echo "ALLOWED_ORIGINS=$allowed_origins"
+          echo "PROXY_ALLOWED_ORIGINS=$proxy_allowed_origins"
           echo "LOG_DRAIN_VERIFICATION_CODE=$log_drain_verification_code"
         } >> "$GITHUB_ENV"
 

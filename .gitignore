@@ -56,6 +56,7 @@ ENV/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.preview
 .env*.local
 !.env.example
 !.env.local.example

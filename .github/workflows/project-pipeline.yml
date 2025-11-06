@@ -118,6 +118,14 @@ on:
         required: false
         type: string
         default: "https://us.posthog.com"
+      allowed-origins:
+        required: false
+        type: string
+        default: "http://localhost:3000,http://127.0.0.1:3000"
+      proxy-allowed-origins:
+        required: false
+        type: string
+        default: ""
     secrets:
       api-token:
         required: false
@@ -146,6 +154,10 @@ on:
       e2e_coordinator_password:
         required: false
       log_drain_verification_code:
+        required: false
+      allowed-origins:
+        required: false
+      proxy-allowed-origins:
         required: false
 
 concurrency:
@@ -207,6 +219,8 @@ jobs:
           next-public-posthog-key: ${{ inputs.next-public-posthog-key != '' && inputs.next-public-posthog-key || secrets.NEXT_PUBLIC_POSTHOG_KEY || '' }}
           next-public-posthog-host: ${{ inputs.next-public-posthog-host != '' && inputs.next-public-posthog-host || secrets.NEXT_PUBLIC_POSTHOG_HOST || '' }}
           log_drain_verification_code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
+          allowed-origins: ${{ inputs.allowed-origins != '' && inputs.allowed-origins || secrets.ALLOWED_ORIGINS || '' }}
+          proxy-allowed-origins: ${{ inputs.proxy-allowed-origins != '' && inputs.proxy-allowed-origins || secrets.PROXY_ALLOWED_ORIGINS || '' }}
 
       - name: Initialize database schema
         if: ${{ inputs.run-database-prep }}
