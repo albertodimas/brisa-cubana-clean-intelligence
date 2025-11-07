@@ -345,11 +345,11 @@ test.describe.serial("Calendario", () => {
     ];
 
     for (const entry of entries) {
-      await expect(
-        legend
-          .getByTestId(`calendar-status-legend-${entry.id}`)
-          .getByText(entry.label),
-      ).toBeVisible();
+      const legendEntry = legend.getByTestId(
+        `calendar-status-legend-${entry.id}`,
+      );
+      await expect(legendEntry).toBeVisible();
+      await expect(legendEntry.getByText(entry.label)).toBeVisible();
     }
   });
 

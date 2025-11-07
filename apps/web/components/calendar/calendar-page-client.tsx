@@ -22,7 +22,6 @@ export function CalendarPageClient({
   services,
   staff,
 }: CalendarPageClientProps) {
-  const loadingMinVisibleMs = 800;
   const [selectedBooking, setSelectedBooking] =
     useState<CalendarBooking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,6 +36,7 @@ export function CalendarPageClient({
     type: "success" | "error" | "loading";
     message: string;
   } | null>(null);
+  const loadingMinVisibleMs = 1000;
   const minimumVisibleWindowMs = 5000;
   const router = useRouter();
   const scheduleStatusClear = () => {
