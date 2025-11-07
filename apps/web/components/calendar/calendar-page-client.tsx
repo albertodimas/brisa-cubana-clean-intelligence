@@ -36,7 +36,7 @@ export function CalendarPageClient({
     type: "success" | "error" | "loading";
     message: string;
   } | null>(null);
-  const loadingMinVisibleMs = 1000;
+  const loadingMinVisibleMs = 1500;
   const minimumVisibleWindowMs = 5000;
   const router = useRouter();
   const scheduleStatusClear = () => {
