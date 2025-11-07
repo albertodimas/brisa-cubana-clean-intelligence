@@ -21,7 +21,20 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": []
+      "outputs": [],
+      "env": [
+        "DATABASE_URL",
+        "DATABASE_URL_UNPOOLED",
+        "JWT_SECRET",
+        "AUTH_SECRET",
+        "ALLOWED_ORIGINS",
+        "ENABLE_TEST_UTILS",
+        "NEXT_PUBLIC_API_URL",
+        "INTERNAL_API_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_SITE_URL",
+        "PROXY_ALLOWED_ORIGINS"
+      ]
     }
   }
 }
