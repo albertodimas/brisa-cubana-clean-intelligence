@@ -11,6 +11,18 @@ const envSchema = z
     ALLOWED_ORIGINS: z.string().optional(),
     ENABLE_TEST_UTILS: z.enum(["true", "false"]).optional(),
     HEALTH_CHECK_TOKEN: z.string().optional(),
+    REDIS_URL: z.string().url().optional(),
+    NOTIFICATION_SMTP_HOST: z.string().optional(),
+    NOTIFICATION_SMTP_PORT: z.string().optional(),
+    NOTIFICATION_SMTP_USER: z.string().optional(),
+    NOTIFICATION_SMTP_PASSWORD: z.string().optional(),
+    NOTIFICATION_SMTP_SECURE: z.enum(["true", "false"]).optional(),
+    NOTIFICATION_FROM_EMAIL: z.string().email().optional(),
+    NOTIFICATION_STREAM_HEARTBEAT_MS: z.string().optional(),
+    NOTIFICATION_STREAM_LIMIT: z.string().optional(),
+    TWILIO_ACCOUNT_SID: z.string().optional(),
+    TWILIO_AUTH_TOKEN: z.string().optional(),
+    TWILIO_PHONE_NUMBER: z.string().optional(),
   })
   .passthrough()
   .superRefine((data, ctx) => {

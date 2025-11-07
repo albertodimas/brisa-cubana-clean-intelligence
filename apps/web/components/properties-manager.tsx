@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import type { QueryParams } from "@/hooks/use-paginated-resource";
 import type { Property, Customer, PaginationInfo } from "@/lib/api";
 import { Button } from "./ui/button";
+import { ExportButton } from "./ui/export-button";
 import { FilterChips, type FilterChip } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
 import { SearchBar } from "./ui/search-bar";
@@ -179,7 +181,7 @@ export function PropertiesManager({
   }
 
   return (
-    <>
+    <section className="ui-stack" data-testid="panel-section-properties">
       {/* Create Property Form */}
       <form
         className="ui-panel-surface ui-panel-surface--muted grid gap-4"
@@ -303,7 +305,48 @@ export function PropertiesManager({
 
       {/* Manage Properties List */}
       <section className="ui-stack">
-        <h3 className="ui-section-title">Inventario de propiedades</h3>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h3 className="ui-section-title">Inventario de propiedades</h3>
+          <ExportButton
+            data={properties}
+            filename={`propiedades-${new Date().toISOString().split("T")[0]}`}
+            resourceType="properties"
+            testId="export-properties-csv"
+            columns={[
+              { key: "id", label: "ID" },
+              { key: "label", label: "Nombre" },
+              {
+                key: "type",
+                label: "Tipo",
+                transform: (p) => PROPERTY_TYPE_LABELS[p.type] ?? p.type,
+              },
+              { key: "city", label: "Ciudad" },
+              {
+                key: "owner",
+                label: "Propietario",
+                transform: (p) =>
+                  p.owner?.fullName ?? p.owner?.email ?? "Sin propietario",
+              },
+              {
+                key: "bedrooms",
+                label: "Habitaciones",
+                transform: (p) => String(p.bedrooms ?? ""),
+              },
+              {
+                key: "bathrooms",
+                label: "Baños",
+                transform: (p) => String(p.bathrooms ?? ""),
+              },
+              {
+                key: "sqft",
+                label: "M²",
+                transform: (p) => String(p.sqft ?? ""),
+              },
+              { key: "notes", label: "Notas", transform: (p) => p.notes ?? "" },
+            ]}
+            disabled={isLoading}
+          />
+        </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="w-full sm:max-w-xs">
             <SearchBar
@@ -379,7 +422,15 @@ export function PropertiesManager({
               >
                 <div className="ui-flex-between">
                   <div className="flex flex-col gap-1">
-                    <strong>{property.label}</strong>
+                    <Link
+                      href={{
+                        pathname: "/panel/properties/[id]",
+                        query: { id: property.id },
+                      }}
+                      className="hover:underline"
+                    >
+                      <strong>{property.label}</strong>
+                    </Link>
                     <span className="ui-caption">
                       {property.addressLine}, {property.city}, {property.state}{" "}
                       {property.zipCode}
@@ -521,6 +572,6 @@ export function PropertiesManager({
           </div>
         )}
       </section>
-    </>
+    </section>
   );
 }

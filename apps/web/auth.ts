@@ -54,7 +54,7 @@ export const {
   },
   providers: [
     Credentials({
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const email = credentials.email;
         const password = credentials.password;
 
@@ -67,9 +67,30 @@ export const {
           return null;
         }
 
+        const forwardedForHeader =
+          request?.headers.get("x-forwarded-for") ??
+          request?.headers.get("x-real-ip") ??
+          request?.headers.get("cf-connecting-ip") ??
+          request?.headers.get("x-client-ip") ??
+          null;
+
+        const proxyHeaders: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+
+        if (forwardedForHeader) {
+          proxyHeaders["x-forwarded-for"] = forwardedForHeader;
+          proxyHeaders["x-internal-remote-address"] =
+            request?.headers.get("x-internal-remote-address") ?? "127.0.0.1";
+        } else {
+          proxyHeaders["x-forwarded-for"] =
+            process.env.AUTH_TEST_FORWARD_IP ?? "198.51.100.5";
+          proxyHeaders["x-internal-remote-address"] = "127.0.0.1";
+        }
+
         const res = await fetch(`${API_URL}/api/authentication/login`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: proxyHeaders,
           body: JSON.stringify({ email, password }),
         });
 

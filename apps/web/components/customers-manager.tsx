@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { QueryParams } from "@/hooks/use-paginated-resource";
 import type { Customer, PaginationInfo } from "@/lib/api";
+import { ExportButton } from "./ui/export-button";
 import { FilterChips } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
 import { SearchBar } from "./ui/search-bar";
@@ -52,8 +54,26 @@ export function CustomersManager({
   const hasSearch = Boolean(searchTerm.trim());
 
   return (
-    <section className="ui-stack">
-      <h3 className="ui-section-title">Clientes registrados</h3>
+    <section className="ui-stack" data-testid="panel-section-customers">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h3 className="ui-section-title">Clientes registrados</h3>
+        <ExportButton
+          data={customers}
+          filename={`clientes-${new Date().toISOString().split("T")[0]}`}
+          resourceType="customers"
+          testId="export-customers-csv"
+          columns={[
+            { key: "id", label: "ID" },
+            {
+              key: "fullName",
+              label: "Nombre completo",
+              transform: (c) => c.fullName ?? "Sin nombre",
+            },
+            { key: "email", label: "Email" },
+          ]}
+          disabled={isLoading}
+        />
+      </div>
       <div className="w-full sm:max-w-xs">
         <SearchBar
           value={searchTerm}
@@ -104,7 +124,15 @@ export function CustomersManager({
                 className="ui-panel-surface ui-panel-surface--muted flex flex-col gap-2"
               >
                 <strong>{customer.fullName ?? "Cliente sin nombre"}</strong>
-                <span className="ui-caption">{customer.email}</span>
+                <Link
+                  href={{
+                    pathname: "/panel/customers/[id]",
+                    query: { id: customer.id },
+                  }}
+                  className="ui-caption hover:underline"
+                >
+                  {customer.email}
+                </Link>
               </li>
             ))}
           </ul>

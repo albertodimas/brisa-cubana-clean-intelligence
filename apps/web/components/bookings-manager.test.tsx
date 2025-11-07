@@ -2,9 +2,27 @@ import React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { Booking, PaginationInfo, Property, Service } from "@/lib/api";
+import type {
+  Booking,
+  PaginationInfo,
+  Property,
+  Service,
+  User,
+} from "@/lib/api";
 import type { QueryParams } from "@/hooks/use-paginated-resource";
 import { BookingsManager } from "./bookings-manager";
+
+const mockStaffUsers: User[] = [
+  {
+    id: "staff-1",
+    email: "staff@test.com",
+    fullName: "John Staff",
+    role: "STAFF",
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+  },
+];
 
 function getFormAction(
   form: HTMLFormElement,
@@ -93,8 +111,10 @@ const defaultProps = {
   isLoadingMore: false,
   onLoadMore: vi.fn(),
   onUpdate: vi.fn().mockResolvedValue({ success: "Updated" }),
+  onAssignStaff: vi.fn().mockResolvedValue({ success: "Staff assigned" }),
   services,
   properties,
+  staffUsers: mockStaffUsers,
   formatDateTime: (value: string) => value,
   currentQuery: defaultQuery,
   setQuery: vi.fn(),
@@ -227,5 +247,162 @@ describe("BookingsManager", () => {
     expect(onUpdate).toHaveBeenCalledWith("book-1", expect.any(FormData));
     expect(onToast).toHaveBeenCalledWith("Failed to update booking", "error");
     expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("assigns staff to booking and shows success toast", async () => {
+    const user = userEvent.setup();
+    const onAssignStaff = vi
+      .fn()
+      .mockResolvedValue({ success: "Personal asignado correctamente" });
+    const onToast = vi.fn();
+    const refresh = vi.fn();
+
+    render(
+      <BookingsManager
+        {...defaultProps}
+        onAssignStaff={onAssignStaff}
+        onToast={onToast}
+        refresh={refresh}
+      />,
+    );
+
+    const staffSelect = screen.getByTestId("booking-staff-select");
+    expect(staffSelect).toBeInTheDocument();
+
+    await user.selectOptions(staffSelect, "staff-1");
+
+    await waitFor(() => {
+      expect(onAssignStaff).toHaveBeenCalledWith("book-1", "staff-1");
+    });
+
+    expect(onToast).toHaveBeenCalledWith(
+      "Personal asignado correctamente",
+      "success",
+    );
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it("unassigns staff from booking", async () => {
+    const user = userEvent.setup();
+    const onAssignStaff = vi
+      .fn()
+      .mockResolvedValue({ success: "Personal desasignado" });
+    const onToast = vi.fn();
+    const refresh = vi.fn();
+
+    const bookingWithStaff: Booking = {
+      ...bookings[0],
+      assignedStaff: mockStaffUsers[0],
+    };
+
+    render(
+      <BookingsManager
+        {...defaultProps}
+        bookings={[bookingWithStaff]}
+        onAssignStaff={onAssignStaff}
+        onToast={onToast}
+        refresh={refresh}
+      />,
+    );
+
+    const staffSelect = screen.getByTestId("booking-staff-select");
+    expect(staffSelect).toBeInTheDocument();
+
+    await user.selectOptions(staffSelect, "");
+
+    await waitFor(() => {
+      expect(onAssignStaff).toHaveBeenCalledWith("book-1", null);
+    });
+
+    expect(onToast).toHaveBeenCalledWith("Personal desasignado", "success");
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it("shows error toast when staff assignment fails", async () => {
+    const user = userEvent.setup();
+    const onAssignStaff = vi
+      .fn()
+      .mockResolvedValue({ error: "No se pudo asignar el personal" });
+    const onToast = vi.fn();
+    const refresh = vi.fn();
+
+    render(
+      <BookingsManager
+        {...defaultProps}
+        onAssignStaff={onAssignStaff}
+        onToast={onToast}
+        refresh={refresh}
+      />,
+    );
+
+    const staffSelect = screen.getByTestId("booking-staff-select");
+
+    await user.selectOptions(staffSelect, "staff-1");
+
+    await waitFor(() => {
+      expect(onAssignStaff).toHaveBeenCalledWith("book-1", "staff-1");
+    });
+
+    expect(onToast).toHaveBeenCalledWith(
+      "No se pudo asignar el personal",
+      "error",
+    );
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("disables staff select for completed bookings", () => {
+    const completedBooking: Booking = {
+      ...bookings[0],
+      status: "COMPLETED",
+    };
+
+    render(<BookingsManager {...defaultProps} bookings={[completedBooking]} />);
+
+    const staffSelect = screen.getByTestId("booking-staff-select");
+
+    expect(staffSelect).toBeDisabled();
+  });
+
+  it("disables staff select for cancelled bookings", () => {
+    const cancelledBooking: Booking = {
+      ...bookings[0],
+      status: "CANCELLED",
+    };
+
+    render(<BookingsManager {...defaultProps} bookings={[cancelledBooking]} />);
+
+    const staffSelect = screen.getByTestId("booking-staff-select");
+
+    expect(staffSelect).toBeDisabled();
+  });
+
+  it("filters bookings by assigned staff", async () => {
+    const user = userEvent.setup();
+    const setQuery = vi.fn();
+
+    render(<BookingsManager {...defaultProps} setQuery={setQuery} />);
+
+    // Find staff filter select (different from staff assignment selects in booking cards)
+    // Staff filter should have an option like "Todos los staff" or "ALL"
+    const filterSelects = screen.getAllByRole("combobox");
+    const staffFilterSelect = filterSelects.find((select) => {
+      const options = Array.from((select as HTMLSelectElement).options).map(
+        (opt) => opt.textContent,
+      );
+      return options.some(
+        (text) => text?.includes("staff") || text?.includes("Staff"),
+      );
+    });
+
+    if (staffFilterSelect) {
+      await user.selectOptions(
+        staffFilterSelect as HTMLSelectElement,
+        "staff-1",
+      );
+
+      await waitFor(() => {
+        expect(setQuery).toHaveBeenCalledWith({ assignedStaffId: "staff-1" });
+      });
+    }
   });
 });

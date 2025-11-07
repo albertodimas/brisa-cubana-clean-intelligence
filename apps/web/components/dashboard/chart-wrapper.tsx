@@ -45,7 +45,7 @@ const CHART_COLORS = [
   BRISA_COLORS.info,
 ];
 
-interface BaseChartProps {
+interface BaseChartProps<T = Record<string, unknown>> {
   /**
    * Título del chart
    */
@@ -57,7 +57,7 @@ interface BaseChartProps {
   /**
    * Datos para el chart
    */
-  data: any[];
+  data: T[];
   /**
    * Altura del chart en pixeles
    */
@@ -85,6 +85,7 @@ interface CustomTooltipProps {
     name: string;
     value: number | string;
     color: string;
+    dataKey?: string;
   }>;
   label?: string;
 }
@@ -98,7 +99,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   return (
     <div className="bg-brisa-900/95 backdrop-blur-md border border-brisa-700/50 rounded-lg p-3 shadow-xl">
       <p className="text-sm font-semibold text-brisa-100 mb-2">{label}</p>
-      {payload.map((entry: any, index: number) => (
+      {payload.map((entry, index: number) => (
         <div key={index} className="flex items-center gap-2 text-sm">
           <div
             className="w-3 h-3 rounded-full"

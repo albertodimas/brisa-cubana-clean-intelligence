@@ -33,8 +33,25 @@ enum NotificationType {
   BOOKING_CREATED
   BOOKING_CANCELLED
   BOOKING_RESCHEDULED
+  BOOKING_REMINDER_24H
+  BOOKING_REMINDER_1H
+  BOOKING_COMPLETED
+  BOOKING_STATUS_CHANGED
   USER_DEACTIVATED
   SERVICE_UPDATED
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
 }
 
 enum LeadStatus {
@@ -120,6 +137,7 @@ model Booking {
   assignedStaffId String?
   assignedStaff   User?         @relation("BookingAssignedStaff", fields: [assignedStaffId], references: [id])
   invoices    Invoice[]
+  notifications Notification[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   deletedAt   DateTime?
@@ -129,16 +147,27 @@ model Booking {
 }
 
 model Notification {
-  id        String           @id @default(cuid())
+  id        String              @id @default(cuid())
   userId    String
-  user      User             @relation(fields: [userId], references: [id])
+  user      User                @relation(fields: [userId], references: [id])
   type      NotificationType
+  channel   NotificationChannel @default(IN_APP)
+  status    NotificationStatus  @default(PENDING)
+  subject   String?
   message   String
+  metadata  Json?
+  sentAt    DateTime?
+  failedAt  DateTime?
+  errorMessage String?
   readAt    DateTime?
-  createdAt DateTime         @default(now())
+  bookingId String?
+  booking   Booking?            @relation(fields: [bookingId], references: [id])
+  createdAt DateTime            @default(now())
 
   @@index([userId, readAt])
   @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([bookingId])
 }
 
 model MagicLinkToken {
@@ -215,4 +244,85 @@ enum InvoiceStatus {
   PAID
   FAILED
   REFUNDED
+}
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Testimonial {
+  id        String            @id @default(cuid())
+  author    String
+  role      String
+  quote     String            @db.Text
+  status    TestimonialStatus @default(PENDING)
+  order     Int               @default(0)
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([status, isActive, order])
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String   @db.Text
+  answer    String   @db.Text
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+model PricingTier {
+  id           String   @id @default(cuid())
+  tierCode     String   @unique
+  name         String
+  headline     String
+  description  String?  @db.Text
+  price        String
+  priceSuffix  String?
+  features     Json
+  addons       Json?
+  highlighted  Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+model PortfolioStats {
+  id              String   @id @default(cuid())
+  activeProperties Int
+  averageRating   Decimal  @db.Decimal(3, 2)
+  totalTurnovers  Int
+  period          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+}
+
+model MarketStat {
+  id           String   @id @default(cuid())
+  metricId     String   @unique
+  label        String
+  value        Decimal  @db.Decimal(10, 2)
+  valueMax     Decimal? @db.Decimal(10, 2)
+  source       String
+  sourceUrl    String?
+  period       String?
+  notes        String?  @db.Text
+  presentation Json
+  lastUpdated  DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([metricId])
 }

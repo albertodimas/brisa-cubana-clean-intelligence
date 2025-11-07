@@ -33,8 +33,14 @@ export async function createNotificationFixture(
   );
 
   if (!response.ok()) {
+    let errorDetails = "";
+    try {
+      errorDetails = await response.text();
+    } catch {
+      errorDetails = "";
+    }
     throw new Error(
-      `No se pudo crear la notificación: ${response.status()} ${response.statusText()}`,
+      `No se pudo crear la notificación: ${response.status()} ${response.statusText()} ${errorDetails}`,
     );
   }
 

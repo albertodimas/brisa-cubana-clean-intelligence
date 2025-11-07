@@ -50,6 +50,14 @@ export { PageTransition, type PageTransitionProps } from "./page-transition";
 // Feedback Components
 export { ToastProvider, useToast } from "./toast";
 export { Tooltip, type TooltipProps } from "./tooltip";
+export {
+  HelpIcon,
+  HelpText,
+  InfoBanner,
+  type HelpIconProps,
+  type HelpTextProps,
+  type InfoBannerProps,
+} from "./help-icon";
 export { Skeleton, type SkeletonProps } from "./skeleton";
 export { Spinner, type SpinnerProps } from "./spinner";
 export { Alert, type AlertProps } from "./alert";
@@ -61,6 +69,7 @@ export { FilterChips } from "./filter-chips";
 export { InfiniteList } from "./infinite-list";
 export { SearchBar } from "./search-bar";
 export { Pagination } from "./pagination";
+export { ExportButton } from "./export-button";
 
 // Overlays & Dropdowns
 export {

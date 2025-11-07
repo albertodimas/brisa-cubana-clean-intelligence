@@ -63,8 +63,13 @@ test.describe("@critical portal cliente – flujo completo", () => {
     const customerIdMatch = dashboardUrl.pathname.match(/\/clientes\/([^/]+)/i);
     const currentCustomerId = customerIdMatch?.[1] ?? "[a-z0-9]+";
 
-    const targetBookingCard = page.locator("[data-portal-booking-id]").first();
-    await expect(targetBookingCard).toBeVisible();
+    const targetBookingCard = page
+      .locator("[data-portal-booking-id]")
+      .filter({
+        has: page.getByRole("link", { name: "Ver detalle" }),
+      })
+      .first();
+    await expect(targetBookingCard).toBeVisible({ timeout: 15000 });
     const targetBookingCode =
       (await targetBookingCard.getAttribute("data-portal-booking-code")) ?? "";
     expect(targetBookingCode).toBeTruthy();

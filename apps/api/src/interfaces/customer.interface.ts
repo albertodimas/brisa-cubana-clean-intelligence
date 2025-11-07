@@ -27,4 +27,5 @@ export interface ICustomerRepository {
   findManyWithSearch(
     params: CustomerSearchParams,
   ): Promise<{ data: CustomerResponse[]; pagination: CustomerPagination }>;
+  findById(id: string): Promise<CustomerResponse | null>;
 }

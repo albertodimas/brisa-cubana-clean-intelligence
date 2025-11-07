@@ -21,7 +21,7 @@ export interface Column<T> {
   /**
    * Función para renderizar custom content
    */
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
   /**
    * Si la columna es sortable
    */

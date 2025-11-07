@@ -89,4 +89,17 @@ export class CustomerRepository implements ICustomerRepository {
       },
     } satisfies { data: CustomerResponse[]; pagination: CustomerPagination };
   }
+
+  async findById(id: string): Promise<CustomerResponse | null> {
+    const customer = await this.prisma.user.findUnique({
+      where: { id, role: "CLIENT" },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+      },
+    });
+
+    return customer;
+  }
 }

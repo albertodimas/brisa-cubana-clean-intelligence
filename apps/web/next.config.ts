@@ -111,6 +111,10 @@ const nextConfig: NextConfig = {
           module: /require-in-the-middle/,
           message: /Critical dependency/,
         },
+        {
+          module: /import-in-the-middle/,
+          message: /.*/, // Ignorar todos los warnings de import-in-the-middle
+        },
       ];
     }
     return config;

@@ -1,6 +1,6 @@
 # Brisa Cubana Clean Intelligence – Manual de Documentación
 
-**Última revisión:** 6 de noviembre de 2025
+**Última revisión:** 7 de noviembre de 2025
 
 > ℹ️ El plan de recuperación sigue activo. Consulta el [recovery-plan](overview/recovery-plan.md) y el [resumen de estado](overview/status.md) para conocer la información vigente; el histórico de octubre está en `docs/archive/2025-10-status.md`.
 

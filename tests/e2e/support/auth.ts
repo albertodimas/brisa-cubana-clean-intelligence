@@ -1,5 +1,12 @@
-import { expect, type Page, type TestInfo } from "@playwright/test";
+import {
+  expect,
+  request as playwrightRequest,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import { createHash } from "node:crypto";
+import { deleteUserFixture, getAdminAccessToken } from "./services";
 
 export const adminEmail =
   process.env.E2E_ADMIN_EMAIL ?? "admin@brisacubanacleanintelligence.com";
@@ -11,6 +18,96 @@ export const coordinatorPassword =
   process.env.E2E_COORDINATOR_PASSWORD ?? "Brisa123!";
 export const ADMIN_STORAGE_STATE_PATH =
   process.env.E2E_ADMIN_STATE_PATH ?? "tests/e2e/.auth/admin.json";
+
+const apiBaseUrl = process.env.E2E_API_URL || "http://localhost:3001";
+const createdUsers = new Map<
+  string,
+  { id: string; password: string; role: string }
+>();
+
+async function ensureUserCredentials(
+  email: string,
+  password: string,
+  role: "ADMIN" | "COORDINATOR" | "STAFF" | "CLIENT" = "ADMIN",
+  fullName = "QA Automation User",
+): Promise<{ id: string }> {
+  const apiContext = await playwrightRequest.newContext({
+    baseURL: apiBaseUrl,
+  });
+
+  try {
+    const accessToken = await getAdminAccessToken(apiContext);
+    const searchResponse = await apiContext.get(
+      `/api/users?limit=1&search=${encodeURIComponent(email)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    let userId: string | undefined;
+    if (searchResponse.ok()) {
+      const json = (await searchResponse.json()) as {
+        data?: Array<{ id: string }>;
+      };
+      userId = json?.data?.[0]?.id;
+    }
+
+    if (userId) {
+      const updateResponse = await apiContext.patch(`/api/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        data: {
+          password,
+          role,
+          isActive: true,
+        },
+      });
+
+      if (!updateResponse.ok()) {
+        throw new Error(
+          `No se pudo actualizar el usuario ${email}: ${updateResponse.status()} ${updateResponse.statusText()}`,
+        );
+      }
+    } else {
+      const createResponse = await apiContext.post(`/api/users`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        data: {
+          email,
+          fullName,
+          password,
+          role,
+        },
+      });
+
+      if (!createResponse.ok()) {
+        throw new Error(
+          `No se pudo crear el usuario ${email}: ${createResponse.status()} ${createResponse.statusText()}`,
+        );
+      }
+
+      const createJson = (await createResponse.json()) as {
+        data: { id: string };
+      };
+      userId = createJson.data.id;
+    }
+
+    if (!userId) {
+      throw new Error(`No se pudo asegurar el usuario ${email}`);
+    }
+
+    createdUsers.set(email, { id: userId, password, role });
+    return { id: userId };
+  } finally {
+    await apiContext.dispose();
+  }
+}
 
 export function ipForTest(testInfo: TestInfo): string {
   // Derive a deterministic but non-guessable octet from the test title to avoid Math.random().
@@ -161,4 +258,93 @@ export async function loginAsCoordinator(
     password: coordinatorPassword,
     retries: options.retries ?? 4,
   });
+}
+
+type CreateTestUserOptions = {
+  email?: string;
+  password?: string;
+  fullName?: string;
+  role?: "ADMIN" | "COORDINATOR" | "STAFF" | "CLIENT";
+};
+
+export async function createTestUser(
+  overrides: CreateTestUserOptions = {},
+): Promise<{ id: string; email: string; password: string }> {
+  const email =
+    overrides.email ??
+    `qa-user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@brisacubanacleanintelligence.com`;
+  const password = overrides.password ?? "Brisa123!";
+  const role = overrides.role ?? "ADMIN";
+  const fullName = overrides.fullName ?? "QA Dashboard User";
+
+  await ensureUserCredentials(email, password, role, fullName);
+  const entry = createdUsers.get(email);
+  if (!entry) {
+    throw new Error("No se pudo registrar el usuario de prueba");
+  }
+
+  return { id: entry.id, email, password };
+}
+
+export async function deleteTestUser(email: string): Promise<void> {
+  const entry = createdUsers.get(email);
+  if (!entry) {
+    return;
+  }
+
+  const apiContext = await playwrightRequest.newContext({
+    baseURL: apiBaseUrl,
+  });
+
+  try {
+    await deleteUserFixture(apiContext, entry.id);
+  } catch (error) {
+    console.warn(`[e2e] Failed to delete test user ${email}:`, error);
+  } finally {
+    createdUsers.delete(email);
+    await apiContext.dispose();
+  }
+}
+
+export async function loginAsUser(
+  page: Page,
+  _context: BrowserContext,
+  email: string,
+  password: string,
+): Promise<void> {
+  const fakeTestInfo = { title: `login:${email}` } as TestInfo;
+  await loginWithCredentials(page, fakeTestInfo, {
+    email,
+    password,
+    retries: 4,
+  });
+}
+
+export async function performLogin(
+  page: Page,
+  credentials: { email: string; password: string },
+): Promise<void> {
+  const fakeTestInfo = {
+    title: `performLogin:${credentials.email}`,
+  } as TestInfo;
+
+  try {
+    await loginWithCredentials(page, fakeTestInfo, {
+      email: credentials.email,
+      password: credentials.password,
+      retries: 4,
+    });
+  } catch (error) {
+    await ensureUserCredentials(
+      credentials.email,
+      credentials.password,
+      "ADMIN",
+      "QA Admin",
+    );
+    await loginWithCredentials(page, fakeTestInfo, {
+      email: credentials.email,
+      password: credentials.password,
+      retries: 4,
+    });
+  }
 }

@@ -141,20 +141,23 @@ const AnimatedTabsList = React.forwardRef<
         }}
       />
       {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          // @ts-expect-error - child.props is safe here, AnimatedTabsList children should be TabsTrigger components
+        if (
+          React.isValidElement<
+            React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+          >(child)
+        ) {
           const childValue = child.props.value;
-          // @ts-expect-error - child.props.onClick is safe here
           const childOnClick = child.props.onClick;
 
-          return React.cloneElement(child, {
-            // @ts-expect-error - spreading props is safe for TabsTrigger children
+          return React.cloneElement<
+            React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+          >(child, {
             ...child.props,
-            onClick: (e: React.MouseEvent) => {
+            onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
               setActiveTab(childValue);
               childOnClick?.(e);
             },
-          } as any);
+          });
         }
         return child;
       })}

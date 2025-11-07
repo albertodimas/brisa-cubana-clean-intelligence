@@ -1,4 +1,8 @@
-import type { PrismaClient, NotificationType } from "@prisma/client";
+import type {
+  PrismaClient,
+  NotificationType,
+  Notification as PrismaNotification,
+} from "@prisma/client";
 import type {
   NotificationPagination,
   NotificationResponse,
@@ -6,6 +10,24 @@ import type {
 } from "../interfaces/notification.interface.js";
 import type { INotificationRepository } from "../interfaces/notification.interface.js";
 import { emitNotificationEvent } from "../lib/notification-hub.js";
+
+function normalizeMetadata(
+  metadata: PrismaNotification["metadata"],
+): Record<string, unknown> | null {
+  if (metadata && typeof metadata === "object" && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+  return null;
+}
+
+function toNotificationResponse(
+  notification: PrismaNotification,
+): NotificationResponse {
+  return {
+    ...notification,
+    metadata: normalizeMetadata(notification.metadata),
+  };
+}
 
 export class NotificationRepository implements INotificationRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -35,7 +57,7 @@ export class NotificationRepository implements INotificationRepository {
     const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
 
     return {
-      data,
+      data: data.map(toNotificationResponse),
       pagination: {
         limit,
         cursor: cursor ?? null,
@@ -55,9 +77,9 @@ export class NotificationRepository implements INotificationRepository {
     });
     emitNotificationEvent(userId, {
       type: "notification:update",
-      notification: updated,
+      notification: toNotificationResponse(updated),
     });
-    return updated;
+    return toNotificationResponse(updated);
   }
 
   async markAllAsRead(userId: string): Promise<number> {
@@ -77,12 +99,19 @@ export class NotificationRepository implements INotificationRepository {
     message: string;
   }): Promise<NotificationResponse> {
     const created = await this.prisma.notification.create({
-      data: input,
+      data: {
+        userId: input.userId,
+        type: input.type,
+        message: input.message,
+        channel: "IN_APP",
+        status: "SENT",
+        sentAt: new Date(),
+      },
     });
     emitNotificationEvent(input.userId, {
       type: "notification:new",
-      notification: created,
+      notification: toNotificationResponse(created),
     });
-    return created;
+    return toNotificationResponse(created);
   }
 }

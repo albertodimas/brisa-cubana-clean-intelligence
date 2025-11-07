@@ -1,6 +1,6 @@
 # Guía Operativa: Portal Cliente
 
-**Última actualización:** 18 de octubre de 2025  
+**Última actualización:** 7 de noviembre de 2025  
 **Responsables:** Producto · Operaciones · QA
 
 Esta guía describe cómo habilitar, verificar y operar el portal de autoservicio para clientes hospedado en `/clientes`. Cubre los flujos actuales (beta) basados en enlaces mágicos, las acciones disponibles para los clientes y los criterios de observabilidad/QA.
@@ -74,6 +74,18 @@ PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"
 | Cancelar      | `POST /api/portal/bookings/:id/cancel`     | Reserva del cliente, no completada/cancelada.                                   | Marca `CANCELLED`, registra motivo, notificación `BOOKING_CANCELLED`.                       |
 | Cerrar sesión | `POST /api/portal/auth/logout`             | Requiere token portal                                                           | Limpia cookies y redirige a `/clientes/acceso`.                                             |
 
+### 4.4 Descarga de comprobantes PDF (Sprint 4)
+
+- **Ruta Next:** `GET /app/api/portal/bookings/[bookingId]/pdf`
+- **Qué hace:** Genera un recibo PDF (componentes `BookingReceipt` + React PDF) con datos del booking, propiedad, servicio, costo y sello temporal (`generatedAt`).
+- **Autorización:** Usa las cookies `portal_token` y `portal_customer_id` enviadas automáticamente por el navegador. Si faltan, responde 401.
+- **Rate limiting:** 10 descargas por minuto por correo (`X-RateLimit-*` en headers). El limitador es en memoria; cuando se habilite Redis bastará con apuntar `REDIS_URL`.
+- **QA:** En el portal, cada tarjeta muestra “Descargar comprobante”. Valida que:
+  - Archivos sigan el formato `comprobante-{code}-{id}.pdf`.
+  - Estados en el PDF muestren el badge correcto (confirmada, completada, etc.).
+  - Al superar 10 descargas/minuto aparezca mensaje amigable.
+  - El endpoint responde 404 si el booking no pertenece al cliente.
+
 ---
 
 ## 5. Observabilidad y telemetría
@@ -89,7 +101,7 @@ PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"
 
 ## 6. QA y evidencias
 
-- **CTest automatizado:** `tests/e2e/portal-client.spec.ts` (suite @critical). Ejecutar con `pnpm test:e2e:critical`.
+- **CTest automatizado:** `tests/e2e/portal-client.spec.ts` (suite @critical) + `tests/e2e/csv-export.spec.ts` cubre interacción con el mismo dataset cuando se descargan comprobantes/exportaciones. Ejecutar con `pnpm test:e2e:critical`.
 - **Seeds dependientes:** `prisma/seed.demo.ts` crea reservas demo para el cliente `cliente@brisacubanacleanintelligence.com`.
 - **Manual QA:** agregar resultados y capturas en [`docs/development/qa/regression-checklist.md`](../qa/regression-checklist.md) sección 8 (Portal cliente).
 
@@ -113,6 +125,8 @@ Checklist previo a habilitar cambios en producción:
 | Logout no elimina cookies                 | Proxy sin limpiar `Set-Cookie`                                    | Revisar `app/api/[...route]/route.ts` y asegurar `set-cookie` se propaga.                            |
 | No llegan correos en producción           | SMTP bloqueado o campos faltantes                                 | Revisar credenciales en Vercel, confirmar `PORTAL_MAGIC_LINK_FROM`.                                  |
 | API responde 503 al solicitar enlace      | SMTP no configurado (`PORTAL_MAGIC_LINK_*` incompletas)           | Completar variables en Vercel; sin SMTP la API rechaza la solicitud para evitar falsas expectativas. |
+| Botón "Descargar PDF" retorna 429         | Cliente excedió 10 descargas/minuto                               | Esperar 60 s; validar que no haya pruebas automatizadas ejecutándose con la misma cuenta.            |
+| PDF muestra datos incompletos             | API `/api/portal/bookings/:id` no retorna relaciones nuevas       | Regenerar seeds o revisar migraciones (`assignedStaff`, `propertyOwner`).                            |
 
 ---
 

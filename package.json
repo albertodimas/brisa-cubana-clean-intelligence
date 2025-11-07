@@ -13,10 +13,10 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "test:e2e": "LOGIN_RATE_LIMIT=20 playwright test --project=full",
-    "test:e2e:smoke": "LOGIN_RATE_LIMIT=20 playwright test --project=smoke",
-    "test:e2e:critical": "E2E_LOGIN_RATE_LIMIT=50 LOGIN_RATE_LIMIT=20 playwright test --project=critical",
-    "test:e2e:full": "LOGIN_RATE_LIMIT=20 playwright test --project=full",
+    "test:e2e": "LOGIN_RATE_LIMIT=100 playwright test --project=full",
+    "test:e2e:smoke": "LOGIN_RATE_LIMIT=100 playwright test --project=smoke",
+    "test:e2e:critical": "E2E_LOGIN_RATE_LIMIT=100 LOGIN_RATE_LIMIT=100 playwright test --project=critical",
+    "test:e2e:full": "LOGIN_RATE_LIMIT=100 playwright test --project=full",
     "typecheck": "turbo run typecheck",
     "db:push": "pnpm --filter @brisa/api db:push",
     "db:migrate": "pnpm --filter @brisa/api db:migrate",
@@ -61,7 +61,9 @@
     "overrides": {
       "esbuild": "^0.25.10",
       "tmp": "^0.2.4",
-      "vite": "7.1.11"
+      "vite": "7.1.11",
+      "import-in-the-middle": "1.15.0",
+      "require-in-the-middle": "7.5.2"
     },
     "onlyBuiltDependencies": [
       "@prisma/client",

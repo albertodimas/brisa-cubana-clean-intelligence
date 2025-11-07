@@ -3,12 +3,33 @@ import { adminEmail, adminPassword } from "./auth";
 
 const apiBaseUrl = process.env.E2E_API_URL || "http://localhost:3001";
 
+let forwardedIpCounter = 10;
+function nextForwardedIp(): string {
+  forwardedIpCounter = (forwardedIpCounter + 1) % 200;
+  const base = 50 + forwardedIpCounter;
+  return `198.51.100.${base}`;
+}
+
+function loginHeaders(overrides: Record<string, string> = {}) {
+  return {
+    "Content-Type": "application/json",
+    "x-forwarded-for":
+      overrides["x-forwarded-for"] ??
+      process.env.E2E_FORWARD_IP ??
+      nextForwardedIp(),
+    "x-internal-remote-address":
+      overrides["x-internal-remote-address"] ?? "127.0.0.1",
+    ...overrides,
+  };
+}
+
 export async function getAdminAccessToken(
   request: APIRequestContext,
 ): Promise<string> {
   const response = await request.post(
     `${apiBaseUrl}/api/authentication/login`,
     {
+      headers: loginHeaders(),
       data: {
         email: adminEmail,
         password: adminPassword,
@@ -134,6 +155,41 @@ export async function deleteUserFixture(
   }
 }
 
+export async function deleteAllBookings(
+  request: APIRequestContext,
+  accessToken: string,
+): Promise<void> {
+  const response = await request.get(`${apiBaseUrl}/api/bookings?limit=100`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok()) {
+    console.warn(
+      "[e2e] No se pudo obtener el listado de bookings para limpieza",
+      response.status(),
+      response.statusText(),
+    );
+    return;
+  }
+
+  const json = (await response.json()) as { data?: Array<{ id: string }> };
+  const bookings = json.data ?? [];
+
+  await Promise.all(
+    bookings.map((booking) =>
+      request.delete(`${apiBaseUrl}/api/bookings/${booking.id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }),
+    ),
+  );
+}
+
 export async function getUserAccessToken(
   request: APIRequestContext,
   email: string,
@@ -142,6 +198,7 @@ export async function getUserAccessToken(
   const response = await request.post(
     `${apiBaseUrl}/api/authentication/login`,
     {
+      headers: loginHeaders(),
       data: {
         email,
         password,
@@ -187,6 +244,7 @@ async function fetchCollection<T>(
 
 type BookingFixtureOptions = {
   status?: "PENDING" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  scheduledAt?: string;
 };
 
 export async function createBookingFixture(
@@ -222,33 +280,81 @@ export async function createBookingFixture(
     );
   }
 
-  const scheduledAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+  const useCustomSchedule = Boolean(options.scheduledAt);
+  const baseTimestamp = useCustomSchedule
+    ? new Date(options.scheduledAt!).getTime()
+    : Date.now() + 2 * 60 * 60 * 1000;
+  const durationMs = (service.durationMin ?? 120) * 60 * 1000;
+  const jitterRange = Math.max(durationMs / 3, 5 * 60 * 1000);
 
-  const response = await request.post(`${apiBaseUrl}/api/bookings`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    data: {
-      customerId,
-      propertyId,
-      serviceId: service.id,
-      scheduledAt,
-      durationMin: service.durationMin ?? 120,
-    },
-  });
+  let booking: {
+    id: string;
+    code: string;
+    status: string;
+    scheduledAt: string;
+  } | null = null;
+  let lastError: { status: number; statusText: string } | null = null;
 
-  if (!response.ok()) {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const jitterMs = useCustomSchedule
+      ? 0
+      : Math.floor((Math.random() - 0.5) * jitterRange);
+    const scheduledAt = new Date(
+      baseTimestamp + attempt * durationMs + jitterMs,
+    ).toISOString();
+
+    const response = await request.post(`${apiBaseUrl}/api/bookings`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      data: {
+        customerId,
+        propertyId,
+        serviceId: service.id,
+        scheduledAt,
+        durationMin: service.durationMin ?? 120,
+      },
+    });
+
+    if (response.ok()) {
+      const bookingResponse = (await response.json()) as {
+        data: {
+          id: string;
+          code: string;
+          status: string;
+          scheduledAt: string;
+        };
+      };
+      booking = bookingResponse.data;
+      break;
+    }
+
+    const status = response.status();
+    const statusText = response.statusText();
+    lastError = { status, statusText };
+
+    if (status === 409) {
+      // Conflicto por doble booking: intentar con otro horario.
+      continue;
+    }
+
     throw new Error(
-      `No se pudo crear la reserva de prueba: ${response.status()} ${response.statusText()}`,
+      `No se pudo crear la reserva de prueba: ${status} ${statusText}`,
     );
   }
 
-  const bookingResponse = (await response.json()) as {
-    data: { id: string; code: string; status: string };
-  };
-
-  const booking = bookingResponse.data;
+  if (!booking) {
+    const details =
+      lastError?.status === 409
+        ? "La API reportó conflictos repetidos (409) a pesar de reintentos con horarios alternos."
+        : `${lastError?.status ?? "desconocido"} ${
+            lastError?.statusText ?? ""
+          }`;
+    throw new Error(
+      `No se pudo crear la reserva de prueba tras múltiples intentos: ${details}`,
+    );
+  }
 
   if (options.status && options.status !== booking.status) {
     const patchResponse = await request.patch(
@@ -271,7 +377,12 @@ export async function createBookingFixture(
     }
 
     const patched = (await patchResponse.json()) as {
-      data: { id: string; code: string; status: string };
+      data: {
+        id: string;
+        code: string;
+        status: string;
+        scheduledAt: string;
+      };
     };
 
     return patched.data;

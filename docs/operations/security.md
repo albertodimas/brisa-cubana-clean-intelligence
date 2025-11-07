@@ -84,6 +84,9 @@ Las credenciales de producción están configuradas en:
 - `STRIPE_SECRET_KEY` (modo test en Preview/Development, live en Production).
 - `STRIPE_PUBLISHABLE_KEY` (se usa en la aplicación web para inicializar Stripe.js).
 - `STRIPE_WEBHOOK_SECRET` (clave de firma para `/api/payments/stripe/webhook`).
+- `NOTIFICATION_SMTP_HOST` / `PORT` / `USER` / `PASSWORD` / `SECURE` / `NOTIFICATION_FROM_EMAIL` (envío de correos operativos: usa la cuenta de SendGrid autenticada para `brisacubanacleanintelligence.com`).
+- `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_PHONE_NUMBER` (requeridos sólo si los SMS de notificación se activan; mantener vacíos en preproducción si no se usan).
+- `NOTIFICATION_STREAM_HEARTBEAT_MS` / `NOTIFICATION_STREAM_LIMIT` (ajustan el SSE de notificaciones internas; por defecto `10000`/`50`, no exponen secrets pero conviene registrarlos).
 - Documenta los valores en 1Password/Vault del equipo y rota si hay fuga.
 
 ### Procedimiento de rotación seguro
@@ -165,6 +168,13 @@ Configura alertas en Sentry/PostHog si detectas patrones de abuso (se recomienda
   2. Confirmar que el atributo `Expires` coincide con el valor `expiresAt` devuelto por la API.
   3. Validar que tras `POST /api/portal/auth/logout` ambas cookies se eliminan en el browser y en la respuesta HTTP.
 - Las solicitudes de cancelación/reagendo desde el portal generan notificaciones `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED` dirigidas a usuarios activos con rol `ADMIN` o `COORDINATOR`, para que operaciones pueda reaccionar.
+
+## 📣 Sistema de notificaciones operativas
+
+- Los correos salen mediante `NOTIFICATION_SMTP_*` y `NOTIFICATION_FROM_EMAIL`. En producción apunta a SendGrid (`smtp.sendgrid.net`, puerto 465/587) con autenticación por API key (`user=apikey`, `password=<API_KEY>`).
+- Si `NOTIFICATION_SMTP_*` falta o es incorrecto, la cola marca cada evento como `FAILED` y registra el motivo en logs (`"Email notification skipped - SMTP not configured"`). Supervisa el stream SSE (`/api/notifications/stream`) y Sentry para detectar fallas.
+- Los SMS dependen de Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`). Mientras estén vacíos, el dispatcher degrada a `not-configured` y evita intentos. Nunca subas credenciales Twilio de producción a repositorios o entornos compartidos.
+- La cola de notificaciones (in-memory) da prioridad a trabajos con `priority` más alta; documenta cualquier cambio operativo en `docs/operations/email-routing.md` o crea un runbook dedicado si se suma un broker externo (ej. Redis/BullMQ).
 
 ---
 

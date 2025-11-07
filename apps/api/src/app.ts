@@ -18,6 +18,8 @@ import portalAuth from "./routes/portal-auth.js";
 import portalBookings from "./routes/portal-bookings.js";
 import leads from "./routes/leads.js";
 import invoices from "./routes/invoices.js";
+import calendar from "./routes/calendar.js";
+import marketing from "./routes/marketing.js";
 
 // Initialize Dependency Injection Container
 initializeContainer();
@@ -266,14 +268,19 @@ app.route("/api/services", services);
 app.route("/api/properties", properties);
 app.route("/api/customers", customers);
 app.route("/api/bookings", bookings);
+app.route("/api/calendar", calendar);
 app.route("/api/users", users);
 app.route("/api/notifications", notifications);
 app.route("/api/payments", payments);
 app.route("/api/leads", leads);
 app.route("/api/invoices", invoices);
+app.route("/api/marketing", marketing);
 app.route("/api/portal/auth", portalAuth);
 app.route("/api/portal/bookings", portalBookings);
-if (process.env.ENABLE_TEST_UTILS === "true") {
+const testUtilsEnabled =
+  process.env.ENABLE_TEST_UTILS === "true" ||
+  process.env.PLAYWRIGHT_TEST_RUN === "true";
+if (testUtilsEnabled) {
   app.route("/api/test-utils", testUtils);
 }
 // Note: Using /api/authentication instead of /api/auth because Vercel

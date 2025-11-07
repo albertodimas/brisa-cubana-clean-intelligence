@@ -3,11 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import type { QueryParams } from "@/hooks/use-paginated-resource";
 import { Button } from "./ui/button";
+import { ExportButton } from "./ui/export-button";
 import { FilterChips, type FilterChip } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
 import { SearchBar } from "./ui/search-bar";
 import { Skeleton } from "./ui/skeleton";
-import type { Booking, PaginationInfo, Property, Service } from "@/lib/api";
+import type {
+  Booking,
+  PaginationInfo,
+  Property,
+  Service,
+  User,
+} from "@/lib/api";
 
 type ActionResult = {
   success?: string;
@@ -29,8 +36,13 @@ type BookingsManagerProps = {
   isLoadingMore: boolean;
   onLoadMore: () => Promise<void> | void;
   onUpdate: (bookingId: string, formData: FormData) => Promise<ActionResult>;
+  onAssignStaff: (
+    bookingId: string,
+    staffId: string | null,
+  ) => Promise<ActionResult>;
   services: Service[];
   properties: Property[];
+  staffUsers: User[];
   formatDateTime: (iso: string) => string;
   currentQuery: QueryParams;
   setQuery: (query: QueryParams) => Promise<void>;
@@ -46,8 +58,10 @@ export function BookingsManager({
   isLoadingMore,
   onLoadMore,
   onUpdate,
+  onAssignStaff,
   services,
   properties,
+  staffUsers,
   formatDateTime,
   currentQuery,
   setQuery,
@@ -56,6 +70,7 @@ export function BookingsManager({
   onToast,
 }: BookingsManagerProps) {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [assigningStaffId, setAssigningStaffId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>(
     typeof currentQuery.search === "string" ? String(currentQuery.search) : "",
   );
@@ -69,6 +84,11 @@ export function BookingsManager({
         "CANCELLED",
       ].includes(currentQuery.status)
       ? (currentQuery.status as StatusFilter)
+      : "ALL",
+  );
+  const [staffFilter, setStaffFilter] = useState<string>(
+    typeof currentQuery.assignedStaffId === "string"
+      ? String(currentQuery.assignedStaffId)
       : "ALL",
   );
   const [fromDate, setFromDate] = useState<string>(
@@ -103,6 +123,14 @@ export function BookingsManager({
   }, [currentQuery.status]);
 
   useEffect(() => {
+    const nextStaff =
+      typeof currentQuery.assignedStaffId === "string"
+        ? String(currentQuery.assignedStaffId)
+        : "ALL";
+    setStaffFilter((prev) => (prev === nextStaff ? prev : nextStaff));
+  }, [currentQuery.assignedStaffId]);
+
+  useEffect(() => {
     const nextFrom =
       typeof currentQuery.from === "string" ? String(currentQuery.from) : "";
     setFromDate((prev) => (prev === nextFrom ? prev : nextFrom));
@@ -123,6 +151,9 @@ export function BookingsManager({
     if (statusFilter !== "ALL") {
       query.status = statusFilter;
     }
+    if (staffFilter !== "ALL") {
+      query.assignedStaffId = staffFilter;
+    }
     if (fromDate) {
       query.from = fromDate;
     }
@@ -130,7 +161,7 @@ export function BookingsManager({
       query.to = toDate;
     }
     void setQuery(query);
-  }, [searchTerm, statusFilter, fromDate, toDate, setQuery]);
+  }, [searchTerm, statusFilter, staffFilter, fromDate, toDate, setQuery]);
 
   const hasBookings = bookings.length > 0;
 
@@ -151,6 +182,14 @@ export function BookingsManager({
         value: statusFilter,
       });
     }
+    if (staffFilter !== "ALL") {
+      const staff = staffUsers.find((u) => u.id === staffFilter);
+      chips.push({
+        key: "staff",
+        label: "Personal",
+        value: staff?.fullName ?? staff?.email ?? staffFilter,
+      });
+    }
     if (fromDate) {
       chips.push({ key: "from", label: "Desde", value: fromDate });
     }
@@ -158,13 +197,15 @@ export function BookingsManager({
       chips.push({ key: "to", label: "Hasta", value: toDate });
     }
     return chips;
-  }, [searchTerm, statusFilter, fromDate, toDate]);
+  }, [searchTerm, statusFilter, staffFilter, fromDate, toDate, staffUsers]);
 
   const handleRemoveFilter = (key: string) => {
     if (key === "search") {
       setSearchTerm("");
     } else if (key === "status") {
       setStatusFilter("ALL");
+    } else if (key === "staff") {
+      setStaffFilter("ALL");
     } else if (key === "from") {
       setFromDate("");
     } else if (key === "to") {
@@ -175,6 +216,7 @@ export function BookingsManager({
   const handleClearFilters = () => {
     setSearchTerm("");
     setStatusFilter("ALL");
+    setStaffFilter("ALL");
     setFromDate("");
     setToDate("");
     void resetQuery();
@@ -192,9 +234,74 @@ export function BookingsManager({
     }
   }
 
+  async function handleAssignStaff(bookingId: string, staffId: string) {
+    const resolvedStaffId = staffId === "" ? null : staffId;
+    setAssigningStaffId(bookingId);
+    const result = await onAssignStaff(bookingId, resolvedStaffId);
+    setAssigningStaffId(null);
+    if (result.error) {
+      onToast(result.error, "error");
+    } else if (result.success) {
+      onToast(result.success, "success");
+      await refresh();
+    }
+  }
+
   return (
-    <section className="ui-stack ui-stack--lg">
-      <h3 className="ui-section-title">Reservas programadas</h3>
+    <section
+      className="ui-stack ui-stack--lg"
+      data-testid="panel-section-bookings"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h3 className="ui-section-title">Reservas programadas</h3>
+        <ExportButton
+          data={bookings}
+          filename={`reservas-${new Date().toISOString().split("T")[0]}`}
+          resourceType="bookings"
+          testId="export-bookings-csv"
+          columns={[
+            { key: "code", label: "Código" },
+            { key: "status", label: "Estado" },
+            {
+              key: "scheduledAt",
+              label: "Fecha programada",
+              transform: (b) => formatDateTime(b.scheduledAt),
+            },
+            {
+              key: "service",
+              label: "Servicio",
+              transform: (b) => b.service.name,
+            },
+            {
+              key: "property",
+              label: "Propiedad",
+              transform: (b) => b.property.label,
+            },
+            {
+              key: "customer",
+              label: "Cliente",
+              transform: (b) =>
+                b.customer?.fullName ?? b.customer?.email ?? "Sin cliente",
+            },
+            {
+              key: "assignedStaff",
+              label: "Personal asignado",
+              transform: (b) =>
+                b.assignedStaff?.fullName ??
+                b.assignedStaff?.email ??
+                "Sin asignar",
+            },
+            { key: "durationMin", label: "Duración (min)" },
+            {
+              key: "totalAmount",
+              label: "Monto total",
+              transform: (b) => `$${b.totalAmount.toFixed(2)}`,
+            },
+            { key: "notes", label: "Notas", transform: (b) => b.notes ?? "" },
+          ]}
+          disabled={isLoading}
+        />
+      </div>
       <div className="flex flex-col gap-3">
         <div className="w-full sm:max-w-xs">
           <SearchBar
@@ -221,6 +328,23 @@ export function BookingsManager({
               <option value="IN_PROGRESS">En curso</option>
               <option value="COMPLETED">Completada</option>
               <option value="CANCELLED">Cancelada</option>
+            </select>
+          </label>
+
+          <label className="ui-field">
+            <span className="ui-field__label">Personal asignado</span>
+            <select
+              data-testid="booking-staff-filter"
+              value={staffFilter}
+              onChange={(event) => setStaffFilter(event.target.value)}
+              className="ui-input"
+            >
+              <option value="ALL">Todos</option>
+              {staffUsers.map((staff) => (
+                <option key={staff.id} value={staff.id}>
+                  {staff.fullName ?? staff.email}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -352,6 +476,54 @@ export function BookingsManager({
                       </option>
                     ))}
                   </select>
+                </label>
+                <label className="ui-field">
+                  <span
+                    className="ui-field__label"
+                    id={`staff-label-${booking.id}`}
+                  >
+                    Personal asignado
+                  </span>
+                  <select
+                    data-testid="booking-staff-select"
+                    value={booking.assignedStaff?.id ?? ""}
+                    onChange={(event) =>
+                      handleAssignStaff(booking.id, event.target.value)
+                    }
+                    disabled={
+                      assigningStaffId === booking.id ||
+                      booking.status === "COMPLETED" ||
+                      booking.status === "CANCELLED"
+                    }
+                    className="ui-input"
+                    aria-labelledby={`staff-label-${booking.id}`}
+                    aria-busy={assigningStaffId === booking.id}
+                    aria-describedby={
+                      booking.status === "COMPLETED" ||
+                      booking.status === "CANCELLED"
+                        ? `staff-disabled-${booking.id}`
+                        : undefined
+                    }
+                  >
+                    <option value="">Sin asignar</option>
+                    {staffUsers.map((staff) => (
+                      <option key={staff.id} value={staff.id}>
+                        {staff.fullName ?? staff.email}
+                      </option>
+                    ))}
+                  </select>
+                  {(booking.status === "COMPLETED" ||
+                    booking.status === "CANCELLED") && (
+                    <span
+                      id={`staff-disabled-${booking.id}`}
+                      className="sr-only"
+                    >
+                      No se puede modificar el personal asignado para reservas{" "}
+                      {booking.status === "COMPLETED"
+                        ? "completadas"
+                        : "canceladas"}
+                    </span>
+                  )}
                 </label>
               </div>
 

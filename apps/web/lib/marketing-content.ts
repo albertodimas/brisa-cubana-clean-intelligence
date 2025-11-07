@@ -259,7 +259,7 @@ export const processSteps: ProcessStep[] = [
   {
     title: "Operación continua",
     description:
-      "Cuadrillas con suministros estandarizados, lavado propio y checklists firmados in situ para cada turnover.",
+      "Equipos con suministros estandarizados, lavado propio y checklists firmados in situ para cada turnover.",
     icon: ArrowPathIcon,
   },
   {

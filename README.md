@@ -16,6 +16,7 @@ Monorepo (pnpm + Turborepo) para la plataforma operativa de **Brisa Cubana Clean
 - Deploys automatizados en Vercel (web) y API pública `https://api.brisacubanacleanintelligence.com`.
 - Salud, riesgos y suites en verde: ver [`docs/overview/status.md`](docs/overview/status.md).
 - Historial previo (octubre 2025) archivado en [`docs/archive/2025-10-status.md`](docs/archive/2025-10-status.md).
+- Nuevos módulos (Sprint 4): vista operativa de calendario (`/panel/calendario`), dashboard de analytics/marketing y sistema de notificaciones multi-canal.
 
 ---
 

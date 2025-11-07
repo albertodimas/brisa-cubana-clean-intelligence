@@ -1,5 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
+import type { Route } from "next";
 import { ChevronRight, Home } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -11,7 +12,7 @@ export interface BreadcrumbItem {
   /**
    * URL del breadcrumb
    */
-  href?: string;
+  href?: Route | string;
   /**
    * Icono personalizado
    */
@@ -34,7 +35,7 @@ export interface BreadcrumbsProps {
   /**
    * URL del home
    */
-  homeHref?: string;
+  homeHref?: Route | string;
   /**
    * Clases adicionales
    */
@@ -59,7 +60,7 @@ export function Breadcrumbs({
           <>
             <li>
               <Link
-                href={homeHref as any}
+                href={(homeHref || "/") as Route}
                 className={cn(
                   "flex items-center text-sm text-brisa-400 hover:text-brisa-200",
                   "transition-colors duration-200",
@@ -86,7 +87,7 @@ export function Breadcrumbs({
               <li>
                 {item.href && !isLast ? (
                   <Link
-                    href={item.href as any}
+                    href={item.href as Route}
                     className={cn(
                       "flex items-center gap-1.5 text-sm text-brisa-400 hover:text-brisa-200",
                       "transition-colors duration-200",

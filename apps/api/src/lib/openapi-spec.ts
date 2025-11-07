@@ -52,6 +52,14 @@ export const openApiSpec = {
       name: "Portal",
       description: "Flujos de acceso del portal cliente",
     },
+    {
+      name: "Calendar",
+      description: "Vista operativa de reservas y disponibilidad",
+    },
+    {
+      name: "Marketing",
+      description: "Contenido comercial (stats, testimonios, precios, FAQs)",
+    },
     { name: "Health", description: "Health checks y monitoreo" },
   ],
   paths: {
@@ -1092,6 +1100,634 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/calendar": {
+      get: {
+        tags: ["Calendar"],
+        summary: "Obtener calendario operacional",
+        description:
+          "Devuelve reservas agrupadas por fecha dentro de un rango máximo de 90 días con métricas resumidas.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "from",
+            in: "query",
+            required: true,
+            schema: { type: "string", format: "date-time" },
+            description: "Fecha de inicio (inclusive) del rango a consultar.",
+          },
+          {
+            name: "to",
+            in: "query",
+            required: true,
+            schema: { type: "string", format: "date-time" },
+            description:
+              "Fecha de término (inclusive). No debe superar 90 días desde `from`.",
+          },
+          {
+            name: "status",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: [
+                "PENDING",
+                "CONFIRMED",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED",
+              ],
+            },
+            description: "Filtrar por estado de la reserva.",
+          },
+          {
+            name: "propertyId",
+            in: "query",
+            schema: { type: "string" },
+            description: "Filtrar por propiedad.",
+          },
+          {
+            name: "serviceId",
+            in: "query",
+            schema: { type: "string" },
+            description: "Filtrar por servicio.",
+          },
+          {
+            name: "assignedStaffId",
+            in: "query",
+            schema: { type: "string" },
+            description: "Filtrar por miembro de staff asignado.",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Calendario agrupado por fecha",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CalendarResponse" },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
+    "/api/calendar/availability": {
+      get: {
+        tags: ["Calendar"],
+        summary: "Consultar disponibilidad diaria",
+        description:
+          "Calcula intervalos disponibles para una propiedad y duración específica usando las reservas existentes del día.",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "date",
+            in: "query",
+            required: true,
+            schema: { type: "string", format: "date-time" },
+            description:
+              "Fecha del día a consultar (se usa la zona horaria del servidor).",
+          },
+          {
+            name: "propertyId",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+            description: "Identificador de la propiedad a consultar.",
+          },
+          {
+            name: "durationMin",
+            in: "query",
+            schema: { type: "integer", minimum: 30, default: 60 },
+            description:
+              "Duración estimada en minutos. Debe ser >= 30 (por defecto 60).",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Slots disponibles y reservas actuales del día",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/CalendarAvailabilityResponse",
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
+    "/api/marketing/stats/portfolio": {
+      get: {
+        tags: ["Marketing"],
+        summary: "Obtener métricas de portafolio",
+        description:
+          "Devuelve la última captura de métricas públicas mostradas en la landing (propiedades activas, rating promedio, turnovers).",
+        responses: {
+          "200": {
+            description: "Métricas vigentes",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/PortfolioStats" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ["Marketing"],
+        summary: "Registrar nueva métrica de portafolio",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PortfolioStatsRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Métrica registrada",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/PortfolioStats" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
+    "/api/marketing/testimonials": {
+      get: {
+        tags: ["Marketing"],
+        summary: "Listar testimonios publicados",
+        parameters: [
+          {
+            name: "showAll",
+            in: "query",
+            schema: { type: "boolean" },
+            description:
+              "Cuando es true devuelve todos los registros (requiere autenticación).",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Listado de testimonios",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/Testimonial" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ["Marketing"],
+        summary: "Crear testimonio",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/TestimonialRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Testimonio creado",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/Testimonial" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
+    "/api/marketing/testimonials/{id}": {
+      patch: {
+        tags: ["Marketing"],
+        summary: "Actualizar testimonio",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/TestimonialRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Testimonio actualizado",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/Testimonial" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      delete: {
+        tags: ["Marketing"],
+        summary: "Eliminar testimonio",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Testimonio eliminado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "Testimonio eliminado exitosamente" },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/marketing/faqs": {
+      get: {
+        tags: ["Marketing"],
+        summary: "Listar FAQs públicas",
+        parameters: [
+          {
+            name: "showAll",
+            in: "query",
+            schema: { type: "boolean" },
+            description:
+              "Cuando es true devuelve todos los registros (requiere autenticación).",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Listado de preguntas frecuentes",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/FAQ" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ["Marketing"],
+        summary: "Crear FAQ",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/FAQRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "FAQ creada",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/FAQ" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
+    "/api/marketing/faqs/{id}": {
+      patch: {
+        tags: ["Marketing"],
+        summary: "Actualizar FAQ",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/FAQRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "FAQ actualizada",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/FAQ" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      delete: {
+        tags: ["Marketing"],
+        summary: "Eliminar FAQ",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "FAQ eliminada",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "FAQ eliminado exitosamente" },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/marketing/pricing": {
+      get: {
+        tags: ["Marketing"],
+        summary: "Listar planes comerciales",
+        parameters: [
+          {
+            name: "showAll",
+            in: "query",
+            schema: { type: "boolean" },
+            description:
+              "Cuando es true devuelve todos los registros (requiere autenticación).",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Listado de planes",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/PricingTier" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ["Marketing"],
+        summary: "Crear plan comercial",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PricingTierRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Plan creado",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/PricingTier" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
+    "/api/marketing/pricing/{id}": {
+      patch: {
+        tags: ["Marketing"],
+        summary: "Actualizar plan comercial",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PricingTierRequest" },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Plan actualizado",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/PricingTier" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      delete: {
+        tags: ["Marketing"],
+        summary: "Eliminar plan comercial",
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Plan eliminado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "Pricing tier eliminado exitosamente" },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/marketing/stats/market": {
+      get: {
+        tags: ["Marketing"],
+        summary: "Obtener indicadores de mercado",
+        description:
+          "Devuelve los indicadores públicos del mercado consumidos por la landing.",
+        responses: {
+          "200": {
+            description: "Listado de métricas",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/MarketStat" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ["Marketing"],
+        summary: "Crear o actualizar indicador de mercado",
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/MarketStatRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Indicador registrado",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: { $ref: "#/components/schemas/MarketStat" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/ValidationError" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
     "/api/customers": {
       get: {
         tags: ["Customers"],
@@ -1638,6 +2274,303 @@ export const openApiSpec = {
           notes: { type: "string" },
         },
       },
+      CalendarSummary: {
+        type: "object",
+        properties: {
+          totalBookings: { type: "integer", example: 12 },
+          statusCounts: {
+            type: "object",
+            additionalProperties: { type: "integer" },
+            example: {
+              CONFIRMED: 6,
+              IN_PROGRESS: 2,
+              COMPLETED: 3,
+              CANCELLED: 1,
+            },
+          },
+          totalRevenue: {
+            type: "string",
+            example: "1249.00",
+            description:
+              "Ingresos estimados del rango (formateado con 2 decimales).",
+          },
+        },
+      },
+      CalendarResponse: {
+        type: "object",
+        properties: {
+          data: {
+            type: "object",
+            properties: {
+              bookingsByDate: {
+                type: "object",
+                additionalProperties: {
+                  type: "array",
+                  items: { $ref: "#/components/schemas/Booking" },
+                },
+              },
+              dateRange: {
+                type: "array",
+                items: { type: "string", format: "date" },
+                example: ["2025-11-07", "2025-11-08"],
+              },
+              summary: { $ref: "#/components/schemas/CalendarSummary" },
+            },
+          },
+        },
+      },
+      CalendarTimeSlot: {
+        type: "object",
+        properties: {
+          time: {
+            type: "string",
+            format: "date-time",
+            example: "2025-11-07T10:00:00.000Z",
+          },
+          available: { type: "boolean", example: true },
+          bookingId: {
+            type: "string",
+            nullable: true,
+            example: "clbooking123",
+          },
+        },
+      },
+      CalendarAvailabilityResponse: {
+        type: "object",
+        properties: {
+          data: {
+            type: "object",
+            properties: {
+              date: { type: "string", format: "date-time" },
+              propertyId: { type: "string" },
+              durationMin: { type: "integer" },
+              timeSlots: {
+                type: "array",
+                items: { $ref: "#/components/schemas/CalendarTimeSlot" },
+              },
+              bookings: {
+                type: "array",
+                items: { $ref: "#/components/schemas/Booking" },
+              },
+            },
+          },
+        },
+      },
+      PortfolioStats: {
+        type: "object",
+        properties: {
+          activeProperties: { type: "integer", example: 42 },
+          averageRating: { type: "string", example: "4.9" },
+          totalTurnovers: { type: "integer", example: 128 },
+          period: { type: "string", example: "Q4 2025" },
+          lastUpdated: {
+            type: "string",
+            format: "date-time",
+            example: "2025-11-06T09:30:00.000Z",
+          },
+        },
+      },
+      PortfolioStatsRequest: {
+        type: "object",
+        required: [
+          "activeProperties",
+          "averageRating",
+          "totalTurnovers",
+          "period",
+        ],
+        properties: {
+          activeProperties: { type: "integer", minimum: 1, example: 42 },
+          averageRating: {
+            type: "number",
+            minimum: 0,
+            maximum: 5,
+            example: 4.9,
+          },
+          totalTurnovers: { type: "integer", minimum: 0, example: 128 },
+          period: { type: "string", example: "Q4 2025" },
+        },
+      },
+      Testimonial: {
+        type: "object",
+        properties: {
+          id: { type: "string", example: "cltest123" },
+          author: { type: "string", example: "Gabriela B." },
+          role: { type: "string", example: "Propietaria" },
+          quote: {
+            type: "string",
+            example:
+              "Brisa Cubana mantuvo nuestro inventario listo cada fin de semana.",
+          },
+          status: {
+            type: "string",
+            enum: ["PENDING", "APPROVED", "REJECTED"],
+            example: "APPROVED",
+          },
+          order: { type: "integer", example: 1 },
+          isActive: { type: "boolean", example: true },
+        },
+      },
+      TestimonialRequest: {
+        type: "object",
+        required: ["author", "role", "quote"],
+        properties: {
+          author: { type: "string" },
+          role: { type: "string" },
+          quote: { type: "string" },
+          status: {
+            type: "string",
+            enum: ["PENDING", "APPROVED", "REJECTED"],
+          },
+          order: { type: "integer" },
+          isActive: { type: "boolean" },
+        },
+      },
+      FAQ: {
+        type: "object",
+        properties: {
+          id: { type: "string", example: "clfaq123" },
+          question: {
+            type: "string",
+            example: "¿Cuánto tardan en entregar un reporte completo?",
+          },
+          answer: {
+            type: "string",
+            example: "En menos de 4 horas hábiles después del servicio.",
+          },
+          order: { type: "integer", example: 3 },
+          isActive: { type: "boolean", example: true },
+        },
+      },
+      FAQRequest: {
+        type: "object",
+        required: ["question", "answer"],
+        properties: {
+          question: { type: "string" },
+          answer: { type: "string" },
+          order: { type: "integer" },
+          isActive: { type: "boolean" },
+        },
+      },
+      PricingTier: {
+        type: "object",
+        properties: {
+          id: { type: "string", example: "clplan123" },
+          tierCode: { type: "string", example: "pilot-pro" },
+          name: { type: "string", example: "Operativo" },
+          headline: { type: "string", example: "Recorridos semanales" },
+          description: {
+            type: "string",
+            nullable: true,
+            example: "Para carteras con 5-10 propiedades activas.",
+          },
+          price: { type: "string", example: "$369" },
+          priceSuffix: { type: "string", nullable: true, example: "/mes" },
+          features: {
+            type: "array",
+            items: { type: "string" },
+            example: ["Coadministrador dedicado", "Reportes 24/7"],
+          },
+          addons: {
+            type: "array",
+            nullable: true,
+            items: { type: "string" },
+            example: ["Turnos express bajo demanda"],
+          },
+          highlighted: { type: "boolean", example: true },
+          order: { type: "integer", example: 2 },
+          isActive: { type: "boolean", example: true },
+        },
+      },
+      PricingTierRequest: {
+        type: "object",
+        required: ["tierCode", "name", "headline", "price", "features"],
+        properties: {
+          tierCode: { type: "string" },
+          name: { type: "string" },
+          headline: { type: "string" },
+          description: { type: "string" },
+          price: { type: "string" },
+          priceSuffix: { type: "string" },
+          features: {
+            type: "array",
+            items: { type: "string" },
+          },
+          addons: {
+            type: "array",
+            items: { type: "string" },
+          },
+          highlighted: { type: "boolean" },
+          order: { type: "integer" },
+          isActive: { type: "boolean" },
+        },
+      },
+      MarketStat: {
+        type: "object",
+        properties: {
+          metricId: { type: "string", example: "turnover-time" },
+          label: { type: "string", example: "Tiempo promedio de turnover" },
+          value: { type: "number", example: 3.2 },
+          valueMax: { type: "number", nullable: true, example: 5 },
+          source: { type: "string", example: "Datos internos" },
+          sourceUrl: {
+            type: "string",
+            nullable: true,
+            format: "uri",
+            example: "https://example.com/datos-turnover",
+          },
+          period: { type: "string", nullable: true, example: "Q3 2025" },
+          notes: {
+            type: "string",
+            nullable: true,
+            example: "Incluye inventario piloto Miami",
+          },
+          presentation: {
+            type: "object",
+            properties: {
+              format: { type: "string", enum: ["single", "range"] },
+              decimals: { type: "integer", nullable: true },
+              prefix: { type: "string", nullable: true },
+              suffix: { type: "string", nullable: true },
+            },
+          },
+          lastUpdated: {
+            type: "string",
+            format: "date-time",
+            example: "2025-11-05T15:00:00.000Z",
+          },
+        },
+      },
+      MarketStatRequest: {
+        type: "object",
+        required: [
+          "metricId",
+          "label",
+          "value",
+          "source",
+          "presentation",
+          "lastUpdated",
+        ],
+        properties: {
+          metricId: { type: "string" },
+          label: { type: "string" },
+          value: { type: "number" },
+          valueMax: { type: "number" },
+          source: { type: "string" },
+          sourceUrl: { type: "string", format: "uri" },
+          period: { type: "string" },
+          notes: { type: "string" },
+          presentation: {
+            type: "object",
+            properties: {
+              format: { type: "string", enum: ["single", "range"] },
+              decimals: { type: "integer" },
+              prefix: { type: "string" },
+              suffix: { type: "string" },
+            },
+          },
+          lastUpdated: { type: "string", format: "date-time" },
+        },
+      },
       Booking: {
         type: "object",
         properties: {
@@ -1683,6 +2616,15 @@ export const openApiSpec = {
             },
           },
           customer: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string" },
+              fullName: { type: "string", nullable: true },
+              email: { type: "string", format: "email" },
+            },
+          },
+          assignedStaff: {
             type: "object",
             nullable: true,
             properties: {

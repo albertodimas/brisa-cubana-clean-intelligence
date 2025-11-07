@@ -124,16 +124,27 @@ const config = {
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-smooth",
+        "fade-out": "fade-out 0.2s ease-smooth",
         "slide-up": "slide-up 0.4s ease-smooth",
         "slide-down": "slide-down 0.4s ease-smooth",
+        "slide-left": "slide-left 0.3s ease-smooth",
+        "slide-right": "slide-right 0.3s ease-smooth",
         "scale-in": "scale-in 0.2s ease-smooth",
+        "scale-out": "scale-out 0.15s ease-smooth",
+        "bounce-in": "bounce-in 0.5s ease-bounce",
+        shake: "shake 0.5s ease-in-out",
         shimmer: "shimmer 2s infinite",
         "spin-slow": "spin 3s linear infinite",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       keyframes: {
         "fade-in": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
+        },
+        "fade-out": {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
         },
         "slide-up": {
           "0%": { transform: "translateY(10px)", opacity: "0" },
@@ -143,13 +154,40 @@ const config = {
           "0%": { transform: "translateY(-10px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
+        "slide-left": {
+          "0%": { transform: "translateX(10px)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
+        "slide-right": {
+          "0%": { transform: "translateX(-10px)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
         "scale-in": {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "scale-out": {
+          "0%": { transform: "scale(1)", opacity: "1" },
+          "100%": { transform: "scale(0.95)", opacity: "0" },
+        },
+        "bounce-in": {
+          "0%": { transform: "scale(0.3)", opacity: "0" },
+          "50%": { transform: "scale(1.05)" },
+          "70%": { transform: "scale(0.9)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-5px)" },
+          "20%, 40%, 60%, 80%": { transform: "translateX(5px)" },
+        },
         shimmer: {
           "0%": { backgroundPosition: "-1000px 0" },
           "100%": { backgroundPosition: "1000px 0" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
         },
       },
       backdropBlur: {

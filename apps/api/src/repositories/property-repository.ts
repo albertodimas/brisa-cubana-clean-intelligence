@@ -137,6 +137,7 @@ export class PropertyRepository implements IPropertyRepository {
     search,
     city,
     type,
+    ownerId,
     limit = 50,
     cursor,
   }: PropertySearchParams): Promise<{
@@ -151,6 +152,10 @@ export class PropertyRepository implements IPropertyRepository {
 
     if (type) {
       where.type = type;
+    }
+
+    if (ownerId) {
+      where.ownerId = ownerId;
     }
 
     if (search) {

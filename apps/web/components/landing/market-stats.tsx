@@ -40,7 +40,7 @@ const HIGHLIGHT_STATS = [
     id: "occupancy_rate",
     heading: "Programación garantizada",
     prefixText: "24/7",
-    body: "Disponibilidad continua con cuadrillas en guardia, dashboard y alertas en vivo.",
+    body: "Disponibilidad continua con equipo en guardia, portal de cliente y alertas en tiempo real.",
   },
   {
     id: "active_listings",
@@ -167,7 +167,10 @@ export function MarketStatsSnapshot() {
   );
 
   return (
-    <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-white p-6 dark:from-brisa-900/60 dark:via-brisa-950">
+    <div
+      data-testid="market-stats-snapshot"
+      className="grid gap-4 rounded-2xl bg-gradient-to-br from-brisa-100 via-white to-white p-6 dark:from-brisa-900/60 dark:via-brisa-950"
+    >
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm font-semibold text-brisa-700 dark:text-brisa-100">
           Datos clave actualizados

@@ -23,6 +23,10 @@ import type {
   BookingFilters,
   BookingUpdateInput,
 } from "../repositories/booking-repository.js";
+import {
+  notifyBookingCreated,
+  handleBookingUpdate,
+} from "../services/booking-notification-dispatcher.js";
 
 const createBookingSchema = z
   .object({
@@ -291,6 +295,11 @@ router.post(
       const bookingWithRelations =
         await bookingRepository.findByIdWithRelations(created.id);
 
+      // Queue notification for booking created
+      if (bookingWithRelations) {
+        void notifyBookingCreated(bookingWithRelations);
+      }
+
       return c.json(
         {
           data: serializeBooking(bookingWithRelations ?? created),
@@ -336,13 +345,14 @@ router.patch(
       }
     }
 
+    // Get existing booking for notification comparison
+    const existingBooking = await bookingRepository.findById(id);
+    if (!existingBooking) {
+      return c.json({ error: "Reserva no encontrada" }, 404);
+    }
+
     // SECURITY: Si se cambia horario o propiedad, validar conflicto
     if (rest.scheduledAt || rest.durationMin !== undefined || propertyId) {
-      const existingBooking = await bookingRepository.findById(id);
-      if (!existingBooking) {
-        return c.json({ error: "Reserva no encontrada" }, 404);
-      }
-
       const targetPropertyId = propertyId ?? existingBooking.propertyId;
       const targetScheduledAt = rest.scheduledAt ?? existingBooking.scheduledAt;
       const targetDuration =
@@ -397,6 +407,9 @@ router.patch(
       if (!updatedBooking) {
         return c.json({ error: "Reserva no encontrada" }, 404);
       }
+
+      // Queue notifications for booking updates
+      void handleBookingUpdate(existingBooking, updatedBooking);
 
       return c.json({ data: serializeBooking(updatedBooking) });
     } catch (error) {

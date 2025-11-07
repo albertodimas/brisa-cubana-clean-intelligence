@@ -1,9 +1,21 @@
-import type { NotificationType } from "@prisma/client";
+import type {
+  NotificationChannel,
+  NotificationStatus,
+  NotificationType,
+} from "@prisma/client";
 
 export type NotificationResponse = {
   id: string;
   type: NotificationType;
   message: string;
+  subject: string | null;
+  channel: NotificationChannel;
+  status: NotificationStatus;
+  bookingId: string | null;
+  metadata: Record<string, unknown> | null;
+  sentAt: Date | null;
+  failedAt: Date | null;
+  errorMessage: string | null;
   readAt: Date | null;
   createdAt: Date;
 };

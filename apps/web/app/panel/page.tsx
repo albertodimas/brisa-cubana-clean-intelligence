@@ -26,6 +26,7 @@ import {
   toggleUserActiveAction,
   logoutAction,
   updateLeadAction,
+  assignStaffToBookingAction,
 } from "@/app/actions";
 import {
   fetchServicesPage,
@@ -35,6 +36,7 @@ import {
   fetchUsersPage,
   fetchNotificationsPage,
   fetchLeadsPage,
+  fetchStaffUsers,
   type PaginatedResult,
   type Service,
   type Booking,
@@ -88,13 +90,19 @@ async function PanelContent({ user, bookingWindow }: PanelContentProps) {
     to,
   };
 
-  const [servicesPage, bookingsPage, propertiesPage, customersPage] =
-    await Promise.all([
-      fetchServicesPage({ limit: 50 }),
-      fetchBookingsPage({ from, to, limit: 10 }),
-      fetchPropertiesPage({ limit: 50 }),
-      fetchCustomersPage({ limit: 50 }),
-    ]);
+  const [
+    servicesPage,
+    bookingsPage,
+    propertiesPage,
+    customersPage,
+    staffUsers,
+  ] = await Promise.all([
+    fetchServicesPage({ limit: 50 }),
+    fetchBookingsPage({ from, to, limit: 10 }),
+    fetchPropertiesPage({ limit: 50 }),
+    fetchCustomersPage({ limit: 50 }),
+    fetchStaffUsers(),
+  ]);
 
   const emptyUsersPage: PaginatedResult<User> = makeEmptyPage<User>(50);
   const emptyNotificationsPage: PaginatedResult<Notification> =
@@ -169,6 +177,7 @@ async function PanelContent({ user, bookingWindow }: PanelContentProps) {
           bookings={bookingsPage}
           customers={customersPage}
           users={usersPage}
+          staffUsers={staffUsers}
           notifications={notificationsPage}
           initialBookingFilters={bookingFilterDefaults}
           createService={createServiceAction}
@@ -178,6 +187,7 @@ async function PanelContent({ user, bookingWindow }: PanelContentProps) {
           updateService={updateServiceAction}
           updateProperty={updatePropertyAction}
           updateBooking={updateBookingAction}
+          assignStaffToBooking={assignStaffToBookingAction}
           updateUser={updateUserAction}
           toggleUserActive={toggleUserActiveAction}
           logout={logoutAction}
@@ -228,6 +238,7 @@ function PanelContentFallback({ user, bookingWindow }: PanelContentProps) {
           bookings={emptyBookings}
           customers={emptyCustomers}
           users={emptyUsers}
+          staffUsers={[]}
           notifications={emptyNotifications}
           initialBookingFilters={bookingFilterDefaults}
           createService={createServiceAction}
@@ -237,6 +248,7 @@ function PanelContentFallback({ user, bookingWindow }: PanelContentProps) {
           updateService={updateServiceAction}
           updateProperty={updatePropertyAction}
           updateBooking={updateBookingAction}
+          assignStaffToBooking={assignStaffToBookingAction}
           updateUser={updateUserAction}
           toggleUserActive={toggleUserActiveAction}
           logout={logoutAction}

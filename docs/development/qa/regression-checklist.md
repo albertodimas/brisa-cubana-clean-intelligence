@@ -1,444 +1,91 @@
 # Checklist de Regresiones
 
-**Última actualización:** 31 de octubre de 2025  
-**Estado:** ⚠️ En recuperación – alinea esta checklist con los hitos del [recovery-plan](../../overview/recovery-plan.md) antes de marcar un despliegue como listo.
+**Última actualización:** 7 de noviembre de 2025  
+**Estado:** ✅ Validado con suites `critical` (47 tests) y `full` (91 tests). Usa esta lista para QA manual antes de cada despliegue a producción; alinéala con el [recovery-plan](../../overview/recovery-plan.md) cuando se habiliten módulos nuevos.
 
-Este documento define los escenarios críticos que deben verificarse antes de cada despliegue a producción para prevenir regresiones.
+> Comandos mínimos antes de esta checklist: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm docs:verify`, `pnpm exec playwright test --project=critical`.
+
+Cobertura automática actual: <!-- PLAYWRIGHT_CRITICAL_COUNT -->47<!-- /PLAYWRIGHT_CRITICAL_COUNT --> pruebas en la suite `critical`.
 
 ---
 
 ## 1. Autenticación y Autorización
 
-### 1.1 Login Exitoso
-
-- [ ] Usuario ADMIN puede iniciar sesión
-- [ ] Usuario COORDINATOR puede iniciar sesión
-- [ ] Usuario CLIENT puede iniciar sesión
-- [ ] Usuario STAFF puede iniciar sesión (si implementado)
-- [ ] Sesión persiste después de recargar página
-- [ ] Cookie HttpOnly `auth_token` se establece correctamente
-
-### 1.2 Login Fallido
-
-- [ ] Credenciales incorrectas muestran error apropiado
-- [ ] Email inválido es rechazado por validación
-- [ ] Password vacío es rechazado
-- [ ] Usuario no existente muestra error genérico (sin revelar existencia)
-
-### 1.3 Rate Limiting
-
-- [ ] 5 intentos fallidos de login activan rate limit
-- [ ] Rate limit muestra mensaje claro al usuario
-- [ ] Rate limit se resetea después de 60 segundos
-- [ ] Rate limit no afecta usuarios diferentes (por IP)
-
-### 1.4 Logout
-
-- [ ] Botón de logout es visible cuando hay sesión activa
-- [ ] Logout limpia cookie `auth_token`
-- [ ] Logout redirige a página de login o home público
-- [ ] No se puede acceder a operaciones protegidas después de logout
-
-### 1.5 Permisos por Rol
-
-- [ ] ADMIN puede crear/editar/eliminar todos los recursos
-- [ ] COORDINATOR puede crear/editar servicios, propiedades, reservas
-- [ ] CLIENT no puede crear servicios ni propiedades
-- [ ] Endpoints protegidos retornan 401 sin autenticación
-- [ ] Endpoints con permisos insuficientes retornan 403
-
----
-
-## 2. API de Servicios
-
-### 2.1 Listar Servicios (Público)
-
-- [ ] `/api/services` retorna lista de servicios sin autenticación
-- [ ] Servicios ordenados por `name ASC`
-- [ ] Incluye campos: id, name, description, basePrice, durationMin, active, createdAt, updatedAt
-- [ ] Servicios inactivos (`active: false`) también se retornan
-
-### 2.2 Crear Servicio (ADMIN/COORDINATOR)
-
-- [ ] POST `/api/services` crea servicio con datos válidos
-- [ ] Requiere autenticación (Bearer JWT válido)
-- [ ] Requiere rol ADMIN o COORDINATOR
-- [ ] Valida que `name` no esté vacío
-- [ ] Valida que `basePrice` sea numérico positivo
-- [ ] Valida que `durationMin` sea numérico positivo
-- [ ] Retorna 201 con servicio creado
-
-### 2.3 Actualizar Servicio (ADMIN/COORDINATOR)
-
-- [ ] PATCH `/api/services/:id` actualiza servicio existente
-- [ ] Requiere autenticación y permisos
-- [ ] Permite actualización parcial de campos
-- [ ] Valida datos igual que creación
-- [ ] Retorna 404 si servicio no existe
-- [ ] Retorna servicio actualizado
-
-### 2.4 Eliminar Servicio (ADMIN)
-
-- [ ] DELETE `/api/services/:id` marca el servicio como eliminado (`deletedAt` no nulo)
-- [ ] Requiere autenticación y permisos ADMIN
-- [ ] Retorna 404 si el servicio no existe o ya fue eliminado
-- [ ] Servicio eliminado no aparece en listados (soft delete aplicado)
-
----
-
-## 3. API de Propiedades
-
-### 3.1 Listar Propiedades (Público)
-
-- [ ] `/api/properties` retorna lista de propiedades sin autenticación
-- [ ] Incluye relación con `owner` (User)
-- [ ] Ordenadas por `id ASC`
-
-### 3.2 Crear Propiedad (ADMIN/COORDINATOR)
-
-- [ ] POST `/api/properties` crea propiedad con datos válidos
-- [ ] Requiere autenticación y permisos
-- [ ] Valida que `address` no esté vacío
-- [ ] Valida que `ownerId` sea UUID válido
-- [ ] Valida que `ownerId` corresponda a usuario existente
-- [ ] Retorna 201 con propiedad creada
-
-### 3.3 Actualizar Propiedad (ADMIN/COORDINATOR)
-
-- [ ] PATCH `/api/properties/:id` actualiza propiedad
-- [ ] Permite actualización parcial
-- [ ] Retorna 404 si propiedad no existe
-
----
-
-## 4. API de Reservas (Bookings)
-
-### 4.1 Listar Reservas (Público con filtros)
-
-- [ ] `/api/bookings` retorna todas las reservas sin filtros
-- [ ] Filtro `status` funciona (ej. `?status=CONFIRMED`)
-- [ ] Filtro `from` funciona (fecha inicio)
-- [ ] Filtro `to` funciona (fecha fin)
-- [ ] Filtro `propertyId` funciona
-- [ ] Filtro `serviceId` funciona
-- [ ] Filtro `customerId` funciona
-- [ ] Combinación de filtros funciona
-- [ ] Incluye relaciones: service, property, customer
-
-### 4.2 Crear Reserva (ADMIN/COORDINATOR)
-
-- [ ] POST `/api/bookings` crea reserva con datos válidos
-- [ ] Genera código único formato BRISA-XXXX
-- [ ] Copia `finalPrice` desde `service.basePrice`
-- [ ] Copia `durationMin` desde `service.durationMin`
-- [ ] Valida que `scheduledFor` sea fecha válida
-- [ ] Valida que `serviceId`, `propertyId`, `customerId` existan
-- [ ] Retorna 201 con reserva creada
-
-### 4.3 Actualizar Reserva (ADMIN/COORDINATOR)
-
-- [ ] PATCH `/api/bookings/:id` actualiza reserva
-- [ ] Permite cambiar `status` (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED)
-- [ ] Permite cambiar `scheduledFor`
-- [ ] Permite cambiar `finalPrice`
-- [ ] Retorna reserva actualizada
-
----
-
-## 5. API de Clientes
-
-### 5.1 Listar Clientes (ADMIN/COORDINATOR)
-
-- [ ] `/api/customers` retorna usuarios con rol CLIENT
-- [ ] Requiere autenticación y permisos ADMIN/COORDINATOR
-- [ ] Retorna solo: id, email, fullName
-- [ ] No expone password hash ni otros datos sensibles
-
----
-
-## 6. Frontend Web
-
-### 6.1 Landing Page
-
-- [ ] Página principal (`/`) muestra hero con copy actualizado y CTA dobles (“Solicita una propuesta”, “Explora el portal cliente”)
-- [ ] Sección “Oferta de valor” renderiza los tres pilares (respuesta garantizada, visibilidad total, operación sin fricción) y métricas (<120 min, reportes <4 h, CSAT 4.9)
-- [ ] Bloque “Funcionalidades clave del portal” muestra timeline, alertas y control de inventario con sus métricas
-- [ ] Bloque “QA & Garantía” presenta tres highlights y checklist semanal
-- [ ] Secciones “Proceso”, “Historias de clientes” y “Planes y precios” cargan sin errores
-- [ ] FAQ interactiva abre/cierra acordeones correctamente
-- [ ] Formulario “¿Listo para recibir tu propuesta?” valida campos obligatorios y muestra feedback (éxito/error)
-- [ ] CTA hero no mostrados para usuarios autenticados mantienen sesión activa (chip en panel tras login)
-- [ ] Bloque “Datos clave actualizados” muestra valores, tooltips con fuente y no cae en fallback “Dato en actualización”
-- [ ] Ruta `/en` se renderiza en inglés, mantiene enlaces `canonical`/`hreflang` y CTA apunta al formulario principal
-- [ ] Encabezado y navegación muestran el nuevo logotipo vectorial (`BrandLogo`) y mantienen contraste adecuado en modo scrolled/no scrolled
-- [ ] Paleta aqua/navy aplicada (CTA principal, links hover, botones) corresponde al manual de marca y mantiene contraste AA
-
-### 6.2 Panel Operativo
-
-- [ ] Panel se muestra solo a usuarios ADMIN/COORDINATOR
-- [ ] Muestra secciones: Crear servicio, Crear propiedad, Crear reserva
-- [ ] Formularios tienen validación cliente (HTML5)
-- [ ] Formularios muestran mensajes de éxito/error
-- [ ] Filtros de reservas funcionan (selector de estado, rango de fechas)
-- [ ] Lista de reservas se actualiza después de crear/actualizar
-- [ ] Módulo “Leads comerciales” lista los leads ordenados por fecha y permite actualizar estado y notas (verifica persistencia y refresco)
-
-### 6.3 Formularios
-
-- [ ] Crear servicio: muestra mensaje "Servicio creado" al éxito
-- [ ] Crear propiedad: muestra mensaje apropiado
-- [ ] Crear reserva: muestra mensaje apropiado
-- [ ] Actualizar servicio (toggle active): actualiza sin recargar
-- [ ] Actualizar reserva (cambiar estado): persiste cambio
-- [ ] Errores de servidor se muestran al usuario
-
-### 6.4 Proxy API
-
-- [ ] Llamadas `/api/*` desde frontend se enrutan a API Hono
-- [ ] CORS está configurado correctamente
-- [ ] Cookies HttpOnly se preservan
-- [ ] Query strings se preservan
-- [ ] Headers sensibles (`content-length`, `content-encoding`) se limpian
-
-### 6.5 Landing – Analítica y Captura de Leads
-
-- [ ] `LEAD_WEBHOOK_URL` configurado en entorno (revisar Vercel/GitHub Secrets)
-- [ ] Enviar formulario público (`/`, sección contacto) produce 200 y dispara evento en destino (Slack/CRM) con payload esperado (puedes validar manualmente con `scripts/test-lead-webhook.sh` apuntando a la URL de webhook)
-- [ ] CTA hero y pricing generan eventos `cta_request_proposal` y `cta_portal_demo` visibles en la plataforma de analítica (Vercel/PostHog/GA4)
-- [ ] CTA “Agenda diagnóstico express” registra evento `cta_value_pillars` con metadata `plan=turnover`
-- [ ] CTA “Solicitar playbook QA completo” registra evento `cta_qa_playbook`
-- [ ] Tabla “¿Qué diferencia a cada paquete?” renderiza 3 filas y CTA `cta_plan_compare`
-- [ ] CTA de planes agregan `plan`/`inventory` a la URL y el formulario refleja el mensaje de interés + select precargado
-- [ ] Error 4xx/5xx de `/api/leads` muestra fallback “Escríbenos a … o agenda por WhatsApp” y se registra `lead_form_failed`
-- [ ] Widget flotante de WhatsApp abre el chat en `wa.me` y emite evento `whatsapp_chat_start`
-- [ ] Checkout público registra eventos `checkout_started` y `checkout_completed` (ver logs Sentry o analítica) al completar pago de prueba
-
----
-
-## 7. Base de Datos
-
-### 7.1 Schema Prisma
-
-- [ ] `prisma db push` ejecuta sin errores
-- [ ] Todas las tablas se crean correctamente
-- [ ] Seeds operativo + demo corren en el orden documentado
-
-## 8. Pagos (Stripe)
-
-### 8.1 Configuración CLI
-
-- [ ] `pnpm stripe:listen` inicia y muestra `Listening for events on` con endpoint `/api/payments/stripe/webhook`.
-- [ ] `stripe trigger checkout.session.completed` se reenvía y el webhook responde `200`.
-- [ ] `stripe trigger payment_intent.payment_failed` se reenvía y el webhook responde `200` registrando `type=payment_intent.payment_failed`.
-- [ ] Evento con firma alterada (`stripe trigger` + editar header) devuelve `400` y registra `signature_verification_failed`.
-
-### 8.2 Flujo checkout exitoso
-
-- [ ] Usuario completa selección de servicio y fecha sin errores.
-- [ ] Stripe Payment Element confirma pago en modo test y muestra pantalla de confirmación.
-- [ ] Evento `checkout.session.completed` persiste booking con estado `CONFIRMED`.
-- [ ] Logs de API registran `payment_intent.succeeded` y se genera `stripePaymentId`.
-- [ ] UI `/checkout` muestra resumen del servicio, genera PaymentIntent via `/api/checkout/intent` y avanza a la fase de pago.
-
-### 8.3 Flujo checkout fallido
-
-- [ ] Stripe rechaza pago (`pm_card_chargeDeclined`) y UI muestra mensaje `Pago rechazado`.
-- [ ] El booking permanece en estado `PENDING` y se registra `lastPaymentError`.
-- [ ] Retry desde la UI reutiliza la misma Intent y concluye exitosamente tras usar tarjeta válida.
-- [ ] Modalidad fallback (Stripe no configurado o Intent fallida) muestra instrucción “Configura Stripe…”, referencia de seguimiento y CTA de reintento/correo.
-
-### 8.4 Observabilidad y entorno
-
-- [ ] Variables `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (API) y `STRIPE_PUBLISHABLE_KEY` (web) están presentes en Development/Preview/Production (verificado vía `vercel env ls`).
-- [ ] Sentry captura breadcrumb `checkout.payment_submitted` y evento de error si falla la Intent.
-- [ ] Sentry registra `checkout.intent.created`, `checkout.payment.confirmed`/`failed` y breadcrumbs (`intent:create:start`, `payment_confirmed`, `payment_failed`).
-- [ ] LHCI en nightly mantiene Performance ≥ 90 en `/checkout`.
-- [ ] En entornos sin variables Stripe, el endpoint responde `503` con mensaje "stripe unavailable".
-
-### 8.5 Integridad de datos
-
-- [ ] Foreign keys y constraints (`payments`, `bookings`) están aplicados tras `pnpm prisma migrate deploy`.
-- [ ] Índices de búsqueda (`idx_booking_payment_intent`) verificados en base de staging.
-- [ ] Seeds demo crean Intent mock (`stripePaymentId="pi_demo"`) sin duplicados.
-
-### 7.2 Seed
-
-- [ ] `pnpm db:seed` crea usuarios demo
-- [ ] Usuarios demo tienen passwords hasheados con bcrypt
-- [ ] Se crean servicios demo (Turnover Premium, Deep Clean Brickell, Post-Construcción, Amenity Refresh)
-- [ ] Se crean propiedades demo (Skyline Loft Brickell, Azure Villa Key Biscayne)
-- [ ] Se crean reservas demo (BRISA-0001, BRISA-0002, BRISA-0003)
-- [ ] Seed es idempotente (no falla si datos existen)
-
----
-
-## 8. Seguridad
-
-### 8.1 Credenciales
-
-- [ ] No hay archivos `.env` commiteados en Git
-- [ ] `.env.example` tiene valores placeholder
-- [ ] `.gitignore` incluye `.env*` (excepto `.env.example`)
-- [ ] Pre-commit hook verifica ausencia de secretos
-- [ ] Variables de entorno en Vercel están encriptadas
-
-### 8.2 JWT
-
-- [ ] Token JWT se firma con `JWT_SECRET`
-- [ ] Token incluye: userId, email, role, fullName
-- [ ] Token se valida en middleware `authenticate`
-- [ ] Token expirado retorna 401
-
-### 8.3 Passwords
-
-- [ ] Passwords se hashean con bcrypt (10 rounds)
-- [ ] Password hash nunca se retorna en API
-- [ ] Comparación de passwords usa `bcrypt.compare`
-
-### 8.4 Rate Limiting
-
-- [ ] Login tiene rate limit (5 intentos / 60 segundos)
-- [ ] Rate limit configurable vía env vars
-- [ ] Rate limit se aplica por IP (o session si implementado)
-
----
-
-### 8.5 Portal cliente (beta)
-
-- [ ] `/clientes` muestra hero, CTA dual y tarjetas de valor actualizadas.
-- [ ] `/clientes/[customerId]` renderiza métricas, tarjetas de reservas y timeline para `cliente@brisacubanacleanintelligence.com`.
-- [ ] `POST /api/portal/auth/request` devuelve 200 y `debugToken` con un correo válido registrado.
-- [ ] `POST /api/portal/auth/verify` entrega `portalToken` cuando el token es válido.
-- [ ] Token expirado o reutilizado devuelve 400.
-- [ ] Con SMTP configurado (`PORTAL_MAGIC_LINK_*`), el correo llega y el API no expone `debugToken` cuando `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"`.
-- [ ] En entornos Preview/Production `ENABLE_TEST_UTILS` permanece en `false` y la API no muestra mensajes “Magic link email skipped - test utils mode”.
-- [ ] `GET /api/portal/bookings` responde 200 con las reservas del cliente autenticado y respeta filtros (`status`, paginación).
-- [ ] `POST /api/portal/auth/logout` invalida la sesión y limpia cookies (`portal_token`, `portal_customer_id`).
-- [ ] Tras verificar un enlace, la respuesta HTTP incluye `Set-Cookie` para `portal_token` (HttpOnly) y `portal_customer_id` con caducidad alineada a `expiresAt`.
-- [ ] El dashboard muestra callout con el tiempo restante de sesión y CTA para solicitar un nuevo enlace; al expirar, el mensaje cambia a “Tu sesión ya expiró”.
-- [ ] Botones “Reagendar” y “Cancelar” envían solicitudes válidas (`/reschedule`, `/cancel`), muestran mensajes de confirmación y actualizan la lista de reservas sin recargar la página.
-- [ ] Cada solicitud genera una notificación en el panel de operaciones (roles ADMIN/COORDINATOR) con el tipo correcto (`BOOKING_CANCELLED` o `BOOKING_RESCHEDULED`).
-- [ ] La página `/clientes/[customerId]/reservas/[bookingId]` muestra detalle, timeline y CTA de soporte; las acciones desde allí replican el comportamiento del dashboard.
-- [ ] Páginas `/clientes/acceso` y `/clientes/acceso/confirmar` muestran estados correctos (idle/loading/success/error).
-- [ ] Consultar [`qa/portal-accessibility.md`](portal-accessibility.md) y cerrar hallazgos abiertos (aria-live, aria-hidden) antes de GA.
-
-## 9. Deployment
-
-### 9.1 Build
-
-- [ ] `pnpm turbo run build` ejecuta sin errores
-- [ ] Build de API incluye `prisma generate`
-- [ ] Build de Web no tiene errores de TypeScript
-- [ ] Build no tiene warnings críticos
-
-### 9.2 Vercel
-
-- [ ] Deployment a producción se completa sin errores
-- [ ] Variables de entorno están configuradas en Production
-- [ ] Variables de entorno están configuradas en Preview
-- [ ] Logs no muestran errores de conexión a base de datos
-- [ ] Favicon se carga correctamente (no 404)
-
-### 9.3 CI/CD
-
-- [ ] GitHub Actions CI pasa (lint, typecheck, test, e2e, build)
-- [ ] Tests unitarios pasan (161 tests en total: API + Web)
-- [ ] Tests E2E críticos pasan (<!-- PLAYWRIGHT_CRITICAL_COUNT -->20<!-- /PLAYWRIGHT_CRITICAL_COUNT --> tests @critical)
-- [ ] Pre-commit hooks se ejecutan correctamente
-- [ ] Verificación de secretos pasa
-
-### 9.4 Validación Post-Deploy
-
-**Script automatizado:** `bash scripts/qa/validate-accessibility.sh [production|preview]`
-
-- [ ] Portal landing (`/clientes`) responde 200
-- [ ] Portal auth (`/clientes/acceso`) responde 200
-- [ ] HTML incluye `aria-live="polite"` (fix commit `ce37e09`)
-- [ ] HTML incluye `aria-hidden="true"` en íconos decorativos
-- [ ] Headings jerárquicos (h1/h2) presentes
-- [ ] Landmarks semánticos (nav, main, section) correctos
-- [ ] Atributo `lang="es"` presente en HTML
-- [ ] Viewport meta configurado correctamente
-
-**Validación manual post-deploy:**
-
-- [ ] Ejecutar axe DevTools en `/clientes` (espera 0 issues críticos/serios)
-- [ ] Ejecutar Lighthouse en `/clientes` (espera score A11y 100/100, vs 97/100 pre-fix)
-- [ ] Probar navegación con NVDA para confirmar `aria-live` funciona
-- [ ] Actualizar [docs/development/qa/portal-accessibility.md](portal-accessibility.md) con resultados y fecha
-
----
-
-## 10. Performance
-
-### 10.1 API
-
-- [ ] Endpoint `/api/services` responde en < 500ms
-- [ ] Endpoint `/api/bookings` con filtros responde en < 1s
-- [ ] Login responde en < 800ms (incluyendo bcrypt)
-- [ ] No hay queries N+1 (verificar con Prisma logs)
-
-### 10.2 Web
-
-- [ ] Página principal carga en < 3s (First Contentful Paint)
-- [ ] Panel operativo es interactivo en < 2s (Time to Interactive)
-- [ ] No hay errores en consola del navegador
-- [ ] Assets (favicon, images) se cargan correctamente
-
----
-
-## 11. Monitoreo
-
-### 11.1 Logs
-
-- [ ] Logs de Vercel no muestran errores no manejados
-- [ ] Logs estructurados incluyen timestamps
-- [ ] Errores incluyen stack traces (en desarrollo)
-- [ ] No se loguean datos sensibles (passwords, tokens)
-
-### 11.2 Circuito Lead → Slack → PostHog
-
-- [ ] Enviar lead desde landing (`/`), validar mensaje de confirmación.
-- [ ] Confirmar en Slack `#leads-operaciones` el mensaje `🆕 Nuevo Lead Recibido`.
-- [ ] Ejecutar `POSTHOG_API_KEY=… pnpm posthog:test-event checkout_payment_failed` para verificar ingestión.
-- [ ] Ejecutar `POSTHOG_API_KEY=… SLACK_WEBHOOK_URL=… pnpm posthog:monitor` y confirmar alerta `:rotating_light:`.
-- [ ] Registrar fecha en `docs/operations/slack-integration.md` (tabla de verificaciones).
-
-## 12. Documentación
-
-### 12.1 Consistencia
-
-- [ ] README.md tiene instrucciones actualizadas
-- [ ] docs/development/guides/quickstart.md es consistente con setup actual
-- [ ] docs/overview/status.md refleja estado real del proyecto
-- [ ] docs/operations/security.md tiene procedimientos vigentes
-- [ ] CHANGELOG.md tiene últimos cambios (si implementado)
-
----
-
-## Uso del Checklist
-
-### Antes de cada PR
-
-- Ejecutar checklist completo en branch de desarrollo
-- Marcar items que fueron afectados por el PR
-- Ejecutar tests E2E localmente
-
-### Antes de deployment a producción
-
-- Ejecutar checklist completo
-- Verificar que CI está en verde
-- Confirmar con stakeholder cambios funcionales
-- Registrar evidencias en `docs/development/qa/reports/<fecha>-go-live.md`. Último informe: [2025-10-20](reports/2025-10-20-go-live.md).
-
-### Después de deployment
-
-- Verificar logs de Vercel
-- Ejecutar smoke tests en producción
-- Verificar métricas clave (latencia, errores)
-
----
-
-**Nota:** Este checklist es un documento vivo. Añadir nuevos items conforme se descubran regresiones o se añadan funcionalidades.
-
-- [ ] Ejecutar `pnpm --filter @brisa/api test:integration` (requiere que la base local esté disponible).
+- [ ] Login ADMIN, COORDINATOR, STAFF y CLIENT funciona (muestra panel/portal correcto).
+- [ ] Credenciales inválidas disparan mensaje y el rate limit (config por defecto 20 intentos/60 s) responde con toast claro.
+- [ ] Sesión persiste tras refresh, `auth_token` y `session-token` mantienen flags `HttpOnly`, `Secure`, `SameSite=Lax`.
+- [ ] Logout borra cookies y evita acceso directo a `/panel/*` o `/clientes/*`.
+- [ ] `/panel` solo accesible para ADMIN/COORDINATOR (STAFF redirige a `/panel/staff`, CLIENT a `/`).
+- [ ] `/panel/dashboard` y `/panel/calendario` redirigen a `/panel` si el rol no es válido.
+- [ ] `app/api/[...route]/route.ts` respeta encabezados `authorization` y propaga `Set-Cookie`.
+
+## 2. Bookings, Staff & API Operativa
+
+- [ ] Listado de reservas (`BookingsManager`) muestra filtros activos (texto, estado, staff, rango fechas) y los chips reflejan el query real.
+- [ ] Asignar y desasignar staff actualiza el backend (verificar log en `apps/api/src/routes/bookings.ts`) y refleja cambios sin recargar.
+- [ ] Filtro “Personal” persiste al navegar (estado sincronizado con `currentQuery`).
+- [ ] `PATCH /api/bookings/:id/assign-staff` valida estados prohibidos (COMPLETED/CANCELLED) y devuelve mensaje claro.
+- [ ] Health check `/health` reporta `database`, `stripe`, `email`, `sentry`. Stripe puede estar en `warning` si usa claves test; documentar en status.
+- [ ] Rate limiter de API usa Redis cuando `REDIS_URL` está presente, y cae en memoria cuando no (logs `component=rate-limit`).
+- [ ] Seeds (`pnpm --filter @brisa/api db:seed`) crean reservas demo con staff asignable y marketing content.
+
+## 3. Calendario Operativo
+
+- [ ] `/panel/calendario` carga filtros (propiedades, servicios, staff) y muestra resumen (total, confirmadas, ingresos).
+- [ ] Drag & drop: mover reserva confirmada a otro día, verificar toast “Reserva reprogramada exitosamente” y que el booking aparezca en la celda objetivo tras `router.refresh()`.
+- [ ] Las reservas COMPLETED/CANCELLED no son arrastrables (atributo `draggable="false"`).
+- [ ] Vista semanal bloquea drag&drop y mantiene botones “Mes/Semana”.
+- [ ] Al simular error (forzar `PATCH` 400) aparece toast rojo y desaparece después de 5 s (ver `calendar-status-alert`).
+- [ ] Modal de detalles permite cancelar/completar reservas y cierra correctamente.
+- [ ] `GET /api/calendar` respeta filtros y limites (≤90 días).
+- [ ] `GET /api/calendar/availability` devuelve slots y bookings para fecha/propiedad.
+
+## 4. Dashboard & Analytics
+
+- [ ] `/panel/dashboard` solo visible para ADMIN/COORDINATOR. STAFF debe ser redirigido.
+- [ ] Cards muestran totales (reservas, ingresos, staff activo, propiedades).
+- [ ] Gráficas (Recharts) cargan con skeletons mientras llega la data y son responsivas (ver `lg:grid-cols-2`).
+- [ ] Staff workload muestra colores consistentes; top properties lista máximo 5.
+- [ ] `fetchDashboardStats()` no falla si la API devuelve arrays vacíos (ver fallback en componente).
+- [ ] `tests/e2e/dashboard.spec.ts` pasa en local.
+
+## 5. Marketing Panel & Exportaciones
+
+- [ ] `/panel/marketing` (si aplica) permite crear/editar Stats, Pricing, FAQs, Testimonios.
+- [ ] CSV Export (`ExportButton`) aparece en managers de reservas, clientes, propiedades y servicios.
+- [ ] Al exportar >5000 filas aparece confirmación; >10 000 se trunca y se muestra mensaje en tooltip.
+- [ ] Evento `csv_export` se registra (ver consola o PostHog).
+- [ ] Marketing cards en landing (`MarketStatsSnapshot`) muestran valores reales (sin “Dato en actualización”).
+- [ ] Rutas públicas `/api/marketing/*` responden sin autenticación cuando corresponde (`testimonials`, `pricing`, `market stats`).
+- [ ] Rutas protegidas requieren ADMIN/COORDINATOR y registran auditoría.
+
+## 6. Portal Cliente & Comprobantes PDF
+
+- [ ] Flujo de enlace mágico completo: solicitud → correo/debug token → confirmación → dashboard.
+- [ ] Dashboard lista próximas reservas, historial y muestra barra de expiración.
+- [ ] Cancelar y reprogramar funcionan y generan notificaciones en panel.
+- [ ] Botón “Descargar comprobante” descarga PDF con datos correctos (código, servicio, propiedad, monto, badge de estado) usando la ruta `app/api/portal/bookings/[bookingId]/pdf`.
+- [ ] Rate limit PDF (10/min) devuelve 429 y encabezados `X-RateLimit-*` cuando se supera, y se recupera tras 60 s.
+- [ ] Portal respeta dark/light mode y mantiene accesibilidad en botones (`aria-live`, `aria-label`).
+- [ ] `tests/e2e/portal-client.spec.ts` pasa apuntando a datasets seeds.
+
+## 7. Notificaciones y Background Jobs
+
+- [ ] Panel de notificaciones (`/panel?tab=notificaciones`) actualiza al marcar como leídas (botón individual + “Marcar todas”).
+- [ ] SSE stream (`/api/notifications/stream`) reconecta automáticamente; no bloquea UI cuando API no tiene Redis (fallback en memoria).
+- [ ] Servicio `booking-notification-dispatcher` marca `IN_APP` como enviados inmediatamente para evitar pendientes fantasma.
+- [ ] Email/SMS (si configurados) registran en logs `notification-service`.
+- [ ] Stripe webhook (`/api/payments/stripe/webhook`) crea `StripeWebhookEvent`, evita duplicados y genera booking + notificación.
+
+## 8. Infraestructura, Proxy y Deploy
+
+- [ ] `.github/actions/setup-project` instala Playwright solo cuando es necesario y propaga `LOGIN_RATE_LIMIT`.
+- [ ] Workflows `pr-checks`, `ci`, `nightly` tienen variables requeridas (`JWT_SECRET`, `AUTH_SECRET`, `ALLOWED_ORIGINS`, `PORTAL_MAGIC_LINK_*`, `STRIPE_SECRET_KEY`).
+- [ ] Vercel proyectos (`web`, `api`) actualizados con `ALLOWED_ORIGINS`, `PROXY_ALLOWED_ORIGINS`, `PORTAL_MAGIC_LINK_EXPOSE_DEBUG` (solo dev).
+- [ ] `docs/operations/env-sync.md` y `docs/overview/status.md` reflejan la última ejecución de `pnpm env:status`.
+- [ ] Health check público `/healthz` responde 200 y reporta `email: ok`.
+- [ ] PostHog monitor (`.github/workflows/posthog-monitor.yml`) no marca el ambiente `production-web` salvo en despliegues reales.
+- [ ] `pnpm docs:verify` pasa (sincroniza tablas Playwright y enlaces).
+- [ ] `CHANGELOG.md` y `docs/reference/api-reference.md` listan los endpoints nuevos (calendar, marketing, portal PDF).
+
+Cuando todos los ítems aplicables estén marcados, registra la evidencia (capturas, logs, resultados de suites) en el PR o en `docs/overview/status.md` antes de autorizar el deploy.

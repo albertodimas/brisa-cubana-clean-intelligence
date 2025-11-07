@@ -76,6 +76,14 @@ describe("NotificationRepository (Unit)", () => {
         message: "Hello",
         createdAt: new Date(),
         readAt: new Date(),
+        channel: "IN_APP",
+        status: "SENT",
+        sentAt: new Date(),
+        bookingId: null,
+        subject: null,
+        failedAt: null,
+        errorMessage: null,
+        metadata: null,
       };
       mockPrisma.notification.update.mockResolvedValue(notification);
 
@@ -112,6 +120,14 @@ describe("NotificationRepository (Unit)", () => {
         message: "A new booking is ready",
         createdAt: new Date(),
         readAt: null,
+        channel: "IN_APP",
+        status: "SENT",
+        sentAt: new Date(),
+        bookingId: null,
+        subject: null,
+        failedAt: null,
+        errorMessage: null,
+        metadata: null,
       };
 
       mockPrisma.notification.create.mockResolvedValue(created);
@@ -128,6 +144,9 @@ describe("NotificationRepository (Unit)", () => {
           userId: "user_1",
           type: "BOOKING_CREATED",
           message: "A new booking is ready",
+          channel: "IN_APP",
+          status: "SENT",
+          sentAt: expect.any(Date),
         },
       });
     });

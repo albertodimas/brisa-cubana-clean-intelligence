@@ -26,9 +26,10 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.operativo.ts && tsx prisma/seed.demo.ts",
+    "db:seed": "tsx prisma/seed.operativo.ts && tsx prisma/seed.demo.ts && tsx prisma/seed.marketing.ts",
     "db:seed:operativo": "tsx prisma/seed.operativo.ts",
-    "db:seed:demo": "tsx prisma/seed.demo.ts"
+    "db:seed:demo": "tsx prisma/seed.demo.ts",
+    "db:seed:marketing": "tsx prisma/seed.marketing.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.6",
@@ -41,12 +42,14 @@
     "date-fns": "^4.1.0",
     "hono": "4.10.4",
     "hono-rate-limiter": "0.4.2",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.10",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
     "pino-pretty": "^13.1.2",
     "stripe": "^19.2.1",
+    "twilio": "^5.10.4",
     "zod": "^4.1.12"
   },
   "devDependencies": {

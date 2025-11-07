@@ -153,7 +153,7 @@ export function BaseLayout({ children, lang }: BaseLayoutProps) {
   return (
     <html
       lang={lang}
-      className={`${inter.variable} dark scroll-smooth`}
+      className={`${inter.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <head>

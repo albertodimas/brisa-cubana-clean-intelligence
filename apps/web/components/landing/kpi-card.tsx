@@ -80,10 +80,9 @@ export function KPICard({
   const isNumeric = !isNaN(numericValue) && animateNumber;
 
   const spring = useSpring(0, { mass: 0.8, stiffness: 75, damping: 15 });
-  const displayValue = useTransform(spring, (latest) => {
-    if (!isNumeric) return value;
-    return Math.round(latest).toLocaleString();
-  });
+  const displayValue = useTransform(spring, (latest: number) =>
+    Math.round(latest).toLocaleString(),
+  );
 
   React.useEffect(() => {
     if (isInView && isNumeric) {
@@ -193,11 +192,7 @@ export function KPICard({
           {/* Valor principal */}
           <div className="text-3xl sm:text-4xl font-bold text-brisa-50">
             {prefix}
-            {isNumeric ? (
-              <motion.span>{displayValue as any}</motion.span>
-            ) : (
-              value
-            )}
+            {isNumeric ? <motion.span>{displayValue}</motion.span> : value}
             {suffix}
           </div>
 

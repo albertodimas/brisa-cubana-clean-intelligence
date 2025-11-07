@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última actualización:** 6 de noviembre de 2025  
+**Última actualización:** 7 de noviembre de 2025  
 **Responsable actual:** Plataforma & Reliability
 
 ## Resumen operativo
@@ -12,24 +12,26 @@
 - Sprint 3: módulo de facturación (`/api/invoices/**`), ajustes de serialización y documentación al día.
 - Email operativo: dominio autenticado en SendGrid, forwarding con ImprovMX (`cliente@brisacubanacleanintelligence.com`) según [docs/operations/email-routing.md](../operations/email-routing.md).
 
-### Últimos checks locales (06-nov-2025 18:30 UTC)
+### Últimos checks locales (07-nov-2025 15:45 UTC)
 
 <!-- PLAYWRIGHT_SUITE_TABLE:start -->
 
 | Suite    | Tests | Duración | Comando                  |
 | -------- | ----- | -------- | ------------------------ |
-| Smoke    | 4     | ~1min    | `pnpm test:e2e:smoke`    |
-| Critical | 20    | ~6min    | `pnpm test:e2e:critical` |
-| Full     | 32    | ~10min   | `pnpm test:e2e:full`     |
+| Smoke    | 15    | ~1min    | `pnpm test:e2e:smoke`    |
+| Critical | 47    | ~6min    | `pnpm test:e2e:critical` |
+| Full     | 91    | ~10min   | `pnpm test:e2e:full`     |
 
 <!-- PLAYWRIGHT_SUITE_TABLE:end -->
 
-- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->236<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->32<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
-- **Suites E2E activas:** <!-- PLAYWRIGHT_FULL_COUNT -->32<!-- /PLAYWRIGHT_FULL_COUNT -->
+- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->295<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->91<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
+- **Suites E2E activas:** <!-- PLAYWRIGHT_FULL_COUNT -->91<!-- /PLAYWRIGHT_FULL_COUNT -->
+
+> ✅ Estado actual (07-nov-2025 15:45 UTC): `pnpm test:e2e:critical` y `pnpm test:e2e:full` completados en local sin fallos después de refrescar seeds y estabilizar el drag & drop del calendario. Revisa el reporte Playwright adjunto en el PR sólo si introduces cambios adicionales en estos flujos.
 
 > Ejecuta `pnpm lint && pnpm typecheck && pnpm test && pnpm docs:verify` antes de mergear. Para regresiones completas usa `pnpm test:e2e:full`.
 
-## Cambios recientes (Sprint 1-3)
+## Cambios recientes (Sprint 1-4)
 
 1. **Autenticación y seguridad**
    - Validación estricta de vars (`lib/env.ts`), `ALLOWED_ORIGINS` requerido en producción.
@@ -45,8 +47,27 @@
    - Health check extendido (DB, Stripe, SMTP, Sentry).
    - Logging estruturado para asignaciones de staff y pagos.
 5. **Documentación**
-   - README y `docs/README.md` definen política “no PR sin docs”.
+   - README y `docs/README.md` definen política "no PR sin docs".
    - `docs/reference/api-reference.md` cubre bookings, payments, invoices y portal.
+6. **Marketing & Calendario (Sprint 4)**
+   - Suite `/api/marketing/**` (stats, testimoniales, FAQs, pricing tiers, market stats) con endpoints públicos y administrativos.
+   - Panel operativo incorpora dashboard de analytics (charts de ingresos, reservas por estado, top propiedades, workload por staff) y exportaciones CSV.
+   - Vista de calendario (`/panel/calendario`) con drag & drop, modal de detalle, filtros y API `GET /api/calendar` + `/availability`.
+   - Servicio de notificaciones multi-canal (email/SMS/in-app) con plantillas, cola en memoria y endpoints `GET /api/notifications`, `PATCH /read`, `PATCH /read-all`.
+7. **Frontend - Fase 1: Funcionalidades Críticas (Sprint 1-2)** ✅ COMPLETADO
+   - **Sprint 1**: Asignación de Staff
+     - Tipo `Booking` incluye `assignedStaff` en frontend
+     - Columna "Staff asignado" en `BookingsManager` con selector funcional
+     - Dashboard `/panel/staff` para staff ver sus asignaciones
+     - Filtro por staff en búsqueda de reservas
+     - 6 tests E2E críticos + 12 tests unitarios passing
+   - **Sprint 2**: Vista de Relaciones Cliente-Propiedades
+     - Endpoint `GET /api/customers/:id` implementado con tests
+     - Páginas de detalle: `/panel/customers/[id]` y `/panel/properties/[id]`
+     - Server Components con Suspense + carga paralela de datos
+     - Navegación bidireccional (clientes ↔ propiedades ↔ reservas)
+     - Type-safe navigation con hrefs basados en objetos
+     - 110/110 tests web + 192/192 tests API passing
 
 ## Riesgos y pendientes
 

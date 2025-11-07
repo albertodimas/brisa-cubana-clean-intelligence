@@ -485,3 +485,25 @@ export async function markAllNotificationsReadAction(): Promise<ActionResult> {
     return { error: "Error inesperado" };
   }
 }
+
+export async function assignStaffToBookingAction(
+  bookingId: string,
+  staffId: string | null,
+): Promise<ActionResult> {
+  try {
+    const payload = { staffId };
+
+    return await authenticatedFetch(
+      `/api/bookings/${bookingId}/assign-staff`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+      "No se pudo asignar el personal",
+      staffId ? "Personal asignado correctamente" : "Personal desasignado",
+    );
+  } catch (error) {
+    console.error("[actions] assignStaffToBooking", error);
+    return { error: "Error inesperado" };
+  }
+}

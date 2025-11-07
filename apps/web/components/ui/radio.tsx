@@ -167,14 +167,11 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
         role="radiogroup"
       >
         {React.Children.map(children, (child) => {
-          if (React.isValidElement(child)) {
-            // @ts-expect-error - child.props is safe here, RadioGroup children should be Radio components
+          if (React.isValidElement<RadioProps>(child)) {
             const childValue = child.props.value;
-            // @ts-expect-error - child.props.onChange is safe here
             const childOnChange = child.props.onChange;
 
-            return React.cloneElement(child, {
-              // @ts-expect-error - spreading props is safe for Radio children
+            return React.cloneElement<RadioProps>(child, {
               ...child.props,
               name,
               checked: childValue === value,
@@ -183,7 +180,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
                     onChange(e.target.value);
                   }
                 : childOnChange,
-            } as any);
+            });
           }
           return child;
         })}

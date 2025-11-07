@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "../theme-provider";
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Prevent SSR rendering to avoid hydration mismatch
@@ -12,7 +12,7 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
-  // Return null during SSR and initial client render
+  // Return skeleton during SSR and initial client render
   if (!mounted) {
     return (
       <div
@@ -26,13 +26,13 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="p-2 rounded-lg bg-brisa-800 dark:bg-brisa-700 border border-brisa-600/20 hover:border-brisa-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-brisa-400"
-      aria-label={`Cambiar a modo ${theme === "dark" ? "claro" : "oscuro"}`}
-      title={`Cambiar a modo ${theme === "dark" ? "claro" : "oscuro"}`}
+      className="p-2 rounded-lg bg-brisa-800 dark:bg-brisa-700 border border-brisa-600/20 hover:border-brisa-500/40 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brisa-400"
+      aria-label={`Cambiar a modo ${resolvedTheme === "dark" ? "claro" : "oscuro"}`}
+      title={`Cambiar a modo ${resolvedTheme === "dark" ? "claro" : "oscuro"}`}
     >
-      {theme === "dark" ? (
+      {resolvedTheme === "dark" ? (
         <svg
-          className="w-5 h-5 text-brisa-300"
+          className="w-5 h-5 text-brisa-300 transition-transform duration-200 hover:rotate-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -46,7 +46,7 @@ export function ThemeToggle() {
         </svg>
       ) : (
         <svg
-          className="w-5 h-5 text-brisa-700"
+          className="w-5 h-5 text-brisa-700 transition-transform duration-200 hover:-rotate-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

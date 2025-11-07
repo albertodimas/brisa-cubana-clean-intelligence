@@ -361,6 +361,10 @@ describe("Bookings routes - Double booking prevention", () => {
         ...sampleBooking,
         status: "COMPLETED",
       });
+      bookingRepositoryMock.findById.mockResolvedValue({
+        ...sampleBooking,
+        status: "CONFIRMED",
+      });
       bookingRepositoryMock.findByIdWithRelations.mockResolvedValue({
         ...sampleBooking,
         status: "COMPLETED",

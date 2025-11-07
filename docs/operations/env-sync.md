@@ -80,13 +80,18 @@ Pasos para alinear los valores de entorno propios del proxy web y del portal cli
 
 La API valida las env vars en tiempo de arranque. Si falta alguna crítica, el deployment falla antes de exponer el endpoint. Al menos deben existir:
 
-| Variable                | Entornos             | Notas                                                                                    |
-| ----------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
-| `ALLOWED_ORIGINS`       | dev / preview / prod | Lista separada por comas. Debe incluir panel, portal y cualquier dominio de integración. |
-| `DATABASE_URL`          | dev / preview / prod | Cadena de conexión (Neon/Vercel Postgres).                                               |
-| `DATABASE_URL_UNPOOLED` | dev / preview / prod | Igual que la anterior pero para conexiones directas (Prisma `directUrl`).                |
-| `JWT_SECRET`            | dev / preview / prod | Cadena aleatoria >= 32 chars. La API se detiene si falta.                                |
-| `HEALTH_CHECK_TOKEN`    | opcional             | Token para proteger `/healthz` público.                                                  |
+| Variable                                                         | Entornos             | Notas                                                                                    |
+| ---------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
+| `ALLOWED_ORIGINS`                                                | dev / preview / prod | Lista separada por comas. Debe incluir panel, portal y cualquier dominio de integración. |
+| `DATABASE_URL`                                                   | dev / preview / prod | Cadena de conexión (Neon/Vercel Postgres).                                               |
+| `DATABASE_URL_UNPOOLED`                                          | dev / preview / prod | Igual que la anterior pero para conexiones directas (Prisma `directUrl`).                |
+| `JWT_SECRET`                                                     | dev / preview / prod | Cadena aleatoria >= 32 chars. La API se detiene si falta.                                |
+| `NOTIFICATION_SMTP_*`                                            | dev / preview / prod | Host, puerto, usuario, password y flag `SECURE` para el SMTP operativo (SendGrid).       |
+| `NOTIFICATION_FROM_EMAIL`                                        | dev / preview / prod | Remitente de correos transaccionales (ej. `Brisa Cubana <notificaciones@...>`).          |
+| `NOTIFICATION_STREAM_HEARTBEAT_MS`, `NOTIFICATION_STREAM_LIMIT`  | opcional             | Ajustes del stream SSE de notificaciones internas (default `10000` / `50`).              |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` | opcional             | Requeridos sólo si se habilitan SMS; sin ellos la cola registra “not-configured”.        |
+| `HEALTH_CHECK_TOKEN`                                             | opcional             | Token para proteger `/healthz` público.                                                  |
+| `HEALTH_STRIPE_TIMEOUT_MS`                                       | opcional             | Timeout (ms) para consultas de Stripe en el health check (default 3000).                 |
 
 Pasos sugeridos:
 

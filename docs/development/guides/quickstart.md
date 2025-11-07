@@ -44,6 +44,7 @@ Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno loc
    # PORTAL_MAGIC_LINK_CONFIRMATION_PATH="/clientes/acceso/confirmar"
    # PORTAL_MAGIC_LINK_EXPOSE_DEBUG="true" # Usa "false" en producción para ocultar el token
    # ENABLE_TEST_UTILS="true" # Solo en local/CI; en Preview/Producción debe ser "false"
+   # PLAYWRIGHT_TEST_RUN="true" # Playwright lo inyecta automáticamente; decláralo solo si levantas la API para pruebas E2E manuales
    ```
 
    > Consulta `config/env.manifest.json` para conocer las variables requeridas y ejecuta `pnpm env:status` cuando ajustes valores en `.env.local`.

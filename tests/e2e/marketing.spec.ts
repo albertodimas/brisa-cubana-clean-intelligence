@@ -42,7 +42,7 @@ test("@critical muestra métricas de mercado con datos reales", async ({
 }) => {
   await page.goto("/");
 
-  const snapshotSection = page.getByText("Datos clave actualizados");
+  const snapshotSection = page.getByTestId("market-stats-snapshot").first();
   await expect(snapshotSection).toBeVisible();
 
   const expectations = [
@@ -60,7 +60,7 @@ test("@critical muestra métricas de mercado con datos reales", async ({
     await expect(container.getByText(value)).toBeVisible();
   }
 
-  const snapshotList = page.locator("dl").first();
+  const snapshotList = snapshotSection.locator("dl").first();
   await expect(
     snapshotList.getByText("Dato en actualización", { exact: false }),
   ).toHaveCount(0);

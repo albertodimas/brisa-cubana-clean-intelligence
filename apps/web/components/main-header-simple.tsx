@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { BrandLogo } from "@/components/branding/logo";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 type NavigationItem = {
   name: string;
@@ -67,7 +68,8 @@ export function MainHeaderSimple() {
           ))}
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4 lg:items-center">
+          <ThemeToggle />
           <Link
             href="/login"
             className={`text-sm font-semibold leading-6 transition-colors ${

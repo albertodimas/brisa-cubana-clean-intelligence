@@ -22,6 +22,7 @@ const propertySchema = z.object({
 });
 
 const propertyQuerySchema = z.object({
+  ownerId: z.string().cuid().optional(),
   city: z
     .string()
     .optional()
@@ -48,6 +49,31 @@ router.get(
     const repository = getPropertyRepository();
     const result = await repository.findManyWithSearch(queryResult.data);
     return c.json(result);
+  },
+);
+
+router.get(
+  "/:id",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
+  async (c) => {
+    const id = c.req.param("id");
+
+    try {
+      const repository = getPropertyRepository();
+      const property = await repository.findById(id);
+
+      if (!property) {
+        return c.json({ error: "Property not found" }, 404);
+      }
+
+      return c.json({ data: property });
+    } catch (error) {
+      return handlePrismaError(c, error, {
+        notFound: "Property not found",
+        default: "Could not retrieve property",
+      });
+    }
   },
 );
 

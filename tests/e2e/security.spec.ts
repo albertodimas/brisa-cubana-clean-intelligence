@@ -70,7 +70,9 @@ test.describe("Seguridad y Autenticación", () => {
     test("bloquea múltiples intentos fallidos de login", async () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
       // Read rate limit from env (default 5, test env uses 50)
-      const rateLimit = Number(process.env.LOGIN_RATE_LIMIT ?? "5");
+      const rateLimit = Number(
+        process.env.LOGIN_RATE_LIMIT ?? process.env.E2E_LOGIN_RATE_LIMIT ?? "5",
+      );
       const safetyMargin = Math.max(5, Math.ceil(rateLimit * 0.2));
       const attemptsToTriggerLimit = rateLimit + safetyMargin;
 

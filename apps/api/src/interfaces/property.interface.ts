@@ -43,6 +43,7 @@ export interface PropertySearchParams extends PropertyPaginationParams {
   search?: string;
   city?: string;
   type?: CreatePropertyDto["type"];
+  ownerId?: string;
 }
 
 export interface IPropertyRepository {

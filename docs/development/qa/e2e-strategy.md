@@ -1,31 +1,24 @@
 # Estrategia de Testing E2E
 
-## Estado Actual (Baseline)
+## Estado Actual (07-nov-2025)
 
-### Métricas
+### Métricas vigentes
 
-- **Total de tests (`pnpm test:e2e:full`, 31-oct-2025):** 20
-- **Duración total (full suite):** ~4.5 min con servers en frío (~3.8 min con servers en caliente)
-- **Archivos:** 9 (`analytics`, `auth`, `checkout`, `marketing`, `notifications`, `operations`, `portal-client`, `search-and-filters`, `security`, `user-management`)
-- **Ejecución:** Paralela (1 worker en local por defecto; CI usa 2 workers para smoke y 1 para critical/full debido a logística de build)
-- **Distribución actual (31-oct-2025):**
-  - `analytics.spec.ts`: 1 test (PostHog listo en entornos automatizados)
-  - `auth.spec.ts`: 1 test (login operativo)
-  - `checkout.spec.ts`: 1 test (flujo Payment Element)
-  - `marketing.spec.ts`: 2 tests (tabla comparativa + métricas de mercado reales)
-  - `notifications.spec.ts`: 1 test (panel notificaciones SSE)
-  - `operations.spec.ts`: 3 tests (CRUD servicio, filtros, validaciones de datos)
-  - `portal-client.spec.ts`: 1 test (flujo portal end-to-end)
-  - `search-and-filters.spec.ts`: 4 tests (búsquedas combinadas en panel operativo)
-  - `security.spec.ts`: 5 tests (negativos login, permisos, sesión)
-  - `user-management.spec.ts`: 2 tests (creación y activación de usuarios)
+- **Smoke (`pnpm test:e2e:smoke`):** 15 tests en 6 archivos (≈1.5 min con servers en frío). Cobertura: login, métricas PostHog, creación básica de servicios, acceso al calendario mensual y validaciones visuales rápidas.
+- **Critical (`pnpm test:e2e:critical`):** 47 tests en 14 archivos (≈6.5 min). Incluye smoke + flujos completos de calendario (modal, drag&drop, filtros), staff assignment, portal cliente, exports CSV, dashboard y seguridad.
+- **Full (`pnpm test:e2e:full`):** 91 tests en 15 archivos (≈11 min). Añade escenarios de regresión extendidos, validaciones de rate limit, estados vacíos, responsividad y suites de marketing/notifications.
+- **Infra:** Cada corrida reconstruye API y Web en modo producción (`reuseExistingServer: false`) y ejecuta `pnpm db:push --force-reset && pnpm db:seed` para garantizar datos deterministas.
 
-### Problemática Identificada
+### Distribución por archivo (Full)
 
-1. **Feedback lento en CI:** Todos los tests se ejecutan siempre, incluso en cambios mínimos
-2. **Sin priorización:** Tests críticos mezclados con tests exhaustivos
-3. **Escalabilidad:** A medida que crezca la suite, los tiempos aumentarán linealmente
-4. **Costos de CI:** Sin optimización de cuándo ejecutar qué tests
+`analytics`, `auth`, `calendar.spec.ts`, `calendar-drag-drop.spec.ts`, `checkout`, `csv-export`, `dashboard`, `marketing`, `notifications`, `operations`, `portal-client`, `search-and-filters`, `security`, `staff-assignment`, `user-management`.
+
+### Problemática actual
+
+1. **Tiempo de feedback:** Critical tarda >6 min debido al rebuild completo (Next 16 + API). Smoke sigue siendo lo más rápido pero ya contiene 15 pruebas.
+2. **Seeds especializados:** Algunas suites (calendar drag&drop, staff) dependen de seeds y helpers específicos; cualquier cambio en `db:seed` debe avisarse para no romper los tests.
+3. **Rate limiting realista:** Aunque elevamos `LOGIN_RATE_LIMIT`, necesitamos monitorear que los encabezados `x-internal-remote-address` lleguen al API para habilitar Redis cuando esté disponible.
+4. **Visibilidad:** Necesitamos documentar claramente qué cubre cada nivel para evitar duplicación de escenarios en futuras iteraciones.
 
 ---
 
@@ -33,7 +26,7 @@
 
 ### Niveles de Testing
 
-#### 1. **Smoke Tests** (~2s)
+#### 1. **Smoke Tests** (~90s)
 
 **Propósito:** Validación rápida de funcionalidad crítica del sistema
 
@@ -44,22 +37,26 @@
 - API responde correctamente
 - Sin errores fatales en carga inicial
 
-**Tests seleccionados:**
+**Tests seleccionados (15 total / 6 archivos):**
 
-- `auth.spec.ts`: "permite iniciar sesión y acceder al panel operativo"
-- `operations.spec.ts`: "permite crear un nuevo servicio" (prueba que CRUD básico funciona)
+- `analytics.spec.ts` – Inicialización PostHog con bandera headless
+- `auth.spec.ts` – Login + redirección al panel
+- `operations.spec.ts` – Creación rápida de servicios (valida API ↔ panel)
+- `marketing.spec.ts` – Tabla comparativa y CTAs
+- `calendar.spec.ts` – Acceso al calendario, navegación mensual, botón “Hoy”, leyenda y filtros
+- `calendar-drag-drop.spec.ts` – Estados básicos (cursor grab, indicadores, estado de carga, vista semanal bloqueada)
 
 **Ejecución:**
 
 - **Cuándo:** Cada push a cualquier branch
-- **Timeout:** 30 segundos
-- **Workers:** 2 (para máxima velocidad)
+- **Timeout:** 3 minutos (abarca build + pruebas)
+- **Workers:** 1 (garantiza estabilidad con build compartida)
 
-**Objetivo de tiempo:** < 30 segundos (incluye arranque de Next.js + API)
+**Objetivo de tiempo:** < 2 minutos (build + pruebas). Actualmente 1.5 min en frío, ~60 s en caliente.
 
 ---
 
-#### 2. **Critical Tests** (~5s)
+#### 2. **Critical Tests** (~6.5 min)
 
 **Propósito:** Validación de flujos de negocio principales
 
@@ -70,30 +67,31 @@
 - Validaciones de permisos básicas
 - Casos de error comunes
 
-**Tests seleccionados:**
+**Cobertura (47 tests / 14 archivos):**
 
-- Todos los **Smoke Tests** +
-- `operations.spec.ts`: "filtra reservas por estado"
-- `security.spec.ts`:
-  - "rechaza credenciales inválidas"
-  - "usuario CLIENT no debe poder crear servicios"
-  - "permite cerrar sesión correctamente"
-  - "sesión persiste después de recargar página"
-- `checkout.spec.ts`: "carga el checkout público y muestra flujo listo para pago"
-- `marketing.spec.ts`:
-  - "muestra tabla comparativa y CTAs instrumentados"
-  - "muestra métricas de mercado con datos reales"
+- Incluye todo Smoke +
+- `calendar.spec.ts` completo (modal, filtros avanzados, permisos)
+- `calendar-drag-drop.spec.ts` (drag&drop exitoso, preservación de hora, errores simulados)
+- `checkout.spec.ts` – Flujo Payment Element listo para pago
+- `csv-export.spec.ts` – Exportadores de bookings/customers/properties/services
+- `dashboard.spec.ts` – KPIs, estados vacíos y responsividad
+- `notifications.spec.ts` – SSE + acciones read/unread
+- `portal-client.spec.ts` – Flujo completo enlace mágico
+- `search-and-filters.spec.ts` – Buscador y filtros combinados
+- `security.spec.ts` – Login negativos, rate limiting, permisos, sesión/log out
+- `staff-assignment.spec.ts` – Asignar/desasignar staff y vistas específicas
+- `user-management.spec.ts` – CRUD usuarios y restricciones
 
 **Ejecución:**
 
 - **Cuándo:**
-  - Pull requests a `main`
-  - Merges a `main`
-  - Deploys a staging
-- **Timeout:** 60 segundos
-- **Workers:** 1-2 (limitado por build Next 16)
+  - Pull requests dirigidas a `main`
+  - Push/merge a `main`
+  - Deploys a staging / environments compartidos
+- **Timeout:** 15 minutos (incluye build)
+- **Workers:** 1 (para evitar duplicar builds simultáneos)
 
-**Objetivo de tiempo:** < 4 minutos (incluye build Next 16 + arranque API)
+**Objetivo de tiempo:** mantenerla <7 min con servidores fríos y <5 min cuando la build está cacheada.
 
 ##### PostHog en navegadores headless
 
@@ -101,11 +99,11 @@
 - Las pruebas que validan telemetría (ej. `analytics.spec.ts`) deben seguir comprobando el flag `data-brisa-posthog="ready"` en lugar de esperar el envío real de eventos.
 - En entornos productivos/preview con navegadores “reales” seguimos capturando eventos; el fallback solo se activa para entornos automatizados.
 - El preset remoto `tmp/playwright-preview.config.ts` ahora expone proyectos `smoke` y `critical`. Para ejecutar `critical` contra entornos desplegados se requiere un dataset semilla y tokens/bypass equivalentes a los usados en CI (headers `x-lhci-bypass`, cuentas QA, etc.). Sin estos permisos, las pruebas que crean/actualizan recursos (notificaciones, usuarios, portal cliente) fallarán al apuntar a producción.
-- En local, exporta `E2E_LOGIN_RATE_LIMIT=50` (o mayor) antes de `pnpm test:e2e:critical` para evitar rate limits 429 generados por los múltiples logins automáticos. El `playwright.config.ts` propagará el valor tanto al API (`LOGIN_RATE_LIMIT`) como a las cabeceras de bypass.
+- En local, exporta `E2E_LOGIN_RATE_LIMIT=100` (o mayor) antes de `pnpm test:e2e:critical` para evitar rate limits 429 generados por los múltiples logins automáticos. El `playwright.config.ts` propagará el valor tanto al API (`LOGIN_RATE_LIMIT`) como a las cabeceras de bypass.
 
 ---
 
-#### 3. **Full Suite** (~240-270s)
+#### 3. **Full Suite** (~11 min)
 
 **Propósito:** Validación exhaustiva de todos los escenarios
 
@@ -117,9 +115,7 @@
 - Rate limiting
 - Validaciones de datos
 
-**Tests incluidos:**
-
-- 20 tests (smoke + critical + escenarios extendidos de seguridad, filtros, usuarios y portal)
+**Cobertura:** 91 tests en 15 archivos (todos los anteriores + escenarios extendidos de dashboard, filtros vacíos, responsiveness, validaciones adicionales de seguridad y CSV, así como pruebas de marketing/notificaciones completas).
 
 **Ejecución:**
 
@@ -128,10 +124,10 @@
   - Pre-release (antes de tags)
   - Deploys a production
   - Manualmente con `pnpm test:e2e:full`
-- **Timeout:** 120 segundos
-- **Workers:** 1-2 (para evitar condiciones de carrera con seeds y rate limits)
+- **Timeout:** 25 minutos (para cubrir build + tests)
+- **Workers:** 2 (validado 07-nov-2025 con rate limiting elevado)
 
-**Objetivo de tiempo:** < 5 minutos (servidores en frío) / < 4 minutos (servidores en caliente)
+**Objetivo:** mantener <12 min totales (11 min actuales con seeds marketing/operativos).
 
 ---
 
@@ -223,20 +219,30 @@ Aumentar el rate limit en entorno de test en `playwright.config.ts`:
   command: "pnpm --filter @brisa/api dev",
   env: {
     NODE_ENV: "test",
-    LOGIN_RATE_LIMIT: "20",
+    LOGIN_RATE_LIMIT: "100",
     LOGIN_RATE_LIMIT_WINDOW_MS: "60000",
   },
 }
 ```
 
-**Resultado (actualizado 17-oct-2025):**
+**Resultado (07-nov-2025):**
 
-- ✅ Critical suite: 17 tests en 8 archivos (≈60s)
-- ✅ Full suite: 27 tests en 8 archivos (≈95s)
-- ✅ Smoke suite: 2 tests (≈25s)
+- ✅ Smoke suite: 15 tests / 6 archivos (≈90 s en frío, <60 s en caliente)
+- ✅ Critical suite: 47 tests / 14 archivos (≈6.5 min con rebuild completo)
+- ✅ Full suite: 91 tests / 15 archivos (≈11 min con seeds operativos/marketing)
 
 **Mejora futura (opcional):**
 Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, permitiendo usar el rate limiting real por IP.
+
+### Reservas residuales en suites consecutivas
+
+**Problema (nov-2025):** Tras endurecer la detección de doble booking, las suites completas que se ejecutaban en caliente podían dejar reservas activas con la misma propiedad/horario. El siguiente intento fallaba con `409 Conflict` aunque los tests seedearan nueva data.
+
+**Solución aplicada:**
+
+- `playwright.config.ts` ahora reinicia siempre API y Web en entornos locales (`reuseExistingServer: false`), evitando que queden procesos con datos en memoria entre corridas.
+- El helper `createBookingFixture` reintenta hasta seis veces generando horarios futuros con desplazamientos aleatorios, de modo que incluso si persisten reservas anteriores, se selecciona un hueco libre.
+- Si se desea reutilizar servidores manualmente, ejecutar `pnpm --filter @brisa/api db:seed` (o borrar las reservas creadas) antes de relanzar la suite.
 
 ### Playwright con builds de producción (oct-2025)
 
@@ -317,43 +323,32 @@ Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, p
 #### 1. PR Checks (`.github/workflows/pr-checks.yml`)
 
 **Trigger:** Pull requests a `main`
-**Suite:** Smoke (2 tests, ~7s)
+**Suite:** Smoke (15 tests, ~90 s + build)
 **Propósito:** Feedback rápido en PRs validando funcionalidad crítica
 
 **Configuración:**
 
 - PostgreSQL 17
-- LOGIN_RATE_LIMIT=20
-- Solo instala Chromium
-- Sube reporte de Playwright solo en fallos
+- LOGIN_RATE_LIMIT=100
+- Chromium únicamente (disminuye el tiempo de instalación)
+- Reporte Playwright subido solo en fallos
 
-**Incluye:**
-
-- ✅ Lint
-- ✅ Unit tests
-- ✅ Smoke E2E tests
+**Incluye:** lint, unit tests, typecheck y smoke E2E.
 
 #### 2. Main Branch CI (`.github/workflows/ci.yml`)
 
 **Trigger:** Push a `main`
-**Suite:** Critical (7 tests, ~8s)
+**Suite:** Critical (47 tests, ~6.5 min con rebuild)
 **Propósito:** Validar flujos principales después de merge
 
 **Configuración:**
 
 - PostgreSQL 17
-- LOGIN_RATE_LIMIT=20
-- Instala todos los browsers de Playwright
-- Sube reporte solo en fallos
+- LOGIN_RATE_LIMIT=100 / window 60 s
+- Builds productivos de API y Web (sin dev servers)
+- Reporte Playwright en fallos
 
-**Incluye:**
-
-- ✅ Verificación de secretos
-- ✅ Lint
-- ✅ Typecheck
-- ✅ Unit tests
-- ✅ Critical E2E tests
-- ✅ Build de producción
+**Incluye:** verificación de secretos, lint, typecheck, unit/integration tests, build y suite critical.
 
 #### 3. Nightly Full Suite (`.github/workflows/nightly.yml`)
 
@@ -362,31 +357,27 @@ Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, p
 - Cron diario a las 2:00 AM UTC
 - Manual via `workflow_dispatch`
 
-**Suite:** Full (13 tests, ~8s)
+**Suite:** Full (91 tests, ~11 min)
 **Propósito:** Cobertura completa incluyendo rate limiting y edge cases
 
 **Configuración:**
 
 - PostgreSQL 17
-- LOGIN_RATE_LIMIT=20
-- Solo Chromium
-- Sube reportes siempre (14 días retención)
+- LOGIN_RATE_LIMIT=100
+- Chromium (el resto de navegadores no agregan cobertura en esta suite)
+- Siempre adjunta reportes (retención 14 días)
 
-**Incluye:**
-
-- ✅ Full E2E suite
-- ✅ Upload de test results
-- ✅ Upload de Playwright report
+**Incluye:** suite completa, upload de resultados y del reporte HTML.
 
 ---
 
 ## Matriz de Ejecución
 
-| Evento           | Workflow      | Suite    | Tests | Duración | Trigger      |
-| ---------------- | ------------- | -------- | ----- | -------- | ------------ |
-| PR a main        | pr-checks.yml | Smoke    | 2     | ~7s      | pull_request |
-| Push a main      | ci.yml        | Critical | 7     | ~8s      | push         |
-| Nightly / Manual | nightly.yml   | Full     | 13    | ~8s      | cron/manual  |
+| Evento           | Workflow      | Suite    | Tests | Duración aprox. | Trigger        |
+| ---------------- | ------------- | -------- | ----- | --------------- | -------------- |
+| PR a main        | pr-checks.yml | Smoke    | 15    | ~2 min          | `pull_request` |
+| Push a main      | ci.yml        | Critical | 47    | ~6.5 min        | `push`         |
+| Nightly / Manual | nightly.yml   | Full     | 91    | ~11 min         | `cron`/manual  |
 
 ### Beneficios de la Estrategia
 
@@ -416,18 +407,19 @@ Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, p
 
 ### Objetivos a 3 meses
 
-1. **Reducción de tiempo de feedback:**
-   - PR checks: De N/A a <5 segundos
-   - Main branch: De 8s a <7 segundos
-   - Nightly: Mantener <15 segundos con suite en crecimiento
+1. **Tiempos objetivo realistas (con builds productivas):**
+   - PR checks (smoke): mantener <2 min totales
+   - Main branch (critical): estabilizar <6 min (optimizar watchers/build cache)
+   - Nightly (full): mantener <12 min aun con crecimiento de la suite
 
-2. **Cobertura:**
-   - Smoke: 2 tests críticos (login + CRUD básico)
-   - Critical: 6-7 tests (flujos principales)
-   - Full: 13+ tests (creciendo con features)
+2. **Cobertura mínima:**
+   - Smoke: mantener login + calendario + creación servicio (no reducir)
+   - Critical: conservar staff assignment, portal cliente y seguridad
+   - Full: añadir nuevos módulos sólo cuando haya seeds estables documentados
 
 3. **Confiabilidad:**
-   - Flakiness rate: <2%
+   - Flakiness rate <2% (registrar incidentes en `docs/operations/incident-runbook.md`)
+   - Reincidencias deben abrir issue y, si aplica, añadir retry/fixtures específicos.
    - False positives: <5%
    - Time to detect regression: <5 minutos (smoke), <10 minutos (critical)
 

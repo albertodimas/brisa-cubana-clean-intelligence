@@ -44,6 +44,7 @@ type AdminPanelProps = {
   properties: PaginatedResult<Property>;
   bookings: PaginatedResult<Booking>;
   customers: PaginatedResult<Customer>;
+  staffUsers: User[];
   initialBookingFilters: {
     status?: string;
     from?: string;
@@ -65,6 +66,10 @@ type AdminPanelProps = {
     bookingId: string,
     formData: FormData,
   ) => Promise<ActionResult>;
+  assignStaffToBooking: (
+    bookingId: string,
+    staffId: string | null,
+  ) => Promise<ActionResult>;
   users: PaginatedResult<User>;
   notifications: PaginatedResult<Notification>;
   updateUser: (userId: string, formData: FormData) => Promise<ActionResult>;
@@ -81,6 +86,7 @@ export function AdminPanel({
   properties,
   bookings,
   customers,
+  staffUsers,
   initialBookingFilters,
   createService,
   createProperty,
@@ -89,6 +95,7 @@ export function AdminPanel({
   updateService,
   updateProperty,
   updateBooking,
+  assignStaffToBooking,
   users,
   notifications,
   updateUser,
@@ -412,8 +419,10 @@ export function AdminPanel({
         isLoadingMore={isLoadingMoreBookings}
         onLoadMore={loadMoreBookings}
         onUpdate={updateBooking}
+        onAssignStaff={assignStaffToBooking}
         services={serviceItems}
         properties={propertyItems}
+        staffUsers={staffUsers}
         formatDateTime={formatDateTimeLocal}
         currentQuery={bookingQuery}
         setQuery={setBookingQuery}

@@ -11,6 +11,7 @@ import {
 import type { QueryParams } from "@/hooks/use-paginated-resource";
 import type { Service, PaginationInfo } from "@/lib/api";
 import { Button } from "./ui/button";
+import { ExportButton } from "./ui/export-button";
 import { FilterChips, type FilterChip } from "./ui/filter-chips";
 import { Pagination } from "./ui/pagination";
 import { SearchBar } from "./ui/search-bar";
@@ -157,7 +158,7 @@ export function ServicesManager({
   }
 
   return (
-    <>
+    <section className="ui-stack" data-testid="panel-section-services">
       {/* Create Service Form */}
       <section className="ui-panel-surface ui-panel-surface--muted grid gap-4">
         <h3 className="ui-section-title">Crear servicio</h3>
@@ -225,7 +226,36 @@ export function ServicesManager({
 
       {/* Manage Services List */}
       <section className="ui-stack">
-        <h3 className="ui-section-title">Gestionar servicios</h3>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h3 className="ui-section-title">Gestionar servicios</h3>
+          <ExportButton
+            data={services}
+            filename={`servicios-${new Date().toISOString().split("T")[0]}`}
+            resourceType="services"
+            testId="export-services-csv"
+            columns={[
+              { key: "id", label: "ID" },
+              { key: "name", label: "Nombre" },
+              {
+                key: "description",
+                label: "Descripción",
+                transform: (s) => s.description ?? "",
+              },
+              {
+                key: "basePrice",
+                label: "Precio base (USD)",
+                transform: (s) => `$${s.basePrice.toFixed(2)}`,
+              },
+              { key: "durationMin", label: "Duración (min)" },
+              {
+                key: "active",
+                label: "Estado",
+                transform: (s) => (s.active ? "Activo" : "Inactivo"),
+              },
+            ]}
+            disabled={isLoading}
+          />
+        </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="w-full sm:max-w-xs">
             <SearchBar
@@ -408,6 +438,6 @@ export function ServicesManager({
           </div>
         )}
       </section>
-    </>
+    </section>
   );
 }

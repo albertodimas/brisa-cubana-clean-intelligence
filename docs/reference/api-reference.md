@@ -1,6 +1,6 @@
 # API Documentation - OpenAPI/Swagger
 
-**Última actualización:** 6 de noviembre de 2025
+**Última actualización:** 7 de noviembre de 2025
 
 ---
 
@@ -8,6 +8,12 @@
 
 La API de Brisa Cubana Clean Intelligence está completamente documentada con **OpenAPI 3.1** specification. Toda la documentación interactiva está disponible a través de **Scalar API Reference**, una interfaz moderna y funcional para explorar y probar los endpoints.
 
+> **Actualización 7/nov/2025 (Sprint 4):**
+>
+> - Nuevos endpoints operativos: `GET /api/calendar`, `GET /api/calendar/availability` y suite completa de marketing (`/api/marketing/*`).
+> - Sistema de notificaciones multi-canal (email / SMS / in-app) con campos extendidos (`channel`, `status`, `bookingId`, `metadata`) y cola en memoria.
+> - Documentación de variables `NOTIFICATION_SMTP_*`, `NOTIFICATION_FROM_EMAIL`, `TWILIO_*` y ajustes de health check (`HEALTH_STRIPE_TIMEOUT_MS`).
+>
 > **Actualización 5/nov/2025 (Sprint 2 & 3):**
 >
 > - Nuevos endpoints: GET /api/bookings/:id, PATCH /api/bookings/:id/assign-staff, endpoints completos de /api/invoices
@@ -100,6 +106,8 @@ servers:
 - **Invoices**: Facturación y conciliación de pagos
 - **Customers**: Clientes del sistema
 - **Portal**: Autenticación y acciones del portal cliente
+- **Calendar**: Visualización y disponibilidad de reservas
+- **Marketing**: Contenido comercial (stats, testimonios, pricing, FAQs)
 - **Health**: Health checks y monitoreo
 
 ### 4. Seguridad
@@ -152,6 +160,19 @@ security:
 - `PATCH /api/notifications/{notificationId}/read` - Marcar una notificación como leída
 - `PATCH /api/notifications/read-all` - Marcar todas las notificaciones del usuario como leídas
 
+### Calendar
+
+- `GET /api/calendar` - Devuelve reservas agrupadas por fecha en un rango (`from`, `to`) con filtros opcionales (`status`, `propertyId`, `serviceId`, `assignedStaffId`). Roles: ADMIN / COORDINATOR / STAFF.
+- `GET /api/calendar/availability` - Calcula disponibilidad por fecha y propiedad (`date`, `propertyId`, `durationMin`) marcando conflictos y retornando los `bookingId` asociados. Roles: ADMIN / COORDINATOR / STAFF.
+
+### Marketing
+
+- `GET /api/marketing/stats/portfolio` / `POST /api/marketing/stats/portfolio` - Mostrar/registrar métricas del portafolio (activos, rating, turnovers). `POST` reservado a ADMIN.
+- `GET /api/marketing/testimonials` (público) y `POST/PATCH/DELETE /api/marketing/testimonials/:id` (ADMIN/COORDINATOR) - Gestión de testimoniales con workflow `status` (`PENDING`, `APPROVED`, `REJECTED`).
+- `GET /api/marketing/faqs` (público) y `POST/PATCH/DELETE /api/marketing/faqs/:id` (ADMIN) - Preguntas frecuentes ordenadas con bandera `isActive`.
+- `GET /api/marketing/pricing` (público) y `POST/PATCH/DELETE /api/marketing/pricing/:id` (ADMIN) - Tiers comerciales, con campos `features`/`addons` en JSON.
+- `GET /api/marketing/stats/market` (público) y `POST /api/marketing/stats/market` (ADMIN) - Indicadores de mercado (`metricId`) con presentación configurable (`format`, sufijos/prefijos).
+
 ### Services
 
 - `GET /api/services` - Listar servicios (público)
@@ -162,6 +183,63 @@ security:
 ### Properties
 
 - `GET /api/properties` - Listar propiedades (público)
+
+### GET /api/properties/:id
+
+Obtiene el detalle completo de una propiedad por su ID.
+
+**Auth:** Requiere roles ADMIN, COORDINATOR o STAFF
+
+**Parámetros de ruta:**
+
+- `id` (string, requerido) - ID de la propiedad
+
+**Response 200:**
+
+```json
+{
+  "data": {
+    "id": "clx123abc",
+    "label": "Miami Beach House",
+    "addressLine": "123 Ocean Drive",
+    "city": "Miami",
+    "state": "FL",
+    "zipCode": "33139",
+    "type": "VACATION_RENTAL",
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "sqft": 1500,
+    "notes": "Access code: 1234",
+    "ownerId": "clx456def",
+    "owner": {
+      "id": "clx456def",
+      "email": "owner@example.com",
+      "fullName": "John Doe"
+    },
+    "createdAt": "2025-11-06T10:00:00Z",
+    "updatedAt": "2025-11-06T10:00:00Z"
+  }
+}
+```
+
+**Response 404:**
+
+```json
+{
+  "error": "Property not found"
+}
+```
+
+**Response 403:**
+
+```json
+{
+  "error": "Forbidden"
+}
+```
+
+---
+
 - `POST /api/properties` - Crear propiedad (ADMIN/COORDINATOR)
 - `PATCH /api/properties/{propertyId}` - Actualizar propiedad (ADMIN/COORDINATOR)
 - `DELETE /api/properties/{propertyId}` - Desactivar propiedad (ADMIN, soft delete)
@@ -201,6 +279,7 @@ security:
 - `GET /api/portal/bookings/{bookingId}` - Detalle de reserva (sólo si pertenece al cliente)
 - `POST /api/portal/bookings/{bookingId}/cancel` - Solicitar cancelación (restricciones por estado/ventana)
 - `POST /api/portal/bookings/{bookingId}/reschedule` - Solicitar reagendo (valida solapamientos)
+- `GET /app/api/portal/bookings/{bookingId}/pdf` _(Next.js App Route)_ - Genera comprobante en PDF para el cliente autenticado. Rate limit 10 descargas/min por email (`X-RateLimit-*` en headers).
 
 ---
 

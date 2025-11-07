@@ -149,7 +149,7 @@ export function DataExporter<T extends Record<string, any>>({
       // Si hay columnas específicas, filtrar los datos
       const exportData = columns
         ? data.map((row) => {
-            const filtered: Record<string, any> = {};
+            const filtered: Record<string, unknown> = {};
             cols.forEach((col) => {
               filtered[String(col.key)] = row[col.key];
             });

@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- API: endpoints `/api/calendar` y `/api/calendar/availability` para vistas de calendario y disponibilidad con validaciones de rango y agregados de resumen.
+- API: módulo `/api/marketing/**` (stats de portafolio, testimoniales, FAQs, pricing tiers y market stats) con permisos ADMIN/COORDINATOR documentados.
+- API: nuevo servicio de notificaciones multi-canal (email/SMS/in-app) con campos `channel`, `status`, `bookingId`, `metadata` y cola en memoria.
+- Web: vista de calendario operativo (`/panel/calendario`) con drag & drop, modal de detalle y filtros avanzados.
+- Web: dashboard analítico reorganizado (charts de ingresos, top propiedades, workload por staff) y componentes reutilizables (`StatsCard`, `ChartWrapper`).
+- Web: generador de PDF para clientes (`GET /app/api/portal/bookings/[bookingId]/pdf`) con rate limit básico y `BookingReceipt`.
+
 ### Changed
 
 - API: se añadió `assignedStaffId` a `Booking` (nuevo endpoint `GET /api/bookings/:id`, `PATCH /api/bookings/:id/assign-staff`, filtros `assignedStaffId`/`code`) y serialización de staff en responses.
@@ -14,6 +23,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Habilitamos Sentry Replay en Vercel preview (`session=0.05`, `on_error=0.5`) para evaluaciones controladas; producción/desarrollo permanecen en `false/0`.
 - Documentación actualizada: `docs/README.md` enlaza `CHANGELOG.md` y `SECURITY.md`, guía de observabilidad incorpora flags de Replay y referencia a `instrumentation-client.ts`.
 - Alineados precios comerciales ($249 / $369 / $489) entre landing, seeds Prisma, pruebas de integración y documentación operativa/marketing para el lanzamiento piloto.
+- Infra: health check admite `HEALTH_STRIPE_TIMEOUT_MS` y la validación de entorno incluye `NOTIFICATION_SMTP_*`, `NOTIFICATION_FROM_EMAIL`, `NOTIFICATION_STREAM_*` y credenciales Twilio (`TWILIO_*`).
 
 ## [0.4.2] - 2025-10-30
 

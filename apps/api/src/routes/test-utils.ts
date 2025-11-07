@@ -14,11 +14,14 @@ const createNotificationSchema = z.object({
 });
 
 const router = new Hono();
+const testUtilsEnabled =
+  process.env.ENABLE_TEST_UTILS === "true" ||
+  process.env.PLAYWRIGHT_TEST_RUN === "true";
 
 router.use("*", authenticate);
 
 router.post("/notifications", async (c) => {
-  if (process.env.ENABLE_TEST_UTILS !== "true") {
+  if (!testUtilsEnabled) {
     return c.json({ error: "Not Found" }, 404);
   }
 

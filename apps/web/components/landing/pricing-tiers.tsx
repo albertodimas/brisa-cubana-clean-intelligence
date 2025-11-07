@@ -3,8 +3,8 @@ export type PricingTier = {
   name: string;
   headline: string;
   price: string;
-  priceSuffix: string;
-  description: string;
+  priceSuffix?: string;
+  description?: string;
   features: string[];
   highlighted?: boolean;
 };

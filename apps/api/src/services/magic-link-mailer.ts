@@ -26,6 +26,9 @@ const DEFAULT_PORTAL_BASE_URL =
   "https://brisacubanacleanintelligence.com";
 
 let transporter: Transporter | null = null;
+const testUtilsEnabled =
+  process.env.ENABLE_TEST_UTILS === "true" ||
+  process.env.PLAYWRIGHT_TEST_RUN === "true";
 
 function getTransporter(): Transporter | null {
   if (transporter) {
@@ -65,7 +68,7 @@ export function buildPortalMagicLinkUrl(token: string): string {
 }
 
 export function shouldExposeDebugToken(): boolean {
-  if (process.env.ENABLE_TEST_UTILS === "true") {
+  if (testUtilsEnabled) {
     return true;
   }
 
@@ -82,7 +85,7 @@ export function shouldExposeDebugToken(): boolean {
 export async function sendPortalMagicLinkEmail(
   payload: MagicLinkEmailPayload,
 ): Promise<MagicLinkEmailResult> {
-  if (process.env.ENABLE_TEST_UTILS === "true") {
+  if (testUtilsEnabled) {
     logger.warn(
       {
         email: payload.email,
