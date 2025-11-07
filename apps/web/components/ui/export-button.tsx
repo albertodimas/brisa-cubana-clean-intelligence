@@ -18,6 +18,9 @@ type ExportButtonProps<T> = {
   testId?: string;
 };
 
+const numberFormatter = new Intl.NumberFormat("es-ES");
+const formatNumber = (value: number) => numberFormatter.format(value);
+
 export function ExportButton<T extends Record<string, unknown>>({
   data,
   filename,
@@ -104,6 +107,9 @@ export function ExportButton<T extends Record<string, unknown>>({
   const hasData = data.length > 0;
   const isDisabled = disabled || !hasData;
   const exportCount = Math.min(data.length, maxRows);
+  const formattedExportCount = formatNumber(exportCount);
+  const formattedTotalRows = formatNumber(data.length);
+  const formattedMaxRows = formatNumber(maxRows);
 
   if (showConfirmation) {
     return (
@@ -132,10 +138,9 @@ export function ExportButton<T extends Record<string, unknown>>({
               Exportación grande
             </h3>
             <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-              Se exportarán {exportCount.toLocaleString()} filas
-              {data.length > maxRows &&
-                ` (de ${data.length.toLocaleString()} totales)`}
-              . ¿Deseas continuar?
+              Se exportarán {formattedExportCount} filas
+              {data.length > maxRows && ` (de ${formattedTotalRows} totales)`}.
+              ¿Deseas continuar?
             </p>
           </div>
         </div>
@@ -143,7 +148,7 @@ export function ExportButton<T extends Record<string, unknown>>({
           <button
             onClick={performExport}
             className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:bg-amber-700 dark:hover:bg-amber-600"
-            aria-label={`Confirmar exportación de ${exportCount.toLocaleString()} filas`}
+            aria-label={`Confirmar exportación de ${formattedExportCount} filas`}
           >
             Sí, exportar
           </button>
@@ -169,13 +174,13 @@ export function ExportButton<T extends Record<string, unknown>>({
         !hasData
           ? "No hay datos para exportar"
           : data.length > maxRows
-            ? `Se exportarán los primeros ${maxRows.toLocaleString()} registros`
+            ? `Se exportarán los primeros ${formattedMaxRows} registros`
             : undefined
       }
       aria-label={
         !hasData
           ? "No hay datos para exportar"
-          : `Exportar ${exportCount.toLocaleString()} ${exportCount === 1 ? "fila" : "filas"} a CSV`
+          : `Exportar ${formattedExportCount} ${exportCount === 1 ? "fila" : "filas"} a CSV`
       }
       aria-busy={isExporting}
     >
@@ -222,7 +227,7 @@ export function ExportButton<T extends Record<string, unknown>>({
           Exportar CSV
           {data.length > 0 && (
             <span className="text-xs text-gray-500" aria-hidden="true">
-              ({exportCount.toLocaleString()})
+              ({formattedExportCount})
             </span>
           )}
         </>

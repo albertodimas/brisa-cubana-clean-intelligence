@@ -30,6 +30,12 @@ beforeEach(async () => {
   (Papa.default.unparse as any).mockReturnValue("mocked,csv,data");
 });
 
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat("es-ES").format(value);
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 describe("ExportButton", () => {
   const mockData = [
     { id: "1", name: "Test Item 1", value: 100 },
@@ -112,9 +118,9 @@ describe("ExportButton", () => {
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute(
       "title",
-      "Se exportarán los primeros 10.000 registros",
+      `Se exportarán los primeros ${formatNumber(10000)} registros`,
     );
-    expect(screen.getByText("(10.000)")).toBeInTheDocument();
+    expect(screen.getByText(`(${formatNumber(10000)})`)).toBeInTheDocument();
   });
 
   it("triggers CSV download when clicked", async () => {
@@ -268,7 +274,12 @@ describe("ExportButton", () => {
     await waitFor(() => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
       expect(screen.getByText(/exportación grande/i)).toBeInTheDocument();
-      expect(screen.getByText(/6000 filas/i)).toBeInTheDocument();
+      const formattedRows = formatNumber(6000);
+      expect(
+        screen.getByText(
+          new RegExp(`${escapeRegExp(formattedRows)}\\s+filas`, "i"),
+        ),
+      ).toBeInTheDocument();
     });
   });
 
