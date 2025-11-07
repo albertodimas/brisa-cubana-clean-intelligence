@@ -22,6 +22,7 @@ export function CalendarPageClient({
   services,
   staff,
 }: CalendarPageClientProps) {
+  const loadingMinVisibleMs = 800;
   const [selectedBooking, setSelectedBooking] =
     useState<CalendarBooking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +37,22 @@ export function CalendarPageClient({
     type: "success" | "error" | "loading";
     message: string;
   } | null>(null);
+  const minimumVisibleWindowMs = 5000;
   const router = useRouter();
+  const scheduleStatusClear = () => {
+    setTimeout(() => {
+      setStatusMessage(null);
+    }, minimumVisibleWindowMs);
+  };
+
+  const ensureLoadingWindow = async (startedAt: number) => {
+    const elapsed = performance.now() - startedAt;
+    if (elapsed < loadingMinVisibleMs) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, loadingMinVisibleMs - elapsed),
+      );
+    }
+  };
 
   const handleBookingClick = (booking: CalendarBooking) => {
     if (
@@ -62,12 +78,12 @@ export function CalendarPageClient({
     newDateKey: string,
     originalScheduledAt: string,
   ) => {
+    const loadingStartedAt = performance.now();
     setStatusMessage({
       type: "loading",
       message: "Reprogramando reserva...",
     });
 
-    const minimumVisibleWindowMs = 5000;
     try {
       const originalDate = new Date(originalScheduledAt);
       const newDate = new Date(newDateKey);
@@ -93,14 +109,13 @@ export function CalendarPageClient({
         throw new Error(errorData.error || "Error al reprogramar la reserva");
       }
 
+      await ensureLoadingWindow(loadingStartedAt);
       setStatusMessage({
         type: "success",
         message: "Reserva reprogramada exitosamente",
       });
 
-      setTimeout(() => {
-        setStatusMessage(null);
-      }, minimumVisibleWindowMs);
+      scheduleStatusClear();
 
       // Refresh the page to show updated data
       router.refresh();
@@ -110,13 +125,12 @@ export function CalendarPageClient({
         error instanceof Error
           ? error.message
           : "Error al reprogramar la reserva";
+      await ensureLoadingWindow(loadingStartedAt);
       setStatusMessage({
         type: "error",
         message: errorMessage,
       });
-      setTimeout(() => {
-        setStatusMessage(null);
-      }, minimumVisibleWindowMs);
+      scheduleStatusClear();
     }
   };
 

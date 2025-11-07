@@ -335,12 +335,22 @@ test.describe.serial("Calendario", () => {
   }, testInfo: TestInfo) => {
     await openCalendarPage(page, testInfo);
 
-    // Check color legend is visible
-    await expect(page.getByText("Pendiente")).toBeVisible();
-    await expect(page.getByText("Confirmada")).toBeVisible();
-    await expect(page.getByText("En curso")).toBeVisible();
-    await expect(page.getByText("Completada")).toBeVisible();
-    await expect(page.getByText("Cancelada")).toBeVisible();
+    const legend = page.getByTestId("calendar-status-legend");
+    const entries = [
+      { id: "pending", label: "Pendiente" },
+      { id: "confirmed", label: "Confirmada" },
+      { id: "in_progress", label: "En curso" },
+      { id: "completed", label: "Completada" },
+      { id: "cancelled", label: "Cancelada" },
+    ];
+
+    for (const entry of entries) {
+      await expect(
+        legend
+          .getByTestId(`calendar-status-legend-${entry.id}`)
+          .getByText(entry.label),
+      ).toBeVisible();
+    }
   });
 
   test("solo permite acceso a ADMIN y COORDINATOR @security", async ({

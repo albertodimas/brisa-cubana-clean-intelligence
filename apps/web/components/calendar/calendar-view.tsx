@@ -460,19 +460,35 @@ export function CalendarView({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4">
-        {Object.entries(STATUS_COLORS).map(([status, color]) => (
-          <div key={status} className="flex items-center gap-2">
-            <div className={`h-3 w-3 rounded border ${color}`} />
-            <span className="text-sm text-gray-600 dark:text-brisa-300">
-              {status === "PENDING" && "Pendiente"}
-              {status === "CONFIRMED" && "Confirmada"}
-              {status === "IN_PROGRESS" && "En curso"}
-              {status === "COMPLETED" && "Completada"}
-              {status === "CANCELLED" && "Cancelada"}
-            </span>
-          </div>
-        ))}
+      <div
+        className="flex flex-wrap gap-4"
+        data-testid="calendar-status-legend"
+      >
+        {Object.entries(STATUS_COLORS).map(([status, color]) => {
+          const label =
+            status === "PENDING"
+              ? "Pendiente"
+              : status === "CONFIRMED"
+                ? "Confirmada"
+                : status === "IN_PROGRESS"
+                  ? "En curso"
+                  : status === "COMPLETED"
+                    ? "Completada"
+                    : "Cancelada";
+
+          return (
+            <div
+              key={status}
+              className="flex items-center gap-2"
+              data-testid={`calendar-status-legend-${status.toLowerCase()}`}
+            >
+              <div className={`h-3 w-3 rounded border ${color}`} />
+              <span className="text-sm text-gray-600 dark:text-brisa-300">
+                {label}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
