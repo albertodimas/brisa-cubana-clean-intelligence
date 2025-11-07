@@ -379,7 +379,9 @@ describe("useCalendar", () => {
       await result.current.refresh();
     });
 
-    expect(mockFetch.mock.calls.length).toBeGreaterThan(initialCallCount);
+    await waitFor(() => {
+      expect(mockFetch.mock.calls.length).toBeGreaterThan(initialCallCount);
+    });
   });
 
   it("incluye credentials en la petición fetch", async () => {
