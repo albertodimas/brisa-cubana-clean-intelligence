@@ -1,4 +1,15 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { config as loadEnv } from "dotenv";
 import { defineConfig } from "vitest/config";
+
+const envFiles = [".env.test", ".env.local", ".env"];
+for (const file of envFiles) {
+  const fullPath = resolve(process.cwd(), file);
+  if (existsSync(fullPath)) {
+    loadEnv({ path: fullPath, override: true });
+  }
+}
 
 export default defineConfig({
   test: {
