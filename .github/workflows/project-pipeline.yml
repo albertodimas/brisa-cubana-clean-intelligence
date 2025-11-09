@@ -222,6 +222,13 @@ jobs:
           allowed-origins: ${{ inputs.allowed-origins != '' && inputs.allowed-origins || secrets.ALLOWED_ORIGINS || '' }}
           proxy-allowed-origins: ${{ inputs.proxy-allowed-origins != '' && inputs.proxy-allowed-origins || secrets.PROXY_ALLOWED_ORIGINS || '' }}
 
+      - name: Configure Playwright environment
+        if: ${{ inputs.run-e2e-suite != 'none' }}
+        shell: bash
+        run: |
+          echo "PLAYWRIGHT_TEST_RUN=true" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN=true" >> "$GITHUB_ENV"
+
       - name: Initialize database schema
         if: ${{ inputs.run-database-prep }}
         working-directory: apps/api
@@ -275,6 +282,8 @@ jobs:
         env:
           ENABLE_HSTS: ${{ inputs.run-lighthouse && 'false' || '' }}
           NEXT_PUBLIC_API_URL: ${{ inputs.next-public-api-url }}
+          PLAYWRIGHT_TEST_RUN: ${{ inputs.run-e2e-suite != 'none' && 'true' || '' }}
+          NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN: ${{ inputs.run-e2e-suite != 'none' && 'true' || '' }}
         run: pnpm turbo run build --filter=@brisa/api --filter=@brisa/web
 
       - name: Storybook build
@@ -333,6 +342,8 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
           CI: true
+          PLAYWRIGHT_TEST_RUN: "true"
+          NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN: "true"
         run: |
           case "${{ inputs.run-e2e-suite }}" in
             smoke) pnpm test:e2e:smoke ;;
