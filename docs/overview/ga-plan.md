@@ -18,7 +18,7 @@
 
 1. **Completar landing**
    - Reemplazar mocks por assets reales (`apps/web/app/mockups/*`, `operationsMockups`).
-   - Agregar secciones “Casos reales”, “Antes vs. Después”, “Proceso en 4 pasos” (componentes en `components/landing/*`).
+   - Agregar secciones “Casos reales”, “Antes vs. Después”, “Proceso en 4 pasos” (componentes en `components/landing/*`). _(Progreso: se añadieron secciones de casos reales, tabla comparativa y CTA final en `feature/landing-ga-final`.)_
    - Programar variantes `/en` (ya existe carpeta `app/en` pero falta contenido final).
 2. **Micro-sites de soporte/legales**
    - Crear páginas `/servicios`, `/soporte`, `/terminos` dentro de `apps/web/app`. _(Listo: scaffolds iniciales en `feature/landing-ga-final`.)_
