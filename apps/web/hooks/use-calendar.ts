@@ -44,6 +44,7 @@ type UseCalendarOptions = {
   propertyId?: string;
   serviceId?: string;
   assignedStaffId?: string;
+  refreshToken?: number;
 };
 
 export function useCalendar(options: UseCalendarOptions) {
@@ -98,6 +99,7 @@ export function useCalendar(options: UseCalendarOptions) {
     options.propertyId,
     options.serviceId,
     options.assignedStaffId,
+    options.refreshToken,
   ]);
 
   useEffect(() => {

@@ -76,4 +76,29 @@ router.post("/notifications", async (c) => {
   return c.json({ data: notification }, 201);
 });
 
+router.delete("/bookings", async (c) => {
+  if (!testUtilsEnabled) {
+    return c.json({ error: "Not Found" }, 404);
+  }
+
+  const authUser = getAuthenticatedUser(c);
+  if (!authUser || authUser.role !== "ADMIN") {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const prisma = getPrisma();
+  const tag = c.req.query("tag") ?? "[e2e]";
+  const pattern = `%${tag}%`;
+  const deleted = await prisma.$executeRaw`
+    DELETE FROM "Booking"
+    WHERE "notes" ILIKE ${pattern}
+  `;
+
+  return c.json({
+    data: {
+      deleted,
+    },
+  });
+});
+
 export default router;

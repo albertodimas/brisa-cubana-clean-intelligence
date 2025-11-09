@@ -88,4 +88,10 @@ Cobertura automática actual: <!-- PLAYWRIGHT_CRITICAL_COUNT -->47<!-- /PLAYWRIG
 - [ ] `pnpm docs:verify` pasa (sincroniza tablas Playwright y enlaces).
 - [ ] `CHANGELOG.md` y `docs/reference/api-reference.md` listan los endpoints nuevos (calendar, marketing, portal PDF).
 
+## 9. Higiene de datos E2E
+
+- [ ] Cada suite Playwright que crea bookings usa un `notesTag` único (ej. `[e2e-calendar-dnd]`, `[e2e-calendar]`) en `createBookingFixture`.
+- [ ] Los helpers de limpieza (`deleteAllBookings`) reciben el mismo `notesTag` o se valida manualmente que sólo se eliminan fixtures propios mediante `/api/test-utils/bookings?tag=...`.
+- [ ] `PLAYWRIGHT_TEST_RUN="true"` y `NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN="true"` están propagados en CI/local para desactivar tours del calendario y exponer `window.__BRISA_*` (hooks de estado, refresh, estatus de drag & drop).
+
 Cuando todos los ítems aplicables estén marcados, registra la evidencia (capturas, logs, resultados de suites) en el PR o en `docs/overview/status.md` antes de autorizar el deploy.

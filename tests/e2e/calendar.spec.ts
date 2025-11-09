@@ -12,6 +12,26 @@ import {
   locateBookingButton,
 } from "./support/calendar";
 
+const CALENDAR_NOTES_TAG = "[e2e-calendar]";
+
+async function createCalendarBooking(
+  request: Parameters<typeof createBookingFixture>[0],
+  token: string,
+  overrides: Parameters<typeof createBookingFixture>[2] = {},
+) {
+  return createBookingFixture(request, token, {
+    notesTag: CALENDAR_NOTES_TAG,
+    ...overrides,
+  });
+}
+
+async function clearCalendarBookings(
+  request: Parameters<typeof deleteAllBookings>[0],
+  token: string,
+) {
+  await deleteAllBookings(request, token, { notesTag: CALENDAR_NOTES_TAG });
+}
+
 test.describe.serial("Calendario", () => {
   let adminToken: string;
 
@@ -39,7 +59,13 @@ test.describe.serial("Calendario", () => {
 
   test("muestra reservas en el calendario @critical", async ({
     page,
+    request,
   }, testInfo: TestInfo) => {
+    await clearCalendarBookings(request, adminToken);
+    await createCalendarBooking(request, adminToken, {
+      status: "CONFIRMED",
+    });
+
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     await expect(
@@ -72,11 +98,12 @@ test.describe.serial("Calendario", () => {
     request,
   }, testInfo: TestInfo) => {
     // Create bookings with different statuses
-    await createBookingFixture(request, adminToken, {
+    await clearCalendarBookings(request, adminToken);
+    await createCalendarBooking(request, adminToken, {
       status: "CONFIRMED",
     });
 
-    await createBookingFixture(request, adminToken, {
+    await createCalendarBooking(request, adminToken, {
       status: "PENDING",
     });
 
@@ -210,7 +237,8 @@ test.describe.serial("Calendario", () => {
     page,
     request,
   }, testInfo: TestInfo) => {
-    await createBookingFixture(request, adminToken, {
+    await clearCalendarBookings(request, adminToken);
+    await createCalendarBooking(request, adminToken, {
       status: "CONFIRMED",
     });
 
@@ -226,37 +254,14 @@ test.describe.serial("Calendario", () => {
     page,
     request,
   }, testInfo: TestInfo) => {
-    const booking = await createBookingFixture(request, adminToken, {
+    await clearCalendarBookings(request, adminToken);
+    const booking = await createCalendarBooking(request, adminToken, {
       status: "CONFIRMED",
     });
 
     const calendarGrid = await openCalendarPage(page, testInfo);
 
-    const scheduledDate = new Date(booking.scheduledAt);
-    const dateLabel = scheduledDate.toLocaleDateString("es-ES", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-    const timeLabel = scheduledDate.toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    const targetCell = calendarGrid.getByRole("gridcell", {
-      name: new RegExp(dateLabel, "i"),
-    });
-    await expect(targetCell).toBeVisible();
-
-    const servicePattern = booking.service.name.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      "\\$&",
-    );
-    const bookingButton = targetCell
-      .getByRole("button", {
-        name: new RegExp(`${servicePattern}.*${timeLabel}`, "i"),
-      })
-      .first();
+    const bookingButton = locateBookingButton(calendarGrid, booking);
     await expect(bookingButton).toBeVisible();
     await bookingButton.click();
     await page.waitForFunction(
@@ -280,8 +285,8 @@ test.describe.serial("Calendario", () => {
     page,
     request,
   }, testInfo: TestInfo) => {
-    await deleteAllBookings(request, adminToken);
-    const booking = await createBookingFixture(request, adminToken, {
+    await clearCalendarBookings(request, adminToken);
+    const booking = await createCalendarBooking(request, adminToken, {
       status: "CONFIRMED",
     });
 
@@ -307,8 +312,8 @@ test.describe.serial("Calendario", () => {
     page,
     request,
   }, testInfo: TestInfo) => {
-    await deleteAllBookings(request, adminToken);
-    const booking = await createBookingFixture(request, adminToken, {
+    await clearCalendarBookings(request, adminToken);
+    const booking = await createCalendarBooking(request, adminToken, {
       status: "IN_PROGRESS",
     });
 
@@ -345,11 +350,11 @@ test.describe.serial("Calendario", () => {
     ];
 
     for (const entry of entries) {
-      await expect(
-        legend.locator(
-          `[data-testid="calendar-status-legend-${entry.id}"] >> text=${entry.label}`,
-        ),
-      ).toBeVisible();
+      const legendEntry = legend
+        .getByTestId(`calendar-status-legend-${entry.id}`)
+        .first();
+      await expect(legendEntry).toBeVisible();
+      await expect(legendEntry).toContainText(entry.label);
     }
   });
 

@@ -155,39 +155,33 @@ export async function deleteUserFixture(
   }
 }
 
+type DeleteBookingsOptions = {
+  notesTag?: string;
+};
+
 export async function deleteAllBookings(
   request: APIRequestContext,
   accessToken: string,
+  options: DeleteBookingsOptions = {},
 ): Promise<void> {
-  const response = await request.get(`${apiBaseUrl}/api/bookings?limit=100`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
+  const notesTag = options.notesTag ?? "[e2e]";
+  const response = await request.delete(
+    `${apiBaseUrl}/api/test-utils/bookings?tag=${encodeURIComponent(notesTag)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
 
   if (!response.ok()) {
     console.warn(
-      "[e2e] No se pudo obtener el listado de bookings para limpieza",
+      "[e2e] No se pudo limpiar las reservas de prueba",
       response.status(),
       response.statusText(),
     );
-    return;
   }
-
-  const json = (await response.json()) as { data?: Array<{ id: string }> };
-  const bookings = json.data ?? [];
-
-  await Promise.all(
-    bookings.map((booking) =>
-      request.delete(`${apiBaseUrl}/api/bookings/${booking.id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }),
-    ),
-  );
 }
 
 export async function getUserAccessToken(
@@ -220,6 +214,8 @@ export async function getUserAccessToken(
   return json.token;
 }
 
+const DEFAULT_BOOKING_OFFSET_MS = 10 * 24 * 60 * 60 * 1000;
+
 async function fetchCollection<T>(
   request: APIRequestContext,
   accessToken: string,
@@ -245,6 +241,8 @@ async function fetchCollection<T>(
 type BookingFixtureOptions = {
   status?: "PENDING" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   scheduledAt?: string;
+  notes?: string;
+  notesTag?: string;
 };
 
 export async function createBookingFixture(
@@ -283,7 +281,7 @@ export async function createBookingFixture(
   const useCustomSchedule = Boolean(options.scheduledAt);
   const baseTimestamp = useCustomSchedule
     ? new Date(options.scheduledAt!).getTime()
-    : Date.now() + 2 * 60 * 60 * 1000;
+    : Date.now() + DEFAULT_BOOKING_OFFSET_MS;
   const durationMs = (service.durationMin ?? 120) * 60 * 1000;
   const jitterRange = Math.max(durationMs / 3, 5 * 60 * 1000);
 
@@ -294,6 +292,10 @@ export async function createBookingFixture(
     scheduledAt: string;
   } | null = null;
   let lastError: { status: number; statusText: string } | null = null;
+
+  const notesTag = options.notesTag ?? "[e2e]";
+  const bookingNotes =
+    options.notes ?? `${notesTag} booking fixture`.slice(0, 255);
 
   for (let attempt = 0; attempt < 6; attempt++) {
     const jitterMs = useCustomSchedule
@@ -314,6 +316,7 @@ export async function createBookingFixture(
         serviceId: service.id,
         scheduledAt,
         durationMin: service.durationMin ?? 120,
+        notes: bookingNotes,
       },
     });
 

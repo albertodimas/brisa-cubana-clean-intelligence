@@ -13,6 +13,7 @@ type CalendarWeekViewProps = {
     serviceId?: string;
     assignedStaffId?: string;
   };
+  refreshToken?: number;
 };
 
 const DAYS_OF_WEEK = [
@@ -66,6 +67,7 @@ export function CalendarWeekView({
   onBookingClick,
   initialDate = new Date(),
   filters,
+  refreshToken = 0,
 }: CalendarWeekViewProps) {
   const [currentWeekStart, setCurrentWeekStart] = useState(
     getStartOfWeek(initialDate),
@@ -89,6 +91,7 @@ export function CalendarWeekView({
     from,
     to,
     ...filters,
+    refreshToken,
   });
 
   // Generate week days
@@ -259,6 +262,8 @@ export function CalendarWeekView({
           : weekDays.map((day) => (
               <div
                 key={day.dateKey}
+                data-testid="calendar-week-gridcell"
+                data-date-key={day.dateKey}
                 className={`min-h-96 rounded-lg border p-4 ${
                   day.isToday
                     ? "border-blue-400 bg-blue-50 dark:border-blue-600 dark:bg-blue-950"
@@ -305,6 +310,8 @@ export function CalendarWeekView({
                       return (
                         <button
                           key={booking.id}
+                          data-booking-id={booking.id}
+                          data-booking-status={booking.status}
                           onClick={() => onBookingClick?.(booking)}
                           className={`w-full rounded-lg border p-3 text-left transition-all hover:shadow-md ${
                             STATUS_COLORS[booking.status] ||

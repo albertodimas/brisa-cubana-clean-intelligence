@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarView } from "./calendar-view";
 import { CalendarWeekView } from "./calendar-week-view";
 import { CalendarFilters } from "./calendar-filters";
@@ -17,6 +17,15 @@ type CalendarPageClientProps = {
 
 type ViewMode = "month" | "week";
 
+const waitForNextFrame = () =>
+  new Promise<void>((resolve) => {
+    if (typeof window === "undefined") {
+      resolve();
+      return;
+    }
+    window.requestAnimationFrame(() => resolve());
+  });
+
 export function CalendarPageClient({
   properties,
   services,
@@ -32,6 +41,7 @@ export function CalendarPageClient({
     serviceId?: string;
     assignedStaffId?: string;
   }>({});
+  const [calendarRefreshToken, setCalendarRefreshToken] = useState(0);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error" | "loading";
     message: string;
@@ -39,11 +49,46 @@ export function CalendarPageClient({
   const loadingMinVisibleMs = 2000;
   const minimumVisibleWindowMs = 5000;
   const router = useRouter();
+  const statusClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  type StatusDebugType = "success" | "error" | "loading" | "idle";
+
+  const updateStatusDebug = (type: StatusDebugType, message: string) => {
+    if (
+      typeof window === "undefined" ||
+      process.env.NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN !== "true"
+    ) {
+      return;
+    }
+    const instrumentedWindow = window as typeof window & {
+      __BRISA_LAST_STATUS__?: {
+        type: StatusDebugType;
+        message: string;
+        at: number;
+      };
+    };
+    instrumentedWindow.__BRISA_LAST_STATUS__ = {
+      type,
+      message,
+      at: Date.now(),
+    };
+  };
   const scheduleStatusClear = () => {
-    setTimeout(() => {
+    if (statusClearRef.current) {
+      clearTimeout(statusClearRef.current);
+    }
+    statusClearRef.current = setTimeout(() => {
       setStatusMessage(null);
+      statusClearRef.current = null;
     }, minimumVisibleWindowMs);
   };
+
+  useEffect(() => {
+    return () => {
+      if (statusClearRef.current) {
+        clearTimeout(statusClearRef.current);
+      }
+    };
+  }, []);
 
   const ensureLoadingWindow = async (startedAt: number) => {
     const elapsed = performance.now() - startedAt;
@@ -79,10 +124,16 @@ export function CalendarPageClient({
     originalScheduledAt: string,
   ) => {
     const loadingStartedAt = performance.now();
+    if (statusClearRef.current) {
+      clearTimeout(statusClearRef.current);
+      statusClearRef.current = null;
+    }
     setStatusMessage({
       type: "loading",
       message: "Reprogramando reserva...",
     });
+    updateStatusDebug("loading", "Reprogramando reserva...");
+    await waitForNextFrame();
 
     try {
       const originalDate = new Date(originalScheduledAt);
@@ -114,11 +165,13 @@ export function CalendarPageClient({
         type: "success",
         message: "Reserva reprogramada exitosamente",
       });
+      updateStatusDebug("success", "Reserva reprogramada exitosamente");
 
       scheduleStatusClear();
 
       // Refresh the page to show updated data
       router.refresh();
+      setCalendarRefreshToken((token) => token + 1);
     } catch (error) {
       console.error("Error rescheduling booking:", error);
       const errorMessage =
@@ -130,6 +183,7 @@ export function CalendarPageClient({
         type: "error",
         message: errorMessage,
       });
+      updateStatusDebug("error", errorMessage);
       scheduleStatusClear();
     }
   };
@@ -153,6 +207,7 @@ export function CalendarPageClient({
 
     // Refresh the page to show updated data
     router.refresh();
+    setCalendarRefreshToken((token) => token + 1);
   };
 
   const handleCompleteBooking = async (bookingId: string) => {
@@ -174,7 +229,24 @@ export function CalendarPageClient({
 
     // Refresh the page to show updated data
     router.refresh();
+    setCalendarRefreshToken((token) => token + 1);
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (process.env.NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN !== "true") {
+      return;
+    }
+    const instrumentedWindow = window as typeof window & {
+      __BRISA_TEST_RESCHEDULE__?: typeof handleBookingReschedule;
+    };
+    instrumentedWindow.__BRISA_TEST_RESCHEDULE__ = handleBookingReschedule;
+    return () => {
+      delete instrumentedWindow.__BRISA_TEST_RESCHEDULE__;
+    };
+  }, [handleBookingReschedule]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -324,11 +396,13 @@ export function CalendarPageClient({
           onBookingClick={handleBookingClick}
           onBookingReschedule={handleBookingReschedule}
           filters={filters}
+          refreshToken={calendarRefreshToken}
         />
       ) : (
         <CalendarWeekView
           onBookingClick={handleBookingClick}
           filters={filters}
+          refreshToken={calendarRefreshToken}
         />
       )}
 

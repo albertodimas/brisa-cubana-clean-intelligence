@@ -20,6 +20,7 @@ type CalendarViewProps = {
     serviceId?: string;
     assignedStaffId?: string;
   };
+  refreshToken?: number;
 };
 
 const DAYS_OF_WEEK = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -43,6 +44,7 @@ export function CalendarView({
   onBookingReschedule,
   initialMonth = new Date(),
   filters,
+  refreshToken = 0,
 }: CalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(initialMonth);
   const {
@@ -76,6 +78,7 @@ export function CalendarView({
     from,
     to,
     ...filters,
+    refreshToken,
   });
 
   // Generate calendar grid
@@ -336,6 +339,8 @@ export function CalendarView({
               <div
                 key={day.dateKey}
                 role="gridcell"
+                data-testid="calendar-gridcell"
+                data-date-key={day.dateKey}
                 aria-label={`${day.date.toLocaleDateString("es-ES", {
                   weekday: "long",
                   day: "numeric",

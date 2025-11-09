@@ -7,6 +7,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Added
 
 - API: endpoints `/api/calendar` y `/api/calendar/availability` para vistas de calendario y disponibilidad con validaciones de rango y agregados de resumen.
+- API: endpoint `/api/test-utils/bookings` ahora acepta el parámetro `?tag=` para limpiar únicamente los fixtures etiquetados (empleado por las suites Playwright).
 - API: módulo `/api/marketing/**` (stats de portafolio, testimoniales, FAQs, pricing tiers y market stats) con permisos ADMIN/COORDINATOR documentados.
 - API: nuevo servicio de notificaciones multi-canal (email/SMS/in-app) con campos `channel`, `status`, `bookingId`, `metadata` y cola en memoria.
 - Web: vista de calendario operativo (`/panel/calendario`) con drag & drop, modal de detalle y filtros avanzados.
@@ -22,6 +23,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Middleware del panel y endpoints del portal ahora validan JWT de sesión con helpers ligeros (`lib/auth/session-token`), eliminando el match global del middleware y delegando `/api/portal/*` a guards por ruta.
 - Habilitamos Sentry Replay en Vercel preview (`session=0.05`, `on_error=0.5`) para evaluaciones controladas; producción/desarrollo permanecen en `false/0`.
 - Documentación actualizada: `docs/README.md` enlaza `CHANGELOG.md` y `SECURITY.md`, guía de observabilidad incorpora flags de Replay y referencia a `instrumentation-client.ts`.
+- Playwright/Calendar: `CalendarPageClient`, `CalendarView` y `CalendarWeekView` exponen `data-testid`, contadores `__BRISA_*` y refrescos controlados cuando `NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN="true"`; `useCalendar` admite `refreshToken` y las suites `calendar.spec.ts` / `calendar-drag-drop.spec.ts` usan fixtures etiquetadas (`notesTag`) para evitar colisiones entre tests.
 - Alineados precios comerciales ($249 / $369 / $489) entre landing, seeds Prisma, pruebas de integración y documentación operativa/marketing para el lanzamiento piloto.
 - Infra: health check admite `HEALTH_STRIPE_TIMEOUT_MS` y la validación de entorno incluye `NOTIFICATION_SMTP_*`, `NOTIFICATION_FROM_EMAIL`, `NOTIFICATION_STREAM_*` y credenciales Twilio (`TWILIO_*`).
 

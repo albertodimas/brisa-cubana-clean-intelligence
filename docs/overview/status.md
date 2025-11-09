@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última actualización:** 7 de noviembre de 2025  
+**Última actualización:** 8 de noviembre de 2025  
 **Responsable actual:** Plataforma & Reliability
 
 ## Resumen operativo
@@ -11,8 +11,9 @@
 - Sprint 2: motor de reservas detecta doble booking, endpoint `GET /api/bookings/:id` y asignación de staff (`PATCH /api/bookings/:id/assign-staff`).
 - Sprint 3: módulo de facturación (`/api/invoices/**`), ajustes de serialización y documentación al día.
 - Email operativo: dominio autenticado en SendGrid, forwarding con ImprovMX (`cliente@brisacubanacleanintelligence.com`) según [docs/operations/email-routing.md](../operations/email-routing.md).
+- QA: suites Playwright (smoke/critical/full) usan fixtures etiquetados (`notesTag`) y el flag `PLAYWRIGHT_TEST_RUN` para exponer instrumentación del calendario y mantener los flujos drag & drop deterministas.
 
-### Últimos checks locales (07-nov-2025 15:45 UTC)
+### Últimos checks locales (08-nov-2025 23:50 UTC)
 
 <!-- PLAYWRIGHT_SUITE_TABLE:start -->
 
@@ -27,7 +28,7 @@
 - **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->295<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->91<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
 - **Suites E2E activas:** <!-- PLAYWRIGHT_FULL_COUNT -->91<!-- /PLAYWRIGHT_FULL_COUNT -->
 
-> ✅ Estado actual (07-nov-2025 15:45 UTC): `pnpm test:e2e:critical` y `pnpm test:e2e:full` completados en local sin fallos después de refrescar seeds y estabilizar el drag & drop del calendario. Revisa el reporte Playwright adjunto en el PR sólo si introduces cambios adicionales en estos flujos.
+> ✅ Estado actual (08-nov-2025 23:50 UTC): `pnpm test:e2e:critical` y `pnpm test:e2e:full` completados en local sin fallos tras instrumentar el calendario (`NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN`, `__BRISA_*`) y aislar los fixtures mediante `notesTag`. Revisa el reporte Playwright adjunto en el PR sólo si introduces cambios adicionales en estos flujos.
 
 > Ejecuta `pnpm lint && pnpm typecheck && pnpm test && pnpm docs:verify` antes de mergear. Para regresiones completas usa `pnpm test:e2e:full`.
 

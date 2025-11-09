@@ -328,6 +328,13 @@ export async function performLogin(
     title: `performLogin:${credentials.email}`,
   } as TestInfo;
 
+  await ensureUserCredentials(
+    credentials.email,
+    credentials.password,
+    "ADMIN",
+    "QA Admin",
+  );
+
   try {
     await loginWithCredentials(page, fakeTestInfo, {
       email: credentials.email,

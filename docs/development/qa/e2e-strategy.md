@@ -196,6 +196,17 @@ export default defineConfig({
 }
 ```
 
+### Datos sintéticos etiquetados y hooks de prueba
+
+- **Taggea cada fixture.** `createBookingFixture` ahora acepta `notesTag` y `deleteAllBookings` recibe la misma etiqueta para limpiar sólo esos registros vía `/api/test-utils/bookings?tag=...`. Esto evita que un `beforeEach` de otra suite borre datos compartidos y cause 404/409 intermitentes.
+- **Convenciones activas:** `CALENDAR_DND_NOTES_TAG = "[e2e-calendar-dnd]"` y `CALENDAR_NOTES_TAG = "[e2e-calendar]"` mantienen aislados los flujos mensuales/semanales. Sigue el mismo patrón (`[e2e-mi-suite]`) cuando crees nuevos fixtures.
+- **Instrumentación condicionada:** cuando `PLAYWRIGHT_TEST_RUN="true"` (lo inyecta el config y puedes exportarlo manualmente si levantas la API para debugging local) el frontend:
+  - Desactiva tours/onboarding que bloqueaban clicks (ej. `CalendarTour`).
+  - Expone `window.__BRISA_TEST_RESCHEDULE__`, `__BRISA_REFRESH_COUNT__`, `__BRISA_LAST_STATUS__` y contadores visibles para que las specs comprueben refrescos.
+  - Añade `data-testid` (`panel-calendar-grid`, `calendar-week-gridcell`, `calendar-booking-count`) y `statusMessage` asegurando que los `expect` se anclan a nodos deterministas.
+- **Hook de refresco:** `useCalendar` admite `refreshToken`; las suites actualizan este valor cuando `router.refresh()` termina para garantizar que la UI vuelve con datos nuevos antes de continuar.
+- Documenta cualquier etiqueta nueva o helper asociado en la suite correspondiente y enlaza esta sección en el PR para mantener el inventario bajo control.
+
 ---
 
 ## Problemas Resueltos
@@ -242,6 +253,7 @@ Modificar el middleware de Next.js para propagar `x-forwarded-for` al backend, p
 
 - `playwright.config.ts` ahora reinicia siempre API y Web en entornos locales (`reuseExistingServer: false`), evitando que queden procesos con datos en memoria entre corridas.
 - El helper `createBookingFixture` reintenta hasta seis veces generando horarios futuros con desplazamientos aleatorios, de modo que incluso si persisten reservas anteriores, se selecciona un hueco libre.
+- Cuando una suite requiera datos propios, debe pasar `notesTag` (ej. `[e2e-calendar-dnd]`) y limpiar con `deleteAllBookings(..., { notesTag })`, aprovechando el nuevo `?tag=` de `/api/test-utils/bookings`. Así mantenemos aisladas las corridas simultáneas (CI, local, nightly).
 - Si se desea reutilizar servidores manualmente, ejecutar `pnpm --filter @brisa/api db:seed` (o borrar las reservas creadas) antes de relanzar la suite.
 
 ### Playwright con builds de producción (oct-2025)
