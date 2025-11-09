@@ -1,7 +1,7 @@
 import app from "../dist/index.js";
 
 export const config = {
-  runtime: "nodejs22.x",
+  runtime: "nodejs",
   maxDuration: 60,
 };
 
