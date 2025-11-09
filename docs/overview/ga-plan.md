@@ -21,7 +21,7 @@
    - Agregar secciones “Casos reales”, “Antes vs. Después”, “Proceso en 4 pasos” (componentes en `components/landing/*`).
    - Programar variantes `/en` (ya existe carpeta `app/en` pero falta contenido final).
 2. **Micro-sites de soporte/legales**
-   - Crear páginas `/servicios`, `/soporte`, `/terminos` dentro de `apps/web/app`.
+   - Crear páginas `/servicios`, `/soporte`, `/terminos` dentro de `apps/web/app`. _(Listo: scaffolds iniciales en `feature/landing-ga-final`.)_
    - Vincular `docs/operations/security.md` → versión pública mínima.
 3. **Integración leads + analítica**
    - Conectar `LeadCaptureForm` con `LEAD_WEBHOOK_URL` real y confirmar eventos PostHog (`cta_*` events).
