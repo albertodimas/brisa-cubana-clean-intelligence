@@ -564,6 +564,96 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Casos reales */}
+      <section
+        id="casos"
+        className="bg-white dark:bg-brisa-950 py-16 sm:py-20 px-4 sm:px-6 lg:px-8"
+      >
+        <div className="max-w-6xl mx-auto space-y-10">
+          <div className="text-center space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
+              Casos reales
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-[#0d2944] dark:text-white">
+              ¿Qué logramos con anfitriones y property managers?
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 dark:text-brisa-200 max-w-3xl mx-auto">
+              Testeamos cada feature con clientes reales. Estos highlights
+              resumen lo que obtuvieron los primeros 40 portafolios beta.
+            </p>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            {displayTestimonials.slice(0, 2).map((testimonial) => (
+              <article
+                key={testimonial.quote}
+                className="h-full rounded-3xl border border-gray-200 bg-white p-8 shadow-lg shadow-brisa-900/5 dark:border-brisa-800 dark:bg-brisa-950"
+              >
+                <p className="text-lg italic text-gray-700 dark:text-brisa-100">
+                  “{testimonial.quote}”
+                </p>
+                <div className="mt-6">
+                  <p className="text-sm font-semibold text-[#0d2944] dark:text-white">
+                    {testimonial.author}
+                  </p>
+                  <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-brisa-300">
+                    {testimonial.role}
+                  </p>
+                </div>
+              </article>
+            ))}
+            <article className="rounded-3xl border border-white/20 bg-gradient-to-br from-[#0d2944] via-[#102f55] to-[#174469] p-8 text-white shadow-2xl shadow-brisa-900/30">
+              <p className="text-sm uppercase tracking-[0.35em] text-white/70">
+                KPI beta
+              </p>
+              <h3 className="mt-3 text-3xl font-semibold">
+                +0.25⭐ en rating de limpieza promedio
+              </h3>
+              <p className="mt-4 text-sm text-white/90">
+                Los anfitriones de Airbnb/Wynwood redujeron reclamos de limpieza
+                en un 82 % tras tres ciclos. El turnaround visual y el checklist
+                firmado fueron claves para responder reseñas.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm leading-relaxed text-white/80">
+                <li>• 15-30 fotos por servicio disponibles en el portal</li>
+                <li>• Alertas automáticas cuando un PMS modifica reservas</li>
+                <li>• Reportes exportables en PDF/CSV para dueños.</li>
+              </ul>
+            </article>
+            <article className="rounded-3xl border border-gray-200 bg-white p-8 shadow-lg dark:border-brisa-800 dark:bg-brisa-950">
+              <p className="text-sm uppercase tracking-[0.35em] text-brisa-600 dark:text-brisa-300">
+                Caso corporativo · Brickell
+              </p>
+              <h3 className="mt-3 text-2xl font-semibold text-[#0d2944] dark:text-white">
+                120 unidades coordinadas con 4 cuadrillas
+              </h3>
+              <p className="mt-4 text-sm text-gray-600 dark:text-brisa-200">
+                Implementamos inventario RFID, reposición automática y doble QA.
+                El equipo de operaciones ahora recibe alertas en Slack con cada
+                incidencia y evidencia fotográfica adjunta.
+              </p>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-brisa-100 bg-brisa-50 p-4 text-center dark:border-brisa-800 dark:bg-brisa-900/60">
+                  <p className="text-sm uppercase tracking-wide text-brisa-600 dark:text-brisa-200">
+                    SLA real
+                  </p>
+                  <p className="text-2xl font-semibold text-[#0d2944] dark:text-white">
+                    98 %
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-brisa-100 bg-brisa-50 p-4 text-center dark:border-brisa-800 dark:bg-brisa-900/60">
+                  <p className="text-sm uppercase tracking-wide text-brisa-600 dark:text-brisa-200">
+                    Restocks automáticos
+                  </p>
+                  <p className="text-2xl font-semibold text-[#0d2944] dark:text-white">
+                    {"<"}18 h
+                  </p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
       {/* Atención al Detalle */}
       <section className="bg-white dark:bg-brisa-950">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
@@ -1111,6 +1201,69 @@ export default async function LandingPage() {
         </StaggerContainer>
       </section>
 
+      {/* Comparativa de servicios */}
+      <section className="bg-white dark:bg-brisa-950 px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="text-center space-y-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
+              Comparativa
+            </span>
+            <h2 className="text-3xl font-semibold text-[#0d2944] dark:text-white">
+              Elige el servicio adecuado para tu inventario
+            </h2>
+            <p className="text-base text-gray-600 dark:text-brisa-200">
+              Diseñado para propietarios boutique, operadores de STR y
+              portafolios corporativos.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-3xl border border-gray-200 shadow-lg dark:border-brisa-800">
+            <table className="w-full text-left text-sm sm:text-base">
+              <thead className="bg-brisa-50 text-brisa-600 dark:bg-brisa-900/60 dark:text-brisa-100">
+                <tr>
+                  <th className="px-4 py-3">Servicio</th>
+                  <th className="px-4 py-3">Ideal para</th>
+                  <th className="px-4 py-3">SLA</th>
+                  <th className="px-4 py-3">Crew</th>
+                  <th className="px-4 py-3">Entregables</th>
+                  <th className="px-4 py-3">Add-ons</th>
+                </tr>
+              </thead>
+              <tbody>
+                {serviceComparisons.map((service) => (
+                  <tr
+                    key={service.id}
+                    className="border-t border-gray-100 dark:border-brisa-800"
+                  >
+                    <td className="px-4 py-4 font-semibold text-[#0d2944] dark:text-white">
+                      {service.name}
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-brisa-200">
+                      {service.idealFor}
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-brisa-200">
+                      {service.sla}
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-brisa-200">
+                      {service.crew}
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-brisa-200">
+                      <ul className="space-y-1">
+                        {service.deliverables.map((deliverable) => (
+                          <li key={deliverable}>• {deliverable}</li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-brisa-200">
+                      {service.addOns}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-gradient-to-br from-brisa-600 via-brisa-500 to-brisa-400 text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="space-y-8">
@@ -1599,6 +1752,43 @@ export default async function LandingPage() {
       </section>
 
       <FAQSection items={displayFAQs} />
+
+      {/* CTA final */}
+      <section className="bg-[#0d2944] text-white px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="max-w-5xl mx-auto space-y-6 text-center">
+          <p className="text-xs uppercase tracking-[0.4em] text-white/70">
+            Próximo paso
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-semibold leading-tight">
+            Reserva una sesión con operaciones y recibe un plan personalizado en
+            24 horas.
+          </h2>
+          <p className="text-base sm:text-lg text-white/80">
+            Revisamos tu inventario, métricas actuales y proponemos la mezcla
+            ideal de servicios (turnovers, deep cleaning, mantenimiento). Todo
+            queda documentado en el portal para compartirlo con dueños o tu
+            equipo.
+          </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+            <MarketingLink
+              href={{ pathname: "/servicios" }}
+              eventName="cta_view_services"
+              metadata={{ placement: "cta-final" }}
+              className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-[#0d2944] shadow-xl shadow-black/20 hover:bg-brisa-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              Explorar servicios
+            </MarketingLink>
+            <MarketingLink
+              href={{ pathname: "/soporte" }}
+              eventName="cta_contact_support"
+              metadata={{ placement: "cta-final" }}
+              className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 text-base font-semibold text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              Habla con operaciones
+            </MarketingLink>
+          </div>
+        </div>
+      </section>
 
       <LeadCaptureForm />
     </main>
