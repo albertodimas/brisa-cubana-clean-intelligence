@@ -1,13 +1,17 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "pnpm run build",
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs22.x",
-      "memory": 1024,
-      "maxDuration": 60
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "runtime": "nodejs22.x",
+        "maxDuration": 60,
+        "memory": 1024
+      }
     }
-  },
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
