@@ -2,20 +2,23 @@
 
 import { useState, useEffect } from "react";
 import type { Route } from "next";
+import type { UrlObject } from "url";
 import Link from "next/link";
 import { BrandLogo } from "@/components/branding/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 type NavigationItem = {
   name: string;
-  href: Route | { pathname: Route; hash?: string };
+  href: Route | UrlObject;
 };
 
 const navigation: readonly NavigationItem[] = [
-  { name: "Servicios", href: { pathname: "/", hash: "servicios" } },
+  { name: "Servicios", href: { pathname: "/servicios" } },
   { name: "Precios", href: { pathname: "/", hash: "precios" } },
-  { name: "Portal Privado (Beta)", href: "/clientes" },
+  { name: "Soporte", href: { pathname: "/soporte" } },
   { name: "FAQ", href: { pathname: "/", hash: "faq" } },
+  { name: "Portal Privado (Beta)", href: "/clientes" },
+  { name: "Legales", href: { pathname: "/terminos" } },
   { name: "Contacto", href: { pathname: "/", hash: "contacto" } },
 ];
 
