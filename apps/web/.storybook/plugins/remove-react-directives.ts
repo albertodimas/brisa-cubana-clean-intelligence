@@ -1,11 +1,4 @@
-type VitePlugin = {
-  name: string;
-  enforce?: "pre" | "post";
-  transform?: (
-    code: string,
-    id: string,
-  ) => { code: string; map: null } | null | undefined;
-};
+import type { Plugin } from "vite";
 
 const DIRECTIVE_REGEX = /^\s*(?:(["'])use (?:client|server)\1;?\s*)+/u;
 
@@ -20,11 +13,11 @@ export function removeReactDirectives({
   ],
 }: {
   include?: Array<string | RegExp>;
-} = {}): VitePlugin {
+} = {}): Plugin {
   return {
     name: "remove-react-directives",
     enforce: "pre",
-    transform(code: string, id: string) {
+    transform(code, id) {
       const shouldProcess = include.some((pattern) =>
         typeof pattern === "string" ? id.includes(pattern) : pattern.test(id),
       );

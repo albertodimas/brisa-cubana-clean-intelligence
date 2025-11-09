@@ -19,7 +19,8 @@
 1. **Completar landing**
    - Reemplazar mocks por assets reales (`apps/web/app/mockups/*`, `operationsMockups`).
    - Agregar secciones “Casos reales”, “Antes vs. Después”, “Proceso en 4 pasos” (componentes en `components/landing/*`). _(Progreso: se añadieron secciones de casos reales, tabla comparativa y CTA final en `feature/landing-ga-final`.)_
-   - Programar variantes `/en` (ya existe carpeta `app/en` pero falta contenido final).
+   - Programar variantes `/en` (ya existe carpeta `app/en` pero falta contenido final). _(Progreso: `/en` replica secciones clave y ahora incluye el formulario de leads localizado + métricas dinámicas.)_
+   - Completar stories de componentes ui/landing para asegurar consistencia visual (ver `docs/development/ui/storybook-coverage.md`). _(Progreso: UI alcanzó 40/40 historias y landing ya cubre 12/12 componentes, incluidos lead-capture, before/after, timeline, pricing 3D y night shift media.)_
 2. **Micro-sites de soporte/legales**
    - Crear páginas `/servicios`, `/soporte`, `/terminos` dentro de `apps/web/app`. _(Progreso: `/servicios` ya incluye contenido extendido, tabla comparativa y formulario de leads; faltan contenidos finales en soporte/legales.)_
    - Vincular `docs/operations/security.md` → versión pública mínima.
