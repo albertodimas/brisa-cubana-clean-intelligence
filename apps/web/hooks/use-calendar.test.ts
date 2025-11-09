@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import {
   afterEach,
   beforeEach,
@@ -379,9 +379,7 @@ describe("useCalendar", () => {
     const initialCallCount = mockFetch.mock.calls.length;
 
     // Call refresh
-    await act(async () => {
-      await result.current.refresh();
-    });
+    await result.current.refresh();
 
     await flushPromises();
     expect(mockFetch.mock.calls.length).toBe(initialCallCount + 1);
