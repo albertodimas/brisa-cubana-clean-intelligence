@@ -48,6 +48,11 @@ const mockCalendarData: CalendarData = {
   },
 };
 
+const flushPromises = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+
 describe("useCalendar", () => {
   const originalFetch = global.fetch;
   let consoleErrorSpy: MockInstance<typeof console.error>;
@@ -368,9 +373,8 @@ describe("useCalendar", () => {
       }),
     );
 
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalled();
-    });
+    await flushPromises();
+    expect(mockFetch).toHaveBeenCalled();
 
     const initialCallCount = mockFetch.mock.calls.length;
 
@@ -379,6 +383,7 @@ describe("useCalendar", () => {
       await result.current.refresh();
     });
 
+    await flushPromises();
     expect(mockFetch.mock.calls.length).toBe(initialCallCount + 1);
   });
 
