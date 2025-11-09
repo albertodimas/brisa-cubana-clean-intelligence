@@ -18,11 +18,10 @@
 
 1. **Completar landing**
    - Reemplazar mocks por assets reales (`apps/web/app/mockups/*`, `operationsMockups`).
-   - Agregar secciones “Casos reales”, “Antes vs. Después”, “Proceso en 4 pasos” (componentes en `components/landing/*`). _(Progreso: se añadieron secciones de casos reales, tabla comparativa y CTA final en `feature/landing-ga-final`.)_
-   - Programar variantes `/en` (ya existe carpeta `app/en` pero falta contenido final). _(Progreso: `/en` replica secciones clave y ahora incluye el formulario de leads localizado + métricas dinámicas.)_
-   - Completar stories de componentes ui/landing para asegurar consistencia visual (ver `docs/development/ui/storybook-coverage.md`). _(Progreso: UI alcanzó 40/40 historias y landing ya cubre 12/12 componentes, incluidos lead-capture, before/after, timeline, pricing 3D y night shift media.)_
+   - Agregar secciones “Casos reales”, “Antes vs. Después”, “Proceso en 4 pasos” (componentes en `components/landing/*`).
+   - Programar variantes `/en` (ya existe carpeta `app/en` pero falta contenido final).
 2. **Micro-sites de soporte/legales**
-   - Crear páginas `/servicios`, `/soporte`, `/terminos` dentro de `apps/web/app`. _(Progreso: `/servicios` ya incluye contenido extendido, tabla comparativa y formulario de leads; faltan contenidos finales en soporte/legales.)_
+   - Crear páginas `/servicios`, `/soporte`, `/terminos` dentro de `apps/web/app`.
    - Vincular `docs/operations/security.md` → versión pública mínima.
 3. **Integración leads + analítica**
    - Conectar `LeadCaptureForm` con `LEAD_WEBHOOK_URL` real y confirmar eventos PostHog (`cta_*` events).
@@ -32,11 +31,9 @@
 
 1. **Calendario y reservas** (`apps/web/app/panel/calendario`)
    - Finalizar drag & drop, filtros y vista mobile; usar datos reales vía `/api/calendar`.
-   - _(Progreso: Telemetría PostHog registrada para vista inicial/cambios, filtros, reprogramaciones y respuesta (`calendar_data_loaded`) con metadatos de caché + badge visible en el panel; pendiente exponer métricas adicionales (cache miss reasons) y completar suite E2E específica)._
    - Tests E2E dedicados (`tests/e2e/calendar.spec.ts`).
 2. **Dashboard financiero** (`panel/dashboard`, `panel/marketing`)
    - Conectar gráficos con `marketing/stats`, `invoices` y `portfolio` stats.
-   - _(Progreso: `/api/dashboard/stats` consolida reservas, invoices y portfolio; el panel consume este endpoint y muestra tarjetas adicionales de facturación/portfolio con metadatos del rango analizado.)_
    - Exportaciones CSV y permisos (roles).
 3. **Módulo de notificaciones** (`panel/notifications` + SSE en `apps/api/src/routes/notifications.ts`)
    - UI para marcar como leído, filtros y envío manual para operadores.
@@ -47,9 +44,10 @@
 ### WS3 · Backend / seguridad
 
 1. **JWT refresh & sesiones** (pendiente en `docs/overview/status.md`)
-   - _(Progreso: Portal listo — `apps/api/src/routes/portal-auth.ts` emite refresh tokens (`portal_refresh_token`) y la UI puede extender sesión sin reenviar enlace. Panel operativo alineado — `/api/authentication/login|refresh|logout` rota tokens persistentes (`user_sessions`), `apps/web/auth.ts` guarda access/refresh en NextAuth y la documentación de seguridad incluye el runbook de verificación/revocación. Falta instrumentar monitoreo (alertas cuando `revocationReason` ≠ `rotated`) y exponer métricas en el dashboard de seguridad)._
 2. **CSP bloqueante y headers** (`apps/web/next.config.mjs`)
-   - _(Progreso: `apps/web/vercel.json` ahora envía `Content-Security-Policy` bloqueante además del header `Report-Only`, y `docs/operations/security.md` documenta la política vigente/report-uri)._
+   - Implementar refresh tokens y rotación en `apps/api/src/routes/portal-auth.ts`.
+2. **CSP bloqueante y headers** (`apps/web/next.config.mjs`)
+   - Pasar de modo report-only → enforce; actualizar `docs/operations/security.md`.
 3. **Auditoría de roles/rate limits**
    - Revisar `createRateLimiter` y endpoints sensibles (Stripe, portal) para GA.
 4. **Backups y seeds**
@@ -59,7 +57,11 @@
 
 1. **Batería automatizada**
    - Habilitar `pnpm test:e2e:full` en nightly y `test:e2e:critical` en CI (ya configurado) → documentar en `docs/development/qa/e2e-strategy.md`.
+<<<<<<< HEAD
    - _(Progreso: Smoke y critical incluyen proyectos Safari – `playwright.config.ts` agrega `smoke-webkit`/`critical-webkit` y los scripts `pnpm test:e2e:smoke` / `test:e2e:critical:safari` los ejecutan en paralelo.)_
+=======
+   - Añadir smoke cross-browser (Chrome/Safari) usando Playwright projects.
+>>>>>>> 3b05692 (docs: add ga plan)
 2. **Monitoreo producción**
    - Confirmar integraciones Stripe/Sentry/PostHog con datos reales (ejecutar `pnpm sentry:test-event`, `pnpm posthog:test-event`).
    - Configurar alertas Slack/Email para errores y health degradado.
