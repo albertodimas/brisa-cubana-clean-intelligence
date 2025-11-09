@@ -4,6 +4,8 @@
 
 > ⚠️ La API ya no arranca si falta `ALLOWED_ORIGINS`. Asegúrate de que el proyecto **brisa-cubana-clean-intelligence-api** en Vercel tenga ese valor definido en `development`, `preview` y `production` antes de desplegar.
 
+> 🔄 Para mantener protegido el health check público, sincroniza el `HEALTH_CHECK_TOKEN` de Vercel con GitHub siempre que se rote: `pnpm env:sync-health-token`. El comando descarga los envs de producción del proyecto API y actualiza automáticamente el secreto del repositorio mediante `gh secret set`.
+
 La plataforma ejecuta automáticamente esta verificación todos los lunes a las 06:00 UTC mediante el workflow `Env Manifest Audit`. Si aparece en rojo, revisa los pasos inferiores y corrige los entornos antes de volver a ejecutar manualmente el job (`Actions → Env Manifest Audit → Run workflow`).
 
 Pasos para alinear los valores de entorno propios del proxy web y del portal cliente después de retirar `API_TOKEN`.

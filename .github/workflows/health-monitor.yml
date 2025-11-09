@@ -23,6 +23,16 @@ jobs:
         run: |
           set -euo pipefail
 
+          print_snippet() {
+            local label="$1"
+            local file="$2"
+            if [ -s "$file" ]; then
+              echo "   ${label} → $(head -n 1 "$file" | tr -d '\r')"
+            else
+              echo "   ${label} → (respuesta vacía)"
+            fi
+          }
+
           auth_args=()
           if [ -n "${HEALTH_CHECK_TOKEN:-}" ]; then
             auth_args=(--header "Authorization: Bearer ${HEALTH_CHECK_TOKEN}")
@@ -32,6 +42,10 @@ jobs:
           web_status=$(curl -s -o /tmp/web-health.log -w "%{http_code}" "${auth_args[@]}" "$WEB_HEALTH_URL" || echo "000")
           echo "Verificando ${API_HEALTH_URL}"
           api_status=$(curl -s -o /tmp/api-health.log -w "%{http_code}" "${auth_args[@]}" "$API_HEALTH_URL" || echo "000")
+          echo "↪ Web status: $web_status"
+          print_snippet "Web body" /tmp/web-health.log
+          echo "↪ API status: $api_status"
+          print_snippet "API body" /tmp/api-health.log
 
           failures=""
           if [ "$web_status" -lt 200 ] || [ "$web_status" -ge 300 ]; then
