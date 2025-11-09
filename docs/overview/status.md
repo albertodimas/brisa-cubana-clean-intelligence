@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa Cubana Clean Intelligence
 
-**Última actualización:** 8 de noviembre de 2025  
+**Última actualización:** 9 de noviembre de 2025  
 **Responsable actual:** Plataforma & Reliability
 
 ## Resumen operativo
@@ -13,7 +13,7 @@
 - Email operativo: dominio autenticado en SendGrid, forwarding con ImprovMX (`cliente@brisacubanacleanintelligence.com`) según [docs/operations/email-routing.md](../operations/email-routing.md).
 - QA: suites Playwright (smoke/critical/full) usan fixtures etiquetados (`notesTag`) y el flag `PLAYWRIGHT_TEST_RUN` para exponer instrumentación del calendario y mantener los flujos drag & drop deterministas.
 
-### Últimos checks locales (08-nov-2025 23:50 UTC)
+### Últimos checks locales (09-nov-2025 01:40 UTC)
 
 <!-- PLAYWRIGHT_SUITE_TABLE:start -->
 
@@ -47,6 +47,7 @@
 4. **Infra & observabilidad**
    - Health check extendido (DB, Stripe, SMTP, Sentry).
    - Logging estruturado para asignaciones de staff y pagos.
+   - `app.js` (raíz) y `api/index.js` actúan como shims de Hono para Vercel; el proyecto `brisa-cubana-clean-intelligence-api` debe vincularse desde `apps/api` (`vercel link --cwd apps/api`) antes de cada `vercel pull`.
 5. **Documentación**
    - README y `docs/README.md` definen política "no PR sin docs".
    - `docs/reference/api-reference.md` cubre bookings, payments, invoices y portal.
@@ -87,6 +88,12 @@
 - [Checklist de despliegue](../operations/deployment.md)
 - [Referencia API](../reference/api-reference.md)
 - [Guía Portal Cliente](../development/guides/portal-client.md)
+
+## Documentación y comunicación
+
+- Este reporte se sincroniza con el [mapa documental](../README.md) y debe actualizarse en cada release o hotfix.
+- Antes de mergear, registra los comandos ejecutados (`pnpm docs:verify`, suites E2E, seeds) en el PR y enlaza la sección correspondiente del changelog.
+- Archiva estados anteriores en `docs/archive/` para evitar mezclar información vigente con histórica.
 
 ## Archivo histórico
 

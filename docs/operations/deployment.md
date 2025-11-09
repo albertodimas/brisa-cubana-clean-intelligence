@@ -9,7 +9,22 @@ Proceso verificado para promover cambios de Brisa Cubana Clean Intelligence a lo
 - `CHANGELOG.md` actualizado con los cambios a desplegar.
 - Checklist de regresión ejecutada según [`development/qa/regression-checklist.md`](../development/qa/regression-checklist.md); adjuntar resultados en el PR.
 - Variables críticas sincronizadas conforme a [`env-sync.md`](env-sync.md) antes del release (`pnpm env:status` debe indicar que no faltan claves).
-- `vercel.json` (raíz) y `apps/api/vercel.json` versionados con `"git.deploymentEnabled": false` para evitar auto-builds directos desde Vercel.
+- Documentación alineada: `docs/overview/status.md`, `docs/reference/api-reference.md` (si hay cambios de contrato) y cualquier guía impactada fueron actualizadas y verificadas con `pnpm docs:verify`.
+
+### Nota sobre monorepo y Vercel Link
+
+- El proyecto **web** continúa vinculado desde la raíz del repo (`vercel link` sin cambiar de carpeta).
+- El proyecto **API** _debe_ vincularse desde `apps/api`. Ejecuta `cd apps/api && vercel link --scope brisa-cubana` siempre que cambies de máquina o regeneres la carpeta `.vercel/`.
+- Los shims `app.js` y `api/index.js` en la raíz existen como fallback para la CLI, pero los builds oficiales usan la carpeta `apps/api`. Si Vercel intenta compilar desde la raíz volverá a fallar con “No entrypoint found”.
+
+### Checklist documental previo al deploy
+
+1. Confirma que la entrada correspondiente en [`CHANGELOG.md`](../../CHANGELOG.md) describe brevemente el impacto visible.
+2. Actualiza `docs/overview/status.md` con fecha/hora, suites ejecutadas y riesgos abiertos.
+3. Revisa las guías afectadas (`docs/development/*`, `docs/operations/*`, etc.) siguiendo la [tabla de sincronización](../README.md#checklist-de-sincronización-documental).
+4. Ejecuta `pnpm docs:verify` y anexa el comando en la descripción del PR o del release.
+
+Ningún despliegue pasa a producción si esta checklist no está documentada.
 
 ## 2. Variables de entorno requeridas
 

@@ -1,6 +1,6 @@
 # Brisa Cubana Clean Intelligence – Manual de Documentación
 
-**Última revisión:** 7 de noviembre de 2025
+**Última revisión:** 9 de noviembre de 2025
 
 > ℹ️ El plan de recuperación sigue activo. Consulta el [recovery-plan](overview/recovery-plan.md) y el [resumen de estado](overview/status.md) para conocer la información vigente; el histórico de octubre está en `docs/archive/2025-10-status.md`.
 
@@ -22,6 +22,19 @@ Ejecuta `pnpm docs:verify` antes de abrir un PR; el flujo `CI (Main Branch)` blo
 | **Operations & Runbooks** | [`operations/deployment.md`](operations/deployment.md) · [`operations/env-sync.md`](operations/env-sync.md) · [`operations/observability.md`](operations/observability.md) · [`operations/security.md`](operations/security.md) · [`operations/incident-runbook.md`](operations/incident-runbook.md) · [`operations/email-routing.md`](operations/email-routing.md) | Procedimientos de despliegue, sincronización de entornos, observabilidad, seguridad, routing de correo y respuesta a incidentes. |
 | **Reference**             | [`reference/api-reference.md`](reference/api-reference.md) · [`reference/openapi.yaml`](reference/openapi.yaml)                                                                                                                                                                                                                                                     | Especificación OpenAPI y documentación formal de la API (Scalar).                                                                |
 | **Archive & Legacy**      | [`archive/`](archive/) (marketing, negocio, templates, roadmap histórico, etc.)                                                                                                                                                                                                                                                                                     | Material histórico; no referenciar para tareas actuales salvo correcciones puntuales.                                            |
+
+## Checklist de sincronización documental
+
+| Tipo de cambio                       | Actualiza                                                                                                                 | Comandos mínimos                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Endpoint/contrato API                | `docs/reference/api-reference.md`, `docs/overview/status.md`, `CHANGELOG.md`                                              | `pnpm docs:verify`, `pnpm test --filter @brisa/api`             |
+| Funcionalidad Web / UX               | Guías correspondientes (`development/guides/*.md`), `docs/overview/status.md`, capturas en `docs/development/ui-ux/`      | `pnpm lint --filter @brisa/web`, `pnpm test:e2e:critical`       |
+| Operaciones / Deploy / Infra         | `docs/operations/deployment.md`, `docs/operations/env-sync.md`, runbooks o `docs/operations/observability.md`             | `pnpm docs:verify`, `pnpm env:status`                           |
+| Seguridad / Credenciales             | `SECURITY.md`, `docs/operations/security.md`, notas en `docs/overview/status.md`                                          | `pnpm docs:verify`, validar rotaciones en Vercel/GitHub Secrets |
+| Marketing / Portal / Cliente externo | `CHANGELOG.md`, `docs/development/guides/portal-client.md`, `docs/overview/status.md`, activos en `apps/web/public/`      | `pnpm test:e2e:full`, `pnpm docs:verify`                        |
+| Scripts, seeds, migraciones          | `docs/development/guides/quickstart.md`, `docs/operations/deployment.md` (sección migraciones), `docs/overview/status.md` | `pnpm db:push`, `pnpm db:seed`, `pnpm docs:verify`              |
+
+> Si un documento **no** aplica, explícalo en el PR. La regla es “documentar o justificar explícitamente”.
 
 ## Documentos raíz obligatorios
 

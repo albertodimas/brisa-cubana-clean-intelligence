@@ -12,11 +12,10 @@ Monorepo (pnpm + Turborepo) para la plataforma operativa de **Brisa Cubana Clean
 
 ## Estado actual
 
-- Release estable: `v0.4.2`.
-- Deploys automatizados en Vercel (web) y API pública `https://api.brisacubanacleanintelligence.com`.
-- Salud, riesgos y suites en verde: ver [`docs/overview/status.md`](docs/overview/status.md).
-- Historial previo (octubre 2025) archivado en [`docs/archive/2025-10-status.md`](docs/archive/2025-10-status.md).
-- Nuevos módulos (Sprint 4): vista operativa de calendario (`/panel/calendario`), dashboard de analytics/marketing y sistema de notificaciones multi-canal.
+- Release estable `v0.4.2`; roadmap y riesgos siempre actualizados en [`docs/overview/status.md`](docs/overview/status.md).
+- Deploys automatizados (web/API) en Vercel; producción apunta a `https://app.brisacubanacleanintelligence.com` y `https://api.brisacubanacleanintelligence.com`.
+- Cambios funcionales (calendario operativo, dashboard/marketing y notificaciones multi‑canal) documentados en [`CHANGELOG.md`](CHANGELOG.md) → sección **Unreleased**.
+- Histórico previo (octubre 2025) archivado en [`docs/archive/2025-10-status.md`](docs/archive/2025-10-status.md).
 
 ---
 
@@ -35,15 +34,18 @@ pnpm dev          # web:3000, api:3001
 
 ---
 
-## Documentación activa
+## Sistema de documentación
 
-- Manual central: [`docs/README.md`](docs/README.md).
-- Estado operativo: [`docs/overview/status.md`](docs/overview/status.md).
-- Portal cliente y enlaces mágicos: [`docs/development/guides/portal-client.md`](docs/development/guides/portal-client.md).
-- Seguridad/entornos: [`docs/operations/security.md`](docs/operations/security.md) + [`SECURITY.md`](SECURITY.md).
-- Referencia API (OpenAPI): [`docs/reference/api-reference.md`](docs/reference/api-reference.md).
+| Dominio           | Punto de entrada                                                                                                                                                                               | Qué cubre                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Manual general    | [`docs/README.md`](docs/README.md)                                                                                                                                                             | Política de documentación, inventario de carpetas activas y scripts de mantenimiento. |
+| Estado & roadmap  | [`docs/overview/status.md`](docs/overview/status.md) · [`docs/overview/recovery-plan.md`](docs/overview/recovery-plan.md)                                                                      | Salud operativa, riesgos y plan integral por sprint.                                  |
+| Desarrollo & QA   | [`docs/development/guides/quickstart.md`](docs/development/guides/quickstart.md) · [`docs/development/qa/e2e-strategy.md`](docs/development/qa/e2e-strategy.md)                                | Setup local, portal cliente, estrategia de pruebas y lineamientos UI/UX.              |
+| Operaciones       | [`docs/operations/deployment.md`](docs/operations/deployment.md) · [`docs/operations/security.md`](docs/operations/security.md) · [`docs/operations/env-sync.md`](docs/operations/env-sync.md) | Despliegues, seguridad, env-sync, observabilidad y runbooks.                          |
+| Referencia formal | [`docs/reference/api-reference.md`](docs/reference/api-reference.md) · [`docs/reference/openapi.yaml`](docs/reference/openapi.yaml)                                                            | OpenAPI actualizada y contratos compartidos.                                          |
+| Documentos raíz   | [`CHANGELOG.md`](CHANGELOG.md) · [`SECURITY.md`](SECURITY.md)                                                                                                                                  | Cambios visibles para usuarios y política de divulgación responsable.                 |
 
-> **Política:** No se acepta código sin documentación actualizada. Cada PR debe incluir notas relevantes y pasar `pnpm docs:verify`.
+> **Regla:** toda entrega debe explicitar qué documentos tocó y ejecutar `pnpm docs:verify`. El CI bloquea merges si el árbol de documentación queda incongruente.
 
 ---
 
