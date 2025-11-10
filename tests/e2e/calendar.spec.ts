@@ -261,7 +261,11 @@ test.describe.serial("Calendario", () => {
 
     const calendarGrid = await openCalendarPage(page, testInfo);
 
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await expect(bookingButton).toBeVisible();
     await bookingButton.click();
     await page.waitForFunction(
@@ -293,7 +297,11 @@ test.describe.serial("Calendario", () => {
     await openCalendarPage(page, testInfo);
 
     const calendarGrid = await ensureCalendarGridVisible(page);
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await bookingButton.click();
 
     // Click cancel button
@@ -320,7 +328,11 @@ test.describe.serial("Calendario", () => {
     await openCalendarPage(page, testInfo);
 
     const calendarGrid = await ensureCalendarGridVisible(page);
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await bookingButton.click();
 
     // Click complete button
