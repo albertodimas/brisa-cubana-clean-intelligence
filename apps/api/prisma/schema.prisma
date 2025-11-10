@@ -326,3 +326,19 @@ model MarketStat {
 
   @@index([metricId])
 }
+
+model PortalSession {
+  id               String   @id @default(cuid())
+  email            String
+  tokenHash        String   @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revocationReason String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([email, revokedAt])
+  @@index([expiresAt])
+}

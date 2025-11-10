@@ -1,11 +1,12 @@
-import { Hono } from "hono";
-import { setCookie, deleteCookie } from "hono/cookie";
+import { Hono, type Context } from "hono";
+import { setCookie, deleteCookie, getCookie } from "hono/cookie";
 import { z } from "zod";
-import { randomBytes, createHash } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import jwt from "jsonwebtoken";
 import {
   getUserRepository,
   getMagicLinkTokenRepository,
+  getPortalSessionRepository,
 } from "../container.js";
 import { logger } from "../lib/logger.js";
 import {
@@ -15,6 +16,12 @@ import {
 import { authenticatePortal } from "../middleware/auth.js";
 import { resolveCookiePolicy } from "../lib/cookies.js";
 import { createRateLimiter } from "../lib/rate-limiter.js";
+import { hashToken } from "../lib/token-hash.js";
+import {
+  PORTAL_ACCESS_COOKIE_NAME,
+  PORTAL_CUSTOMER_COOKIE_NAME,
+  PORTAL_REFRESH_COOKIE_NAME,
+} from "../lib/portal-session-constants.js";
 
 const router = new Hono();
 
@@ -31,9 +38,15 @@ const MAGIC_LINK_TTL_MINUTES = Number.parseInt(
   10,
 );
 
-function hashToken(token: string) {
-  return createHash("sha256").update(token).digest("hex");
-}
+const PORTAL_ACCESS_TOKEN_TTL_SECONDS = Number.parseInt(
+  process.env.PORTAL_ACCESS_TOKEN_TTL_SECONDS ?? "3600",
+  10,
+);
+
+const PORTAL_REFRESH_TOKEN_TTL_DAYS = Number.parseInt(
+  process.env.PORTAL_REFRESH_TOKEN_TTL_DAYS ?? "30",
+  10,
+);
 
 const portalRequestRateLimiter = createRateLimiter({
   limit: Number(process.env.PORTAL_MAGIC_LINK_RATE_LIMIT ?? "3"),
@@ -53,6 +66,115 @@ const portalVerifyRateLimiter = createRateLimiter({
 
 router.use("/request", portalRequestRateLimiter);
 router.use("/verify", portalVerifyRateLimiter);
+
+function extractClientIp(c: Context): string | null {
+  const forwarded = c.req.header("x-forwarded-for");
+  if (forwarded) {
+    const [first] = forwarded.split(",");
+    if (first && first.trim()) {
+      return first.trim();
+    }
+  }
+  const realIp = c.req.header("x-real-ip");
+  if (realIp) {
+    return realIp;
+  }
+  return null;
+}
+
+function buildPortalJwtSecret() {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET no configurado en el entorno");
+  }
+  return jwtSecret;
+}
+
+async function issuePortalSessionCookies(
+  c: Context,
+  user: { id: string; email: string },
+  options: { revokeExisting?: boolean } = {},
+) {
+  const jwtSecret = buildPortalJwtSecret();
+  const sessionRepository = getPortalSessionRepository();
+  const now = Date.now();
+  const accessExpiresAt = new Date(
+    now + PORTAL_ACCESS_TOKEN_TTL_SECONDS * 1000,
+  );
+  const refreshExpiresAt = new Date(
+    now + PORTAL_REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
+  );
+
+  if (options.revokeExisting) {
+    await sessionRepository.revokeAllForEmail(user.email, "rotated");
+  }
+
+  const portalToken = jwt.sign(
+    {
+      sub: user.email,
+      scope: "portal-client",
+    },
+    jwtSecret,
+    {
+      expiresIn: PORTAL_ACCESS_TOKEN_TTL_SECONDS,
+      audience: "portal-client",
+      issuer: "brisa-cubana",
+    },
+  );
+
+  const refreshToken = randomBytes(32).toString("hex");
+  await sessionRepository.create({
+    email: user.email,
+    tokenHash: hashToken(refreshToken),
+    expiresAt: refreshExpiresAt,
+    userAgent: c.req.header("user-agent") ?? null,
+    ipAddress: extractClientIp(c),
+  });
+
+  const { secure, sameSite } = resolveCookiePolicy(c);
+
+  setCookie(c, PORTAL_ACCESS_COOKIE_NAME, portalToken, {
+    httpOnly: true,
+    secure,
+    sameSite,
+    path: "/",
+    maxAge: PORTAL_ACCESS_TOKEN_TTL_SECONDS,
+    expires: accessExpiresAt,
+  });
+
+  setCookie(c, PORTAL_REFRESH_COOKIE_NAME, refreshToken, {
+    httpOnly: true,
+    secure,
+    sameSite,
+    path: "/",
+    maxAge: PORTAL_REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60,
+    expires: refreshExpiresAt,
+  });
+
+  setCookie(c, PORTAL_CUSTOMER_COOKIE_NAME, user.id, {
+    httpOnly: false,
+    secure,
+    sameSite,
+    path: "/",
+    maxAge: PORTAL_REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60,
+    expires: refreshExpiresAt,
+  });
+
+  return {
+    portalToken,
+    email: user.email,
+    customerId: user.id,
+    expiresAt: accessExpiresAt.toISOString(),
+    refreshExpiresAt: refreshExpiresAt.toISOString(),
+  };
+}
+
+function clearPortalCookies(c: Context) {
+  const { secure, sameSite } = resolveCookiePolicy(c);
+  deleteCookie(c, PORTAL_ACCESS_COOKIE_NAME, { path: "/", secure, sameSite });
+  deleteCookie(c, PORTAL_REFRESH_COOKIE_NAME, { path: "/", secure, sameSite });
+  deleteCookie(c, PORTAL_CUSTOMER_COOKIE_NAME, { path: "/", secure, sameSite });
+}
 
 router.post("/request", async (c) => {
   const body = await c.req.json().catch(() => null);
@@ -150,11 +272,6 @@ router.post("/verify", async (c) => {
     return c.json({ error: "Token inválido o expirado" }, 400);
   }
 
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    return c.json({ error: "JWT_SECRET no configurado en el entorno" }, 500);
-  }
-
   const userRepository = getUserRepository();
   const user = await userRepository.findByEmail(tokenRecord.email);
   if (!user || !user.isActive || user.role !== "CLIENT") {
@@ -164,58 +281,35 @@ router.post("/verify", async (c) => {
 
   await magicLinkRepository.consume(tokenRecord.id);
 
-  const sessionTtlSeconds = 60 * 60;
-  const sessionExpiresAt = new Date(Date.now() + sessionTtlSeconds * 1000);
-
-  const portalToken = jwt.sign(
-    {
-      sub: tokenRecord.email,
-      scope: "portal-client",
-    },
-    jwtSecret,
-    {
-      expiresIn: "1h",
-      audience: "portal-client",
-      issuer: "brisa-cubana",
-    },
-  );
-
-  const { secure, sameSite } = resolveCookiePolicy(c);
-
-  setCookie(c, "portal_token", portalToken, {
-    httpOnly: true,
-    secure,
-    sameSite,
-    path: "/",
-    maxAge: sessionTtlSeconds,
-    expires: sessionExpiresAt,
-  });
-
-  setCookie(c, "portal_customer_id", user.id, {
-    httpOnly: false,
-    secure,
-    sameSite,
-    path: "/",
-    maxAge: sessionTtlSeconds,
-    expires: sessionExpiresAt,
+  const sessionPayload = await issuePortalSessionCookies(c, user, {
+    revokeExisting: true,
   });
 
   return c.json({
-    data: {
-      portalToken,
-      email: tokenRecord.email,
-      customerId: user.id,
-      expiresAt: sessionExpiresAt.toISOString(),
-    },
+    data: sessionPayload,
   });
 });
 
 router.post("/logout", authenticatePortal, async (c) => {
   const portalAuth = c.get("portalAuth");
-  const { secure, sameSite } = resolveCookiePolicy(c);
+  const refreshToken = getCookie(c, PORTAL_REFRESH_COOKIE_NAME);
+  if (refreshToken) {
+    try {
+      await getPortalSessionRepository().revokeByTokenHash(
+        hashToken(refreshToken),
+        "logout",
+      );
+    } catch (error) {
+      logger.warn(
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+        "No se pudo revocar el refresh token del portal en logout",
+      );
+    }
+  }
 
-  deleteCookie(c, "portal_token", { path: "/", secure, sameSite });
-  deleteCookie(c, "portal_customer_id", { path: "/", secure, sameSite });
+  clearPortalCookies(c);
 
   logger.info(
     {
@@ -225,6 +319,51 @@ router.post("/logout", authenticatePortal, async (c) => {
     "Portal logout solicitado",
   );
   return c.json({ success: true });
+});
+
+router.post("/refresh", async (c) => {
+  const refreshToken = getCookie(c, PORTAL_REFRESH_COOKIE_NAME);
+  if (!refreshToken) {
+    clearPortalCookies(c);
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const portalSessionRepository = getPortalSessionRepository();
+  const existingSession = await portalSessionRepository.findValidByTokenHash(
+    hashToken(refreshToken),
+  );
+
+  if (!existingSession) {
+    clearPortalCookies(c);
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const userRepository = getUserRepository();
+  const user = await userRepository.findByEmail(existingSession.email);
+  if (!user || !user.isActive || user.role !== "CLIENT") {
+    await portalSessionRepository.revokeById(
+      existingSession.id,
+      "user-not-eligible",
+    );
+    clearPortalCookies(c);
+    return c.json({ error: "Cuenta no habilitada para portal" }, 403);
+  }
+
+  await portalSessionRepository.revokeById(existingSession.id, "rotated");
+  const sessionPayload = await issuePortalSessionCookies(c, user);
+
+  logger.info(
+    {
+      email: user.email,
+      customerId: user.id,
+      type: "portal_refresh",
+    },
+    "Portal session refreshed via refresh token",
+  );
+
+  return c.json({
+    data: sessionPayload,
+  });
 });
 
 export default router;
