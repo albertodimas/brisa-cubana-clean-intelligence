@@ -23,7 +23,7 @@
     "db:seed": "pnpm --filter @brisa/api db:seed",
     "analyze:web": "pnpm --filter @brisa/web analyze",
     "verify:versions": "node scripts/verify-versions.mjs",
-    "docs:verify": "pnpm verify:versions && bash scripts/verify-doc-structure.sh",
+    "docs:verify": "pnpm verify:versions && bash scripts/verify-doc-structure.sh && pnpm check:storybook-coverage",
     "posthog:monitor": "node scripts/posthog-checkout-monitor.mjs",
     "posthog:sync-dashboard": "node scripts/posthog-sync-dashboard.mjs",
     "capture:hero": "node scripts/capture-landing-hero.mjs",
@@ -39,7 +39,8 @@
     "env:sync-health-token": "node scripts/env/sync-health-token.mjs",
     "status:update": "node scripts/status/generate.mjs",
     "storybook": "pnpm --filter @brisa/web storybook",
-    "storybook:build": "pnpm --filter @brisa/web storybook:build"
+    "storybook:build": "pnpm --filter @brisa/web storybook:build",
+    "check:storybook-coverage": "node scripts/check-storybook-coverage.mjs"
   },
   "devDependencies": {
     "@cspell/dict-es-es": "^3.0.8",

@@ -9,8 +9,8 @@
 | -------------------- | ------------------- | ------------------ | ----------------- |
 | UI (carpeta `ui/`)   | 40                  | 40                 | 0                 |
 | Landing (`landing/`) | 12                  | 12                 | 0                 |
-| Managers/layouts     | 6                   | 0                  | 6                 |
-| **Total**            | **58**              | **52**             | **6**             |
+| Managers/layouts     | 6                   | 6                  | 0                 |
+| **Total**            | **58**              | **58**             | **0**             |
 
 - **Stories actuales UI:** `accordion`, `alert`, `badge`, `breadcrumbs`, `button`, `card`, `checkbox`, `chip`, `count-up`, `dialog`, `dropdown-menu`, `empty-state`, `export-button`, `filter-chips`, `gradient-mesh`, `help-icon`, `infinite-list`, `input`, `kpi-card`, `label`, `pagination`, `page-transition`, `parallax`, `progress`, `radio`, `scroll-area`, `scroll-progress`, `scroll-reveal`, `search-bar`, `select`, `skeleton`, `spinner`, `switch`, `tabs`, `table`, `textarea`, `theme-toggle`, `tilt-card`, `toast`, `tooltip`.
 - **Stories actuales Landing:** `animated-hero`, `animated-timeline`, `before-after-slider`, `faq-section`, `lead-capture-form`, `marketing-link`, `night-shift-media`, `pricing-card-3d`, `pricing-tiers`, `testimonial-card`, `video-section`, `kpi-card`.
@@ -78,11 +78,11 @@
 5. [x] `CustomersManager`
 6. [x] `AdminPanel / Dashboard shell`
 
-> Cada manager debe exponer estados: loading inicial, filtros activos, acción exitosa y acción con error (usando `ActionResult`). Se pueden simular hooks con mocks estáticos.
+> Cada manager ya cuenta con estados: loading inicial, filtros activos, acción exitosa y acción con error (usando `ActionResult`). Para nuevos módulos, replica la misma estrategia con mocks estáticos.
 
 ## Próximos pasos
 
-1. Crear stories para los componentes marcados como prioridad GA siguiendo el orden (UI → Landing → Managers).
+1. Mantener la cobertura 58/58; cualquier componente nuevo debe llegar con su story correspondiente.
 2. Incorporar `pnpm storybook:build` al pipeline y publicar preview una vez el build sea estable.
-3. Automatizar un script (`scripts/check-storybook-coverage.mjs`) que compare componentes vs stories y falle en CI si la cobertura cae.
+3. Ejecutar `pnpm check:storybook-coverage` (incluido en `pnpm docs:verify`) para detectar regresiones automáticamente.
 4. Actualizar este documento cada vez que se añadan stories nuevos para mantener el conteo súper visible.
