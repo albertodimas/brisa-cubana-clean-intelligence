@@ -170,15 +170,16 @@ test.describe.serial("Calendario - Drag & Drop", () => {
 
     const calendarGrid = await openCalendarPage(page, testInfo);
 
-    // This test is difficult to implement with Playwright
-    // as it requires capturing mid-drag state
-    // We can test that the booking has the correct classes when started
     const bookingButton = locateBookingButton(calendarGrid, booking);
     await ensureBookingVisible(bookingButton);
 
-    // Get bounding box for manual drag
-    const sourceBox = await bookingButton.boundingBox();
-    expect(sourceBox).not.toBeNull();
+    // Simulate drag start to verify visual feedback classes
+    await bookingButton.dispatchEvent("dragstart");
+    await expect(bookingButton).toHaveClass(/cursor-grabbing/);
+
+    // Drag end should remove the visual indicator
+    await bookingButton.dispatchEvent("dragend");
+    await expect(bookingButton).not.toHaveClass(/cursor-grabbing/);
   });
 
   test("muestra indicador en celda de destino durante hover @smoke", async ({
