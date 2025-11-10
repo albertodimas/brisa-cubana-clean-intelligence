@@ -61,7 +61,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find draggable booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Should have cursor-grab class
@@ -87,7 +91,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find completed booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Should NOT have cursor-grab class
@@ -113,7 +121,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find cancelled booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Should NOT be draggable
@@ -136,7 +148,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find the booking to drag
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
     const sourceCell = bookingButton.locator("..");
 
@@ -170,10 +186,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
 
     const calendarGrid = await openCalendarPage(page, testInfo);
 
-    // This test is difficult to implement with Playwright
-    // as it requires capturing mid-drag state
-    // We can test that the booking has the correct classes when started
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Get bounding box for manual drag
@@ -222,7 +239,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find the booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Drag to new date

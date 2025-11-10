@@ -45,13 +45,45 @@ export async function openCalendarPage(
   return ensureCalendarGridVisible(page);
 }
 
-export function locateBookingButton(
+export async function locateBookingButton(
+  page: Page,
   calendarGrid: Locator,
   booking: {
     id: string;
     scheduledAt: string;
     service: { name: string };
   },
-): Locator {
-  return calendarGrid.locator(`[data-booking-id="${booking.id}"]`).first();
+): Promise<Locator> {
+  const bookingLocator = calendarGrid
+    .locator(`[data-booking-id="${booking.id}"]`)
+    .first();
+
+  const revealBookingIfHidden = async () => {
+    const dateKey = booking.scheduledAt.split("T")[0] ?? "";
+    const targetCell = calendarGrid
+      .locator(`[data-date-key="${dateKey}"]`)
+      .first();
+    try {
+      await targetCell.scrollIntoViewIfNeeded();
+    } catch {
+      // Si la celda ya está visible no necesitamos hacer nada
+    }
+
+    const expandButton = targetCell
+      .getByRole("button", { name: /\+\d+\sreservas/ })
+      .first();
+    if ((await expandButton.count()) > 0) {
+      await expandButton.click();
+      await page.waitForTimeout(100);
+    }
+  };
+
+  try {
+    await bookingLocator.waitFor({ state: "visible", timeout: 2000 });
+    return bookingLocator;
+  } catch {
+    await revealBookingIfHidden();
+    await bookingLocator.waitFor({ state: "visible", timeout: 8000 });
+    return bookingLocator;
+  }
 }
