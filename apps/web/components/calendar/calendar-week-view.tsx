@@ -1,11 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useCalendar, type CalendarBooking } from "@/hooks/use-calendar";
 import { Skeleton } from "../ui/skeleton";
 
 type CalendarWeekViewProps = {
   onBookingClick?: (booking: CalendarBooking) => void;
+  onBookingReschedule?: (
+    bookingId: string,
+    newDate: string,
+    originalScheduledAt: string,
+  ) => void;
   initialDate?: Date;
   filters?: {
     status?: string;
@@ -47,6 +52,17 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Cancelada",
 };
 
+const VIEW_MODE_STORAGE_KEY = "brisa-calendar-view-mode";
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 1023px)";
+
+const getStoredViewMode = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+  return stored === "week" || stored === "month" ? stored : null;
+};
+
 // Utility: Get start of week (Sunday)
 function getStartOfWeek(date: Date): Date {
   const d = new Date(date);
@@ -72,6 +88,16 @@ export function CalendarWeekView({
   const [currentWeekStart, setCurrentWeekStart] = useState(
     getStartOfWeek(initialDate),
   );
+  const [hasUserPreferredWeek, setHasUserPreferredWeek] = useState(() => {
+    const stored = getStoredViewMode();
+    return stored === "week";
+  });
+  const [isSingleColumn, setIsSingleColumn] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    return window.matchMedia("(max-width: 1023px)").matches;
+  });
 
   // Calculate date range for the week
   const { from, to } = useMemo(() => {
@@ -93,6 +119,19 @@ export function CalendarWeekView({
     ...filters,
     refreshToken,
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const mediaQuery = window.matchMedia("(max-width: 640px)");
+    const updateColumns = () => {
+      setIsSingleColumn(mediaQuery.matches);
+    };
+    updateColumns();
+    mediaQuery.addEventListener("change", updateColumns);
+    return () => mediaQuery.removeEventListener("change", updateColumns);
+  }, []);
 
   // Generate week days
   const weekDays = useMemo(() => {
@@ -140,6 +179,29 @@ export function CalendarWeekView({
   const handleToday = () => {
     setCurrentWeekStart(getStartOfWeek(new Date()));
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (!hasUserPreferredWeek) {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, "week");
+      setHasUserPreferredWeek(true);
+    }
+  }, [hasUserPreferredWeek]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT_QUERY);
+    const updateColumns = () => {
+      setIsSingleColumn(mediaQuery.matches);
+    };
+    updateColumns();
+    mediaQuery.addEventListener("change", updateColumns);
+    return () => mediaQuery.removeEventListener("change", updateColumns);
+  }, []);
 
   const weekRange = `${currentWeekStart.toLocaleDateString("es-ES", {
     day: "numeric",
@@ -246,7 +308,9 @@ export function CalendarWeekView({
       )}
 
       {/* Week Grid */}
-      <div className="grid gap-4 lg:grid-cols-7">
+      <div
+        className={`grid gap-4 ${isSingleColumn ? "grid-cols-1" : "lg:grid-cols-7"}`}
+      >
         {isLoading
           ? Array.from({ length: 7 }).map((_, i) => (
               <div
