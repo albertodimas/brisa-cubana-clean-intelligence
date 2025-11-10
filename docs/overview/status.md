@@ -48,14 +48,18 @@
    - Health check extendido (DB, Stripe, SMTP, Sentry).
    - Logging estruturado para asignaciones de staff y pagos.
    - `app.js` (raíz) y `api/index.js` actúan como shims de Hono para Vercel; el proyecto `brisa-cubana-clean-intelligence-api` debe vincularse desde `apps/api` (`vercel link --cwd apps/api`) antes de cada `vercel pull`.
+   - Vercel (`apps/web` y `apps/api`) con variables críticas sincronizadas; se documentó el flujo `vercel env add/pull` y se rotó `HEALTH_CHECK_TOKEN` para que el monitor `Production Health Monitor` reciba 200 estables.
 5. **Documentación**
    - README y `docs/README.md` definen política "no PR sin docs".
    - `docs/reference/api-reference.md` cubre bookings, payments, invoices y portal.
+   - Se añadió `scripts/check-storybook-coverage.mjs` + `pnpm check:storybook-coverage` (incluido en `docs:verify`) para impedir regresiones en las 58 historias obligatorias (UI/Landing/Managers).
+   - Nuevo plan WS2 específico: `docs/development/panel/calendar-hardening.md` desglosa el hardening del calendario (cache API, virtualización, métricas y e2e).
 6. **Marketing & Calendario (Sprint 4)**
    - Suite `/api/marketing/**` (stats, testimoniales, FAQs, pricing tiers, market stats) con endpoints públicos y administrativos.
    - Panel operativo incorpora dashboard de analytics (charts de ingresos, reservas por estado, top propiedades, workload por staff) y exportaciones CSV.
    - Vista de calendario (`/panel/calendario`) con drag & drop, modal de detalle, filtros y API `GET /api/calendar` + `/availability`.
    - Servicio de notificaciones multi-canal (email/SMS/in-app) con plantillas, cola en memoria y endpoints `GET /api/notifications`, `PATCH /read`, `PATCH /read-all`.
+   - `LeadCaptureForm` ahora es bilingüe (ES/EN) y la landing `/en` incluye el formulario localizado con la misma telemetría/UTM del sitio principal.
 7. **Frontend - Fase 1: Funcionalidades Críticas (Sprint 1-2)** ✅ COMPLETADO
    - **Sprint 1**: Asignación de Staff
      - Tipo `Booking` incluye `assignedStaff` en frontend
