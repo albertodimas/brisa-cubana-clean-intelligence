@@ -10,7 +10,7 @@ Esta guía describe cómo habilitar, verificar y operar el portal de autoservici
 ## 1. Panorama general
 
 - **Rutas clave:** `/clientes`, `/clientes/acceso`, `/clientes/acceso/confirmar`, `/clientes/[customerId]`, `/clientes/[customerId]/reservas/[bookingId]`.
-- **Autenticación:** enlaces mágicos emitidos por la API (cookies `portal_token` HttpOnly + `portal_customer_id` pública).
+- **Autenticación:** enlaces mágicos emitidos por la API (cookies `portal_token` y `portal_refresh_token` HttpOnly + `portal_customer_id` pública).
 - **Estado actual:** Beta validada en CI (`tests/e2e/portal-client.spec.ts`) con seeds demo. El modo producción requiere SMTP configurado para envío de correos.
 
 ---
@@ -45,8 +45,8 @@ PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"
 2. La API (`POST /api/portal/auth/request`) genera token temporal (TTL configurable).
 3. El correo contiene enlace `PORTAL_MAGIC_LINK_BASE_URL + CONFIRMATION_PATH?token=...`.
 4. `/clientes/acceso/confirmar` valida el token vía `POST /api/portal/auth/verify`.
-5. La API devuelve cookies de sesión (`portal_token`, `portal_customer_id`) y vencimiento `expiresAt`.
-6. El frontend redirige a `/clientes/[customerId]` mostrando dashboard con reservas.
+5. La API devuelve cookies de sesión (`portal_token`, `portal_refresh_token`, `portal_customer_id`) y tiempos `expiresAt`/`refreshExpiresAt`.
+6. El frontend redirige a `/clientes/[customerId]` mostrando dashboard con reservas y programa la extensión automática de sesión (`/api/portal/auth/refresh`).
 
 > QA local: usa `cliente@brisacubanacleanintelligence.com`, captura `debugToken` del response y navega a `/clientes/acceso/confirmar?token=...`.
 
@@ -68,11 +68,12 @@ PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"
 
 ### 4.3 Acciones de autoservicio
 
-| Acción        | Endpoint                                   | Validaciones                                                                    | Efecto                                                                                      |
-| ------------- | ------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Reagendar     | `POST /api/portal/bookings/:id/reschedule` | Fecha futura, reserva del cliente, estados mutables (`CONFIRMED`, `SCHEDULED`). | Actualiza `scheduledAt`, registra nota opcional, genera notificación `BOOKING_RESCHEDULED`. |
-| Cancelar      | `POST /api/portal/bookings/:id/cancel`     | Reserva del cliente, no completada/cancelada.                                   | Marca `CANCELLED`, registra motivo, notificación `BOOKING_CANCELLED`.                       |
-| Cerrar sesión | `POST /api/portal/auth/logout`             | Requiere token portal                                                           | Limpia cookies y redirige a `/clientes/acceso`.                                             |
+| Acción          | Endpoint                                                      | Validaciones                                                                    | Efecto                                                                                                                                          |
+| --------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Reagendar       | `POST /api/portal/bookings/:id/reschedule`                    | Fecha futura, reserva del cliente, estados mutables (`CONFIRMED`, `SCHEDULED`). | Actualiza `scheduledAt`, registra nota opcional, genera notificación `BOOKING_RESCHEDULED`.                                                     |
+| Cancelar        | `POST /api/portal/bookings/:id/cancel`                        | Reserva del cliente, no completada/cancelada.                                   | Marca `CANCELLED`, registra motivo, notificación `BOOKING_CANCELLED`.                                                                           |
+| Cerrar sesión   | `POST /api/portal/auth/logout`                                | Requiere token portal (`portal_token`) y se invoca vía `/api/portal/logout`.    | Revoca el refresh token (`PortalSession`), limpia `portal_token`, `portal_refresh_token` y `portal_customer_id`, redirige a `/clientes/acceso`. |
+| Extender sesión | `POST /api/portal/auth/refresh` (proxy `/api/portal/refresh`) | Requiere cookie `portal_refresh_token` válida.                                  | Rota ambos tokens, extiende la sesión sin solicitar nuevo enlace y registra `PortalSession` con `revocationReason="rotated"`.                   |
 
 ### 4.4 Descarga de comprobantes PDF (Sprint 4)
 

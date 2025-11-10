@@ -11,6 +11,12 @@ type RateLimitClientInfo = {
   resetTime: Date;
 };
 
+type ResettableStore = Store & {
+  resetAll?: () => Promise<void>;
+};
+
+const registeredStores: ResettableStore[] = [];
+
 class FixedWindowMemoryStore implements Store {
   private windowMs = 60_000;
   private readonly clients = new Map<string, RateLimitClientInfo>();
@@ -367,9 +373,10 @@ export function createRateLimiter({
 
   // Usar Redis si REDIS_URL está configurado, sino usar MemoryStore
   const useRedis = Boolean(process.env.REDIS_URL);
-  const store = useRedis
+  const store: ResettableStore = useRedis
     ? new FixedWindowRedisStore()
     : new FixedWindowMemoryStore();
+  registeredStores.push(store);
 
   if (useRedis) {
     rateLimitLogger.info(
@@ -420,4 +427,18 @@ export function createRateLimiter({
 
 export function defaultRateLimitKey(c: Context): string {
   return extractClientIdentifier(c);
+}
+
+export async function resetRateLimiterStoresForTests(): Promise<void> {
+  if (registeredStores.length === 0) {
+    return;
+  }
+
+  await Promise.all(
+    registeredStores.map((store) =>
+      typeof store.resetAll === "function"
+        ? store.resetAll()
+        : Promise.resolve(),
+    ),
+  );
 }
