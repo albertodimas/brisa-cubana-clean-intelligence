@@ -74,6 +74,7 @@ export default defineConfig({
             LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
             ENABLE_TEST_UTILS: "true",
             PLAYWRIGHT_TEST_RUN: "true",
+            CALENDAR_CACHE_TTL_MS: "0",
             PORT: process.env.API_PORT ?? "3001",
           },
           timeout: 120_000,
@@ -123,6 +124,7 @@ export default defineConfig({
             LOGIN_RATE_LIMIT_WINDOW_MS: loginRateLimitWindow,
             ENABLE_TEST_UTILS: "true",
             PLAYWRIGHT_TEST_RUN: "true",
+            CALENDAR_CACHE_TTL_MS: "0",
             PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION:
               process.env.PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION ?? "si",
             PORT: process.env.API_PORT ?? "3001",

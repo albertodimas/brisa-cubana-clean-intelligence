@@ -61,7 +61,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find draggable booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Should have cursor-grab class
@@ -87,7 +91,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find completed booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Should NOT have cursor-grab class
@@ -113,7 +121,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find cancelled booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Should NOT be draggable
@@ -136,7 +148,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find the booking to drag
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
     const sourceCell = bookingButton.locator("..");
 
@@ -170,15 +186,20 @@ test.describe.serial("Calendario - Drag & Drop", () => {
 
     const calendarGrid = await openCalendarPage(page, testInfo);
 
-    // This test is difficult to implement with Playwright
-    // as it requires capturing mid-drag state
-    // We can test that the booking has the correct classes when started
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
-    // Get bounding box for manual drag
-    const sourceBox = await bookingButton.boundingBox();
-    expect(sourceBox).not.toBeNull();
+    // Simulate drag start to verify visual feedback classes
+    await bookingButton.dispatchEvent("dragstart");
+    await expect(bookingButton).toHaveClass(/cursor-grabbing/);
+
+    // Drag end should remove the visual indicator
+    await bookingButton.dispatchEvent("dragend");
+    await expect(bookingButton).not.toHaveClass(/cursor-grabbing/);
   });
 
   test("muestra indicador en celda de destino durante hover @smoke", async ({
@@ -222,7 +243,11 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     const calendarGrid = await openCalendarPage(page, testInfo);
 
     // Find the booking
-    const bookingButton = locateBookingButton(calendarGrid, booking);
+    const bookingButton = await locateBookingButton(
+      page,
+      calendarGrid,
+      booking,
+    );
     await ensureBookingVisible(bookingButton);
 
     // Drag to new date
@@ -375,7 +400,7 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     await expectStatusType(page, "success");
   });
 
-  test("no permite drag & drop en vista semanal @smoke", async ({
+  test("vista semanal mantiene reservas arrastrables @smoke", async ({
     page,
     request,
   }, testInfo: TestInfo) => {
@@ -411,18 +436,15 @@ test.describe.serial("Calendario - Drag & Drop", () => {
       ).toBeVisible({ timeout: 15000 });
     }
 
-    // Bookings in weekly view should not be draggable
+    // Bookings in weekly view should remain draggable
     const weeklyBookingButton = page
       .locator(`[data-booking-id="${booking.id}"]`)
       .first();
     await ensureBookingVisible(weeklyBookingButton);
     const isDraggable = await weeklyBookingButton.getAttribute("draggable");
 
-    // In weekly view, bookings should not have draggable attribute
-    // or it should be false
-    if (isDraggable !== null) {
-      expect(isDraggable).toBe("false");
-    }
+    expect(isDraggable).toBe("true");
+    await expect(weeklyBookingButton).toHaveClass(/cursor-grab/);
   });
 
   test("refresca el calendario después de reprogramación exitosa @critical", async ({

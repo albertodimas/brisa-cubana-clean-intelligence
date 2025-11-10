@@ -3,9 +3,57 @@ import { z } from "zod";
 import { authenticate, requireRoles } from "../middleware/auth.js";
 import { getBookingRepository } from "../container.js";
 import { serializeBooking } from "../lib/serializers.js";
+import { calendarLogger } from "../lib/logger.js";
 import type { BookingStatus } from "@prisma/client";
+import type { BookingWithRelations } from "../repositories/booking-repository.js";
 
 const router = new Hono();
+
+type CalendarBookingPayload = {
+  id: string;
+  code: string;
+  scheduledAt: string;
+  durationMin: number;
+  status: BookingStatus;
+  totalAmount: number;
+  service?: { id: string; name: string } | null;
+  property?: { id: string; label: string } | null;
+  customer?: {
+    id: string;
+    fullName: string | null;
+    email: string;
+  } | null;
+  assignedStaff?: {
+    id: string;
+    fullName: string | null;
+    email: string;
+  } | null;
+};
+
+type CalendarResponsePayload = {
+  bookingsByDate: Record<string, CalendarBookingPayload[]>;
+  dateRange: string[];
+  summary: {
+    totalBookings: number;
+    statusCounts: Record<string, number>;
+    totalRevenue: string;
+  };
+};
+
+type CalendarCacheEntry = {
+  expiresAt: number;
+  payload: CalendarResponsePayload;
+  cachedAt: number;
+};
+
+type CacheMissReason = "not_found" | "expired" | "disabled";
+
+const calendarCacheTtlMs = Math.max(
+  0,
+  Number(process.env.CALENDAR_CACHE_TTL_MS ?? "60000"),
+);
+
+const calendarCache = new Map<string, CalendarCacheEntry>();
 
 const calendarQuerySchema = z.object({
   from: z.coerce.date(),
@@ -27,6 +75,7 @@ router.get(
   authenticate,
   requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
   async (c) => {
+    const startedAt = Date.now();
     const parsed = calendarQuerySchema.safeParse(c.req.query());
     if (!parsed.success) {
       return c.json({ error: parsed.error.flatten() }, 400);
@@ -86,6 +135,39 @@ router.get(
       filters.assignedStaffId = assignedStaffId;
     }
 
+    const cacheKey = buildCacheKey({
+      from: from.toISOString(),
+      to: to.toISOString(),
+      status,
+      propertyId,
+      serviceId,
+      assignedStaffId,
+    });
+
+    let cacheMissReason: CacheMissReason = "disabled";
+
+    if (calendarCacheTtlMs > 0) {
+      const cacheLookup = getCachedResponse(cacheKey);
+      if (cacheLookup.type === "hit") {
+        const durationMs = Date.now() - startedAt;
+        calendarLogger.debug({
+          event: "calendar_cache_hit",
+          cacheHit: true,
+          durationMs,
+        });
+        return c.json({
+          data: cacheLookup.entry.payload,
+          meta: {
+            cacheHit: true,
+            cachedAt: new Date(cacheLookup.entry.cachedAt).toISOString(),
+            cacheExpiresAt: new Date(cacheLookup.entry.expiresAt).toISOString(),
+            durationMs,
+          },
+        });
+      }
+      cacheMissReason = cacheLookup.reason;
+    }
+
     // Fetch all bookings in range (high limit for calendar view)
     // Note: If a property has more than 2000 bookings in 90 days,
     // consider implementing server-side pagination for the calendar
@@ -100,7 +182,7 @@ router.get(
     );
 
     // Group bookings by date
-    const bookingsByDate: Record<string, any[]> = {};
+    const bookingsByDate: Record<string, CalendarBookingPayload[]> = {};
 
     for (const booking of result.data) {
       // Extract date in YYYY-MM-DD format in local timezone
@@ -113,7 +195,7 @@ router.get(
         bookingsByDate[dateKey] = [];
       }
 
-      bookingsByDate[dateKey].push(serializeBooking(booking));
+      bookingsByDate[dateKey].push(transformBookingForCalendar(booking));
     }
 
     // Generate date range to include empty dates
@@ -145,15 +227,46 @@ router.get(
       0,
     );
 
+    const payload: CalendarResponsePayload = {
+      bookingsByDate,
+      dateRange,
+      summary: {
+        totalBookings,
+        statusCounts,
+        totalRevenue: totalRevenue.toFixed(2),
+      },
+    };
+
+    if (calendarCacheTtlMs > 0) {
+      const cachedAt = Date.now();
+      calendarCache.set(cacheKey, {
+        expiresAt: cachedAt + calendarCacheTtlMs,
+        payload,
+        cachedAt,
+      });
+    }
+
+    const durationMs = Date.now() - startedAt;
+    calendarLogger.info({
+      event: "calendar_query",
+      durationMs,
+      cacheHit: false,
+      cacheMissReason,
+      filters: {
+        status,
+        propertyId,
+        serviceId,
+        assignedStaffId,
+      },
+      totalBookings,
+    });
+
     return c.json({
-      data: {
-        bookingsByDate,
-        dateRange,
-        summary: {
-          totalBookings,
-          statusCounts,
-          totalRevenue: totalRevenue.toFixed(2),
-        },
+      data: payload,
+      meta: {
+        cacheHit: false,
+        cacheMissReason,
+        durationMs,
       },
     });
   },
@@ -260,3 +373,65 @@ router.get(
 );
 
 export default router;
+
+function buildCacheKey(filters: Record<string, string | undefined>) {
+  const entries = Object.entries(filters)
+    .filter(([, value]) => value !== undefined)
+    .sort(([a], [b]) => a.localeCompare(b));
+  return JSON.stringify(entries);
+}
+
+type CacheLookupResult =
+  | { type: "hit"; entry: CalendarCacheEntry }
+  | { type: "miss"; reason: Exclude<CacheMissReason, "disabled"> };
+
+function getCachedResponse(key: string): CacheLookupResult {
+  const entry = calendarCache.get(key);
+  if (!entry) {
+    return { type: "miss", reason: "not_found" };
+  }
+  if (entry.expiresAt < Date.now()) {
+    calendarCache.delete(key);
+    return { type: "miss", reason: "expired" };
+  }
+  return { type: "hit", entry };
+}
+
+function transformBookingForCalendar(
+  booking: BookingWithRelations,
+): CalendarBookingPayload {
+  return {
+    id: booking.id,
+    code: booking.code,
+    scheduledAt: booking.scheduledAt.toISOString(),
+    durationMin: booking.durationMin,
+    status: booking.status,
+    totalAmount: Number(booking.totalAmount),
+    service: booking.service
+      ? {
+          id: booking.service.id,
+          name: booking.service.name,
+        }
+      : null,
+    property: booking.property
+      ? {
+          id: booking.property.id,
+          label: booking.property.label,
+        }
+      : null,
+    customer: booking.customer
+      ? {
+          id: booking.customer.id,
+          fullName: booking.customer.fullName,
+          email: booking.customer.email,
+        }
+      : null,
+    assignedStaff: booking.assignedStaff
+      ? {
+          id: booking.assignedStaff.id,
+          fullName: booking.assignedStaff.fullName,
+          email: booking.assignedStaff.email,
+        }
+      : null,
+  };
+}

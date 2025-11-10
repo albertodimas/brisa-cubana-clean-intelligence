@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useCalendar, type CalendarBooking } from "@/hooks/use-calendar";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import {
+  useCalendar,
+  type CalendarBooking,
+  type CalendarDataMeta,
+} from "@/hooks/use-calendar";
 import { useDragDrop } from "@/hooks/use-drag-drop";
 import { Skeleton } from "../ui/skeleton";
 
@@ -13,6 +17,7 @@ type CalendarViewProps = {
     newDate: string,
     originalScheduledAt: string,
   ) => void;
+  onDataLoaded?: (meta: CalendarDataMeta) => void;
   initialMonth?: Date;
   filters?: {
     status?: string;
@@ -42,11 +47,19 @@ export function CalendarView({
   onBookingClick,
   onDateClick,
   onBookingReschedule,
+  onDataLoaded,
   initialMonth = new Date(),
   filters,
   refreshToken = 0,
 }: CalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(initialMonth);
+  const [expandedDayKey, setExpandedDayKey] = useState<string | null>(null);
+  const [maxVisibleBookings, setMaxVisibleBookings] = useState(() => {
+    if (typeof window === "undefined") {
+      return 4;
+    }
+    return window.matchMedia("(max-width: 640px)").matches ? 2 : 4;
+  });
   const {
     state: dragState,
     handleDragStart,
@@ -74,12 +87,31 @@ export function CalendarView({
     };
   }, [currentMonth]);
 
-  const { data, isLoading, error } = useCalendar({
+  const { data, meta, isLoading, error } = useCalendar({
     from,
     to,
     ...filters,
     refreshToken,
   });
+
+  useEffect(() => {
+    if (meta) {
+      onDataLoaded?.(meta);
+    }
+  }, [meta, onDataLoaded]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const mediaQuery = window.matchMedia("(max-width: 640px)");
+    const updateMaxVisible = () => {
+      setMaxVisibleBookings(mediaQuery.matches ? 2 : 4);
+    };
+    updateMaxVisible();
+    mediaQuery.addEventListener("change", updateMaxVisible);
+    return () => mediaQuery.removeEventListener("change", updateMaxVisible);
+  }, []);
 
   // Generate calendar grid
   const calendarDays = useMemo(() => {
@@ -195,6 +227,10 @@ export function CalendarView({
   const handleToday = () => {
     setCurrentMonth(new Date());
   };
+
+  const handleToggleExpandedDay = useCallback((dayKey: string) => {
+    setExpandedDayKey((prev) => (prev === dayKey ? null : dayKey));
+  }, []);
 
   const monthName = currentMonth.toLocaleDateString("es-ES", {
     month: "long",
@@ -402,61 +438,83 @@ export function CalendarView({
                 </div>
 
                 <div className="mt-1 space-y-1">
-                  {day.bookings.slice(0, 3).map((booking) => (
-                    <button
-                      key={booking.id}
-                      data-booking-id={booking.id}
-                      data-booking-code={booking.code}
-                      draggable={
-                        onBookingReschedule !== undefined &&
-                        booking.status !== "COMPLETED" &&
-                        booking.status !== "CANCELLED"
-                      }
-                      onDragStart={(e) => {
-                        e.stopPropagation();
-                        handleDragStart(booking.id, booking.scheduledAt);
-                      }}
-                      onDragEnd={(e) => {
-                        e.stopPropagation();
-                        handleDragEnd();
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onBookingClick?.(booking);
-                      }}
-                      aria-label={`Reserva ${booking.service.name} a las ${new Date(
-                        booking.scheduledAt,
-                      ).toLocaleTimeString("es-ES", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}`}
-                      className={`w-full truncate rounded border px-1 py-0.5 text-left text-xs transition-colors hover:opacity-80 ${
-                        STATUS_COLORS[booking.status] || STATUS_COLORS.PENDING
-                      } ${
-                        dragState.draggedItemId === booking.id
-                          ? "opacity-50 cursor-grabbing"
-                          : onBookingReschedule !== undefined &&
-                              booking.status !== "COMPLETED" &&
-                              booking.status !== "CANCELLED"
-                            ? "cursor-grab"
-                            : ""
-                      }`}
-                    >
-                      {new Date(booking.scheduledAt).toLocaleTimeString(
-                        "es-ES",
-                        {
+                  {day.bookings
+                    .slice(
+                      0,
+                      expandedDayKey === day.dateKey
+                        ? undefined
+                        : maxVisibleBookings,
+                    )
+                    .map((booking) => (
+                      <button
+                        key={booking.id}
+                        data-booking-id={booking.id}
+                        data-booking-code={booking.code}
+                        draggable={
+                          onBookingReschedule !== undefined &&
+                          booking.status !== "COMPLETED" &&
+                          booking.status !== "CANCELLED"
+                        }
+                        onDragStart={(e) => {
+                          e.stopPropagation();
+                          handleDragStart(booking.id, booking.scheduledAt);
+                        }}
+                        onDragEnd={(e) => {
+                          e.stopPropagation();
+                          handleDragEnd();
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onBookingClick?.(booking);
+                        }}
+                        aria-label={`Reserva ${booking.service.name} a las ${new Date(
+                          booking.scheduledAt,
+                        ).toLocaleTimeString("es-ES", {
                           hour: "2-digit",
                           minute: "2-digit",
-                        },
-                      )}{" "}
-                      {booking.service.name}
-                    </button>
-                  ))}
-                  {day.bookings.length > 3 && (
-                    <div className="text-xs text-gray-500 dark:text-brisa-400">
-                      +{day.bookings.length - 3} más
-                    </div>
-                  )}
+                        })}`}
+                        className={`w-full truncate rounded border px-1 py-0.5 text-left text-xs transition-colors hover:opacity-80 ${
+                          STATUS_COLORS[booking.status] || STATUS_COLORS.PENDING
+                        } ${
+                          dragState.draggedItemId === booking.id
+                            ? "opacity-50 cursor-grabbing"
+                            : onBookingReschedule !== undefined &&
+                                booking.status !== "COMPLETED" &&
+                                booking.status !== "CANCELLED"
+                              ? "cursor-grab"
+                              : ""
+                        }`}
+                      >
+                        {new Date(booking.scheduledAt).toLocaleTimeString(
+                          "es-ES",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}{" "}
+                        {booking.service.name}
+                      </button>
+                    ))}
+                  {day.bookings.length > maxVisibleBookings &&
+                    expandedDayKey !== day.dateKey && (
+                      <button
+                        type="button"
+                        className="mt-1 w-full rounded-md border border-dashed border-gray-300 px-2 py-1 text-xs font-semibold text-gray-600 hover:border-gray-400 dark:border-brisa-600 dark:text-brisa-200"
+                        onClick={() => handleToggleExpandedDay(day.dateKey)}
+                      >
+                        +{day.bookings.length - maxVisibleBookings} reservas
+                      </button>
+                    )}
+                  {expandedDayKey === day.dateKey &&
+                    day.bookings.length > maxVisibleBookings && (
+                      <button
+                        type="button"
+                        className="mt-1 w-full rounded-md border border-gray-200 px-2 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-brisa-700 dark:text-brisa-200 dark:hover:bg-brisa-800"
+                        onClick={() => handleToggleExpandedDay(day.dateKey)}
+                      >
+                        Mostrar menos
+                      </button>
+                    )}
                 </div>
               </div>
             ))}

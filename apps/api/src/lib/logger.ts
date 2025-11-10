@@ -148,6 +148,7 @@ export const authLogger = logger.child({ component: "auth" });
  * Logger para rate limiting
  */
 export const rateLimitLogger = logger.child({ component: "rate-limit" });
+export const calendarLogger = logger.child({ component: "calendar" });
 
 /**
  * Helper para log de inicio de servidor

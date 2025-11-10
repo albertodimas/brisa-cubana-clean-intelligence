@@ -1,6 +1,6 @@
 # Production Setup Guide
 
-**Last Updated:** October 26, 2025
+**Last Updated:** November 9, 2025
 **Status:** Ready for Production Deployment
 
 ---
@@ -59,11 +59,58 @@ El proyecto actualmente tiene configuradas las claves públicas de Stripe pero *
    vercel --prod
    ```
 
+````
+
+### **2. Cache de Calendario (opcional)**
+
+`CALENDAR_CACHE_TTL_MS` controla el tiempo de vida (en milisegundos) de la caché que utiliza `/api/calendar`. El default es `60000`. Si necesitas depurar en caliente puedes ponerlo en `0`, pero en producción recomendamos mantenerlo entre 30 000 y 120 000 para aligerar Prisma cuando se cambian filtros constantemente.
+
+```bash
+vercel env add CALENDAR_CACHE_TTL_MS preview
+vercel env add CALENDAR_CACHE_TTL_MS production
+````
+
 ---
+
+## 🌐 Web App Environment Sync
+
+El proyecto `web` en Vercel requiere un set mínimo de variables alineadas en **preview** y **production** para que los builds no fallen (Next 16 valida esto en `next.config.mjs`). Usa este bloque como checklist cada vez que clones el proyecto o restableces el entorno:
+
+```bash
+vercel env add NEXT_PUBLIC_API_URL preview
+vercel env add NEXT_PUBLIC_API_URL production
+vercel env add INTERNAL_API_URL preview
+vercel env add INTERNAL_API_URL production
+vercel env add NEXT_PUBLIC_BASE_URL preview
+vercel env add NEXT_PUBLIC_BASE_URL production
+vercel env add NEXT_PUBLIC_SITE_URL preview
+vercel env add NEXT_PUBLIC_SITE_URL production
+vercel env add NEXTAUTH_URL preview
+vercel env add NEXTAUTH_URL production
+vercel env add PORTAL_MAGIC_LINK_BASE_URL preview
+vercel env add PORTAL_MAGIC_LINK_BASE_URL production
+vercel env add PORTAL_MAGIC_LINK_CONFIRMATION_PATH preview
+vercel env add PORTAL_MAGIC_LINK_CONFIRMATION_PATH production
+vercel env add NEXT_PUBLIC_POSTHOG_HOST preview
+vercel env add NEXT_PUBLIC_POSTHOG_HOST production
+vercel env add NEXT_PUBLIC_POSTHOG_KEY preview
+vercel env add NEXT_PUBLIC_POSTHOG_KEY production
+vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY preview
+vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY production
+vercel env add NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT preview
+vercel env add NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT production
+```
+
+> Todas apuntan a `https://api.brisacubanacleanintelligence.com` / `https://brisacubanacleanintelligence.com` salvo las claves PostHog y Stripe. Tras el alta, ejecuta `vercel env pull --environment production` para verificar que `NEXT_PUBLIC_API_URL` e `INTERNAL_API_URL` estén presentes; sin ellas el build muere con `NEXT_PUBLIC_API_URL or INTERNAL_API_URL must be defined`.
+
+Adicional:
+
+- `HEALTH_CHECK_TOKEN` debe existir en el proyecto API y también como secreto de GitHub para que el monitor “Production Health Monitor” no regrese códigos `000`.
+- Cuando edites este bloque vuelve a desplegar los dos proyectos (`apps/web` y `apps/api`) con `vercel --cwd apps/web` y `vercel --cwd apps/api` para propagar los envs recien cargados.
 
 ## 📊 Lead Capture System
 
-El sistema de captura de leads ahora es **100% interno** - no requiere webhooks externos.
+El sistema de captura de leads se orquesta internamente (landing → API → PostgreSQL) y puede replicar cada registro hacia Slack y/o un CRM vía webhook. El endpoint `/api/leads` ejecuta hasta **3 intentos** con _timeouts_ de 5 segundos antes de marcar un fallo definitivo (ver `apps/api/src/routes/leads.ts`).
 
 ### **Arquitectura actual:**
 
@@ -74,12 +121,15 @@ Landing Form → API /api/leads → PostgreSQL (tabla leads) → Slack (opcional
 ### **Variables de entorno:**
 
 ```bash
-# ✅ YA CONFIGURADO
+# ✅ RECOMENDADO
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+LEAD_WEBHOOK_URL=https://crm.miempresa.com/hooks/brisa-leads
 
-# ❌ ELIMINADO (ya no se usa)
-LEAD_WEBHOOK_URL  # Removido de Vercel - leads van directo a DB
+# Opcional
+# Si no defines LEAD_WEBHOOK_URL los leads quedan en Postgres + Slack.
 ```
+
+> Usa `scripts/test-lead-webhook.sh` tras exportar `LEAD_WEBHOOK_URL` para validar que el CRM responda 2xx. Cada intento fallido se loguea como `[lead webhook] attempt <n> failed` y se reintenta automáticamente con _backoff_ incremental.
 
 ### **Endpoints disponibles:**
 

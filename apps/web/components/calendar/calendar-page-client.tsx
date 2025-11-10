@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CalendarView } from "./calendar-view";
 import { CalendarWeekView } from "./calendar-week-view";
 import { CalendarFilters } from "./calendar-filters";
 import { BookingDetailsModal } from "./booking-details-modal";
 import { CalendarTour } from "./calendar-tour";
-import type { CalendarBooking } from "@/hooks/use-calendar";
+import type { CalendarBooking, CalendarDataMeta } from "@/hooks/use-calendar";
 import { useRouter } from "next/navigation";
+import { recordCalendarEvent } from "@/lib/marketing-telemetry";
 
 type CalendarPageClientProps = {
   properties: Array<{ id: string; label: string }>;
@@ -16,6 +17,33 @@ type CalendarPageClientProps = {
 };
 
 type ViewMode = "month" | "week";
+
+const VIEW_MODE_STORAGE_KEY = "brisa-calendar-view-mode";
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 1023px)";
+const CACHE_MISS_REASON_LABELS: Record<string, string> = {
+  expired: "cache expirada",
+  not_found: "sin entrada en cache",
+  disabled: "cache desactivada",
+};
+
+const getStoredViewMode = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+  return stored === "month" || stored === "week" ? stored : null;
+};
+
+const getInitialViewMode = (): ViewMode => {
+  if (typeof window === "undefined") {
+    return "month";
+  }
+  const stored = getStoredViewMode();
+  if (stored) {
+    return stored;
+  }
+  return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches ? "week" : "month";
+};
 
 const waitForNextFrame = () =>
   new Promise<void>((resolve) => {
@@ -26,6 +54,20 @@ const waitForNextFrame = () =>
     window.requestAnimationFrame(() => resolve());
   });
 
+const formatCachedTimestamp = (iso?: string | null) => {
+  if (!iso) {
+    return null;
+  }
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export function CalendarPageClient({
   properties,
   services,
@@ -34,7 +76,12 @@ export function CalendarPageClient({
   const [selectedBooking, setSelectedBooking] =
     useState<CalendarBooking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("month");
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    getInitialViewMode(),
+  );
+  const [hasUserViewPreference, setHasUserViewPreference] = useState<boolean>(
+    () => Boolean(getStoredViewMode()),
+  );
   const [filters, setFilters] = useState<{
     status?: string;
     propertyId?: string;
@@ -46,10 +93,13 @@ export function CalendarPageClient({
     type: "success" | "error" | "loading";
     message: string;
   } | null>(null);
+  const [dataMeta, setDataMeta] = useState<CalendarDataMeta | null>(null);
   const loadingMinVisibleMs = 2000;
   const minimumVisibleWindowMs = 5000;
   const router = useRouter();
   const statusClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasLoggedInitialViewRef = useRef(false);
+  const lastDataEventSignatureRef = useRef<string | null>(null);
   type StatusDebugType = "success" | "error" | "loading" | "idle";
 
   const updateStatusDebug = (type: StatusDebugType, message: string) => {
@@ -81,6 +131,111 @@ export function CalendarPageClient({
       statusClearRef.current = null;
     }, minimumVisibleWindowMs);
   };
+
+  const setViewModeWithSource = useCallback(
+    (mode: ViewMode, source: "user" | "auto" = "user") => {
+      setViewMode((current) => {
+        if (current === mode) {
+          return current;
+        }
+        return mode;
+      });
+      if (source === "user" && typeof window !== "undefined") {
+        window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+        setHasUserViewPreference(true);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined" || hasUserViewPreference) {
+      return;
+    }
+    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT_QUERY);
+
+    const applyPreferredMode = (matches: boolean) => {
+      setViewModeWithSource(matches ? "week" : "month", "auto");
+    };
+
+    applyPreferredMode(mediaQuery.matches);
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      applyPreferredMode(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [hasUserViewPreference, setViewModeWithSource]);
+
+  const buildFilterSnapshot = useCallback(
+    (
+      overrides?: Partial<{
+        status?: string;
+        propertyId?: string;
+        serviceId?: string;
+        assignedStaffId?: string;
+      }>,
+    ) => ({
+      viewMode,
+      filterStatus: overrides?.status ?? filters.status ?? "all",
+      filterPropertyId: overrides?.propertyId ?? filters.propertyId ?? null,
+      filterServiceId: overrides?.serviceId ?? filters.serviceId ?? null,
+      filterStaffId:
+        overrides?.assignedStaffId ?? filters.assignedStaffId ?? null,
+    }),
+    [filters, viewMode],
+  );
+
+  useEffect(() => {
+    const metadata = buildFilterSnapshot();
+    if (!hasLoggedInitialViewRef.current) {
+      recordCalendarEvent("calendar_viewed", metadata);
+      hasLoggedInitialViewRef.current = true;
+      return;
+    }
+    recordCalendarEvent("calendar_view_mode_changed", metadata);
+  }, [buildFilterSnapshot, viewMode]);
+
+  const handleFiltersChange = useCallback(
+    (nextFilters: {
+      status?: string;
+      propertyId?: string;
+      serviceId?: string;
+      assignedStaffId?: string;
+    }) => {
+      setFilters(nextFilters);
+      recordCalendarEvent(
+        "calendar_filter_applied",
+        buildFilterSnapshot(nextFilters),
+      );
+    },
+    [buildFilterSnapshot],
+  );
+
+  const handleCalendarDataLoaded = useCallback(
+    (meta: CalendarDataMeta) => {
+      setDataMeta(meta);
+      const snapshot = buildFilterSnapshot();
+      const sanitizedMeta = {
+        cacheHit: meta.cacheHit,
+        cacheMissReason: meta.cacheMissReason ?? null,
+        cachedAt: meta.cachedAt ?? null,
+        cacheExpiresAt: meta.cacheExpiresAt ?? null,
+        durationMs: meta.durationMs ?? null,
+      };
+      const signature = JSON.stringify({ sanitizedMeta, snapshot });
+      if (lastDataEventSignatureRef.current === signature) {
+        return;
+      }
+      lastDataEventSignatureRef.current = signature;
+      recordCalendarEvent("calendar_data_loaded", {
+        ...snapshot,
+        ...sanitizedMeta,
+      });
+    },
+    [buildFilterSnapshot],
+  );
 
   useEffect(() => {
     return () => {
@@ -144,6 +299,14 @@ export function CalendarPageClient({
       newDate.setMinutes(originalDate.getMinutes());
       newDate.setSeconds(originalDate.getSeconds());
 
+      const analyticsBase = buildFilterSnapshot();
+      recordCalendarEvent("calendar_reschedule_attempted", {
+        ...analyticsBase,
+        bookingId,
+        targetDateKey: newDateKey,
+        originalScheduledAt,
+      });
+
       const response = await fetch(`/api/bookings/${bookingId}`, {
         method: "PATCH",
         headers: {
@@ -166,6 +329,11 @@ export function CalendarPageClient({
         message: "Reserva reprogramada exitosamente",
       });
       updateStatusDebug("success", "Reserva reprogramada exitosamente");
+      recordCalendarEvent("calendar_reschedule_succeeded", {
+        ...analyticsBase,
+        bookingId,
+        newScheduledAt: newDate.toISOString(),
+      });
 
       scheduleStatusClear();
 
@@ -184,6 +352,12 @@ export function CalendarPageClient({
         message: errorMessage,
       });
       updateStatusDebug("error", errorMessage);
+      recordCalendarEvent("calendar_reschedule_failed", {
+        ...buildFilterSnapshot(),
+        bookingId,
+        targetDateKey: newDateKey,
+        reason: errorMessage,
+      });
       scheduleStatusClear();
     }
   };
@@ -252,7 +426,7 @@ export function CalendarPageClient({
     <div className="space-y-4 sm:space-y-6">
       {/* Filters */}
       <CalendarFilters
-        onFiltersChange={setFilters}
+        onFiltersChange={handleFiltersChange}
         properties={properties}
         services={services}
         staff={staff}
@@ -265,7 +439,7 @@ export function CalendarPageClient({
           aria-label="Selector de vista del calendario"
         >
           <button
-            onClick={() => setViewMode("month")}
+            onClick={() => setViewModeWithSource("month")}
             aria-label="Vista mensual"
             aria-pressed={viewMode === "month" ? "true" : "false"}
             className={`flex flex-1 sm:flex-initial items-center justify-center gap-1.5 sm:gap-2 rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
@@ -290,7 +464,7 @@ export function CalendarPageClient({
             <span>Mes</span>
           </button>
           <button
-            onClick={() => setViewMode("week")}
+            onClick={() => setViewModeWithSource("week")}
             aria-label="Vista semanal"
             aria-pressed={viewMode === "week" ? "true" : "false"}
             className={`flex flex-1 sm:flex-initial items-center justify-center gap-1.5 sm:gap-2 rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
@@ -316,6 +490,41 @@ export function CalendarPageClient({
           </button>
         </div>
       </div>
+
+      {dataMeta && (
+        <div className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[0.7rem] text-gray-600 shadow-sm dark:border-brisa-700 dark:bg-brisa-900 dark:text-brisa-200 sm:flex-row sm:items-center sm:justify-between sm:text-xs">
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex h-2 w-2 rounded-full ${
+                dataMeta.cacheHit ? "bg-emerald-500" : "bg-amber-500"
+              }`}
+              aria-hidden="true"
+            />
+            <span className="font-medium">
+              {dataMeta.cacheHit ? "Datos desde caché" : "Consulta directa"}
+            </span>
+            {typeof dataMeta.durationMs === "number" && (
+              <span className="font-mono text-[0.65rem] sm:text-xs">
+                {Math.round(dataMeta.durationMs)} ms
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-[0.65rem] sm:justify-end sm:text-xs">
+            {dataMeta.cacheHit && dataMeta.cachedAt && (
+              <span>
+                Cacheado{" "}
+                {formatCachedTimestamp(dataMeta.cachedAt) ?? "reciente"}
+              </span>
+            )}
+            {!dataMeta.cacheHit && dataMeta.cacheMissReason && (
+              <span className="text-amber-600 dark:text-amber-300">
+                {CACHE_MISS_REASON_LABELS[dataMeta.cacheMissReason] ??
+                  dataMeta.cacheMissReason}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Status Message */}
       {statusMessage && (
@@ -395,12 +604,16 @@ export function CalendarPageClient({
         <CalendarView
           onBookingClick={handleBookingClick}
           onBookingReschedule={handleBookingReschedule}
+          onDataLoaded={handleCalendarDataLoaded}
           filters={filters}
           refreshToken={calendarRefreshToken}
         />
       ) : (
         <CalendarWeekView
           onBookingClick={handleBookingClick}
+          onBookingReschedule={handleBookingReschedule}
+          onViewModePersist={() => setViewModeWithSource("week", "user")}
+          onDataLoaded={handleCalendarDataLoaded}
           filters={filters}
           refreshToken={calendarRefreshToken}
         />

@@ -1,6 +1,7 @@
 import NextAuth, { AuthError } from "next-auth";
 import type { NextRequest } from "next/server";
 import Credentials from "next-auth/providers/credentials";
+import type { JWT } from "next-auth/jwt";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const normalizedNextAuthUrl =
@@ -30,6 +31,25 @@ type AuthUser = {
   email: string;
   role: string;
   token: string;
+  refreshToken: string;
+  accessExpiresAt: string;
+  refreshExpiresAt: string;
+};
+
+type RefreshResponse = {
+  token: string;
+  refreshToken: string;
+  expiresAt: string;
+  refreshExpiresAt: string;
+};
+
+type BrisaJWT = JWT & {
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpires?: number;
+  refreshTokenExpires?: number;
+  role?: string;
+  error?: string;
 };
 
 export const {
@@ -106,11 +126,20 @@ export const {
         }
 
         const token = json.token as string | undefined;
+        const refreshToken = json.refreshToken as string | undefined;
+        const expiresAt = json.expiresAt as string | undefined;
+        const refreshExpiresAt = json.refreshExpiresAt as string | undefined;
         const data = json.data as
           | { id: string; email: string; role: string }
           | undefined;
 
-        if (!token || !data) {
+        if (
+          !token ||
+          !refreshToken ||
+          !expiresAt ||
+          !refreshExpiresAt ||
+          !data
+        ) {
           throw new AuthError("CredentialsSignin", {
             cause: {
               status: res.status,
@@ -122,30 +151,76 @@ export const {
         return {
           ...data,
           token,
+          refreshToken,
+          accessExpiresAt: expiresAt,
+          refreshExpiresAt,
         } satisfies AuthUser;
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
+      const brisaToken = token as BrisaJWT;
       if (user) {
-        token.sub = user.id;
-        token.role = "role" in user ? user.role : undefined;
-        token.accessToken = "token" in user ? user.token : undefined;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        if (typeof token.sub === "string") {
-          session.user.id = token.sub;
-        }
-        session.user.role =
-          typeof token.role === "string" ? token.role : session.user.role;
+        const authUser = user as AuthUser;
+        brisaToken.sub = authUser.id;
+        brisaToken.role = authUser.role;
+        brisaToken.accessToken = authUser.token;
+        brisaToken.refreshToken = authUser.refreshToken;
+        brisaToken.accessTokenExpires = new Date(
+          authUser.accessExpiresAt,
+        ).getTime();
+        brisaToken.refreshTokenExpires = new Date(
+          authUser.refreshExpiresAt,
+        ).getTime();
+        delete brisaToken.error;
+        return brisaToken;
       }
 
-      session.accessToken =
-        typeof token.accessToken === "string" ? token.accessToken : undefined;
+      const shouldRefresh =
+        typeof brisaToken.accessTokenExpires === "number" &&
+        Date.now() > brisaToken.accessTokenExpires - 30_000;
+
+      if (!shouldRefresh) {
+        return brisaToken;
+      }
+
+      if (!brisaToken.refreshToken) {
+        brisaToken.error = "RefreshAccessTokenError";
+        return brisaToken;
+      }
+
+      const refreshed = await refreshAccessToken(brisaToken.refreshToken);
+      if (!refreshed) {
+        brisaToken.error = "RefreshAccessTokenError";
+        delete brisaToken.accessToken;
+        delete brisaToken.refreshToken;
+        delete brisaToken.accessTokenExpires;
+        delete brisaToken.refreshTokenExpires;
+        return brisaToken;
+      }
+
+      brisaToken.accessToken = refreshed.accessToken;
+      brisaToken.refreshToken = refreshed.refreshToken;
+      brisaToken.accessTokenExpires = refreshed.accessExpiresAt;
+      brisaToken.refreshTokenExpires = refreshed.refreshExpiresAt;
+      delete brisaToken.error;
+      return brisaToken;
+    },
+    async session({ session, token }) {
+      const brisaToken = token as BrisaJWT;
+      if (session.user) {
+        if (typeof brisaToken.sub === "string") {
+          session.user.id = brisaToken.sub;
+        }
+        session.user.role =
+          typeof brisaToken.role === "string"
+            ? brisaToken.role
+            : session.user.role;
+      }
+
+      session.accessToken = brisaToken.accessToken;
+      (session as typeof session & { error?: string }).error = brisaToken.error;
       return session;
     },
     authorized({ auth: authSession, request }) {
@@ -177,3 +252,41 @@ export const {
   },
   trustHost: true,
 });
+
+async function refreshAccessToken(refreshToken: string): Promise<{
+  accessToken: string;
+  refreshToken: string;
+  accessExpiresAt: number;
+  refreshExpiresAt: number;
+} | null> {
+  try {
+    const response = await fetch(`${API_URL}/api/authentication/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const json = (await response.json()) as RefreshResponse;
+    if (!json.token || !json.refreshToken || !json.expiresAt) {
+      return null;
+    }
+
+    return {
+      accessToken: json.token,
+      refreshToken: json.refreshToken,
+      accessExpiresAt: new Date(json.expiresAt).getTime(),
+      refreshExpiresAt: json.refreshExpiresAt
+        ? new Date(json.refreshExpiresAt).getTime()
+        : new Date().getTime(),
+    };
+  } catch {
+    return null;
+  }
+}

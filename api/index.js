@@ -1,3 +1,5 @@
+// Importación explícita de hono para que Vercel lo identifique como framework soportado
+import "hono";
 import app from "../apps/api/dist/index.js";
 
 export const config = {

@@ -2296,6 +2296,60 @@ export const openApiSpec = {
           },
         },
       },
+      CalendarBooking: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          code: { type: "string" },
+          scheduledAt: { type: "string", format: "date-time" },
+          durationMin: { type: "integer", example: 90 },
+          status: {
+            type: "string",
+            enum: [
+              "PENDING",
+              "CONFIRMED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED",
+            ],
+          },
+          totalAmount: { type: "number", example: 250 },
+          service: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string" },
+              name: { type: "string" },
+            },
+          },
+          property: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string" },
+              label: { type: "string" },
+            },
+          },
+          customer: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string" },
+              fullName: { type: "string", nullable: true },
+              email: { type: "string" },
+            },
+          },
+          assignedStaff: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string" },
+              fullName: { type: "string", nullable: true },
+              email: { type: "string" },
+            },
+          },
+        },
+      },
       CalendarResponse: {
         type: "object",
         properties: {
@@ -2306,7 +2360,7 @@ export const openApiSpec = {
                 type: "object",
                 additionalProperties: {
                   type: "array",
-                  items: { $ref: "#/components/schemas/Booking" },
+                  items: { $ref: "#/components/schemas/CalendarBooking" },
                 },
               },
               dateRange: {
@@ -2315,6 +2369,18 @@ export const openApiSpec = {
                 example: ["2025-11-07", "2025-11-08"],
               },
               summary: { $ref: "#/components/schemas/CalendarSummary" },
+            },
+          },
+          meta: {
+            type: "object",
+            properties: {
+              cacheHit: { type: "boolean", example: false },
+              durationMs: { type: "integer", example: 180 },
+              cachedAt: {
+                type: "string",
+                format: "date-time",
+                nullable: true,
+              },
             },
           },
         },
