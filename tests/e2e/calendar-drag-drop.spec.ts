@@ -400,7 +400,7 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     await expectStatusType(page, "success");
   });
 
-  test("no permite drag & drop en vista semanal @smoke", async ({
+  test("vista semanal mantiene reservas arrastrables @smoke", async ({
     page,
     request,
   }, testInfo: TestInfo) => {
@@ -436,18 +436,15 @@ test.describe.serial("Calendario - Drag & Drop", () => {
       ).toBeVisible({ timeout: 15000 });
     }
 
-    // Bookings in weekly view should not be draggable
+    // Bookings in weekly view should remain draggable
     const weeklyBookingButton = page
       .locator(`[data-booking-id="${booking.id}"]`)
       .first();
     await ensureBookingVisible(weeklyBookingButton);
     const isDraggable = await weeklyBookingButton.getAttribute("draggable");
 
-    // In weekly view, bookings should not have draggable attribute
-    // or it should be false
-    if (isDraggable !== null) {
-      expect(isDraggable).toBe("false");
-    }
+    expect(isDraggable).toBe("true");
+    await expect(weeklyBookingButton).toHaveClass(/cursor-grab/);
   });
 
   test("refresca el calendario después de reprogramación exitosa @critical", async ({
