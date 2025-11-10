@@ -12,6 +12,7 @@ type CalendarWeekViewProps = {
     newDate: string,
     originalScheduledAt: string,
   ) => void;
+  onViewModePersist?: () => void;
   initialDate?: Date;
   filters?: {
     status?: string;
@@ -75,6 +76,7 @@ function getEndOfWeek(date: Date): Date {
 export function CalendarWeekView({
   onBookingClick,
   onBookingReschedule,
+  onViewModePersist,
   initialDate = new Date(),
   filters,
   refreshToken = 0,
@@ -184,8 +186,9 @@ export function CalendarWeekView({
     const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
     if (stored !== "week") {
       window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, "week");
+      onViewModePersist?.();
     }
-  }, []);
+  }, [onViewModePersist]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

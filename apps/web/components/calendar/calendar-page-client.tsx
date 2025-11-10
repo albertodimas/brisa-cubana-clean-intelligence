@@ -464,6 +464,8 @@ export function CalendarPageClient({
       ) : (
         <CalendarWeekView
           onBookingClick={handleBookingClick}
+          onBookingReschedule={handleBookingReschedule}
+          onViewModePersist={() => setViewModeWithSource("week", "user")}
           filters={filters}
           refreshToken={calendarRefreshToken}
         />
