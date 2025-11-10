@@ -74,8 +74,19 @@ forbidden_patterns=(
   "docs/operations/git-remote-push.md"
 )
 
+search_obsolete_reference() {
+  local pattern="$1"
+  if command -v rg >/dev/null 2>&1; then
+    rg --fixed-strings --glob "*.md" --glob "*.yml" --glob "*.yaml" -q \
+      "${pattern}" docs README.md CHANGELOG.md .github
+  else
+    grep -R -F --include="*.md" --include="*.yml" --include="*.yaml" \
+      "${pattern}" docs README.md CHANGELOG.md .github >/dev/null
+  fi
+}
+
 for pattern in "${forbidden_patterns[@]}"; do
-  if rg --fixed-strings --glob "*.md" --glob "*.yml" --glob "*.yaml" -q "${pattern}" docs README.md CHANGELOG.md .github; then
+  if search_obsolete_reference "${pattern}"; then
     echo "❌ Referencia obsoleta detectada: ${pattern}"
     violations=1
   fi
