@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useCalendar, type CalendarBooking } from "@/hooks/use-calendar";
+import { useDragDrop } from "@/hooks/use-drag-drop";
 import { Skeleton } from "../ui/skeleton";
 
 type CalendarWeekViewProps = {
@@ -55,14 +56,6 @@ const STATUS_LABELS: Record<string, string> = {
 const VIEW_MODE_STORAGE_KEY = "brisa-calendar-view-mode";
 const MOBILE_BREAKPOINT_QUERY = "(max-width: 1023px)";
 
-const getStoredViewMode = () => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-  return stored === "week" || stored === "month" ? stored : null;
-};
-
 // Utility: Get start of week (Sunday)
 function getStartOfWeek(date: Date): Date {
   const d = new Date(date);
@@ -81,6 +74,7 @@ function getEndOfWeek(date: Date): Date {
 
 export function CalendarWeekView({
   onBookingClick,
+  onBookingReschedule,
   initialDate = new Date(),
   filters,
   refreshToken = 0,
@@ -88,16 +82,19 @@ export function CalendarWeekView({
   const [currentWeekStart, setCurrentWeekStart] = useState(
     getStartOfWeek(initialDate),
   );
-  const [hasUserPreferredWeek, setHasUserPreferredWeek] = useState(() => {
-    const stored = getStoredViewMode();
-    return stored === "week";
-  });
   const [isSingleColumn, setIsSingleColumn] = useState(() => {
     if (typeof window === "undefined") {
       return false;
     }
     return window.matchMedia("(max-width: 1023px)").matches;
   });
+  const {
+    state: dragState,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOver,
+    handleDragLeave,
+  } = useDragDrop();
 
   // Calculate date range for the week
   const { from, to } = useMemo(() => {
@@ -184,11 +181,11 @@ export function CalendarWeekView({
     if (typeof window === "undefined") {
       return;
     }
-    if (!hasUserPreferredWeek) {
+    const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    if (stored !== "week") {
       window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, "week");
-      setHasUserPreferredWeek(true);
     }
-  }, [hasUserPreferredWeek]);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -328,10 +325,34 @@ export function CalendarWeekView({
                 key={day.dateKey}
                 data-testid="calendar-week-gridcell"
                 data-date-key={day.dateKey}
-                className={`min-h-96 rounded-lg border p-4 ${
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  handleDragOver(day.dateKey);
+                }}
+                onDragLeave={handleDragLeave}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  if (
+                    dragState.draggedItemId &&
+                    dragState.draggedItemData &&
+                    onBookingReschedule
+                  ) {
+                    onBookingReschedule(
+                      dragState.draggedItemId,
+                      day.dateKey,
+                      dragState.draggedItemData,
+                    );
+                  }
+                  handleDragEnd();
+                }}
+                className={`min-h-96 rounded-lg border p-4 transition-colors ${
                   day.isToday
                     ? "border-blue-400 bg-blue-50 dark:border-blue-600 dark:bg-blue-950"
                     : "border-gray-200 bg-white dark:border-brisa-700 dark:bg-brisa-900"
+                } ${
+                  dragState.dropTargetId === day.dateKey && dragState.isDragging
+                    ? "ring-2 ring-blue-500 ring-offset-2"
+                    : ""
                 }`}
               >
                 {/* Day Header */}
@@ -377,9 +398,30 @@ export function CalendarWeekView({
                           data-booking-id={booking.id}
                           data-booking-status={booking.status}
                           onClick={() => onBookingClick?.(booking)}
+                          draggable={
+                            onBookingReschedule !== undefined &&
+                            booking.status !== "COMPLETED" &&
+                            booking.status !== "CANCELLED"
+                          }
+                          onDragStart={(event) => {
+                            event.stopPropagation();
+                            handleDragStart(booking.id, booking.scheduledAt);
+                          }}
+                          onDragEnd={(event) => {
+                            event.stopPropagation();
+                            handleDragEnd();
+                          }}
                           className={`w-full rounded-lg border p-3 text-left transition-all hover:shadow-md ${
                             STATUS_COLORS[booking.status] ||
                             STATUS_COLORS.PENDING
+                          } ${
+                            dragState.draggedItemId === booking.id
+                              ? "opacity-50 cursor-grabbing"
+                              : onBookingReschedule !== undefined &&
+                                  booking.status !== "COMPLETED" &&
+                                  booking.status !== "CANCELLED"
+                                ? "cursor-grab"
+                                : ""
                           }`}
                         >
                           {/* Time */}
