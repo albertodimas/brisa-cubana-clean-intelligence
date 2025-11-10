@@ -5,6 +5,8 @@ import { FAQSection } from "@/components/landing/faq-section";
 import { LeadCaptureForm } from "@/components/landing/lead-capture-form";
 import { PricingTiers } from "@/components/landing/pricing-tiers";
 import { MarketingLink } from "@/components/landing/marketing-link";
+import { BeforeAfterGallery } from "@/components/landing/before-after-gallery";
+import { SectionHeading } from "@/components/landing/section-heading";
 import {
   ScrollProgress,
   ScrollReveal,
@@ -15,6 +17,8 @@ import {
 } from "@/components/ui";
 import {
   differentiators,
+  caseStudies,
+  beforeAfterScenarios,
   operationsMockups,
   portalCapabilities,
   pricingTiers as fallbackPricingTiers,
@@ -98,7 +102,7 @@ export default async function LandingPage() {
       {/* Scroll Progress Bar */}
       <ScrollProgress position="top" thickness={3} glow />
 
-      <div className="relative overflow-hidden bg-gradient-to-br from-brisa-100 via-white to-white dark:from-brisa-900/60 dark:via-brisa-950 dark:to-brisa-950">
+      <div className="relative overflow-hidden bg-gradient-to-b from-white via-brisa-50/60 to-white dark:from-brisa-900/70 dark:via-brisa-950 dark:to-brisa-950">
         {/* Gradient Mesh Background - Premium Effect */}
         <GradientMesh
           colors={{
@@ -140,7 +144,7 @@ export default async function LandingPage() {
                     href="/?plan=turnover&inventory=6-15%20unidades#contacto"
                     eventName="cta_request_proposal"
                     metadata={{ placement: "hero", target: "contact_form" }}
-                    className="inline-flex items-center justify-center rounded-full bg-[#0d2944] px-6 py-3 text-base font-semibold text-white shadow-lg shadow-[#0d294433] hover:bg-[#11466d] hover:shadow-xl hover:shadow-[#0d29444d] transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1ecad3]"
+                    className="inline-flex items-center justify-center rounded-full bg-brisa-900 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brisa-900/25 hover:bg-brisa-800 hover:shadow-xl hover:shadow-brisa-900/40 transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brisa-500"
                     prefetch={false}
                   >
                     Solicitar cotización
@@ -149,7 +153,7 @@ export default async function LandingPage() {
                     href="/clientes"
                     eventName="cta_portal_demo"
                     metadata={{ placement: "hero" }}
-                    className="inline-flex items-center justify-center rounded-full border border-transparent px-4 py-3 text-base font-semibold text-[#0f8c94] hover:text-[#0a4750] hover:bg-[#ecfcff] dark:text-[#7adfe9] dark:hover:text-white dark:hover:bg-[#0c6870]/40 transition-all"
+                    className="inline-flex items-center justify-center rounded-full border border-brisa-200/60 px-4 py-3 text-base font-semibold text-brisa-700 hover:text-brisa-900 hover:bg-brisa-50 dark:border-brisa-700 dark:text-brisa-200 dark:hover:text-white dark:hover:bg-brisa-900 transition-all"
                   >
                     Conoce el portal (beta privada)
                   </MarketingLink>
@@ -229,149 +233,105 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section className="relative mt-24 px-4 sm:px-6 lg:px-8">
-        <div className="absolute inset-0 bg-pattern-waves opacity-40 dark:opacity-20" />
-        <div className="relative mx-auto grid max-w-6xl gap-8 lg:grid-cols-2">
-          <article className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-xl shadow-brisa-900/10 dark:border-brisa-700/40 dark:bg-brisa-900/80">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brisa-300/60 bg-brisa-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-brisa-600 dark:border-brisa-500/40 dark:bg-brisa-800/60 dark:text-brisa-200">
-              Before / After · Cocina
-            </span>
-            <h2 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">
-              Documentamos mejoras con evidencia comparable
-            </h2>
-            <p className="mt-3 text-sm text-gray-600 dark:text-brisa-200">
-              Cada servicio incluye fotos “antes y después” y checklist firmado
-              digitalmente. Tus propietarios reciben un reporte que muestra el
-              impacto real del Turnover Premium y los upsells ejecutados.
-            </p>
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-md dark:border-brisa-800/50 dark:bg-brisa-900/60">
-                <Image
-                  src="/branding/kitchen-before.webp"
-                  alt="Cocina antes del servicio Brisa Cubana"
-                  width={1500}
-                  height={899}
-                  className="h-auto w-full object-cover"
-                />
-                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-300">
-                  Antes
-                </figcaption>
-              </figure>
-              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-lg shadow-brisa-900/10 dark:border-brisa-700/60 dark:bg-brisa-900/60">
-                <Image
-                  src="/branding/kitchen-after.webp"
-                  alt="Cocina impecable tras Turnover Premium"
-                  width={1500}
-                  height={1000}
-                  className="h-auto w-full object-cover"
-                />
-                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-200">
-                  Después
-                </figcaption>
-              </figure>
-            </div>
-          </article>
-          <article className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-xl shadow-brisa-900/10 dark:border-brisa-700/40 dark:bg-brisa-900/80">
-            <span className="inline-flex items-center gap-2 rounded-full border border-rose-300/40 bg-rose-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-rose-500 dark:border-rose-500/40 dark:bg-rose-950/30 dark:text-rose-200">
-              Before / After · Baño
-            </span>
-            <h2 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">
-              Estándar hotelero desde griferías hasta amenities
-            </h2>
-            <p className="mt-3 text-sm text-gray-600 dark:text-brisa-200">
-              El protocolo Deep Clean Brickell Collection incluye saneamiento de
-              juntas, pulido de superficies delicadas y aromatización. El
-              reporte QA muestra cada mejora para sostener reseñas 5 ⭐.
-            </p>
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-md dark:border-brisa-800/50 dark:bg-brisa-900/60">
-                <Image
-                  src="/branding/bathroom-before.webp"
-                  alt="Baño antes de la limpieza profunda"
-                  width={1500}
-                  height={1000}
-                  className="h-auto w-full object-cover"
-                />
-                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-300">
-                  Antes
-                </figcaption>
-              </figure>
-              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-lg shadow-brisa-900/10 dark:border-brisa-700/60 dark:bg-brisa-900/60">
-                <Image
-                  src="/branding/bathroom-after.webp"
-                  alt="Baño premium después de Deep Clean"
-                  width={1500}
-                  height={2249}
-                  className="h-auto w-full object-cover"
-                />
-                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-200">
-                  Después
-                </figcaption>
-              </figure>
-            </div>
-          </article>
+      {/* Casos reales */}
+      <section
+        id="casos-reales"
+        className="py-16 sm:py-20 bg-brisa-50/60 dark:bg-brisa-950"
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <SectionHeading
+              eyebrow="Casos reales"
+              title="Propietarios y PMs que ya operan con Brisa Cubana."
+              description="Seleccionamos cuentas con diferentes mixes (luxury villas, STR creativos y portfolios corporativos) para mostrar cómo estandarizamos la operación sin importar el volumen."
+            />
+            <ScrollReveal
+              variant="fadeLeft"
+              delay={0.15}
+              className="sm:text-right text-sm text-gray-500 dark:text-brisa-300"
+            >
+              <p className="font-semibold text-gray-800 dark:text-white">
+                ¿Quieres un benchmark privado?
+              </p>
+              <MarketingLink
+                href="/?plan=auditoria-operativa#contacto"
+                eventName="cta_case_study"
+                metadata={{ placement: "case-studies" }}
+                className="underline underline-offset-4 font-semibold text-brisa-700 dark:text-brisa-200 hover:text-brisa-900"
+              >
+                Agenda una sesión de descubrimiento →
+              </MarketingLink>
+            </ScrollReveal>
+          </div>
+
+          <StaggerContainer className="grid gap-6 lg:grid-cols-3">
+            {caseStudies.map((study) => (
+              <StaggerItem key={study.id}>
+                <TiltCard className="h-full bg-white/95 dark:bg-brisa-900 border border-gray-100 dark:border-brisa-800 shadow-lg shadow-brisa-900/5 dark:shadow-none">
+                  <div className="flex flex-col gap-4">
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                        {study.vertical}
+                      </p>
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                          {study.client}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-brisa-300">
+                          {study.units}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2 rounded-2xl bg-gray-50 dark:bg-brisa-950/80 p-4 text-sm text-gray-600 dark:text-brisa-200">
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        Desafío
+                      </p>
+                      <p>{study.challenge}</p>
+                    </div>
+                    <div className="rounded-2xl border border-gray-100 dark:border-brisa-800 p-4 bg-white dark:bg-brisa-900/60">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                        Resultado
+                      </p>
+                      <p className="mt-2 text-sm text-gray-600 dark:text-brisa-200">
+                        {study.resultSummary}
+                      </p>
+                      <dl className="mt-4 grid gap-3 text-sm">
+                        {study.impact.map((metric) => (
+                          <div
+                            key={metric.label}
+                            className="rounded-xl bg-brisa-50 dark:bg-brisa-950/70 px-3 py-2"
+                          >
+                            <dt className="text-xs uppercase tracking-wider text-brisa-500 dark:text-brisa-200">
+                              {metric.label}
+                            </dt>
+                            <dd className="text-lg font-semibold text-gray-900 dark:text-white">
+                              {metric.value}
+                            </dd>
+                            <p className="text-[0.7rem] text-gray-500 dark:text-brisa-300">
+                              {metric.description}
+                            </p>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                    <blockquote className="rounded-2xl border border-gray-100 dark:border-brisa-800 bg-white dark:bg-brisa-900/60 p-4 text-sm italic text-gray-700 dark:text-brisa-100">
+                      “{study.quote}”
+                      <div className="mt-3 not-italic text-xs text-gray-500 dark:text-brisa-300">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {study.spokesperson}
+                        </p>
+                        <p>{study.spokespersonRole}</p>
+                      </div>
+                    </blockquote>
+                  </div>
+                </TiltCard>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
         </div>
       </section>
 
-      {/* Before/After Dormitorios */}
-      <section className="relative mt-16 px-4 sm:px-6 lg:px-8">
-        <div className="relative mx-auto max-w-4xl">
-          <article className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-xl shadow-brisa-900/10 dark:border-brisa-700/40 dark:bg-brisa-900/80">
-            <span className="inline-flex items-center gap-2 rounded-full border border-purple-300/60 bg-purple-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-purple-600 dark:border-purple-500/40 dark:bg-purple-950/30 dark:text-purple-200">
-              Before / After · Dormitorio
-            </span>
-            <h2 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">
-              Staging profesional para fotografías five-star
-            </h2>
-            <p className="mt-3 text-sm text-gray-600 dark:text-brisa-200">
-              Cada dormitorio recibe staging completo: ropa de cama luxury,
-              planchado de cobertores, acomodo de almohadas decorativas y ajuste
-              de iluminación para que tus fotos de Airbnb destaquen en
-              búsquedas.
-            </p>
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-md dark:border-brisa-800/50 dark:bg-brisa-900/60">
-                <Image
-                  src="/branding/bedroom-before.webp"
-                  alt="Dormitorio antes del servicio de staging Brisa Cubana"
-                  width={1500}
-                  height={1000}
-                  loading="lazy"
-                  className="h-auto w-full object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-300">
-                  Antes
-                </figcaption>
-              </figure>
-              <figure className="overflow-hidden rounded-2xl border border-brisa-100/80 bg-white shadow-lg shadow-brisa-900/10 dark:border-brisa-700/60 dark:bg-brisa-900/60">
-                <Image
-                  src="/branding/bedroom-after.webp"
-                  alt="Dormitorio con staging premium listo para fotos profesionales"
-                  width={1500}
-                  height={1000}
-                  loading="lazy"
-                  className="h-auto w-full object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <figcaption className="px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-brisa-500 dark:text-brisa-200">
-                  Después
-                </figcaption>
-              </figure>
-            </div>
-            <div className="mt-6 rounded-2xl bg-purple-50/60 dark:bg-purple-950/20 p-4 border border-purple-200/50 dark:border-purple-800/30">
-              <p className="text-sm text-gray-700 dark:text-brisa-200">
-                <span className="font-semibold text-purple-600 dark:text-purple-300">
-                  Pro tip:
-                </span>{" "}
-                El staging premium puede incrementar tu ADR entre $15-$35/noche
-                según análisis de portfolios en Brickell y Edgewater. Incluido
-                en paquete Turnover Premium sin costo adicional.
-              </p>
-            </div>
-          </article>
-        </div>
-      </section>
+      <BeforeAfterGallery scenarios={beforeAfterScenarios} />
 
       <section id="equipo" className="mt-24 px-4 sm:px-6 lg:px-8 scroll-mt-24">
         <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
