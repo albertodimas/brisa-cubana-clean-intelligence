@@ -184,6 +184,27 @@ export async function deleteAllBookings(
   }
 }
 
+export async function resetRateLimitCounters(
+  request: APIRequestContext,
+  accessToken?: string,
+): Promise<void> {
+  const token = accessToken ?? (await getAdminAccessToken(request));
+  const response = await request.post(
+    `${apiBaseUrl}/api/test-utils/rate-limiter/reset`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  if (!response.ok()) {
+    throw new Error(
+      `No se pudo reiniciar el rate limiting: ${response.status()} ${response.statusText()}`,
+    );
+  }
+}
+
 export async function getUserAccessToken(
   request: APIRequestContext,
   email: string,

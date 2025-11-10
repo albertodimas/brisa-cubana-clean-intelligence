@@ -3,6 +3,7 @@ import { z } from "zod";
 import { NotificationType } from "@prisma/client";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
 import { getNotificationRepository, getPrisma } from "../container.js";
+import { resetRateLimiterStoresForTests } from "../lib/rate-limiter.js";
 
 const createNotificationSchema = z.object({
   userId: z.string().uuid().optional(),
@@ -99,6 +100,20 @@ router.delete("/bookings", async (c) => {
       deleted,
     },
   });
+});
+
+router.post("/rate-limiter/reset", async (c) => {
+  if (!testUtilsEnabled) {
+    return c.json({ error: "Not Found" }, 404);
+  }
+
+  const authUser = getAuthenticatedUser(c);
+  if (!authUser || authUser.role !== "ADMIN") {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  await resetRateLimiterStoresForTests();
+  return c.json({ success: true });
 });
 
 export default router;
