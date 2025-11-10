@@ -10,6 +10,7 @@ import {
 import type { Hono } from "hono";
 import { createHash } from "node:crypto";
 import { sendPortalMagicLinkEmail } from "../../../src/services/magic-link-mailer.js";
+import { resetRateLimiterStoresForTests } from "../../../src/lib/rate-limiter.js";
 
 vi.mock("../../../src/services/magic-link-mailer.js", () => {
   const sendPortalMagicLinkEmail = vi.fn(async () => ({
@@ -243,7 +244,8 @@ describe("Portal auth routes", () => {
     delete process.env.PORTAL_REFRESH_TOKEN_TTL_DAYS;
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await resetRateLimiterStoresForTests();
     magicLinkTokens.length = 0;
     portalSessions.length = 0;
     userRepositoryMock.findByEmail.mockReset();
@@ -251,7 +253,11 @@ describe("Portal auth routes", () => {
     magicLinkRepositoryMock.findValidByHash.mockClear();
     magicLinkRepositoryMock.consume.mockClear();
     magicLinkRepositoryMock.invalidateExpiredForEmail.mockClear();
-    sendPortalMagicLinkEmailMock.mockClear();
+    sendPortalMagicLinkEmailMock.mockReset();
+    sendPortalMagicLinkEmailMock.mockImplementation(async () => ({
+      delivered: true,
+      messageId: "test-message",
+    }));
     portalSessionRepositoryMock.create.mockClear();
     portalSessionRepositoryMock.findValidByTokenHash.mockClear();
     portalSessionRepositoryMock.revokeById.mockClear();
@@ -285,7 +291,11 @@ describe("Portal auth routes", () => {
     const response = await app.request("/api/portal/auth/request", {
       method: "POST",
       body: JSON.stringify({ email: "client@portal.test" }),
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100.250",
+        "x-internal-remote-address": "10.1.1.1",
+      },
     });
 
     expect(response.status).toBe(200);
@@ -404,6 +414,11 @@ describe("Portal auth routes", () => {
   });
 
   it("retorna 503 cuando el correo no está configurado", async () => {
+    await resetRateLimiterStoresForTests();
+    const windowMs = Number(
+      process.env.PORTAL_MAGIC_LINK_WINDOW_MS ?? "900000",
+    );
+    await new Promise((resolve) => setTimeout(resolve, windowMs + 50));
     sendPortalMagicLinkEmailMock.mockResolvedValueOnce({
       delivered: false,
       reason: "not-configured",
@@ -412,7 +427,13 @@ describe("Portal auth routes", () => {
     const response = await app.request("/api/portal/auth/request", {
       method: "POST",
       body: JSON.stringify({ email: "client@portal.test" }),
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        // Forzar un identificador único para evitar que el rate limiter del resto
+        // de la suite marque este caso como duplicado cuando corre en paralelo.
+        "x-internal-remote-address": "10.55.0.10",
+        "x-forwarded-for": "203.0.113.199",
+      },
     });
 
     expect(response.status).toBe(503);
