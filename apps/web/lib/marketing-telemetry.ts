@@ -106,3 +106,7 @@ export function recordMarketingEvent(event: string, data?: EventData) {
 export function recordCheckoutEvent(event: string, data?: EventData) {
   recordAnalyticsEvent("checkout", event, data);
 }
+
+export function recordCalendarEvent(event: string, data?: EventData) {
+  recordAnalyticsEvent("calendar", event, data);
+}

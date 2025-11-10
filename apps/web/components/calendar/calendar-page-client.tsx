@@ -8,6 +8,7 @@ import { BookingDetailsModal } from "./booking-details-modal";
 import { CalendarTour } from "./calendar-tour";
 import type { CalendarBooking } from "@/hooks/use-calendar";
 import { useRouter } from "next/navigation";
+import { recordCalendarEvent } from "@/lib/marketing-telemetry";
 
 type CalendarPageClientProps = {
   properties: Array<{ id: string; label: string }>;
@@ -77,6 +78,7 @@ export function CalendarPageClient({
   const minimumVisibleWindowMs = 5000;
   const router = useRouter();
   const statusClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasLoggedInitialViewRef = useRef(false);
   type StatusDebugType = "success" | "error" | "loading" | "idle";
 
   const updateStatusDebug = (type: StatusDebugType, message: string) => {
@@ -145,6 +147,51 @@ export function CalendarPageClient({
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [hasUserViewPreference, setViewModeWithSource]);
 
+  const buildFilterSnapshot = useCallback(
+    (
+      overrides?: Partial<{
+        status?: string;
+        propertyId?: string;
+        serviceId?: string;
+        assignedStaffId?: string;
+      }>,
+    ) => ({
+      viewMode,
+      filterStatus: overrides?.status ?? filters.status ?? "all",
+      filterPropertyId: overrides?.propertyId ?? filters.propertyId ?? null,
+      filterServiceId: overrides?.serviceId ?? filters.serviceId ?? null,
+      filterStaffId:
+        overrides?.assignedStaffId ?? filters.assignedStaffId ?? null,
+    }),
+    [filters, viewMode],
+  );
+
+  useEffect(() => {
+    const metadata = buildFilterSnapshot();
+    if (!hasLoggedInitialViewRef.current) {
+      recordCalendarEvent("calendar_viewed", metadata);
+      hasLoggedInitialViewRef.current = true;
+      return;
+    }
+    recordCalendarEvent("calendar_view_mode_changed", metadata);
+  }, [buildFilterSnapshot, viewMode]);
+
+  const handleFiltersChange = useCallback(
+    (nextFilters: {
+      status?: string;
+      propertyId?: string;
+      serviceId?: string;
+      assignedStaffId?: string;
+    }) => {
+      setFilters(nextFilters);
+      recordCalendarEvent(
+        "calendar_filter_applied",
+        buildFilterSnapshot(nextFilters),
+      );
+    },
+    [buildFilterSnapshot],
+  );
+
   useEffect(() => {
     return () => {
       if (statusClearRef.current) {
@@ -207,6 +254,14 @@ export function CalendarPageClient({
       newDate.setMinutes(originalDate.getMinutes());
       newDate.setSeconds(originalDate.getSeconds());
 
+      const analyticsBase = buildFilterSnapshot();
+      recordCalendarEvent("calendar_reschedule_attempted", {
+        ...analyticsBase,
+        bookingId,
+        targetDateKey: newDateKey,
+        originalScheduledAt,
+      });
+
       const response = await fetch(`/api/bookings/${bookingId}`, {
         method: "PATCH",
         headers: {
@@ -229,6 +284,11 @@ export function CalendarPageClient({
         message: "Reserva reprogramada exitosamente",
       });
       updateStatusDebug("success", "Reserva reprogramada exitosamente");
+      recordCalendarEvent("calendar_reschedule_succeeded", {
+        ...analyticsBase,
+        bookingId,
+        newScheduledAt: newDate.toISOString(),
+      });
 
       scheduleStatusClear();
 
@@ -247,6 +307,12 @@ export function CalendarPageClient({
         message: errorMessage,
       });
       updateStatusDebug("error", errorMessage);
+      recordCalendarEvent("calendar_reschedule_failed", {
+        ...buildFilterSnapshot(),
+        bookingId,
+        targetDateKey: newDateKey,
+        reason: errorMessage,
+      });
       scheduleStatusClear();
     }
   };
@@ -315,7 +381,7 @@ export function CalendarPageClient({
     <div className="space-y-4 sm:space-y-6">
       {/* Filters */}
       <CalendarFilters
-        onFiltersChange={setFilters}
+        onFiltersChange={handleFiltersChange}
         properties={properties}
         services={services}
         staff={staff}

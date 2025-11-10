@@ -4,8 +4,9 @@
 
 ### Métricas vigentes
 
-- **Smoke (`pnpm test:e2e:smoke`):** 15 tests en 6 archivos (≈1.5 min con servers en frío). Cobertura: login, métricas PostHog, creación básica de servicios, acceso al calendario mensual y validaciones visuales rápidas.
+- **Smoke (`pnpm test:e2e:smoke`):** 15 tests en 6 archivos ejecutados en Chrome **y** Safari (≈1.5 min con servers en frío). Cobertura: login, métricas PostHog, creación básica de servicios, acceso al calendario mensual y validaciones visuales rápidas.
 - **Critical (`pnpm test:e2e:critical`):** 47 tests en 14 archivos (≈6.5 min). Incluye smoke + flujos completos de calendario (modal, drag&drop, filtros), staff assignment, portal cliente, exports CSV, dashboard y seguridad.
+- **Critical Safari (`pnpm test:e2e:critical:safari`):** Mismos 47 tests ejecutados en WebKit. Se usa para validación cruzada (job `safari-critical` en `nightly.yml`) y puede correrse manualmente cuando se investigan regresiones específicas de Safari.
 - **Full (`pnpm test:e2e:full`):** 91 tests en 15 archivos (≈11 min). Añade escenarios de regresión extendidos, validaciones de rate limit, estados vacíos, responsividad y suites de marketing/notifications.
 - **Infra:** Cada corrida reconstruye API y Web en modo producción (`reuseExistingServer: false`) y ejecuta `pnpm db:push --force-reset && pnpm db:seed` para garantizar datos deterministas.
 
@@ -157,28 +158,20 @@ test("pagina reservas correctamente", async ({ request }) => {
 
 ### Configuración de Projects
 
-`playwright.config.ts` tendrá 3 projects:
+`playwright.config.ts` define 5 projects (Chrome/Safari para smoke + critical, y full suite en Chrome):
 
 ```typescript
 export default defineConfig({
   projects: [
+    { name: "smoke", grep: /@smoke/, use: devices["Desktop Chrome"] },
+    { name: "smoke-webkit", grep: /@smoke/, use: devices["Desktop Safari"] },
+    { name: "critical", grep: /@critical/, use: devices["Desktop Chrome"] },
     {
-      name: "smoke",
-      testMatch: /.*(spec|test)\.ts/,
-      grep: /@smoke/,
-      use: { ...devices["Desktop Chrome"] },
+      name: "critical-webkit",
+      grep: /@critical/,
+      use: devices["Desktop Safari"],
     },
-    {
-      name: "critical",
-      testMatch: /.*(spec|test)\.ts/,
-      grep: /@(smoke|critical)/,
-      use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      name: "full",
-      testMatch: /.*(spec|test)\.ts/,
-      use: { ...devices["Desktop Chrome"] },
-    },
+    { name: "full", use: devices["Desktop Chrome"] },
   ],
 });
 ```
@@ -189,8 +182,9 @@ export default defineConfig({
 {
   "scripts": {
     "test:e2e": "playwright test --project=full",
-    "test:e2e:smoke": "playwright test --project=smoke",
+    "test:e2e:smoke": "playwright test --project=smoke --project=smoke-webkit",
     "test:e2e:critical": "playwright test --project=critical",
+    "test:e2e:critical:safari": "playwright test --project=critical-webkit",
     "test:e2e:full": "playwright test --project=full"
   }
 }

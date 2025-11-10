@@ -139,16 +139,16 @@ Configura alertas en Sentry/PostHog si detectas patrones de abuso (se recomienda
 
 ## 🛡️ Content Security Policy (CSP)
 
-- La web sirve un encabezado `Content-Security-Policy-Report-Only` desde `apps/web/vercel.json`. Esto nos permite detectar recursos externos no declarados antes de bloquearlos.
-- Política actual: `default-src 'self'; script-src 'self' https://js.stripe.com https://cdn.posthog.com https://www.googletagmanager.com https://www.gstatic.com https://js.sentry-cdn.com https://vercel.live https://vitals.vercel-insights.com; connect-src 'self' https://api.brisacubanacleanintelligence.com https://*.posthog.com https://*.ingest.sentry.io https://js.stripe.com https://api.stripe.com https://vercel.live https://vitals.vercel-insights.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; frame-src https://js.stripe.com https://hooks.stripe.com https://vercel.live; base-uri 'self'; form-action 'self' https://api.brisacubanacleanintelligence.com; frame-ancestors 'none'`.
+- La web sirve encabezados `Content-Security-Policy` (enforce) y `Content-Security-Policy-Report-Only` desde `apps/web/vercel.json`, de modo que bloqueamos recursos no permitidos sin perder telemetría.
+- Política actual: `default-src 'self'; script-src 'self' https://js.stripe.com https://cdn.posthog.com https://www.googletagmanager.com https://www.gstatic.com https://js.sentry-cdn.com https://vercel.live https://vitals.vercel-insights.com; connect-src 'self' https://api.brisacubanacleanintelligence.com https://*.posthog.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.sentry.io https://js.stripe.com https://api.stripe.com https://vercel.live https://vitals.vercel-insights.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; frame-src https://js.stripe.com https://hooks.stripe.com https://vercel.live; base-uri 'self'; form-action 'self' https://api.brisacubanacleanintelligence.com; frame-ancestors 'none'; report-uri https://brisacubanacleanintelligence.com/api/security/csp-report`.
 - Los reportes se envían a `https://brisacubanacleanintelligence.com/api/security/csp-report` mediante los encabezados `Report-To` y `Reporting-Endpoints`. La ruta (`apps/web/app/api/security/csp-report/route.ts`) normaliza el payload, anota el `user-agent` y lo envía a Sentry como mensaje `warning` (`CSP Violation`).
-- Si un nuevo proveedor externo es necesario, agrégalo explícitamente en la directiva pertinente y documenta el motivo aquí. Tras estabilizar los reportes, migraremos la política a modo bloqueante (`Content-Security-Policy`).
+- Si un nuevo proveedor externo es necesario, agrégalo explícitamente en la directiva pertinente y documenta el motivo aquí. Revisa los reportes antes de relajar reglas.
 
 ## ✉️ Enlaces mágicos (portal cliente)
 
 - Los tokens generados por `/api/portal/auth/request` se almacenan con hash SHA-256 y caducan en 15 minutos (configurable vía `MAGIC_LINK_TTL_MINUTES`).
-- El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite un JWT (`portalToken`) con scope `portal-client` válido por 1 hora.
-- La API adjunta automáticamente las cookies `portal_token` (HttpOnly) y `portal_customer_id` tras una verificación exitosa; la UI ya no debe intentar generarlas manualmente.
+- El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite un JWT (`portalToken`) con scope `portal-client` válido por 1 hora, además de registrar un refresh token persistente.
+- La API adjunta automáticamente las cookies `portal_token` y `portal_refresh_token` (ambas HttpOnly) y `portal_customer_id` tras una verificación exitosa; la UI ya no debe intentar generarlas manualmente.
 - Endpoints de autoservicio `POST /api/portal/bookings/:id/cancel|reschedule` validan pertenencia del cliente, registran logs (`Portal booking cancellation/reschedule processed`) y limitan estados permitidos.
 - Configura el canal SMTP (`PORTAL_MAGIC_LINK_*`) para enviar correos reales desde producción. Actualmente se usa SendGrid (`smtp.sendgrid.net`, puerto 465 con `secure=true` y usuario `apikey`) con el dominio `brisacubanacleanintelligence.com` autenticado (DKIM + SPF).
 - El buzón `cliente@brisacubanacleanintelligence.com` se gestiona vía ImprovMX (ver `docs/operations/email-routing.md`) para recibir smoke tests del portal.
@@ -161,13 +161,29 @@ Configura alertas en Sentry/PostHog si detectas patrones de abuso (se recomienda
   - `PORTAL_MAGIC_LINK_BASE_URL`
 - Define `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción para evitar que el API incluya el `debugToken` en la respuesta una vez que el envío por correo esté habilitado.
 - Asegura que `ENABLE_TEST_UTILS="false"` en producción y preview; este flag activa bypasses de seguridad (omisión de correo y exposición de tokens) pensados solo para entornos locales/CI.
-- El frontend confía en las cookies emitidas por la API (`portal_token` HttpOnly + `portal_customer_id` pública). Ambas expiran conforme al `expiresAt` otorgado por el backend y deben tratarse como credenciales de sesión.
-- El endpoint `POST /api/portal/auth/logout` invalida la sesión actual (requiere token de portal) y debe invocarse desde la UI al cerrar sesión para limpiar cookies.
+- El frontend confía en las cookies emitidas por la API (`portal_token` y `portal_refresh_token` HttpOnly + `portal_customer_id` pública). Sus expiraciones (`expiresAt`/`refreshExpiresAt`) deben coincidir con lo enviado por la API y tratarse como credenciales de sesión.
+- El endpoint `POST /api/portal/auth/logout` invalida la sesión actual (requiere token de portal) y debe invocarse desde la UI al cerrar sesión para limpiar cookies. Para extender sesiones sin reenviar enlaces existe `POST /api/portal/auth/refresh`, que rota ambos tokens.
 - Checklist manual tras cualquier cambio:
-  1. Verificar en DevTools (Application → Storage → Cookies) que `portal_token` es HttpOnly/SameSite `Strict` en producción o `Lax` en local con HTTP.
-  2. Confirmar que el atributo `Expires` coincide con el valor `expiresAt` devuelto por la API.
-  3. Validar que tras `POST /api/portal/auth/logout` ambas cookies se eliminan en el browser y en la respuesta HTTP.
+  1. Verificar en DevTools (Application → Storage → Cookies) que `portal_token` y `portal_refresh_token` son HttpOnly y SameSite `Strict` en producción o `Lax` en local con HTTP.
+  2. Confirmar que los atributos `Expires` coinciden con `expiresAt`/`refreshExpiresAt` devueltos por la API.
+  3. Validar que tras `POST /api/portal/auth/logout` las tres cookies (`portal_token`, `portal_refresh_token`, `portal_customer_id`) se eliminan en el browser y en la respuesta HTTP.
 - Las solicitudes de cancelación/reagendo desde el portal generan notificaciones `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED` dirigidas a usuarios activos con rol `ADMIN` o `COORDINATOR`, para que operaciones pueda reaccionar.
+
+## 🔑 Autenticación del panel (NextAuth)
+
+- El panel operativo usa una combinación de NextAuth (sesiones JWT) y la API `/api/authentication/*`. El endpoint `POST /api/authentication/login` emite:
+  - Cookie `auth_token` (HttpOnly, `SameSite` determinado por `AUTH_COOKIE_SECURE`) con un JWT firmado por `JWT_SECRET`. Su TTL se controla mediante `AUTH_ACCESS_TOKEN_TTL_SECONDS` (default 3600 s).
+  - Refresh token persistente que se guarda hasheado (SHA-256) en la tabla `UserSession`. Su caducidad se controla con `AUTH_REFRESH_TOKEN_TTL_DAYS` (default 7 días).
+  - Campo `refreshToken` en la respuesta JSON para que NextAuth pueda guardarlo en el JWT interno y refrescar el access token sin intervención del usuario.
+- `/api/authentication/refresh` valida que el refresh token exista, no esté revocado y que el usuario siga activo. Si pasa todas las validaciones, invalida la fila previa (`revocationReason="rotated"`) y emite un nuevo par access/refresh token.
+- `/api/authentication/logout` requiere autenticación (bearer o cookie) y acepta opcionalmente el refresh token en el body. Si se provee, revoca únicamente esa sesión; de lo contrario revoca todas las sesiones activas del usuario.
+- NextAuth usa `AUTH_SECRET` para firmar su propio `session-token`; este token **no** otorga acceso en la API, pero ayuda a mantener la sesión del lado de la UI. Mantén `AUTH_COOKIE_SECURE="true"` en producción para forzar `SameSite=Strict`/`Secure` y evita fugas a subdominios inseguros.
+- Runbook después de cambios en autenticación:
+  1. En local o staging, haz login con `pnpm --filter @brisa/web dev` y verifica que aparecen dos cookies: `auth_token` (HttpOnly) y `__Secure-authjs.session-token` (si `AUTH_COOKIE_SECURE=true`). Sus expiraciones deben coincidir con `expiresAt`/`refreshExpiresAt` en la respuesta JSON.
+  2. Abre `prisma studio` (`pnpm --filter @brisa/api prisma studio`) y confirma que se crea un registro en `UserSession` con `revokedAt=null`.
+  3. Invoca `POST /api/authentication/refresh` con el `refreshToken` recibido y comprueba que genera un nuevo par de tokens y marca la sesión previa con `revocationReason="rotated"`.
+  4. Invoca `POST /api/authentication/logout` con header `Authorization: Bearer <token>` y el `refreshToken` en el body; confirma que la respuesta es `200` y que toda fila correspondiente tiene `revokedAt` poblado.
+  5. Si necesitas limpiar el estado de rate limiting durante QA/E2E, habilita `ENABLE_TEST_UTILS=true` y usa `POST /api/test-utils/rate-limiter/reset` (requiere token de admin) para reiniciar los contadores.
 
 ## 📣 Sistema de notificaciones operativas
 
