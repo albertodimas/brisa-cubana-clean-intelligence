@@ -37,6 +37,14 @@ export type CalendarData = {
   };
 };
 
+export type CalendarDataMeta = {
+  cacheHit: boolean;
+  cacheMissReason?: string | null;
+  cachedAt?: string | null;
+  cacheExpiresAt?: string | null;
+  durationMs?: number | null;
+};
+
 type UseCalendarOptions = {
   from: Date;
   to: Date;
@@ -49,6 +57,7 @@ type UseCalendarOptions = {
 
 export function useCalendar(options: UseCalendarOptions) {
   const [data, setData] = useState<CalendarData | null>(null);
+  const [meta, setMeta] = useState<CalendarDataMeta | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,9 +95,11 @@ export function useCalendar(options: UseCalendarOptions) {
 
       const result = await response.json();
       setData(result.data);
+      setMeta(result.meta ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
       console.error("Error fetching calendar:", err);
+      setMeta(null);
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +119,7 @@ export function useCalendar(options: UseCalendarOptions) {
 
   return {
     data,
+    meta,
     isLoading,
     error,
     refresh: fetchCalendar,

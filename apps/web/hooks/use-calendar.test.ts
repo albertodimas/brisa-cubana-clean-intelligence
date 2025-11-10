@@ -84,6 +84,7 @@ describe("useCalendar", () => {
 
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeNull();
+    expect(result.current.meta).toBeNull();
     // isLoading will become true during effect, so we don't assert its initial value
   });
 
@@ -91,7 +92,14 @@ describe("useCalendar", () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
-        json: async () => ({ data: mockCalendarData }),
+        json: async () => ({
+          data: mockCalendarData,
+          meta: {
+            cacheHit: false,
+            cacheMissReason: "disabled",
+            durationMs: 123,
+          },
+        }),
       } as Response),
     );
 
@@ -108,6 +116,45 @@ describe("useCalendar", () => {
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
+    expect(result.current.meta).toEqual({
+      cacheHit: false,
+      cacheMissReason: "disabled",
+      durationMs: 123,
+    });
+  });
+
+  it("expone metadatos de cache cuando la API los envía", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: async () => ({
+          data: mockCalendarData,
+          meta: {
+            cacheHit: true,
+            cachedAt: "2025-11-15T10:00:00.000Z",
+            cacheExpiresAt: "2025-11-15T10:01:00.000Z",
+            durationMs: 45,
+          },
+        }),
+      } as Response),
+    );
+
+    const { result } = renderHook(() =>
+      useCalendar({
+        from: new Date("2025-11-15"),
+        to: new Date("2025-11-16"),
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.meta?.cacheHit).toBe(true);
+    });
+    expect(result.current.meta).toMatchObject({
+      cacheHit: true,
+      cachedAt: "2025-11-15T10:00:00.000Z",
+      cacheExpiresAt: "2025-11-15T10:01:00.000Z",
+      durationMs: 45,
+    });
   });
 
   it("construye URL con parámetros de fecha", async () => {

@@ -68,6 +68,19 @@ export type QaHighlight = {
   icon: typeof SparklesIcon;
 };
 
+export type CaseStudy = {
+  id: string;
+  client: string;
+  vertical: string;
+  units: string;
+  challenge: string;
+  resultSummary: string;
+  impact: Array<{ label: string; value: string; description: string }>;
+  quote: string;
+  spokesperson: string;
+  spokespersonRole: string;
+};
+
 export type ServiceComparison = {
   id: PricingTier["id"];
   name: string;
@@ -381,5 +394,180 @@ export const operationsMockups: OperationsMockup[] = [
       "Matriz de servicios con inventario RFID, KPIs por propiedad y mantenimiento preventivo.",
     src: "/assets/mockups/16-9/portal-services-1920w.webp",
     placeholder: "/assets/mockups/16-9/portal-services-1280w.webp",
+  },
+];
+
+const DEFAULT_BLUR_DATA_URL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
+
+export type BeforeAfterScenario = {
+  id: string;
+  label: string;
+  title: string;
+  description: string;
+  highlights: string[];
+  before: { src: string; alt: string; blurDataURL?: string };
+  after: { src: string; alt: string; blurDataURL?: string };
+};
+
+export const beforeAfterScenarios: BeforeAfterScenario[] = [
+  {
+    id: "kitchen",
+    label: "Cocina",
+    title: "Deep Clean + staging premium",
+    description:
+      "Desengrasado industrial, reemplazo de amenities y staging con utilería para fotografías profesionales.",
+    highlights: [
+      "Desinfección de electrodomésticos + acero inoxidable sin huellas",
+      "Reposición de kits de bienvenida y amenities de barra",
+    ],
+    before: {
+      src: "/branding/kitchen-before.webp",
+      alt: "Cocina antes del servicio de limpieza profunda Brisa Cubana",
+      blurDataURL: DEFAULT_BLUR_DATA_URL,
+    },
+    after: {
+      src: "/branding/kitchen-after.webp",
+      alt: "Cocina impecable lista para huéspedes después del servicio Brisa Cubana",
+      blurDataURL: DEFAULT_BLUR_DATA_URL,
+    },
+  },
+  {
+    id: "bathroom",
+    label: "Baño",
+    title: "Hotel readiness en menos de 50 minutos",
+    description:
+      "Remoción de depósitos minerales, cristales pulidos y textiles hoteleros plegados con estándares cinco estrellas.",
+    highlights: [
+      "Sellado express de cristal y grifería",
+      "Reposición de amenities premium y toallas con folding hotelero",
+    ],
+    before: {
+      src: "/branding/bathroom-before.webp",
+      alt: "Baño antes de la intervención profunda",
+      blurDataURL: DEFAULT_BLUR_DATA_URL,
+    },
+    after: {
+      src: "/branding/bathroom-after.webp",
+      alt: "Baño premium después del servicio de limpieza Brisa Cubana",
+      blurDataURL: DEFAULT_BLUR_DATA_URL,
+    },
+  },
+  {
+    id: "bedroom",
+    label: "Dormitorio",
+    title: "Staging para foto + inspección QA",
+    description:
+      "Ropa de cama luxury, planchado in situ y ajuste de iluminación para elevar el CTR en OTAs.",
+    highlights: [
+      "Revisión RFID de blancos y almohadas",
+      "Checklist Enhanced Cleaning con firma digital",
+    ],
+    before: {
+      src: "/branding/bedroom-before.webp",
+      alt: "Dormitorio antes del servicio de staging Brisa Cubana",
+      blurDataURL: DEFAULT_BLUR_DATA_URL,
+    },
+    after: {
+      src: "/branding/bedroom-after.webp",
+      alt: "Dormitorio listo para fotografías profesionales después del servicio",
+      blurDataURL: DEFAULT_BLUR_DATA_URL,
+    },
+  },
+];
+
+export const caseStudies: CaseStudy[] = [
+  {
+    id: "brickell-portfolio",
+    client: "Miami Premium Rentals",
+    vertical: "Property Management · Brickell / Edgewater",
+    units: "12 unidades STR",
+    challenge:
+      "Respuestas irregulares de proveedores locales y 4.2 ★ en limpieza durante temporada alta.",
+    resultSummary:
+      "En 90 días estabilizamos el pipeline de turnovers same-day, incrementamos los ratings de limpieza a 4.95 ★ y eliminamos por completo los reclamos por inventario.",
+    impact: [
+      {
+        label: "SLA cumplido",
+        value: "97 %",
+        description: "turnos entregados en <120 min durante Q3",
+      },
+      {
+        label: "Tickets por restock",
+        value: "-83 %",
+        description: "gracias a inventario RFID y alertas automáticas",
+      },
+      {
+        label: "CSAT anfitriones",
+        value: "4.9/5",
+        description: "evaluaciones internas después de cada turno",
+      },
+    ],
+    quote:
+      "Nunca había tenido tanta visibilidad. Los reportes fotográficos llegan antes que mi staff llegue al edificio, y el portal me permite reagendar sin chats interminables.",
+    spokesperson: "María González Castro",
+    spokespersonRole: "Property Manager · Miami Premium Rentals",
+  },
+  {
+    id: "wynwood-superhost",
+    client: "Roberto Martínez",
+    vertical: "Airbnb Superhost · Wynwood / Midtown",
+    units: "8 lofts creativos",
+    challenge:
+      "Expansión acelerada con cleaning scores cayendo a 4.6 y huéspedes solicitando partial refunds.",
+    resultSummary:
+      "Implementamos deep cleans bimestrales + checklist personalizado y redujimos los reclamos a cero; los reviews de limpieza ahora promedian 4.96.",
+    impact: [
+      {
+        label: "Cleaning rating",
+        value: "4.96 ★",
+        description: "promedio rolling 6 semanas en Airbnb",
+      },
+      {
+        label: "Tiempo de respuesta",
+        value: "28 min",
+        description: "para reagendos vía portal + WhatsApp Business",
+      },
+      {
+        label: "Horas internas liberadas",
+        value: "12 h/sem",
+        description: "al delegar QA y reposiciones",
+      },
+    ],
+    quote:
+      "Brisa se volvió mi extensión operativa. Si un huésped pide early check-in, en segundos ya están coordinados y me comparten fotos before/after. Es literalmente plug & play.",
+    spokesperson: "Roberto Martínez",
+    spokespersonRole: "Airbnb Superhost",
+  },
+  {
+    id: "luxury-beach",
+    client: "Coastal Luxury Properties",
+    vertical: "Portfolio de lujo · Miami Beach / Sunny Isles",
+    units: "6 penthouses + 4 villas",
+    challenge:
+      "Clientes UHNW exigiendo evidencia diaria y protocolos de mantenimiento preventivo documentados.",
+    resultSummary:
+      "Digitalizamos los checklists con firmas duales, sumamos inspecciones QA sorpresa y habilitamos reportes PDF con branding del cliente para compartir con los owners.",
+    impact: [
+      {
+        label: "Incidencias críticas",
+        value: "0",
+        description: "durante 7 meses consecutivos",
+      },
+      {
+        label: "Tiempo de reporte",
+        value: "2h 12m",
+        description: "promedio desde cierre del turno hasta PDF final",
+      },
+      {
+        label: "NPS owners",
+        value: "+62",
+        description: "según encuesta interna Coastal Luxury",
+      },
+    ],
+    quote:
+      "Por primera vez tenemos trazabilidad completa: checklist firmado, fotos, inventario y seguimiento de incidencias en un solo lugar. Nuestros owners están fascinados.",
+    spokesperson: "Ana Sofía Ramírez",
+    spokespersonRole: "Portfolio Manager · Coastal Luxury Properties",
   },
 ];
