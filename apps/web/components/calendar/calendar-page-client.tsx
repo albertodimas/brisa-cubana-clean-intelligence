@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CalendarView } from "./calendar-view";
 import { CalendarWeekView } from "./calendar-week-view";
 import { CalendarFilters } from "./calendar-filters";
@@ -16,6 +16,28 @@ type CalendarPageClientProps = {
 };
 
 type ViewMode = "month" | "week";
+
+const VIEW_MODE_STORAGE_KEY = "brisa-calendar-view-mode";
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 1023px)";
+
+const getStoredViewMode = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+  return stored === "month" || stored === "week" ? stored : null;
+};
+
+const getInitialViewMode = (): ViewMode => {
+  if (typeof window === "undefined") {
+    return "month";
+  }
+  const stored = getStoredViewMode();
+  if (stored) {
+    return stored;
+  }
+  return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches ? "week" : "month";
+};
 
 const waitForNextFrame = () =>
   new Promise<void>((resolve) => {
@@ -34,7 +56,12 @@ export function CalendarPageClient({
   const [selectedBooking, setSelectedBooking] =
     useState<CalendarBooking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("month");
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    getInitialViewMode(),
+  );
+  const [hasUserViewPreference, setHasUserViewPreference] = useState<boolean>(
+    () => Boolean(getStoredViewMode()),
+  );
   const [filters, setFilters] = useState<{
     status?: string;
     propertyId?: string;
@@ -81,6 +108,42 @@ export function CalendarPageClient({
       statusClearRef.current = null;
     }, minimumVisibleWindowMs);
   };
+
+  const setViewModeWithSource = useCallback(
+    (mode: ViewMode, source: "user" | "auto" = "user") => {
+      setViewMode((current) => {
+        if (current === mode) {
+          return current;
+        }
+        return mode;
+      });
+      if (source === "user" && typeof window !== "undefined") {
+        window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+        setHasUserViewPreference(true);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined" || hasUserViewPreference) {
+      return;
+    }
+    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT_QUERY);
+
+    const applyPreferredMode = (matches: boolean) => {
+      setViewModeWithSource(matches ? "week" : "month", "auto");
+    };
+
+    applyPreferredMode(mediaQuery.matches);
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      applyPreferredMode(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [hasUserViewPreference, setViewModeWithSource]);
 
   useEffect(() => {
     return () => {
@@ -265,7 +328,7 @@ export function CalendarPageClient({
           aria-label="Selector de vista del calendario"
         >
           <button
-            onClick={() => setViewMode("month")}
+            onClick={() => setViewModeWithSource("month")}
             aria-label="Vista mensual"
             aria-pressed={viewMode === "month" ? "true" : "false"}
             className={`flex flex-1 sm:flex-initial items-center justify-center gap-1.5 sm:gap-2 rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
@@ -290,7 +353,7 @@ export function CalendarPageClient({
             <span>Mes</span>
           </button>
           <button
-            onClick={() => setViewMode("week")}
+            onClick={() => setViewModeWithSource("week")}
             aria-label="Vista semanal"
             aria-pressed={viewMode === "week" ? "true" : "false"}
             className={`flex flex-1 sm:flex-initial items-center justify-center gap-1.5 sm:gap-2 rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
