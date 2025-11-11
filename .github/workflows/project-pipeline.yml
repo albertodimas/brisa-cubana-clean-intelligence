@@ -354,7 +354,7 @@ jobs:
 
       - name: Upload Playwright report
         if: ${{ inputs.run-e2e-suite != 'none' && inputs.upload-playwright-report && (!inputs.upload-playwright-only-on-failure || failure()) }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ inputs.playwright-report-name }}
           path: playwright-report/
@@ -363,7 +363,7 @@ jobs:
 
       - name: Upload Playwright test results
         if: ${{ inputs.run-e2e-suite != 'none' && inputs.upload-playwright-report && (!inputs.upload-playwright-only-on-failure || failure()) }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-results
           path: test-results/

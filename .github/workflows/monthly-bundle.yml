@@ -46,14 +46,14 @@ jobs:
           tar -czf bundle-analyze.tar.gz -C apps/web/.next analyze
 
       - name: Upload analyzer artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: monthly-bundle-analyze
           path: bundle-analyze.tar.gz
           retention-days: 30
 
       - name: Upload bundle summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: monthly-bundle-summary
           path: bundle-summary.json
