@@ -63,6 +63,8 @@ export async function POST(request: Request) {
     }
   } else {
     nextResponse.cookies.delete("portal_token");
+    nextResponse.cookies.delete("portal_refresh_token");
+    nextResponse.cookies.delete("portal_customer_id");
   }
 
   return nextResponse;

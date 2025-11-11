@@ -1,17 +1,8 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasPortalAccess } from "@/lib/auth/session-token";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
-const isProduction = process.env.NODE_ENV === "production";
-
 export async function POST(request: Request) {
-  const cookieStore = cookies();
-  if (!(await hasPortalAccess(cookieStore))) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -20,7 +11,7 @@ export async function POST(request: Request) {
     headers.cookie = cookieHeader;
   }
 
-  const upstreamResponse = await fetch(`${API_URL}/api/portal/auth/logout`, {
+  const upstreamResponse = await fetch(`${API_URL}/api/portal/auth/refresh`, {
     method: "POST",
     headers,
     credentials: "include",
@@ -47,22 +38,10 @@ export async function POST(request: Request) {
     setCookieHeaders.forEach((cookie) => {
       response.headers.append("set-cookie", cookie);
     });
-  } else {
+  } else if (!upstreamResponse.ok) {
     response.cookies.delete("portal_token");
     response.cookies.delete("portal_refresh_token");
     response.cookies.delete("portal_customer_id");
-  }
-
-  if (upstreamResponse.ok) {
-    response.cookies.set({
-      name: "portal_logout_ts",
-      value: String(Date.now()),
-      httpOnly: false,
-      secure: isProduction,
-      sameSite: "lax",
-      maxAge: 5,
-      path: "/",
-    });
   }
 
   return response;

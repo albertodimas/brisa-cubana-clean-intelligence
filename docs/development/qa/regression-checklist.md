@@ -63,6 +63,7 @@ Cobertura automática actual: <!-- PLAYWRIGHT_CRITICAL_COUNT -->50<!-- /PLAYWRIG
 
 - [ ] Flujo de enlace mágico completo: solicitud → correo/debug token → confirmación → dashboard.
 - [ ] Dashboard lista próximas reservas, historial y muestra barra de expiración.
+- [ ] Botón “Extender sesión” ejecuta `/api/portal/refresh`, rota `portal_token`/`portal_refresh_token` y mantiene al cliente autenticado sin pedir nuevo enlace.
 - [ ] Cancelar y reprogramar funcionan y generan notificaciones en panel.
 - [ ] Botón “Descargar comprobante” descarga PDF con datos correctos (código, servicio, propiedad, monto, badge de estado) usando la ruta `app/api/portal/bookings/[bookingId]/pdf`.
 - [ ] Rate limit PDF (10/min) devuelve 429 y encabezados `X-RateLimit-*` cuando se supera, y se recupera tras 60 s.
