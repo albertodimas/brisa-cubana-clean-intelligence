@@ -193,9 +193,13 @@ test.describe.serial("Calendario - Drag & Drop", () => {
     );
     await ensureBookingVisible(bookingButton);
 
-    // Get bounding box for manual drag
-    const sourceBox = await bookingButton.boundingBox();
-    expect(sourceBox).not.toBeNull();
+    // Simulate drag start to verify visual feedback classes
+    await bookingButton.dispatchEvent("dragstart");
+    await expect(bookingButton).toHaveClass(/cursor-grabbing/);
+
+    // Drag end should remove the visual indicator
+    await bookingButton.dispatchEvent("dragend");
+    await expect(bookingButton).not.toHaveClass(/cursor-grabbing/);
   });
 
   test("muestra indicador en celda de destino durante hover @smoke", async ({

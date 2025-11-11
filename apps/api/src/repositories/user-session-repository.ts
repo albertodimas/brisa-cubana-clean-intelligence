@@ -1,34 +1,32 @@
-import type { PrismaClient, PortalSession } from "@prisma/client";
+import type { PrismaClient, UserSession } from "@prisma/client";
 
-export type PortalSessionCreateInput = {
-  email: string;
+export type UserSessionCreateInput = {
+  userId: string;
   tokenHash: string;
   expiresAt: Date;
   userAgent?: string | null;
   ipAddress?: string | null;
 };
 
-export class PortalSessionRepository {
+export class UserSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  create(data: PortalSessionCreateInput): Promise<PortalSession> {
-    return this.prisma.portalSession.create({ data });
+  create(data: UserSessionCreateInput): Promise<UserSession> {
+    return this.prisma.userSession.create({ data });
   }
 
-  findValidByTokenHash(tokenHash: string): Promise<PortalSession | null> {
-    return this.prisma.portalSession.findFirst({
+  findValidByTokenHash(tokenHash: string): Promise<UserSession | null> {
+    return this.prisma.userSession.findFirst({
       where: {
         tokenHash,
         revokedAt: null,
-        expiresAt: {
-          gt: new Date(),
-        },
+        expiresAt: { gt: new Date() },
       },
     });
   }
 
   async revokeById(id: string, reason?: string): Promise<void> {
-    await this.prisma.portalSession.update({
+    await this.prisma.userSession.update({
       where: { id },
       data: {
         revokedAt: new Date(),
@@ -38,7 +36,7 @@ export class PortalSessionRepository {
   }
 
   async revokeByTokenHash(tokenHash: string, reason?: string): Promise<void> {
-    await this.prisma.portalSession.updateMany({
+    await this.prisma.userSession.updateMany({
       where: { tokenHash, revokedAt: null },
       data: {
         revokedAt: new Date(),
@@ -47,9 +45,9 @@ export class PortalSessionRepository {
     });
   }
 
-  async revokeAllForEmail(email: string, reason?: string): Promise<void> {
-    await this.prisma.portalSession.updateMany({
-      where: { email, revokedAt: null },
+  async revokeAllForUser(userId: string, reason?: string): Promise<void> {
+    await this.prisma.userSession.updateMany({
+      where: { userId, revokedAt: null },
       data: {
         revokedAt: new Date(),
         revocationReason: reason ?? "manual-revocation",

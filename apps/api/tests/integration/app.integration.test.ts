@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import OpenAPIResponseValidator from "openapi-response-validator";
 import { openApiSpec } from "../../src/lib/openapi-spec.js";
+import { resetRateLimiterStoresForTests } from "../../src/lib/rate-limiter.js";
 
 process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
 process.env.JWT_SECRET = "test-secret";
@@ -12,11 +13,76 @@ let bookingsFixture: any[] = [];
 let usersFixture: any[] = [];
 let propertiesFixture: any[] = [];
 let notificationsFixture: any[] = [];
+let userSessionsFixture: any[] = [];
 
 const makeCuid = (index: number) => `c${index.toString(36).padStart(24, "0")}`;
 
 const mockPrisma = {
   $queryRaw: vi.fn().mockResolvedValue([{ ok: 1 }]),
+  userSession: {
+    create: vi.fn().mockImplementation(async ({ data }: any) => {
+      const record = {
+        id: makeCuid(userSessionsFixture.length + 1),
+        userId: data.userId,
+        tokenHash: data.tokenHash,
+        expiresAt: data.expiresAt,
+        userAgent: data.userAgent ?? null,
+        ipAddress: data.ipAddress ?? null,
+        createdAt: new Date(),
+        revokedAt: null,
+        revocationReason: null,
+      };
+      userSessionsFixture.push(record);
+      return record;
+    }),
+    findFirst: vi.fn().mockImplementation(
+      async ({ where }: { where?: any }) =>
+        userSessionsFixture.find((session) => {
+          if (where?.tokenHash && session.tokenHash !== where.tokenHash) {
+            return false;
+          }
+          if (where?.revokedAt === null && session.revokedAt !== null) {
+            return false;
+          }
+          if (where?.expiresAt?.gt) {
+            if (!(session.expiresAt > where.expiresAt.gt)) {
+              return false;
+            }
+          }
+          return true;
+        }) ?? null,
+    ),
+    update: vi.fn().mockImplementation(async ({ where, data }: any) => {
+      const target = userSessionsFixture.find(
+        (session) => session.id === where.id,
+      );
+      if (!target) {
+        throw new Error("Session not found");
+      }
+      Object.assign(target, data);
+      return target;
+    }),
+    updateMany: vi.fn().mockImplementation(async ({ where, data }: any) => {
+      let count = 0;
+      userSessionsFixture.forEach((session) => {
+        const matchesTokenHash =
+          typeof where?.tokenHash === "string"
+            ? session.tokenHash === where.tokenHash
+            : true;
+        const matchesUserId =
+          typeof where?.userId === "string"
+            ? session.userId === where.userId
+            : true;
+        const matchesRevoked =
+          where?.revokedAt === null ? session.revokedAt === null : true;
+        if (matchesTokenHash && matchesUserId && matchesRevoked) {
+          Object.assign(session, data);
+          count += 1;
+        }
+      });
+      return { count };
+    }),
+  },
   service: {
     findMany: vi.fn().mockImplementation(
       async ({
@@ -799,7 +865,8 @@ const coordinatorHeaders = {
 };
 
 describe("app", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await resetRateLimiterStoresForTests();
     vi.clearAllMocks();
     servicesFixture = [
       {
@@ -993,6 +1060,7 @@ describe("app", () => {
         createdAt: new Date("2025-10-13T08:00:00Z"),
       },
     ];
+    userSessionsFixture = [];
     mockPrisma.$queryRaw.mockClear();
     mockCompare.mockResolvedValue(true);
   });

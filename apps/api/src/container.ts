@@ -6,6 +6,7 @@ import { UserRepository } from "./repositories/user-repository.js";
 import { CustomerRepository } from "./repositories/customer-repository.js";
 import { NotificationRepository } from "./repositories/notification-repository.js";
 import { MagicLinkTokenRepository } from "./repositories/magic-link-token-repository.js";
+import { UserSessionRepository } from "./repositories/user-session-repository.js";
 import { PortalSessionRepository } from "./repositories/portal-session-repository.js";
 import { LeadRepository } from "./repositories/lead-repository.js";
 import { StripeWebhookEventRepository } from "./repositories/stripe-webhook-event-repository.js";
@@ -82,6 +83,7 @@ export const ServiceKeys = {
   CUSTOMER_REPOSITORY: "customerRepository",
   NOTIFICATION_REPOSITORY: "notificationRepository",
   MAGIC_LINK_TOKEN_REPOSITORY: "magicLinkTokenRepository",
+  USER_SESSION_REPOSITORY: "userSessionRepository",
   PORTAL_SESSION_REPOSITORY: "portalSessionRepository",
   LEAD_REPOSITORY: "leadRepository",
   STRIPE_WEBHOOK_EVENT_REPOSITORY: "stripeWebhookEventRepository",
@@ -134,6 +136,11 @@ export function initializeContainer(): void {
   container.register(
     ServiceKeys.MAGIC_LINK_TOKEN_REPOSITORY,
     () => new MagicLinkTokenRepository(prisma),
+  );
+
+  container.register(
+    ServiceKeys.USER_SESSION_REPOSITORY,
+    () => new UserSessionRepository(prisma),
   );
 
   container.register(
@@ -199,6 +206,12 @@ export function getNotificationRepository(): NotificationRepository {
 export function getMagicLinkTokenRepository(): MagicLinkTokenRepository {
   return container.resolve<MagicLinkTokenRepository>(
     ServiceKeys.MAGIC_LINK_TOKEN_REPOSITORY,
+  );
+}
+
+export function getUserSessionRepository(): UserSessionRepository {
+  return container.resolve<UserSessionRepository>(
+    ServiceKeys.USER_SESSION_REPOSITORY,
   );
 }
 

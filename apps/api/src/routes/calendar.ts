@@ -46,6 +46,8 @@ type CalendarCacheEntry = {
   cachedAt: number;
 };
 
+type CacheMissReason = "not_found" | "expired" | "disabled";
+
 const calendarCacheTtlMs = Math.max(
   0,
   Number(process.env.CALENDAR_CACHE_TTL_MS ?? "60000"),
@@ -142,23 +144,28 @@ router.get(
       assignedStaffId,
     });
 
-    const cached =
-      calendarCacheTtlMs > 0 ? getCachedResponse(cacheKey) : undefined;
-    if (cached) {
-      const durationMs = Date.now() - startedAt;
-      calendarLogger.debug({
-        event: "calendar_cache_hit",
-        cacheHit: true,
-        durationMs,
-      });
-      return c.json({
-        data: cached.payload,
-        meta: {
+    let cacheMissReason: CacheMissReason = "disabled";
+
+    if (calendarCacheTtlMs > 0) {
+      const cacheLookup = getCachedResponse(cacheKey);
+      if (cacheLookup.type === "hit") {
+        const durationMs = Date.now() - startedAt;
+        calendarLogger.debug({
+          event: "calendar_cache_hit",
           cacheHit: true,
-          cachedAt: new Date(cached.cachedAt).toISOString(),
           durationMs,
-        },
-      });
+        });
+        return c.json({
+          data: cacheLookup.entry.payload,
+          meta: {
+            cacheHit: true,
+            cachedAt: new Date(cacheLookup.entry.cachedAt).toISOString(),
+            cacheExpiresAt: new Date(cacheLookup.entry.expiresAt).toISOString(),
+            durationMs,
+          },
+        });
+      }
+      cacheMissReason = cacheLookup.reason;
     }
 
     // Fetch all bookings in range (high limit for calendar view)
@@ -231,10 +238,11 @@ router.get(
     };
 
     if (calendarCacheTtlMs > 0) {
+      const cachedAt = Date.now();
       calendarCache.set(cacheKey, {
-        expiresAt: Date.now() + calendarCacheTtlMs,
+        expiresAt: cachedAt + calendarCacheTtlMs,
         payload,
-        cachedAt: Date.now(),
+        cachedAt,
       });
     }
 
@@ -243,6 +251,7 @@ router.get(
       event: "calendar_query",
       durationMs,
       cacheHit: false,
+      cacheMissReason,
       filters: {
         status,
         propertyId,
@@ -256,6 +265,7 @@ router.get(
       data: payload,
       meta: {
         cacheHit: false,
+        cacheMissReason,
         durationMs,
       },
     });
@@ -371,16 +381,20 @@ function buildCacheKey(filters: Record<string, string | undefined>) {
   return JSON.stringify(entries);
 }
 
-function getCachedResponse(key: string) {
+type CacheLookupResult =
+  | { type: "hit"; entry: CalendarCacheEntry }
+  | { type: "miss"; reason: Exclude<CacheMissReason, "disabled"> };
+
+function getCachedResponse(key: string): CacheLookupResult {
   const entry = calendarCache.get(key);
   if (!entry) {
-    return undefined;
+    return { type: "miss", reason: "not_found" };
   }
   if (entry.expiresAt < Date.now()) {
     calendarCache.delete(key);
-    return undefined;
+    return { type: "miss", reason: "expired" };
   }
-  return entry;
+  return { type: "hit", entry };
 }
 
 function transformBookingForCalendar(

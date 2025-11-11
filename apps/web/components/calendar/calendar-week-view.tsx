@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useCalendar, type CalendarBooking } from "@/hooks/use-calendar";
+import {
+  useCalendar,
+  type CalendarBooking,
+  type CalendarDataMeta,
+} from "@/hooks/use-calendar";
 import { useDragDrop } from "@/hooks/use-drag-drop";
 import { Skeleton } from "../ui/skeleton";
 
@@ -13,6 +17,7 @@ type CalendarWeekViewProps = {
     originalScheduledAt: string,
   ) => void;
   onViewModePersist?: () => void;
+  onDataLoaded?: (meta: CalendarDataMeta) => void;
   initialDate?: Date;
   filters?: {
     status?: string;
@@ -77,6 +82,7 @@ export function CalendarWeekView({
   onBookingClick,
   onBookingReschedule,
   onViewModePersist,
+  onDataLoaded,
   initialDate = new Date(),
   filters,
   refreshToken = 0,
@@ -112,12 +118,18 @@ export function CalendarWeekView({
     };
   }, [currentWeekStart]);
 
-  const { data, isLoading, error } = useCalendar({
+  const { data, meta, isLoading, error } = useCalendar({
     from,
     to,
     ...filters,
     refreshToken,
   });
+
+  useEffect(() => {
+    if (meta) {
+      onDataLoaded?.(meta);
+    }
+  }, [meta, onDataLoaded]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

@@ -77,6 +77,7 @@ model User {
   bookings      Booking[]      @relation("BookingCustomer")
   notifications Notification[]
   assignedBookings Booking[] @relation("BookingAssignedStaff")
+  userSessions UserSession[]
 
   @@index([deletedAt])
 }
@@ -180,6 +181,39 @@ model MagicLinkToken {
 
   @@index([email, expiresAt])
   @@index([consumedAt])
+}
+
+model UserSession {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  tokenHash        String   @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revocationReason String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model PortalSession {
+  id               String   @id @default(cuid())
+  email            String
+  tokenHash        String   @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revocationReason String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([email, revokedAt])
+  @@index([expiresAt])
 }
 
 model Lead {

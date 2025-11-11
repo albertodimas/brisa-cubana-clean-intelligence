@@ -15,7 +15,13 @@ type ResettableStore = Store & {
   resetAll?: () => Promise<void>;
 };
 
-const registeredStores: ResettableStore[] = [];
+const globalScope = globalThis as {
+  __BRISA_RATE_LIMIT_STORES__?: ResettableStore[];
+};
+
+const registeredStores: ResettableStore[] =
+  globalScope.__BRISA_RATE_LIMIT_STORES__ ??
+  (globalScope.__BRISA_RATE_LIMIT_STORES__ = []);
 
 class FixedWindowMemoryStore implements Store {
   private windowMs = 60_000;
@@ -349,6 +355,24 @@ function extractClientIdentifier(c: Context, identifier?: string): string {
   return "anonymous";
 }
 
+function registerRateLimiterStore(store: ResettableStore): void {
+  registeredStores.push(store);
+}
+
+export async function resetRateLimiterStoresForTests(): Promise<void> {
+  if (registeredStores.length === 0) {
+    return;
+  }
+
+  await Promise.all(
+    registeredStores.map((store) =>
+      typeof store.resetAll === "function"
+        ? store.resetAll()
+        : Promise.resolve(),
+    ),
+  );
+}
+
 export function createRateLimiter({
   limit,
   windowMs,
@@ -376,7 +400,7 @@ export function createRateLimiter({
   const store: ResettableStore = useRedis
     ? new FixedWindowRedisStore()
     : new FixedWindowMemoryStore();
-  registeredStores.push(store);
+  registerRateLimiterStore(store);
 
   if (useRedis) {
     rateLimitLogger.info(
@@ -427,18 +451,4 @@ export function createRateLimiter({
 
 export function defaultRateLimitKey(c: Context): string {
   return extractClientIdentifier(c);
-}
-
-export async function resetRateLimiterStoresForTests(): Promise<void> {
-  if (registeredStores.length === 0) {
-    return;
-  }
-
-  await Promise.all(
-    registeredStores.map((store) =>
-      typeof store.resetAll === "function"
-        ? store.resetAll()
-        : Promise.resolve(),
-    ),
-  );
 }
