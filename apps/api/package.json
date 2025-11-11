@@ -34,8 +34,8 @@
   "dependencies": {
     "@hono/node-server": "^1.19.6",
     "@hono/swagger-ui": "^0.5.2",
-    "@prisma/client": "6.18.0",
-    "@scalar/hono-api-reference": "^0.9.23",
+    "@prisma/client": "6.19.0",
+    "@scalar/hono-api-reference": "^0.9.24",
     "@sentry/node": "^10.24.0",
     "@sentry/profiling-node": "^10.24.0",
     "bcryptjs": "^3.0.3",
@@ -48,7 +48,7 @@
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
     "pino-pretty": "^13.1.2",
-    "stripe": "^19.2.1",
+    "stripe": "^19.3.0",
     "twilio": "^5.10.4",
     "zod": "^4.1.12"
   },
