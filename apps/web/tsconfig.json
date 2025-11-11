@@ -10,7 +10,7 @@
       "react",
       "next-auth",
       "vitest/globals",
-      "@testing-library/jest-dom/vitest"
+      "@testing-library/jest-dom"
     ],
     "paths": {
       "@/*": ["./*"]
