@@ -7,6 +7,7 @@ import {
   ResponsiveContainer,
   Legend,
   Tooltip,
+  type PieLabelRenderProps,
 } from "recharts";
 import type { DashboardStats } from "@/lib/api";
 
@@ -62,7 +63,17 @@ export function BookingsByStatusChart({ data }: BookingsByStatusChartProps) {
             cx="50%"
             cy="50%"
             labelLine={false}
-            label={({ percentage }) => `${percentage}%`}
+            label={({ payload, percent }: PieLabelRenderProps) => {
+              const derivedPercentage =
+                typeof (payload as (typeof chartData)[number] | undefined)
+                  ?.percentage === "number"
+                  ? (payload as (typeof chartData)[number] | undefined)
+                      ?.percentage
+                  : typeof percent === "number"
+                    ? Math.round(percent * 100)
+                    : 0;
+              return `${derivedPercentage}%`;
+            }}
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
