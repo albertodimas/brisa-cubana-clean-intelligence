@@ -47,12 +47,12 @@ export class PortalSessionRepository {
     });
   }
 
-  async revokeAllForEmail(email: string): Promise<void> {
+  async revokeAllForEmail(email: string, reason?: string): Promise<void> {
     await this.prisma.portalSession.updateMany({
       where: { email, revokedAt: null },
       data: {
         revokedAt: new Date(),
-        revocationReason: "manual-revocation",
+        revocationReason: reason ?? "manual-revocation",
       },
     });
   }

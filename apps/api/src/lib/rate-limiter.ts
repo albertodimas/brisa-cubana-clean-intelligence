@@ -397,7 +397,7 @@ export function createRateLimiter({
 
   // Usar Redis si REDIS_URL está configurado, sino usar MemoryStore
   const useRedis = Boolean(process.env.REDIS_URL);
-  const store = useRedis
+  const store: ResettableStore = useRedis
     ? new FixedWindowRedisStore()
     : new FixedWindowMemoryStore();
   registerRateLimiterStore(store);

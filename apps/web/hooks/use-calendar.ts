@@ -84,9 +84,12 @@ export function useCalendar(options: UseCalendarOptions) {
         params.append("assignedStaffId", options.assignedStaffId);
       }
 
-      const response = await fetch(`/api/calendar?${params.toString()}`, {
-        credentials: "include",
-      });
+      const response = await globalThis.fetch(
+        `/api/calendar?${params.toString()}`,
+        {
+          credentials: "include",
+        },
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -159,7 +162,7 @@ export function useAvailability(
           durationMin: durationMin.toString(),
         });
 
-        const response = await fetch(
+        const response = await globalThis.fetch(
           `/api/calendar/availability?${params.toString()}`,
           {
             credentials: "include",

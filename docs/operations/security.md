@@ -147,8 +147,10 @@ Configura alertas en Sentry/PostHog si detectas patrones de abuso (se recomienda
 ## ✉️ Enlaces mágicos (portal cliente)
 
 - Los tokens generados por `/api/portal/auth/request` se almacenan con hash SHA-256 y caducan en 15 minutos (configurable vía `MAGIC_LINK_TTL_MINUTES`).
-- El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite un JWT (`portalToken`) con scope `portal-client` válido por 1 hora, además de registrar un refresh token persistente.
-- La API adjunta automáticamente las cookies `portal_token` y `portal_refresh_token` (ambas HttpOnly) y `portal_customer_id` tras una verificación exitosa; la UI ya no debe intentar generarlas manualmente.
+- El endpoint `/api/portal/auth/verify` consume el token tras el primer uso y emite dos credenciales:
+  - `portal_token`: JWT con scope `portal-client`, firmado con `JWT_SECRET` y TTL configurable vía `PORTAL_ACCESS_TOKEN_TTL_SECONDS` (default 1 hora).
+  - `portal_refresh_token`: token aleatorio almacenado como hash en la tabla `PortalSession`; su vigencia depende de `PORTAL_REFRESH_TOKEN_TTL_DAYS` y se rota tanto en cada refresh como en logout.
+- La API adjunta automáticamente las cookies `portal_token`, `portal_refresh_token` (ambas HttpOnly) y `portal_customer_id` tras una verificación exitosa; la UI sólo debe propagarlas mediante los proxys `/app/api/portal/*`.
 - Endpoints de autoservicio `POST /api/portal/bookings/:id/cancel|reschedule` validan pertenencia del cliente, registran logs (`Portal booking cancellation/reschedule processed`) y limitan estados permitidos.
 - Configura el canal SMTP (`PORTAL_MAGIC_LINK_*`) para enviar correos reales desde producción. Actualmente se usa SendGrid (`smtp.sendgrid.net`, puerto 465 con `secure=true` y usuario `apikey`) con el dominio `brisacubanacleanintelligence.com` autenticado (DKIM + SPF).
 - El buzón `cliente@brisacubanacleanintelligence.com` se gestiona vía ImprovMX (ver `docs/operations/email-routing.md`) para recibir smoke tests del portal.
@@ -161,12 +163,13 @@ Configura alertas en Sentry/PostHog si detectas patrones de abuso (se recomienda
   - `PORTAL_MAGIC_LINK_BASE_URL`
 - Define `PORTAL_MAGIC_LINK_EXPOSE_DEBUG="false"` en producción para evitar que el API incluya el `debugToken` en la respuesta una vez que el envío por correo esté habilitado.
 - Asegura que `ENABLE_TEST_UTILS="false"` en producción y preview; este flag activa bypasses de seguridad (omisión de correo y exposición de tokens) pensados solo para entornos locales/CI.
-- El frontend confía en las cookies emitidas por la API (`portal_token` y `portal_refresh_token` HttpOnly + `portal_customer_id` pública). Sus expiraciones (`expiresAt`/`refreshExpiresAt`) deben coincidir con lo enviado por la API y tratarse como credenciales de sesión.
-- El endpoint `POST /api/portal/auth/logout` invalida la sesión actual (requiere token de portal) y debe invocarse desde la UI al cerrar sesión para limpiar cookies. Para extender sesiones sin reenviar enlaces existe `POST /api/portal/auth/refresh`, que rota ambos tokens.
+- El frontend confía en las cookies emitidas por la API (`portal_token`, `portal_refresh_token` y `portal_customer_id`). Sus expiraciones (`expiresAt`/`refreshExpiresAt`) deben coincidir con lo enviado por la API y tratarse como credenciales de sesión.
+- El endpoint `POST /api/portal/auth/logout` invalida la sesión actual (requiere token de portal) y debe invocarse desde la UI al cerrar sesión para limpiar cookies. `POST /api/portal/auth/refresh` (llamado mediante `app/api/portal/refresh/route.ts`) rota ambos tokens y crea una fila nueva en `PortalSession`.
 - Checklist manual tras cualquier cambio:
-  1. Verificar en DevTools (Application → Storage → Cookies) que `portal_token` y `portal_refresh_token` son HttpOnly y SameSite `Strict` en producción o `Lax` en local con HTTP.
+  1. Verificar en DevTools (Application → Storage → Cookies) que `portal_token` y `portal_refresh_token` son HttpOnly y `SameSite=Strict` en producción (o `Lax` en local sobre HTTP).
   2. Confirmar que los atributos `Expires` coinciden con `expiresAt`/`refreshExpiresAt` devueltos por la API.
-  3. Validar que tras `POST /api/portal/auth/logout` las tres cookies (`portal_token`, `portal_refresh_token`, `portal_customer_id`) se eliminan en el browser y en la respuesta HTTP.
+  3. Ejecutar `POST /api/portal/auth/refresh` y validar que las cookies se rotan y que la fila anterior en `PortalSession` queda con `revokedAt`/`revocationReason="rotated"`.
+  4. Validar que tras `POST /api/portal/auth/logout` las tres cookies (`portal_token`, `portal_refresh_token`, `portal_customer_id`) se eliminan en el browser y en la respuesta HTTP.
 - Las solicitudes de cancelación/reagendo desde el portal generan notificaciones `BOOKING_CANCELLED`/`BOOKING_RESCHEDULED` dirigidas a usuarios activos con rol `ADMIN` o `COORDINATOR`, para que operaciones pueda reaccionar.
 
 ## 🔑 Autenticación del panel (NextAuth)
