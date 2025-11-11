@@ -34,7 +34,7 @@ jobs:
 
       - name: Open/update tracking issue
         if: steps.versions.outputs.needs-update == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.VERCEL_CLI_WATCH_TOKEN }}
           script: |
