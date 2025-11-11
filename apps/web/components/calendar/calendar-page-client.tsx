@@ -6,7 +6,7 @@ import { CalendarWeekView } from "./calendar-week-view";
 import { CalendarFilters } from "./calendar-filters";
 import { BookingDetailsModal } from "./booking-details-modal";
 import { CalendarTour } from "./calendar-tour";
-import type { CalendarBooking } from "@/hooks/use-calendar";
+import type { CalendarBooking, CalendarDataMeta } from "@/hooks/use-calendar";
 import { useRouter } from "next/navigation";
 import { recordCalendarEvent } from "@/lib/marketing-telemetry";
 
@@ -20,6 +20,11 @@ type ViewMode = "month" | "week";
 
 const VIEW_MODE_STORAGE_KEY = "brisa-calendar-view-mode";
 const MOBILE_BREAKPOINT_QUERY = "(max-width: 1023px)";
+const CACHE_MISS_REASON_LABELS: Record<string, string> = {
+  expired: "cache expirada",
+  not_found: "sin entrada en cache",
+  disabled: "cache desactivada",
+};
 
 const getStoredViewMode = () => {
   if (typeof window === "undefined") {
@@ -49,6 +54,20 @@ const waitForNextFrame = () =>
     window.requestAnimationFrame(() => resolve());
   });
 
+const formatCachedTimestamp = (iso?: string | null) => {
+  if (!iso) {
+    return null;
+  }
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export function CalendarPageClient({
   properties,
   services,
@@ -74,11 +93,13 @@ export function CalendarPageClient({
     type: "success" | "error" | "loading";
     message: string;
   } | null>(null);
+  const [dataMeta, setDataMeta] = useState<CalendarDataMeta | null>(null);
   const loadingMinVisibleMs = 2000;
   const minimumVisibleWindowMs = 5000;
   const router = useRouter();
   const statusClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasLoggedInitialViewRef = useRef(false);
+  const lastDataEventSignatureRef = useRef<string | null>(null);
   type StatusDebugType = "success" | "error" | "loading" | "idle";
 
   const updateStatusDebug = (type: StatusDebugType, message: string) => {
@@ -188,6 +209,30 @@ export function CalendarPageClient({
         "calendar_filter_applied",
         buildFilterSnapshot(nextFilters),
       );
+    },
+    [buildFilterSnapshot],
+  );
+
+  const handleCalendarDataLoaded = useCallback(
+    (meta: CalendarDataMeta) => {
+      setDataMeta(meta);
+      const snapshot = buildFilterSnapshot();
+      const sanitizedMeta = {
+        cacheHit: meta.cacheHit,
+        cacheMissReason: meta.cacheMissReason ?? null,
+        cachedAt: meta.cachedAt ?? null,
+        cacheExpiresAt: meta.cacheExpiresAt ?? null,
+        durationMs: meta.durationMs ?? null,
+      };
+      const signature = JSON.stringify({ sanitizedMeta, snapshot });
+      if (lastDataEventSignatureRef.current === signature) {
+        return;
+      }
+      lastDataEventSignatureRef.current = signature;
+      recordCalendarEvent("calendar_data_loaded", {
+        ...snapshot,
+        ...sanitizedMeta,
+      });
     },
     [buildFilterSnapshot],
   );
@@ -446,6 +491,41 @@ export function CalendarPageClient({
         </div>
       </div>
 
+      {dataMeta && (
+        <div className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[0.7rem] text-gray-600 shadow-sm dark:border-brisa-700 dark:bg-brisa-900 dark:text-brisa-200 sm:flex-row sm:items-center sm:justify-between sm:text-xs">
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex h-2 w-2 rounded-full ${
+                dataMeta.cacheHit ? "bg-emerald-500" : "bg-amber-500"
+              }`}
+              aria-hidden="true"
+            />
+            <span className="font-medium">
+              {dataMeta.cacheHit ? "Datos desde caché" : "Consulta directa"}
+            </span>
+            {typeof dataMeta.durationMs === "number" && (
+              <span className="font-mono text-[0.65rem] sm:text-xs">
+                {Math.round(dataMeta.durationMs)} ms
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-[0.65rem] sm:justify-end sm:text-xs">
+            {dataMeta.cacheHit && dataMeta.cachedAt && (
+              <span>
+                Cacheado{" "}
+                {formatCachedTimestamp(dataMeta.cachedAt) ?? "reciente"}
+              </span>
+            )}
+            {!dataMeta.cacheHit && dataMeta.cacheMissReason && (
+              <span className="text-amber-600 dark:text-amber-300">
+                {CACHE_MISS_REASON_LABELS[dataMeta.cacheMissReason] ??
+                  dataMeta.cacheMissReason}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Status Message */}
       {statusMessage && (
         <div
@@ -524,6 +604,7 @@ export function CalendarPageClient({
         <CalendarView
           onBookingClick={handleBookingClick}
           onBookingReschedule={handleBookingReschedule}
+          onDataLoaded={handleCalendarDataLoaded}
           filters={filters}
           refreshToken={calendarRefreshToken}
         />
@@ -532,6 +613,7 @@ export function CalendarPageClient({
           onBookingClick={handleBookingClick}
           onBookingReschedule={handleBookingReschedule}
           onViewModePersist={() => setViewModeWithSource("week", "user")}
+          onDataLoaded={handleCalendarDataLoaded}
           filters={filters}
           refreshToken={calendarRefreshToken}
         />

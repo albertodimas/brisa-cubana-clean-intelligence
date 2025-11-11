@@ -5,7 +5,7 @@
 
 > Comandos mínimos antes de esta checklist: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm docs:verify`, `pnpm exec playwright test --project=critical`.
 
-Cobertura automática actual: <!-- PLAYWRIGHT_CRITICAL_COUNT -->47<!-- /PLAYWRIGHT_CRITICAL_COUNT --> pruebas en la suite `critical`.
+Cobertura automática actual: <!-- PLAYWRIGHT_CRITICAL_COUNT -->50<!-- /PLAYWRIGHT_CRITICAL_COUNT --> pruebas en la suite `critical`.
 
 ---
 

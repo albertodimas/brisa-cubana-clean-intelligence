@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useCalendar, type CalendarBooking } from "@/hooks/use-calendar";
+import {
+  useCalendar,
+  type CalendarBooking,
+  type CalendarDataMeta,
+} from "@/hooks/use-calendar";
 import { useDragDrop } from "@/hooks/use-drag-drop";
 import { Skeleton } from "../ui/skeleton";
 
@@ -13,6 +17,7 @@ type CalendarViewProps = {
     newDate: string,
     originalScheduledAt: string,
   ) => void;
+  onDataLoaded?: (meta: CalendarDataMeta) => void;
   initialMonth?: Date;
   filters?: {
     status?: string;
@@ -42,6 +47,7 @@ export function CalendarView({
   onBookingClick,
   onDateClick,
   onBookingReschedule,
+  onDataLoaded,
   initialMonth = new Date(),
   filters,
   refreshToken = 0,
@@ -81,12 +87,18 @@ export function CalendarView({
     };
   }, [currentMonth]);
 
-  const { data, isLoading, error } = useCalendar({
+  const { data, meta, isLoading, error } = useCalendar({
     from,
     to,
     ...filters,
     refreshToken,
   });
+
+  useEffect(() => {
+    if (meta) {
+      onDataLoaded?.(meta);
+    }
+  }, [meta, onDataLoaded]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
