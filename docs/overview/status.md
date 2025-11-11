@@ -20,12 +20,12 @@
 | Suite    | Tests | Duración | Comando                  |
 | -------- | ----- | -------- | ------------------------ |
 | Smoke    | 15    | ~1min    | `pnpm test:e2e:smoke`    |
-| Critical | 47    | ~6min    | `pnpm test:e2e:critical` |
-| Full     | 91    | ~10min   | `pnpm test:e2e:full`     |
+| Critical | 50    | ~6min    | `pnpm test:e2e:critical` |
+| Full     | 94    | ~10min   | `pnpm test:e2e:full`     |
 
 <!-- PLAYWRIGHT_SUITE_TABLE:end -->
 
-- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->295<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->91<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
+- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->298<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->94<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
 - **Suites E2E activas:** <!-- PLAYWRIGHT_FULL_COUNT -->91<!-- /PLAYWRIGHT_FULL_COUNT -->
 
 > ✅ Estado actual (08-nov-2025 23:50 UTC): `pnpm test:e2e:critical` y `pnpm test:e2e:full` completados en local sin fallos tras instrumentar el calendario (`NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN`, `__BRISA_*`) y aislar los fixtures mediante `notesTag`. Revisa el reporte Playwright adjunto en el PR sólo si introduces cambios adicionales en estos flujos.

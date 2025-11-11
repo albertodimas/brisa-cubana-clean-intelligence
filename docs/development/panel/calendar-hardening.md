@@ -70,3 +70,8 @@
 3. Eventos PostHog + Playwright specs (PR 3).
 
 > Actualizar este documento conforme avancemos cada PR y referenciarlo desde `docs/overview/ga-plan.md` (WS2.1).
+
+### Bitácora de avances
+
+- **2025-11-10:** `CalendarPageClient` ahora emite `calendar_viewed`, `calendar_filter_applied`, `calendar_reschedule_*` y `calendar_data_loaded` (incluyendo `cacheHit`, `durationMs`, `cachedAt`). El hook `useCalendar` expone los metadatos del endpoint y la UI muestra un badge informativo tras cada carga.
+- **2025-11-10 (tarde):** Se documentó el flujo de refresh del panel y se agregaron tests E2E específicos (`panel-auth.spec.ts`) para cubrir `login → refresh → logout`, además de un endpoint de test-utils que reinicia contadores de rate limiting. Próximo foco: exponer `cacheMissReason`/`staleAge` en la UI, agregar métricas a `/api/calendar` (log JSON) y escribir escenarios Playwright para los filtros semanales y los badges de caché.
