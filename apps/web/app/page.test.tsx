@@ -26,19 +26,6 @@ vi.mock("@/lib/api", () => ({
       order: 1,
     },
   ]),
-  getPricingTiers: vi.fn().mockResolvedValue([
-    {
-      id: "tier-1",
-      tierCode: "standard",
-      name: "Standard",
-      headline: "Turnovers esenciales para STR",
-      description: "Incluye limpieza premium y QA básico.",
-      price: "$249",
-      priceSuffix: "/turno",
-      features: ["Checklists digitales", "Reportes en 4h"],
-      order: 1,
-    },
-  ]),
 }));
 
 async function renderLandingPage() {
@@ -53,30 +40,24 @@ describe("LandingPage", () => {
     expect(markup).toContain(
       "Limpieza profesional y documentada para propiedades premium en Miami.",
     );
-    expect(markup).toContain("Solicitar cotización");
-    expect(markup).toContain("Conoce el portal (beta privada)");
+    expect(markup).toContain("Agendar diagnóstico");
+    expect(markup).toContain("Ver portal");
   });
 
   it("detalla beneficios clave", async () => {
     const markup = await renderLandingPage();
 
-    expect(markup).toContain(
-      "Unimos operación premium, datos en vivo y soporte humano 24/7.",
-    );
-    expect(markup).toContain("Funcionalidades clave del portal");
-    expect(markup).toContain(
-      "Calidad supervisada en cada turno, lista para auditar.",
-    );
-    expect(markup).toContain("Agenda diagnóstico express");
-    expect(markup).toContain("Solicitar playbook QA completo");
-    expect(markup).toContain("¿Qué diferencia a cada paquete?");
+    expect(markup).toContain("Por qué Brisa Cubana");
+    expect(markup).toContain("Operación premium con resultados medibles");
+    expect(markup).toContain("Servicios clave");
+    expect(markup).toContain("Portal cliente");
   });
 
-  it("presenta pricing, FAQ y formulario de contacto", async () => {
+  it("presenta testimonios, FAQ y formulario de contacto", async () => {
     const markup = await renderLandingPage();
 
-    expect(markup).toContain("Planes y precios");
     expect(markup).toContain("Preguntas frecuentes");
-    expect(markup).toContain("Recibir propuesta personalizada");
+    expect(markup).toContain("Hosts y PMs con operación documentada");
+    expect(markup).toContain('id="contacto-form"');
   });
 });

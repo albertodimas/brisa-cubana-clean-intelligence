@@ -13,8 +13,8 @@ type NavigationItem = {
 
 const navigation: readonly NavigationItem[] = [
   { name: "Servicios", href: { pathname: "/", hash: "servicios" } },
-  { name: "Precios", href: { pathname: "/", hash: "precios" } },
-  { name: "Portal Privado (Beta)", href: "/clientes" },
+  { name: "Portal", href: { pathname: "/", hash: "portal" } },
+  { name: "Testimonios", href: { pathname: "/", hash: "testimonios" } },
   { name: "FAQ", href: { pathname: "/", hash: "faq" } },
   { name: "Contacto", href: { pathname: "/", hash: "contacto" } },
 ];

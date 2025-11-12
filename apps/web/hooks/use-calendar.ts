@@ -1,5 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
 
+const PUBLIC_BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_APP_URL ??
+  "http://localhost:3000";
+
+const ensureAbsoluteBase = (value: string) =>
+  /^https?:\/\//.test(value) ? value : `https://${value}`;
+
+const resolveBaseUrl = () => {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+  return ensureAbsoluteBase(PUBLIC_BASE_URL);
+};
+
+const buildApiUrl = (path: string, params: URLSearchParams) => {
+  const baseUrl = resolveBaseUrl();
+  const url = new URL(path, baseUrl);
+  url.search = params.toString();
+  return url.toString();
+};
+
 export type CalendarBooking = {
   id: string;
   code: string;
@@ -84,12 +106,10 @@ export function useCalendar(options: UseCalendarOptions) {
         params.append("assignedStaffId", options.assignedStaffId);
       }
 
-      const response = await globalThis.fetch(
-        `/api/calendar?${params.toString()}`,
-        {
-          credentials: "include",
-        },
-      );
+      const calendarUrl = buildApiUrl("/api/calendar", params);
+      const response = await globalThis.fetch(calendarUrl, {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -162,12 +182,13 @@ export function useAvailability(
           durationMin: durationMin.toString(),
         });
 
-        const response = await globalThis.fetch(
-          `/api/calendar/availability?${params.toString()}`,
-          {
-            credentials: "include",
-          },
+        const availabilityUrl = buildApiUrl(
+          "/api/calendar/availability",
+          params,
         );
+        const response = await globalThis.fetch(availabilityUrl, {
+          credentials: "include",
+        });
 
         if (!response.ok) {
           const errorData = await response.json();

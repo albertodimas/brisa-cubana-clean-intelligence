@@ -4,18 +4,23 @@ type FAQItem = {
 };
 
 type FAQSectionProps = {
+  id?: string;
   title?: string;
   subtitle?: string;
   items: FAQItem[];
 };
 
 export function FAQSection({
+  id,
   title = "Preguntas frecuentes",
   subtitle = "Contexto operativo, tiempos de respuesta y lo que necesitas para arrancar.",
   items,
 }: FAQSectionProps) {
   return (
-    <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+    <section
+      id={id}
+      className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20"
+    >
       <div className="text-center mb-12 space-y-4">
         <span className="text-xs tracking-[0.45em] uppercase text-brisa-600 dark:text-brisa-300">
           FAQ

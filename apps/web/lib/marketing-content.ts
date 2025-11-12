@@ -121,6 +121,24 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
+export const fallbackFaqs: Array<{ question: string; answer: string }> = [
+  {
+    question: "¿En cuánto tiempo entregan un turnover same-day?",
+    answer:
+      "Operamos cuadrillas on-call 24/7 y rutas por zonas, lo que nos permite entregar turnovers en menos de 4 horas desde que recibimos la orden (incluye checklist, fotos y reporte firmado).",
+  },
+  {
+    question: "¿Cómo documentan la calidad y los daños?",
+    answer:
+      "Cada servicio genera checklists digitales con evidencia fotográfica before/after, firmas digitales y registro de incidencias. Si detectamos daños o restocks, abrimos un ticket en el portal y notificamos por WhatsApp/Email.",
+  },
+  {
+    question: "¿Pueden integrarse con mi PMS o workflows actuales?",
+    answer:
+      "Sí. Nos integramos con PMS como Guesty, Hostaway o Breezeway para sincronizar reservaciones y disparar alertas cuando hay cambios. También podemos conectarnos a Slack, Email o WhatsApp Business.",
+  },
+];
+
 export const differentiators: Differentiator[] = [
   {
     title: "Protocolos cinco estrellas",
