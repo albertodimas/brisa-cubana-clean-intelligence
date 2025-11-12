@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+const DEFAULT_DEVELOPMENT_ALLOWED_ORIGINS = "http://localhost:3000";
+const DEFAULT_PRODUCTION_ALLOWED_ORIGINS =
+  "https://brisacubanacleanintelligence.com";
+
 const envSchema = z
   .object({
     NODE_ENV: z
@@ -24,17 +28,7 @@ const envSchema = z
     TWILIO_AUTH_TOKEN: z.string().optional(),
     TWILIO_PHONE_NUMBER: z.string().optional(),
   })
-  .passthrough()
-  .superRefine((data, ctx) => {
-    if (data.NODE_ENV === "production" && !data.ALLOWED_ORIGINS) {
-      ctx.addIssue({
-        path: ["ALLOWED_ORIGINS"],
-        code: z.ZodIssueCode.custom,
-        message:
-          "ALLOWED_ORIGINS must be set in production to avoid falling back to insecure defaults.",
-      });
-    }
-  });
+  .passthrough();
 
 const parsed = envSchema.safeParse(process.env);
 
@@ -50,6 +44,27 @@ if (!parsed.success) {
   throw new Error("Invalid environment variables");
 }
 
-export const env = Object.freeze(parsed.data);
+const fallbackAllowedOrigins =
+  parsed.data.ALLOWED_ORIGINS && parsed.data.ALLOWED_ORIGINS.trim().length > 0
+    ? parsed.data.ALLOWED_ORIGINS
+    : parsed.data.NODE_ENV === "production"
+      ? DEFAULT_PRODUCTION_ALLOWED_ORIGINS
+      : DEFAULT_DEVELOPMENT_ALLOWED_ORIGINS;
+
+if (
+  parsed.data.NODE_ENV === "production" &&
+  (!parsed.data.ALLOWED_ORIGINS ||
+    parsed.data.ALLOWED_ORIGINS.trim().length === 0)
+) {
+  console.warn(
+    "⚠️ ALLOWED_ORIGINS no está configurado en producción. Usando fallback por defecto:",
+    fallbackAllowedOrigins,
+  );
+}
+
+export const env = Object.freeze({
+  ...parsed.data,
+  ALLOWED_ORIGINS: fallbackAllowedOrigins,
+});
 
 export type Env = typeof env;
