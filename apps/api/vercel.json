@@ -1,7 +1,7 @@
 {
   "version": 2,
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm run build",
+  "buildCommand": "pnpm run build && pnpm run vercel:deps",
   "builds": [
     {
       "src": "api/index.js",

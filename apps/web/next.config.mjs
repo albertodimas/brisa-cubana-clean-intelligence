@@ -147,6 +147,8 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN:
       process.env.NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN,
+    NEXT_PUBLIC_PORTAL_LOGIN_ENABLED:
+      process.env.NEXT_PUBLIC_PORTAL_LOGIN_ENABLED,
   },
   webpack: (config, { isServer }) => {
     // Suprimir warnings conocidos de OpenTelemetry (Sentry)

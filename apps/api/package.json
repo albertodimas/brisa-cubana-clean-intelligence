@@ -30,7 +30,8 @@
     "db:seed": "tsx prisma/seed.operativo.ts && tsx prisma/seed.demo.ts && tsx prisma/seed.marketing.ts",
     "db:seed:operativo": "tsx prisma/seed.operativo.ts",
     "db:seed:demo": "tsx prisma/seed.demo.ts",
-    "db:seed:marketing": "tsx prisma/seed.marketing.ts"
+    "db:seed:marketing": "tsx prisma/seed.marketing.ts",
+    "vercel:deps": "node ./scripts/prepare-vercel-deps.mjs"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.6",

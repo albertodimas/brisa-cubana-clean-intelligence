@@ -87,6 +87,7 @@ Desktop.ini
 
 # Prisma
 apps/api/prisma/migrations/**/migration.sql.bak
+apps/api/deploy/
 
 # Temporary files
 tmp/
