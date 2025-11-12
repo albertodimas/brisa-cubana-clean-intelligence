@@ -107,6 +107,18 @@ async function checkStripe(): Promise<ServiceCheck> {
       message: "STRIPE_SECRET_KEY not configured",
     };
   }
+  if (process.env.STRIPE_HEALTH_CHECK_ENABLED === "false") {
+    return {
+      status: "disabled",
+      message: "Stripe health check disabled by configuration",
+    };
+  }
+  if (/brisa|demo/i.test(secret)) {
+    return {
+      status: "disabled",
+      message: "Stripe placeholder key detected; skipping verification",
+    };
+  }
 
   const { default: Stripe } = await import("stripe");
   const runtimeApiVersion = process.env.STRIPE_API_VERSION ?? "2023-10-16";
