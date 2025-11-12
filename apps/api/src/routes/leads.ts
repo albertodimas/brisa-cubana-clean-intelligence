@@ -6,6 +6,27 @@ import { authenticate, requireRoles } from "../middleware/auth.js";
 
 const router = new Hono();
 
+const TEST_EMAIL_PATTERNS = [/qa\+/i, /\+qa/i, /test\+/i, /\+test/i];
+
+function normalize(str: string | undefined | null) {
+  return str?.toLowerCase().trim() ?? "";
+}
+
+function isTestLead(data: { email: string; notes?: string | null }) {
+  const email = normalize(data.email);
+  const notes = normalize(data.notes);
+  const matchesTestEmail = TEST_EMAIL_PATTERNS.some((pattern) =>
+    pattern.test(email),
+  );
+  const mentionsTestInNotes =
+    notes.includes("qa test") ||
+    notes.includes("prueba automática") ||
+    notes.includes("test lead") ||
+    notes.includes("ignore response");
+
+  return matchesTestEmail || mentionsTestInNotes;
+}
+
 const createLeadSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
@@ -55,6 +76,7 @@ router.post("/", async (c) => {
 
   try {
     const repository = getLeadRepository();
+    const markAsLost = isTestLead({ email: data.email, notes: data.notes });
     const lead = await repository.create({
       name: data.name,
       email: data.email,
@@ -64,6 +86,7 @@ router.post("/", async (c) => {
       serviceInterest: data.serviceInterest,
       planCode: data.planCode,
       notes: data.notes,
+      status: markAsLost ? LeadStatus.LOST : undefined,
       utmSource: data.utm_source,
       utmMedium: data.utm_medium,
       utmCampaign: data.utm_campaign,
