@@ -3,6 +3,7 @@ import type {
   NotificationType,
   Notification as PrismaNotification,
 } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { logger } from "../lib/logger.js";
 import { emitNotificationEvent } from "../lib/notification-hub.js";
@@ -46,6 +47,34 @@ export type SendNotificationResult =
 export async function createNotification(
   payload: CreateNotificationPayload,
 ): Promise<string> {
+  try {
+    const notification = await persistNotification(payload);
+    return notification.id;
+  } catch (error) {
+    if (shouldRetryWithoutBookingId(error, payload.bookingId)) {
+      logger.warn(
+        {
+          bookingId: payload.bookingId,
+          userId: payload.userId,
+          type: payload.type,
+          channel: payload.channel,
+        },
+        "Notification booking reference missing. Retrying without relation.",
+      );
+      const notification = await persistNotification({
+        ...payload,
+        bookingId: undefined,
+      });
+      return notification.id;
+    }
+
+    throw error;
+  }
+}
+
+async function persistNotification(
+  payload: CreateNotificationPayload,
+): Promise<PrismaNotification> {
   const isInApp = payload.channel === "IN_APP";
 
   const notification = await prisma.notification.create({
@@ -72,8 +101,7 @@ export async function createNotification(
     "Notification created",
   );
 
-  // Emit real-time event for in-app notifications
-  if (payload.channel === "IN_APP") {
+  if (isInApp) {
     const response = toNotificationResponse(notification);
     emitNotificationEvent(payload.userId, {
       type: "notification:new",
@@ -81,7 +109,22 @@ export async function createNotification(
     });
   }
 
-  return notification.id;
+  return notification;
+}
+
+function shouldRetryWithoutBookingId(
+  error: unknown,
+  bookingId?: string,
+): error is Prisma.PrismaClientKnownRequestError {
+  if (!bookingId) {
+    return false;
+  }
+
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2003" &&
+    error.meta?.constraint === "Notification_bookingId_fkey"
+  );
 }
 
 /**
