@@ -1,4 +1,4 @@
-# Observabilidad y Monitoreo
+# Observabilidad y Monitoreo – Brisa OS
 
 **Última actualización:** 31 de octubre de 2025  
 **Estado actual:** ⚠️ En seguimiento – logging y alertas operativas, pero faltan dashboards actualizados para portal y validación de SSE/PostHog tras el plan de recuperación.

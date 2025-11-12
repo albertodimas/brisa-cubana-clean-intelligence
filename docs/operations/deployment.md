@@ -1,6 +1,6 @@
 # Manual Deployment Guide
 
-Proceso verificado para promover cambios de Brisa Cubana Clean Intelligence a los entornos gestionados en Vercel.
+Proceso verificado para promover cambios de Brisa OS (Brisa Cubana Clean Intelligence) a los entornos gestionados en Vercel.
 
 ## 1. Pre-requisitos
 

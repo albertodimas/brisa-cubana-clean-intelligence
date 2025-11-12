@@ -29,4 +29,4 @@ Los entornos de clientes y cualquier servicio de terceros fuera de este reposito
 - **Investigadores:** evitar pruebas que degraden el servicio, respetar datos personales y no divulgar detalles antes de que el parche esté disponible (coordinated disclosure).
 - **Equipo Brisa:** mantener informada a la persona que reporta el hallazgo, reconocer su contribución (salvo solicitud en contrario) y publicar notas en el CHANGELOG una vez desplegada la corrección.
 
-Gracias por ayudarnos a mantener Brisa Cubana Clean Intelligence segura para toda la comunidad.
+Gracias por ayudarnos a mantener Brisa OS (Brisa Cubana Clean Intelligence) segura para toda la comunidad.

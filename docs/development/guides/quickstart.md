@@ -1,6 +1,6 @@
 # Quickstart: Desarrollo local
 
-Guía verificada para levantar Brisa Cubana Clean Intelligence en un entorno local.
+Guía verificada para levantar Brisa OS (Brisa Cubana Clean Intelligence) en un entorno local.
 
 ## Prerrequisitos
 

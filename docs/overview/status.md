@@ -1,19 +1,31 @@
-# Estado del Proyecto – Brisa Cubana Clean Intelligence
+# Estado del Proyecto – Brisa OS
 
-**Última actualización:** 9 de noviembre de 2025  
-**Responsable actual:** Plataforma & Reliability
+**Última actualización:** 12 de noviembre de 2025  
+**Responsable actual:** Producto & Plataforma (equipo fundador)
 
-## Resumen operativo
+---
 
-- API `@brisa/api` 0.4.2 (Hono 4.10.3 + Prisma 6.17.1) y web `@brisa/web` 0.4.2 (Next.js 16.0.0) desplegadas en Vercel.
-- Salud: `/health` verifica base de datos, Stripe (modo test) y SMTP; `/healthz` expone estado público protegido opcionalmente por token.
-- Seguridad crítica cerrada (Sprint 1): `JWT_SECRET` obligatorio, validación de envs, rate limiting reforzado, cookies del portal HTTP-only.
-- Sprint 2: motor de reservas detecta doble booking, endpoint `GET /api/bookings/:id` y asignación de staff (`PATCH /api/bookings/:id/assign-staff`).
-- Sprint 3: módulo de facturación (`/api/invoices/**`), ajustes de serialización y documentación al día.
-- Email operativo: dominio autenticado en SendGrid, forwarding con ImprovMX (`cliente@brisacubanacleanintelligence.com`) según [docs/operations/email-routing.md](../operations/email-routing.md).
-- QA: suites Playwright (smoke/critical/full) usan fixtures etiquetados (`notesTag`) y el flag `PLAYWRIGHT_TEST_RUN` para exponer instrumentación del calendario y mantener los flujos drag & drop deterministas.
+## 1. Resumen estratégico
 
-### Últimos checks locales (09-nov-2025 01:40 UTC)
+- El repositorio pivota oficialmente a **Brisa OS**, el software asequible para empresas de limpieza/turnovers. La visión completa vive en [`docs/product/saas-vision.md`](../product/saas-vision.md) y toda decisión debe referenciarla.
+- Versiones vigentes: `@brisa/api` 0.4.2 (Hono + Prisma) y `@brisa/web` 0.4.2 (Next.js 16). La release `v0.5.0` marcará el primer corte SaaS (landing nueva + multi-tenant básico).
+- Dominios productivos: `https://brisacubanacleanintelligence.com` (landing + portal) y `https://api.brisacubanacleanintelligence.com`. Se conservarán hasta definir un dominio adicional si es necesario.
+- Prioridades inmediatas:
+  1. ✅ Reescritura de la landing para captar empresas (copy + secciones SaaS) desplegada en `apps/web/app/page.tsx`.
+  2. Diseño/implementación multi-tenant en la API (tenantId, roles, scoping).
+  3. IA de resúmenes automáticos para reportes de servicio.
+  4. Preparar estrategia de planes/billing (Starter, Growth, Scale).
+
+---
+
+## 2. Estado operativo
+
+- Salud: `/health` sigue comprobando DB, Stripe (modo test) y SMTP; `/healthz` protegido por token opcional.
+- Deploys: Vercel (web/API) continúa siendo el canal oficial. `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm docs:verify` obligatorios antes de merge.
+- QA: suites Playwright smoke/critical/full activas; usar `NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN` y fixtures `notesTag` para reproducibilidad.
+- Email/dominios: autenticados mediante SendGrid + ImprovMX (ver [docs/operations/email-routing.md](../operations/email-routing.md)).
+
+### Últimos checks locales (12-nov-2025 03:10 UTC)
 
 <!-- PLAYWRIGHT_SUITE_TABLE:start -->
 
@@ -25,80 +37,68 @@
 
 <!-- PLAYWRIGHT_SUITE_TABLE:end -->
 
-- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->298<!-- /PLAYWRIGHT_TOTAL --> en total incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->94<!-- /PLAYWRIGHT_FULL_COUNT --> E2E)
-- **Suites E2E activas:** <!-- PLAYWRIGHT_FULL_COUNT -->91<!-- /PLAYWRIGHT_FULL_COUNT -->
+- **Total**: 204 pruebas unitarias/integración passing (<!-- PLAYWRIGHT_TOTAL -->298<!-- /PLAYWRIGHT_TOTAL --> totales incluyendo <!-- PLAYWRIGHT_FULL_COUNT -->94<!-- /PLAYWRIGHT_FULL_COUNT --> E2E).
+- **Suites E2E activas:** <!-- PLAYWRIGHT_FULL_COUNT -->94<!-- /PLAYWRIGHT_FULL_COUNT -->
 
-> ✅ Estado actual (08-nov-2025 23:50 UTC): `pnpm test:e2e:critical` y `pnpm test:e2e:full` completados en local sin fallos tras instrumentar el calendario (`NEXT_PUBLIC_PLAYWRIGHT_TEST_RUN`, `__BRISA_*`) y aislar los fixtures mediante `notesTag`. Revisa el reporte Playwright adjunto en el PR sólo si introduces cambios adicionales en estos flujos.
+- **Estado**: `pnpm test:e2e:critical` y `pnpm test:e2e:full` pasan después de la actualización de documentación SaaS.
 
-> Ejecuta `pnpm lint && pnpm typecheck && pnpm test && pnpm docs:verify` antes de mergear. Para regresiones completas usa `pnpm test:e2e:full`.
+---
 
-## Cambios recientes (Sprint 1-4)
+## 3. Cambios recientes (histórico Sprint 1-4)
+
+> Se mantienen como referencia para quien necesite contexto del sistema previo (operación interna).
 
 1. **Autenticación y seguridad**
-   - Validación estricta de vars (`lib/env.ts`), `ALLOWED_ORIGINS` requerido en producción.
-   - Rate limiter central (`createRateLimiter`) endurecido; login 5/60s, portal magic-link 3/15m, checkout Stripe 10/60s.
+   - Validación estricta de variables (`lib/env.ts`), `ALLOWED_ORIGINS` obligatorio.
+   - Rate limiter central endurecido; cookies portal HTTP-only.
 2. **Reservas y staff**
-   - Detección de solapamientos en POST/PATCH `/api/bookings`.
-   - `GET /api/bookings/:id` devuelve relaciones completas + staff.
-   - `PATCH /api/bookings/:id/assign-staff` asigna/desasigna staff con validaciones de rol/estado.
+   - Detección de solapamientos, `GET /api/bookings/:id`, asignación de staff.
 3. **Pagos y facturación**
-   - Webhook Stripe crea booking confirmado, deduplicado con `StripeWebhookEvent` y notifica a Operaciones.
-   - `/api/invoices` permite listar, crear, actualizar y eliminar invoices; rate limit configurable.
+   - Webhook Stripe, endpoints `/api/invoices/**`, serialización revisada.
 4. **Infra & observabilidad**
-   - Health check extendido (DB, Stripe, SMTP, Sentry).
-   - Logging estruturado para asignaciones de staff y pagos.
-   - `app.js` (raíz) y `api/index.js` actúan como shims de Hono para Vercel; el proyecto `brisa-cubana-clean-intelligence-api` debe vincularse desde `apps/api` (`vercel link --cwd apps/api`) antes de cada `vercel pull`.
-   - Vercel (`apps/web` y `apps/api`) con variables críticas sincronizadas; se documentó el flujo `vercel env add/pull` y se rotó `HEALTH_CHECK_TOKEN` para que el monitor `Production Health Monitor` reciba 200 estables.
+   - Health check extendido, logging estructurado, shims Hono para Vercel, sincronización de `vercel env`.
 5. **Documentación**
-   - README y `docs/README.md` definen política "no PR sin docs".
-   - `docs/reference/api-reference.md` cubre bookings, payments, invoices y portal.
-   - Se añadió `scripts/check-storybook-coverage.mjs` + `pnpm check:storybook-coverage` (incluido en `docs:verify`) para impedir regresiones en las 58 historias obligatorias (UI/Landing/Managers).
-   - Nuevo plan WS2 específico: `docs/development/panel/calendar-hardening.md` desglosa el hardening del calendario (cache API, virtualización, métricas y e2e).
-6. **Marketing & Calendario (Sprint 4)**
-   - Suite `/api/marketing/**` (stats, testimoniales, FAQs, pricing tiers, market stats) con endpoints públicos y administrativos.
-   - Panel operativo incorpora dashboard de analytics (charts de ingresos, reservas por estado, top propiedades, workload por staff) y exportaciones CSV.
-   - Vista de calendario (`/panel/calendario`) con drag & drop, modal de detalle, filtros y API `GET /api/calendar` + `/availability`.
-   - Servicio de notificaciones multi-canal (email/SMS/in-app) con plantillas, cola en memoria y endpoints `GET /api/notifications`, `PATCH /read`, `PATCH /read-all`.
-   - `LeadCaptureForm` ahora es bilingüe (ES/EN) y la landing `/en` incluye el formulario localizado con la misma telemetría/UTM del sitio principal.
-7. **Frontend - Fase 1: Funcionalidades Críticas (Sprint 1-2)** ✅ COMPLETADO
-   - **Sprint 1**: Asignación de Staff
-     - Tipo `Booking` incluye `assignedStaff` en frontend
-     - Columna "Staff asignado" en `BookingsManager` con selector funcional
-     - Dashboard `/panel/staff` para staff ver sus asignaciones
-     - Filtro por staff en búsqueda de reservas
-     - 6 tests E2E críticos + 12 tests unitarios passing
-   - **Sprint 2**: Vista de Relaciones Cliente-Propiedades
-     - Endpoint `GET /api/customers/:id` implementado con tests
-     - Páginas de detalle: `/panel/customers/[id]` y `/panel/properties/[id]`
-     - Server Components con Suspense + carga paralela de datos
-     - Navegación bidireccional (clientes ↔ propiedades ↔ reservas)
-     - Type-safe navigation con hrefs basados en objetos
-     - 110/110 tests web + 192/192 tests API passing
+   - Política “no PR sin docs”, referencia API actualizada, verificación Storybook.
+6. **Marketing & Calendario**
+   - API `/api/marketing/**`, dashboards operativos, vista calendario drag&drop, notificaciones multi-canal.
+7. **Frontend (Sprints 1-2)**
+   - Asignación de staff y vista relaciones cliente-propiedad completadas (RSC, Suspense, filtros).
 
-## Riesgos y pendientes
+---
 
-| Trabajo                                     | Estado         | Próximo paso                                                                   |
-| ------------------------------------------- | -------------- | ------------------------------------------------------------------------------ |
-| Refresh tokens Auth.js                      | 🔄 Planificado | Diseñar flow de refresh y documentarlo (RFC en `docs/development/tech-debt/`). |
-| CSP modo bloqueante                         | 🔄 Planificado | Revisar reportes actuales y migrar a política estricta.                        |
-| Estrategia de caché API                     | 🔄 En análisis | Evaluar Redis/Upstash para endpoints read-heavy.                               |
-| Reducción de `any`                          | 🔄 En curso    | Bajar a <20 usos, registrar hallazgos en `docs/development/tech-debt.md`.      |
-| Manifesto de entornos (`env.manifest.json`) | 🔄 En curso    | Automatizar `vercel env pull` ↔ manifiesto.                                   |
+## 4. Riesgos y pendientes
 
-## Documentos relacionados
+| Trabajo                                       | Estado         | Próximo paso                                                                             |
+| --------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------- |
+| Landing SaaS (copy + secciones + formularios) | 🔄 En curso    | Definir estructura final y validar con MCP antes de publicar.                            |
+| Multi-tenant (tenantId, roles, permisos)      | 🔄 Planificado | Diseñar migración Prisma + middleware; documentar en `docs/development/architecture.md`. |
+| IA – resúmenes automáticos                    | 🔄 Planificado | Definir inputs/prompt/modelo; crear servicio en `apps/api` y exponerlo al portal.        |
+| Pricing/Billing (Stripe)                      | 🔄 En análisis | Decidir estructura (Starter/Growth/Scale + add-ons) y preparar scripts de facturación.   |
+| CSP modo bloqueante                           | 🔄 Planificado | Auditar reportes actuales y migrar a política estricta.                                  |
+| Manifesto de entornos (`env.manifest.json`)   | 🔄 En curso    | Automatizar `vercel env pull` ↔ manifiesto y registrarlo en CI.                         |
+| Reducción de `any` y deuda TS                 | 🔄 En curso    | Bajar a <20 usos; rastrear en `docs/development/tech-debt.md`.                           |
 
-- [Plan de recuperación](recovery-plan.md)
+---
+
+## 5. Documentos relacionados
+
+- [Visión SaaS](../product/saas-vision.md)
+- [Plan de recuperación histórico](recovery-plan.md)
 - [Guía de seguridad](../operations/security.md)
 - [Checklist de despliegue](../operations/deployment.md)
 - [Referencia API](../reference/api-reference.md)
-- [Guía Portal Cliente](../development/guides/portal-client.md)
+- [Guía portal cliente](../development/guides/portal-client.md)
 
-## Documentación y comunicación
+---
 
-- Este reporte se sincroniza con el [mapa documental](../README.md) y debe actualizarse en cada release o hotfix.
-- Antes de mergear, registra los comandos ejecutados (`pnpm docs:verify`, suites E2E, seeds) en el PR y enlaza la sección correspondiente del changelog.
-- Archiva estados anteriores en `docs/archive/` para evitar mezclar información vigente con histórica.
+## 6. Documentación y comunicación
 
-## Archivo histórico
+- Cada PR debe indicar qué parte de la visión SaaS aborda y qué documentos tocó.
+- `pnpm docs:verify` es obligatorio cuando se actualiza documentación.
+- Conservar estados anteriores en `docs/archive/` para separar lo histórico de lo vigente.
 
-El estado previo al 31-oct-2025 permanece en [`docs/archive/2025-10-status.md`](../archive/2025-10-status.md). Mantén este documento como fuente de verdad vigente.
+---
+
+## 7. Archivo histórico
+
+El estado previo al 31-oct-2025 permanece en [`docs/archive/2025-10-status.md`](../archive/2025-10-status.md). Si se necesitan detalles de la operación como servicio, acudir a ese archivo.

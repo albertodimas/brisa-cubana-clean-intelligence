@@ -1,4 +1,4 @@
-# Integración con Slack – Brisa Cubana Clean Intelligence
+# Integración con Slack – Brisa OS (Brisa Cubana Clean Intelligence)
 
 **Última actualización:** 23 de octubre de 2025  
 **Estado:** ✅ Webhooks configurados en producción (`#alerts-operaciones`) · ✅ Taxonomía de canales aprobada · ✅ Verificación más reciente 23-oct-2025 13:45 UTC

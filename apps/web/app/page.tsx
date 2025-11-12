@@ -19,13 +19,13 @@ import {
 } from "@/lib/api";
 
 export const metadata: Metadata = {
-  title: "Brisa Cubana Clean Intelligence · Turnovers premium en Miami",
+  title: "Brisa OS · Software para empresas de limpieza",
   description:
-    "Operamos turnovers same-day, deep cleaning y mantenimiento preventivo para propiedades premium en Miami con reportes en menos de 4 horas.",
+    "Digitaliza tu operación con checklists hoteleros, portal cliente white-label e IA para reportes automáticos desde USD 99/mes.",
   openGraph: {
-    title: "Brisa Cubana Clean Intelligence",
+    title: "Brisa OS · Software para empresas de limpieza",
     description:
-      "Limpieza profesional con evidencia fotográfica y reportes en menos de 4 horas para STR y residencias premium en Miami.",
+      "Sistema operativo para compañías de limpieza: evidencia automática, portal white-label e integraciones PMS.",
   },
   alternates: {
     canonical: "/",
@@ -38,35 +38,89 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600;
 
-const serviceHighlights = [
+const featureHighlights = [
   {
-    title: "Turnovers same-day",
+    title: "Checklists hoteleros + evidencia",
     description:
-      "Checklists de 100+ puntos, dotación de amenities y reportes en menos de 4 horas para STR premium.",
+      "Plantillas listas (turnover, deep clean, staging) con fotos, firmas y trazabilidad por cada visita.",
     bullets: [
-      "Cuadrillas on-call 24/7",
-      "Inventario trazable (RFID)",
-      "Evidencia fotográfica before/after",
+      "Más de 100 pasos configurables",
+      "Antes/después en alta resolución",
+      "Roles y aprobaciones para tu equipo",
     ],
   },
   {
-    title: "Deep cleaning & mantenimiento",
+    title: "Portal cliente white-label",
     description:
-      "Protocolos hoteleros para residencias de alto valor, con inspección de detalles y supervisión QA.",
-    bullets: [
-      "Equipos certificados",
-      "Lista de 60 ítems mecánicos/eléctricos",
-      "Entrega con firmas digitales",
-    ],
-  },
-  {
-    title: "Portal cliente + soporte",
-    description:
-      "Visibilidad total: agenda, reagenda, solicita restocks y recibe alertas en tiempo real desde cualquier dispositivo.",
+      "Comparte un tablero con tu logotipo para que tus clientes aprueben extras, descarguen reportes y vean el historial en tiempo real.",
     bullets: [
       "Magic links sin contraseñas",
-      "Alertas proactivas y SLA claros",
-      "Integración con PMS líderes",
+      "Tickets y aprobaciones en 1 clic",
+      "Alertas por email, Slack o WhatsApp",
+    ],
+  },
+  {
+    title: "Automatización inteligente",
+    description:
+      "IA para generar resúmenes, detectar incidencias en fotos y sugerir restocks o upsells sin esfuerzo.",
+    bullets: [
+      "Resúmenes automáticos para tus clientes",
+      "Detección de anomalías en evidencias",
+      "Recomendaciones de inventario y servicios",
+    ],
+  },
+];
+
+const workflowSteps = [
+  {
+    title: "Configura en minutos",
+    description:
+      "Importa propiedades y clientes, elige plantillas y personaliza el portal con tu marca sin depender de desarrolladores.",
+  },
+  {
+    title: "Opera y documenta",
+    description:
+      "Tus cuadrillas usan la app para seguir checklists, tomar fotos y registrar incidencias. Todo llega al panel automáticamente.",
+  },
+  {
+    title: "Entrega y cobra",
+    description:
+      "Envía reportes premium, comparte el portal y registra pagos o upsells con evidencia y métricas listas para tus clientes.",
+  },
+];
+
+const pricingPlans = [
+  {
+    name: "Starter",
+    price: "USD 99",
+    subtitle: "Hasta 5 propiedades · 10 usuarios",
+    bullets: [
+      "Checklists premium + fotos",
+      "Portal estándar y reportes en PDF",
+      "1 integración PMS o CRM",
+      "Soporte por email",
+    ],
+  },
+  {
+    name: "Growth",
+    price: "USD 249",
+    subtitle: "Hasta 25 propiedades · 40 usuarios",
+    bullets: [
+      "Portal white-label y alertas multicanal",
+      "Inventario/restocks + IA resúmenes",
+      "Integraciones múltiples (Slack, PMS, CRM)",
+      "Onboarding asistido y soporte prioritario",
+    ],
+  },
+  {
+    name: "Scale",
+    price: "USD 499+",
+    subtitle: "50+ propiedades · multi-tenant",
+    bullets: [
+      "Dashboards financieros y API abierta",
+      "Automatizaciones personalizadas",
+      "CSM dedicado y canal Slack privado",
+      "Add-ons: usuarios, marcas y consultoría",
     ],
   },
 ];
@@ -95,19 +149,19 @@ export default async function LandingPage() {
 
   const heroStats = [
     {
-      label: "Propiedades activas",
+      label: "Empresas digitalizadas",
       value: portfolioStats?.activeProperties
         ? `${portfolioStats.activeProperties}+`
         : "70+",
     },
     {
-      label: "Turnovers entregados",
+      label: "Operaciones documentadas",
       value: portfolioStats?.totalTurnovers
         ? portfolioStats.totalTurnovers.toLocaleString()
         : "12K+",
     },
     {
-      label: "Rating promedio",
+      label: "Satisfacción promedio",
       value: ratingValue,
     },
   ];
@@ -121,29 +175,27 @@ export default async function LandingPage() {
         <div className="max-w-6xl mx-auto grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] items-center">
           <div className="space-y-6">
             <span className="text-xs tracking-[0.45em] uppercase text-brisa-600 dark:text-brisa-300">
-              Brisa Cubana Clean Intelligence
+              Brisa OS · SaaS para empresas de limpieza
             </span>
             <h1 className="text-4xl sm:text-5xl font-semibold leading-tight">
-              Limpieza profesional y documentada para propiedades premium en
-              Miami.
+              Tu operación de limpieza, digitalizada en minutos.
             </h1>
             <p className="text-lg text-gray-600 dark:text-brisa-200 max-w-2xl">
-              Turnovers same-day, deep cleaning y mantenimiento preventivo con
-              evidencia fotográfica y reportes firmados en menos de cuatro
-              horas.
+              Checklists hoteleros, portal cliente white-label e IA para
+              entregar evidencia impecable sin construir software propio.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="#contacto"
                 className="inline-flex items-center justify-center rounded-full bg-brisa-900 px-5 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-brisa-800 dark:bg-brisa-50 dark:text-brisa-900 dark:hover:bg-white"
               >
-                Agendar diagnóstico
+                Solicitar demo
               </Link>
               <Link
-                href="#portal"
+                href="#como-funciona"
                 className="inline-flex items-center justify-center rounded-full border border-brisa-200 px-5 py-2 text-sm font-semibold text-gray-900 transition hover:-translate-y-0.5 hover:border-brisa-400 dark:border-brisa-700 dark:text-white"
               >
-                Ver portal
+                Ver cómo funciona
               </Link>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -199,9 +251,9 @@ export default async function LandingPage() {
       <section className="bg-brisa-50/70 dark:bg-brisa-900/50 py-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            eyebrow="Por qué Brisa Cubana"
-            title="Operación premium con resultados medibles"
-            description="Condensamos nuestro stack en tres pilares que reducen escalamiento operativo y elevan la experiencia del huésped."
+            eyebrow="Por qué Brisa OS"
+            title="Software pensado para operaciones premium"
+            description="Todos los aprendizajes de 12K+ servicios se condensan en módulos listos para usar, sin desarrollos a medida."
           />
           <div className="grid gap-6 mt-10 lg:grid-cols-3">
             {pillarCards.map((pillar) => (
@@ -230,22 +282,22 @@ export default async function LandingPage() {
       <section id="servicios" className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <SectionHeading
-            eyebrow="Servicios clave"
-            title="Un solo equipo para turnovers, deep cleaning y portal cliente."
-            description="Cada servicio incluye supervisión QA, inventario trazable y soporte directo para anfitriones y property managers."
+            eyebrow="Productividad"
+            title="Todas las herramientas para operar como hotel cinco estrellas."
+            description="Digitaliza tus procesos, estandariza la calidad y ofrece un portal que enamore a tus clientes."
           />
           <div className="grid gap-6 lg:grid-cols-3">
-            {serviceHighlights.map((service) => (
+            {featureHighlights.map((feature) => (
               <div
-                key={service.title}
+                key={feature.title}
                 className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-brisa-800 dark:bg-brisa-900"
               >
-                <h3 className="text-xl font-semibold">{service.title}</h3>
+                <h3 className="text-xl font-semibold">{feature.title}</h3>
                 <p className="mt-3 text-sm text-gray-600 dark:text-brisa-200 leading-relaxed">
-                  {service.description}
+                  {feature.description}
                 </p>
                 <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-brisa-300">
-                  {service.bullets.map((bullet) => (
+                  {feature.bullets.map((bullet) => (
                     <li key={bullet} className="flex gap-2">
                       <span
                         aria-hidden
@@ -271,8 +323,8 @@ export default async function LandingPage() {
           <div className="space-y-6">
             <SectionHeading
               eyebrow="Portal cliente"
-              title="Todo el control en un solo tablero"
-              description="Magic links, alertas inteligentes y restocks sin fricción. Pensado para property managers y anfitriones con múltiples unidades."
+              title="Portal cliente listo para entregar"
+              description="Magic links, alertas y reportes bajo tu marca para que cada cliente confíe en tu operación."
             />
             <ul className="space-y-4">
               {portalItems.map((item) => (
@@ -303,6 +355,85 @@ export default async function LandingPage() {
               sizes="(max-width: 1024px) 100vw, 640px"
               loading="lazy"
             />
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="como-funciona"
+        className="py-16 sm:py-20 border-t border-gray-100 dark:border-brisa-800"
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <SectionHeading
+            eyebrow="Cómo funciona"
+            title="Sin desarrollos, sin fricción"
+            description="Así se ve tu implementación con Brisa OS."
+          />
+          <div className="grid gap-6 md:grid-cols-3">
+            {workflowSteps.map((step) => (
+              <div
+                key={step.title}
+                className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-brisa-800 dark:bg-brisa-900"
+              >
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brisa-100 text-xs font-bold uppercase text-brisa-700 dark:bg-brisa-800 dark:text-brisa-200">
+                  {workflowSteps.indexOf(step) + 1}
+                </span>
+                <h3 className="mt-4 text-xl font-semibold">{step.title}</h3>
+                <p className="mt-3 text-sm text-gray-600 dark:text-brisa-200 leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="planes"
+        className="py-16 sm:py-20 bg-brisa-50/70 dark:bg-brisa-900/40"
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <SectionHeading
+            eyebrow="Planes claros"
+            title="Precio accesible para cada etapa"
+            description="Empieza con un plan pequeño y evoluciona sin migrar de plataforma."
+          />
+          <div className="grid gap-6 md:grid-cols-3">
+            {pricingPlans.map((plan) => (
+              <div
+                key={plan.name}
+                className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-brisa-800 dark:bg-brisa-900 flex flex-col"
+              >
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-brisa-500 dark:text-brisa-300">
+                    {plan.name}
+                  </p>
+                  <h3 className="mt-2 text-3xl font-semibold">{plan.price}</h3>
+                  <p className="text-sm text-gray-500 dark:text-brisa-300">
+                    {plan.subtitle}
+                  </p>
+                </div>
+                <ul className="mt-5 space-y-2 text-sm text-gray-600 dark:text-brisa-200 flex-1">
+                  {plan.bullets.map((bullet) => (
+                    <li key={bullet} className="flex gap-2">
+                      <span
+                        aria-hidden
+                        className="text-brisa-600 dark:text-brisa-200"
+                      >
+                        •
+                      </span>
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="#contacto"
+                  className="mt-6 inline-flex items-center justify-center rounded-full border border-brisa-200 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:-translate-y-0.5 hover:border-brisa-400 dark:border-brisa-700 dark:text-white"
+                >
+                  Hablar con ventas
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       </section>

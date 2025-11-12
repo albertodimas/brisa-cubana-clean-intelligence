@@ -1,4 +1,4 @@
-# Checklists Operativos – Brisa Cubana Clean Intelligence
+# Checklists Operativos – Brisa OS (Brisa Cubana Clean Intelligence)
 
 > **Última actualización:** 30 de octubre de 2025
 

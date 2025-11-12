@@ -1,6 +1,6 @@
 # Backup Run Log
 
-Registro verificado de ejecuciones de respaldo para Brisa Cubana Clean Intelligence. Completa una entrada cada vez que se ejecuta `scripts/verify-backup.sh` o se realiza un `pg_dump` manual.
+Registro verificado de ejecuciones de respaldo para Brisa OS (Brisa Cubana Clean Intelligence). Completa una entrada cada vez que se ejecuta `scripts/verify-backup.sh` o se realiza un `pg_dump` manual.
 
 | Fecha (UTC) | Ejecutado por | Procedimiento                                 | Resultado | Evidencia                                         |
 | ----------- | ------------- | --------------------------------------------- | --------- | ------------------------------------------------- |

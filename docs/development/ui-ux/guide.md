@@ -1,4 +1,4 @@
-# Guía Completa UI/UX - Brisa Cubana Clean Intelligence
+# Guía Completa UI/UX – Brisa OS (Brisa Cubana Clean Intelligence)
 
 **Última actualización:** 31 de octubre de 2025  
 **Versión:** 1.1.0  

@@ -1,4 +1,4 @@
-# Guía de Seguridad - Brisa Cubana Clean Intelligence
+# Guía de Seguridad – Brisa OS (Brisa Cubana Clean Intelligence)
 
 ## ⚠️ Manejo de Credenciales y Secrets
 

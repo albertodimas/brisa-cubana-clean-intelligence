@@ -26,7 +26,7 @@ Esta guía describe cómo habilitar, verificar y operar el portal de autoservici
 Variables mínimas:
 
 ```dotenv
-PORTAL_MAGIC_LINK_FROM="Brisa Cubana <no-reply@brisacubanacleanintelligence.com>"
+PORTAL_MAGIC_LINK_FROM="Brisa OS <no-reply@brisacubanacleanintelligence.com>"
 PORTAL_MAGIC_LINK_SMTP_HOST="smtp.mailtrap.io"
 PORTAL_MAGIC_LINK_SMTP_PORT="587"
 PORTAL_MAGIC_LINK_SMTP_USER="smtp-user"

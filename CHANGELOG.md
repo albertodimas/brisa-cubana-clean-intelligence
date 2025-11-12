@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Docs: `docs/product/saas-vision.md` consolida la nueva visión SaaS (cliente ideal, propuesta de valor, planes Starter/Growth/Scale, roadmap y tareas pendientes).
+- Docs: `README.md` describe Brisa OS como software para empresas de limpieza y enlaza el documento maestro; `docs/overview/status.md` se actualiza con las prioridades SaaS.
+
+### Changed
+
+- Estrategia: el repositorio pivota oficialmente de operación interna a producto SaaS; todas las futuras entregas deben alinearse con `docs/product/saas-vision.md`.
+
+### Added
+
 - API: endpoints `/api/calendar` y `/api/calendar/availability` para vistas de calendario y disponibilidad con validaciones de rango y agregados de resumen.
 - API: endpoint `/api/test-utils/bookings` ahora acepta el parámetro `?tag=` para limpiar únicamente los fixtures etiquetados (empleado por las suites Playwright).
 - API: módulo `/api/marketing/**` (stats de portafolio, testimoniales, FAQs, pricing tiers y market stats) con permisos ADMIN/COORDINATOR documentados.

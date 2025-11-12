@@ -1,7 +1,7 @@
-# Production Setup Guide
+# Brisa OS – Guía de configuración en producción
 
-**Last Updated:** November 9, 2025
-**Status:** Ready for Production Deployment
+**Última actualización:** 12 de noviembre de 2025  
+**Estado:** Vigente (SaaS – Brisa OS)
 
 ---
 
@@ -110,7 +110,7 @@ Adicional:
 
 ## 📊 Lead Capture System
 
-El sistema de captura de leads se orquesta internamente (landing → API → PostgreSQL) y puede replicar cada registro hacia Slack y/o un CRM vía webhook. El endpoint `/api/leads` ejecuta hasta **3 intentos** con _timeouts_ de 5 segundos antes de marcar un fallo definitivo (ver `apps/api/src/routes/leads.ts`).
+El sistema de captura de leads se orquesta internamente (landing → API → PostgreSQL) y puede replicar cada registro hacia Slack y/o un CRM vía webhook. El endpoint `/api/leads` ejecuta hasta **3 intentos** con _timeouts_ de 5 segundos antes de marcar un fallo definitivo (ver `apps/api/src/routes/leads.ts`). Los leads QA (emails con `qa+` o notas de prueba) se marcan automáticamente como `LOST` para no contaminar el pipeline comercial.
 
 ### **Arquitectura actual:**
 

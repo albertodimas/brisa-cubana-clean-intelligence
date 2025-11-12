@@ -1,4 +1,4 @@
-# Entorno Staging – Brisa Cubana Clean Intelligence
+# Entorno Staging – Brisa OS (Brisa Cubana Clean Intelligence)
 
 **Última actualización:** 23 de octubre de 2025  
 **Objetivo:** Proveer un espacio intermedio entre desarrollo local y producción para validar integraciones (Stripe, portal cliente, checkout) con datos realistas sin arriesgar clientes reales.
