@@ -163,6 +163,12 @@ function checkEmail(): ServiceCheck {
 }
 
 function checkSentry(): ServiceCheck {
+  if (process.env.SENTRY_HEALTH_CHECK_ENABLED === "false") {
+    return {
+      status: "disabled",
+      message: "Sentry health check disabled by configuration",
+    };
+  }
   const dsn = process.env.SENTRY_DSN;
   if (!dsn) {
     return {
