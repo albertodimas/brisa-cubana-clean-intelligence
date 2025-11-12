@@ -98,6 +98,7 @@ SENTRY_ORG=brisacubana
 SENTRY_PROJECT=brisa-cubana-api
 SENTRY_AUTH_TOKEN=<SENTRY_AUTH_TOKEN>
 SENTRY_ENVIRONMENT=production
+SENTRY_ENABLE_PROFILING=false   # En Vercel/serverless mantenlo en false
 ```
 
 ### Configuración de Alertas en Sentry
