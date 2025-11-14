@@ -1,6 +1,10 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { authenticate, requireRoles } from "../middleware/auth.js";
+import {
+  authenticate,
+  requireRoles,
+  getAuthenticatedUser,
+} from "../middleware/auth.js";
 import { parseSearchableQuery } from "../lib/pagination.js";
 import { isParseFailure } from "../lib/parse-result.js";
 import { validateRequest } from "../lib/validation.js";
@@ -46,8 +50,16 @@ router.get(
       return queryResult.response;
     }
 
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     const repository = getPropertyRepository();
-    const result = await repository.findManyWithSearch(queryResult.data);
+    const result = await repository.findManyWithSearch(
+      queryResult.data,
+      authUser.tenantId,
+    );
     return c.json(result);
   },
 );
@@ -58,10 +70,14 @@ router.get(
   requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
   async (c) => {
     const id = c.req.param("id");
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
 
     try {
       const repository = getPropertyRepository();
-      const property = await repository.findById(id);
+      const property = await repository.findById(id, authUser.tenantId);
 
       if (!property) {
         return c.json({ error: "Property not found" }, 404);
@@ -87,9 +103,17 @@ router.post(
       return validation.response;
     }
 
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     try {
       const repository = getPropertyRepository();
-      const property = await repository.create(validation.data);
+      const property = await repository.create(
+        validation.data,
+        authUser.tenantId,
+      );
       return c.json({ data: property }, 201);
     } catch (error) {
       return handlePrismaError(c, error, {
@@ -116,9 +140,18 @@ router.patch(
       return validation.response;
     }
 
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     try {
       const repository = getPropertyRepository();
-      const property = await repository.update(id, validation.data);
+      const property = await repository.update(
+        id,
+        validation.data,
+        authUser.tenantId,
+      );
       return c.json({ data: property });
     } catch (error) {
       return handlePrismaError(c, error, {
@@ -133,10 +166,14 @@ router.patch(
 
 router.delete("/:id", authenticate, requireRoles(["ADMIN"]), async (c) => {
   const id = c.req.param("id");
+  const authUser = getAuthenticatedUser(c);
+  if (!authUser?.tenantId) {
+    return c.json({ error: "Tenant scope requerido" }, 400);
+  }
 
   try {
     const repository = getPropertyRepository();
-    await repository.delete(id);
+    await repository.delete(id, authUser.tenantId);
     return c.json({ message: "Property deleted successfully" });
   } catch (error) {
     return handlePrismaError(c, error, {

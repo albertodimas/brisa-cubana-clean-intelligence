@@ -1,4 +1,12 @@
-import type { UserRole } from "@prisma/client";
+import type { TenantStatus, UserRole } from "@prisma/client";
+
+export interface TenantMembershipResponse {
+  tenantId: string;
+  tenantSlug: string;
+  tenantName: string;
+  status: TenantStatus;
+  role: UserRole;
+}
 
 export interface CreateUserDto {
   email: string;
@@ -6,6 +14,7 @@ export interface CreateUserDto {
   passwordHash: string;
   role: UserRole;
   isActive?: boolean;
+  tenantId: string;
 }
 
 export interface UpdateUserDto {
@@ -23,10 +32,12 @@ export interface UserResponse {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  tenants?: TenantMembershipResponse[];
 }
 
 export interface AuthUserResponse extends UserResponse {
   passwordHash: string;
+  tenants: TenantMembershipResponse[];
 }
 
 export interface PaginationParams {
@@ -53,16 +64,27 @@ export interface PaginatedResponse<T> {
 }
 
 export interface IUserRepository {
-  findMany(params: PaginationParams): Promise<PaginatedResponse<UserResponse>>;
+  findMany(
+    params: PaginationParams,
+    tenantId?: string,
+  ): Promise<PaginatedResponse<UserResponse>>;
   findManyWithSearch(
     params: UserSearchParams,
+    tenantId?: string,
   ): Promise<PaginatedResponse<UserResponse>>;
-  findById(id: string): Promise<UserResponse | null>;
+  findById(id: string, tenantId?: string): Promise<UserResponse | null>;
   findByEmail(email: string): Promise<UserResponse | null>;
   findAuthByEmail(email: string): Promise<AuthUserResponse | null>;
   create(data: CreateUserDto): Promise<UserResponse>;
-  update(id: string, data: UpdateUserDto): Promise<UserResponse>;
+  update(
+    id: string,
+    data: UpdateUserDto,
+    tenantId?: string,
+  ): Promise<UserResponse>;
   delete(id: string): Promise<void>;
-  restore(id: string): Promise<UserResponse>;
-  findActiveByRoles(roles: UserRole[]): Promise<UserResponse[]>;
+  restore(id: string, tenantId?: string): Promise<UserResponse>;
+  findActiveByRoles(
+    roles: UserRole[],
+    tenantId?: string,
+  ): Promise<UserResponse[]>;
 }

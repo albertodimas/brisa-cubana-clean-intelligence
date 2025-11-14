@@ -49,13 +49,20 @@ export interface PropertySearchParams extends PropertyPaginationParams {
 export interface IPropertyRepository {
   findMany(
     pagination?: PropertyPaginationParams,
+    tenantId?: string,
   ): Promise<{ data: PropertyResponse[]; pagination: PropertyPagination }>;
-  findById(id: string): Promise<PropertyResponse | null>;
-  create(data: CreatePropertyDto): Promise<PropertyResponse>;
-  update(id: string, data: UpdatePropertyDto): Promise<PropertyResponse>;
-  delete(id: string): Promise<void>;
-  restore(id: string): Promise<PropertyResponse>;
+  findById(id: string, tenantId?: string): Promise<PropertyResponse | null>;
+  create(data: CreatePropertyDto, tenantId?: string): Promise<PropertyResponse>;
+  update(
+    id: string,
+    data: UpdatePropertyDto,
+    tenantId?: string,
+  ): Promise<PropertyResponse>;
+  delete(id: string, tenantId?: string): Promise<void>;
+  restore(id: string, tenantId?: string): Promise<PropertyResponse>;
   findManyWithSearch(
     params: PropertySearchParams,
+    tenantId?: string,
   ): Promise<{ data: PropertyResponse[]; pagination: PropertyPagination }>;
+  findByOwner(ownerId: string, tenantId?: string): Promise<PropertyResponse[]>;
 }

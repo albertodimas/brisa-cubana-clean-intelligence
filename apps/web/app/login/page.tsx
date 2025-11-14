@@ -26,6 +26,8 @@ export default async function LoginPage() {
 
   const portalLoginEnabled =
     process.env.NEXT_PUBLIC_PORTAL_LOGIN_ENABLED === "true";
+  const defaultTenantSlug =
+    process.env.NEXT_PUBLIC_DEFAULT_TENANT_SLUG ?? "brisa-cubana";
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center gap-8 bg-gradient-to-br from-brisa-950 via-brisa-900 to-brisa-950 px-6 py-8 text-brisa-50">
@@ -78,7 +80,10 @@ export default async function LoginPage() {
 
         {portalLoginEnabled ? (
           <ScrollReveal variant="fadeUp" delay={0.2}>
-            <LoginForm action={loginAction} />
+            <LoginForm
+              action={loginAction}
+              defaultTenantSlug={defaultTenantSlug}
+            />
           </ScrollReveal>
         ) : (
           <ScrollReveal variant="fadeUp" delay={0.2}>

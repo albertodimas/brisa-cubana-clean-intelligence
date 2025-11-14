@@ -55,6 +55,9 @@ Pasos para alinear los valores de entorno propios del proxy web y del portal cli
    # Habilitar el checkout sólo cuando esté listo comercialmente
    echo "false" | vercel env add NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT production --force
 
+   # Slug del tenant activo para el login multi-tenant (debe coincidir con DEFAULT_TENANT_SLUG en la API)
+   echo "brisa-cubana" | vercel env add NEXT_PUBLIC_DEFAULT_TENANT_SLUG production --force
+
    # Replay de Sentry: mantener desactivado salvo campañas aprobadas
    for env in production development; do
      echo "false" | vercel env add SENTRY_REPLAY_ENABLED "$env" --force
@@ -88,6 +91,8 @@ La API valida las env vars en tiempo de arranque. Si falta alguna crítica, el d
 | `DATABASE_URL`                                                   | dev / preview / prod | Cadena de conexión (Neon/Vercel Postgres).                                               |
 | `DATABASE_URL_UNPOOLED`                                          | dev / preview / prod | Igual que la anterior pero para conexiones directas (Prisma `directUrl`).                |
 | `JWT_SECRET`                                                     | dev / preview / prod | Cadena aleatoria >= 32 chars. La API se detiene si falta.                                |
+| `DEFAULT_TENANT_SLUG`                                            | dev / preview / prod | Slug de tenant usado como fallback en los logins multi-tenant (ej. `brisa-cubana`).      |
+| `DEFAULT_TENANT_ID`                                              | opcional             | ID persistente del tenant por defecto (`tenant_brisa_cubana` si no se define).           |
 | `NOTIFICATION_SMTP_*`                                            | dev / preview / prod | Host, puerto, usuario, password y flag `SECURE` para el SMTP operativo (SendGrid).       |
 | `NOTIFICATION_FROM_EMAIL`                                        | dev / preview / prod | Remitente de correos transaccionales (ej. `Brisa Cubana <notificaciones@...>`).          |
 | `NOTIFICATION_STREAM_HEARTBEAT_MS`, `NOTIFICATION_STREAM_LIMIT`  | opcional             | Ajustes del stream SSE de notificaciones internas (default `10000` / `50`).              |

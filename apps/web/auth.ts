@@ -34,6 +34,11 @@ type AuthUser = {
   refreshToken: string;
   accessExpiresAt: string;
   refreshExpiresAt: string;
+  tenant: {
+    id: string;
+    slug: string;
+    name?: string | null;
+  };
 };
 
 type RefreshResponse = {
@@ -49,6 +54,9 @@ type BrisaJWT = JWT & {
   accessTokenExpires?: number;
   refreshTokenExpires?: number;
   role?: string;
+  tenantId?: string;
+  tenantSlug?: string;
+  tenantName?: string | null;
   error?: string;
 };
 
@@ -77,6 +85,10 @@ export const {
       async authorize(credentials, request) {
         const email = credentials.email;
         const password = credentials.password;
+        const tenantSlug =
+          typeof credentials.tenantSlug === "string"
+            ? credentials.tenantSlug
+            : undefined;
 
         if (
           !email ||
@@ -111,7 +123,7 @@ export const {
         const res = await fetch(`${API_URL}/api/authentication/login`, {
           method: "POST",
           headers: proxyHeaders,
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, tenantSlug }),
         });
 
         const json = await res.json().catch(() => null);
@@ -130,7 +142,12 @@ export const {
         const expiresAt = json.expiresAt as string | undefined;
         const refreshExpiresAt = json.refreshExpiresAt as string | undefined;
         const data = json.data as
-          | { id: string; email: string; role: string }
+          | {
+              id: string;
+              email: string;
+              role: string;
+              tenant?: { id: string; slug: string; name?: string };
+            }
           | undefined;
 
         if (
@@ -154,6 +171,11 @@ export const {
           refreshToken,
           accessExpiresAt: expiresAt,
           refreshExpiresAt,
+          tenant: {
+            id: data.tenant?.id ?? "",
+            slug: data.tenant?.slug ?? "",
+            name: data.tenant?.name ?? null,
+          },
         } satisfies AuthUser;
       },
     }),
@@ -173,6 +195,9 @@ export const {
         brisaToken.refreshTokenExpires = new Date(
           authUser.refreshExpiresAt,
         ).getTime();
+        brisaToken.tenantId = authUser.tenant.id;
+        brisaToken.tenantSlug = authUser.tenant.slug;
+        brisaToken.tenantName = authUser.tenant.name ?? null;
         delete brisaToken.error;
         return brisaToken;
       }
@@ -190,7 +215,10 @@ export const {
         return brisaToken;
       }
 
-      const refreshed = await refreshAccessToken(brisaToken.refreshToken);
+      const refreshed = await refreshAccessToken(
+        brisaToken.refreshToken,
+        brisaToken.tenantSlug,
+      );
       if (!refreshed) {
         brisaToken.error = "RefreshAccessTokenError";
         delete brisaToken.accessToken;
@@ -217,6 +245,11 @@ export const {
           typeof brisaToken.role === "string"
             ? brisaToken.role
             : session.user.role;
+        session.user.tenant = {
+          id: brisaToken.tenantId ?? "",
+          slug: brisaToken.tenantSlug ?? "",
+          name: brisaToken.tenantName ?? null,
+        };
       }
 
       session.accessToken = brisaToken.accessToken;
@@ -253,7 +286,10 @@ export const {
   trustHost: true,
 });
 
-async function refreshAccessToken(refreshToken: string): Promise<{
+async function refreshAccessToken(
+  refreshToken: string,
+  tenantSlug?: string,
+): Promise<{
   accessToken: string;
   refreshToken: string;
   accessExpiresAt: number;
@@ -265,7 +301,7 @@ async function refreshAccessToken(refreshToken: string): Promise<{
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({ refreshToken, tenantSlug }),
       cache: "no-store",
     });
 

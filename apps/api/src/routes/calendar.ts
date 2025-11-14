@@ -1,6 +1,10 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { authenticate, requireRoles } from "../middleware/auth.js";
+import {
+  authenticate,
+  requireRoles,
+  getAuthenticatedUser,
+} from "../middleware/auth.js";
 import { getBookingRepository } from "../container.js";
 import { serializeBooking } from "../lib/serializers.js";
 import { calendarLogger } from "../lib/logger.js";
@@ -75,6 +79,11 @@ router.get(
   authenticate,
   requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
   async (c) => {
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     const startedAt = Date.now();
     const parsed = calendarQuerySchema.safeParse(c.req.query());
     if (!parsed.success) {
@@ -179,6 +188,7 @@ router.get(
       {
         orderBy: [{ scheduledAt: "asc" }],
       },
+      authUser.tenantId,
     );
 
     // Group bookings by date

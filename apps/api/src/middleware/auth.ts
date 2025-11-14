@@ -7,6 +7,9 @@ type AuthInfo = {
   id: string;
   email: string;
   role: UserRole;
+  tenantId: string;
+  tenantSlug: string;
+  tenantName?: string;
   kind: "user" | "service";
 };
 
@@ -50,6 +53,9 @@ export const authenticate: MiddlewareHandler = async (c, next) => {
     id: payload.sub,
     email: payload.email,
     role: payload.role,
+    tenantId: payload.tenantId,
+    tenantSlug: payload.tenantSlug,
+    tenantName: payload.tenantName,
     kind: "user",
   });
 

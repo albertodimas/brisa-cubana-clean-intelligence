@@ -1148,12 +1148,15 @@ describe("app", () => {
 
     const res = await app.request("/api/services");
     expect(res.status).toBe(200);
-    expect(spy).toHaveBeenCalledWith({
-      search: undefined,
-      active: undefined,
-      limit: 50,
-      cursor: undefined,
-    });
+    expect(spy).toHaveBeenCalledWith(
+      {
+        search: undefined,
+        active: undefined,
+        limit: 50,
+        cursor: undefined,
+      },
+      undefined,
+    );
 
     spy.mockRestore();
   });

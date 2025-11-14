@@ -38,19 +38,19 @@ describe("LandingPage", () => {
   it("muestra hero y llamados a la acción", async () => {
     const markup = await renderLandingPage();
     expect(markup).toContain(
-      "Limpieza profesional y documentada para propiedades premium en Miami.",
+      "Tu operación de limpieza, digitalizada en minutos.",
     );
-    expect(markup).toContain("Agendar diagnóstico");
-    expect(markup).toContain("Ver portal");
+    expect(markup).toContain("Solicitar demo");
+    expect(markup).toContain("Ver cómo funciona");
   });
 
   it("detalla beneficios clave", async () => {
     const markup = await renderLandingPage();
 
-    expect(markup).toContain("Por qué Brisa Cubana");
-    expect(markup).toContain("Operación premium con resultados medibles");
-    expect(markup).toContain("Servicios clave");
-    expect(markup).toContain("Portal cliente");
+    expect(markup).toContain("Por qué Brisa OS");
+    expect(markup).toContain("Software pensado para operaciones premium");
+    expect(markup).toContain("Productividad");
+    expect(markup).toContain("Portal cliente listo para entregar");
   });
 
   it("presenta testimonios, FAQ y formulario de contacto", async () => {

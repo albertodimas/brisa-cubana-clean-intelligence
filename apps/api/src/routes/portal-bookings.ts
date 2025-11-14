@@ -10,6 +10,9 @@ import { authenticatePortal, getPortalAuth } from "../middleware/auth.js";
 import { serializeBooking } from "../lib/serializers.js";
 import { logger } from "../lib/logger.js";
 
+const DEFAULT_TENANT_ID =
+  process.env.DEFAULT_TENANT_ID ?? "tenant_brisa_cubana";
+
 const router = new Hono();
 
 const bookingStatusValues = [
@@ -42,15 +45,22 @@ function formatDateForMessage(date: Date): string {
   return date.toISOString().replace("T", " ").replace("Z", " UTC");
 }
 
+function resolveTenantIdFromUser(
+  user: { tenants?: { tenantId: string }[] } | null,
+) {
+  return user?.tenants?.[0]?.tenantId ?? DEFAULT_TENANT_ID;
+}
+
 async function notifyOperationsAboutBooking(
   userRepository: ReturnType<typeof getUserRepository>,
   notificationRepository: ReturnType<typeof getNotificationRepository>,
   notification: { type: NotificationType; message: string },
+  tenantId: string,
 ) {
-  const operations = await userRepository.findActiveByRoles([
-    "ADMIN",
-    "COORDINATOR",
-  ]);
+  const operations = await userRepository.findActiveByRoles(
+    ["ADMIN", "COORDINATOR"],
+    tenantId,
+  );
 
   if (operations.length === 0) {
     return;
@@ -92,6 +102,7 @@ router.get("/", async (c) => {
   }
 
   const bookingRepository = getBookingRepository();
+  const tenantId = resolveTenantIdFromUser(user);
   const result = await bookingRepository.findManyPaginated(
     limit,
     cursor,
@@ -103,6 +114,7 @@ router.get("/", async (c) => {
     {
       orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
     },
+    tenantId,
   );
 
   const serialized = result.data.map((booking) => serializeBooking(booking));
@@ -146,7 +158,8 @@ router.get("/:id", async (c) => {
     return c.json({ error: "Cuenta no habilitada para portal" }, 403);
   }
 
-  const booking = await bookingRepository.findByIdWithRelations(id);
+  const tenantId = resolveTenantIdFromUser(user);
+  const booking = await bookingRepository.findByIdWithRelations(id, tenantId);
   if (!booking || booking.customerId !== user.id) {
     logger.warn(
       {
@@ -213,7 +226,8 @@ router.post("/:id/cancel", async (c) => {
     return c.json({ error: "Cuenta no habilitada para portal" }, 403);
   }
 
-  const booking = await bookingRepository.findByIdWithRelations(id);
+  const tenantId = resolveTenantIdFromUser(user);
+  const booking = await bookingRepository.findByIdWithRelations(id, tenantId);
   if (!booking || booking.customerId !== user.id) {
     return c.json({ error: "Reserva no encontrada" }, 404);
   }
@@ -230,12 +244,19 @@ router.post("/:id/cancel", async (c) => {
     : "Cancelación solicitada desde el portal cliente.";
   const updatedNotes = [booking.notes, reasonNote].filter(Boolean).join("\n\n");
 
-  await bookingRepository.update(booking.id, {
-    status: "CANCELLED",
-    notes: updatedNotes.slice(0, 500),
-  });
+  await bookingRepository.update(
+    booking.id,
+    {
+      status: "CANCELLED",
+      notes: updatedNotes.slice(0, 500),
+    },
+    tenantId,
+  );
 
-  const updated = await bookingRepository.findByIdWithRelations(booking.id);
+  const updated = await bookingRepository.findByIdWithRelations(
+    booking.id,
+    tenantId,
+  );
 
   logger.info(
     {
@@ -257,10 +278,15 @@ router.post("/:id/cancel", async (c) => {
   const message =
     `Portal: ${booking.code} (${serviceName}) cancelada por ${customerLabel} (${scheduledAtLabel}).${reasonSnippet}`.trim();
 
-  await notifyOperationsAboutBooking(userRepository, notificationRepository, {
-    type: NotificationType.BOOKING_CANCELLED,
-    message,
-  });
+  await notifyOperationsAboutBooking(
+    userRepository,
+    notificationRepository,
+    {
+      type: NotificationType.BOOKING_CANCELLED,
+      message,
+    },
+    tenantId,
+  );
 
   return c.json({
     data: serializeBooking(updated ?? booking),
@@ -300,7 +326,8 @@ router.post("/:id/reschedule", async (c) => {
     return c.json({ error: "Cuenta no habilitada para portal" }, 403);
   }
 
-  const booking = await bookingRepository.findByIdWithRelations(id);
+  const tenantId = resolveTenantIdFromUser(user);
+  const booking = await bookingRepository.findByIdWithRelations(id, tenantId);
   if (!booking || booking.customerId !== user.id) {
     return c.json({ error: "Reserva no encontrada" }, 404);
   }
@@ -320,13 +347,20 @@ router.post("/:id/reschedule", async (c) => {
     noteSegments.push("Reagendado desde el portal cliente.");
   }
 
-  await bookingRepository.update(booking.id, {
-    scheduledAt,
-    status: booking.status === "PENDING" ? booking.status : "PENDING",
-    notes: noteSegments.filter(Boolean).join("\n\n").slice(0, 500),
-  });
+  await bookingRepository.update(
+    booking.id,
+    {
+      scheduledAt,
+      status: booking.status === "PENDING" ? booking.status : "PENDING",
+      notes: noteSegments.filter(Boolean).join("\n\n").slice(0, 500),
+    },
+    tenantId,
+  );
 
-  const updated = await bookingRepository.findByIdWithRelations(booking.id);
+  const updated = await bookingRepository.findByIdWithRelations(
+    booking.id,
+    tenantId,
+  );
 
   logger.info(
     {
@@ -347,10 +381,15 @@ router.post("/:id/reschedule", async (c) => {
   const message =
     `Portal: ${booking.code} (${serviceName}) reagendada por ${customerLabel} al ${scheduledAtLabel}.${notesSnippet}`.trim();
 
-  await notifyOperationsAboutBooking(userRepository, notificationRepository, {
-    type: NotificationType.BOOKING_RESCHEDULED,
-    message,
-  });
+  await notifyOperationsAboutBooking(
+    userRepository,
+    notificationRepository,
+    {
+      type: NotificationType.BOOKING_RESCHEDULED,
+      message,
+    },
+    tenantId,
+  );
 
   return c.json({
     data: serializeBooking(updated ?? booking),

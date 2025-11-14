@@ -18,6 +18,9 @@ export type AuthPayload = {
   sub: string;
   email: string;
   role: UserRole;
+  tenantId: string;
+  tenantSlug: string;
+  tenantName?: string;
 };
 
 export type PortalAuthPayload = {

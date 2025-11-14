@@ -45,6 +45,9 @@ Guía verificada para levantar Brisa OS (Brisa Cubana Clean Intelligence) en un 
    # PORTAL_MAGIC_LINK_EXPOSE_DEBUG="true" # Usa "false" en producción para ocultar el token
    # ENABLE_TEST_UTILS="true" # Solo en local/CI; en Preview/Producción debe ser "false"
    # PLAYWRIGHT_TEST_RUN="true" # Playwright lo inyecta automáticamente; decláralo solo si levantas la API para pruebas E2E manuales
+   # DEFAULT_TENANT_SLUG="brisa-cubana" # Slug que el backend usará como fallback cuando el login no envíe tenant
+   # DEFAULT_TENANT_ID="tenant_brisa_cubana" # ID interno del tenant base; no lo cambies salvo que migres datos
+   # NEXT_PUBLIC_DEFAULT_TENANT_SLUG="brisa-cubana" # Prefill del campo "Código de tenant" en la UI
    ```
 
    > Consulta `config/env.manifest.json` para conocer las variables requeridas y ejecuta `pnpm env:status` cuando ajustes valores en `.env.local`.
@@ -76,11 +79,11 @@ Guía verificada para levantar Brisa OS (Brisa Cubana Clean Intelligence) en un 
 
 ## Credenciales sembradas
 
-| Rol          | Usuario                                        | Contraseña  |
-| ------------ | ---------------------------------------------- | ----------- |
-| Admin        | `admin@brisacubanacleanintelligence.com`       | `Brisa123!` |
-| Coordinador  | `operaciones@brisacubanacleanintelligence.com` | `Brisa123!` |
-| Cliente demo | `cliente@brisacubanacleanintelligence.com`     | `Brisa123!` |
+| Rol          | Usuario                                        | Contraseña  | Tenant slug    |
+| ------------ | ---------------------------------------------- | ----------- | -------------- |
+| Admin        | `admin@brisacubanacleanintelligence.com`       | `Brisa123!` | `brisa-cubana` |
+| Coordinador  | `operaciones@brisacubanacleanintelligence.com` | `Brisa123!` | `brisa-cubana` |
+| Cliente demo | `cliente@brisacubanacleanintelligence.com`     | `Brisa123!` | `brisa-cubana` |
 
 ## Scripts de calidad
 
@@ -107,7 +110,7 @@ pnpm build       # Compila Next.js y API
 
 ## Autenticación en la UI
 
-1. Accede a <http://localhost:3000/login> y autentícate con un usuario `ADMIN` o `COORDINATOR`.
+1. Accede a <http://localhost:3000/login> y autentícate con un usuario `ADMIN` o `COORDINATOR`. Completa también el campo **Código de tenant** usando `brisa-cubana` (o el slug que hayas configurado en `DEFAULT_TENANT_SLUG`); sin ese dato el backend rechazará el JWT.
 2. El panel operativo permitirá crear servicios, propiedades y reservas usando las APIs reales.
 3. Para el portal cliente, visita <http://localhost:3000/clientes/acceso>, solicita un enlace mágico con `cliente@brisacubanacleanintelligence.com` y usa el token de debug que se muestra (solo en beta) para confirmar el acceso en <http://localhost:3000/clientes/acceso/confirmar?token=...>.
 4. Para validar pagos de prueba, visita <http://localhost:3000/checkout> con las claves modo test de Stripe y usa tarjetas demo (`4242 4242 4242 4242`) antes de activar modo live.

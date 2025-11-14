@@ -48,7 +48,11 @@ describe("loginAction", () => {
     vi.mocked(signIn).mockResolvedValueOnce(undefined);
 
     const result = await loginAction(
-      buildFormData({ email: "user@example.com", password: "secret" }),
+      buildFormData({
+        email: "user@example.com",
+        password: "secret",
+        tenantSlug: "brisa-cubana",
+      }),
     );
 
     expect(signIn).toHaveBeenCalledWith(
@@ -56,6 +60,7 @@ describe("loginAction", () => {
       expect.objectContaining({
         email: "user@example.com",
         password: "secret",
+        tenantSlug: "brisa-cubana",
         redirect: false,
       }),
     );
@@ -77,7 +82,11 @@ describe("loginAction", () => {
     vi.mocked(signIn).mockRejectedValueOnce(error);
 
     const result = await loginAction(
-      buildFormData({ email: "user@example.com", password: "bad" }),
+      buildFormData({
+        email: "user@example.com",
+        password: "bad",
+        tenantSlug: "brisa",
+      }),
     );
 
     expect(result).toEqual({
@@ -91,7 +100,11 @@ describe("loginAction", () => {
     vi.mocked(signIn).mockRejectedValueOnce(error);
 
     const result = await loginAction(
-      buildFormData({ email: "user@example.com", password: "secret" }),
+      buildFormData({
+        email: "user@example.com",
+        password: "secret",
+        tenantSlug: "demo",
+      }),
     );
 
     expect(result).toEqual({ error: "No se pudo iniciar sesión" });
@@ -101,7 +114,11 @@ describe("loginAction", () => {
     vi.mocked(signIn).mockRejectedValueOnce(new Error("boom"));
 
     const result = await loginAction(
-      buildFormData({ email: "user@example.com", password: "secret" }),
+      buildFormData({
+        email: "user@example.com",
+        password: "secret",
+        tenantSlug: "demo",
+      }),
     );
 
     expect(result).toEqual({ error: "Error inesperado" });

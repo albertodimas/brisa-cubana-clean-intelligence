@@ -18,6 +18,13 @@ export type ServiceCreateInput = {
 
 export type ServiceUpdateInput = Partial<ServiceCreateInput>;
 
+const DEFAULT_TENANT_ID =
+  process.env.DEFAULT_TENANT_ID ?? "tenant_brisa_cubana";
+
+function assertTenantId(tenantId?: string): string {
+  return tenantId ?? DEFAULT_TENANT_ID;
+}
+
 /**
  * Repositorio para la entidad Service
  *
@@ -30,17 +37,25 @@ export class ServiceRepository
 {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findById(id: string): Promise<Service | null> {
-    return await this.prisma.service.findUnique({
-      where: { id },
+  async findById(id: string, tenantId?: string): Promise<Service | null> {
+    const scopedTenantId = assertTenantId(tenantId);
+    return await this.prisma.service.findFirst({
+      where: { id, tenantId: scopedTenantId },
     });
   }
 
-  async findMany(options: FindManyOptions = {}): Promise<Service[]> {
+  async findMany(
+    options: FindManyOptions = {},
+    tenantId?: string,
+  ): Promise<Service[]> {
+    const scopedTenantId = assertTenantId(tenantId);
     const { take, skip, cursor, where, orderBy } = options;
 
     return await this.prisma.service.findMany({
-      where,
+      where: {
+        ...where,
+        tenantId: scopedTenantId,
+      },
       take,
       skip,
       cursor,
@@ -57,12 +72,17 @@ export class ServiceRepository
         | Prisma.ServiceOrderByWithRelationInput[];
       where?: Prisma.ServiceWhereInput;
     } = {},
+    tenantId?: string,
   ): Promise<PaginatedResult<Service>> {
+    const scopedTenantId = assertTenantId(tenantId);
     const take = limit + 1; // Traer uno extra para saber si hay más
     const { orderBy, where } = options;
 
     const services = await this.prisma.service.findMany({
-      where,
+      where: {
+        ...where,
+        tenantId: scopedTenantId,
+      },
       take,
       ...(cursor && {
         skip: 1,
@@ -84,35 +104,47 @@ export class ServiceRepository
     };
   }
 
-  async create(data: ServiceCreateInput): Promise<Service> {
+  async create(data: ServiceCreateInput, tenantId?: string): Promise<Service> {
+    const scopedTenantId = assertTenantId(tenantId);
     return await this.prisma.service.create({
-      data,
+      data: { ...data, tenantId: scopedTenantId },
     });
   }
 
-  async update(id: string, data: ServiceUpdateInput): Promise<Service> {
+  async update(
+    id: string,
+    data: ServiceUpdateInput,
+    tenantId?: string,
+  ): Promise<Service> {
+    const scopedTenantId = assertTenantId(tenantId);
     return await this.prisma.service.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data,
     });
   }
 
-  async count(where?: any): Promise<number> {
+  async count(where?: any, tenantId?: string): Promise<number> {
+    const scopedTenantId = assertTenantId(tenantId);
     return await this.prisma.service.count({
-      where,
+      where: {
+        ...where,
+        tenantId: scopedTenantId,
+      },
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, tenantId?: string): Promise<void> {
+    const scopedTenantId = assertTenantId(tenantId);
     await this.prisma.service.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data: { deletedAt: new Date() },
     });
   }
 
-  async restore(id: string): Promise<Service> {
+  async restore(id: string, tenantId?: string): Promise<Service> {
+    const scopedTenantId = assertTenantId(tenantId);
     return await this.prisma.service.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data: { deletedAt: null },
     });
   }
@@ -120,9 +152,10 @@ export class ServiceRepository
   /**
    * Busca servicios activos
    */
-  async findActive(): Promise<Service[]> {
+  async findActive(tenantId?: string): Promise<Service[]> {
+    const scopedTenantId = assertTenantId(tenantId);
     return await this.prisma.service.findMany({
-      where: { active: true },
+      where: { active: true, tenantId: scopedTenantId },
       orderBy: { createdAt: "desc" },
     });
   }
@@ -130,9 +163,11 @@ export class ServiceRepository
   /**
    * Busca servicios por nombre (búsqueda parcial)
    */
-  async findByName(name: string): Promise<Service[]> {
+  async findByName(name: string, tenantId?: string): Promise<Service[]> {
+    const scopedTenantId = assertTenantId(tenantId);
     return await this.prisma.service.findMany({
       where: {
+        tenantId: scopedTenantId,
         name: {
           contains: name,
           mode: "insensitive",
@@ -142,12 +177,16 @@ export class ServiceRepository
     });
   }
 
-  async findManyWithSearch(options: {
-    search?: string;
-    active?: boolean;
-    limit?: number;
-    cursor?: string;
-  }): Promise<PaginatedResult<Service>> {
+  async findManyWithSearch(
+    options: {
+      search?: string;
+      active?: boolean;
+      limit?: number;
+      cursor?: string;
+    },
+    tenantId?: string,
+  ): Promise<PaginatedResult<Service>> {
+    const scopedTenantId = assertTenantId(tenantId);
     const { search, active, limit = 50, cursor } = options;
 
     const where: Prisma.ServiceWhereInput = {};
@@ -163,9 +202,16 @@ export class ServiceRepository
       ];
     }
 
-    return await this.findManyPaginated(limit, cursor, {
-      where,
-      orderBy: [{ name: "asc" }, { id: "asc" }],
-    });
+    where.tenantId = scopedTenantId;
+
+    return await this.findManyPaginated(
+      limit,
+      cursor,
+      {
+        where,
+        orderBy: [{ name: "asc" }, { id: "asc" }],
+      },
+      scopedTenantId,
+    );
   }
 }

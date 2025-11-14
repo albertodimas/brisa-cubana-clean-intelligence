@@ -10,6 +10,27 @@ import type {
   PaginatedResult,
 } from "./base-repository.js";
 
+const DEFAULT_TENANT_ID =
+  process.env.DEFAULT_TENANT_ID ?? "tenant_brisa_cubana";
+
+function resolveTenantId(tenantId?: string) {
+  return tenantId ?? DEFAULT_TENANT_ID;
+}
+
+function withTenantScope(
+  where: Prisma.BookingWhereInput | undefined,
+  tenantId: string,
+): Prisma.BookingWhereInput {
+  if (!where) {
+    return { tenantId } satisfies Prisma.BookingWhereInput;
+  }
+
+  return {
+    ...where,
+    tenantId,
+  } satisfies Prisma.BookingWhereInput;
+}
+
 /**
  * Tipos para Booking Repository
  */
@@ -24,6 +45,7 @@ export type BookingCreateInput = {
   customerId: string;
   notes?: string;
   assignedStaffId?: string | null;
+  tenantId?: string;
 };
 
 export type BookingUpdateInput = Partial<
@@ -65,17 +87,20 @@ export class BookingRepository
 {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findById(id: string): Promise<Booking | null> {
-    return await this.prisma.booking.findUnique({
-      where: { id },
+  async findById(id: string, tenantId?: string): Promise<Booking | null> {
+    const scopedTenantId = resolveTenantId(tenantId);
+    return await this.prisma.booking.findFirst({
+      where: { id, tenantId: scopedTenantId },
     });
   }
 
   async findByIdWithRelations(
     id: string,
+    tenantId?: string,
   ): Promise<BookingWithRelations | null> {
-    return await this.prisma.booking.findUnique({
-      where: { id },
+    const scopedTenantId = resolveTenantId(tenantId);
+    return await this.prisma.booking.findFirst({
+      where: { id, tenantId: scopedTenantId },
       include: {
         service: true,
         property: true,
@@ -93,11 +118,15 @@ export class BookingRepository
     });
   }
 
-  async findMany(options: FindManyOptions = {}): Promise<Booking[]> {
+  async findMany(
+    options: FindManyOptions = {},
+    tenantId?: string,
+  ): Promise<Booking[]> {
     const { take, skip, cursor, where, include, orderBy } = options;
+    const scopedTenantId = resolveTenantId(tenantId);
 
     return await this.prisma.booking.findMany({
-      where,
+      where: withTenantScope(where, scopedTenantId),
       include,
       take,
       skip,
@@ -116,10 +145,15 @@ export class BookingRepository
         | Prisma.BookingOrderByWithRelationInput
         | Prisma.BookingOrderByWithRelationInput[];
     } = {},
+    tenantId?: string,
   ): Promise<PaginatedResult<Booking | BookingWithRelations>> {
     const take = limit + 1;
 
-    const where = this.buildWhereClause(filters);
+    const scopedTenantId = resolveTenantId(tenantId);
+    const where = withTenantScope(
+      this.buildWhereClause(filters),
+      scopedTenantId,
+    );
     const { orderBy } = options;
 
     const bookings = await this.prisma.booking.findMany({
@@ -159,15 +193,21 @@ export class BookingRepository
     };
   }
 
-  async create(data: BookingCreateInput): Promise<Booking> {
+  async create(data: BookingCreateInput, tenantId?: string): Promise<Booking> {
+    const scopedTenantId = resolveTenantId(data.tenantId ?? tenantId);
     return await this.prisma.booking.create({
-      data,
+      data: { ...data, tenantId: scopedTenantId },
     });
   }
 
-  async update(id: string, data: BookingUpdateInput): Promise<Booking> {
+  async update(
+    id: string,
+    data: BookingUpdateInput,
+    tenantId?: string,
+  ): Promise<Booking> {
+    const scopedTenantId = resolveTenantId(tenantId);
     return await this.prisma.booking.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data,
     });
   }
@@ -181,13 +221,19 @@ export class BookingRepository
   /**
    * Busca reservas por rango de fechas
    */
-  async findByDateRange(from: Date, to: Date): Promise<Booking[]> {
+  async findByDateRange(
+    from: Date,
+    to: Date,
+    tenantId?: string,
+  ): Promise<Booking[]> {
+    const scopedTenantId = resolveTenantId(tenantId);
     return await this.prisma.booking.findMany({
       where: {
         scheduledAt: {
           gte: from,
           lte: to,
         },
+        tenantId: scopedTenantId,
       },
       orderBy: { scheduledAt: "asc" },
     });
@@ -196,9 +242,13 @@ export class BookingRepository
   /**
    * Busca reservas por estado
    */
-  async findByStatus(status: BookingStatus): Promise<Booking[]> {
+  async findByStatus(
+    status: BookingStatus,
+    tenantId?: string,
+  ): Promise<Booking[]> {
+    const scopedTenantId = resolveTenantId(tenantId);
     return await this.prisma.booking.findMany({
-      where: { status },
+      where: { status, tenantId: scopedTenantId },
       orderBy: { scheduledAt: "desc" },
     });
   }
@@ -206,9 +256,13 @@ export class BookingRepository
   /**
    * Busca reservas de una propiedad específica
    */
-  async findByProperty(propertyId: string): Promise<Booking[]> {
+  async findByProperty(
+    propertyId: string,
+    tenantId?: string,
+  ): Promise<Booking[]> {
+    const scopedTenantId = resolveTenantId(tenantId);
     return await this.prisma.booking.findMany({
-      where: { propertyId },
+      where: { propertyId, tenantId: scopedTenantId },
       include: {
         service: true,
         customer: true,
@@ -217,16 +271,18 @@ export class BookingRepository
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, tenantId?: string): Promise<void> {
+    const scopedTenantId = resolveTenantId(tenantId);
     await this.prisma.booking.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data: { deletedAt: new Date() },
     });
   }
 
-  async restore(id: string): Promise<Booking> {
+  async restore(id: string, tenantId?: string): Promise<Booking> {
+    const scopedTenantId = resolveTenantId(tenantId);
     return await this.prisma.booking.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data: { deletedAt: null },
     });
   }
@@ -246,13 +302,16 @@ export class BookingRepository
     scheduledAt: Date,
     durationMin: number,
     excludeBookingId?: string,
+    tenantId?: string,
   ): Promise<boolean> {
     const endTime = new Date(scheduledAt.getTime() + durationMin * 60 * 1000);
+    const scopedTenantId = resolveTenantId(tenantId);
 
     // Buscar reservas activas que se solapen con el rango propuesto
     const conflictingBooking = await this.prisma.booking.findFirst({
       where: {
         propertyId,
+        tenantId: scopedTenantId,
         deletedAt: null,
         // Solo considerar reservas que no están canceladas
         status: {

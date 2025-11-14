@@ -132,6 +132,11 @@ router.get(
       return queryResult.response;
     }
 
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     const {
       search,
       from,
@@ -185,6 +190,7 @@ router.get(
       {
         orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
       },
+      authUser.tenantId,
     );
 
     const serialized = result.data.map((booking) => serializeBooking(booking));
@@ -206,11 +212,19 @@ router.get(
   authenticate,
   requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
   async (c) => {
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     const id = c.req.param("id");
     const repository = getBookingRepository();
 
     try {
-      const booking = await repository.findByIdWithRelations(id);
+      const booking = await repository.findByIdWithRelations(
+        id,
+        authUser.tenantId,
+      );
 
       if (!booking) {
         return c.json({ error: "Booking not found" }, 404);
@@ -236,6 +250,11 @@ router.post(
       return c.json({ error: parsed.error.flatten() }, 400);
     }
 
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     const { durationMin, serviceId, customerId, propertyId, ...rest } =
       parsed.data;
 
@@ -245,9 +264,9 @@ router.post(
     const bookingRepository = getBookingRepository();
 
     const [service, customer, property] = await Promise.all([
-      serviceRepository.findById(serviceId),
-      userRepository.findById(customerId),
-      propertyRepository.findById(propertyId),
+      serviceRepository.findById(serviceId, authUser.tenantId),
+      userRepository.findById(customerId, authUser.tenantId),
+      propertyRepository.findById(propertyId, authUser.tenantId),
     ]);
     if (!service) {
       return c.json({ error: "Service not found" }, 404);
@@ -265,6 +284,8 @@ router.post(
       propertyId,
       rest.scheduledAt,
       finalDuration,
+      undefined,
+      authUser.tenantId,
     );
 
     if (hasConflict) {
@@ -291,9 +312,15 @@ router.post(
         ...(rest.notes !== undefined ? { notes: rest.notes } : {}),
       };
 
-      const created = await bookingRepository.create(createPayload);
+      const created = await bookingRepository.create(
+        createPayload,
+        authUser.tenantId,
+      );
       const bookingWithRelations =
-        await bookingRepository.findByIdWithRelations(created.id);
+        await bookingRepository.findByIdWithRelations(
+          created.id,
+          authUser.tenantId,
+        );
 
       // Queue notification for booking created
       if (bookingWithRelations) {
@@ -326,27 +353,41 @@ router.patch(
       return c.json({ error: parsed.error.flatten() }, 400);
     }
 
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     const { propertyId, serviceId, ...rest } = parsed.data;
     const serviceRepository = getServiceRepository();
     const propertyRepository = getPropertyRepository();
     const bookingRepository = getBookingRepository();
 
     if (serviceId) {
-      const service = await serviceRepository.findById(serviceId);
+      const service = await serviceRepository.findById(
+        serviceId,
+        authUser.tenantId,
+      );
       if (!service) {
         return c.json({ error: "Service not found" }, 404);
       }
     }
 
     if (propertyId) {
-      const property = await propertyRepository.findById(propertyId);
+      const property = await propertyRepository.findById(
+        propertyId,
+        authUser.tenantId,
+      );
       if (!property) {
         return c.json({ error: "Property not found" }, 404);
       }
     }
 
     // Get existing booking for notification comparison
-    const existingBooking = await bookingRepository.findById(id);
+    const existingBooking = await bookingRepository.findById(
+      id,
+      authUser.tenantId,
+    );
     if (!existingBooking) {
       return c.json({ error: "Reserva no encontrada" }, 404);
     }
@@ -365,6 +406,7 @@ router.patch(
         targetScheduledAt,
         targetDuration,
         id, // Excluir el booking actual
+        authUser.tenantId,
       );
 
       if (hasConflict) {
@@ -401,8 +443,11 @@ router.patch(
         updates.serviceId = serviceId;
       }
 
-      await bookingRepository.update(id, updates);
-      const updatedBooking = await bookingRepository.findByIdWithRelations(id);
+      await bookingRepository.update(id, updates, authUser.tenantId);
+      const updatedBooking = await bookingRepository.findByIdWithRelations(
+        id,
+        authUser.tenantId,
+      );
 
       if (!updatedBooking) {
         return c.json({ error: "Reserva no encontrada" }, 404);
@@ -429,6 +474,9 @@ router.patch(
     const id = c.req.param("id");
     const body = await c.req.json();
     const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
 
     const assignStaffSchema = z.object({
       staffId: z.string().cuid().nullable(),
@@ -444,7 +492,7 @@ router.patch(
     // Si se proporciona staffId, validar que el usuario existe, es STAFF y está activo
     if (staffId) {
       const userRepository = getUserRepository();
-      const staff = await userRepository.findById(staffId);
+      const staff = await userRepository.findById(staffId, authUser.tenantId);
 
       if (!staff) {
         return c.json({ error: "Usuario no encontrado" }, 404);
@@ -461,11 +509,18 @@ router.patch(
 
     try {
       const bookingRepository = getBookingRepository();
-      await bookingRepository.update(id, {
-        assignedStaffId: staffId ?? null,
-      });
+      await bookingRepository.update(
+        id,
+        {
+          assignedStaffId: staffId ?? null,
+        },
+        authUser.tenantId,
+      );
 
-      const updatedBooking = await bookingRepository.findByIdWithRelations(id);
+      const updatedBooking = await bookingRepository.findByIdWithRelations(
+        id,
+        authUser.tenantId,
+      );
 
       if (!updatedBooking) {
         return c.json({ error: "Reserva no encontrada" }, 404);

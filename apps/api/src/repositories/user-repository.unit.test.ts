@@ -120,6 +120,7 @@ describe("UserRepository", () => {
       fullName: "User",
       passwordHash: "hashed",
       role: "COORDINATOR" as UserRole,
+      tenantId: "tenant_test",
     };
 
     const created = {

@@ -13,6 +13,8 @@ import type { ActionResult } from "@/lib/types";
 export async function loginAction(formData: FormData): Promise<ActionResult> {
   const email = formData.get("email")?.toString() ?? "";
   const password = formData.get("password")?.toString() ?? "";
+  const tenantSlug =
+    formData.get("tenantSlug")?.toString().trim().toLowerCase() ?? "";
 
   if (!email || !password) {
     return { error: "Ingresa usuario y contraseña" };
@@ -22,6 +24,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     await signIn("credentials", {
       email,
       password,
+      tenantSlug: tenantSlug || undefined,
       redirect: false,
     });
     revalidatePath("/");

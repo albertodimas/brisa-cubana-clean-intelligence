@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Docs: `docs/product/saas-vision.md` consolida la nueva visión SaaS (cliente ideal, propuesta de valor, planes Starter/Growth/Scale, roadmap y tareas pendientes).
 - Docs: `README.md` describe Brisa OS como software para empresas de limpieza y enlaza el documento maestro; `docs/overview/status.md` se actualiza con las prioridades SaaS.
+- API: Fundaciones multi-tenant (`Tenant`, `UserTenant` y columnas `tenantId` opcionales en entidades clave) para aislar datos por empresa.
 
 ### Changed
 

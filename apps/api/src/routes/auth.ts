@@ -5,6 +5,7 @@ import * as bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
 import type { UserRole } from "@prisma/client";
 import { signAuthToken } from "../lib/jwt.js";
+import { env } from "../lib/env.js";
 import { authenticate, getAuthenticatedUser } from "../middleware/auth.js";
 import { getUserRepository, getUserSessionRepository } from "../container.js";
 import { resolveCookiePolicy } from "../lib/cookies.js";
@@ -14,6 +15,12 @@ import { hashToken } from "../lib/token-hash.js";
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  tenantSlug: z
+    .string()
+    .min(2)
+    .max(64)
+    .transform((value) => value.trim().toLowerCase())
+    .optional(),
 });
 
 const router = new Hono();
@@ -37,6 +44,12 @@ const REFRESH_TOKEN_TTL_DAYS = Number(
 
 const refreshSchema = z.object({
   refreshToken: z.string().min(20),
+  tenantSlug: z
+    .string()
+    .min(2)
+    .max(64)
+    .transform((value) => value.trim().toLowerCase())
+    .optional(),
 });
 
 type AuthContext = Context;
@@ -56,7 +69,14 @@ function extractClientIp(c: AuthContext): string | null {
   return null;
 }
 
-type AuthUser = { id: string; email: string; role: UserRole };
+type AuthUser = {
+  id: string;
+  email: string;
+  role: UserRole;
+  tenantId: string;
+  tenantSlug: string;
+  tenantName?: string;
+};
 
 async function issueUserSession(
   c: AuthContext,
@@ -68,6 +88,9 @@ async function issueUserSession(
       sub: user.id,
       email: user.email,
       role: user.role,
+      tenantId: user.tenantId,
+      tenantSlug: user.tenantSlug,
+      tenantName: user.tenantName,
     },
     ACCESS_TOKEN_TTL_SECONDS,
   );
@@ -124,7 +147,7 @@ router.post("/login", async (c) => {
     return c.json({ error: parsed.error.flatten() }, 400);
   }
 
-  const { email, password } = parsed.data;
+  const { email, password, tenantSlug } = parsed.data;
   const userRepository = getUserRepository();
   const user = await userRepository.findAuthByEmail(email);
 
@@ -158,9 +181,44 @@ router.post("/login", async (c) => {
   const { passwordHash: _passwordHash, ...publicUser } = user;
   void _passwordHash;
 
-  const sessionTokens = await issueUserSession(c, publicUser as AuthUser, {
-    revokeExisting: true,
-  });
+  const memberships = user.tenants ?? [];
+  const requestedSlug = tenantSlug && tenantSlug.length > 0 ? tenantSlug : null;
+  const fallbackSlug = env.DEFAULT_TENANT_SLUG;
+  const normalizedSlug = requestedSlug ?? fallbackSlug;
+
+  let selectedMembership = normalizedSlug
+    ? memberships.find(
+        (membership) =>
+          membership.tenantSlug.toLowerCase() === normalizedSlug.toLowerCase(),
+      )
+    : undefined;
+
+  if (!selectedMembership && memberships.length === 1) {
+    selectedMembership = memberships[0];
+  }
+
+  if (!selectedMembership) {
+    return c.json({ error: "No tienes acceso a ese tenant" }, 403);
+  }
+
+  if (selectedMembership.status !== "ACTIVE") {
+    return c.json({ error: "El tenant seleccionado está inactivo" }, 403);
+  }
+
+  const sessionTokens = await issueUserSession(
+    c,
+    {
+      id: publicUser.id,
+      email: publicUser.email,
+      role: selectedMembership.role,
+      tenantId: selectedMembership.tenantId,
+      tenantSlug: selectedMembership.tenantSlug,
+      tenantName: selectedMembership.tenantName,
+    },
+    {
+      revokeExisting: true,
+    },
+  );
   attachAuthCookies(
     c,
     sessionTokens.accessToken,
@@ -171,7 +229,12 @@ router.post("/login", async (c) => {
     data: {
       id: publicUser.id,
       email: publicUser.email,
-      role: publicUser.role,
+      role: selectedMembership.role,
+      tenant: {
+        id: selectedMembership.tenantId,
+        slug: selectedMembership.tenantSlug,
+        name: selectedMembership.tenantName,
+      },
     },
     token: sessionTokens.accessToken,
     refreshToken: sessionTokens.refreshToken,
@@ -228,8 +291,36 @@ router.post("/refresh", async (c) => {
     return c.json({ error: "Account has been deactivated" }, 403);
   }
 
+  const memberships = user.tenants ?? [];
+  const requestedSlug = parsed.data.tenantSlug;
+  const fallbackSlug = env.DEFAULT_TENANT_SLUG;
+  const normalizedSlug =
+    requestedSlug && requestedSlug.length > 0 ? requestedSlug : fallbackSlug;
+
+  let selectedMembership = normalizedSlug
+    ? memberships.find(
+        (membership) =>
+          membership.tenantSlug.toLowerCase() === normalizedSlug.toLowerCase(),
+      )
+    : undefined;
+
+  if (!selectedMembership && memberships.length === 1) {
+    selectedMembership = memberships[0];
+  }
+
+  if (!selectedMembership) {
+    return c.json({ error: "No tienes acceso a ese tenant" }, 403);
+  }
+
   await userSessionRepository.revokeById(existingSession.id, "rotated");
-  const sessionTokens = await issueUserSession(c, user as AuthUser);
+  const sessionTokens = await issueUserSession(c, {
+    id: user.id,
+    email: user.email,
+    role: selectedMembership.role,
+    tenantId: selectedMembership.tenantId,
+    tenantSlug: selectedMembership.tenantSlug,
+    tenantName: selectedMembership.tenantName,
+  });
   attachAuthCookies(
     c,
     sessionTokens.accessToken,
@@ -240,7 +331,12 @@ router.post("/refresh", async (c) => {
     data: {
       id: user.id,
       email: user.email,
-      role: user.role,
+      role: selectedMembership.role,
+      tenant: {
+        id: selectedMembership.tenantId,
+        slug: selectedMembership.tenantSlug,
+        name: selectedMembership.tenantName,
+      },
     },
     token: sessionTokens.accessToken,
     refreshToken: sessionTokens.refreshToken,

@@ -52,16 +52,24 @@ router.get("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
     return queryResult.response;
   }
 
+  const authUser = getAuthenticatedUser(c);
+  if (!authUser?.tenantId) {
+    return c.json({ error: "Tenant scope requerido" }, 400);
+  }
+
   const { limit, cursor, search, role, isActive } = queryResult.data;
 
   const repository = getUserRepository();
-  const result = await repository.findManyWithSearch({
-    limit,
-    cursor,
-    search,
-    role,
-    isActive,
-  });
+  const result = await repository.findManyWithSearch(
+    {
+      limit,
+      cursor,
+      search,
+      role,
+      isActive,
+    },
+    authUser.tenantId,
+  );
   return c.json(result);
 });
 
@@ -79,6 +87,11 @@ router.post("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
       return c.json({ error: "Servicio de hashing no disponible" }, 500);
     }
 
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
     const repository = getUserRepository();
     const user = await repository.create({
       email,
@@ -86,6 +99,7 @@ router.post("/", authenticate, requireRoles(["ADMIN"]), async (c) => {
       role,
       passwordHash,
       isActive: true,
+      tenantId: authUser.tenantId,
     });
 
     return c.json({ data: user }, 201);
@@ -116,7 +130,11 @@ router.patch("/:userId", authenticate, requireRoles(["ADMIN"]), async (c) => {
   }
 
   const authUser = getAuthenticatedUser(c);
-  if (authUser?.id === id) {
+  if (!authUser?.tenantId) {
+    return c.json({ error: "Tenant scope requerido" }, 400);
+  }
+
+  if (authUser.id === id) {
     if (data.role) {
       return c.json({ error: "No puedes cambiar tu propio rol" }, 400);
     }
@@ -127,7 +145,11 @@ router.patch("/:userId", authenticate, requireRoles(["ADMIN"]), async (c) => {
 
   try {
     const repository = getUserRepository();
-    const user = await repository.update(id, data as unknown as UpdateUserDto);
+    const user = await repository.update(
+      id,
+      data as unknown as UpdateUserDto,
+      authUser.tenantId,
+    );
 
     return c.json({ data: user });
   } catch (error) {

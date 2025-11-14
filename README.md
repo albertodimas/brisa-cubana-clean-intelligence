@@ -58,6 +58,8 @@ pnpm db:push && pnpm db:seed
 pnpm dev          # web:3000, api:3001
 ```
 
+- **Tenant base**: define el slug por defecto tanto en la API (`DEFAULT_TENANT_SLUG`) como en la web (`NEXT_PUBLIC_DEFAULT_TENANT_SLUG`). Para el entorno actual seguimos usando `brisa-cubana`, pero ya puedes declarar otros slugs por empresa.
+- **Login multi-tenant**: el formulario solicita el `Código de tenant` y se lo pasa a NextAuth ⇒ el token de sesión ahora incluye `tenantId/tenantSlug` y todas las llamadas autenticadas quedan scopeadas.
 - Usuarios demo: `admin@brisacubanacleanintelligence.com / Brisa123!`, `operaciones@… / Brisa123!`, `cliente@… / Brisa123!`.
 - Variantes, scripts y troubleshooting: [Guía completa](docs/development/guides/quickstart.md).
 - Sincronización de variables: [docs/operations/env-sync.md](docs/operations/env-sync.md).

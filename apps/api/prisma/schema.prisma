@@ -15,6 +15,19 @@ enum UserRole {
   CLIENT
 }
 
+enum TenantPlan {
+  STARTER
+  GROWTH
+  SCALE
+  CUSTOM
+}
+
+enum TenantStatus {
+  ACTIVE
+  PAUSED
+  SUSPENDED
+}
+
 enum PropertyType {
   RESIDENTIAL
   VACATION_RENTAL
@@ -73,11 +86,12 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  properties    Property[]
-  bookings      Booking[]      @relation("BookingCustomer")
-  notifications Notification[]
-  assignedBookings Booking[] @relation("BookingAssignedStaff")
-  userSessions UserSession[]
+  properties       Property[]
+  bookings         Booking[]      @relation("BookingCustomer")
+  notifications    Notification[]
+  assignedBookings Booking[]      @relation("BookingAssignedStaff")
+  userSessions     UserSession[]
+  tenants          UserTenant[]
 
   @@index([deletedAt])
 }
@@ -96,6 +110,8 @@ model Property {
   bathrooms   Int?
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id])
+  tenantId    String?
+  tenant      Tenant?      @relation(fields: [tenantId], references: [id])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
@@ -103,6 +119,7 @@ model Property {
   bookings Booking[]
 
   @@index([deletedAt])
+  @@index([tenantId])
 }
 
 model Service {
@@ -112,6 +129,8 @@ model Service {
   basePrice   Decimal   @db.Decimal(10, 2)
   durationMin Int
   active      Boolean   @default(true)
+  tenantId    String?
+  tenant      Tenant?   @relation(fields: [tenantId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
@@ -119,56 +138,63 @@ model Service {
   bookings Booking[]
 
   @@index([deletedAt])
+  @@index([tenantId])
 }
 
 model Booking {
-  id          String        @id @default(cuid())
-  code        String        @unique
-  scheduledAt DateTime
-  durationMin Int
-  notes       String?
-  status      BookingStatus @default(PENDING)
-  totalAmount Decimal       @db.Decimal(10, 2)
-  customerId  String
-  customer    User          @relation("BookingCustomer", fields: [customerId], references: [id])
-  propertyId  String
-  property    Property      @relation(fields: [propertyId], references: [id])
-  serviceId   String
-  service     Service       @relation(fields: [serviceId], references: [id])
+  id              String         @id @default(cuid())
+  code            String         @unique
+  scheduledAt     DateTime
+  durationMin     Int
+  notes           String?
+  status          BookingStatus  @default(PENDING)
+  totalAmount     Decimal        @db.Decimal(10, 2)
+  customerId      String
+  customer        User           @relation("BookingCustomer", fields: [customerId], references: [id])
+  propertyId      String
+  property        Property       @relation(fields: [propertyId], references: [id])
+  serviceId       String
+  service         Service        @relation(fields: [serviceId], references: [id])
   assignedStaffId String?
-  assignedStaff   User?         @relation("BookingAssignedStaff", fields: [assignedStaffId], references: [id])
-  invoices    Invoice[]
-  notifications Notification[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  deletedAt   DateTime?
+  assignedStaff   User?          @relation("BookingAssignedStaff", fields: [assignedStaffId], references: [id])
+  invoices        Invoice[]
+  notifications   Notification[]
+  tenantId        String?
+  tenant          Tenant?        @relation(fields: [tenantId], references: [id])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
 
   @@index([deletedAt])
   @@index([assignedStaffId])
+  @@index([tenantId])
 }
 
 model Notification {
-  id        String              @id @default(cuid())
-  userId    String
-  user      User                @relation(fields: [userId], references: [id])
-  type      NotificationType
-  channel   NotificationChannel @default(IN_APP)
-  status    NotificationStatus  @default(PENDING)
-  subject   String?
-  message   String
-  metadata  Json?
-  sentAt    DateTime?
-  failedAt  DateTime?
+  id           String              @id @default(cuid())
+  userId       String
+  user         User                @relation(fields: [userId], references: [id])
+  type         NotificationType
+  channel      NotificationChannel @default(IN_APP)
+  status       NotificationStatus  @default(PENDING)
+  subject      String?
+  message      String
+  metadata     Json?
+  sentAt       DateTime?
+  failedAt     DateTime?
   errorMessage String?
-  readAt    DateTime?
-  bookingId String?
-  booking   Booking?            @relation(fields: [bookingId], references: [id])
-  createdAt DateTime            @default(now())
+  readAt       DateTime?
+  bookingId    String?
+  booking      Booking?            @relation(fields: [bookingId], references: [id])
+  tenantId     String?
+  tenant       Tenant?             @relation(fields: [tenantId], references: [id])
+  createdAt    DateTime            @default(now())
 
   @@index([userId, readAt])
   @@index([createdAt])
   @@index([status, createdAt])
   @@index([bookingId])
+  @@index([tenantId])
 }
 
 model MagicLinkToken {
@@ -184,33 +210,35 @@ model MagicLinkToken {
 }
 
 model UserSession {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   userId           String
-  user             User     @relation(fields: [userId], references: [id])
-  tokenHash        String   @unique
+  user             User      @relation(fields: [userId], references: [id])
+  tokenHash        String    @unique
   userAgent        String?
   ipAddress        String?
   expiresAt        DateTime
   revokedAt        DateTime?
   revocationReason String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([userId, revokedAt])
   @@index([expiresAt])
 }
 
 model PortalSession {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   email            String
-  tokenHash        String   @unique
+  tokenHash        String    @unique
+  tenantId         String?
+  tenant           Tenant?   @relation(fields: [tenantId], references: [id])
   userAgent        String?
   ipAddress        String?
   expiresAt        DateTime
   revokedAt        DateTime?
   revocationReason String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([email, revokedAt])
   @@index([expiresAt])
@@ -232,12 +260,15 @@ model Lead {
   utmCampaign     String?
   utmContent      String?
   utmTerm         String?
+  tenantId        String?
+  tenant          Tenant?    @relation(fields: [tenantId], references: [id])
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
   @@index([status])
   @@index([createdAt])
   @@index([email])
+  @@index([tenantId])
 }
 
 model StripeWebhookEvent {
@@ -256,21 +287,24 @@ model StripeWebhookEvent {
 }
 
 model Invoice {
-  id                   String        @id @default(cuid())
-  bookingId            String
-  booking              Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  stripePaymentIntentId String?      @unique
-  amount               Decimal       @db.Decimal(10, 2)
-  status               InvoiceStatus @default(PENDING)
-  paidAt               DateTime?
-  metadata             Json?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  id                    String        @id @default(cuid())
+  bookingId             String
+  booking               Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  stripePaymentIntentId String?       @unique
+  amount                Decimal       @db.Decimal(10, 2)
+  status                InvoiceStatus @default(PENDING)
+  paidAt                DateTime?
+  tenantId              String?
+  tenant                Tenant?       @relation(fields: [tenantId], references: [id])
+  metadata              Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 
   @@index([bookingId])
   @@index([status])
   @@index([stripePaymentIntentId])
   @@index([createdAt])
+  @@index([tenantId])
 }
 
 enum InvoiceStatus {
@@ -313,34 +347,69 @@ model FAQ {
 }
 
 model PricingTier {
-  id           String   @id @default(cuid())
-  tierCode     String   @unique
-  name         String
-  headline     String
-  description  String?  @db.Text
-  price        String
-  priceSuffix  String?
-  features     Json
-  addons       Json?
-  highlighted  Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  order        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  tierCode    String   @unique
+  name        String
+  headline    String
+  description String?  @db.Text
+  price       String
+  priceSuffix String?
+  features    Json
+  addons      Json?
+  highlighted Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([isActive, order])
 }
 
 model PortfolioStats {
-  id              String   @id @default(cuid())
+  id               String   @id @default(cuid())
   activeProperties Int
-  averageRating   Decimal  @db.Decimal(3, 2)
-  totalTurnovers  Int
-  period          String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  averageRating    Decimal  @db.Decimal(3, 2)
+  totalTurnovers   Int
+  period           String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([createdAt(sort: Desc)])
+}
+
+model Tenant {
+  id        String       @id @default(cuid())
+  slug      String       @unique
+  name      String
+  logoUrl   String?
+  plan      TenantPlan   @default(STARTER)
+  status    TenantStatus @default(ACTIVE)
+  settings  Json?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  userTenants    UserTenant[]
+  properties     Property[]
+  services       Service[]
+  bookings       Booking[]
+  notifications  Notification[]
+  portalSessions PortalSession[]
+  leads          Lead[]
+  invoices       Invoice[]
+}
+
+model UserTenant {
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String
+  role      UserRole
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([userId, tenantId])
+  @@index([tenantId])
 }
 
 model MarketStat {

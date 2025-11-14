@@ -11,6 +11,7 @@ type LoginAction = typeof loginAction;
 
 type Props = {
   action: LoginAction;
+  defaultTenantSlug?: string;
 };
 
 function SubmitButton() {
@@ -28,7 +29,7 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm({ action }: Props) {
+export function LoginForm({ action, defaultTenantSlug }: Props) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
 
@@ -63,6 +64,15 @@ export function LoginForm({ action }: Props) {
           placeholder="Brisa123!"
           required
           autoComplete="current-password"
+        />
+
+        <Input
+          id="tenantSlug"
+          name="tenantSlug"
+          label="Código de tenant"
+          placeholder="brisa-cubana"
+          defaultValue={defaultTenantSlug}
+          autoComplete="organization"
         />
 
         {message && (

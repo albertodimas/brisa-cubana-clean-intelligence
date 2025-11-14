@@ -35,6 +35,9 @@ const runtimeStripeApiVersion =
     : "2023-10-16");
 const stripeApiVersion = runtimeStripeApiVersion as Stripe.LatestApiVersion;
 
+const DEFAULT_TENANT_ID =
+  process.env.DEFAULT_TENANT_ID ?? "tenant_brisa_cubana";
+
 const stripeClient = stripeSecret
   ? new Stripe(stripeSecret, {
       apiVersion: stripeApiVersion,
@@ -257,6 +260,7 @@ async function handleCheckoutSessionCompleted(
       role: "CLIENT",
       passwordHash,
       isActive: true,
+      tenantId: DEFAULT_TENANT_ID,
     });
 
     logger.info(
@@ -286,20 +290,26 @@ async function handleCheckoutSessionCompleted(
 
   // Obtener la primera propiedad del cliente o usar una por defecto
   const propertyRepo = getPropertyRepository();
-  const properties = await propertyRepo.findByOwner(customer.id);
+  const properties = await propertyRepo.findByOwner(
+    customer.id,
+    DEFAULT_TENANT_ID,
+  );
   let propertyId = properties[0]?.id;
 
   // Si el cliente no tiene propiedades, crear una temporal
   if (!propertyId) {
-    const tempProperty = await propertyRepo.create({
-      label: `Propiedad de ${customer.fullName}`,
-      addressLine: "Dirección pendiente",
-      city: "Miami",
-      state: "FL",
-      zipCode: "33101",
-      type: "RESIDENTIAL",
-      ownerId: customer.id,
-    });
+    const tempProperty = await propertyRepo.create(
+      {
+        label: `Propiedad de ${customer.fullName}`,
+        addressLine: "Dirección pendiente",
+        city: "Miami",
+        state: "FL",
+        zipCode: "33101",
+        type: "RESIDENTIAL",
+        ownerId: customer.id,
+      },
+      DEFAULT_TENANT_ID,
+    );
     propertyId = tempProperty.id;
 
     logger.info(
@@ -326,10 +336,11 @@ async function handleCheckoutSessionCompleted(
     serviceId: service.id,
     propertyId,
     customerId: customer.id,
+    tenantId: DEFAULT_TENANT_ID,
     ...(metadata.notes ? { notes: metadata.notes } : {}),
   };
 
-  const booking = await bookingRepo.create(bookingPayload);
+  const booking = await bookingRepo.create(bookingPayload, DEFAULT_TENANT_ID);
 
   logger.info(
     {
@@ -345,10 +356,10 @@ async function handleCheckoutSessionCompleted(
 
   // Notificar al equipo de operaciones
   const notificationRepo = getNotificationRepository();
-  const coordinators = await userRepo.findActiveByRoles([
-    "ADMIN",
-    "COORDINATOR",
-  ]);
+  const coordinators = await userRepo.findActiveByRoles(
+    ["ADMIN", "COORDINATOR"],
+    DEFAULT_TENANT_ID,
+  );
 
   for (const coordinator of coordinators) {
     await notificationRepo.createNotification({
@@ -382,7 +393,10 @@ router.post("/stripe/intent", async (c) => {
 
   try {
     const serviceRepository = getServiceRepository();
-    const service = await serviceRepository.findById(serviceId);
+    const service = await serviceRepository.findById(
+      serviceId,
+      DEFAULT_TENANT_ID,
+    );
 
     if (!service || !service.active) {
       return c.json(

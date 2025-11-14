@@ -27,6 +27,7 @@ const envSchema = z
     TWILIO_ACCOUNT_SID: z.string().optional(),
     TWILIO_AUTH_TOKEN: z.string().optional(),
     TWILIO_PHONE_NUMBER: z.string().optional(),
+    DEFAULT_TENANT_SLUG: z.string().min(1).optional(),
   })
   .passthrough();
 
@@ -51,6 +52,12 @@ const fallbackAllowedOrigins =
       ? DEFAULT_PRODUCTION_ALLOWED_ORIGINS
       : DEFAULT_DEVELOPMENT_ALLOWED_ORIGINS;
 
+const normalizedDefaultTenantSlug =
+  parsed.data.DEFAULT_TENANT_SLUG &&
+  parsed.data.DEFAULT_TENANT_SLUG.trim().length > 0
+    ? parsed.data.DEFAULT_TENANT_SLUG.trim().toLowerCase()
+    : "brisa-cubana";
+
 if (
   parsed.data.NODE_ENV === "production" &&
   (!parsed.data.ALLOWED_ORIGINS ||
@@ -65,6 +72,7 @@ if (
 export const env = Object.freeze({
   ...parsed.data,
   ALLOWED_ORIGINS: fallbackAllowedOrigins,
+  DEFAULT_TENANT_SLUG: normalizedDefaultTenantSlug,
 });
 
 export type Env = typeof env;

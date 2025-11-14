@@ -19,6 +19,13 @@ type PrismaPropertyWithOwner = Property & {
   owner?: { id: string; email: string; fullName: string } | null;
 };
 
+const DEFAULT_TENANT_ID =
+  process.env.DEFAULT_TENANT_ID ?? "tenant_brisa_cubana";
+
+function assertTenantId(tenantId?: string): string {
+  return tenantId ?? DEFAULT_TENANT_ID;
+}
+
 function toPropertyResponse(
   property: PrismaPropertyWithOwner,
 ): PropertyResponse {
@@ -38,10 +45,15 @@ function toPropertyResponse(
 export class PropertyRepository implements IPropertyRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findMany({ limit = 50, cursor }: PropertyPaginationParams = {}) {
+  async findMany(
+    { limit = 50, cursor }: PropertyPaginationParams = {},
+    tenantId?: string,
+  ) {
+    const scopedTenantId = assertTenantId(tenantId);
     const take = limit + 1;
 
     const properties = await this.prisma.property.findMany({
+      where: { tenantId: scopedTenantId },
       take,
       ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
@@ -74,9 +86,10 @@ export class PropertyRepository implements IPropertyRepository {
     };
   }
 
-  async findById(id: string) {
-    const property = await this.prisma.property.findUnique({
-      where: { id },
+  async findById(id: string, tenantId?: string) {
+    const scopedTenantId = assertTenantId(tenantId);
+    const property = await this.prisma.property.findFirst({
+      where: { id, tenantId: scopedTenantId },
       include: { owner: { select: ownerSelect } },
     });
     if (!property) {
@@ -85,44 +98,53 @@ export class PropertyRepository implements IPropertyRepository {
     return toPropertyResponse(property as PrismaPropertyWithOwner);
   }
 
-  async create(data: CreatePropertyDto) {
+  async create(data: CreatePropertyDto, tenantId?: string) {
+    const scopedTenantId = assertTenantId(tenantId);
     const property = await this.prisma.property.create({
-      data,
+      data: { ...data, tenantId: scopedTenantId },
       include: { owner: { select: ownerSelect } },
     });
     return toPropertyResponse(property as PrismaPropertyWithOwner);
   }
 
-  async update(id: string, data: UpdatePropertyDto) {
+  async update(id: string, data: UpdatePropertyDto, tenantId?: string) {
+    const scopedTenantId = assertTenantId(tenantId);
     const property = await this.prisma.property.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data,
       include: { owner: { select: ownerSelect } },
     });
     return toPropertyResponse(property as PrismaPropertyWithOwner);
   }
 
-  async delete(id: string) {
+  async delete(id: string, tenantId?: string) {
+    const scopedTenantId = assertTenantId(tenantId);
     await this.prisma.property.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data: { deletedAt: new Date() },
     });
   }
 
-  async restore(id: string) {
+  async restore(id: string, tenantId?: string) {
+    const scopedTenantId = assertTenantId(tenantId);
     const property = await this.prisma.property.update({
-      where: { id },
+      where: { id, tenantId: scopedTenantId },
       data: { deletedAt: null },
       include: { owner: { select: ownerSelect } },
     });
     return toPropertyResponse(property as PrismaPropertyWithOwner);
   }
 
-  async findByOwner(ownerId: string): Promise<PropertyResponse[]> {
+  async findByOwner(
+    ownerId: string,
+    tenantId?: string,
+  ): Promise<PropertyResponse[]> {
+    const scopedTenantId = assertTenantId(tenantId);
     const properties = await this.prisma.property.findMany({
       where: {
         ownerId,
         deletedAt: null,
+        tenantId: scopedTenantId,
       },
       orderBy: [{ createdAt: "desc" }],
       include: { owner: { select: ownerSelect } },
@@ -133,17 +155,14 @@ export class PropertyRepository implements IPropertyRepository {
     );
   }
 
-  async findManyWithSearch({
-    search,
-    city,
-    type,
-    ownerId,
-    limit = 50,
-    cursor,
-  }: PropertySearchParams): Promise<{
+  async findManyWithSearch(
+    { search, city, type, ownerId, limit = 50, cursor }: PropertySearchParams,
+    tenantId?: string,
+  ): Promise<{
     data: PropertyResponse[];
     pagination: PropertyPagination;
   }> {
+    const scopedTenantId = assertTenantId(tenantId);
     const where: Prisma.PropertyWhereInput = {};
 
     if (city) {
@@ -165,6 +184,8 @@ export class PropertyRepository implements IPropertyRepository {
         { addressLine: { contains: search, mode: "insensitive" } },
       ];
     }
+
+    where.tenantId = scopedTenantId;
 
     const take = limit + 1;
     const properties = await this.prisma.property.findMany({
