@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { StorybookConfig } from "@storybook/react-vite";
+import { removeReactDirectives } from "./plugins/remove-react-directives";
 
 const config: StorybookConfig = {
   stories: [
@@ -27,6 +28,14 @@ const config: StorybookConfig = {
         find: "next/link",
         replacement: path.resolve(__dirname, "./mocks/next-link.tsx"),
       },
+      {
+        find: "next/navigation",
+        replacement: path.resolve(__dirname, "./mocks/next-navigation.ts"),
+      },
+      {
+        find: "@sentry/nextjs",
+        replacement: path.resolve(__dirname, "./mocks/sentry.ts"),
+      },
     ];
 
     if (!config.resolve) {
@@ -46,6 +55,10 @@ const config: StorybookConfig = {
         ...aliases,
       ];
     }
+
+    config.plugins = config.plugins ?? [];
+    config.plugins.push(removeReactDirectives());
+
     return config;
   },
   staticDirs: ["../public"],
