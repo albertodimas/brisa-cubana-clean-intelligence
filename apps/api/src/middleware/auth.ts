@@ -10,6 +10,7 @@ type AuthInfo = {
   tenantId: string;
   tenantSlug: string;
   tenantName?: string;
+  sessionId?: string;
   kind: "user" | "service";
 };
 
@@ -56,6 +57,7 @@ export const authenticate: MiddlewareHandler = async (c, next) => {
     tenantId: payload.tenantId,
     tenantSlug: payload.tenantSlug,
     tenantName: payload.tenantName,
+    sessionId: payload.sessionId,
     kind: "user",
   });
 

@@ -164,6 +164,7 @@ model Booking {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   deletedAt       DateTime?
+  summary         BookingSummary?
 
   @@index([deletedAt])
   @@index([assignedStaffId])
@@ -194,6 +195,21 @@ model Notification {
   @@index([createdAt])
   @@index([status, createdAt])
   @@index([bookingId])
+  @@index([tenantId])
+}
+
+model BookingSummary {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  tenantId  String?
+  summary   String   @db.Text
+  model     String
+  tokens    Int
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  tenant  Tenant? @relation(fields: [tenantId], references: [id])
+
   @@index([tenantId])
 }
 
@@ -396,6 +412,7 @@ model Tenant {
   portalSessions PortalSession[]
   leads          Lead[]
   invoices       Invoice[]
+  summaries      BookingSummary[]
 }
 
 model UserTenant {

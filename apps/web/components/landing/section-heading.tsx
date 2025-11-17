@@ -7,6 +7,7 @@ type SectionHeadingProps = {
   description?: string;
   align?: "left" | "center" | "right";
   className?: string;
+  animated?: boolean;
 };
 
 export function SectionHeading({
@@ -15,6 +16,7 @@ export function SectionHeading({
   description,
   align = "left",
   className,
+  animated = true,
 }: SectionHeadingProps) {
   const alignment =
     align === "center"
@@ -23,11 +25,8 @@ export function SectionHeading({
         ? "text-right items-end"
         : "text-left items-start";
 
-  return (
-    <ScrollReveal
-      variant="fadeUp"
-      className={cn("flex flex-col gap-3", alignment, className)}
-    >
+  const Content = (
+    <>
       {eyebrow ? (
         <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-brisa-600 dark:text-brisa-300">
           {eyebrow}
@@ -41,6 +40,23 @@ export function SectionHeading({
           {description}
         </p>
       ) : null}
+    </>
+  );
+
+  if (!animated) {
+    return (
+      <div className={cn("flex flex-col gap-3", alignment, className)}>
+        {Content}
+      </div>
+    );
+  }
+
+  return (
+    <ScrollReveal
+      variant="fadeUp"
+      className={cn("flex flex-col gap-3", alignment, className)}
+    >
+      {Content}
     </ScrollReveal>
   );
 }

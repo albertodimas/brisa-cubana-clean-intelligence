@@ -23,6 +23,10 @@ const TEST_STAFF_ID = "clh5k2j3a0006mh08staff123";
 const TEST_BOOKING_ID_1 = "clh5k2j3a0007mh08book1111";
 const TEST_BOOKING_ID_2 = "clh5k2j3a0008mh08book2222";
 
+const TEST_TENANT_ID = "tenant_test";
+const TEST_TENANT_SLUG = "tenant-test";
+const TEST_TENANT_NAME = "Tenant Test";
+
 const bookingRepositoryMock = {
   findById: vi.fn(),
   findByIdWithRelations: vi.fn(),
@@ -107,6 +111,8 @@ const sampleBooking2 = {
 beforeAll(async () => {
   // Mock environment variables
   process.env.JWT_SECRET = "test-secret-key-for-testing-only";
+  process.env.DEFAULT_TENANT_ID = TEST_TENANT_ID;
+  process.env.DEFAULT_TENANT_SLUG = TEST_TENANT_SLUG;
 
   // Mock the container module
   vi.mock("../../../src/container.js", () => ({
@@ -114,14 +120,21 @@ beforeAll(async () => {
     getBookingRepository: () => bookingRepositoryMock,
   }));
 
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2025-10-01T00:00:00.000Z"));
+
   // Import app after mocking
   const { default: importedApp } = await import("../../../src/app.js");
   app = importedApp;
 });
 
 afterAll(() => {
+  vi.useRealTimers();
   vi.clearAllMocks();
   vi.resetModules();
+  delete process.env.JWT_SECRET;
+  delete process.env.DEFAULT_TENANT_ID;
+  delete process.env.DEFAULT_TENANT_SLUG;
 });
 
 beforeEach(() => {
@@ -139,6 +152,10 @@ function generateTestToken(
       userId: role === "STAFF" ? TEST_STAFF_ID : TEST_CUSTOMER_ID,
       email: role === "STAFF" ? "staff@test.com" : "admin@test.com",
       role,
+      tenantId: TEST_TENANT_ID,
+      tenantSlug: TEST_TENANT_SLUG,
+      tenantName: TEST_TENANT_NAME,
+      sessionId: "test-session",
     },
     process.env.JWT_SECRET!,
     { expiresIn: "1h" },
@@ -305,6 +322,7 @@ describe("GET /api/calendar", () => {
       }),
       true,
       expect.any(Object),
+      TEST_TENANT_ID,
     );
   });
 
@@ -339,6 +357,7 @@ describe("GET /api/calendar", () => {
       }),
       true,
       expect.any(Object),
+      TEST_TENANT_ID,
     );
   });
 
@@ -373,6 +392,7 @@ describe("GET /api/calendar", () => {
       }),
       true,
       expect.any(Object),
+      TEST_TENANT_ID,
     );
   });
 
@@ -407,6 +427,7 @@ describe("GET /api/calendar", () => {
       }),
       true,
       expect.any(Object),
+      TEST_TENANT_ID,
     );
   });
 

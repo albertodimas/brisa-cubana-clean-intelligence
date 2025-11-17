@@ -21,6 +21,7 @@ export type AuthPayload = {
   tenantId: string;
   tenantSlug: string;
   tenantName?: string;
+  sessionId: string;
 };
 
 export type PortalAuthPayload = {

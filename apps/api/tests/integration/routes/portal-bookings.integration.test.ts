@@ -13,10 +13,15 @@ import { NotificationType } from "@prisma/client";
 
 let app: Hono;
 
+const TEST_TENANT_ID = "tenant_brisa_cubana";
 const bookingRepositoryMock = {
   findManyPaginated: vi.fn(),
   findByIdWithRelations: vi.fn(),
   update: vi.fn(),
+};
+
+const bookingSummaryRepositoryMock = {
+  findByBookingId: vi.fn(),
 };
 
 const userRepositoryMock = {
@@ -65,6 +70,7 @@ const makeToken = (email: string) =>
 let getBookingRepositorySpy: ReturnType<typeof vi.spyOn>;
 let getUserRepositorySpy: ReturnType<typeof vi.spyOn>;
 let getNotificationRepositorySpy: ReturnType<typeof vi.spyOn>;
+let getBookingSummaryRepositorySpy: ReturnType<typeof vi.spyOn>;
 
 describe("Portal bookings routes", () => {
   beforeAll(async () => {
@@ -72,6 +78,8 @@ describe("Portal bookings routes", () => {
     process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
     process.env.DATABASE_URL_UNPOOLED =
       "postgresql://test:test@localhost:5432/test";
+    process.env.DEFAULT_TENANT_ID = TEST_TENANT_ID;
+    process.env.DEFAULT_TENANT_SLUG = "brisa-cubana";
 
     vi.resetModules();
     const containerModule = await import("../../../src/container.js");
@@ -84,6 +92,9 @@ describe("Portal bookings routes", () => {
     getNotificationRepositorySpy = vi
       .spyOn(containerModule, "getNotificationRepository")
       .mockReturnValue(notificationRepositoryMock as any);
+    getBookingSummaryRepositorySpy = vi
+      .spyOn(containerModule, "getBookingSummaryRepository")
+      .mockReturnValue(bookingSummaryRepositoryMock as any);
 
     app = (await import("../../../src/app.js")).default;
   });
@@ -92,9 +103,12 @@ describe("Portal bookings routes", () => {
     getBookingRepositorySpy.mockRestore();
     getUserRepositorySpy.mockRestore();
     getNotificationRepositorySpy.mockRestore();
+    getBookingSummaryRepositorySpy.mockRestore();
     delete process.env.JWT_SECRET;
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_URL_UNPOOLED;
+    delete process.env.DEFAULT_TENANT_ID;
+    delete process.env.DEFAULT_TENANT_SLUG;
   });
 
   beforeEach(() => {
@@ -104,6 +118,7 @@ describe("Portal bookings routes", () => {
     userRepositoryMock.findByEmail.mockReset();
     userRepositoryMock.findActiveByRoles.mockReset();
     notificationRepositoryMock.createNotification.mockReset();
+    bookingSummaryRepositoryMock.findByBookingId.mockReset();
 
     userRepositoryMock.findByEmail.mockResolvedValue({
       id: "user-1",
@@ -162,6 +177,7 @@ describe("Portal bookings routes", () => {
       {
         orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
       },
+      TEST_TENANT_ID,
     );
 
     expect(json.data).toHaveLength(1);
@@ -187,6 +203,7 @@ describe("Portal bookings routes", () => {
 
     expect(bookingRepositoryMock.findByIdWithRelations).toHaveBeenCalledWith(
       "booking-1",
+      TEST_TENANT_ID,
     );
     expect(json.data.id).toBe("booking-1");
     expect(json.customer.id).toBe("user-1");
@@ -275,12 +292,14 @@ describe("Portal bookings routes", () => {
     expect(response.status).toBe(200);
     expect(bookingRepositoryMock.findByIdWithRelations).toHaveBeenCalledWith(
       "booking-1",
+      TEST_TENANT_ID,
     );
     expect(bookingRepositoryMock.update).toHaveBeenCalledWith(
       "booking-1",
       expect.objectContaining({
         status: "CANCELLED",
       }),
+      TEST_TENANT_ID,
     );
     expect(notificationRepositoryMock.createNotification).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -346,6 +365,7 @@ describe("Portal bookings routes", () => {
       expect.objectContaining({
         scheduledAt: expect.any(Date),
       }),
+      TEST_TENANT_ID,
     );
     expect(notificationRepositoryMock.createNotification).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -353,5 +373,30 @@ describe("Portal bookings routes", () => {
         type: NotificationType.BOOKING_RESCHEDULED,
       }),
     );
+  });
+  it("devuelve el resumen disponible para el cliente", async () => {
+    const token = makeToken("client@portal.test");
+    bookingSummaryRepositoryMock.findByBookingId.mockResolvedValue({
+      id: "sum_portal",
+      bookingId: "booking-1",
+      tenantId: "tenant_test",
+      summary: "Resumen para portal",
+      model: "brisa-template-v1",
+      tokens: 15,
+      createdAt: new Date(),
+    });
+
+    const response = await app.request(
+      "/api/portal/bookings/booking-1/summary",
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.data.summary).toBe("Resumen para portal");
   });
 });

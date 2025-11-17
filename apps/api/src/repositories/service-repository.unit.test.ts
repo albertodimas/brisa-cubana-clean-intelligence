@@ -1,15 +1,31 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { ServiceRepository } from "./service-repository.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Prisma, PrismaClient } from "@prisma/client";
+import { ServiceRepository } from "./service-repository.js";
+
+const DEFAULT_TENANT = "tenant_brisa_cubana";
+
+function ownerSelect() {
+  return {
+    tenantId: DEFAULT_TENANT,
+  };
+}
 
 describe("ServiceRepository (Unit)", () => {
   let repository: ServiceRepository;
-  let mockPrisma: any;
+  let prisma: {
+    service: {
+      findFirst: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+      create: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
+    };
+  };
 
   beforeEach(() => {
-    mockPrisma = {
+    prisma = {
       service: {
-        findUnique: vi.fn(),
+        findFirst: vi.fn(),
         findMany: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
@@ -17,295 +33,168 @@ describe("ServiceRepository (Unit)", () => {
       },
     };
 
-    repository = new ServiceRepository(mockPrisma as PrismaClient);
+    repository = new ServiceRepository(prisma as unknown as PrismaClient);
   });
 
-  describe("findById", () => {
-    it("returns a service when found", async () => {
-      const mockService = {
-        id: "service_1",
-        name: "Test Service",
-        basePrice: 100,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+  it("findById scopes the lookup by tenant", async () => {
+    const service = { id: "service_1", name: "Checklist", ...ownerSelect() };
+    vi.mocked(prisma.service.findFirst).mockResolvedValue(service);
 
-      mockPrisma.service.findUnique.mockResolvedValue(mockService);
+    const result = await repository.findById("service_1");
 
-      const result = await repository.findById("service_1");
-
-      expect(result).toEqual(mockService);
-      expect(mockPrisma.service.findUnique).toHaveBeenCalledWith({
-        where: { id: "service_1" },
-      });
-    });
-
-    it("returns null when service not found", async () => {
-      mockPrisma.service.findUnique.mockResolvedValue(null);
-
-      const result = await repository.findById("nonexistent");
-
-      expect(result).toBeNull();
+    expect(result).toEqual(service);
+    expect(prisma.service.findFirst).toHaveBeenCalledWith({
+      where: { id: "service_1", tenantId: DEFAULT_TENANT },
     });
   });
 
-  describe("findMany", () => {
-    it("returns services with default ordering", async () => {
-      const mockServices = [
-        { id: "1", name: "Service A" },
-        { id: "2", name: "Service B" },
-      ];
+  it("findMany applies tenant constraint and pagination options", async () => {
+    vi.mocked(prisma.service.findMany).mockResolvedValue([]);
 
-      mockPrisma.service.findMany.mockResolvedValue(mockServices);
-
-      const result = await repository.findMany();
-
-      expect(result).toEqual(mockServices);
-      expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
-        where: undefined,
-        take: undefined,
-        skip: undefined,
-        cursor: undefined,
-        orderBy: { createdAt: "desc" },
-      });
+    await repository.findMany({
+      take: 10,
+      skip: 5,
+      cursor: { id: "cursor" },
+      where: { active: true },
     });
 
-    it("applies pagination options", async () => {
-      mockPrisma.service.findMany.mockResolvedValue([]);
-
-      await repository.findMany({
-        take: 10,
-        skip: 5,
-        cursor: { id: "cursor_id" },
-      });
-
-      expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
-        where: undefined,
-        take: 10,
-        skip: 5,
-        cursor: { id: "cursor_id" },
-        orderBy: { createdAt: "desc" },
-      });
+    expect(prisma.service.findMany).toHaveBeenCalledWith({
+      where: { active: true, tenantId: DEFAULT_TENANT },
+      take: 10,
+      skip: 5,
+      cursor: { id: "cursor" },
+      orderBy: { createdAt: "desc" },
     });
   });
 
   describe("findManyPaginated", () => {
-    it("returns paginated result with hasMore=true when more items exist", async () => {
-      const mockServices = Array.from({ length: 11 }, (_, i) => ({
-        id: `service_${i}`,
-        name: `Service ${i}`,
+    it("returns pagination metadata and enforces tenant scoping", async () => {
+      const data = Array.from({ length: 11 }, (_, index) => ({
+        id: `service_${index}`,
+        name: `Service ${index}`,
+        ...ownerSelect(),
       }));
 
-      mockPrisma.service.findMany.mockResolvedValue(mockServices);
+      vi.mocked(prisma.service.findMany).mockResolvedValue(data);
 
       const result = await repository.findManyPaginated(10);
 
       expect(result.data).toHaveLength(10);
       expect(result.hasMore).toBe(true);
       expect(result.nextCursor).toBe("service_9");
-    });
-
-    it("returns paginated result with hasMore=false when no more items", async () => {
-      const mockServices = Array.from({ length: 5 }, (_, i) => ({
-        id: `service_${i}`,
-        name: `Service ${i}`,
-      }));
-
-      mockPrisma.service.findMany.mockResolvedValue(mockServices);
-
-      const result = await repository.findManyPaginated(10);
-
-      expect(result.data).toHaveLength(5);
-      expect(result.hasMore).toBe(false);
-      expect(result.nextCursor).toBeUndefined();
-    });
-
-    it("applies cursor for pagination", async () => {
-      mockPrisma.service.findMany.mockResolvedValue([]);
-
-      await repository.findManyPaginated(10, "cursor_123");
-
-      expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
-        where: undefined,
+      expect(prisma.service.findMany).toHaveBeenCalledWith({
+        where: { tenantId: DEFAULT_TENANT },
         take: 11,
+        orderBy: { createdAt: "desc" },
+      });
+    });
+
+    it("applies cursor skipping when provided", async () => {
+      vi.mocked(prisma.service.findMany).mockResolvedValue([]);
+
+      await repository.findManyPaginated(5, "cursor_123");
+
+      expect(prisma.service.findMany).toHaveBeenCalledWith({
+        where: { tenantId: DEFAULT_TENANT },
+        take: 6,
         skip: 1,
         cursor: { id: "cursor_123" },
         orderBy: { createdAt: "desc" },
       });
     });
 
-    it("honors custom orderBy option", async () => {
-      mockPrisma.service.findMany.mockResolvedValue([]);
-
+    it("accepts custom ordering", async () => {
       const orderBy: Prisma.ServiceOrderByWithRelationInput[] = [
         { name: "asc" },
         { id: "asc" },
       ];
+      vi.mocked(prisma.service.findMany).mockResolvedValue([]);
+
       await repository.findManyPaginated(5, undefined, { orderBy });
 
-      expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
-        where: undefined,
+      expect(prisma.service.findMany).toHaveBeenCalledWith({
+        where: { tenantId: DEFAULT_TENANT },
         take: 6,
         orderBy,
       });
     });
   });
 
-  describe("create", () => {
-    it("creates a new service", async () => {
-      const input = {
-        name: "New Service",
-        description: "Description",
-        basePrice: 150,
-        durationMin: 60,
-      };
+  it("create injects tenantId automatically", async () => {
+    const payload = {
+      name: "Deep Clean",
+      description: "Checklist",
+      basePrice: 150,
+      durationMin: 60,
+    };
+    const created = { id: "service_new", ...payload, ...ownerSelect() };
+    vi.mocked(prisma.service.create).mockResolvedValue(created);
 
-      const mockCreated = {
-        id: "new_id",
-        ...input,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+    const result = await repository.create(payload);
 
-      mockPrisma.service.create.mockResolvedValue(mockCreated);
-
-      const result = await repository.create(input);
-
-      expect(result).toEqual(mockCreated);
-      expect(mockPrisma.service.create).toHaveBeenCalledWith({
-        data: input,
-      });
+    expect(result).toEqual(created);
+    expect(prisma.service.create).toHaveBeenCalledWith({
+      data: { ...payload, tenantId: DEFAULT_TENANT },
     });
   });
 
-  describe("update", () => {
-    it("updates an existing service", async () => {
-      const updates = { basePrice: 200 };
-      const mockUpdated = {
-        id: "service_1",
-        name: "Service",
-        basePrice: 200,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+  it("update and lifecycle ops keep tenant in where clause", async () => {
+    const updated = {
+      id: "service_1",
+      name: "Updated",
+      basePrice: 250,
+      ...ownerSelect(),
+    };
+    vi.mocked(prisma.service.update).mockResolvedValue(updated);
 
-      mockPrisma.service.update.mockResolvedValue(mockUpdated);
+    const result = await repository.update("service_1", { basePrice: 250 });
 
-      const result = await repository.update("service_1", updates);
+    expect(result).toEqual(updated);
+    expect(prisma.service.update).toHaveBeenCalledWith({
+      where: { id: "service_1", tenantId: DEFAULT_TENANT },
+      data: { basePrice: 250 },
+    });
 
-      expect(result).toEqual(mockUpdated);
-      expect(mockPrisma.service.update).toHaveBeenCalledWith({
-        where: { id: "service_1" },
-        data: updates,
-      });
+    await repository.delete("service_1");
+    expect(prisma.service.update).toHaveBeenCalledWith({
+      where: { id: "service_1", tenantId: DEFAULT_TENANT },
+      data: { deletedAt: expect.any(Date) },
+    });
+
+    await repository.restore("service_1");
+    expect(prisma.service.update).toHaveBeenCalledWith({
+      where: { id: "service_1", tenantId: DEFAULT_TENANT },
+      data: { deletedAt: null },
     });
   });
 
-  describe("delete", () => {
-    it("marks a service as deleted", async () => {
-      mockPrisma.service.update.mockResolvedValue({
-        id: "service_1",
-        deletedAt: new Date(),
-      });
+  it("count and findActive honor tenant scoping", async () => {
+    vi.mocked(prisma.service.count).mockResolvedValue(5);
+    vi.mocked(prisma.service.findMany).mockResolvedValue([]);
 
-      await repository.delete("service_1");
+    await repository.count({ active: true });
+    expect(prisma.service.count).toHaveBeenNthCalledWith(1, {
+      where: { active: true, tenantId: DEFAULT_TENANT },
+    });
 
-      expect(mockPrisma.service.update).toHaveBeenCalledWith({
-        where: { id: "service_1" },
-        data: { deletedAt: expect.any(Date) },
-      });
+    await repository.findActive();
+    expect(prisma.service.findMany).toHaveBeenCalledWith({
+      where: { active: true, tenantId: DEFAULT_TENANT },
+      orderBy: { createdAt: "desc" },
     });
   });
 
-  describe("restore", () => {
-    it("restores a soft deleted service", async () => {
-      const restored = {
-        id: "service_1",
-        name: "Service",
-        basePrice: 200,
-        durationMin: 60,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-      };
+  it("findByName adds LIKE filters plus tenant constraint", async () => {
+    vi.mocked(prisma.service.findMany).mockResolvedValue([]);
 
-      mockPrisma.service.update.mockResolvedValue(restored);
+    await repository.findByName("deep");
 
-      const result = await repository.restore("service_1");
-
-      expect(mockPrisma.service.update).toHaveBeenCalledWith({
-        where: { id: "service_1" },
-        data: { deletedAt: null },
-      });
-      expect(result).toEqual(restored);
-    });
-  });
-
-  describe("count", () => {
-    it("returns total count", async () => {
-      mockPrisma.service.count.mockResolvedValue(42);
-
-      const result = await repository.count();
-
-      expect(result).toBe(42);
-      expect(mockPrisma.service.count).toHaveBeenCalledWith({
-        where: undefined,
-      });
-    });
-
-    it("applies where clause", async () => {
-      mockPrisma.service.count.mockResolvedValue(5);
-
-      const result = await repository.count({ category: "limpieza" });
-
-      expect(result).toBe(5);
-      expect(mockPrisma.service.count).toHaveBeenCalledWith({
-        where: { category: "limpieza" },
-      });
-    });
-  });
-
-  describe("findActive", () => {
-    it("finds only active services", async () => {
-      const mockServices = [
-        { id: "1", name: "Service A", active: true },
-        { id: "2", name: "Service B", active: true },
-      ];
-
-      mockPrisma.service.findMany.mockResolvedValue(mockServices);
-
-      const result = await repository.findActive();
-
-      expect(result).toEqual(mockServices);
-      expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
-        where: { active: true },
-        orderBy: { createdAt: "desc" },
-      });
-    });
-  });
-
-  describe("findByName", () => {
-    it("finds services by name", async () => {
-      const mockServices = [
-        { id: "1", name: "Limpieza profunda" },
-        { id: "2", name: "Limpieza express" },
-      ];
-
-      mockPrisma.service.findMany.mockResolvedValue(mockServices);
-
-      const result = await repository.findByName("limpieza");
-
-      expect(result).toEqual(mockServices);
-      expect(mockPrisma.service.findMany).toHaveBeenCalledWith({
-        where: {
-          name: {
-            contains: "limpieza",
-            mode: "insensitive",
-          },
-        },
-        orderBy: { name: "asc" },
-      });
+    expect(prisma.service.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: DEFAULT_TENANT,
+        name: { contains: "deep", mode: "insensitive" },
+      },
+      orderBy: { name: "asc" },
     });
   });
 });

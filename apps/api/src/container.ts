@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { ServiceRepository } from "./repositories/service-repository.js";
 import { BookingRepository } from "./repositories/booking-repository.js";
+import { BookingSummaryRepository } from "./repositories/booking-summary-repository.js";
 import { PropertyRepository } from "./repositories/property-repository.js";
 import { UserRepository } from "./repositories/user-repository.js";
 import { CustomerRepository } from "./repositories/customer-repository.js";
@@ -78,6 +79,7 @@ export const ServiceKeys = {
   DATABASE_URL: "databaseUrl",
   SERVICE_REPOSITORY: "serviceRepository",
   BOOKING_REPOSITORY: "bookingRepository",
+  BOOKING_SUMMARY_REPOSITORY: "bookingSummaryRepository",
   PROPERTY_REPOSITORY: "propertyRepository",
   USER_REPOSITORY: "userRepository",
   CUSTOMER_REPOSITORY: "customerRepository",
@@ -111,6 +113,11 @@ export function initializeContainer(): void {
   container.register(
     ServiceKeys.BOOKING_REPOSITORY,
     () => new BookingRepository(prisma),
+  );
+
+  container.register(
+    ServiceKeys.BOOKING_SUMMARY_REPOSITORY,
+    () => new BookingSummaryRepository(prisma),
   );
 
   container.register(
@@ -183,6 +190,12 @@ export function getServiceRepository(): ServiceRepository {
  */
 export function getBookingRepository(): BookingRepository {
   return container.resolve<BookingRepository>(ServiceKeys.BOOKING_REPOSITORY);
+}
+
+export function getBookingSummaryRepository(): BookingSummaryRepository {
+  return container.resolve<BookingSummaryRepository>(
+    ServiceKeys.BOOKING_SUMMARY_REPOSITORY,
+  );
 }
 
 export function getPropertyRepository(): PropertyRepository {

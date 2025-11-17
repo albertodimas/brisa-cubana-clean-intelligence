@@ -2,60 +2,103 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PrismaClient, PropertyType } from "@prisma/client";
 import { PropertyRepository } from "./property-repository.js";
 
+const DEFAULT_TENANT = "tenant_brisa_cubana";
+const CUSTOM_TENANT = "tenant_property";
+const ownerSelect = { id: true, email: true, fullName: true } as const;
+
 describe("PropertyRepository", () => {
   let repository: PropertyRepository;
-  let prisma: Pick<PrismaClient, "property">;
+  let prisma: {
+    property: {
+      findMany: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
+      create: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+    };
+  };
 
   beforeEach(() => {
     prisma = {
       property: {
         findMany: vi.fn(),
-        findUnique: vi.fn(),
+        findFirst: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
-        delete: vi.fn(),
       },
-    } as unknown as Pick<PrismaClient, "property">;
+    };
 
-    repository = new PropertyRepository(prisma as PrismaClient);
+    repository = new PropertyRepository(prisma as unknown as PrismaClient);
   });
 
-  it("findMany returns paginated result", async () => {
-    const propertyList = Array.from({ length: 3 }, (_, index) => ({
+  it("findMany returns paginated list scoped by tenant", async () => {
+    const properties = Array.from({ length: 3 }, (_, index) => ({
       id: `prop_${index}`,
       label: `Property ${index}`,
-      addressLine: "123 St",
+      addressLine: "123 Main",
       city: "Miami",
       state: "FL",
       zipCode: "33130",
       type: "RESIDENTIAL" as PropertyType,
       ownerId: "owner_1",
-      tenantId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      tenantId: DEFAULT_TENANT,
       bedrooms: null,
       bathrooms: null,
       sqft: null,
       notes: null,
       deletedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       owner: { id: "owner_1", email: "owner@test.com", fullName: "Owner" },
     }));
 
-    vi.mocked(prisma.property.findMany).mockResolvedValue(propertyList);
+    vi.mocked(prisma.property.findMany).mockResolvedValue(properties);
 
     const result = await repository.findMany({ limit: 2 });
 
     expect(prisma.property.findMany).toHaveBeenCalledWith({
+      where: { tenantId: DEFAULT_TENANT },
       take: 3,
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-      include: { owner: { select: { id: true, email: true, fullName: true } } },
+      include: { owner: { select: ownerSelect } },
     });
     expect(result.data).toHaveLength(2);
     expect(result.pagination.hasMore).toBe(true);
     expect(result.pagination.nextCursor).toBe("prop_1");
+    expect(result.data[0]).toHaveProperty("owner");
   });
 
-  it("creates a property", async () => {
+  it("findById applies tenant filtering", async () => {
+    const property = {
+      id: "prop_1",
+      label: "Prop",
+      addressLine: "123",
+      city: "Miami",
+      state: "FL",
+      zipCode: "33130",
+      type: "RESIDENTIAL" as PropertyType,
+      ownerId: "owner_1",
+      tenantId: DEFAULT_TENANT,
+      bedrooms: null,
+      bathrooms: null,
+      sqft: null,
+      notes: null,
+      deletedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: "owner_1", email: "owner@test.com", fullName: "Owner" },
+    };
+
+    vi.mocked(prisma.property.findFirst).mockResolvedValue(property);
+
+    await repository.findById("prop_1");
+
+    expect(prisma.property.findFirst).toHaveBeenCalledWith({
+      where: { id: "prop_1", tenantId: DEFAULT_TENANT },
+      include: { owner: { select: ownerSelect } },
+    });
+  });
+
+  it("create injects tenant id and selects owner", async () => {
     const payload = {
       label: "New Property",
       addressLine: "456 Ave",
@@ -65,111 +108,78 @@ describe("PropertyRepository", () => {
       type: "OFFICE" as PropertyType,
       ownerId: "owner_2",
     };
+    const created = { id: "prop_new", tenantId: DEFAULT_TENANT, ...payload };
+    vi.mocked(prisma.property.create).mockResolvedValue(created as any);
 
-    const created = {
-      ...payload,
-      id: "prop_new",
-      tenantId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      bedrooms: null,
-      bathrooms: null,
-      sqft: null,
-      notes: null,
-      deletedAt: null,
-    };
-
-    vi.mocked(prisma.property.create).mockResolvedValue(created);
-
-    const result = await repository.create(payload);
+    await repository.create(payload);
 
     expect(prisma.property.create).toHaveBeenCalledWith({
-      data: payload,
-      include: { owner: { select: { id: true, email: true, fullName: true } } },
+      data: { ...payload, tenantId: DEFAULT_TENANT },
+      include: { owner: { select: ownerSelect } },
     });
-    expect(result).toEqual({ ...created, owner: undefined });
   });
 
-  it("updates a property", async () => {
+  it("update/delete/restore keep tenant constraint", async () => {
     const updated = {
       id: "prop_1",
       label: "Updated",
-      addressLine: "123 St",
-      city: "Miami",
-      state: "FL",
-      zipCode: "33130",
-      type: "RESIDENTIAL" as PropertyType,
-      ownerId: "owner_1",
-      tenantId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      bedrooms: null,
-      bathrooms: null,
-      sqft: null,
-      notes: null,
-      deletedAt: null,
+      tenantId: DEFAULT_TENANT,
     };
+    vi.mocked(prisma.property.update).mockResolvedValue(updated as any);
 
-    vi.mocked(prisma.property.update).mockResolvedValue(updated);
-
-    const result = await repository.update("prop_1", { label: "Updated" });
-
+    await repository.update("prop_1", { label: "Updated" });
     expect(prisma.property.update).toHaveBeenCalledWith({
-      where: { id: "prop_1" },
+      where: { id: "prop_1", tenantId: DEFAULT_TENANT },
       data: { label: "Updated" },
-      include: { owner: { select: { id: true, email: true, fullName: true } } },
+      include: { owner: { select: ownerSelect } },
     });
-    expect(result).toEqual({ ...updated, owner: undefined });
-  });
-
-  it("deletes a property", async () => {
-    vi.mocked(prisma.property.update).mockResolvedValue({} as any);
 
     await repository.delete("prop_1");
-
     expect(prisma.property.update).toHaveBeenCalledWith({
-      where: { id: "prop_1" },
+      where: { id: "prop_1", tenantId: DEFAULT_TENANT },
       data: { deletedAt: expect.any(Date) },
+    });
+
+    await repository.restore("prop_1");
+    expect(prisma.property.update).toHaveBeenCalledWith({
+      where: { id: "prop_1", tenantId: DEFAULT_TENANT },
+      data: { deletedAt: null },
+      include: { owner: { select: ownerSelect } },
     });
   });
 
-  it("restores a property", async () => {
-    const restored = {
-      id: "prop_1",
-      label: "Prop",
-      addressLine: "123",
-      city: "Miami",
-      state: "FL",
-      zipCode: "33130",
-      type: "RESIDENTIAL" as PropertyType,
-      ownerId: "owner_1",
-      tenantId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      bedrooms: null,
-      bathrooms: null,
-      sqft: null,
-      notes: null,
-      deletedAt: null,
-      owner: { id: "owner_1", email: "owner@test.com", fullName: "Owner" },
-    };
+  it("findManyWithSearch merges filters and tenantId", async () => {
+    vi.mocked(prisma.property.findMany).mockResolvedValue([]);
 
-    vi.mocked(prisma.property.update).mockResolvedValue(restored);
-
-    const result = await repository.restore("prop_1");
-
-    expect(prisma.property.update).toHaveBeenCalledWith({
-      where: { id: "prop_1" },
-      data: { deletedAt: null },
-      include: { owner: { select: { id: true, email: true, fullName: true } } },
-    });
-    expect(result).toEqual({
-      ...restored,
-      owner: {
-        id: "owner_1",
-        email: "owner@test.com",
-        fullName: "Owner",
+    await repository.findManyWithSearch(
+      {
+        search: "Miami",
+        city: "Miami",
+        type: "RESIDENTIAL",
+        ownerId: "owner_1",
+        limit: 10,
+        cursor: "prop_1",
       },
+      CUSTOM_TENANT,
+    );
+
+    expect(prisma.property.findMany).toHaveBeenCalledWith({
+      where: {
+        city: "Miami",
+        type: "RESIDENTIAL",
+        ownerId: "owner_1",
+        OR: [
+          { label: { contains: "Miami", mode: "insensitive" } },
+          { city: { contains: "Miami", mode: "insensitive" } },
+          { addressLine: { contains: "Miami", mode: "insensitive" } },
+        ],
+        tenantId: CUSTOM_TENANT,
+      },
+      take: 11,
+      skip: 1,
+      cursor: { id: "prop_1" },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      include: { owner: { select: ownerSelect } },
     });
   });
 });

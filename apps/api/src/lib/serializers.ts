@@ -1,4 +1,4 @@
-import type { Prisma, Service } from "@prisma/client";
+import type { BookingSummary, Prisma, Service } from "@prisma/client";
 
 type ServiceLike = {
   id: string;
@@ -72,5 +72,15 @@ export function serializeBooking<T extends BookingLike>(
       role: string;
       isActive: boolean;
     } | null;
+  };
+}
+
+export function serializeBookingSummary(summary: BookingSummary) {
+  return {
+    id: summary.id,
+    summary: summary.summary,
+    model: summary.model,
+    tokens: summary.tokens,
+    createdAt: summary.createdAt,
   };
 }

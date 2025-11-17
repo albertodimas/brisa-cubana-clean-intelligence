@@ -6,9 +6,22 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- _Nada por ahora._
+
+### Changed
+
+- _Nada por ahora._
+
+## [0.5.0] - 2025-11-14
+
+### Added
+
 - Docs: `docs/product/saas-vision.md` consolida la nueva visión SaaS (cliente ideal, propuesta de valor, planes Starter/Growth/Scale, roadmap y tareas pendientes).
 - Docs: `README.md` describe Brisa OS como software para empresas de limpieza y enlaza el documento maestro; `docs/overview/status.md` se actualiza con las prioridades SaaS.
+- Docs: One-pager comercial (`docs/product/one-pager.md` + `/recursos/one-pager`) y guía de IA [`docs/development/guides/ai-resumenes.md`]; runbooks (`production-setup`, `domain-map`, `quickstart`) explican `DEFAULT_TENANT_*`.
 - API: Fundaciones multi-tenant (`Tenant`, `UserTenant` y columnas `tenantId` opcionales en entidades clave) para aislar datos por empresa.
+- Migraciones Prisma `20251112223445_add_multi_tenant` y `20251112223737_seed_default_tenant`.
+- Landing: CTA “Ver one-pager”, copy del formulario renombrado a “Formulario de interés SaaS” y recursos enlazados.
 
 ### Changed
 

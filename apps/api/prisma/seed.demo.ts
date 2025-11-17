@@ -11,6 +11,25 @@ const prisma = new PrismaClient();
 
 const PASSWORD_HASH =
   "$2a$10$Rh8ljaYqrkUNe4l.rxkDKek/pixK3GkjRuHM47fOjf80gZIydzoL."; // hash de "Brisa123!"
+const DEFAULT_TENANT_ID =
+  process.env.DEFAULT_TENANT_ID ?? "tenant_brisa_cubana";
+
+async function upsertMembership(userId: string, role: UserRole) {
+  await prisma.userTenant.upsert({
+    where: {
+      userId_tenantId: {
+        userId,
+        tenantId: DEFAULT_TENANT_ID,
+      },
+    },
+    update: { role },
+    create: {
+      userId,
+      tenantId: DEFAULT_TENANT_ID,
+      role,
+    },
+  });
+}
 
 async function seedDemo() {
   const demoClient = await prisma.user.upsert({
@@ -24,6 +43,7 @@ async function seedDemo() {
       passwordHash: PASSWORD_HASH,
     },
   });
+  await upsertMembership(demoClient.id, demoClient.role);
 
   const [
     turnoverPremium,
@@ -40,6 +60,7 @@ async function seedDemo() {
           "Cambio integral entre huéspedes con restocking completo, lavandería express y reporte fotográfico en menos de 4 horas.",
         basePrice: 249.0,
         durationMin: 160,
+        tenantId: DEFAULT_TENANT_ID,
       },
     }),
     prisma.service.upsert({
@@ -51,6 +72,7 @@ async function seedDemo() {
           "Limpieza profunda trimestral con detailing premium, tratamiento antivaho y control de inventario.",
         basePrice: 369.0,
         durationMin: 210,
+        tenantId: DEFAULT_TENANT_ID,
       },
     }),
     prisma.service.upsert({
@@ -62,6 +84,7 @@ async function seedDemo() {
           "Limpieza fina tras remodelaciones: pulido de superficies, remoción de residuos y staging final para entrega premium.",
         basePrice: 489.0,
         durationMin: 240,
+        tenantId: DEFAULT_TENANT_ID,
       },
     }),
     prisma.service.upsert({
@@ -73,6 +96,7 @@ async function seedDemo() {
           "Reposición y staging rápido entre estancias back-to-back con checklist de decoración ligera.",
         basePrice: 129.0,
         durationMin: 90,
+        tenantId: DEFAULT_TENANT_ID,
       },
     }),
   ]);
@@ -93,6 +117,7 @@ async function seedDemo() {
         bedrooms: 2,
         bathrooms: 2,
         notes: "Vista panorámica · Smart-home · Piso 32",
+        tenantId: DEFAULT_TENANT_ID,
       },
     }),
     prisma.property.upsert({
@@ -111,6 +136,7 @@ async function seedDemo() {
         bathrooms: 5,
         notes:
           "Piscina climatizada · Acceso privado a playa · Calendario high-turnover",
+        tenantId: DEFAULT_TENANT_ID,
       },
     }),
   ]);
@@ -129,6 +155,7 @@ async function seedDemo() {
       totalAmount: turnoverPremium.basePrice,
       notes:
         "Stock de amenities ‘Signature Citrus’. Revisar sensor de humedad en master bedroom antes de la entrega.",
+      tenantId: DEFAULT_TENANT_ID,
     },
   });
 
@@ -146,6 +173,7 @@ async function seedDemo() {
       totalAmount: deepCleanBrickell.basePrice,
       notes:
         "Cliente solicita aromaterapia ‘Ocean Mist’. Ajustar difusor al modo eco al finalizar.",
+      tenantId: DEFAULT_TENANT_ID,
     },
   });
 
@@ -163,6 +191,7 @@ async function seedDemo() {
       totalAmount: amenityRefresh.basePrice,
       notes:
         "Back-to-back check-in/out. Reponer welcome kit, revisar toallas de playa y staging del patio.",
+      tenantId: DEFAULT_TENANT_ID,
     },
   });
 
@@ -180,6 +209,7 @@ async function seedDemo() {
           message:
             "Se agendó BRISA-0003 – Amenity Refresh Express en Azure Villa Key Biscayne.",
           readAt: null,
+          tenantId: DEFAULT_TENANT_ID,
         },
         {
           userId: coordinator.id,
@@ -187,6 +217,7 @@ async function seedDemo() {
           message:
             "El servicio Turnover Premium Airbnb ahora incluye auditoría de inventario con RFID.",
           readAt: null,
+          tenantId: DEFAULT_TENANT_ID,
         },
         {
           userId: coordinator.id,
@@ -194,6 +225,7 @@ async function seedDemo() {
           message:
             "Alerta: cliente reporta humedad en baño de visitas (Skyline Loft Brickell) – coordinar inspección preventiva.",
           readAt: null,
+          tenantId: DEFAULT_TENANT_ID,
         },
       ],
       skipDuplicates: true,

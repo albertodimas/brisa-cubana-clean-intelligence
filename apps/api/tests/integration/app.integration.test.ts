@@ -14,6 +14,7 @@ let usersFixture: any[] = [];
 let propertiesFixture: any[] = [];
 let notificationsFixture: any[] = [];
 let userSessionsFixture: any[] = [];
+let userTenantsFixture: any[] = [];
 
 const makeCuid = (index: number) => `c${index.toString(36).padStart(24, "0")}`;
 
@@ -108,6 +109,9 @@ const mockPrisma = {
               }
             }
 
+            if (where.tenantId && service.tenantId !== where.tenantId) {
+              return false;
+            }
             if (Array.isArray(where.OR) && where.OR.length > 0) {
               const matchesOr = where.OR.some((clause: any) => {
                 if (clause.name?.contains) {
@@ -162,6 +166,7 @@ const mockPrisma = {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
+        tenantId: data.tenantId ?? defaultTenantId,
         ...data,
       };
       servicesFixture.push(record);
@@ -185,6 +190,17 @@ const mockPrisma = {
         async ({ where }: { where: any }) =>
           servicesFixture.find((item) => item.id === where.id) ?? null,
       ),
+    findFirst: vi.fn().mockImplementation(
+      async ({ where }: { where?: any } = {}) =>
+        servicesFixture.find((item) => {
+          if (!where) return true;
+          if (where.id && item.id !== where.id) return false;
+          if (where.tenantId && item.tenantId !== where.tenantId) {
+            return false;
+          }
+          return true;
+        }) ?? null,
+    ),
   },
   booking: {
     findMany: vi.fn().mockImplementation(
@@ -206,6 +222,9 @@ const mockPrisma = {
             return false;
           }
           if (!where) return true;
+          if (where.tenantId && booking.tenantId !== where.tenantId) {
+            return false;
+          }
           if (where.status && booking.status !== where.status) return false;
           if (where.propertyId && booking.propertyId !== where.propertyId)
             return false;
@@ -325,6 +344,7 @@ const mockPrisma = {
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
+            tenantId: data.tenantId ?? defaultTenantId,
           };
           bookingsFixture.push(record);
           return {
@@ -389,7 +409,11 @@ const mockPrisma = {
       .fn()
       .mockImplementation(
         async ({ where, include }: { where: any; include?: any }) => {
-          const booking = bookingsFixture.find((item) => item.id === where.id);
+          const booking = bookingsFixture.find(
+            (item) =>
+              item.id === where.id &&
+              (!where.tenantId || item.tenantId === where.tenantId),
+          );
           if (!booking) {
             return null;
           }
@@ -415,29 +439,83 @@ const mockPrisma = {
           };
         },
       ),
-    findFirst: vi.fn().mockResolvedValue(null), // Para hasTimeConflict - no conflictos por defecto
+    findFirst: vi
+      .fn()
+      .mockImplementation(
+        async ({ where, include }: { where?: any; include?: any } = {}) => {
+          const booking =
+            bookingsFixture.find((item) => {
+              if (!where) return true;
+              if (where.id && item.id !== where.id) return false;
+              if (where.code && item.code !== where.code) return false;
+              if (where.tenantId && item.tenantId !== where.tenantId) {
+                return false;
+              }
+              return true;
+            }) ?? null;
+          if (!booking) {
+            return null;
+          }
+          if (!include) {
+            return booking;
+          }
+          return {
+            ...booking,
+            customer: include.customer
+              ? (usersFixture.find((user) => user.id === booking.customerId) ??
+                null)
+              : undefined,
+            property: include.property
+              ? (propertiesFixture.find(
+                  (property) => property.id === booking.propertyId,
+                ) ?? null)
+              : undefined,
+            service: include.service
+              ? (servicesFixture.find(
+                  (service) => service.id === booking.serviceId,
+                ) ?? null)
+              : undefined,
+          };
+        },
+      ),
   },
   user: {
-    findUnique: vi
-      .fn()
-      .mockImplementation(async ({ where }: { where: any }) => {
-        const match = (() => {
-          if (where.id) {
-            return usersFixture.find((item) => item.id === where.id) ?? null;
-          }
-          if (where.email) {
-            return (
-              usersFixture.find((item) => item.email === where.email) ?? null
-            );
-          }
-          return null;
-        })();
-        if (match?.deletedAt) {
-          return null;
+    findUnique: vi.fn(async ({ where }: { where: any }) => {
+      const match = (() => {
+        if (where.id) {
+          return usersFixture.find((item) => item.id === where.id) ?? null;
         }
-        return match;
-      }),
-    findMany: vi.fn().mockImplementation(
+        if (where.email) {
+          return (
+            usersFixture.find((item) => item.email === where.email) ?? null
+          );
+        }
+        return null;
+      })();
+      if (match?.deletedAt) {
+        return null;
+      }
+      return match;
+    }),
+    findFirst: vi.fn(
+      async ({ where }: { where?: any } = {}) =>
+        usersFixture.find((user) => {
+          if (!where) return true;
+          if (where.id && user.id !== where.id) return false;
+          if (where.email && user.email !== where.email) return false;
+          const tenantCondition = where.tenants?.some?.tenantId?.equals;
+          if (tenantCondition) {
+            const hasMembership = (user.tenants ?? []).some(
+              (membership: any) => membership.tenantId === tenantCondition,
+            );
+            if (!hasMembership) {
+              return false;
+            }
+          }
+          return true;
+        }) ?? null,
+    ),
+    findMany: vi.fn(
       async ({
         where,
         take,
@@ -452,6 +530,15 @@ const mockPrisma = {
         select?: Record<string, boolean>;
       } = {}) => {
         let filtered = usersFixture.filter((user) => user.deletedAt === null);
+
+        const tenantCondition = where?.tenants?.some?.tenantId?.equals;
+        if (tenantCondition) {
+          filtered = filtered.filter((user) =>
+            (user.tenants ?? []).some(
+              (membership: any) => membership.tenantId === tenantCondition,
+            ),
+          );
+        }
 
         if (where?.role) {
           filtered = filtered.filter((user) => user.role === where.role);
@@ -539,7 +626,7 @@ const mockPrisma = {
         return filtered;
       },
     ),
-    create: vi.fn().mockImplementation(async ({ data, select }: any) => {
+    create: vi.fn(async ({ data, select }: any) => {
       if (usersFixture.some((user) => user.email === data.email)) {
         const error: any = new Error(
           "Unique constraint failed on the fields: (`email`)",
@@ -549,14 +636,32 @@ const mockPrisma = {
         error.clientVersion = "6.0.0";
         throw error;
       }
+      const tenantId =
+        data.tenants?.create?.tenantId ?? data.tenantId ?? defaultTenantId;
       const record = {
         id: makeCuid(usersFixture.length + 300),
         createdAt: new Date(),
         updatedAt: new Date(),
-        ...data,
         deletedAt: null,
+        ...data,
+        tenants: [
+          {
+            tenantId,
+            role: data.role,
+            tenant: {
+              slug: defaultTenantSlug,
+              name: defaultTenantName,
+              status: "ACTIVE",
+            },
+          },
+        ],
       };
       usersFixture.push(record);
+      userTenantsFixture.push({
+        userId: record.id,
+        tenantId,
+        role: data.role,
+      });
       if (select) {
         return {
           id: record.id,
@@ -570,12 +675,23 @@ const mockPrisma = {
       }
       return record;
     }),
-    update: vi.fn().mockImplementation(async ({ where, data }: any) => {
+    update: vi.fn(async ({ where, data }: any) => {
       const user = usersFixture.find((item) => item.id === where.id);
       if (!user) {
         throw new Error("User not found");
       }
       Object.assign(user, data, { updatedAt: new Date() });
+      if (data.role) {
+        user.tenants = (user.tenants ?? []).map((membership: any) => ({
+          ...membership,
+          role: data.role,
+        }));
+        userTenantsFixture = userTenantsFixture.map((membership) =>
+          membership.userId === user.id
+            ? { ...membership, role: data.role }
+            : membership,
+        );
+      }
       return {
         id: user.id,
         email: user.email,
@@ -584,6 +700,23 @@ const mockPrisma = {
         isActive: user.isActive,
         updatedAt: user.updatedAt,
       };
+    }),
+  },
+  userTenant: {
+    updateMany: vi.fn(async ({ where, data }: { where: any; data: any }) => {
+      let count = 0;
+      userTenantsFixture = userTenantsFixture.map((membership) => {
+        const matchesUser =
+          !where?.userId || membership.userId === where.userId;
+        const matchesTenant =
+          !where?.tenantId || membership.tenantId === where.tenantId;
+        if (matchesUser && matchesTenant) {
+          count += 1;
+          return { ...membership, ...data };
+        }
+        return membership;
+      });
+      return { count };
     }),
   },
   property: {
@@ -611,6 +744,9 @@ const mockPrisma = {
               return false;
             }
             if (where.type && property.type !== where.type) {
+              return false;
+            }
+            if (where.tenantId && property.tenantId !== where.tenantId) {
               return false;
             }
             if (Array.isArray(where.OR) && where.OR.length > 0) {
@@ -675,6 +811,7 @@ const mockPrisma = {
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
+            tenantId: data.tenantId ?? defaultTenantId,
             ...data,
           };
           propertiesFixture.push(record);
@@ -694,6 +831,17 @@ const mockPrisma = {
         async ({ where }: { where: any }) =>
           propertiesFixture.find((item) => item.id === where.id) ?? null,
       ),
+    findFirst: vi.fn().mockImplementation(
+      async ({ where }: { where?: any } = {}) =>
+        propertiesFixture.find((item) => {
+          if (!where) return true;
+          if (where.id && item.id !== where.id) return false;
+          if (where.tenantId && item.tenantId !== where.tenantId) {
+            return false;
+          }
+          return true;
+        }) ?? null,
+    ),
     update: vi
       .fn()
       .mockImplementation(
@@ -815,19 +963,30 @@ const mockPrisma = {
   },
 };
 
+const defaultTenantId = process.env.DEFAULT_TENANT_ID ?? "tenant_brisa_cubana";
+const defaultTenantSlug = process.env.DEFAULT_TENANT_SLUG ?? "brisa-cubana";
+const defaultTenantName = "Brisa Cubana Clean Intelligence";
+
+function buildAuthPayload(role: "ADMIN" | "COORDINATOR") {
+  return {
+    sub: makeCuid(role === "ADMIN" ? 102 : 103),
+    email:
+      role === "ADMIN"
+        ? "admin@brisacubanacleanintelligence.com"
+        : "operaciones@brisacubanacleanintelligence.com",
+    role,
+    tenantId: defaultTenantId,
+    tenantSlug: defaultTenantSlug,
+    tenantName: defaultTenantName,
+    sessionId: "test-session",
+  };
+}
+
 const mockVerify = vi.fn((token: string) =>
   token === "jwt-admin"
-    ? {
-        sub: makeCuid(102),
-        email: "admin@brisacubanacleanintelligence.com",
-        role: "ADMIN",
-      }
+    ? buildAuthPayload("ADMIN")
     : token === "jwt-coordinator"
-      ? {
-          sub: makeCuid(103),
-          email: "operaciones@brisacubanacleanintelligence.com",
-          role: "COORDINATOR",
-        }
+      ? buildAuthPayload("COORDINATOR")
       : null,
 );
 
@@ -917,7 +1076,10 @@ describe("app", () => {
         updatedAt: new Date(),
         deletedAt: null,
       },
-    ];
+    ].map((service) => ({
+      ...service,
+      tenantId: defaultTenantId,
+    }));
     usersFixture = [
       {
         id: makeCuid(101),
@@ -955,7 +1117,25 @@ describe("app", () => {
         isActive: false,
         deletedAt: null,
       },
-    ];
+    ].map((user) => ({
+      ...user,
+      tenants: [
+        {
+          tenantId: defaultTenantId,
+          role: user.role,
+          tenant: {
+            slug: defaultTenantSlug,
+            name: defaultTenantName,
+            status: "ACTIVE",
+          },
+        },
+      ],
+    }));
+    userTenantsFixture = usersFixture.map((user) => ({
+      userId: user.id,
+      tenantId: defaultTenantId,
+      role: user.role,
+    }));
     propertiesFixture = [
       {
         id: makeCuid(201),
@@ -996,7 +1176,10 @@ describe("app", () => {
         updatedAt: new Date("2024-03-01"),
         deletedAt: null,
       },
-    ];
+    ].map((property) => ({
+      ...property,
+      tenantId: defaultTenantId,
+    }));
     bookingsFixture = [
       {
         id: "booking_fixture_1",
@@ -1030,7 +1213,10 @@ describe("app", () => {
         updatedAt: new Date(),
         deletedAt: null,
       },
-    ];
+    ].map((booking) => ({
+      ...booking,
+      tenantId: defaultTenantId,
+    }));
     notificationsFixture = [
       {
         id: makeCuid(900),
@@ -1361,9 +1547,16 @@ describe("app", () => {
       headers: authorizedHeaders,
     });
     expect(res.status).toBe(200);
-    expect(spy).toHaveBeenCalledWith(20, undefined, {}, true, {
-      orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
-    });
+    expect(spy).toHaveBeenCalledWith(
+      20,
+      undefined,
+      {},
+      true,
+      {
+        orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
+      },
+      defaultTenantId,
+    );
 
     spy.mockRestore();
   });
@@ -1482,6 +1675,7 @@ describe("app", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
+        tenantId: defaultTenantId,
       });
     }
 

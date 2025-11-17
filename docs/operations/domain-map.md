@@ -5,11 +5,11 @@ Esta guía resume los dominios activos del proyecto y los subdominios planeados 
 
 ## 1. Dominios activos
 
-| Dominio                                | Servicio / Uso                          | Estado    | Notas                                                                          |
-| -------------------------------------- | --------------------------------------- | --------- | ------------------------------------------------------------------------------ |
-| `brisacubanacleanintelligence.com`     | Marketing site + portal cliente + panel | ✅ Activo | Aliased a `brisa-cubana-clean-intelligence-np54jzbn1-brisa-cubana.vercel.app`. |
-| `www.brisacubanacleanintelligence.com` | Redirección 301 al dominio raíz         | ✅ Activo | Configurado en `apps/web/vercel.json`.                                         |
-| `api.brisacubanacleanintelligence.com` | API Hono (apps/api)                     | ✅ Activo | Alias a `brisa-cubana-clean-intelligence-mpcjiihms-brisa-cubana.vercel.app`.   |
+| Dominio                                | Servicio / Uso                          | Estado    | Notas                                                                                                                    |
+| -------------------------------------- | --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `brisacubanacleanintelligence.com`     | Marketing site + portal cliente + panel | ✅ Activo | Aliased a `brisa-cubana-clean-intelligence-np54jzbn1-brisa-cubana.vercel.app`. `/recursos/one-pager` sirve el one-pager. |
+| `www.brisacubanacleanintelligence.com` | Redirección 301 al dominio raíz         | ✅ Activo | Configurado en `apps/web/vercel.json`.                                                                                   |
+| `api.brisacubanacleanintelligence.com` | API Hono (apps/api)                     | ✅ Activo | Alias a `brisa-cubana-clean-intelligence-mpcjiihms-brisa-cubana.vercel.app`.                                             |
 
 ## 2. Subdominios reservados / futuros
 
@@ -49,6 +49,8 @@ Configurar los valores siguientes (Development / Preview / Production) con los d
 | `SLACK_WEBHOOK_URL`                                        | URL del webhook Slack (canal #alerts-operaciones) | web        |
 | `LEAD_WEBHOOK_URL`                                         | URL del CRM/automation para leads                 | web        |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` | Claves Stripe modo live                           | web, api   |
+| `DEFAULT_TENANT_ID` / `DEFAULT_TENANT_SLUG`                | `tenant_brisa_cubana` / `brisa-cubana`            | api        |
+| `NEXT_PUBLIC_DEFAULT_TENANT_SLUG`                          | `brisa-cubana`                                    | web        |
 
 ## 5. Checklist de despliegue por dominio
 

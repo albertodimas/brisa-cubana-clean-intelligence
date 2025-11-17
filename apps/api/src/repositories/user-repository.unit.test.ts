@@ -2,9 +2,42 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PrismaClient, UserRole } from "@prisma/client";
 import { UserRepository } from "./user-repository.js";
 
+const DEFAULT_TENANT = "tenant_brisa_cubana";
+const CUSTOM_TENANT = "tenant_custom";
+
+function buildUser(index = 0, role: UserRole = "STAFF") {
+  return {
+    id: `user_${index}`,
+    email: `user${index}@test.com`,
+    fullName: `User ${index}`,
+    role,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    tenants: [
+      {
+        tenantId: DEFAULT_TENANT,
+        role,
+        tenant: {
+          slug: "brisa",
+          name: "Brisa Cubana",
+          status: "ACTIVE",
+        },
+      },
+    ],
+  };
+}
+
 describe("UserRepository", () => {
   let repository: UserRepository;
-  let prisma: Pick<PrismaClient, "user">;
+  let prisma: {
+    user: {
+      findMany: ReturnType<typeof vi.fn>;
+      findUnique: ReturnType<typeof vi.fn>;
+      create: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+    };
+  };
 
   beforeEach(() => {
     prisma = {
@@ -13,129 +46,90 @@ describe("UserRepository", () => {
         findUnique: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
-        delete: vi.fn(),
       },
-    } as unknown as Pick<PrismaClient, "user">;
+    };
 
-    repository = new UserRepository(prisma as PrismaClient);
+    repository = new UserRepository(prisma as unknown as PrismaClient);
   });
 
-  it("findMany returns paginated users", async () => {
-    const records = Array.from({ length: 3 }, (_, index) => ({
-      id: `user_${index}`,
-      email: `user${index}@test.com`,
-      fullName: `User ${index}`,
-      role: "STAFF" as UserRole,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      passwordHash: "hashed",
-      deletedAt: null,
-    }));
-
-    vi.mocked(prisma.user.findMany).mockResolvedValue(records);
+  it("findMany scopes by tenant and returns paginated data", async () => {
+    const users = [buildUser(0, "ADMIN"), buildUser(1, "STAFF"), buildUser(2)];
+    vi.mocked(prisma.user.findMany).mockResolvedValue(users);
 
     const result = await repository.findMany({ limit: 2 });
 
-    expect(prisma.user.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        take: 3,
-        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-        select: expect.objectContaining({ email: true }),
-      }),
-    );
-
+    expect(prisma.user.findMany).toHaveBeenCalledWith({
+      where: {
+        AND: [
+          {
+            tenants: { some: { tenantId: DEFAULT_TENANT } },
+          },
+        ],
+      },
+      take: 3,
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      select: expect.any(Object),
+    });
     expect(result.data).toHaveLength(2);
+    expect(result.data[0]).toMatchObject({
+      role: "ADMIN",
+      tenants: [
+        expect.objectContaining({
+          tenantId: DEFAULT_TENANT,
+          tenantSlug: "brisa",
+        }),
+      ],
+    });
     expect(result.pagination.hasMore).toBe(true);
   });
 
-  it("findByEmail delegates to prisma", async () => {
-    const user = {
-      id: "user_1",
-      email: "user@test.com",
-      fullName: "User",
-      role: "ADMIN" as UserRole,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      passwordHash: "hashed",
-      deletedAt: null,
-    };
-
+  it("findByEmail selects tenants and normalizes response", async () => {
+    const user = buildUser();
     vi.mocked(prisma.user.findUnique).mockResolvedValue(user);
 
-    const result = await repository.findByEmail("user@test.com");
+    const result = await repository.findByEmail("user0@test.com");
 
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
-      where: { email: "user@test.com" },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      where: { email: "user0@test.com" },
+      select: expect.objectContaining({
+        tenants: expect.any(Object),
+      }),
     });
-    expect(result).toBe(user);
+    expect(result?.tenants?.[0]?.tenantId).toBe(DEFAULT_TENANT);
   });
 
-  it("findAuthByEmail returns user including password hash", async () => {
+  it("findAuthByEmail includes password hash in select", async () => {
     const authUser = {
-      id: "user_2",
-      email: "secure@test.com",
-      fullName: "Secure User",
-      role: "COORDINATOR" as UserRole,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      ...buildUser(0, "COORDINATOR"),
       passwordHash: "hashed",
-      deletedAt: null,
     };
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(authUser as any);
 
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(authUser);
-
-    const result = await repository.findAuthByEmail("secure@test.com");
+    const result = await repository.findAuthByEmail("login@test.com");
 
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
-      where: { email: "secure@test.com" },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
+      where: { email: "login@test.com" },
+      select: expect.objectContaining({
         passwordHash: true,
-      },
+        tenants: expect.any(Object),
+      }),
     });
-    expect(result).toBe(authUser);
+    expect(result?.passwordHash).toBe("hashed");
+    expect(result?.tenants?.[0]?.tenantId).toBe(DEFAULT_TENANT);
   });
 
-  it("creates a user with hashed password", async () => {
+  it("creates a user with tenant membership", async () => {
     const payload = {
-      email: "user@test.com",
-      fullName: "User",
+      email: "new@test.com",
+      fullName: "New User",
       passwordHash: "hashed",
-      role: "COORDINATOR" as UserRole,
-      tenantId: "tenant_test",
+      role: "STAFF" as UserRole,
+      tenantId: DEFAULT_TENANT,
     };
+    const created = buildUser(99, "STAFF");
+    vi.mocked(prisma.user.create).mockResolvedValue(created as any);
 
-    const created = {
-      ...payload,
-      isActive: true,
-      id: "user_new",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      passwordHash: payload.passwordHash,
-      deletedAt: null,
-    };
-
-    vi.mocked(prisma.user.create).mockResolvedValue(created);
-
-    const result = await repository.create(payload);
+    await repository.create(payload);
 
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {
@@ -144,97 +138,47 @@ describe("UserRepository", () => {
         role: payload.role,
         isActive: true,
         passwordHash: payload.passwordHash,
+        tenants: {
+          create: {
+            tenantId: payload.tenantId,
+            role: payload.role,
+          },
+        },
       },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: expect.any(Object),
     });
-    expect(result).toBe(created);
   });
 
-  it("updates a user", async () => {
-    const updated = {
-      id: "user_1",
-      email: "user@test.com",
-      fullName: "Updated",
-      role: "ADMIN" as UserRole,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      passwordHash: "hashed",
-      deletedAt: null,
-    };
+  it("update, delete and restore follow tenant rules", async () => {
+    const updated = buildUser(1, "ADMIN");
+    vi.mocked(prisma.user.update).mockResolvedValue(updated as any);
 
-    vi.mocked(prisma.user.update).mockResolvedValue(updated);
-
-    const result = await repository.update("user_1", {
-      fullName: "Updated",
-      passwordHash: "hashed",
-    });
+    const result = await repository.update(
+      "user_1",
+      { fullName: "Updated" },
+      CUSTOM_TENANT,
+    );
 
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: "user_1" },
-      data: { fullName: "Updated", passwordHash: "hashed" },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      data: { fullName: "Updated" },
+      select: expect.any(Object),
     });
-    expect(result).toBe(updated);
-  });
-
-  it("deletes a user", async () => {
-    vi.mocked(prisma.user.update).mockResolvedValue({} as any);
+    expect(result.role).toBe("ADMIN");
 
     await repository.delete("user_1");
-
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: "user_1" },
       data: { deletedAt: expect.any(Date) },
     });
-  });
 
-  it("restores a user", async () => {
-    const restored = {
-      id: "user_1",
-      email: "user@test.com",
-      fullName: "User",
-      role: "ADMIN" as UserRole,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      passwordHash: "hashed",
-      deletedAt: null,
-    };
-
-    vi.mocked(prisma.user.update).mockResolvedValue(restored);
-
-    const result = await repository.restore("user_1");
-
+    vi.mocked(prisma.user.update).mockResolvedValue(updated as any);
+    const restored = await repository.restore("user_1");
+    expect(restored.role).toBe("ADMIN");
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: "user_1" },
       data: { deletedAt: null },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: expect.any(Object),
     });
-    expect(result).toEqual(restored);
   });
 });

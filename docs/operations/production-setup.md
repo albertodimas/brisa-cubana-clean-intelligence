@@ -7,7 +7,27 @@
 
 ## 🔐 Critical Environment Variables
 
-### **1. Stripe Secret Key (REQUIRED)**
+### **1. Identidad multi-tenant (REQUIRED)**
+
+El backend y la web necesitan saber qué tenant usar cuando no se envía `tenantSlug` desde el login (ej. primera empresa cargada en la base). Configura los valores por entorno antes de cualquier despliegue:
+
+```bash
+vercel env add DEFAULT_TENANT_ID production       # ej. tenant_brisa_cubana
+vercel env add DEFAULT_TENANT_SLUG production     # ej. brisa-cubana
+vercel env add DEFAULT_TENANT_ID preview
+vercel env add DEFAULT_TENANT_SLUG preview
+vercel env add DEFAULT_TENANT_ID development
+vercel env add DEFAULT_TENANT_SLUG development
+
+vercel env add NEXT_PUBLIC_DEFAULT_TENANT_SLUG production
+vercel env add NEXT_PUBLIC_DEFAULT_TENANT_SLUG preview
+vercel env add NEXT_PUBLIC_DEFAULT_TENANT_SLUG development
+```
+
+- `DEFAULT_TENANT_ID` se usa para backfill automático (migración `20251112223737_seed_default_tenant`).
+- `DEFAULT_TENANT_SLUG` y `NEXT_PUBLIC_DEFAULT_TENANT_SLUG` rellenan el campo “Código de tenant” en el login y en las llamadas del portal.
+
+### **2. Stripe Secret Key (REQUIRED)**
 
 El proyecto actualmente tiene configuradas las claves públicas de Stripe pero **falta la clave secreta**.
 
@@ -61,7 +81,7 @@ El proyecto actualmente tiene configuradas las claves públicas de Stripe pero *
 
 ````
 
-### **2. Cache de Calendario (opcional)**
+### **3. Cache de Calendario (opcional)**
 
 `CALENDAR_CACHE_TTL_MS` controla el tiempo de vida (en milisegundos) de la caché que utiliza `/api/calendar`. El default es `60000`. Si necesitas depurar en caliente puedes ponerlo en `0`, pero en producción recomendamos mantenerlo entre 30 000 y 120 000 para aligerar Prisma cuando se cambian filtros constantemente.
 
@@ -99,6 +119,8 @@ vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY preview
 vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY production
 vercel env add NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT preview
 vercel env add NEXT_PUBLIC_ENABLE_PUBLIC_CHECKOUT production
+vercel env add NEXT_PUBLIC_DEFAULT_TENANT_SLUG preview
+vercel env add NEXT_PUBLIC_DEFAULT_TENANT_SLUG production
 ```
 
 > Todas apuntan a `https://api.brisacubanacleanintelligence.com` / `https://brisacubanacleanintelligence.com` salvo las claves PostHog y Stripe. Tras el alta, ejecuta `vercel env pull --environment production` para verificar que `NEXT_PUBLIC_API_URL` e `INTERNAL_API_URL` estén presentes; sin ellas el build muere con `NEXT_PUBLIC_API_URL or INTERNAL_API_URL must be defined`.
@@ -108,7 +130,7 @@ Adicional:
 - `HEALTH_CHECK_TOKEN` debe existir en el proyecto API y también como secreto de GitHub para que el monitor “Production Health Monitor” no regrese códigos `000`.
 - Cuando edites este bloque vuelve a desplegar los dos proyectos (`apps/web` y `apps/api`) con `vercel --cwd apps/web` y `vercel --cwd apps/api` para propagar los envs recien cargados.
 
-## 📊 Lead Capture System
+## 📊 Lead Capture System / Formulario de interés
 
 El sistema de captura de leads se orquesta internamente (landing → API → PostgreSQL) y puede replicar cada registro hacia Slack y/o un CRM vía webhook. El endpoint `/api/leads` ejecuta hasta **3 intentos** con _timeouts_ de 5 segundos antes de marcar un fallo definitivo (ver `apps/api/src/routes/leads.ts`). Los leads QA (emails con `qa+` o notas de prueba) se marcan automáticamente como `LOST` para no contaminar el pipeline comercial.
 
@@ -124,9 +146,8 @@ Landing Form → API /api/leads → PostgreSQL (tabla leads) → Slack (opcional
 # ✅ RECOMENDADO
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
 LEAD_WEBHOOK_URL=https://crm.miempresa.com/hooks/brisa-leads
-
-# Opcional
-# Si no defines LEAD_WEBHOOK_URL los leads quedan en Postgres + Slack.
+LEAD_FORM_BRAND_NAME=\"Brisa OS\"       # copy del formulario en landing
+LEAD_FORM_DEFAULT_PLAN=\"starter\"      # se usa como fallback cuando no viene query ?plan=
 ```
 
 > Usa `scripts/test-lead-webhook.sh` tras exportar `LEAD_WEBHOOK_URL` para validar que el CRM responda 2xx. Cada intento fallido se loguea como `[lead webhook] attempt <n> failed` y se reintenta automáticamente con _backoff_ incremental.
@@ -134,12 +155,12 @@ LEAD_WEBHOOK_URL=https://crm.miempresa.com/hooks/brisa-leads
 ### **Endpoints disponibles:**
 
 ```bash
-# Público (landing page)
-POST https://brisa-cubana-clean-intelligence-api.vercel.app/api/leads
+# Público (landing page / formulario de interés SaaS)
+POST https://api.brisacubanacleanintelligence.com/api/leads
 
-# Admin (panel interno)
-GET https://brisa-cubana-clean-intelligence-api.vercel.app/api/leads
-# Requiere: Authorization: Bearer <JWT>
+# Admin (panel interno multi-tenant)
+GET https://api.brisacubanacleanintelligence.com/api/leads
+# Requiere: Authorization: Bearer <JWT> con tenantId
 ```
 
 ### **Schema de datos:**

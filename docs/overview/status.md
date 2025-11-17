@@ -1,6 +1,6 @@
 # Estado del Proyecto – Brisa OS
 
-**Última actualización:** 12 de noviembre de 2025  
+**Última actualización:** 14 de noviembre de 2025  
 **Responsable actual:** Producto & Plataforma (equipo fundador)
 
 ---
@@ -11,10 +11,10 @@
 - Versiones vigentes: `@brisa/api` 0.4.2 (Hono + Prisma) y `@brisa/web` 0.4.2 (Next.js 16). La release `v0.5.0` marcará el primer corte SaaS (landing nueva + multi-tenant básico).
 - Dominios productivos: `https://brisacubanacleanintelligence.com` (landing + portal) y `https://api.brisacubanacleanintelligence.com`. Se conservarán hasta definir un dominio adicional si es necesario.
 - Prioridades inmediatas:
-  1. ✅ Reescritura de la landing para captar empresas (copy + secciones SaaS) desplegada en `apps/web/app/page.tsx`.
-  2. Diseño/implementación multi-tenant en la API (tenantId, roles, scoping).
-  3. IA de resúmenes automáticos para reportes de servicio.
-  4. Preparar estrategia de planes/billing (Starter, Growth, Scale).
+  1. ✅ Reescritura de la landing + recursos SaaS (`apps/web/app/page.tsx`, `/recursos/one-pager`).
+  2. ✅ Fundaciones multi-tenant (migraciones Prisma, repositorios y middleware con `tenantId`/`tenantSlug`).
+  3. IA de resúmenes automáticos para reportes de servicio (nuevo módulo descrito en `docs/development/guides/ai-resumenes.md`).
+  4. Preparar estrategia de planes/billing (Starter, Growth, Scale) y activar Stripe live.
 
 ---
 
@@ -68,15 +68,15 @@
 
 ## 4. Riesgos y pendientes
 
-| Trabajo                                       | Estado         | Próximo paso                                                                             |
-| --------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------- |
-| Landing SaaS (copy + secciones + formularios) | 🔄 En curso    | Definir estructura final y validar con MCP antes de publicar.                            |
-| Multi-tenant (tenantId, roles, permisos)      | 🔄 Planificado | Diseñar migración Prisma + middleware; documentar en `docs/development/architecture.md`. |
-| IA – resúmenes automáticos                    | 🔄 Planificado | Definir inputs/prompt/modelo; crear servicio en `apps/api` y exponerlo al portal.        |
-| Pricing/Billing (Stripe)                      | 🔄 En análisis | Decidir estructura (Starter/Growth/Scale + add-ons) y preparar scripts de facturación.   |
-| CSP modo bloqueante                           | 🔄 Planificado | Auditar reportes actuales y migrar a política estricta.                                  |
-| Manifesto de entornos (`env.manifest.json`)   | 🔄 En curso    | Automatizar `vercel env pull` ↔ manifiesto y registrarlo en CI.                         |
-| Reducción de `any` y deuda TS                 | 🔄 En curso    | Bajar a <20 usos; rastrear en `docs/development/tech-debt.md`.                           |
+| Trabajo                                       | Estado         | Próximo paso                                                                           |
+| --------------------------------------------- | -------------- | -------------------------------------------------------------------------------------- |
+| Landing SaaS (copy + secciones + formularios) | ✅ Completo    | Mantener métricas y actualizar recursos cuando cambien planes/precios.                 |
+| Multi-tenant (tenantId, roles, permisos)      | ✅ Fundaciones | Extender scoping a leads/notifs restantes y habilitar selector UI multi-tenant.        |
+| IA – resúmenes automáticos                    | 🔄 Planificado | Definir inputs/prompt/modelo; crear servicio en `apps/api` y exponerlo al portal.      |
+| Pricing/Billing (Stripe)                      | 🔄 En análisis | Decidir estructura (Starter/Growth/Scale + add-ons) y preparar scripts de facturación. |
+| CSP modo bloqueante                           | 🔄 Planificado | Auditar reportes actuales y migrar a política estricta.                                |
+| Manifesto de entornos (`env.manifest.json`)   | 🔄 En curso    | Automatizar `vercel env pull` ↔ manifiesto y registrarlo en CI.                       |
+| Reducción de `any` y deuda TS                 | 🔄 En curso    | Bajar a <20 usos; rastrear en `docs/development/tech-debt.md`.                         |
 
 ---
 

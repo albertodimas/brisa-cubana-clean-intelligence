@@ -198,6 +198,24 @@ export default defineConfig({
   - Desactiva tours/onboarding que bloqueaban clicks (ej. `CalendarTour`).
   - Expone `window.__BRISA_TEST_RESCHEDULE__`, `__BRISA_REFRESH_COUNT__`, `__BRISA_LAST_STATUS__` y contadores visibles para que las specs comprueben refrescos.
   - Añade `data-testid` (`panel-calendar-grid`, `calendar-week-gridcell`, `calendar-booking-count`) y `statusMessage` asegurando que los `expect` se anclan a nodos deterministas.
+
+### Reutilizar servidores locales para acelerar Playwright
+
+Desde noviembre 2025 puedes evitar los rebuilds completos exportando `PLAYWRIGHT_REUSE_SERVERS=true` antes de ejecutar `pnpm test:e2e:*`. El flujo recomendado:
+
+```bash
+# En una terminal
+pnpm --filter @brisa/api start
+
+# En otra terminal
+pnpm --filter @brisa/web start
+
+# Finalmente, con los servers ya arriba
+PLAYWRIGHT_REUSE_SERVERS=true pnpm test:e2e:critical
+```
+
+Cuando la bandera está activa, `playwright.config.ts` marca `reuseExistingServer: true`; si detecta los puertos 3001/3000 con vida, no vuelve a correr `pnpm db:push --force-reset && pnpm db:seed`. Si los puertos están libres, Playwright ejecutará el comando completo como siempre, así que asegúrate de tener la base `brisa_cubana_e2e` disponible si decides no levantar los servers manualmente.
+
 - **Hook de refresco:** `useCalendar` admite `refreshToken`; las suites actualizan este valor cuando `router.refresh()` termina para garantizar que la UI vuelve con datos nuevos antes de continuar.
 - Documenta cualquier etiqueta nueva o helper asociado en la suite correspondiente y enlaza esta sección en el PR para mantener el inventario bajo control.
 

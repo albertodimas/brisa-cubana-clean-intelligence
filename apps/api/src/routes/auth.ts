@@ -83,17 +83,6 @@ async function issueUserSession(
   user: AuthUser,
   options: { revokeExisting?: boolean } = {},
 ) {
-  const accessToken = signAuthToken(
-    {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      tenantId: user.tenantId,
-      tenantSlug: user.tenantSlug,
-      tenantName: user.tenantName,
-    },
-    ACCESS_TOKEN_TTL_SECONDS,
-  );
   const userSessionRepository = getUserSessionRepository();
 
   if (options.revokeExisting) {
@@ -107,13 +96,26 @@ async function issueUserSession(
   );
   const refreshToken = randomBytes(32).toString("hex");
 
-  await userSessionRepository.create({
+  const session = await userSessionRepository.create({
     userId: user.id,
     tokenHash: hashToken(refreshToken),
     expiresAt: refreshExpiresAt,
     userAgent: c.req.header("user-agent") ?? null,
     ipAddress: extractClientIp(c),
   });
+
+  const accessToken = signAuthToken(
+    {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId,
+      tenantSlug: user.tenantSlug,
+      tenantName: user.tenantName,
+      sessionId: session.id,
+    },
+    ACCESS_TOKEN_TTL_SECONDS,
+  );
 
   return {
     accessToken,

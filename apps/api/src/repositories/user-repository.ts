@@ -250,6 +250,16 @@ export class UserRepository implements IUserRepository {
       select: defaultSelectWithTenants,
     });
 
+    if (data.role) {
+      await this.prisma.userTenant.updateMany({
+        where: {
+          userId: id,
+          tenantId: scopedTenantId,
+        },
+        data: { role: data.role as UserRole },
+      });
+    }
+
     return this.toUserResponse(user, scopedTenantId);
   }
 

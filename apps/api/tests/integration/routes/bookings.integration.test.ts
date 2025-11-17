@@ -19,6 +19,16 @@ const TEST_CUSTOMER_ID = "clh5k2j3a0002mh08def67890";
 const TEST_PROPERTY_ID = "clh5k2j3a0003mh08ghi11111";
 const TEST_PROPERTY_ID_2 = "clh5k2j3a0004mh08jkl22222";
 const TEST_BOOKING_ID = "clh5k2j3a0005mh08mno33333";
+const DAY_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_SCHEDULED_AT = new Date(Date.now() + 7 * DAY_MS);
+const DEFAULT_SCHEDULED_AT_ISO = DEFAULT_SCHEDULED_AT.toISOString();
+const UPDATED_SCHEDULED_AT_ISO = new Date(
+  DEFAULT_SCHEDULED_AT.getTime() + DAY_MS,
+).toISOString();
+
+const TEST_TENANT_ID = "tenant_test";
+const TEST_TENANT_SLUG = "tenant-test";
+const TEST_TENANT_NAME = "Tenant Test";
 
 const bookingRepositoryMock = {
   findById: vi.fn(),
@@ -27,6 +37,11 @@ const bookingRepositoryMock = {
   create: vi.fn(),
   update: vi.fn(),
   hasTimeConflict: vi.fn(),
+};
+
+const bookingSummaryRepositoryMock = {
+  findByBookingId: vi.fn(),
+  upsert: vi.fn(),
 };
 
 const serviceRepositoryMock = {
@@ -48,6 +63,7 @@ const sampleService = {
   basePrice: 15000,
   durationMin: 120,
   active: true,
+  tenantId: TEST_TENANT_ID,
 };
 
 const sampleCustomer = {
@@ -66,12 +82,13 @@ const sampleProperty = {
   zipCode: "33131",
   type: "VACATION_RENTAL",
   ownerId: TEST_CUSTOMER_ID,
+  tenantId: TEST_TENANT_ID,
 };
 
 const sampleBooking = {
   id: TEST_BOOKING_ID,
   code: "BRISA-0001",
-  scheduledAt: new Date("2025-11-15T14:00:00.000Z"),
+  scheduledAt: DEFAULT_SCHEDULED_AT,
   durationMin: 120,
   status: "CONFIRMED" as BookingStatus,
   totalAmount: 15000,
@@ -81,13 +98,19 @@ const sampleBooking = {
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
+  tenantId: TEST_TENANT_ID,
 };
 
 const makeToken = (email: string, role: string = "ADMIN") =>
   jwt.sign(
     {
       sub: email,
+      email,
       role,
+      tenantId: TEST_TENANT_ID,
+      tenantSlug: TEST_TENANT_SLUG,
+      tenantName: TEST_TENANT_NAME,
+      sessionId: "test-session",
     },
     process.env.JWT_SECRET ?? "test-secret",
     {
@@ -99,6 +122,7 @@ let getBookingRepositorySpy: ReturnType<typeof vi.spyOn>;
 let getServiceRepositorySpy: ReturnType<typeof vi.spyOn>;
 let getUserRepositorySpy: ReturnType<typeof vi.spyOn>;
 let getPropertyRepositorySpy: ReturnType<typeof vi.spyOn>;
+let getBookingSummaryRepositorySpy: ReturnType<typeof vi.spyOn>;
 
 describe("Bookings routes - Double booking prevention", () => {
   beforeAll(async () => {
@@ -106,6 +130,8 @@ describe("Bookings routes - Double booking prevention", () => {
     process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
     process.env.DATABASE_URL_UNPOOLED =
       "postgresql://test:test@localhost:5432/test";
+    process.env.DEFAULT_TENANT_ID = TEST_TENANT_ID;
+    process.env.DEFAULT_TENANT_SLUG = TEST_TENANT_SLUG;
 
     vi.resetModules();
     const containerModule = await import("../../../src/container.js");
@@ -121,6 +147,9 @@ describe("Bookings routes - Double booking prevention", () => {
     getPropertyRepositorySpy = vi
       .spyOn(containerModule, "getPropertyRepository")
       .mockReturnValue(propertyRepositoryMock as any);
+    getBookingSummaryRepositorySpy = vi
+      .spyOn(containerModule, "getBookingSummaryRepository")
+      .mockReturnValue(bookingSummaryRepositoryMock as any);
 
     app = (await import("../../../src/app.js")).default;
   });
@@ -130,9 +159,12 @@ describe("Bookings routes - Double booking prevention", () => {
     getServiceRepositorySpy.mockRestore();
     getUserRepositorySpy.mockRestore();
     getPropertyRepositorySpy.mockRestore();
+    getBookingSummaryRepositorySpy.mockRestore();
     delete process.env.JWT_SECRET;
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_URL_UNPOOLED;
+    delete process.env.DEFAULT_TENANT_ID;
+    delete process.env.DEFAULT_TENANT_SLUG;
   });
 
   beforeEach(() => {
@@ -142,6 +174,8 @@ describe("Bookings routes - Double booking prevention", () => {
     bookingRepositoryMock.create.mockReset();
     bookingRepositoryMock.update.mockReset();
     bookingRepositoryMock.hasTimeConflict.mockReset();
+    bookingSummaryRepositoryMock.findByBookingId.mockReset();
+    bookingSummaryRepositoryMock.upsert.mockReset();
     serviceRepositoryMock.findById.mockReset();
     userRepositoryMock.findById.mockReset();
     userRepositoryMock.findByEmail.mockReset();
@@ -149,15 +183,45 @@ describe("Bookings routes - Double booking prevention", () => {
 
     // Default mocks
     serviceRepositoryMock.findById.mockResolvedValue(sampleService);
-    userRepositoryMock.findById.mockResolvedValue(sampleCustomer);
+    const tenantMembership = [
+      {
+        tenantId: TEST_TENANT_ID,
+        tenantSlug: TEST_TENANT_SLUG,
+        tenantName: TEST_TENANT_NAME,
+        status: "ACTIVE",
+        role: "ADMIN",
+      },
+    ];
+    userRepositoryMock.findById.mockResolvedValue({
+      ...sampleCustomer,
+      tenants: tenantMembership,
+    });
     userRepositoryMock.findByEmail.mockResolvedValue({
       ...sampleCustomer,
       email: "admin@test.com",
       role: "ADMIN",
+      tenants: tenantMembership,
     });
     propertyRepositoryMock.findById.mockResolvedValue(sampleProperty);
     bookingRepositoryMock.hasTimeConflict.mockResolvedValue(false);
     bookingRepositoryMock.create.mockResolvedValue(sampleBooking);
+    bookingRepositoryMock.findByIdWithRelations.mockResolvedValue({
+      ...sampleBooking,
+      tenantId: "tenant_test",
+      property: sampleProperty,
+      service: sampleService,
+      customer: sampleCustomer,
+    });
+    bookingSummaryRepositoryMock.findByBookingId.mockResolvedValue(null);
+    bookingSummaryRepositoryMock.upsert.mockResolvedValue({
+      id: "sum_1",
+      bookingId: TEST_BOOKING_ID,
+      tenantId: "tenant_test",
+      summary: "Servicio generado de prueba",
+      model: "brisa-template-v1",
+      tokens: 42,
+      createdAt: new Date(),
+    });
     bookingRepositoryMock.findByIdWithRelations.mockResolvedValue({
       ...sampleBooking,
       service: sampleService,
@@ -181,7 +245,7 @@ describe("Bookings routes - Double booking prevention", () => {
           customerId: TEST_CUSTOMER_ID,
           propertyId: TEST_PROPERTY_ID,
           serviceId: TEST_SERVICE_ID,
-          scheduledAt: "2025-11-15T14:00:00.000Z",
+          scheduledAt: DEFAULT_SCHEDULED_AT_ISO,
           durationMin: 120,
         }),
       });
@@ -191,6 +255,8 @@ describe("Bookings routes - Double booking prevention", () => {
         TEST_PROPERTY_ID,
         expect.any(Date),
         120,
+        undefined,
+        TEST_TENANT_ID,
       );
       expect(bookingRepositoryMock.create).toHaveBeenCalled();
     });
@@ -209,7 +275,7 @@ describe("Bookings routes - Double booking prevention", () => {
           customerId: TEST_CUSTOMER_ID,
           propertyId: TEST_PROPERTY_ID,
           serviceId: TEST_SERVICE_ID,
-          scheduledAt: "2025-11-15T14:00:00.000Z",
+          scheduledAt: DEFAULT_SCHEDULED_AT_ISO,
           durationMin: 120,
         }),
       });
@@ -238,7 +304,7 @@ describe("Bookings routes - Double booking prevention", () => {
           customerId: TEST_CUSTOMER_ID,
           propertyId: TEST_PROPERTY_ID,
           serviceId: TEST_SERVICE_ID,
-          scheduledAt: "2025-11-15T14:00:00.000Z",
+          scheduledAt: DEFAULT_SCHEDULED_AT_ISO,
           // Sin durationMin
         }),
       });
@@ -247,6 +313,8 @@ describe("Bookings routes - Double booking prevention", () => {
         TEST_PROPERTY_ID,
         expect.any(Date),
         120, // Duración del servicio
+        undefined,
+        TEST_TENANT_ID,
       );
     });
   });
@@ -258,7 +326,7 @@ describe("Bookings routes - Double booking prevention", () => {
       bookingRepositoryMock.hasTimeConflict.mockResolvedValue(false);
       bookingRepositoryMock.update.mockResolvedValue({
         ...sampleBooking,
-        scheduledAt: new Date("2025-11-16T10:00:00.000Z"),
+        scheduledAt: new Date(UPDATED_SCHEDULED_AT_ISO),
       });
 
       const response = await app.request(`/api/bookings/${TEST_BOOKING_ID}`, {
@@ -268,7 +336,7 @@ describe("Bookings routes - Double booking prevention", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          scheduledAt: "2025-11-16T10:00:00.000Z",
+          scheduledAt: UPDATED_SCHEDULED_AT_ISO,
         }),
       });
 
@@ -278,6 +346,7 @@ describe("Bookings routes - Double booking prevention", () => {
         expect.any(Date),
         120,
         TEST_BOOKING_ID, // excludeBookingId
+        TEST_TENANT_ID,
       );
     });
 
@@ -293,7 +362,7 @@ describe("Bookings routes - Double booking prevention", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          scheduledAt: "2025-11-16T10:00:00.000Z",
+          scheduledAt: UPDATED_SCHEDULED_AT_ISO,
         }),
       });
 
@@ -328,6 +397,7 @@ describe("Bookings routes - Double booking prevention", () => {
         expect.any(Date),
         120,
         TEST_BOOKING_ID,
+        TEST_TENANT_ID,
       );
     });
 
@@ -352,6 +422,7 @@ describe("Bookings routes - Double booking prevention", () => {
         expect.any(Date),
         180, // Nueva duración
         TEST_BOOKING_ID,
+        TEST_TENANT_ID,
       );
     });
 
@@ -383,6 +454,63 @@ describe("Bookings routes - Double booking prevention", () => {
 
       expect(bookingRepositoryMock.hasTimeConflict).not.toHaveBeenCalled();
       expect(bookingRepositoryMock.update).toHaveBeenCalled();
+    });
+  });
+
+  describe("Booking summaries", () => {
+    it("genera un resumen cuando no existe", async () => {
+      const token = makeToken("admin@test.com", "ADMIN");
+      bookingSummaryRepositoryMock.findByBookingId.mockResolvedValue(null);
+
+      const response = await app.request(
+        `/api/bookings/${TEST_BOOKING_ID}/summary`,
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${token}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({}),
+        },
+      );
+
+      expect(response.status).toBe(200);
+      expect(bookingSummaryRepositoryMock.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bookingId: TEST_BOOKING_ID,
+          model: "brisa-template-v1",
+          tenantId: TEST_TENANT_ID,
+        }),
+      );
+      const payload = await response.json();
+      expect(payload.data.summary).toContain("Servicio");
+    });
+
+    it("obtiene un resumen existente", async () => {
+      const token = makeToken("admin@test.com", "ADMIN");
+      bookingSummaryRepositoryMock.findByBookingId.mockResolvedValue({
+        id: "sum_existing",
+        bookingId: TEST_BOOKING_ID,
+        tenantId: "tenant_test",
+        summary: "Resumen guardado",
+        model: "brisa-template-v1",
+        tokens: 10,
+        createdAt: new Date(),
+      });
+
+      const response = await app.request(
+        `/api/bookings/${TEST_BOOKING_ID}/summary`,
+        {
+          method: "GET",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      expect(response.status).toBe(200);
+      const payload = await response.json();
+      expect(payload.data.summary).toBe("Resumen guardado");
     });
   });
 });

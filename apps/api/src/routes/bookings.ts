@@ -7,13 +7,17 @@ import {
   requireRoles,
   getAuthenticatedUser,
 } from "../middleware/auth.js";
-import { serializeBooking } from "../lib/serializers.js";
+import {
+  serializeBooking,
+  serializeBookingSummary,
+} from "../lib/serializers.js";
 import { handlePrismaError } from "../lib/prisma-error-handler.js";
 import { parseSearchableQuery } from "../lib/pagination.js";
 import { isParseFailure } from "../lib/parse-result.js";
 import { logger } from "../lib/logger.js";
 import {
   getBookingRepository,
+  getBookingSummaryRepository,
   getPropertyRepository,
   getServiceRepository,
   getUserRepository,
@@ -27,6 +31,7 @@ import {
   notifyBookingCreated,
   handleBookingUpdate,
 } from "../services/booking-notification-dispatcher.js";
+import { AiSummaryService } from "../services/ai-summary-service.js";
 
 const createBookingSchema = z
   .object({
@@ -54,6 +59,7 @@ const createBookingSchema = z
   );
 
 const router = new Hono();
+const aiSummaryService = new AiSummaryService();
 
 const bookingStatusValues = [
   "PENDING",
@@ -121,6 +127,13 @@ const updateBookingSchema = z
       path: ["scheduledAt"],
     },
   );
+
+const summaryRequestSchema = z
+  .object({
+    force: z.boolean().optional(),
+  })
+  .partial()
+  .default({});
 
 router.get(
   "/",
@@ -240,6 +253,31 @@ router.get(
   },
 );
 
+router.get(
+  "/:id/summary",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR", "STAFF"]),
+  async (c) => {
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+
+    const id = c.req.param("id");
+    const summaryRepository = getBookingSummaryRepository();
+    const summary = await summaryRepository.findByBookingId(id);
+
+    if (
+      !summary ||
+      (summary.tenantId && summary.tenantId !== authUser.tenantId)
+    ) {
+      return c.json({ error: "Resumen no encontrado" }, 404);
+    }
+
+    return c.json({ data: serializeBookingSummary(summary) });
+  },
+);
+
 router.post(
   "/",
   authenticate,
@@ -340,6 +378,57 @@ router.post(
         default: "No se pudo crear la reserva",
       });
     }
+  },
+);
+
+router.post(
+  "/:id/summary",
+  authenticate,
+  requireRoles(["ADMIN", "COORDINATOR"]),
+  async (c) => {
+    const authUser = getAuthenticatedUser(c);
+    if (!authUser?.tenantId) {
+      return c.json({ error: "Tenant scope requerido" }, 400);
+    }
+    const id = c.req.param("id");
+    const bookingRepository = getBookingRepository();
+    const summaryRepository = getBookingSummaryRepository();
+
+    const body = await c.req.json().catch(() => ({}));
+    const parsed = summaryRequestSchema.safeParse(body ?? {});
+    if (!parsed.success) {
+      return c.json({ error: parsed.error.flatten() }, 400);
+    }
+    const force = parsed.data.force ?? false;
+
+    const existing = await summaryRepository.findByBookingId(id);
+    if (
+      existing &&
+      (existing.tenantId === null || existing.tenantId === authUser.tenantId) &&
+      !force
+    ) {
+      return c.json({ data: serializeBookingSummary(existing) });
+    }
+
+    const booking = await bookingRepository.findByIdWithRelations(
+      id,
+      authUser.tenantId,
+    );
+    if (!booking) {
+      return c.json({ error: "Booking not found" }, 404);
+    }
+
+    const summaryResult = aiSummaryService.generateSummary(booking);
+
+    const saved = await summaryRepository.upsert({
+      bookingId: booking.id,
+      tenantId: booking.tenantId ?? authUser.tenantId,
+      summary: summaryResult.summary,
+      model: summaryResult.model,
+      tokens: summaryResult.tokens,
+    });
+
+    return c.json({ data: serializeBookingSummary(saved) });
   },
 );
 router.patch(

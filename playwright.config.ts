@@ -27,6 +27,15 @@ if (!process.env.LOGIN_RATE_LIMIT_WINDOW_MS) {
   process.env.LOGIN_RATE_LIMIT_WINDOW_MS = loginRateLimitWindow;
 }
 
+const reuseLocalServers =
+  !isCI && process.env.PLAYWRIGHT_REUSE_SERVERS === "true";
+const localApiCommand = reuseLocalServers
+  ? "pnpm --filter @brisa/api start"
+  : "pnpm db:push --force-reset && pnpm db:seed && pnpm --filter @brisa/api build && pnpm --filter @brisa/api start";
+const localWebCommand = reuseLocalServers
+  ? "pnpm --filter @brisa/web start"
+  : "pnpm --filter @brisa/web build && pnpm --filter @brisa/web start";
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
@@ -109,10 +118,9 @@ export default defineConfig({
     : [
         // Local dev: Setup DB and use dev servers
         {
-          command:
-            "pnpm db:push --force-reset && pnpm db:seed && pnpm --filter @brisa/api build && pnpm --filter @brisa/api start",
+          command: localApiCommand,
           url: `${baseApiUrl}/health`,
-          reuseExistingServer: false,
+          reuseExistingServer: reuseLocalServers,
           stdout: "pipe",
           stderr: "pipe",
           env: {
@@ -132,10 +140,9 @@ export default defineConfig({
           timeout: 120_000,
         },
         {
-          command:
-            "pnpm --filter @brisa/web build && pnpm --filter @brisa/web start",
+          command: localWebCommand,
           url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
-          reuseExistingServer: false,
+          reuseExistingServer: reuseLocalServers,
           stdout: "pipe",
           stderr: "pipe",
           env: {

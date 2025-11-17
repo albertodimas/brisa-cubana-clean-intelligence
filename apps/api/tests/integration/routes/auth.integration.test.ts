@@ -17,6 +17,13 @@ type MockUser = {
   role: string;
   isActive: boolean;
   passwordHash: string;
+  tenants?: Array<{
+    tenantId: string;
+    tenantSlug: string;
+    tenantName?: string;
+    status?: string;
+    role: string;
+  }>;
 };
 
 type MockSession = {
@@ -30,6 +37,10 @@ type MockSession = {
 describe("Auth routes", () => {
   let app: Hono;
   const sessions: MockSession[] = [];
+  const TEST_TENANT_ID = "tenant_test";
+  const TEST_TENANT_SLUG = "tenant-test";
+  const TEST_TENANT_NAME = "Tenant Test";
+
   const userRepositoryMock = {
     findAuthByEmail: vi.fn<(email: string) => Promise<MockUser | null>>(),
     findById: vi.fn<(id: string) => Promise<MockUser | null>>(),
@@ -91,6 +102,8 @@ describe("Auth routes", () => {
     process.env.JWT_SECRET = "test-secret";
     process.env.AUTH_ACCESS_TOKEN_TTL_SECONDS = "60";
     process.env.AUTH_REFRESH_TOKEN_TTL_DAYS = "7";
+    process.env.DEFAULT_TENANT_ID = TEST_TENANT_ID;
+    process.env.DEFAULT_TENANT_SLUG = TEST_TENANT_SLUG;
     passwordHash = await bcrypt.hash("Test1234!", 8);
 
     vi.resetModules();
@@ -111,17 +124,29 @@ describe("Auth routes", () => {
     delete process.env.JWT_SECRET;
     delete process.env.AUTH_ACCESS_TOKEN_TTL_SECONDS;
     delete process.env.AUTH_REFRESH_TOKEN_TTL_DAYS;
+    delete process.env.DEFAULT_TENANT_ID;
+    delete process.env.DEFAULT_TENANT_SLUG;
   });
 
   beforeEach(() => {
     sessions.length = 0;
     vi.clearAllMocks();
+    const tenantMembership = [
+      {
+        tenantId: TEST_TENANT_ID,
+        tenantSlug: TEST_TENANT_SLUG,
+        tenantName: TEST_TENANT_NAME,
+        status: "ACTIVE",
+        role: "ADMIN",
+      },
+    ];
     userRepositoryMock.findAuthByEmail.mockResolvedValue({
       id: "user-1",
       email: "admin@test.com",
       role: "ADMIN",
       isActive: true,
       passwordHash,
+      tenants: tenantMembership,
     });
     userRepositoryMock.findById.mockResolvedValue({
       id: "user-1",
@@ -129,6 +154,7 @@ describe("Auth routes", () => {
       role: "ADMIN",
       isActive: true,
       passwordHash,
+      tenants: tenantMembership,
     });
   });
 

@@ -19,6 +19,12 @@ const TEST_CUSTOMER_ID = "clh5k2j3a0002mh08def67890";
 const TEST_PROPERTY_ID = "clh5k2j3a0003mh08ghi11111";
 const TEST_BOOKING_ID = "clh5k2j3a0005mh08mno33333";
 const TEST_STAFF_ID = "clh5k2j3a0006mh08staff001";
+const DAY_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_SCHEDULED_AT = new Date(Date.now() + 7 * DAY_MS);
+
+const TEST_TENANT_ID = "tenant_test";
+const TEST_TENANT_SLUG = "tenant-test";
+const TEST_TENANT_NAME = "Tenant Test";
 
 const bookingRepositoryMock = {
   findById: vi.fn(),
@@ -40,6 +46,7 @@ const sampleService = {
   basePrice: 15000,
   durationMin: 120,
   active: true,
+  tenantId: TEST_TENANT_ID,
 };
 
 const sampleCustomer = {
@@ -48,6 +55,7 @@ const sampleCustomer = {
   fullName: "Cliente Test",
   isActive: true,
   role: "CLIENT",
+  tenantId: TEST_TENANT_ID,
 };
 
 const sampleProperty = {
@@ -58,6 +66,7 @@ const sampleProperty = {
   zipCode: "33131",
   type: "VACATION_RENTAL",
   ownerId: TEST_CUSTOMER_ID,
+  tenantId: TEST_TENANT_ID,
 };
 
 const sampleStaff = {
@@ -66,12 +75,13 @@ const sampleStaff = {
   fullName: "Staff Member",
   isActive: true,
   role: "STAFF",
+  tenantId: TEST_TENANT_ID,
 };
 
 const sampleBooking = {
   id: TEST_BOOKING_ID,
   code: "BRISA-0001",
-  scheduledAt: new Date("2025-11-15T14:00:00.000Z"),
+  scheduledAt: DEFAULT_SCHEDULED_AT,
   durationMin: 120,
   status: "CONFIRMED" as BookingStatus,
   totalAmount: 15000,
@@ -82,6 +92,7 @@ const sampleBooking = {
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
+  tenantId: TEST_TENANT_ID,
 };
 
 const makeToken = (email: string, role: string = "ADMIN") =>
@@ -89,6 +100,10 @@ const makeToken = (email: string, role: string = "ADMIN") =>
     {
       sub: email,
       role,
+      tenantId: TEST_TENANT_ID,
+      tenantSlug: TEST_TENANT_SLUG,
+      tenantName: TEST_TENANT_NAME,
+      sessionId: "test-session",
     },
     process.env.JWT_SECRET ?? "test-secret",
     {
@@ -105,6 +120,8 @@ describe("Bookings routes - Sprint 2 Features", () => {
     process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
     process.env.DATABASE_URL_UNPOOLED =
       "postgresql://test:test@localhost:5432/test";
+    process.env.DEFAULT_TENANT_ID = TEST_TENANT_ID;
+    process.env.DEFAULT_TENANT_SLUG = TEST_TENANT_SLUG;
 
     vi.resetModules();
     const containerModule = await import("../../../src/container.js");
@@ -124,6 +141,8 @@ describe("Bookings routes - Sprint 2 Features", () => {
     delete process.env.JWT_SECRET;
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_URL_UNPOOLED;
+    delete process.env.DEFAULT_TENANT_ID;
+    delete process.env.DEFAULT_TENANT_SLUG;
   });
 
   beforeEach(() => {
@@ -135,10 +154,20 @@ describe("Bookings routes - Sprint 2 Features", () => {
     userRepositoryMock.findByEmail.mockReset();
 
     // Default mocks
+    const tenantMembership = [
+      {
+        tenantId: TEST_TENANT_ID,
+        tenantSlug: TEST_TENANT_SLUG,
+        tenantName: TEST_TENANT_NAME,
+        status: "ACTIVE",
+        role: "ADMIN",
+      },
+    ];
     userRepositoryMock.findByEmail.mockResolvedValue({
       ...sampleCustomer,
       email: "admin@test.com",
       role: "ADMIN",
+      tenants: tenantMembership,
     });
     bookingRepositoryMock.findByIdWithRelations.mockResolvedValue({
       ...sampleBooking,
@@ -172,6 +201,7 @@ describe("Bookings routes - Sprint 2 Features", () => {
       expect(json.data.customer).toBeDefined();
       expect(bookingRepositoryMock.findByIdWithRelations).toHaveBeenCalledWith(
         TEST_BOOKING_ID,
+        TEST_TENANT_ID,
       );
     });
 
@@ -270,6 +300,7 @@ describe("Bookings routes - Sprint 2 Features", () => {
         {
           assignedStaffId: TEST_STAFF_ID,
         },
+        TEST_TENANT_ID,
       );
     });
 
@@ -308,6 +339,7 @@ describe("Bookings routes - Sprint 2 Features", () => {
         {
           assignedStaffId: null,
         },
+        TEST_TENANT_ID,
       );
     });
 
@@ -438,6 +470,7 @@ describe("Bookings routes - Sprint 2 Features", () => {
         }),
         true,
         expect.any(Object),
+        TEST_TENANT_ID,
       );
     });
 
@@ -465,6 +498,7 @@ describe("Bookings routes - Sprint 2 Features", () => {
         }),
         true,
         expect.any(Object),
+        TEST_TENANT_ID,
       );
     });
 
@@ -496,6 +530,7 @@ describe("Bookings routes - Sprint 2 Features", () => {
         }),
         true,
         expect.any(Object),
+        TEST_TENANT_ID,
       );
     });
   });

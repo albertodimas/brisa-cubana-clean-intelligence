@@ -3,11 +3,15 @@ import { z } from "zod";
 import { BookingStatus, NotificationType } from "@prisma/client";
 import {
   getBookingRepository,
+  getBookingSummaryRepository,
   getNotificationRepository,
   getUserRepository,
 } from "../container.js";
 import { authenticatePortal, getPortalAuth } from "../middleware/auth.js";
-import { serializeBooking } from "../lib/serializers.js";
+import {
+  serializeBooking,
+  serializeBookingSummary,
+} from "../lib/serializers.js";
 import { logger } from "../lib/logger.js";
 
 const DEFAULT_TENANT_ID =
@@ -394,6 +398,35 @@ router.post("/:id/reschedule", async (c) => {
   return c.json({
     data: serializeBooking(updated ?? booking),
   });
+});
+
+router.get("/:id/summary", async (c) => {
+  const portalAuth = getPortalAuth(c);
+  if (!portalAuth) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const id = c.req.param("id");
+  const userRepository = getUserRepository();
+  const bookingRepository = getBookingRepository();
+  const summaryRepository = getBookingSummaryRepository();
+
+  const user = await userRepository.findByEmail(portalAuth.email);
+  if (!user || !user.isActive || user.role !== "CLIENT") {
+    return c.json({ error: "Cuenta no habilitada para portal" }, 403);
+  }
+
+  const booking = await bookingRepository.findByIdWithRelations(id);
+  if (!booking || booking.customerId !== user.id) {
+    return c.json({ error: "Reserva no encontrada" }, 404);
+  }
+
+  const summary = await summaryRepository.findByBookingId(id);
+  if (!summary) {
+    return c.json({ error: "Resumen no disponible" }, 404);
+  }
+
+  return c.json({ data: serializeBookingSummary(summary) });
 });
 
 export default router;

@@ -34,7 +34,8 @@
     "unit": "thousands",
     "presentation": {
       "suffix": "K+",
-      "decimals": 1
+      "decimals": 1,
+      "locale": "en-US"
     },
     "period": "Sep 2025",
     "source": "Miami-Dade Short-Term Rental Compliance Report",
@@ -53,7 +54,7 @@
     "period": "Año calendario 2024",
     "source": "Greater Miami Convention & Visitors Bureau",
     "sourceUrl": "https://www.gmcvb.com/research-and-statistics/",
-    "lastUpdated": "2025-07-15"
+    "lastUpdated": "2025-10-05"
   },
   {
     "metricId": "turnovers_per_property",
@@ -97,7 +98,7 @@
     "period": "Año calendario 2024",
     "source": "Greater Miami Convention & Visitors Bureau",
     "sourceUrl": "https://www.gmcvb.com/research-and-statistics/",
-    "lastUpdated": "2025-07-15",
+    "lastUpdated": "2025-10-05",
     "notes": "Incluye visitantes nacionales e internacionales reportados."
   }
 ]

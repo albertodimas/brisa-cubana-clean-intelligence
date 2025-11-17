@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { BookingRepository } from "./booking-repository.js";
 
+const DEFAULT_TENANT = "tenant_brisa_cubana";
+
 describe("BookingRepository (Unit)", () => {
   let repository: BookingRepository;
-  let mockPrisma: {
+  let prisma: {
     booking: {
       findMany: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
@@ -12,17 +14,17 @@ describe("BookingRepository (Unit)", () => {
   };
 
   beforeEach(() => {
-    mockPrisma = {
+    prisma = {
       booking: {
         findMany: vi.fn().mockResolvedValue([]),
         update: vi.fn(),
       },
     };
 
-    repository = new BookingRepository(mockPrisma as unknown as PrismaClient);
+    repository = new BookingRepository(prisma as unknown as PrismaClient);
   });
 
-  it("builds where clause with full set of filters", async () => {
+  it("builds where clause with filters and tenant constraint", async () => {
     const from = new Date("2025-01-01T00:00:00Z");
     const to = new Date("2025-01-31T23:59:59Z");
 
@@ -35,27 +37,25 @@ describe("BookingRepository (Unit)", () => {
       to,
     });
 
-    expect(mockPrisma.booking.findMany).toHaveBeenCalledWith({
+    expect(prisma.booking.findMany).toHaveBeenCalledWith({
       where: {
         status: "CONFIRMED",
         propertyId: "prop_1",
         serviceId: "service_1",
         customerId: "customer_1",
-        scheduledAt: {
-          gte: from,
-          lte: to,
-        },
+        scheduledAt: { gte: from, lte: to },
+        tenantId: DEFAULT_TENANT,
       },
       take: 11,
       orderBy: { scheduledAt: "desc" },
     });
   });
 
-  it("omits where clause when filters are empty", async () => {
+  it("defaults to tenant filter when no additional filters provided", async () => {
     await repository.findManyPaginated(5);
 
-    expect(mockPrisma.booking.findMany).toHaveBeenCalledWith({
-      where: undefined,
+    expect(prisma.booking.findMany).toHaveBeenCalledWith({
+      where: { tenantId: DEFAULT_TENANT },
       take: 6,
       orderBy: { scheduledAt: "desc" },
     });
@@ -71,37 +71,37 @@ describe("BookingRepository (Unit)", () => {
       orderBy,
     });
 
-    expect(mockPrisma.booking.findMany).toHaveBeenCalledWith({
-      where: undefined,
+    expect(prisma.booking.findMany).toHaveBeenCalledWith({
+      where: { tenantId: DEFAULT_TENANT },
       take: 6,
       orderBy,
     });
   });
 
-  it("marks booking as deleted", async () => {
-    vi.mocked(mockPrisma.booking.update).mockResolvedValue({} as any);
+  it("delete/restore operations scope by tenant id", async () => {
+    vi.mocked(prisma.booking.update).mockResolvedValue({} as any);
 
     await repository.delete("booking_1");
-
-    expect(mockPrisma.booking.update).toHaveBeenCalledWith({
-      where: { id: "booking_1" },
+    expect(prisma.booking.update).toHaveBeenCalledWith({
+      where: { id: "booking_1", tenantId: DEFAULT_TENANT },
       data: { deletedAt: expect.any(Date) },
     });
-  });
 
-  it("restores a booking", async () => {
-    const booking = {
+    vi.mocked(prisma.booking.update).mockResolvedValue({
       id: "booking_1",
+      tenantId: DEFAULT_TENANT,
       deletedAt: null,
-    };
-    vi.mocked(mockPrisma.booking.update).mockResolvedValue(booking as any);
+    } as any);
 
-    const result = await repository.restore("booking_1");
-
-    expect(mockPrisma.booking.update).toHaveBeenCalledWith({
-      where: { id: "booking_1" },
+    const restored = await repository.restore("booking_1");
+    expect(restored).toEqual({
+      id: "booking_1",
+      tenantId: DEFAULT_TENANT,
+      deletedAt: null,
+    });
+    expect(prisma.booking.update).toHaveBeenCalledWith({
+      where: { id: "booking_1", tenantId: DEFAULT_TENANT },
       data: { deletedAt: null },
     });
-    expect(result).toEqual(booking);
   });
 });
