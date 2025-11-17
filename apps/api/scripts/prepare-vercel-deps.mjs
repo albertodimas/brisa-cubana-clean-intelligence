@@ -39,9 +39,10 @@ async function prepare() {
   }
 
   const projectRoot = dirname(__dirname);
+  const repoRoot = dirname(dirname(projectRoot));
   const deployDir = `${projectRoot}/deploy`;
   const nodeModulesDir = `${projectRoot}/node_modules`;
-  const serverlessNodeModulesDir = `${projectRoot}/../api/node_modules`;
+  const serverlessNodeModulesDir = `${repoRoot}/api/node_modules`;
 
   log("Limpieza de la carpeta deploy previa.");
   await rm(deployDir, { recursive: true, force: true });
