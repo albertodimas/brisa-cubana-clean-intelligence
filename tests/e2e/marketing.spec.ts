@@ -5,12 +5,16 @@ test("@smoke @critical muestra tabla comparativa y CTAs instrumentados", async (
 }) => {
   await page.goto("/");
 
-  const heading = page.getByRole("heading", {
-    name: "¿Qué diferencia a cada paquete?",
-  });
+  const heading = page
+    .getByRole("heading", {
+      name: "¿Qué diferencia a cada paquete?",
+    })
+    .first();
+  await heading.scrollIntoViewIfNeeded();
   await expect(heading).toBeVisible();
 
-  const table = page.getByTestId("service-comparison-table");
+  const table = page.getByTestId("service-comparison-table").first();
+  await table.scrollIntoViewIfNeeded();
   await expect(table).toBeVisible();
 
   const rows = table.locator("tbody tr");
