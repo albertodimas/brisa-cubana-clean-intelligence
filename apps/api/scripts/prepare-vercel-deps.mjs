@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { rm, rename, stat } from "node:fs/promises";
+import { cp, rm, rename, stat } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
@@ -41,6 +41,7 @@ async function prepare() {
   const projectRoot = dirname(__dirname);
   const deployDir = `${projectRoot}/deploy`;
   const nodeModulesDir = `${projectRoot}/node_modules`;
+  const serverlessNodeModulesDir = `${projectRoot}/../api/node_modules`;
 
   log("Limpieza de la carpeta deploy previa.");
   await rm(deployDir, { recursive: true, force: true });
@@ -60,6 +61,10 @@ async function prepare() {
   log("Sustituyendo node_modules por la versión sin symlinks.");
   await rm(nodeModulesDir, { recursive: true, force: true });
   await rename(deployNodeModules, nodeModulesDir);
+
+  log("Replicando dependencias en api/node_modules para la función serverless.");
+  await rm(serverlessNodeModulesDir, { recursive: true, force: true });
+  await cp(nodeModulesDir, serverlessNodeModulesDir, { recursive: true });
 
   log("Eliminando carpeta deploy temporal.");
   await rm(deployDir, { recursive: true, force: true });
