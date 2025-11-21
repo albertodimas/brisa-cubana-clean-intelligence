@@ -43,7 +43,7 @@ Monorepo (pnpm + Turborepo) del nuevo **Brisa OS**: el software asequible que di
 ## Estado del proyecto
 
 - Release estable actual: `v0.4.2`. La transición a SaaS quedará registrada a partir de `v0.5.0`.
-- Deploys automatizados (web/API) en Vercel → `https://brisacubanacleanintelligence.com` y `https://api.brisacubanacleanintelligence.com`.
+- Deploys automatizados en Vercel: web `prj_n11x8GsVN5qDw0eOFAcQiOfpc0Zg` (alias `brisacubanacleanintelligence.com` y `app.brisacubanacleanintelligence.com`) y API Hono `prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j` (alias `api.brisacubanacleanintelligence.com`).
 - Roadmap, riesgos y planes activos: [`docs/overview/status.md`](docs/overview/status.md) y [`docs/product/saas-vision.md`](docs/product/saas-vision.md).
 - Histórico previo (modelo servicios) archivado en [`docs/archive/`](docs/archive/); no modificar sin referencia.
 

@@ -1,15 +1,16 @@
 # Mapa de Dominios e Integraciones
 
-**Última actualización:** 23 de octubre de 2025  
+**Última actualización:** 21 de noviembre de 2025  
 Esta guía resume los dominios activos del proyecto y los subdominios planeados para escalabilidad futura. Úsala al coordinar DNS, certificados y variables de entorno en Vercel.
 
 ## 1. Dominios activos
 
-| Dominio                                | Servicio / Uso                          | Estado    | Notas                                                                                                                    |
-| -------------------------------------- | --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `brisacubanacleanintelligence.com`     | Marketing site + portal cliente + panel | ✅ Activo | Aliased a `brisa-cubana-clean-intelligence-np54jzbn1-brisa-cubana.vercel.app`. `/recursos/one-pager` sirve el one-pager. |
-| `www.brisacubanacleanintelligence.com` | Redirección 301 al dominio raíz         | ✅ Activo | Configurado en `apps/web/vercel.json`.                                                                                   |
-| `api.brisacubanacleanintelligence.com` | API Hono (apps/api)                     | ✅ Activo | Alias a `brisa-cubana-clean-intelligence-mpcjiihms-brisa-cubana.vercel.app`.                                             |
+| Dominio                                | Servicio / Uso                          | Estado    | Notas                                                                                                                                                                    |
+| -------------------------------------- | --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `brisacubanacleanintelligence.com`     | Marketing site + portal cliente + panel | ✅ Activo | Alias del proyecto web (`prj_n11x8GsVN5qDw0eOFAcQiOfpc0Zg`). Deployment productivo actual: `brisa-cubana-clean-intelligence-ffulg7sdr-brisa-cubana.vercel.app` (12-nov). |
+| `app.brisacubanacleanintelligence.com` | Alias web adicional (landing + portal)  | ✅ Activo | CNAME gestionado en Vercel DNS; apunta al mismo deployment productivo que el dominio raíz. `curl -I` devuelve 200 (21-nov-2025).                                         |
+| `www.brisacubanacleanintelligence.com` | Redirección 301 al dominio raíz         | ✅ Activo | Configurado en `apps/web/vercel.json`.                                                                                                                                   |
+| `api.brisacubanacleanintelligence.com` | API Hono (apps/api)                     | ✅ Activo | Alias del proyecto API (`prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j`). Deployment productivo actual: `brisa-cubana-clean-intelligence-8x2jtzv6i-brisa-cubana.vercel.app` (17-nov). |
 
 ## 2. Subdominios reservados / futuros
 
@@ -17,7 +18,6 @@ Esta guía resume los dominios activos del proyecto y los subdominios planeados 
 | ----------------------------------------- | -------------------------------------------- | ------------ | ----------------------------------------------------------------------------------- |
 | `status.brisacubanacleanintelligence.com` | Status page automatizado (UptimeRobot / etc) | 📝 Pendiente | Crear proyecto/servicio y añadir CNAME en Vercel DNS cuando se defina proveedor.    |
 | `docs.brisacubanacleanintelligence.com`   | Documentación pública / knowledge base       | 📝 Pendiente | Reservado para futuro despliegue (ej. Nextra, Mintlify).                            |
-| `app.brisacubanacleanintelligence.com`    | Separar panel/portal del marketing site      | 📝 Pendiente | Solo necesario si se despliega un frontend dedicado distinto a `apps/web`.          |
 | `cdn.brisacubanacleanintelligence.com`    | CDN/Assets estáticos                         | 📝 Pendiente | Evaluar si es necesario cuando se sirvan archivos pesados o integraciones externas. |
 
 > _Nota:_ no crear registros DNS sin un proyecto o servicio definido. Mantener esta tabla sincronizada cuando se agreguen nuevos subdominios.
@@ -51,6 +51,8 @@ Configurar los valores siguientes (Development / Preview / Production) con los d
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` | Claves Stripe modo live                           | web, api   |
 | `DEFAULT_TENANT_ID` / `DEFAULT_TENANT_SLUG`                | `tenant_brisa_cubana` / `brisa-cubana`            | api        |
 | `NEXT_PUBLIC_DEFAULT_TENANT_SLUG`                          | `brisa-cubana`                                    | web        |
+
+> Incluye **ambos** dominios (`https://brisacubanacleanintelligence.com` y `https://app.brisacubanacleanintelligence.com`) en `ALLOWED_ORIGINS` y `PROXY_ALLOWED_ORIGINS` para evitar bloqueos de CORS cuando se usen enlaces de app o marketing.
 
 ## 5. Checklist de despliegue por dominio
 

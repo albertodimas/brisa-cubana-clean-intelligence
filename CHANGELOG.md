@@ -10,7 +10,9 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- _Nada por ahora._
+- Docs: README y guías de dominios/despliegue actualizadas con los proyectos Vercel reales (web `prj_n11x8GsVN5qDw0eOFAcQiOfpc0Zg`, API `prj_XN0HG1kF1XanhlMq78ZBPM01Ky3j`), alias `app.brisacubanacleanintelligence.com` y despliegues productivos vigentes.
+- Docs: `docs/overview/status.md` refleja la verificación de salud 21-nov-2025 (api/web 200) y la fecha de corte más reciente.
+- CI: nuevo flag `disable-posthog` en `setup-project`/`project-pipeline` y variable `NEXT_PUBLIC_POSTHOG_DISABLED` para evitar llamadas a PostHog en suites E2E (nightly/PR/critical) cuando la clave de API no es válida.
 
 ## [0.5.0] - 2025-11-14
 
