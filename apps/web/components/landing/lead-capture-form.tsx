@@ -476,7 +476,12 @@ export function LeadCaptureForm({
             {isPending ? i18n.submittingLabel : i18n.submitLabel}
           </button>
 
-          <div id={`${formId}-status`} aria-live="polite" className="text-sm">
+          <div
+            id={`${formId}-status`}
+            aria-live="polite"
+            role="status"
+            className="text-sm"
+          >
             {status === "success" ? (
               <p className="text-green-600 dark:text-green-400">
                 {i18n.successMessage}

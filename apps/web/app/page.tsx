@@ -93,7 +93,9 @@ export default async function LandingPage() {
     testimonials.length > 0 ? testimonials : fallbackTestimonials;
   const displayPricingTiers =
     pricingTiers.length > 0 ? pricingTiers : fallbackPricingTiers;
-  const displayFAQs = faqItems.length > 0 ? faqItems : fallbackFaqs;
+  // Si la API devuelve un array vacío o un valor inesperado, usamos las FAQs de marketing
+  const displayFAQs =
+    Array.isArray(faqItems) && faqItems.length > 0 ? faqItems : fallbackFaqs;
   return (
     <main className="min-h-screen bg-white dark:bg-brisa-950 text-gray-900 dark:text-brisa-50">
       {/* Scroll Progress Bar */}

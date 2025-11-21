@@ -26,6 +26,16 @@ vi.mock("@/lib/api", () => ({
       order: 1,
     },
   ]),
+  getPricingTiers: vi.fn().mockResolvedValue([
+    {
+      id: "starter",
+      name: "Starter",
+      description: "Equipo inicial para portfolios pequeños",
+      price: 99,
+      features: ["Checklist digital", "Reportes básicos"],
+      popular: false,
+    },
+  ]),
 }));
 
 async function renderLandingPage() {
@@ -38,26 +48,26 @@ describe("LandingPage", () => {
   it("muestra hero y llamados a la acción", async () => {
     const markup = await renderLandingPage();
     expect(markup).toContain(
-      "Tu operación de limpieza, digitalizada en minutos.",
+      "Limpieza profesional y documentada para propiedades premium en Miami.",
     );
-    expect(markup).toContain("Solicitar demo");
-    expect(markup).toContain("Ver cómo funciona");
+    expect(markup).toContain("Solicitar cotización");
+    expect(markup).toContain("Conoce el portal (beta privada)");
   });
 
   it("detalla beneficios clave", async () => {
     const markup = await renderLandingPage();
 
-    expect(markup).toContain("Por qué Brisa OS");
-    expect(markup).toContain("Software pensado para operaciones premium");
-    expect(markup).toContain("Productividad");
-    expect(markup).toContain("Portal cliente listo para entregar");
+    expect(markup).toContain("Lo que entregamos en cada turno");
+    expect(markup).toContain("Documentamos mejoras con evidencia comparable");
+    expect(markup).toContain("¿Qué diferencia a cada paquete?");
+    expect(markup).toContain("Turnover Premium");
   });
 
   it("presenta testimonios, FAQ y formulario de contacto", async () => {
     const markup = await renderLandingPage();
 
     expect(markup).toContain("Preguntas frecuentes");
-    expect(markup).toContain("Hosts y PMs con operación documentada");
-    expect(markup).toContain('id="contacto-form"');
+    expect(markup).toContain("¿Qué incluye cada turno?");
+    expect(markup).toContain('data-testid="lead-form-section"');
   });
 });
