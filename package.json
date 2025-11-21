@@ -65,7 +65,9 @@
       "tmp": "^0.2.4",
       "vite": "7.1.11",
       "import-in-the-middle": "1.15.0",
-      "require-in-the-middle": "7.5.2"
+      "require-in-the-middle": "7.5.2",
+      "glob": "^11.1.0",
+      "js-yaml": "^4.1.1"
     },
     "onlyBuiltDependencies": [
       "@prisma/client",
