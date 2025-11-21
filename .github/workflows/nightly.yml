@@ -15,6 +15,7 @@ jobs:
       job-name: Nightly full e2e
       run-database-prep: true
       run-e2e-suite: full
+      disable-posthog: true
       playwright-report-name: playwright-report-full
       playwright-retention-days: 14
       run-lighthouse: false

@@ -9,6 +9,8 @@ const POSTHOG_KEY =
 const POSTHOG_HOST =
   (process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "").trim() ||
   "https://us.i.posthog.com";
+const POSTHOG_DISABLED =
+  (process.env.NEXT_PUBLIC_POSTHOG_DISABLED ?? "").toLowerCase() === "true";
 const POSTHOG_FORCE_ENABLE =
   (process.env.NEXT_PUBLIC_POSTHOG_FORCE_ENABLE ?? "").toLowerCase() === "true";
 
@@ -16,6 +18,10 @@ let isPostHogInitialized = false;
 let posthogClientPromise: Promise<PosthogClient> | undefined;
 
 function shouldSkipAnalytics() {
+  if (POSTHOG_DISABLED) {
+    return true;
+  }
+
   if (POSTHOG_FORCE_ENABLE) {
     return false;
   }
@@ -90,6 +96,14 @@ export function PostHogAnalytics() {
       return;
     }
 
+    if (POSTHOG_DISABLED) {
+      const noopClient = createNoopClient();
+      posthogClientPromise = Promise.resolve(noopClient);
+      markPosthogReady(noopClient);
+      isPostHogInitialized = true;
+      return;
+    }
+
     if (shouldSkipAnalytics()) {
       const noopClient = createNoopClient();
       posthogClientPromise = Promise.resolve(noopClient);
@@ -132,7 +146,12 @@ export function PostHogAnalytics() {
   }, []);
 
   useEffect(() => {
-    if (!POSTHOG_KEY || !isPostHogInitialized || shouldSkipAnalytics()) {
+    if (
+      POSTHOG_DISABLED ||
+      !POSTHOG_KEY ||
+      !isPostHogInitialized ||
+      shouldSkipAnalytics()
+    ) {
       return;
     }
 

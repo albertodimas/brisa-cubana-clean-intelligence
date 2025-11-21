@@ -126,6 +126,10 @@ on:
         required: false
         type: string
         default: ""
+      disable-posthog:
+        required: false
+        type: boolean
+        default: false
     secrets:
       api-token:
         required: false
@@ -218,6 +222,7 @@ jobs:
           portal-magic-link-expose-debug: ${{ inputs.portal-magic-link-expose-debug }}
           next-public-posthog-key: ${{ inputs.next-public-posthog-key != '' && inputs.next-public-posthog-key || secrets.NEXT_PUBLIC_POSTHOG_KEY || '' }}
           next-public-posthog-host: ${{ inputs.next-public-posthog-host != '' && inputs.next-public-posthog-host || secrets.NEXT_PUBLIC_POSTHOG_HOST || '' }}
+          disable-posthog: ${{ inputs.disable-posthog }}
           log_drain_verification_code: ${{ secrets.LOG_DRAIN_VERIFICATION_CODE }}
           allowed-origins: ${{ inputs.allowed-origins != '' && inputs.allowed-origins || secrets.ALLOWED_ORIGINS || '' }}
           proxy-allowed-origins: ${{ inputs.proxy-allowed-origins != '' && inputs.proxy-allowed-origins || secrets.PROXY_ALLOWED_ORIGINS || '' }}

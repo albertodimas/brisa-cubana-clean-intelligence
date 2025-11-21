@@ -113,6 +113,7 @@ jobs:
       run-docs-verify: false
       run-database-prep: true
       run-e2e-suite: critical
+      disable-posthog: true
       next-public-api-url: "http://localhost:3001"
       playwright-report-name: playwright-report-critical
       playwright-retention-days: 7

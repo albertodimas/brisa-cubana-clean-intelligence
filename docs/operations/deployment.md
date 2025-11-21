@@ -53,12 +53,13 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 
 > ℹ️ **Salud de la API**: `/healthz` y `/api/healthz` se reescriben desde el proyecto web hacia la API. Si usas un dominio personalizado diferente o deshabilitas las rewrites, asegúrate de mantener una regla equivalente en Vercel para evitar redirecciones a `/login`.
 
-| Dominio                                | Proyecto | Propósito                           |
-| -------------------------------------- | -------- | ----------------------------------- |
-| `brisacubanacleanintelligence.com`     | Web      | Landing + Checkout + Portal + Panel |
-| `www.brisacubanacleanintelligence.com` | Web      | Redirect 301 → dominio raíz         |
-| `api.brisacubanacleanintelligence.com` | API      | Backend Hono + Prisma               |
-| _Subdominios futuros_                  | —        | Ver [domain-map.md](domain-map.md)  |
+| Dominio                                | Proyecto | Propósito                            |
+| -------------------------------------- | -------- | ------------------------------------ |
+| `brisacubanacleanintelligence.com`     | Web      | Landing + Checkout + Portal + Panel  |
+| `app.brisacubanacleanintelligence.com` | Web      | Alias activo (apunta al mismo build) |
+| `www.brisacubanacleanintelligence.com` | Web      | Redirect 301 → dominio raíz          |
+| `api.brisacubanacleanintelligence.com` | API      | Backend Hono + Prisma                |
+| _Subdominios futuros_                  | —        | Ver [domain-map.md](domain-map.md)   |
 
 **Procedimiento recomendado**
 
@@ -69,6 +70,7 @@ Revisar y, si aplica, actualizar los valores en Vercel:
 5. Revisa la guía [domain-map.md](domain-map.md) para asegurarte de que los subdominios reservados/quedados por configurar se mantengan sincronizados con DNS y Vercel.
 
 > **Env vars obligatorias:** tras aplicar un alias nuevo, confirma en Vercel → Settings → Environment Variables que `NEXT_PUBLIC_BASE_URL`, `NEXTAUTH_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL`, `INTERNAL_API_URL` y `PORTAL_MAGIC_LINK_BASE_URL` apuntan al dominio final. Replica los cambios en GitHub Actions si usas secretos espejo.
+> Incluye ambos hosts (`brisacubanacleanintelligence.com` y `app.brisacubanacleanintelligence.com`) en `ALLOWED_ORIGINS`/`PROXY_ALLOWED_ORIGINS` para evitar rechazos de CORS cuando se compartan enlaces del alias `app`.
 
 ### Certificados SSL
 

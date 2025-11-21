@@ -9,7 +9,10 @@ type PosthogClient = {
 type AllowedPropertyValue = string | number | boolean | null;
 type EventData = Record<string, AllowedPropertyValue | undefined>;
 
-const HAS_POSTHOG_KEY = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
+const POSTHOG_DISABLED =
+  (process.env.NEXT_PUBLIC_POSTHOG_DISABLED ?? "").toLowerCase() === "true";
+const HAS_POSTHOG_KEY =
+  !POSTHOG_DISABLED && Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 const globalScope =
   typeof window !== "undefined"
     ? (window as unknown as {
@@ -22,7 +25,7 @@ function captureWithPosthog(
   event: string,
   properties?: Record<string, unknown>,
 ) {
-  if (!HAS_POSTHOG_KEY || !globalScope) {
+  if (POSTHOG_DISABLED || !HAS_POSTHOG_KEY || !globalScope) {
     return;
   }
 

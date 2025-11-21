@@ -22,5 +22,6 @@ jobs:
       run-secret-scan: true
       run-database-prep: true
       run-e2e-suite: smoke
+      disable-posthog: true
       playwright-report-name: playwright-report-smoke
       upload-playwright-only-on-failure: true
